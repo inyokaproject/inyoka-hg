@@ -1,0 +1,1010 @@
+# -*- coding: utf-8 -*-
+r"""
+    inyoka.wiki.parser
+    ~~~~~~~~~~~~~~~~~~
+
+    The package implements a rather complex parsers for the inyoka wiki
+    syntax. The parser is roughly divided into five more or less independent
+    parts:
+
+    - `Lexer` -- tokenizes the markup into tokens, holds in internal stack
+      that resolves mismatched elements.
+
+    - `Parser` -- fetches tokens from the lexer and creates nodes.
+      Additionally it calls the transformers after that tree was created.
+
+    - `Node` -- multile nodes make a tree. A tree is renderable into multiple
+      output formats, however HTML is the only supported at the moment.
+
+    - `Transformer` -- the transformers postprocess the syntax tree. This is
+      necessary for typography, smiley insertions, paragraphs etc.
+
+    - `machine` -- the machine is the compiler and renderer. The compiler
+      just takes the flattened stream from the node tree and compiles it into
+      a format the renderer can process. The renderer is then able to
+      generate HTML or whatever from the compiler. If caching is not wanted
+      for a specific output format the compilation step can be omitted and the
+      renderer fetches the instructions directly from the node tree's prepared
+      stream.
+
+      Parts of the machine are mixed into the nodes so you can renders nodes
+      directly without additional imports.
+
+
+    Example usage
+    -------------
+
+    If you want to work with the node tree you just have to parse something::
+
+        >>> from inyoka.wiki.parser import parse
+        >>> node = parse("Hello World!\n\n''foo bar spam''")
+
+    Rendering works directly from the node if you don't want to cache it::
+
+        >>> node.render(context, 'html')
+        u'<p>Hello World!</p>\n<p><em>foo bar spam</em></p>\n'
+
+    You can also stream it into a generator that yields the result step by
+    step::
+
+        >>> gen = node.stream(context, 'html')
+        >>> gen.next()
+        u'<p>'
+        >>> gen.next()
+        u'Hello World!'
+        >>> gen.next()
+        u'</p>\n'
+
+    Or compile it::
+
+        >>> code = node.compile('html')
+
+    And then render the compiled string using `render()`::
+
+        >>> from inyoka.wiki.parser import render
+        >>> render(code, context)
+        u'<p>Hello World!</p>\n<p><em>foo bar spam</em></p>\n'
+
+    The compiler ensures that dynamic elements like runtime macros or parsers
+    are called during rendering, not during compiling. This gives us the
+    possibility to cache things in the cached stream.
+
+    The code format is either a static string with a header prefix or a
+    pickled list with references to dynamic elements. It may and will most
+    likely contain binary data, thus it should not be saved in the database.
+
+
+    Syntax
+    ------
+
+    The syntax we use is derived from the MoinMoin engine's syntax. In fact
+    this parser tries to stay as compatible as possible while fixing some of
+    the problem that exist in the moin syntax.
+
+    This (from an implementors point of view) most obvious difference is that
+    the inyoka parser is not line based although many syntax elements are
+    newline aware. One of the syntax elements that end at a newline are for
+    example list items. If however inline markup (such as bold text) is left
+    opened the list item will not close until the bold markup is closed first.
+
+    We require that because the lexer does not know anything about block or
+    inline elements. That said it becomes obvious that paragraph handling is
+    not part of the lexing process but patched into the syntax tree after the
+    parsing process. This allows use to generate more valid HTML because we
+    can avoid adding paragraphs to inline elements or macros.
+
+    Differences to MoinMoin
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    -   Elements must be closed and cannot spawn multiple paragraphs
+    -   \\ at the end of a line with a newline following creates a newline
+    -   Macros, parsers, table definitions and some other syntax elements
+        that allow arguments have an fixed argument syntax:  a list of
+        arguments, whitespace or comma keeps arguments apart and if you
+        put single quotes around multiple arguments (escaped with doubling
+        quotes) preserves whitespace. Inside such strings one can even
+        use the macro delimiters. (``[[Macro('[[Foo()]]')]]`` is valid)
+    -   Blockquotes are supported and can contain any kind of markup. The
+        syntax is derived from ASCII Mails: ``> quoted text here``.
+
+    Additionally all the keyword parameters are translated to German for
+    obvious reasons. Keep in mind that Moin changed the syntax from 1.6
+    to 1.7 and this parsers is not (yet?) compatible with the latter.
+
+
+    Meta Data
+    ---------
+
+    The syntax tree has support for metadata. After parsing metadata from the
+    tree is combined (at least by the wiki system) with other metadata and
+    stored in the database. For example the tree is traversed for any
+    `nodes.MetaData` and `InternalLink` nodes. Not every component in the
+    inyoka systems makes use of metadata and they can ignore those nodes
+    completely. Their text and rendering representation is empty.
+
+    However if metadata is used it's important to *walk* the tree, not just
+    look for `nodes.MetaData` at toplevel. It's true that the metadata
+    comment syntax is only parsed at top level but there are elements that
+    support nested markup such as quote tags. Also macros and parsers that
+    are expanded at parse time can return `nodes.MetaData` metadata.
+
+
+    :copyright: Copyright 2007 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import re
+import unicodedata
+from inyoka.utils.urls import href
+from inyoka.wiki.parser.lexer import escape, Lexer
+from inyoka.wiki.parser.machine import Renderer, RenderContext
+from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
+from inyoka.wiki.parser.constants import HTML_COLORS
+from inyoka.wiki.parser import nodes
+
+
+__all__ = ['parse', 'render', 'stream', 'escape']
+
+
+_hex_color_re = re.compile(r'#([a-f0-9]{3}){1,2}$')
+
+_table_align_re = re.compile(r'''(?x)
+    (-(?P<colspan>\d+)) |
+    (\|(?P<rowspan>\d+)) |
+    (?P<left>\() |
+    (?P<right>\)) |
+    (?P<center>:) |
+    (?P<top>\^) |
+    (?P<middle>\~) |
+    (?P<bottom>v)
+''')
+
+
+def parse(markup):
+    """Parse markup into a node."""
+    return Parser(markup).parse()
+
+
+def render(instructions, context=None):
+    """Render the compiled instructions."""
+    if context is None:
+        context = RenderContext()
+    return Renderer(instructions).render(context)
+
+
+def stream(instructions, context=None):
+    """Stream the compiled instructions."""
+    if context is None:
+        context = RenderContext()
+    return Renderer(instructions).stream(context)
+
+
+def unescape_string(string):
+    """
+    Unescape a string with python semantics but silent fallback.
+    """
+    result = []
+    write = result.append
+    simple_escapes = {
+        'a':    '\a',
+        'n':    '\n',
+        'r':    '\r',
+        'f':    '\f',
+        't':    '\t',
+        'v':    '\v',
+        '\\':   '\\',
+        '"':    '"',
+        "'":    "'",
+        '0':    '\x00'
+    }
+    unicode_escapes = {
+        'x':    2,
+        'u':    4,
+        'U':    8
+    }
+    chariter = iter(string)
+    next_char = chariter.next
+
+    try:
+        for char in chariter:
+            if char == '\\':
+                char = next_char()
+                if char in simple_escapes:
+                    write(simple_escapes[char])
+                elif char in unicode_escapes:
+                    seq = [next_char() for x in xrange(unicode_escapes[char])]
+                    try:
+                        write(unichr(int(''.join(seq), 16)))
+                    except ValueError:
+                        pass
+                elif char == 'N' and next_char() != '{':
+                    seq = []
+                    while True:
+                        char = next_char()
+                        if char == '}':
+                            break
+                        seq.append(char)
+                    try:
+                        write(unicodedata.lookup(u''.join(seq)))
+                    except KeyError:
+                        pass
+                else:
+                    write('\\' + char)
+            else:
+                write(char)
+    except StopIteration:
+        pass
+    return u''.join(result)
+
+
+def _parse_align_args(args, kwargs):
+    """
+    A helper function that parses position arguments for the table syntax.
+    It's passed an `args` tuple and `kwargs` dict and will return a dict with
+    the parsed attributes (and a copy of the `kwargs`) and a list of
+    position arguments not yet handled.
+
+    Common idom::
+
+        attributes, args = _parse_align_args(args, kwargs)
+
+    After that you can savely ignore kwargs.
+    """
+    attributes = kwargs.copy()
+    args_left = []
+    for arg in args:
+        pos = 0
+        while pos < len(arg):
+            m = _table_align_re.match(arg, pos)
+            if m is None:
+                args_left.append(arg[pos:])
+                break
+            args = m.groupdict()
+            pos = m.end()
+
+            for x in 'colspan', 'rowspan':
+                if args[x] is not None:
+                    attributes[x == 'colspan' and 'spalten' or 'zeilen'] =\
+                        int(args[x])
+                    break
+            else:
+                for x in 'left', 'right', 'center':
+                    if args[x] is not None:
+                        attributes['ausrichtung'] = {
+                            'left':     'links',
+                            'right':    'rechts',
+                            'center':   'zentriert'
+                        }.get(x)
+                        break
+                else:
+                    for x in 'top', 'middle', 'bottom':
+                        if args[x] is not None:
+                            attributes['vausrichtung'] = {
+                                'top':      'oben',
+                                'middle':   'mitte',
+                                'bottom':   'unten'
+                            }.get(x)
+                            break
+
+    return attributes, args_left
+
+
+class Parser(object):
+    """
+    The wiki syntax parser. Never use this class directly, always do this
+    via the public `parse()` function of this module. The behavior of this
+    class in multithreaded environments is undefined (might change from
+    revision to revision) and the `parse()` function knows how to handle that.
+    Either be reusing parsers if safe, locking or reinstanciating.
+
+    This parser should be considered a private class. All of the attributes
+    and methods exists for the internal parsing process. As long as you don't
+    extend the parser you should only use the `parse()` function (except of
+    parser unittests which can savely user the `Parser` class itself).
+    """
+
+    def __init__(self, string, transformers=None):
+        """
+        In theory you never have to instanciate this parser yourself because
+        the high level `parse()` function encapsulates this. However for the
+        unittests it's important to be able to disable and enable the
+        `transformers` by hand. If you don't provide any transformers the
+        default transformers are used.
+        """
+        self.string = string
+        self.lexer = Lexer()
+        if transformers is None:
+            transformers = DEFAULT_TRANSFORMERS[:]
+        self.transformers = transformers
+
+        #: node dispatchers
+        self._handlers = {
+            'text':                 self.parse_text,
+            'conflict_begin':       self.parse_conflict_left,
+            'conflict_switch':      self.parse_conflict_middle,
+            'conflict_end':         self.parse_conflict_end,
+            'metadata_begin':       self.parse_metadata,
+            'headline_begin':       self.parse_headline,
+            'strong_begin':         self.parse_strong,
+            'emphasized_begin':     self.parse_emphasized,
+            'escaped_code_begin':   self.parse_escaped_code,
+            'code_begin':           self.parse_code,
+            'underline_begin':      self.parse_underline,
+            'stroke_begin':         self.parse_stroke,
+            'small_begin':          self.parse_small,
+            'big_begin':            self.parse_big,
+            'sub_begin':            self.parse_sub,
+            'sup_begin':            self.parse_sup,
+            'footnote_begin':       self.parse_footnote,
+            'color_begin':          self.parse_color,
+            'size_begin':           self.parse_size,
+            'font_begin':           self.parse_font,
+            'quote_begin':          self.parse_quote,
+            'list_item_begin':      self.parse_list,
+            'definition_begin':     self.parse_definition,
+            'wiki_link_begin':      self.parse_wiki_link,
+            'external_link_begin':  self.parse_external_link,
+            'free_link':            self.parse_free_link,
+            'newline':              self.parse_newline,
+            'ruler':                self.parse_ruler,
+            'macro_begin':          self.parse_macro,
+            'pre_begin':            self.parse_pre_block,
+            'table_row_begin':      self.parse_table,
+            'box_begin':            self.parse_box
+        }
+
+        #: runtime information
+        self.is_dirty = False
+        self.deferred_macros = {
+            'final':    [],
+            'initial':  [],
+            'late':     []
+        }
+
+    def parse_node(self, stream):
+        """
+        Call this with a `TokenStream` to dispatch to the correct parser call.
+        If the current token on the stream is not handleable it will raise a
+        `KeyError`. However you should not relay on that behavior because the
+        beavior is undefined and may change. It's your reposibility to make
+        sure the parser never calls `parse_node` on not existing nodes when
+        extending the lexer / parser.
+        """
+        return self._handlers[stream.current.type](stream)
+
+    def parse_text(self, stream):
+        """Expects a ``'text'`` token and returns a `nodes.Text`."""
+        return nodes.Text(stream.expect('text').value)
+
+    def parse_conflict_left(self, stream):
+        """The begin conflict marker."""
+        stream.expect('conflict_begin')
+        return nodes.ConflictMarker('left')
+
+    def parse_conflict_middle(self, stream):
+        """The middle conflict marker."""
+        stream.expect('conflict_switch')
+        return nodes.ConflictMarker('middle')
+
+    def parse_conflict_end(self, stream):
+        """The end conflict marker."""
+        stream.expect('conflict_end')
+        return nodes.ConflictMarker('right')
+
+    def parse_metadata(self, stream):
+        """
+        We do support inline metadata on a syntax level too. A metadata
+        section starts with *one* leading hash until the end of the line. If
+        the lexer stumbles upon something like that it emits a
+        ``'metadata_begin'`` token this parsing function uses. It's important
+        to know that this can yield metadata at arbitrary positions if quoted
+        for example.
+
+        Returns a `nodes.MetaData` object.
+        """
+        stream.expect('metadata_begin')
+        key = stream.expect('metadata_key').value
+        args, kwargs = self.parse_arguments(stream, 'metadata_end')
+        stream.expect('metadata_end')
+        assert not kwargs
+        return nodes.MetaData(key, args)
+
+    def parse_headline(self, stream):
+        """
+        Parse a headline. Unlike MoinMoin with inline formatting and a
+        variable length headline closing section.
+
+        Returns a `Headline` node.
+        """
+        token = stream.expect('headline_begin')
+        children = []
+        while stream.current.type != 'headline_end':
+            children.append(self.parse_node(stream))
+        stream.expect('headline_end')
+        return nodes.Headline(len(token.value.strip()), children=children)
+
+    def parse_strong(self, stream):
+        """
+        Parse strong emphasized text.
+
+        Returns a `Strong` node.
+        """
+        stream.expect('strong_begin')
+        children = []
+        while stream.current.type != 'strong_end':
+            children.append(self.parse_node(stream))
+        stream.expect('strong_end')
+        return nodes.Strong(children)
+
+    def parse_emphasized(self, stream):
+        """
+        Parse normal emphasized text.
+
+        Returns a `Emphasized` node.
+        """
+        stream.expect('emphasized_begin')
+        children = []
+        while stream.current.type != 'emphasized_end':
+            children.append(self.parse_node(stream))
+        stream.expect('emphasized_end')
+        return nodes.Emphasized(children)
+
+    def parse_escaped_code(self, stream):
+        """
+        This parses escaped code formattings. Escaped code formattings work
+        like normal code formattings but their delimiter backticks are doubled
+        so that one can use single backticks inside.
+
+        Returns a `Code` node.
+        """
+        stream.expect('escaped_code_begin')
+        buffer = []
+        while stream.current.type == 'text':
+            buffer.append(stream.current.value)
+            stream.next()
+        stream.expect('escaped_code_end')
+        return nodes.Code([nodes.Text(u''.join(buffer))])
+
+    def parse_code(self, stream):
+        """
+        Parse inline code, don't confuse that with `parse_pre_block`.
+
+        Returns a `Code` node.
+        """
+        stream.expect('code_begin')
+        buffer = []
+        while stream.current.type == 'text':
+            buffer.append(stream.current.value)
+            stream.next()
+        stream.expect('code_end')
+        return nodes.Code([nodes.Text(u''.join(buffer))])
+
+    def parse_underline(self, stream):
+        """
+        Parses the underline formatting. This should really go away or change
+        the meaning to *inserted* text in which situation this makes sense.
+
+        Returns a `Underline` node.
+        """
+        stream.expect('underline_begin')
+        children = []
+        while stream.current.type != 'underline_end':
+            children.append(self.parse_node(stream))
+        stream.expect('underline_end')
+        return nodes.Underline(children)
+
+    def parse_stroke(self, stream):
+        """
+        Parse deleted text.
+
+        Returns a `Stroke` node.
+        """
+        stream.expect('stroke_begin')
+        children = []
+        while stream.current.type != 'stroke_end':
+            children.append(self.parse_node(stream))
+        stream.expect('stroke_end')
+        return nodes.Stroke(children)
+
+    def parse_small(self, stream):
+        """
+        Parse belittled text.
+
+        Returns a `Small` node.
+        """
+        stream.expect('small_begin')
+        children = []
+        while stream.current.type != 'small_end':
+            children.append(self.parse_node(stream))
+        stream.expect('small_end')
+        return nodes.Small(children)
+
+    def parse_big(self, stream):
+        """
+        Parse augmented text.
+
+        Returns a `Big` node.
+        """
+        stream.expect('big_begin')
+        children = []
+        while stream.current.type != 'big_end':
+            children.append(self.parse_node(stream))
+        stream.expect('big_end')
+        return nodes.Big(children)
+
+    def parse_sub(self, stream):
+        """
+        Parse text in subscript.
+
+        Returns a `Sub` node.
+        """
+        stream.expect('sub_begin')
+        children = []
+        while stream.current.type != 'sub_end':
+            children.append(self.parse_node(stream))
+        stream.expect('sub_end')
+        return nodes.Sub(children)
+
+    def parse_sup(self, stream):
+        """
+        Parse text in supscript.
+
+        Returns a `Sup` node.
+        """
+        stream.expect('sup_begin')
+        children = []
+        while stream.current.type != 'sup_end':
+            children.append(self.parse_node(stream))
+        stream.expect('sup_end')
+        return nodes.Sup(children)
+
+    def parse_footnote(self, stream):
+        """
+        Parses an inline footnote declaration. This doesn't make it a
+        footnote though, for that tasks a `FootnoteSupport` transformer
+        exists. The default rendering is just parenthized small text
+        at the same position.
+
+        Returns a `Footnote` node.
+        """
+        stream.expect('footnote_begin')
+        children = []
+        while stream.current.type != 'footnote_end':
+            children.append(self.parse_node(stream))
+        stream.expect('footnote_end')
+        return nodes.Footnote(children)
+
+    def parse_color(self, stream):
+        """
+        Parse a color definition. This exists for backwards compatibility
+        with phpBB.
+
+        Returns a `Color` node.
+        """
+        stream.expect('color_begin')
+        color = stream.expect('color_value').value.strip().lower()
+        if not _hex_color_re.match(color):
+            if color in HTML_COLORS:
+                color = HTML_COLORS[color]
+            else:
+                color = '#000000'
+        children = []
+        while stream.current.type != 'color_end':
+            children.append(self.parse_node(stream))
+        stream.expect('color_end')
+        return nodes.Color(color, children)
+
+    def parse_size(self, stream):
+        """
+        Parse a size tag. This exists for backwards compatibility with phpBB.
+
+        Returns a `Size` node.
+        """
+        stream.expect('size_begin')
+        size = stream.expect('font_size').value.strip()
+        try:
+            size = int(100.0 / 14 * float(size))
+        except ValueError:
+            size = 100
+        children = []
+        while stream.current.type != 'size_end':
+            children.append(self.parse_node(stream))
+        stream.expect('size_end')
+        return nodes.Size(size, children)
+
+    def parse_font(self, stream):
+        """
+        Parse a font tag. This exists for backwards compatibility with phpBB.
+
+        Returns a `Font` node.
+        """
+        stream.expect('font_begin')
+        face = stream.expect('font_face').value.strip()
+        children = []
+        while stream.current.type != 'font_end':
+            children.append(self.parse_node(stream))
+        stream.expect('font_end')
+        return nodes.Font([face], children)
+
+    def parse_quote(self, stream):
+        """
+        Parse a quoted block (blockquote). It does not set the typographic
+        quotes you might have expected. That's part of the `GermanTypography`
+        transformer.
+
+        Returns a `Quote` node.
+        """
+        stream.expect('quote_begin')
+        children = []
+        while stream.current.type != 'quote_end':
+            children.append(self.parse_node(stream))
+        stream.expect('quote_end')
+        return nodes.Quote(children)
+
+    def parse_list(self, stream):
+        """
+        This parses a list or a list of lists. Due to the fail silent
+        approach of the syntax this fixes some common errors. For example
+        a list that follows a list with a different type and no paragraph
+        inbetween is considered being a different list.
+
+        Returns a `List` node.
+        """
+        def check_item(token):
+            full = token.value.expandtabs()
+            stripped = full.lstrip()
+            indentation = len(full) - len(stripped)
+            return indentation, ('unordered', 'unordered', 'arabiczero',
+                               'arabic', 'alphalower', 'alphaupper',
+                               'romanlower', 'romanupper'
+                               )['*-01aAiI'.index(stripped[0])]
+
+        indentation, list_type = check_item(stream.current)
+        result = nodes.List(list_type)
+
+        while stream.current.type == 'list_item_begin':
+            new_indentation, new_list_type = check_item(stream.current)
+            if (list_type != new_list_type and
+                new_indentation == indentation) or new_indentation < indentation:
+                break
+            elif new_indentation > indentation:
+                nested_list = self.parse_list(stream)
+                if result.children:
+                    result.children[-1].children.append(nested_list)
+                else:
+                    result.children.append(nodes.ListItem([nested_list]))
+                continue
+            stream.next()
+            children = []
+            while stream.current.type != 'list_item_end':
+                children.append(self.parse_node(stream))
+            if children:
+                result.children.append(nodes.ListItem(children))
+            stream.next()
+        return result
+
+    def parse_definition(self, stream):
+        """
+        Parses a definition list.
+
+        Returns a `DefinitionList` node.
+        """
+        stream.expect('definition_begin')
+        result = nodes.DefinitionList()
+
+        while not stream.eof:
+            term = stream.expect('definition_term').value
+            children = []
+            while stream.current.type != 'definition_end':
+                children.append(self.parse_node(stream))
+            result.children.append(nodes.DefinitionTerm(term, children))
+            if stream.current.type == 'definition_end':
+                stream.next()
+                if stream.current.type == 'definition_begin':
+                    stream.next()
+                else:
+                    break
+        return result
+
+    def parse_wiki_link(self, stream):
+        """
+        Parses an wiki or interwiki link. Depending on the syntax the
+        returned link is either an `InternalLink` node or an
+        `InternalLink` node.
+        """
+        stream.expect('wiki_link_begin')
+        wiki, page = stream.expect('link_target').value
+        children = []
+        while stream.current.type != 'wiki_link_end':
+            children.append(self.parse_node(stream))
+        stream.expect('wiki_link_end')
+        if not wiki:
+            return nodes.InternalLink(page, children)
+        elif wiki == 'user':
+            if not children:
+                children = [nodes.Text(page)]
+            return nodes.Link(href('portal', 'users', page), children,
+                              class_='user')
+        return nodes.InterWikiLink(wiki, page, children)
+
+    def parse_external_link(self, stream):
+        """
+        Parses an external link.
+
+        Returns a `Link` node.
+        """
+        stream.expect('external_link_begin')
+        url = stream.expect('link_target').value
+        children = []
+        while stream.current.type != 'external_link_end':
+            children.append(self.parse_node(stream))
+        stream.expect('external_link_end')
+        return nodes.Link(url, children)
+
+    def parse_free_link(self, stream):
+        """
+        Parses an free link.
+
+        Returns a `Link` node.
+        """
+        target = stream.expect('free_link').value
+        return nodes.Link(target)
+
+    def parse_newline(self, stream):
+        """
+        Parse a simple newline marker. Note that the parser does not process
+        paragraphs because it's not safe to guess their positions before the
+        parsing and macro expansion process took place. Have a look at the
+        `AutomaticParagraphs` transformer for more details.
+
+        Returns a `Newline` node.
+        """
+        token = stream.expect('newline')
+        return nodes.Newline()
+
+    def parse_ruler(self, stream):
+        """
+        Parses a horizontal ruler.
+
+        Returns a `Ruler` node.
+        """
+        token = stream.expect('ruler')
+        return nodes.Ruler()
+
+    def parse_macro(self, stream):
+        """
+        Parse a macro declaration. It's important to know that macros are
+        expanded already in the parsing process. Depending on the type the
+        macros specify the macro is then either inserted into the parse tree
+        (default behavior) or marked as deferred and processed after the main
+        parsing (or after the transformers).
+
+        If a macro is expanded at rendering time a `nodes.Macro` is returned
+        that holds the already instanciated macro. Because the macro *is*
+        instanciate, dynamic macros have to ensure that they support pickle.
+        """
+        from inyoka.wiki.macros import get_macro
+        stream.expect('macro_begin')
+        name = stream.expect('macro_name').value
+        args, kwargs = self.parse_arguments(stream, 'macro_end')
+        stream.next()
+        macro = get_macro(name, args, kwargs)
+        if macro is None:
+            return nodes.error_box('Fehlendes Macro',
+                                   u'Das Macro „%s“ konnte nicht '
+                                   u'gefunden werden.' % name)
+        elif macro.is_tree_processor:
+            placeholder = nodes.DeferredNode()
+            self.deferred_macros[macro.stage].append((placeholder, macro))
+            return placeholder
+        elif macro.is_static:
+            return macro.build_node()
+        return nodes.Macro(macro)
+
+    def parse_pre_block(self, stream):
+        """
+        Parse a pre block or parser block. If a shebang is present the parser
+        with that name is instanciated and expanded, if it's a dynamic parser
+        a `Parser` node will be returned.
+
+        If no shebang is present or a parser with that name does not exist the
+        data is handled as preformatted block data and a `Preformatted` node
+        is returned.
+        """
+        from inyoka.wiki.parsers import get_parser
+        stream.expect('pre_begin')
+        if stream.current.type == 'parser_begin':
+            name = stream.current.value
+            stream.next()
+            args, kwargs = self.parse_arguments(stream, 'parser_end')
+            stream.next()
+        else:
+            name = 'text'
+
+        buffer = []
+        while stream.current.type == 'text':
+            buffer.append(stream.current.value)
+            stream.next()
+        stream.expect('pre_end')
+        data = u''.join(buffer)
+
+        # strip exactly one leading or trailing newline before creating a node.
+        if data[:1] == '\n':
+            data = data[1:]
+        if data[-1:] == '\n':
+            data = data[:-1]
+
+        if name == 'text':
+            return nodes.Preformatted([nodes.Text(data)])
+        parser = get_parser(name, args, kwargs, data)
+        if parser is None:
+            return nodes.Preformatted([nodes.Text(data)])
+        elif parser.is_static:
+            return parser.build_node()
+        return nodes.Parser(parser)
+
+    def parse_table(self, stream):
+        """
+        Parse a table. Contrary to moin we have extended support for
+        attribute sections (``<foo, bar=baz>``) which means that table
+        delimiters are supported inside that section. Also all attributes
+        in such a section are German.
+
+        Returns a `Table` node.
+        """
+        def attach_defs():
+            if stream.current.type in 'table_def_begin':
+                stream.next()
+                args, kwargs = self.parse_arguments(stream, 'table_def_end')
+                if stream.current.type == 'table_def_end':
+                    stream.next()
+                attrs, args = _parse_align_args(args, kwargs)
+                if cell_type == 'tablefirst':
+                    table.class_ = attrs.get('tabellenklasse') or None
+                    table.style = attrs.get('tabellenstil')
+                if cell_type in ('tablefirst', 'rowfirst'):
+                    row.class_ = attrs.get('zeilenklasse') or None
+                    if not row.class_:
+                        row.class_ = u' '.join(args) or None
+                    row.style = attrs.get('zeilenstil')
+                cell.class_ = attrs.get('zellklasse') or None
+                cell.colspan = attrs.get('spalten', 0)
+                cell.rowspan = attrs.get('zeilen', 0)
+                cell.align = {
+                    'links':        'left',
+                    'rechts':       'right',
+                    'zentriert':    'center'
+                }.get(attrs.get('ausrichtung'))
+                cell.valign = {
+                    'oben':         'top',
+                    'mitte':        'middle',
+                    'unten':        'bottom'
+                }.get(attrs.get('vausrichtung'))
+                if cell_type == 'normal':
+                    if not cell.class_:
+                        cell.class_ = u' '.join(args) or None
+
+        table = nodes.Table()
+        cell = row = None
+        cell_type = 'tablefirst'
+        while not stream.eof:
+            if stream.current.type == 'table_row_begin':
+                stream.next()
+                cell = nodes.TableCell()
+                row = nodes.TableRow([cell])
+                table.children.append(row)
+                attach_defs()
+            elif stream.current.type == 'table_col_switch':
+                stream.next()
+                cell_type = 'normal'
+                cell = nodes.TableCell()
+                row.children.append(cell)
+                attach_defs()
+            elif stream.current.type == 'table_row_end':
+                stream.next()
+                cell_type = 'rowfirst'
+                if stream.current.type != 'table_row_begin':
+                    break
+            else:
+                cell.children.append(self.parse_node(stream))
+        return table
+
+    def parse_box(self, stream):
+        """
+        Parse a box. Pretty much like a table with one cell that renders to
+        a div or a div with a title and body.
+
+        Returns a `Box` node.
+        """
+        box = nodes.Box()
+        stream.expect('box_begin')
+        if stream.current.type == 'box_def_begin':
+            stream.next()
+            args, kwargs = self.parse_arguments(stream, 'box_def_end')
+            if stream.current.type == 'box_def_end':
+                stream.next()
+            attrs, args = _parse_align_args(args, kwargs)
+            box.align = {
+                'links':        'left',
+                'rechts':       'right',
+                'zentriert':    'center'
+            }.get(attrs.get('ausrichtung'))
+            box.valign = {
+                'oben':         'top',
+                'mitte':        'middle',
+                'unten':        'bottom'
+            }.get(attrs.get('vausrichtung'))
+            box.class_ = attrs.get('klasse')
+            if not box.class_:
+                box.class_ = u' '.join(args)
+            box.style = attrs.get('stil')
+            box.title = attrs.get('titel')
+
+        while stream.current.type != 'box_end':
+            box.children.append(self.parse_node(stream))
+        stream.expect('box_end')
+        return box
+
+    def parse_arguments(self, stream, end_token):
+        """
+        Helper function for function argument parsing. Pass it a
+        `TokenStream` and the delimiter token for the argument section and
+        it will extract all position and keyword arguments.
+
+        Returns a ``(args, kwargs)`` tuple.
+        """
+        args = []
+        kwargs = {}
+        keywords = []
+        while stream.current.type != end_token:
+            if stream.current.type in ('func_string_arg', 'text'):
+                if stream.current.type == 'text':
+                    value = stream.current.value
+                else:
+                    value = unescape_string(stream.current.value[1:-1])
+                stream.next()
+                if keywords:
+                    for keyword in keywords:
+                        kwargs[keyword] = value
+                    del keywords[:]
+                else:
+                    args.append(value)
+            elif stream.current.type == 'text':
+                args.append(stream.current.value)
+                stream.next()
+            elif stream.current.type == 'func_kwarg':
+                keywords.append(stream.current.value)
+                stream.next()
+            elif stream.current.type == 'func_argument_delimiter':
+                stream.next()
+            else:
+                break
+        for keyword in keywords:
+            args.append(keyword)
+        return tuple(args), kwargs
+
+    def expand_macros(self, tree, stage):
+        """
+        Helper function for macro expansion. This is called at the end of
+        the parsing process to insert deferred macros.
+        """
+        for placeholder, macro in self.deferred_macros[stage]:
+            placeholder.become(macro.build_node(tree))
+
+    def parse(self):
+        """
+        Starts the parsing process. This sets the dirty flag which means that
+        you have to create a new parser after the parsing.
+        """
+        if self.is_dirty:
+            raise RuntimeError('the parser is dirty. reinstanciate it.')
+        self.is_dirty = True
+        stream = self.lexer.tokenize(self.string)
+        result = nodes.Document()
+        while not stream.eof:
+            result.children.append(self.parse_node(stream))
+        for stage in 'initial', 'late':
+            self.expand_macros(result, stage)
+        for transformer in self.transformers:
+            result = transformer.transform(result)
+        self.expand_macros(result, 'final')
+        return result

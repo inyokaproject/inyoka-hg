@@ -1,0 +1,167 @@
+# -*- coding: utf-8 -*-
+"""
+    inyoka.forum.forms
+    ~~~~~~~~~~~~~~~~~~
+
+    Formulars for the forum.
+
+    :copyright: 2007 by Maximilian Trescher, Benjamin Wiegand.
+    :license: GNU GPL, see LICENSE for more details.
+"""
+from django import newforms as forms
+from inyoka.utils.forms import MultiField
+from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS
+
+VERSION_CHOICES = [('', 'Version auswählen')] + list(
+    UBUNTU_VERSIONS.iteritems()
+)
+DISTRO_CHOICES = [('', 'Distribution auswählen')] + list(
+    UBUNTU_DISTROS.iteritems()
+)
+
+
+class NewPostForm(forms.Form):
+    """
+    Allows the user to create a new post. It provides the following fields:
+    `text`
+        The text for the post.
+    `att_ids`
+        A list of new attachments attached to this post.
+    It's generally used together with `AddAttachmentForm`.
+    """
+    text = forms.CharField(widget=forms.Textarea)
+    att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
+
+
+class EditPostForm(forms.Form):
+    """
+    Allows the user to edit the text of a post.
+    It's generally used together with `AddAttachmentForm`.
+    """
+    text = forms.CharField(widget=forms.Textarea)
+    #: this field only appears if the post is the first post of the topic.
+    #: the user can select, whether the post's topic should be sticky or not.
+    sticky = forms.BooleanField(required=False)
+
+
+class NewTopicForm(forms.Form):
+    """
+    Allows the user to create a new topic.
+    It provides the following fields:
+    `title`
+        The title of the topic.
+    `text`
+        The text of the first post inside the topic.
+    `att_ids`
+        A list of new attachments attached to this post.
+    `polls`
+        A list of new polls bound to this topic.
+    `ubuntu_version`
+        The ubuntu version the user has.
+    `ubuntu_distro`
+        The ubuntu distribution the user has.
+    It's used together with `AddAttachmentForm` in general.
+    """
+    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}));
+    text = forms.CharField(widget=forms.Textarea)
+    att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
+    polls = forms.CharField(widget=forms.HiddenInput, required=False)
+    ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
+                                                required=False)
+    ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
+    sticky = forms.BooleanField(required=False)
+
+
+class MoveTopicForm(forms.Form):
+    """
+    This form gives the user the possibility to select a new forum for a
+    topic.
+    """
+    forum_id = forms.ChoiceField()
+
+
+class SplitTopicForm(forms.Form):
+    """
+    This form used on the split topic page gives the user the choice whether
+    the posts should be moved into an existing or a new topic.
+    """
+    action = forms.ChoiceField(choices=(('add', ''), ('new', '')))
+    #: the title of the new topic
+    title = forms.CharField(max_length=200)
+    #: the forum of the new topic
+    forum = forms.ChoiceField()
+    #: the slug of the existing topic
+    topic_slug = forms.CharField(max_length=200)
+    #: this is a boolean that is True if the user wants to select single posts
+    #: for splitting out of the topic.
+    select_selected = forms.BooleanField(required=False)
+    #: this is the list of post ids the user selected manually.
+    #: if `select_following` is True, it's ignored if `select` is empty.
+    select = forms.MultipleChoiceField()
+    #: this is a boolean that is True if the user wants to split out all posts
+    #: newer than a specific post.
+    select_following = forms.BooleanField(required=False)
+    #: this is the first post the user wants to get splitted out of the topic.
+    #: All posts following are selected too automatically.
+    #: It's ignored if `start` is empty if `select_selected` is True.
+    start = forms.ChoiceField()
+
+    def clean(self):
+        data = self.cleaned_data
+        if data['select_selected']:
+            self._errors.pop('start', None)
+        elif data['select_following']:
+            self._errors.pop('select', None)
+        if data.get('action') == 'new':
+            self._errors.pop('topic_slug', None)
+        elif data.get('action') == 'add':
+            self._errors.pop('title', None)
+            self._errors.pop('forum', None)
+        return data
+
+
+class AddAttachmentForm(forms.Form):
+    """
+    Allows the user to upload new attachments. It provides the following fields:
+    `attachment`
+        A file field for the uploaded file.
+
+    `filename`
+        The target filename. If this is left blank the original filename
+        is used for the server too.
+
+    `override`
+        A checkbox for the override flag. If this is true a filename with
+        the same name is overridden (A new revision is created)
+
+    `description`
+        The description of the attachment as textarea.
+    """
+    attachment = forms.FileField(required=True)
+    filename = forms.CharField(max_length=512, required=False)
+    override = forms.BooleanField(required=False)
+    description = forms.CharField(label='Description', required=False,
+                  widget=forms.TextInput(attrs={'size':'60'}))
+
+
+class AddPollForm(forms.Form):
+    question = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'size':'60'}))
+    multiple = forms.BooleanField()
+    options = MultiField((forms.CharField(max_length=100),))
+
+
+class ReportTopicForm(forms.Form):
+    """
+    Allows the user to report the moderators a topic.
+    It's only field is a text field where the user can write why he thinks
+    that the moderators should have a look at this topic.
+    """
+    text = forms.CharField(label='Begründung', widget=forms.Textarea)
+
+
+class ReportListForm(forms.Form):
+    """
+    This form lets the moderator select a bunch of topics for removing the
+    reported flag.
+    """
+    selected = forms.MultipleChoiceField()

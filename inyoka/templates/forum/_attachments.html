@@ -1,0 +1,38 @@
+{#
+    forum/_attachments.html
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    A macro that renders the attachments of a post.
+    :Parameters:
+
+        attachments
+            This has to be a list of the attachments that belong to the current
+            post.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license GNU GPL
+    
+#}
+{%- if attachments %}
+<table class="attachments">
+  {%- for att in attachments %}
+  <tr>
+    <th colspan="3">{{ att.name|e }}</th>
+  </tr>
+  {%- if att.description %}
+  <tr>
+    <td colspan="3" class="description">
+      {{ att.description|e }}
+    </td>
+  </tr>
+  {%- endif %}
+  <tr>
+    <td>Dateigröße:</td>
+    <td>{{ att.size|filesizeformat }}</td>
+    <td>
+      <a href="{{ att|url }}">Download</a>
+    </td>
+  </tr>
+  {%- endfor %}
+</table>
+{%- endif %}

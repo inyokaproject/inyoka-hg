@@ -1,0 +1,38 @@
+{#
+    pastebin/page.html
+    ~~~~~~~~~~~~~~~~~~
+
+    This template is included by all pastebin templates and adds the elements
+    they all use (stylesheets etc).
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+
+{% set title_trace = title_trace + ['NoPaste'] %}
+{% set navigation_trace = [('/', 'NoPaste')] + navigation_trace %}
+{% set styles = styles + ['pastebin.css'] %}
+{% set active_app = 'paste' %}
+{% set navi_type  = 'tabbar' %}
+
+{% block appheader %}
+  <h1>NoPaste</h1>
+  <h2>{{ title_trace[:-1]|join(' » ') }}</h2>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="contentbar">
+      {%- block paste_content %}
+      {%- endblock %}      
+    </div>
+  </div>
+{%- endblock %}
+
+{% macro tab_navigation(page) %}
+  <ul>
+    <li><a href="{{ href('pastebin') }}"{{ page == 'add' and ' class="active"' or '' }}>Neuer Paste</a></li>
+    <li><a href="{{ href('pastebin', 'browse') }}"{{ page == 'browse' and ' class="active"' or '' }}>Pastes Durchstöbern</a></li>
+  </ul>
+{% endmacro %}

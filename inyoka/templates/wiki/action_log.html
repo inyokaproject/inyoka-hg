@@ -1,0 +1,66 @@
+{#
+    wiki/action_log.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    This template is used to show the user a small dialog that let
+    him / her compare various revisions (and later restoring them too).
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+
+{% extends 'wiki/page.html' %}
+{% set title_trace = [page.title|e, 'Versionen'] %}
+{% set action = 'log' %}
+{% block wiki_content %}
+  {% set latest_rev = revisions[0] -%}
+  <p>
+    Der Artikel „<a href="{{ page|url|e }}">{{ page.title|e }}</a>“ hat
+    bislang {% trans count=revisions|count, h_count=revisions|count|
+    hnumber('feminine')%}{{ h_count }} Revision{% pluralize %}{{ h_count
+    }} Revisionen{% endtrans %}.
+    Die <a href="{{ latest_rev|url|e }}">jüngste Revision</a> ist {{
+    latest_rev.change_date|specificdatetimeformat|e }} und wurde von
+    {% if latest_rev.user %}
+    <a href="{{ latest_rev.user|url }}">{{ latest_rev.user.username|e
+    }}</a>
+    {% else %}
+    einem anonymen Benutzer über die IP {{ latest_rev.remote_addr|e }}
+    {% endif %} erstellt.
+  </p>
+  <p>
+    Um immer auf dem neuesten Stand zu sein, kannst du die Änderungen auf
+    diesem Artikel als <a href="?action=log&amp;format=atom">ATOM Feed
+    abonnieren</a> oder dich <a href="?action=subscribe">via E-Mail</a> über
+    Änderungen informieren lassen.
+  </p>
+  <form action="" method="get">
+    <table class="revisions">
+      <tr>
+        <th class="date">Datum</th>
+        <th class="user">Benutzer</th>
+        <th class="note">Änderungsnotiz</th>
+        <th colspan="2" class="actions">
+          <input type="submit" value="Vergleichen" />
+          <input type="hidden" name="action" value="diff" />
+        </th>
+      </tr>
+    {%- for revision in revisions %}
+      <tr>
+        <td class="date"><a href="{{ revision|url|e }}">{{ revision.change_date|datetimeformat }}</a></td>
+        <td class="user">{% if revision.user %}
+          <a href="{{ revision.user|url|e }}">{{ revision.user.username|e }}</a>
+        {% else %}
+          {{ revision.remote_addr|e }}
+        {% endif %}</td>
+        <td class="note">{{ revision.note|e }}</td>
+        <td class="old_rev"><input type="radio" name="rev" value="{{ revision.id }}"{%
+          if loop.index == 2 or revisions|count == 1 %} checked="checked"{% endif %} /></td>
+        <td class="new_rev"><input type="radio" name="new_rev" value="{{ revision.id }}"{%
+          if loop.index == 1 %} checked="checked"{% endif %} /></td>
+      </tr>
+    {%- endfor %}
+    </table>
+  </form>
+{% endblock %}

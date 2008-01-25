@@ -1,0 +1,46 @@
+{#
+    portal/grouplist.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows all existing groups.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Gruppen'] %}
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>Gruppenliste</h2>
+{% endblock %}
+{% block content %}
+  <h2>Gruppen</h2>
+  <p>
+    Insgesamt gibt es
+    {%- trans count=group_count -%}
+      <strong>{{ count }}</strong> Gruppe
+    {%- pluralize -%}
+      <strong>{{ count }}</strong> Gruppen
+    {%- endtrans %} von denen du in <strong>{{ user_groups }}</strong> Mitglied bist (fett gedruckt).
+  </p>
+  <table>
+    <tr>
+      <th>{{ table.get_html('id', '#') }}</th>
+      <th>{{ table.get_html('name', 'Name') }}</th>
+    </tr>
+    {%- for group in groups %}
+    <tr>
+      <td>{{ group.id }}</td>
+      <td>
+        {%- if group in USER.groups.all() %}<strong>{% endif -%}
+        <a href="{{ group|url }}">{{ group.name|e }}</a>
+        {%- if group in USER.groups.all() %}</strong>{% endif -%}
+      </td>
+    </tr>
+    {%- endfor %}
+  </table>
+  <div class="pagination">
+    Seite: {{ pagination }}
+  </div>
+{% endblock %}

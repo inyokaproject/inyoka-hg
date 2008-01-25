@@ -1,0 +1,163 @@
+/**
+ * syle.wiki
+ * ~~~~~~~~~
+ *
+ * The style for the wiki. This does not include styles for wiki markup
+ * because that one can appear outside of the wiki.
+ *
+ * :copyright: 2007 by Armin Ronacher.
+ * :license: GNU GPL.
+ */
+
+h1.pagetitle {
+	color: #a57205;
+}
+
+h1.pagetitle a {
+    color: #b58215;
+    text-decoration: none;
+}
+
+#page, .preview {
+    line-height: 1.8em;
+    font-size: 1em;
+    margin: 0;
+}
+
+div.preview {
+    border: 1px solid #ccc;
+    margin: 20px 0 20px 0;
+    padding: 10px 20px 10px 20px;
+    background-color: #f8f8f8;
+    background-image: url(../img/draft.png);
+}
+
+p.meta {
+    margin: 1em 0 0 0;
+    padding: 0.4em;
+    text-align: right;
+    font-size: 0.85em;
+}
+
+#form_addattachment textarea {
+    width: 35em;
+    height: 6em;
+}
+
+#form_addattachment label {
+    float: left;
+    width: 10em;
+}
+
+#form_addattachment label[for="id_override"] {
+    float: none;
+}
+
+/*table.revisions {
+    width: 100%;
+    margin: 1em 0 1em 0;
+    border-collapse: collapse;
+}
+
+table.revisions tr th {
+    background-color: #bbb;
+    border: 1px solid #bbb;
+    color: white;
+    padding: 0.3em;
+    text-align: left;
+}
+
+table.revisions tr td {
+    padding: 0.3em;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}*/
+
+table.revisions .date {
+    width: 15em;
+}
+
+table.revisions .user {
+    width: 10em;
+}
+
+table.revisions .actions {
+    width: 6em;
+    text-align: center;
+}
+
+table.revisions .old_rev {
+    text-align: right;
+}
+
+table.revisions .new_rev {
+    text-align: left;
+}
+
+table.diff {
+    empty-cells: show;
+}
+
+table.diff th.old_rev,
+table.diff th.new_rev {
+    width: 3em;
+}
+
+table.diff tr.line th.old_rev,
+table.diff tr.line th.new_rev {
+    padding: 0.2em 0.5em 0.2em 0;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.8em;
+    background-color: #eee;
+    color: #444;
+    border: 1px solid #ccc;
+    vertical-align: top;
+}
+
+table.diff tr.ellipsis th {
+    border: 1px solid #ccc;
+    background-color: #dfdfdf;
+}
+
+table.diff tr.line td.code {
+    padding: 0.1em 0.4em 0.1em 0.4em;
+    font-family: monospace;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: pre-wrap;
+}
+
+table.diff tr.add td.code {
+    background-color: #dfd;
+}
+
+table.diff tr.del td.code {
+    background-color: #fcc;
+}
+
+table.diff tr.add td.code ins {
+    background-color: #9e9;
+    text-decoration: none;
+}
+
+table.diff tr.del td.code del {
+    background-color: #e99;
+    text-decoration: none;
+}
+
+div.conflict {
+    border: 1px solid #ccc;
+    background-color: #eee;
+    color: #999;
+    font-size: 0.9em;
+    padding: 0 0.5em 0 0.5em;
+    line-height: 1.6em;
+}
+
+div.conflict strong {
+    color: black;
+}

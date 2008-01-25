@@ -1,0 +1,35 @@
+{#
+    admin/planet_edit.html
+    ~~~~~~~~~~~~~~~~~~~~~~
+
+    Formular for editing or creating a new blog.
+
+    :copyright: 2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% block admin_content %}
+  <form action="" method="post" enctype="multipart/form-data">
+    <dl>
+      <dt>Name:</dt>
+      <dd>{{ form.name }}{{ h.field_errors(form.errors.name) }}</dd>
+      <dt>Beschreibung:</dt>
+      <dd>{{ form.description }}{{ h.field_errors(form.errors.description) }}</dd>
+      <dt>URL des Blogs:</dt>
+      <dd>{{ form.blog_url }}{{ h.field_errors(form.errors.blog_url) }}</dd>
+      <dt>URL des Feeds:</dt>
+      <dd>{{ form.feed_url }}{{ h.field_errors(form.errors.feed_url) }}</dd>
+      <dt>Icon:</dt>
+      <dd>
+        {{- form.icon }}{{ h.field_errors(form.errors.icon) }}<br />
+        {%- if blog.icon -%}
+        {{ form.delete_icon }} <label for="id_delete_icon">Aktuelles Icon löschen</label>
+        {%- endif -%}
+      </dd>
+    </dl>
+    <p>
+      <input type="submit" value="Speichern" />
+      <input type="reset" value="Zurücksetzen" /> 
+    </p>
+  </form>
+{% endblock %}

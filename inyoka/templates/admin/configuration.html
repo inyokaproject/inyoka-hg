@@ -1,0 +1,32 @@
+{#
+    templates.admin.configuration
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    On this page the administrator can set general configuration values.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'config'), 'Konfiguration')
+  ] %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" class="ikhaya">
+  <dl>
+    <dt>Globale Ankündigung</dt>
+    <dd>{{ form.global_message }}{{ h.field_errors(form.errors.global_message) }}</dd>
+    <dd class="note">
+      Diese Nachricht wird auf allen Seiten über dem Inhalt angezeigt (HTML ist erlaubt).
+      Um sie zu deaktivieren, lasse das Feld leer.
+    </dd>
+  </dl>
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+{% endblock %}

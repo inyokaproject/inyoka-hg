@@ -1,0 +1,289 @@
+# -*- coding: utf-8 -*-
+"""
+    inyoka.wiki.storage
+    ~~~~~~~~~~~~~~~~~~~
+
+    Beside the metadata the wiki has a storage concept which is a bit simpler
+    in terms of implementation. Basically a wiki storage is a preformatted
+    block in a special wiki page that is know at compile time. That block is
+    then processed by a storage class and converted into a list of tuples or
+    a dict, or something different, depending what the class wants to have.
+
+    This is used for similies, interwiki links, access control and much more.
+    If a page is a storage container is determined by the special 'X-Behave'
+    metadata header. There can be multiple pages with the same behave header,
+    the contents of those pages are combined afterwards.
+
+    The following behave headers are known so far:
+
+    ``X-Behave: Smiley-Map``
+        this page must contain a pre block that binds smiley codes to their
+        image location. If the link is relative it's assumed to be a link to
+        an attachment, otherwise a full url.
+
+    ``X-Behave: Interwiki-Map``
+        Binds shortnames to wiki URLs.
+
+    ``X-Behave: Access-Control-List``
+        This storage contains ACL information
+
+    ``X-Behave: Dangerous-File-Extensions``
+        This storage contains a list of file extensions users without the
+        special `PRIV_ATTACH_DANGEROUS` privilege are not allowed to upload.
+
+    Storage objects are read only because they combine the information from
+    multiple pages.
+
+    It's important to know that the storage system does not use the normal
+    parser but a lightweight version of it that just looks for the pre tag.
+    This is not only faster but also ensures that we don't get bootstrapping
+    problems.
+
+
+    :copyright: Copyright 2007 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+import re
+from urlparse import urljoin
+from django.core.cache import cache
+from django.conf import settings
+from django.db import connection
+
+
+_block_re = re.compile(r'^\{\{\{(?:\n?#.*?$)?(.*?)^\}\}\}(?sm)')
+
+
+class StorageManager(object):
+    """
+    Manager multiple storages.
+    """
+
+    def __init__(self, **storages):
+        self.storages = storages
+
+    def __getattr__(self, key):
+        if key in self.storages:
+            return self.storages[key]().data
+        raise AttributeError(key)
+
+    def clear_cache(self):
+        """Clear all active caches."""
+        for obj in self.storages.itervalues():
+            cache.delete('wiki/storage/' + obj.behavior_key)
+
+
+class BaseStorage(object):
+    """
+    Abstract base class for all the storage objects that contains the shared
+    logic like flushing the cache and storing back to it.
+    """
+
+    #: the name of the behavior key this storage looks for. If it's `None`
+    #: this storage is abstract and useful as baseclass for concrete storages.
+    behavior_key = None
+
+    def __init__(self):
+        key = 'wiki/storage/' + self.behavior_key
+        self.data = cache.get(key)
+        if self.data is not None:
+            return
+
+        cur = connection.cursor()
+        cur.execute('''
+            select t.value, p.name, max(r.id)
+              from wiki_page p,
+                   wiki_revision r,
+                   wiki_text t,
+                   wiki_metadata m
+             where p.id = r.page_id and
+                   p.id = m.page_id and
+                   t.id = r.text_id and
+                   not r.deleted and
+                   m.key = 'X-Behave' and
+                   m.value = %s
+          group by r.id
+          order by p.name
+        ''', [self.behavior_key])
+
+        objects = []
+        for raw_text, page_name, rewest_rev in cur.fetchall():
+            block = self.find_block(raw_text)
+            objects.append(self.extract_data(block))
+        cur.close()
+
+        self.data = self.combine_data(objects)
+        cache.set(key, self.data, 10000)
+
+    def find_block(self, text):
+        """Helper method that finds a processable block in the text."""
+        m = _block_re.search(text)
+        if m:
+            return m.group(1).strip('\r\n')
+        return u''
+
+    def extract_data(self, text):
+        """
+        This is passed the text of the first preformatted node on a page where
+        the behavior header matched. The returned object is probably post-
+        processed by `combine_data` to comine multiple results.
+        """
+
+    def combine_data(self, objects):
+        """Combine multiple results."""
+        return objects
+
+
+class DictStorage(BaseStorage):
+    """
+    Helper for storing dicts.
+    """
+
+    _line_re = re.compile(r'(?<!!)=')
+    multi_key = False
+
+    def extract_data(self, text):
+        for line in text.splitlines():
+            if self.multi_key:
+                bits = self._line_re.split(line)
+                if len(bits) > 1:
+                    for key in bits[:-1]:
+                        yield key.strip(), bits[-1].strip()
+            else:
+                bits = self._line_re.split(line, 1)
+                if len(bits) == 2:
+                    yield bits[0].strip(), bits[1].strip()
+
+    def combine_data(self, objects):
+        result = {}
+        for obj in objects:
+            for key, value in obj:
+                result[key] = value
+        return result
+
+
+class SetStorage(BaseStorage):
+    """
+    Stores a set.
+    """
+
+    def extract_data(self, text):
+        for line in text.splitlines():
+            line = line.strip()
+            if line:
+                yield line
+
+    def combine_data(self, objects):
+        result = set()
+        for obj in objects:
+            result.update(obj)
+        return result
+
+
+class SmileyMap(DictStorage):
+    """
+    Stores smiley code to image mappings.
+    """
+    behavior_key = 'Smiley-Map'
+    multi_key = True
+
+    def extract_data(self, text):
+        for key, value in DictStorage.extract_data(self, text):
+            yield key, urljoin(settings.STATIC_URL, value.encode('utf-8'))
+
+    def combine_data(self, objects):
+        result = []
+        for obj in objects:
+            result.extend(obj)
+        return result
+
+
+class InterwikiMap(DictStorage):
+    """
+    Map shortnames to full interwiki links.
+    """
+    behavior_key = 'Interwiki-Map'
+
+
+class DangerousFileExtensions(SetStorage):
+    """
+    Holds a number of dangerous file extensions (with or without dot).
+    """
+    behavior_key = 'Dangerous-File-Extensions'
+
+    def extract_data(self, text):
+        for extension in SetStorage.extract_data(self, text):
+            yield extension.lstrip('.')
+
+
+class AccessControlList(BaseStorage):
+    """
+    This storage holds the access control lists for the whole wiki. The rules
+    are similar to the basic expansion rules we also use for the `PageList`
+    macro but they are always case sensitive.
+    """
+    behavior_key = 'Access-Control-List'
+
+    def extract_data(self, text):
+        from inyoka.wiki import acl
+        privileges = {
+            'lesen':            acl.PRIV_READ,
+            'bearbeiten':       acl.PRIV_EDIT,
+            'erstellen':        acl.PRIV_CREATE,
+            'hochladen':        acl.PRIV_ATTACH,
+            u'löschen':         acl.PRIV_DELETE,
+            'verwalten':        acl.PRIV_MANAGE,
+            'alle_hochladen':   acl.PRIV_ATTACH_DANGEROUS
+        }
+
+        groups = ['*']
+        for line in text.splitlines():
+            # comments and empty lines
+            line = line.strip()
+            if not line or line.startswith('##'):
+                continue
+
+            # group sections
+            if line[0] == '[' and line[-1] == ']':
+                groups = [x.strip() for x in line[1:-1].split(',')]
+                continue
+
+            bits = line.split('=', 1)
+            if len(bits) != 2:
+                continue
+
+            subjects = set(s.strip() for s in bits[0].split(','))
+            add_privs = del_privs = 0
+            for s in bits[1].split(','):
+                s = s.strip().lower()
+                if s in ('alles', '-nichts'):
+                    add_privs = acl.PRIV_ALL
+                elif s in ('-alles', 'nichts'):
+                    del_privs = acl.PRIV_ALL
+                else:
+                    if s.startswith('-'):
+                        s = s[1:]
+                        if s in privileges:
+                            del_privs |= privileges[s]
+                    else:
+                        if s in privileges:
+                            add_privs |= privileges[s]
+
+            for group in groups:
+                pattern = re.compile(r'^%s$' % re.escape(group).
+                                     replace('\\*', '.*?'))
+                for subject in subjects:
+                    yield pattern, subject, add_privs, del_privs
+
+    def combine_data(self, objects):
+        rv = []
+        for obj in objects:
+            rv.extend(obj)
+        return rv
+
+
+storage = StorageManager(
+    smilies=SmileyMap,
+    interwiki=InterwikiMap,
+    dangerous_file_extensions=DangerousFileExtensions,
+    acl=AccessControlList
+)

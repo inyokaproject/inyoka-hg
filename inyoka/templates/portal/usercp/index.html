@@ -1,0 +1,52 @@
+{#
+    portal/usercp/index.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows the user control panel index page.
+
+    :copyright: 2007 by Christopher Grebs, Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/usercp/overall.html' %}
+
+{% block portal_content %}
+  <table class="usercp_control">
+    <tr>
+      <td>
+        <a href="{{ href('portal', 'usercp', 'profile') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-profile.png') }}" alt="Profilinformationen" /><br />
+          Profilinformationen
+        </a>
+      </td>
+      <td>
+        <a href="{{ href('portal', 'usercp', 'settings') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-preferences.png') }}" alt="Benutzereinstellungen" /><br />
+          Benutzereinstellungen
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="{{ href('portal', 'usercp', 'password') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-password.png') }}" alt="Passwort ändern" /><br />
+          Passwort ändern
+        </a>
+      </td>
+      <td>
+        <a href="{{ href('portal', 'usercp', 'subscriptions') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-subscriptions.png') }}" alt="Benachrichtigungen" /><br />
+          Benachrichtigungen
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="{{ href('portal', 'usercp', 'deactivate') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-deactivate.png') }}" alt="Benutzer deaktivieren" /><br />
+          Benutzer deaktivieren
+        </a>
+      </td>
+    </tr>
+  </table>
+{% endblock %}

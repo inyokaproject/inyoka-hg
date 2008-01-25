@@ -1,0 +1,48 @@
+{#
+    portal/_registration_form
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This macro renders the register formular.
+
+    :copyright: 2007 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+<form action="" method="post">
+  <dl>
+    <dt>Benutzername:</dt>
+    <dd>{{ form.username }}{{ h.field_errors(form.errors.username) }}</dd>
+    <dt>Passwort:</dt>
+    <dd>{{ form.password }}{{ h.field_errors(form.errors.password) }}</dd>
+    <dt>Passwortbestätigung:</dt>
+    <dd>{{ form.confirm_password }}{{ h.field_errors(form.errors.confirm_password) }}</dd>
+    <dt>E-Mail:</dt>
+    <dd>{{ form.email }}{{ h.field_errors(form.errors.email) }}</dd>
+    <dt>Nutzungshinweise:</dt>
+    {# include the agreement letter #}
+    <dd>{{ form.terms_of_usage }} Ich bestätige den <a href="{{ href('portal', 'lizenz') }}">Lizenztext</a> gelesen zu haben und erkläre mich mit der Veröffentlichung unter dieser Lizenz einverstanden.<br />Durch das Abschließen der Registrierung stimme ich den <a href="{{ href('portal', 'nutzungsbedingungen') }}">Nutzungsbedingungen</a> ebenfalls zu.<br />
+    {{ h.field_errors(form.errors.tua) }}</dd>
+   <dd>{{ form.hidden_captcha }}</dd>
+   <dd>{{ h.field_errors(form.errors.hidden_captcha) }}</dd>
+   <dt>CAPTCHA</dt>
+    <dd class="captcha"><img src="{{ href('portal', '_captcha') }}" alt="XXX: Hinweis auf Audio Version" />
+        <a href="">neues Captcha erzeugen</a></dd>
+    <dd>Bitte gebe den Code von obigem Bild hier ein:</dd>
+    <dd>{{ form.captcha }}{{ h.field_errors(form.errors.captcha) }}</dd>
+    <dd>
+      <input type="reset" value="Zurücksetzen" />
+      <input type="submit" value="Registrieren" />
+    </dd>
+  </dl>
+  <script type="text/javascript">
+    (function() {
+      var captcha_url = $('dd.captcha img').attr('src');
+      $('dd.captcha a')
+        .click(function() {
+          var uid = Math.random().toString().substring(2, 10);
+          $('dd.captcha img')
+            .attr('src', captcha_url + '#rnd-' + uid);
+          return false;
+        });
+    })();
+  </script>
+</form>

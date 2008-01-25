@@ -1,0 +1,52 @@
+/**
+ * style.ikhaya
+ * ~~~~~~~~~~~~
+ *
+ * The styles for ikhaya.
+ *
+ * :copyright: 2007 by ...
+ * :license: GNU GPL.
+ */
+ 
+.navi_sidebar .navi_about_ikhaya { background-image: url('../img/icons/ikhaya_sb.png'); }
+.navi_sidebar .navi_new_article  { background-image: url('../img/icons/new_article.png'); }
+.navi_sidebar .navi_archive      { background-image: url('../img/icons/archive.png'); }
+.navi_sidebar .navi_categories   { background-image: url('../img/icons/categories.png'); }
+
+ul.articles {
+  list-style-type: none;
+  padding: 0.0em;
+}
+
+li.article {
+  border-bottom: solid 1px #aaa;
+  padding: 1.0em 0.0em;
+  margin: 0.0em;
+  margin-bottom: 1.5em;
+}
+
+h3.title {
+}
+
+p {
+  margin-bottom: 0.5em;
+}
+
+div.intro {
+  font-size: 0.95em;
+  color: #777;
+  font-weight: bold;
+  margin-left: 1.0em;
+}
+
+p.meta {
+  color: #777;
+  font-size: 0.9em;
+  margin-bottom:0.1em;
+}
+
+img.icon {
+  float: right;
+  max-width: 200px;
+  max-height: 120px;
+}

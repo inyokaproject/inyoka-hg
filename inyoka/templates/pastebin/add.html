@@ -1,0 +1,43 @@
+{#
+    pastebin/add.html
+    ~~~~~~~~~~~~~~~~~
+
+    On this page the user can add a new pastebin entry.
+
+    It's pastebin's index page.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'pastebin/page.html' %}
+
+{% set title_trace = ['Neuer Eintrag'] %}
+
+{% block navigation %}
+  {{ tab_navigation('add') }}
+{% endblock %}
+
+{% block paste_content %}
+  <form action="" method="post">
+    <dl>
+      <dt>Funktion:</dt>
+      <dd>
+        Dies ist ein No Paste Service, wo du Fehlermeldungen, Logs, Konfigurationsdateien oder
+        Quelltexte pasten kannst, um Forenthreads oder IRC-Channels nicht unnötig unleserlich zu
+        machen. Dazu kopierst du den zu pastenden Text in das Textfeld und wählst die passende
+        Sprache aus. Dann kopierst du die URL in den Thread bzw. Channel. Genaueres zu unserem
+        No Paste Service findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
+      </dd>
+      <dt>Titel:</dt>
+      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
+      <dt>Sprache:</dt>
+      <dd>{{ form.language }}{{ h.field_errors(form.errors.language) }}</dd>
+      <dt>Code:</dt>
+      <dd>{{ form.code }}{{ h.field_errors(form.errors.code) }}</dd>
+      <dd>
+        <input type="reset" value="Zurücksetzen" />
+        <input type="submit" value="Hinzufügen" />
+      </dd>
+    </dl>
+  </form>
+{% endblock %}

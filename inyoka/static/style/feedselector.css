@@ -1,0 +1,25 @@
+ul.radio {
+  list-style: none;
+  padding-left: 0;
+}
+ul.radio li {
+  margin-left: 0.66em;
+}
+ul.radio li:first-line {
+  margin-left: 0;
+}
+
+/*ul.radio div {
+  margin-left: 1em;
+}*/
+
+.feed_count_increase {
+  position: relative;
+  bottom: 7px;
+}
+.feed_count_decrease { 
+  position: relative;
+  top: 2px;
+  right: 9px;
+  margin-right: -9px;
+}

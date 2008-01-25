@@ -1,0 +1,26 @@
+/**
+ * style.sourceviewer
+ * ~~~~~~~~~~~~~~~~~~
+ *
+ * Extra classes for the sourceviewer.
+ *
+ * :copyright: 2007 by Armin Ronacher.
+ * :license: GNU GPL.
+ */
+
+div.code {
+    border: 1px solid #ccc;
+}
+
+div.code pre {
+    margin: 0;
+    padding: 15px;
+    font-size: 13px;
+    line-height: 15px;
+}
+
+div.code div.highlighted pre {
+    margin: -15px 0 0 0;
+    padding: 0 15px 0 15px;
+    background-color: #fff;
+}

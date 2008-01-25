@@ -1,0 +1,33 @@
+{#
+    errors/403.html
+    ~~~~~~~~~~~~~~~
+
+    This template is shown if the user requested a page he isn't allowed to see.
+
+    If the user isn't logged in, a login form will be displayed.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+
+{% set title_trace = title_trace + ['Zugriff verweigert'] %}
+{% block appheader %}
+  <h1>Fehler</h1>
+  <h2>Zugriff verweigert</h2>
+{% endblock %}
+{% block portal_content %}
+  <div class="error">
+    <p>
+      Du bist nicht berechtigt, diese Seite aufzurufen.
+    </p>
+    {% if not user.is_authenticated() %}
+      <p>
+        Das liegt möglicherweise daran, dass du nicht eingeloggt bist.
+      </p>
+      {{ loginform() }}
+    {% endif %}
+  </div>
+{% endblock %}
+

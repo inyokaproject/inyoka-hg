@@ -1,0 +1,39 @@
+{#
+    admin/pages_edit.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Formular for editing or writing a new page.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% if page %}
+  {% set navigation_trace = [
+      (page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.name))
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (href('admin', 'pages', 'new'), 'Neue Seite erstellen')
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'pages'), 'Statische Seiten')
+  ] + navigation_trace %}
+{% block admin_content %}
+  <form action="" method="post">
+    <dl>
+      <dt>Titel:</dt>
+      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
+      <dt>Schlüssel:</dt>
+      <dd>{{ form.key }}{{ h.field_errors(form.errors.key) }}</dd>
+      <dt>Content:</dt>
+      {{ form.content }}
+      <p>
+        {{ h.field_errors(form.errors.content) }}
+      </p>
+    </dl>
+    <input type="submit" value="Speichern" />
+    <input type="reset" value="Zurücksetzen" /> 
+  </form>
+{% endblock %}

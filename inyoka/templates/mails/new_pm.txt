@@ -1,0 +1,6 @@
+Hallo {{ username }},
+
+Du hast von „{{ sender }}“ eine neue private Nachricht mit dem Titel „{{ subject }}“ bekommen.
+Du kannst sie dir in deinem Posteingang ansehen: {{ href('portal', 'privmsg', 'inbox') }}
+
+Falls du bei neuen Privatnachrichten in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ href('portal', 'usercp', 'settings') }}

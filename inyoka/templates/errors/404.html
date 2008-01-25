@@ -1,0 +1,29 @@
+{#
+    errors/404.html
+    ~~~~~~~~~~~~~~~
+
+    This template is shown if the page requested does not exist.
+
+    :copyright: 2007 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+
+{% set title_trace = title_trace + ['Seite existiert nicht'] %}
+{% block appheader %}
+  <h1>Fehler</h1>
+  <h2>404 Seite Nicht Gefunden</h2>
+{% endblock %}
+{% block portal_content %}
+  <div class="not_found">
+    <p>
+    {% if err_message %}
+      <strong>{{ err_message }}</strong>
+    {% else %}
+      <strong>Die Seite konnte nicht gefunden werden.</strong>
+    {% endif %}
+    </p>
+    <img src="{{ href('static', 'img/not_found.png') }}" />
+  </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{#
+    planet/index.html
+    ~~~~~~~~~~~~~~~~~
+
+    This page shows some of the latest planet entries.
+
+    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher.
+    :license: GNU GPL.
+#}
+{% extends 'planet/page.html' %}
+
+{% set feeds = [
+  ('Planet - Nur Überschrift', href('planet', 'feeds/title/25')),
+  ('Planet - Nur Einleitung', href('planet', 'feeds/short/25')),
+  ('Planet - Ganzer Beitrag', href('planet', 'feeds/full/25'))
+] %}
+
+{% block planet_content %}
+  {%- if days %}
+  <div class="articles">
+  {%- for day in days %}
+    <div class="day">
+      <h2>{{ day.date|dateformat }}</h2>
+      {% for article in day.articles %}
+      <div class="article">
+        <div class="author">
+          <a href="{{ article.blog|url|e }}">
+            <img src="{{ article.blog.icon_url|e }}" alt="" /><br />
+            {{ article.blog.name|e }}
+          </a>
+        </div>
+        <div class="contents">
+          <div class="post">
+            <div class="head"><h3><a href="{{ article|url|e }}">{{ article.title }}</a></h3></div>
+            <div class="text">{{ article.text }}</div>
+            <div class="meta">
+              <p>{{ article.pub_date|specificdatetimeformat(true) }} |
+                 <a href="{{ article|url|e }}">#</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {%- endfor %}
+    </div>
+  {%- endfor %}
+  </div>
+  <div class="pagination">Gehe zu: {{ pagination }}</div>
+  {%- else %}
+  <p>Es wurden noch keine Einträge aggregiert.</p>
+  {%- endif %}
+{% endblock %}

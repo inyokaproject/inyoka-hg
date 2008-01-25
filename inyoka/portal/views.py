@@ -1,0 +1,813 @@
+# -*- coding: utf-8 -*-
+"""
+    inyoka.portal.views
+    ~~~~~~~~~~~~~~~~~~~
+
+    All views for the portal including the user control panel,
+    private messages, static pages and the login/register and search
+    dialogs.
+
+    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
+                                  Christoph Hack, Marian Sigler.
+    :license: GNU GPL.
+"""
+from datetime import datetime
+from django.newforms.models import model_to_dict
+from django.http import Http404 as PageNotFound, HttpResponseRedirect
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.cache import cache
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from inyoka.utils import get_random_password, human_number
+from inyoka.utils.http import templated, TemplateResponse, HttpResponse
+from inyoka.utils.sessions import get_sessions, set_session_info, \
+                                  make_permanent, get_user_record
+from inyoka.utils.urls import href, url_for, is_save_domain
+from inyoka.utils.search import search as search_system
+from inyoka.utils.html import escape
+from inyoka.utils.captcha import Captcha
+from inyoka.utils.flashing import flash
+from inyoka.utils.sortable import Sortable
+from inyoka.utils.templating import render_template
+from inyoka.utils.pagination import Pagination
+from inyoka.utils.decorators import check_login
+from inyoka.utils.notification import send_notification
+from inyoka.utils.user import check_activation_key, send_activation_mail, \
+                              send_new_user_password, authenticate, \
+                              login as do_login, logout as do_logout
+from inyoka.wiki.models import Page as WikiPage
+from inyoka.ikhaya.models import Article, Category
+from inyoka.forum.models import Forum
+from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
+                                UserCPSettingsForm, PrivateMessageForm, \
+                                DeactivateUserForm, LostPasswordForm, \
+                                ChangePasswordForm, SubscriptionForm, \
+                                UserCPProfileForm, NOTIFICATION_CHOICES
+from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
+                                 PrivateMessageEntry, PRIVMSG_FOLDERS
+from inyoka.portal.user import User, Group, deactivate_user
+
+
+@templated('errors/404.html')
+def not_found(request, err_message=None):
+    return {
+        'err_message': err_message,
+    }
+
+
+@templated('errors/500.html')
+def internal_server_error(request):
+    pass
+
+
+@templated('portal/index.html')
+def index(request):
+    """
+    Startpage that shows the latest ikhaya articles
+    and some records of ubuntuusers.de
+    """
+    ikhaya_latest = Article.published.all()[:10]
+    set_session_info(request, u'ist am Portal', 'Portal')
+    record, record_time = get_user_record()
+    return {
+        'ikhaya_latest':    list(ikhaya_latest),
+        'sessions':         get_sessions(order_by='subject_text'),
+        'record':           record,
+        'record_time':      record_time
+    }
+
+
+
+@templated('portal/whoisonline.html')
+def whoisonline(request):
+    """Shows who is online and a link to the page the user views."""
+    set_session_info(request, u'schaut sich an, wer online ist',
+                     u'Wer ist online')
+    record, record_time = get_user_record()
+    return {
+        'sessions':         get_sessions(),
+        'record':           record,
+        'record_time':      record_time
+    }
+
+
+@templated('portal/register.html')
+def register(request):
+    """Register a new user."""
+    redirect = request.GET.get('next') or href('portal')
+    if request.user.is_authenticated():
+        flash(u'Du bist bereits angemeldet.', False)
+        return HttpResponseRedirect(redirect)
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        request.session['register_form_data'] = request.POST
+        form.captcha_solution = request.session.get('captcha_solution')
+        if form.is_valid():
+            data = form.cleaned_data
+            user = User.objects.register_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'])
+            flash(u'Der Benutzer „%s“ wurde erfolgreich registriert. '
+                  u'Es wurde eine E-Mail an „%s“ gesendet, in der du deinen '
+                  u'Account aktivieren kannst.' % (
+                        escape(data['username']), escape(data['email'])), True)
+
+            # clean up request.session
+            del request.session['captcha_solution']
+            del request.session['register_form_data']
+            return HttpResponseRedirect(redirect)
+    else:
+        if 'register_form_data' in request.session:
+            # the form was posted at least once
+            # so restore the posted data
+            form = RegisterForm(request.session['register_form_data'])
+        else:
+            form = RegisterForm()
+
+    set_session_info(request, u'registriert sich',
+                     'registriere dich auch')
+    return {
+        'form': form
+    }
+
+
+def get_captcha(request):
+    """little CAPTCHA view for the register dialog."""
+    response = HttpResponse(content_type='image/png')
+    captcha = Captcha()
+    request.session['captcha_solution'] = captcha.solution
+    captcha.render_image().save(response, 'PNG')
+    return response
+
+
+def activate(request, action='', username='', activation_key=''):
+    """Activate a user with the activation key send via email."""
+    redirect = is_save_domain(request.GET.get('next', ''))
+    if not redirect:
+        redirect = href('portal', 'login', username=username)
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        flash(u'Der Benutzer „%s“ existiert nicht!' % escape(username), False)
+        return HttpResponseRedirect(href('portal'))
+
+    if not action in ('delete', 'activate'):
+        raise PageNotFound()
+
+    if action == 'delete':
+        if check_activation_key(user, activation_key):
+            if not user.is_active:
+                user.delete()
+                flash(u'Der Benutzer „%s“ wurde gelöscht.' %
+                      escape(username), True)
+            else:
+                flash(u'Der Benutzer „%s“ wurde schon aktiviert.' %
+                      escape(username), False)
+        else:
+            flash(u'Dein Aktivierungskey stimmt nicht überein!', False)
+        return HttpResponseRedirect(href('portal'))
+    else:
+        if check_activation_key(user, activation_key):
+            user.is_active = True
+            user.save()
+            flash(u'Du wurdest erfolgreich aktiviert und kannst dich nun '
+                  u'einloggen.', True)
+            return HttpResponseRedirect(redirect)
+        else:
+            flash(u'Dein Aktivierungskey stimmt nicht überein!', False)
+            return HttpResponseRedirect(href('portal'))
+
+
+def resend_activation_mail(request, username):
+    """Resend the activation mail if the user is not already activated."""
+    user = get_object_or_404(User, username=username)
+    if user.is_active:
+        flash(u'Das Benutzerkonto von „%s“ ist schon aktiviert worden!' %
+              escape(user.username), False)
+        return HttpResponseRedirect(href('portal'))
+    send_activation_mail(user)
+    flash(u'Es wurde eine E-Mail an „%s“ gesendet, in der du dein '
+          u'Benutzerkonto aktivieren kannst.' % escape(user.email), True)
+    return HttpResponseRedirect(href('portal'))
+
+
+@templated('portal/lost_password.html')
+def lost_password(request):
+    """
+    View for the lost password dialog.
+    It generates a new random password and sends it via mail.
+    """
+    redirect = href('portal', 'login')
+
+    if request.method == 'POST':
+        form = LostPasswordForm(request.POST)
+        request.session['lost_password_form_data'] = request.POST
+        form.captcha_solution = request.session.get('captcha_solution')
+        if form.is_valid():
+            data = form.cleaned_data
+            send_new_user_password(User.objects.get(
+                username=data['username'],
+                email=data['email']))
+            flash(u'Ein neues Passwort für den Benutzer „%s“'
+                  u' wurde an „%s“ versandt' % (
+                  escape(data['username']), escape(data['email'])), True)
+
+            # clean up request.session
+            del request.session['captcha_solution']
+            del request.session['lost_password_form_data']
+            return HttpResponseRedirect(redirect)
+    else:
+        if 'lost_password_form_data' in request.session:
+            form = LostPasswordForm(request.session['lost_password_form_data'])
+        else:
+            form = LostPasswordForm()
+
+    return {
+        'form': form
+    }
+
+
+
+@templated('portal/login.html')
+def login(request):
+    """Login dialog that supports permanent logins"""
+    redirect = is_save_domain(request.GET.get('next', '')) and \
+                 request.GET['next'] or href('portal')
+    if request.user.is_authenticated():
+        flash(u'Du bist bereits angemeldet!', False)
+        return HttpResponseRedirect(redirect)
+
+    failed = inactive = False
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = authenticate(username=data['username'],
+                                password=data['password'])
+            if user is not None:
+                if user.is_active:
+                    if data['permanent']:
+                        make_permanent(request)
+                    # username matches password and user is active
+                    flash(u'Du hast dich erfolgreich angemeldet.', True)
+                    do_login(request, user)
+                    return HttpResponseRedirect(redirect)
+                inactive = True
+
+            # username doesn't match password or user isn't activate
+            failed = True
+    else:
+        form = LoginForm()
+
+    d = {
+        'form':     form,
+        'failed':   failed,
+        'inactive': inactive,
+    }
+    if failed:
+        d['username'] = data['username']
+    return d
+
+
+def logout(request):
+    """Simple logout view that flashes if the process was done
+    successfull or not (e.g if the user wasn't logged in)."""
+    if request.user.is_authenticated():
+        do_logout(request)
+        flash(u'Du hast dich erfolgreich abgemeldet.', True)
+    else:
+        flash(u'Du warst nicht eingeloggt', False)
+    return HttpResponseRedirect(request.GET.get('next') or
+                                href('portal'))
+
+
+@templated('portal/search.html')
+def search(request):
+    """Search dialog for the Xapian search engine."""
+    set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
+    f = SearchForm(request.REQUEST)
+    if f.is_valid():
+        d = f.cleaned_data
+        results = search_system.query(
+            d['area'] and d['area'] != 'all'
+                and '(%s) AND area:%s' % (d['query'], d['area']) \
+                or d['query'],
+            page=d['page'] or 1, per_page=d['per_page'] or 20,
+            date_begin=d['date_begin'], date_end=d['date_end']
+        )
+        if len(results.results ) > 0:
+            return TemplateResponse('portal/search_results.html', {
+                'query':        d['query'],
+                'highlight':    results.highlight_string,
+                'area':         d['area'],
+                'results':      results
+            })
+        else:
+            flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %
+                escape(d['query']))
+
+    return {
+        'searchform': f
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein um ein Benutzerprofil zu '
+                     u'sehen')
+@templated('portal/profile.html')
+def profile(request, username):
+    """Shows the user profile if the user is logged in."""
+    user = User.objects.get(username=username)
+    try:
+        wikipage = WikiPage.objects.get_by_name('Benutzer/%s' % username)
+        content = wikipage.rev.rendered_text
+    except ObjectDoesNotExist:
+        content = u''
+    set_session_info(request, u'schaut sich das Benutzerprofil von '
+                     u'„<a href="%s">%s</a>“ an.' % (
+        escape(url_for(user)),
+        escape(user.username),
+    ))
+    return {
+        'user':     user,
+        'groups':   user.groups.all(),
+        'wikipage': content
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um dein Verwaltungscenter '
+                     u'zu sehen')
+@templated('portal/usercp/index.html')
+def usercp(request):
+    """User control panel index page"""
+    set_session_info(request, 'schaut sich sein Verwaltungscenter an')
+    user = request.user
+    return {
+        'user': user,
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um dein Profil zu ändern')
+@templated('portal/usercp/profile.html')
+def usercp_profile(request):
+    """User control panel view for changing the user's profile"""
+    if request.method == 'POST':
+        form = UserCPProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
+                        'signature', 'location', 'occupation',
+                        'interests', 'website', 'email'):
+                setattr(request.user, key, data[key])
+            if data['delete_avatar']:
+                request.user.delete_avatar()
+            if data['avatar']:
+                request.user.save_avatar(data['avatar'])
+            request.user.save()
+            flash(u'Deine Profilinformationen wurden erfolgreich '
+                  u'aktualisiert.', True)
+        else:
+            flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
+                  u'auf. Bitte behebe sie.')
+    else:
+        values = model_to_dict(request.user)
+        settings = request.user.settings
+        form = UserCPProfileForm(values)
+    return {
+        'form': form,
+        'user': request.user
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um deine Einstellungen zu '
+                     u'ändern')
+@templated('portal/usercp/settings.html')
+def usercp_settings(request):
+    """User control panel view for changing various user settings"""
+    if request.method == 'POST':
+        form = UserCPSettingsForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            for key, value in data.iteritems():
+                request.user.settings[key] = data[key]
+            request.user.save()
+            flash(u'Deine Benutzereinstellungen wurden erfolgreich '
+                  u'aktualisiert.', True)
+        else:
+            flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
+                  u'auf. Bitte behebe sie.')
+    else:
+        settings = request.user.settings
+        values = {
+            'notify': settings.get('notify', ['mail']),
+            'notifications': settings.get('notifications', [c[0] for c in
+                                                    NOTIFICATION_CHOICES]),
+            'hide_avatars': settings.get('hide_avatars', False),
+            'hide_signatures': settings.get('hide_signatures', False)
+        }
+        form = UserCPSettingsForm(values)
+    return {
+        'form': form,
+        'user': request.user
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um dein Benutzerpasswort '
+                     u'ändern zu können')
+@templated('portal/usercp/change_password.html')
+def usercp_password(request):
+    """User control panel view for changing the password."""
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = request.user
+            if user.check_password(data['old_password']):
+                user.set_password(data['new_password'])
+                user.save()
+                flash(u'Dein Passwort wurde erfolgreich geändert',
+                      success=True)
+                return HttpResponseRedirect(href('portal', 'usercp'))
+            else:
+                form.errors['old_password'] = [u'Das eingegebene Passwort '
+                                    u'stimmt nicht mit deinem Alten überein']
+    else:
+        if 'random' in request.GET:
+            form = ChangePasswordForm({'new_password': get_random_password()})
+        else:
+            form = ChangePasswordForm()
+
+    return {
+        'form': form
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um deine Benachrichtigungen '
+                     u'sehen bzw. ändern zu können')
+@templated('portal/usercp/subscriptions.html')
+def usercp_subscriptions(request):
+    """
+    This page shows all subscriptions of the current user and allows him
+    to delete them.
+    """
+    sub = list(request.user.subscription_set.all())
+
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST)
+        form.fields['delete'].choices = [(s.id, u'') for s in sub]
+        if form.is_valid():
+            d = form.cleaned_data
+            Subscription.objects.delete_list(d['delete'])
+            if len(d['delete']) == 1:
+                flash(u'Es wurde ein Abonnement gelöscht.', success=True)
+            else:
+                flash(u'Es wurden %s Abonnements gelöscht.'
+                      % human_number(len(d['delete'])), success=True)
+            sub = filter(lambda s: str(s.id) not in d['delete'], sub)
+
+    return {
+        'subscriptions': sub
+    }
+
+
+@check_login(message=u'Du musst eingeloggt sein, um deinen Benutzer '
+                     u'deaktivieren zu können')
+@templated('portal/usercp/deactivate.html')
+def usercp_deactivate(request):
+    """
+    This page allows the user to deactivate his account.
+    """
+    if request.method == 'POST':
+        form = DeactivateUserForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            if request.user.check_password(data['password_confirmation']):
+                deactivate_user(request.user)
+                do_logout(request)
+                return HttpResponseRedirect(href('portal'))
+            else:
+                form.errors['password_confirmation'] = [u'Das eingegebene'
+                                                     u' Passwort war falsch.']
+    else:
+        form = DeactivateUserForm()
+    return {
+        'form': form
+    }
+
+
+@templated('portal/privmsg/index.html')
+@check_login(message=u'Du musst eingeloggt sein, um deine privaten '
+                     u'Nachrichten anzusehen')
+def privmsg(request, folder=None, entry_id=None):
+    if folder is None:
+        return HttpResponseRedirect(href('portal', 'privmsg',
+                                         PRIVMSG_FOLDERS['inbox'][1]))
+    message = None
+    if entry_id is not None:
+        entry = PrivateMessageEntry.objects.get(user=request.user,
+            folder=PRIVMSG_FOLDERS[folder][0], id=entry_id)
+        message = entry.message
+        if not entry.read:
+            entry.read = True
+            entry.save()
+            cache.delete('portal/pm_count/%s' % request.user.id)
+        action = request.GET.get('action')
+        if action == 'reply':
+            return HttpResponseRedirect(href('portal', 'privmsg', 'new',
+                reply_to=entry.message_id))
+        elif action == 'delete':
+            folder = entry.folder
+            entry.delete()
+            if not entry.read:
+                cache.delete('portal/pm_count/%s' % request.user_id)
+            flash(u'Die Nachricht wurde erfolgreich gelöscht.', True)
+            return HttpResponseRedirect(href('portal', 'privmsg',
+                                             PRIVMSG_FOLDERS[folder][1]))
+        elif action == 'archive':
+            if entry.archive():
+                flash(u'Die Nachricht wurde in dein Archiv verschoben.', True)
+                message = None
+        elif action == 'revert':
+            if entry.revert():
+                flash(u'Die Nachricht wurde wiederhergestellt.', True)
+                message = None
+    else:
+        message = None
+    entries = PrivateMessageEntry.objects.filter(
+        user=request.user,
+        folder=PRIVMSG_FOLDERS[folder][0]
+    )
+    return {
+        'entries': list(entries),
+        'folder': {
+            'name': PRIVMSG_FOLDERS[folder][2],
+            'id': PRIVMSG_FOLDERS[folder][1]
+        },
+        'message': message
+    }
+
+
+@templated('portal/privmsg/new.html')
+@check_login(message=u'Du musst eingeloggt sein, um deine privaten '
+                     u'Nachrichten anzusehen')
+def privmsg_new(request, username=None):
+    if request.method == 'POST':
+        form = PrivateMessageForm(request.POST)
+        if form.is_valid():
+            d = form.cleaned_data
+            try:
+                recipients = set(r.strip() for r in \
+                                 d['recipient'].split(';') if r)
+                if request.user.username in recipients:
+                    flash(u'Du kannst dir selber keine Nachrichten schicken.',
+                          False)
+                    recipients = []
+                recipients = [User.objects.get(username__exact=r) \
+                              for r in recipients]
+            except User.DoesNotExist:
+                recipients = None
+                flash('XXX Mindestens einen der Benutzer gibts nicht!', False)
+            if recipients:
+                msg = PrivateMessage()
+                msg.author = request.user
+                msg.subject = d['subject']
+                msg.text = d['text']
+                msg.pub_date = datetime.now()
+                msg.send(recipients)
+                # send notification
+                for recipient in recipients:
+                    if 'pm_new' in recipient.settings.get('notifications',
+                                                          ('pm_new',)):
+                        text = render_template('mails/new_pm.txt', {
+                            'username': recipient.username,
+                            'sender':   request.user.username,
+                            'subject':  d['subject']
+                       })
+                        send_notification(recipient, u'Neue private Nachricht'
+                                   u' von %s' % (request.user.username), text)
+    else:
+        data = {}
+        if request.GET.get('reply_to'):
+            try:
+                entry = PrivateMessageEntry.objects.get(user=request.user,
+                    message=request.GET.get('reply_to'))
+                msg = entry.message
+                data['subject'] = msg.subject.startswith(u'Re: ') and \
+                                  msg.subject or u'Re: %s' % msg.subject
+                data['recipient'] = msg.author.username
+                data['text'] = u'%s schrieb:\n%s' % (
+                    msg.author.username,
+                    '\n'.join('> %s' % l for l in msg.text.splitlines()))
+            except PrivateMessageEntry.DoesNotExist:
+                pass
+        if username:
+            form = PrivateMessageForm(initial={'recipient': username})
+        else:
+            form = PrivateMessageForm(data)
+    return {
+        'form': form
+    }
+
+
+@templated('portal/memberlist.html')
+def memberlist(request, page=1):
+    """
+    Shows the memberlist.
+
+    `page` represents the current page in the pagination.
+    """
+    table = Sortable(User.objects.all(), request.GET, 'id')
+    pagination = Pagination(table.get_objects(), page,
+                            href('portal', 'users'), 15)
+    set_session_info(request, u'schaut sich die Mitgliederliste an.',
+                     'Mitgliederliste')
+    return {
+        'users':     list(pagination.get_objects()),
+        'pagination':   pagination.generate(),
+        'table':        table
+    }
+
+
+@templated('portal/grouplist.html')
+def grouplist(request, page=1):
+    """
+    Shows the group list.
+
+    `page` represents the current page in the pagination.
+    """
+    table = Sortable(Group.objects.all(), request.GET, 'name')
+    pagination = Pagination(table.get_objects(), page,
+                            href('portal', 'groups'), 15)
+    set_session_info(request, u'schaut sich die Gruppenliste an.',
+                     'Gruppenliste')
+    return {
+        'groups':      list(pagination.get_objects()),
+        'group_count': Group.objects.count(),
+        'user_groups': request.user.groups.count(),
+        'pagination':  pagination.generate(),
+        'table':       table
+    }
+
+
+@templated('portal/group.html')
+def group(request, name, page=1):
+    """Shows the informations about the group named `name`."""
+    group = Group.objects.get(name=name)
+    users = group.user_set
+
+    table = Sortable(users, request.GET, 'id')
+    pagination = Pagination(table.get_objects(), page,
+                            href('portal', 'groups', escape(name)), 15)
+    set_session_info(request, u'schaut sich die Gruppe '
+                     u'„<a href="%s">%s</a>“ an.' % (
+        href('portal', 'groups', escape(name)),
+        escape(name)
+    ))
+    return {
+        'group':      group,
+        'users':      list(pagination.get_objects()),
+        'user_count': group.user_set.count(),
+        'pagination': pagination,
+        'table':      table,
+    }
+
+
+@templated('portal/usermap.html')
+def usermap(request):
+    set_session_info(request, u'schaut sich die Benutzerkarte an.',
+                     'Benutzerkarte')
+    return {
+        'apikey':       settings.GOOGLE_MAPS_APIKEY,
+    }
+
+
+@templated('portal/feedselector.html')
+def feedselector(request, app=None):
+    #_dbg = open('/tmp/dbg', 'w')
+    #def dbg(t): _dbg.write('%s\n\n' % t)
+    r = {'app': app}
+
+    if app == 'forum':
+        if request.method == 'POST':
+            errors = {}
+            data = dict(request.POST.items()) # request.POST.* is a list
+
+            if not data.get('count', '').isdigit():
+                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
+                data['count'] = None
+            else:
+                data['count'] = _feed_count_cleanup(int(data['count']))
+            if data.get('component') not in ('*', 'forum', 'topic'):
+                errors['component'] = u'Ungültige Auswahl!'
+                data['component'] = None
+            if data.get('component') == 'forum':
+                try:
+                    Forum.objects.get(slug=data.get('forum'))
+                except:
+                    errors['forum'] = u'Bitte ein Forum auswählen!'
+                    data['forum'] = None
+            if data.get('mode') not in ('full', 'short', 'title'):
+                errors['mode'] = u'Bitte eine Art auswählen!'
+                data['mode'] = None
+
+            if not errors:
+                if data.get('component') == '*':
+                    return HttpResponseRedirect(href('forum', 'feeds',
+                           data['mode'], data['count']))
+                if data.get('component') == 'forum':
+                    return HttpResponseRedirect(href('forum', 'feeds', 'forum',
+                           data['forum'], data['mode'], data['count']))
+
+            r['form'] = data
+            r['errors'] = errors
+
+    if app == 'ikhaya':
+        if request.method == 'POST':
+            errors = {}
+            data = dict(request.POST.items()) # request.POST uses lists
+            data.setdefault('category', '*')
+            if not data.get('count', '').isdigit():
+                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
+                data['count'] = None
+            else:
+                data['count'] = _feed_count_cleanup(int(data['count']))
+            if data.get('mode') not in ('full', 'short', 'title'):
+                errors['mode'] = u'Bitte eine Art auswählen!'
+                data['mode'] = None
+            if data.get('category') != '*':
+                try:
+                    Category.objects.get(slug=data.get('category'))
+                except:
+                    errors['category'] = u'Bitte eine Kategorie auswählen!'
+                    data['category'] = None
+
+            if not errors:
+                if data['category'] == '*':
+                    return HttpResponseRedirect(href('ikhaya', 'feeds',
+                           data['mode'], data['count']))
+                else:
+                    return HttpResponseRedirect(href('ikhaya', 'feeds',
+                           data['category'], data['mode'], data['count']))
+            r['form'] = data
+            r['errors'] = errors
+
+    if app == 'planet':
+        if request.method == 'POST':
+            errors = {}
+            data = dict(request.POST.items()) # request.POST uses lists
+            if not data.get('count', '').isdigit():
+                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
+                data['count'] = None
+            else:
+                data['count'] = _feed_count_cleanup(int(data['count']))
+            if data.get('mode') not in ('full', 'short', 'title'):
+                errors['mode'] = u'Bitte eine Art auswählen!'
+                data['mode'] = None
+
+            if not errors:
+                return HttpResponseRedirect(href('planet', 'feeds',
+                       data['mode'], data['count']))
+            r['form'] = data
+            r['errors'] = errors
+
+
+    r['forums'] = Forum.objects.all()
+    r['ikhaya_categories'] = Category.objects.all()
+    #dbg(`r`)
+    #_dbg.close()
+    return r
+
+
+def _feed_count_cleanup(n):
+    COUNTS = (5, 10, 15, 20, 25, 50, 75, 100)
+    if n in COUNTS:
+        return n
+    if n < COUNTS[0]:
+        return COUNTS[0]
+    for i in range(len(COUNTS)):
+        if n < COUNTS[i]:
+            return n - COUNTS[i-1] < COUNTS[i] - n and COUNTS[i-1] or COUNTS[i]
+    return COUNTS[-1]
+
+
+@templated('portal/static_page.html')
+def static_page(request, page):
+    """Renders static pages"""
+    try:
+        q = StaticPage.objects.get(key=page)
+    except StaticPage.DoesNotExist:
+        raise PageNotFound
+    return {
+        'title': q.title,
+        'content': q.content,
+        'key': q.key,
+    }
+
+
+@templated('portal/about_inyoka.html')
+def about_inyoka(request):
+    """Render a inyoka information page."""
+    set_session_info(request, u'informiert sich über <a href="%s">'
+                     u'Inyoka</a>' % href('portal', 'inyoka'))

@@ -1,0 +1,42 @@
+{#
+  admin/overall.html
+  ~~~~~~~~~~~~~~~~~~
+
+  Basic layout for all admin-pages
+
+  :copyright: 2008 by Christopher Grebs.
+  :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+
+{% set active_app = 'portal' %}
+{% set navi_type  = 'both' %}
+{% set styles = ['admin.css'] + styles %}
+{% set navigation_trace = [
+    (href('admin'), 'Adminbereich')
+  ] + navigation_trace %}
+{% set title_trace = [navigation_trace[-1][1], 'Adminbereich'] + title_trace %}
+
+{% macro admin_button(link, icon, name) %}
+  <td>
+    <a href="{{ link }}">
+      <img src="{{ href('static', 'img', 'admin', 'category_%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      {{ name }}
+    </a>
+  </td>
+{% endmacro %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Übersicht</h2>
+{% endblock %}
+
+{% block content %}
+  {% block admin_content %}
+
+  {% endblock %}
+{% endblock %}
+
+{% block navigation %}
+Navigation...
+{% endblock %}

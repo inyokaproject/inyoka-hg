@@ -1,0 +1,36 @@
+{#
+    wiki/action_manage.html
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    Show all management links on this page.
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+{% extends 'wiki/page.html' %}
+{% set title_trace = [page.title|e] %}
+{% set action = 'manage' %}
+{% block wiki_content %}
+  <p>Die folgenden Funktionen stehen für diese Seite zur Verfügung:</p>
+  <ul>
+    {%- if can.read %}
+    <li><a href="?action=show">Seite anzeigen</a></li>
+    {%- endif %}
+    {%- if can.edit %}
+    <li><a href="?action=edit">Seite bearbeiten</a></li>
+    {%- endif %}
+    {%- if can.read %}
+    <li><a href="?action=log">Versionen anzeigen</a></li>
+    <li><a href="?action=backlinks">Backlinks anzeigen</a></li>
+    {%- endif %}
+    <li>Seite exportieren:
+      <a href="?action=export&amp;format=raw">Rohformat</a>,
+      <a href="?action=export&amp;format=html">HTML</a>,
+      <a href="?action=export&amp;format=docbook">Docbook</a>,
+      <a href="?action=export&amp;format=ast">AST</a></li>
+    <li><a href="?action=metaexport">Metadaten exportieren</a></li>
+    <li><a href="?action=attach">Dateianhänge verwalten</a></li>
+    <li><a href="?action=prune">Cache leeren</a></li>
+  </ul>
+{% endblock %}

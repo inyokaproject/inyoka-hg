@@ -1,0 +1,163 @@
+{#
+    portal/feedselector.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    A template for the feed selector
+
+    :copyright: 2007 by Marian Sigler.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Feed auswählen'] %}
+{% set styles = styles + ['feedselector.css'] %}
+{% set scripts = scripts + ['FeedSelector.js'] %}
+
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>Feed auswählen</h2>
+{% endblock %}
+{% block portal_content %}
+  {%- if not app %}
+  <ul class="toc">
+    <li><a href="#forum">Forum</a></li>
+    <li><a href="#wiki">Wiki</a></li>
+    <li><a href="#ikhaya">Ikhaya</a></li>
+    <li><a href="#planet">Planet</a></li>
+  </ul>
+  {%- endif %}
+  
+  {%- if not app or app == 'forum' %}
+  <form action="/feeds/forum/" method="post" id="forum">
+  <h3>Forum</h3>
+  
+  <dl>
+    <dt>Was</dt>
+    <dd>
+      {%- if errors.component %}<div class="error">{{ errors.component }}</div>{% endif %}
+      <ul class="radio">
+        <li>
+          <input type="radio" name="component" value="*" id="id_forum_component_all"{% if form.component == '*' %} checked="checked"{% endif %} />
+          <label for="id_forum_component_all">Alles</label>
+        </li>
+        <li>
+          <input type="radio" name="component" value="forum" id="id_forum_component_forum"{% if form.component == 'forum' %} checked="checked"{% endif %} />
+          <label for="id_forum_component_forum">Für folgendes Forum: </label>
+          <select name="forum" id="id_forum_forum">
+            <option value="" disabled="disabled"{% if not form.forum %} selected="selected"{% endif %}>Forum auswählen</option>
+            {%- for forum in forums %}
+            <option value="{{ forum.slug|e }}"{% if form.forum == forum.slug %} selected="selected"{% endif %}>{{ forum.name|e }}</option>
+            {%- endfor %}
+          </select>
+          {%- if errors.forum %} <span class="error">{{ errors.forum }}</span>{% endif %}
+        </li>
+        <li> {#- TODO: allow a topic to be passed by url #}
+          <input type="radio" name="component" value="topic" id="id_forum_component_topic" disabled="disabled" />
+          <label for="id_forum_component_topic">Für ein Thema</label>
+          <span class="help_text">Bitte im Thema auf den Link klicken, es gibt zu viele Themen um sie alle hier aufzulisten.</span>
+        </li>
+      </ul>
+    </dd>
+    <dt>Wie</dt>
+    <dd>
+      {% if errors.mode %}<div class="error">{{ errors.mode }}</div>{% endif %}
+      <ul class="radio">
+        <li>
+          <input type="radio" name="mode" value="full" id="id_forum_mode_full"{% if form.mode == 'full' %} checked="checked"{% endif %} />
+          <label for="id_forum_mode_full">Ganzer Beitrag</label>
+        </li>
+        <li>
+          <input type="radio" name="mode" value="short" id="id_forum_mode_short"{% if form.mode == 'short' %} checked="checked"{% endif %} />
+          <label for="id_forum_mode_short">Gekürzt</label>
+        </li>
+        <li>
+          <input type="radio" name="mode" value="title" id="id_forum_mode_title"{% if form.mode == 'title' %} checked="checked"{% endif %} />
+          <label for="id_forum_mode_title">Nur Titel</label>
+        </li>
+      </ul>
+      <p>
+        <label for="id_forum_count">Anzahl der Einträge im Feed:</label>
+        <input type="text" name="count" id="id_forum_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
+        <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
+      </p>
+    </dd>
+  </dl>
+  
+  <p id="forum_submit_p"><input type="submit" value="Feed anzeigen" /></p>
+  </form>
+
+    
+  {%- endif %}
+  {%- if not app or app == 'wiki' %}
+  <form action="/feeds/wiki/" method="post" id="wiki">
+  <h3>Wiki</h3>
+  </form>
+  
+  
+  {%- endif %}
+  {%- if not app or app == 'ikhaya' %}
+  <form action="/feeds/ikhaya/" method="post" id="ikhaya">
+  <h3>Ikhaya</h3>
+  
+  <dl>
+    <dt>Was</dt>
+    <dd>
+      <label for="id_ikhaya_category">Kategorie:</label>
+      <select name="category" id="id_ikhaya_category">
+        <option value="*"{% if form.category == '*' %} selected="selected"{% endif %}>Alle</option>
+        {%- for c in ikhaya_categories %}
+        <option value="{{ c.slug|e }}"{% if form.category == c.slug %} selected="selected"{% endif %}>{{ c.name|e }}</option>
+        {%- endfor %}
+      </select>
+    </dd>
+    <dt>Wie</dt>
+    <dd>
+      {% if errors.mode %}<div class="error">{{ errors.mode }}</div>{% endif %}
+      <ul class="radio">
+        <li><input type="radio" name="mode" value="full" id="id_ikhaya_mode_full" /> <label for="id_ikhaya_mode_full">Ganzer Beitrag</label></li>
+        <li><input type="radio" name="mode" value="short" id="id_ikhaya_mode_short" /> <label for="id_ikhaya_mode_short">Nur Einleitung</label></li>
+        <li><input type="radio" name="mode" value="title" id="id_ikhaya_mode_title" /> <label for="id_ikhaya_mode_title">Nur Titel</label></li>
+      </ul>
+      <p>
+        <label for="id_ikhaya_count">Anzahl der Einträge im Feed:</label>
+        <input type="text" name="count" id="id_ikhaya_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
+        <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
+      </p>
+    </dd>
+  </dl>
+
+  <p id="ikhaya_submit_p"><input type="submit" value="Feed anzeigen" /></p>
+  </form>
+  
+  
+  {%- endif %}
+  {%- if not app or app == 'planet' %}
+  <form action="/feeds/planet/" method="post" id="planet">
+  <h3>Planet</h3>
+  <dl>
+    <dt>Wie</dt>
+    <dd>
+      {% if errors.mode %}<div class="error">{{ errors.mode }}</div>{% endif %}
+      <ul class="radio">
+        <li><input type="radio" name="mode" value="full" id="id_planet_mode_full" /> <label for="id_planet_mode_full">Ganzer Beitrag</label></li>
+        <li><input type="radio" name="mode" value="short" id="id_planet_mode_short" /> <label for="id_planet_mode_short">Nur Einleitung</label></li>
+        <li><input type="radio" name="mode" value="title" id="id_planet_mode_title" /> <label for="id_planet_mode_title">Nur Titel</label></li>
+      </ul>
+      <p>
+        <label for="id_planet_count">Anzahl der Einträge im Feed:</label>
+        <input type="text" name="count" id="id_planet_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
+        <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
+      </p>
+    </dd>
+  </dl>
+
+  <p id="planet_submit_p"><input type="submit" value="Feed anzeigen" /></p>
+  </form>
+  
+  
+  {%- endif %}
+  
+{% endblock %}

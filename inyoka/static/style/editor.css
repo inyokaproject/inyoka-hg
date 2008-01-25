@@ -1,0 +1,110 @@
+/**
+ * style.editor
+ * ~~~~~~~~~~~~
+ *
+ * The style for the javascript-based wiki syntax editor.
+ *
+ * :copyright: 2007 by Armin Ronacher, Benjamin Wiegand.
+ * :license: GNU GPL.
+ */
+
+div.editor textarea {
+    height: 250px;
+}
+
+ul.toolbar {
+    margin: 0.5em 0 0.2em 0;
+    padding: 0px;
+    padding-left: 1px !important;
+    list-style: none;
+    height: 32px;
+    line-height: 28px;
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+}
+
+ul.toolbar li {
+    float: left;
+    margin: 0;
+    padding: 2px 1px 2px 1px ;
+}
+
+ul.toolbar li a.button {
+    display: block;
+    width: 26px;
+    height: 26px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border: 1px solid #ddd;
+}
+
+ul.toolbar li a.button:hover {
+    background-color: #fff;
+    border: 1px solid #aaa;
+}
+
+ul.toolbar li a.button:focus {
+    outline: none;
+    border: 1px solid #888;
+}
+
+ul.toolbar li a.button span {
+    display: none;
+}
+
+ul.toolbar li select {
+    margin: 0 4px 0 4px;
+}
+
+ul.toolbar li select option.title {
+    font-weight: bold;
+    background-color: #eee;
+}
+
+ul.toolbar li #button-bold          { background-image: url(../img/icons/bold.png); }
+ul.toolbar li #button-italic        { background-image: url(../img/icons/italic.png); }
+ul.toolbar li #button-underlined    { background-image: url(../img/icons/underlined.png); }
+ul.toolbar li #button-code          { background-image: url(../img/icons/code.png); }
+ul.toolbar li #button-stroke        { background-image: url(../img/icons/stroke.png); }
+ul.toolbar li #button-wiki-link     { background-image: url(../img/icons/wikilink.png); }
+ul.toolbar li #button-external-link { background-image: url(../img/icons/link.png); }
+ul.toolbar li #button-quote         { background-image: url(../img/icons/quote.png); }
+ul.toolbar li #button-pre           { background-image: url(../img/icons/pre.png); }
+ul.toolbar li #button-picture       { background-image: url(../img/icons/picture.png); }
+ul.toolbar li #button-color         { background-image: url(../img/icons/color.png); }
+ul.toolbar li #button-smilies       { background-image: url(../img/icons/smiley.png); }
+ul.toolbar li #button-date          { background-image: url(../img/icons/date.png); }
+ul.toolbar li #button-sig           { background-image: url(../img/icons/sig.png); }
+ul.toolbar li #button-shrink        { background-image: url(../img/icons/shrink.png); height: 12px; }
+ul.toolbar li #button-enlarge       { background-image: url(../img/icons/enlarge.png); height: 12px; position: relative; left:-30px; top:15px }
+
+ul.toolbar li ul.colorbox,
+ul.toolbar li ul.smileybox {
+    list-style: none;
+    position: absolute;
+    border: 1px solid #aaa;
+    padding-left: 0;
+}
+
+ul.toolbar li ul.colorbox li,
+ul.toolbar li ul.smileybox li {
+    float: none;
+    height: 8px;
+    padding: 1px;
+    width: 24px;
+    cursor: pointer;
+}
+
+ul.toolbar li ul.smileybox li {
+    height: 24px;
+    background-color: #eee;
+}
+
+ul.toolbar li ul.colorbox li:hover {
+    padding: 0;
+    border: 1px solid white;
+}
+
+ul.toolbar li ul.smileybox li:hover {
+    background-color: #fff;
+}

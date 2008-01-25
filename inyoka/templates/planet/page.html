@@ -1,0 +1,44 @@
+{#
+    planet/page.html
+    ~~~~~~~~~~~~~~~~
+
+    This template is included by all planet templates and adds the elements
+    they all use (stylesheets etc).
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+
+{% set title_trace = title_trace + ['Planet'] %}
+{% set active_app = 'planet' %}
+{% set navi_type  = 'sidebar' %}
+{% set styles = styles + ['planet.css'] %}
+
+{% block appheader %}
+  <h1>Planet</h1>
+  <h2>Was passiert in der Ubuntu-Welt?</h2>
+{% endblock %}
+
+{% block navigation %}
+  <h3 class="navi_planet">Planet</h3>
+  <p>
+    Der Planet stellt Nachrichten aus Blogs der Ubuntu- und Open
+    Source-Gemeinschaft zusammen.  Wenn du ein ubuntu-bezogenes Blog kennst
+    oder selber führst, kannst du es beim Moderationsteam <a href="{{
+    href('planet', 'suggest') }}">vorschlagen</a> und eintragen lassen.
+  </p>
+  {%- if blogs %}
+  <h3 class="navi_blogs">Blogs</h3>
+  <ul>
+  {%- for blog in blogs %}
+    <li><a href="{{ blog|url|e }}">{{ blog.name|e }}</a></li>
+  {%- endfor %}
+  </ul>
+  {%- endif %}
+{% endblock %}
+
+{% block content %}
+  {%- block planet_content %}
+  {%- endblock %}
+{%- endblock %}

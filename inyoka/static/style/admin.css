@@ -1,0 +1,50 @@
+table.admin_control {
+  text-align: center;
+  border:none;
+}
+
+table.admin_control td {
+  border: 1px dotted #E3D6C4;
+  padding: 0;
+  width: 50%;
+}
+
+table.admin_control td a {
+  text-decoration: none;
+  color: #888;
+  display: block;
+  padding: 10px;
+}
+
+table.admin_control td:hover a {
+  color: #444;
+}
+
+/* Some additional features for non ie users */
+table.admin_control a img {
+  opacity: 0.6;
+}
+table.admin_control a:hover img {
+  opacity: 1;
+}
+
+/* Styles for the static pages overview */
+table.static_pages .key,
+table.static_pages .title {
+  width: 25%;
+}
+table.static_pages tbody tr td {
+  text-align: center;
+}
+
+.icon {
+  float: right;
+  border: 1px solid #D4D4D4;
+  padding: 0.5em;
+}
+
+/* Ikhaya Administration styles */
+table.ikhaya_articles tbody tr.not_published,
+table.ikhaya_articles tbody tr.not_published a {
+  color: #aaa;
+}

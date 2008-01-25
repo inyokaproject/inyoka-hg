@@ -1,0 +1,98 @@
+{#
+    forum/splittopic.html
+    ~~~~~~~~~~~~~~~~
+
+    This page shows the "splittopic" form. 
+
+    :copyright: 2007 by Maximilian Trescher, ostcar (ubuntuusers.de),
+                        Benjamin Wiegand
+    :license GNU GPL
+    
+#}
+{% extends 'forum/page.html' %}
+{% set title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
+{% set navigation_trace =  [
+    (topic.forum|url, topic.forum.name),
+    (topic|url, topic.title),
+    (topic|url('split'), 'Thema aufteilen')
+  ] + navigation_trace %}
+
+{% block forum_content %}
+  <form action="" method="post" class="new_topic">
+    <h2>Thema „{{ topic.name|e }}“ aufteilen</h2>
+    <p>
+      Mit den Eingabefeldern unten kannst du ein Thema in zwei teilen, indem du entweder die Beiträge manuell auswählst oder ab einem gewählten Beitrag teilst.
+    </p>
+    <dl>
+      <dt>
+        <input type="radio" name="action" value="new" id="id_new" />
+        <label for="id_new">Neues Topic erstellen</label>
+      </dt>
+      <dd>
+        Forum des neuen Topics: {{ form.forum }}{{ h.field_errors(form.errors.forum) }}
+      </dd>
+      <dd>
+        Titel des neuen Topics: {{ form.title }}{{ h.field_errors(form.errors.title) }}
+      </dd>
+      <dt>
+        <input type="radio" name="action" value="add" id="id_add" />
+        <label for="id_add">An altes Topic anfügen</label>
+      </dt>
+      <dd>
+        Slug des Topics: {{ form.topic_slug }}{{ h.field_errors(form.errors.topic_slug) }}
+      </dd>
+    </dl>
+    {{ h.field_errors(form.errors.action) }}
+    <table class="topic">
+      <thead>
+      <tr>
+        <th colspan="4">
+          {{ topic.title|e }}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="split">
+          <input type="submit" name="select_selected" value="Gewählte Beiträge" />
+        </td>
+        <td class="split">
+          <input type="submit" name="select_following" value="Ab hier" />
+        </td>
+        <td colspan="2"></td>
+      </tr>
+      {% for post in posts %}
+        <tr>
+          <td class="split">
+            <input type="checkbox" name="select" value="{{ post.id }}" />
+          </td>
+          <td class="split">
+            <input type="radio" name="start" value="{{ post.id }}" />
+          </td>
+          <td class="author">
+            <a href="{{ post.author|url }}" name="{{ post.id }}">
+              {{ post.author|e }}
+            </a><br />
+            Beiträge: {{ post.author.post_count }}
+          </td>
+          <td>
+            <div class="postinfo">
+              Verfasst {{ post.pub_date.strftime('%d.%m.%Y %H:%M') }}
+            </div>
+            {{ post.rendered_text }}
+          </td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td class="split">
+          <input type="submit" name="select_selected" value="Gewählte Beiträge" />
+        </td>
+        <td class="split">
+          <input type="submit" name="select_following" value="Ab hier" />
+        </td>
+        <td colspan="2"></td>
+      </tr>
+      </tbody>
+    </table>
+  </form>
+{% endblock %}

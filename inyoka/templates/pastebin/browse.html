@@ -1,0 +1,37 @@
+{#
+    pastebin/browse.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    On this page the user can browse through old pastebin entries.
+
+    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+{% extends 'pastebin/page.html' %}
+{% set title_trace = ['Archiv'] %}
+
+{% block navigation %}
+  {{ tab_navigation('browse') }}
+{% endblock %}
+
+{% block paste_content %}
+  {%- if entries %}
+    <ul class="pastes">
+      {%- for entry in entries %}
+      <li>
+        <span class="number">#{{ entry.id }}</span>
+        <a href="{{ entry|url }}" class="title">{{ entry.title|e}}</a>
+        <small>von <a href="{{ entry.author|url }}" class="author">
+          {{- entry.author|e -}}
+        </a> — <span class="date">
+          {{- entry.pub_date|specificdatetimeformat(true) }}
+        </span></small>
+      </li>
+      {%- endfor %}
+    </ul>
+    <div class="pagination">Gehe zu: {{ pagination }}</div>
+  {%- else %}
+    <p>Noch wurden keine Pastes erstellt.</p>
+  {%- endif %}
+{% endblock %}

@@ -1,0 +1,58 @@
+{#
+    forum/suggestionlist.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The moderators can see all suggestions for ikhaya articles on this page.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license GNU GPL
+    
+#}
+
+{% extends 'ikhaya/page.html' %}
+{% set title_trace = ['Artikelvorschläge'] %}
+{% set navigation_trace = [
+    (href('ikhaya', 'suggestions'), 'Artikelvorschläge')
+  ] %}
+
+{% block ikhaya_content %}
+<h2>Artikelvorschläge</h2>
+<p>
+  Hier siehst du alle {{ suggestion_count }} Artikelvorschläge, die noch nicht bearbeitet wurden.
+</p>
+<form action="" method="post">
+  <table>
+    <thead>
+      <tr>
+        <th>Autor</th>
+        <th>Artikel</th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for suggestion in suggestions %}
+      <tr>
+        <td>
+          <a href="{{ suggestion.author|url }}">{{ suggestion.author.username }}</a>
+        </td>
+        <td>
+          <h3 class="title">{{ suggestion.title|e }}</h3>
+          <div class="intro">{{ suggestion.rendered_intro }}</div>
+          {{ suggestion.rendered_text }}
+        </td>
+        <td>
+          <a href="?delete={{ suggestion.id }}">Löschen</a>
+          <a href="{{ href('ikhaya', 'add', suggestion.id) }}">Artikel erstellen</a>
+        </td>
+      </tr>
+      {%- else %}
+      <tr>
+        <td colspan="3">
+          Es gibt zurzeit keine neuen Artikelvorschläge.
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</form>
+{% endblock %}

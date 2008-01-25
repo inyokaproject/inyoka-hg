@@ -1,0 +1,58 @@
+{#
+    ikhaya/page.html
+    ~~~~~~~~~~~~~~~~
+
+    they all use (stylesheets etc).
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+{% set navigation_trace = [
+    (href('ikhaya'), 'Ikhaya')
+  ] + navigation_trace %}
+{% set title_trace = title_trace + ['Ikhaya'] %}
+{% set styles = styles + ['ikhaya.css'] %}
+{% set active_app = 'ikhaya' %}
+{% set navi_type  = 'sidebar' %}
+
+{% block appheader %}
+  <h1>Ikhaya</h1>
+  <h2>{{ title_trace[:-1]|join(' » ') or 'Neues von ubuntuusers und Ubuntu' }}</h2>
+{% endblock %}
+
+{% block navigation %}
+  <h3 class="navi_about_ikhaya">Über Ikhaya</h3>
+  <p>
+    Ikhaya ist der Nachrichtenblog der ubuntuusers-Community. Hier werden Nachrichten und
+    Berichte rund um Ubuntu, Linux und Open Source-Software veröffentlicht.
+  </p>
+  <h3 class="navi_new_article">Neue Artikel</h3>
+  <ul>
+    <li><a href="{{ href('ikhaya', 'suggest') }}">Artikel vorschlagen</a></li>
+  </ul>
+  <h3 class="navi_archive">Archiv</h3>
+  <ul>
+    <li><a href="{{ href('ikhaya') }}">Aktuelle Artikel</a></li>
+    {%- for date in archive -%}
+      <li><a href="{{ href('ikhaya', date.strftime('%Y/%m')) }}">{{
+          date.strftime('%B %Y') }}</a></li>
+    {%- endfor %}
+    {%- if short_archive %}
+    <li><a href="{{ href('ikhaya', 'archive') }}">Komplettes Archiv</a></li>
+    {% endif -%}
+  </ul>
+  {% if categories %}
+    <h3 class="navi_categories">Kategorien</h3>
+    <ul>
+    {%- for category in categories -%}
+      <li><a href="{{ category|url }}">{{ category.name|e }}</a></li>
+    {%- endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {%- block ikhaya_content %}
+  {%- endblock %}
+{%- endblock %}

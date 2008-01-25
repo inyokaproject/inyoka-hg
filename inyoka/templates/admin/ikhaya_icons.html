@@ -1,0 +1,41 @@
+{#
+    admin/icons.html
+    ~~~~~~~~~~~~~~~~
+
+    This is the overview of the ikhaya icons.
+
+    :copyright: 2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'ikhaya'), 'Ikhaya'),
+    (href('admin', 'icons'), 'Icons'),
+  ] %}
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Ikhaya</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>Icons</h3>
+<table>
+  <thead>
+  <tr>
+    <th>{{ table.get_html('identifier', 'Bezeichner') }}</th>
+  </tr>
+  </thead>
+  <tbody>
+  {%- for icon in table.get_objects() %}
+  <tr>
+    <td><a href="{{ icon|url('edit') }}">{{ icon.identifier|e }}</a></td>
+  </tr>
+  {%- else %}
+  <tr>
+    <td colspan="3">Es existieren keine Icons, <a href="{{ href('admin', 'ikhaya', 'icons', 'new') }}">erstelle</a> jetzt das erste!</td>
+  </tr>
+  {%- endfor %}
+  </tbody>
+</table>
+<a href="{{ href('admin', 'ikhaya', 'icons', 'new') }}">Neues Icon erstellen</a>
+{% endblock %}

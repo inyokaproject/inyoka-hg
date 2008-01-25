@@ -1,0 +1,104 @@
+{#
+    portal/profile.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    This page shows a user's profile.
+    
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'portal/overall.html' %}
+
+{% set title_trace = [user.username|e, 'Mitglieder'] %}
+{% set styles = styles + ['portal.css'] %}
+
+{% block appheader %}
+  <h1>Mitglieder</h1>
+  <h2>{{ user.username|e }}</h2>
+{% endblock %}
+
+{% block portal_content %}  
+  <h2>{{ user.username|e }}</h2>
+  <table class="userinfo">
+    <tr>
+      <th>Name</th>
+      <td>{{ user.username|e }}</td>
+      <td rowspan="5"><img class="userinfo_avatar" src="{{ user.avatar_url }}" alt="Avatar von „{{ user.username|e }}“" /></td>
+    </tr>
+    <tr>
+      <th>E-Mail Adresse</th>
+      <td>{{ user.email|e or '-' }}</td>
+    </tr>
+    <tr>
+      <th>Website</th>
+      <td>
+        {%- if user.website -%}
+          <a href="{{ user.website|e(True) }}">{{ user.website|e }}</a>
+        {%- else -%}
+          -
+        {%- endif -%}
+      </td>
+    </tr>
+    <tr>
+      <th>Anmeldungsdatum</th>
+      <td>{{ user.date_joined|datetimeformat }}</td>
+    </tr>
+    <tr>
+      <th>Beiträge</th>
+      <td>{{ user.post_count }}</td>
+    </tr>
+    <tr>
+      <th>Wohnort</th>
+      <th>Beruf</th>
+      <th>Interessen</th>
+    </tr>
+    <tr>
+      <td>{{ user.location|e or '-' }}</td>
+      <td>{{ user.occupation|e or '-' }}</td>
+      <td>{{ user.interests|e or '-' }}</td>
+    </tr>
+    <tr>
+      <th>MSN Messenger</th>
+      <th>ICQ-Nummer</th>
+      <th>AIM-Adresse</th>
+    </tr>
+    <tr>
+      <td>{{ user.msg|e or '-' }}</td>
+      <td>{{ user.icq|e or '-' }}</td>
+      <td>{{ user.aim|e or '-' }}</td>
+    </tr>
+    <tr>
+      <th>Yahoo Messenger</th>
+      <th>Jabber</th>
+      <th>Kontakt</th>
+    </tr>
+    <tr>
+      <td>{{ user.yim|e or '-' }}</td>
+      <td>{{ user.jabber|e or '-' }}</td>
+      <td>
+        <a href="{{ user|url('privmsg') }}">Private Nachricht</a>
+      </td>
+    </tr>
+    <tr>
+      <th colspan="3">Gruppenmitgliedschaften</th>
+    </tr>
+    <tr>
+      <td colspan="3">
+        {%- for group in groups -%}
+        <a href="{{ group|url }}">{{ group.name|e }}</a>
+        {%- if not loop.last %},{% endif %}
+        {%- else %}
+        „{{ user.username|e }}“ ist in keiner Gruppe Mitglied.
+        {%- endfor %}
+      </td>
+    </tr>
+  </table>
+
+  {%- if wikipage %}
+  <h3>Benutzerseite (<a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">{{ wikipage and 'bearbeiten'}}</a>)</h3>
+    {{ wikipage }}
+  {%- else %}
+  <h3>Benutzerseite</h3>
+    <p>Der Benutzer „{{ user.username|e }}“ hat noch keine eigene Benutzerseite. <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">Anlegen</a></p>
+  {%- endif %}
+{% endblock %}

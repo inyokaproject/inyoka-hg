@@ -1,0 +1,35 @@
+{#
+    templates.admin.category_edit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Template for editing or creating a ikhaya category.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% if not category %}
+  {% set navigation_trace = [
+      (href('admin', 'ikhaya', 'categories', 'new'), 'Kategorie erstellen')
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (category|url('edit'), 'Kategorie „%s“ bearbeiten'|format(category.name|e))
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'ikhaya'), 'Ikhaya'),
+    (href('admin', 'ikhaya', 'categories'), 'Kategorien')
+  ] + navigation_trace %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" class="ikhaya">
+  {{ h.render_form(form, 'name', 'icon') }}
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+{% endblock %}

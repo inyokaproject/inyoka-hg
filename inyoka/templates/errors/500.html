@@ -1,0 +1,23 @@
+{#
+    errors/500.html
+    ~~~~~~~~~~~~~~~
+
+    This template is shown if the users requested page was moved to another
+    location.
+
+    :copyright: 2007 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Serverfehler'] %}
+{% block appheader %}
+  <h1>Serverfehler</h1>
+  <h2>500 Internal Server Error</h2>
+{% endblock %}
+{% block portal_content %}
+  <p>
+    Es ist ein interner Serverfehler aufgetreten. Die Administratoren wurden
+    bereits über dieses Problem informiert.
+  </p>
+{% endblock %}

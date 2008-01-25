@@ -1,0 +1,18 @@
+{#
+    portal/static_page.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    Used for static pages (imprint, licence etc.)
+
+    :copyright: 2007 by Marian Sigler.
+    :license: GNU GPL.
+#}
+{% extends 'portal/overall.html' %}
+{% set title_trace = [title] %}
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>{{ title|e }}</h2>
+{% endblock %}
+{% block portal_content %}
+{{ content }}
+{% endblock %}

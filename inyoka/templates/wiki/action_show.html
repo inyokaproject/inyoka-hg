@@ -1,0 +1,34 @@
+{#
+    wiki/action_show.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This template is used to show a page of the most recent revision or
+    of a specific revision.
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+
+{% extends 'wiki/page.html' %}
+{% set title_trace = [page.title|e] %}
+{% set action = 'show' %}
+{% block wiki_content %}
+  <h1 class="pagetitle"><a href="{{ href('wiki', page.name, action='backlinks')|e }}">{{ page.short_title|e }}</a></h1>
+
+  {% if page.rev.attachment %}
+  <div id="attachment">{{ page.rev.attachment.html_representation }}</div>
+  {% endif %}
+
+  <div id="page">{{ page.rev.rendered_text }}</div>
+
+  <p class="meta">
+    <a href="{{ page.rev|url|e }}">Diese Revision</a> wurde {{
+      page.rev.change_date|specificdatetimeformat(true) }}
+    von {% if page.rev.user -%}
+      <a href="{{ page.rev.user|url|e }}">{{ page.rev.user.username|e }}</a>
+    {%- else -%}
+      {{ page.rev.remote_addr|e }}
+    {%- endif %} erstellt.
+  </p>
+{% endblock %}

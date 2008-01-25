@@ -1,0 +1,28 @@
+{#
+    ikhaya/archive.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    This page shows links to all months of ikhaya articles.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'ikhaya/page.html' %}
+
+{% set title_trace = ['Archiv'] %}
+
+{% block ikhaya_content %}
+  <p>
+    Hier findest du sämtliche bereits geschriebenen Beiträge in
+    chronologischer Anordnung. Die neuesten Beiträge findest du
+    auf der <a href="{{ href('ikhaya') }}">Übersicht</a>.
+  </p>
+  {% for year in months|groupby('year') %}
+    <h3>{{ year.grouper }}</h3>
+    <ul>
+    {%- for month in year.list %}
+    <li><a href="{{ href('ikhaya', month.strftime('%Y/%m')) }}">{{ month.strftime('%B') }}</a></li>
+    {%- endfor %}
+    </ul>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{#
+    planet/suggest.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    On this page the user can suggest a new blog for the planet.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'planet/page.html' %}
+
+{% set title_trace = ['Blog vorschlagen'] %}
+
+{% block planet_content %}
+  <form action="{{ href('planet', 'suggest') }}" method="post">
+    {{ h.render_form(form, 'name', 'url', 'description') }}
+    <p>
+      <input type="submit" value="Abschicken" />
+      <input type="submit" name="abort" value="Abbrechen" />
+    </p>
+  </form>
+{% endblock %}

@@ -1,0 +1,54 @@
+{#
+    portal/whoisonline.html
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    Shows a list of active users.
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+{% extends 'portal/overall.html' %}
+
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>Wer ist online?</h2>
+{% endblock %}
+
+{% block portal_content %}
+  <p>
+    {% trans all=sessions.all %}
+    Momentan ist <strong>{{ all }}</strong> Benutzer online,
+    {% pluralize %}
+    Momentan sind <strong>{{ all }}</strong> Benutzer online,
+    {% endtrans %}
+    davon
+    {% trans registered=sessions.registered %}
+    <strong>{{ registered }}</strong> Angemeldeter
+    {% pluralize %}
+    <strong>{{ registered }}</strong> Angemeldete
+    {% endtrans %}
+    und
+    {% trans guests=sessions.anonymous %}
+    <strong>{{ guests }}</strong> Gast.
+    {% pluralize %}
+    <strong>{{ guests }}</strong> Gäste.
+    {% endtrans %}
+  </p>
+  Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern am {{ record_time|datetimeformat }}.
+  {%- if sessions.sessions %}
+  <ul>
+  {% for session in sessions.sessions %}
+    <li>
+    {% if session.link -%}
+      <a href="{{ session.link|e }}" class="{{ session.type }}">{{ session.text|e or 'Gast' }}</a>
+    {% else %}
+      <span class="{{ session.type }}">{{ session.text|e or 'Gast' }}</span>
+    {%- endif %}
+    {{ session.action }}
+    <small>({{ session.last_change|timedeltaformat(true) }})</small>
+    {% if session.category %} (<a href="{{ session.action_link|e }}">{{ session.category|e }}</a>){% endif %}
+    </li>
+  {%- endfor %}
+  </ul>
+  {%- endif %}
+{% endblock %}

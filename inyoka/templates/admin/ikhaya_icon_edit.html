@@ -1,0 +1,40 @@
+{#
+    templates.admin.icon_edit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Template for editing or creating an ikhaya icon.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% if not icon %}
+  {% set navigation_trace = [
+      (href('admin', 'ikhaya', 'icons', 'new'), 'Icon erstellen')
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (icon|url('edit'), 'Icon „%s“ bearbeiten'|format(icon.identifier|e))
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'ikhaya'), 'Ikhaya'),
+    (href('admin', 'ikhaya', 'icons'), 'Icons')
+  ] + navigation_trace %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" enctype="multipart/form-data">
+  {%- if icon.img %}
+  <div class="icon">
+    <img src="{{ icon|url }}" alt="{{ identifier|e }}" />
+  </div>
+  {%- endif %}
+  {{ h.render_form(form, 'identifier', 'img') }}
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+{% endblock %}

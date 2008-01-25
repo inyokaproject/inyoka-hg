@@ -1,0 +1,39 @@
+{#
+    portal/memberlist.html
+    ~~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows all registered users.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Mitglieder'] %}
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>Mitgliederliste</h2>
+{% endblock %}
+{% block content %}
+  <h2>Mitglieder</h2>
+  <table>
+    <tr>
+      <th>{{ table.get_html('id', '#') }}</th>
+      <th>{{ table.get_html('username', 'Benutzername') }}</th>
+      <th>{{ table.get_html('location', 'Wohnort') }}</th>
+      <th>{{ table.get_html('date_joined', 'Anmeldungsdatum') }}</th>
+      <th>{{ table.get_html('post_count', 'Beiträge') }}</th>
+    </tr>
+    {%- for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>
+        <a href="{{ user|url }}">{{ user.username|e }}</a></td>
+      <td>{{ user.location }}</td>
+      <td>{{ user.date_joined.strftime('%d.%m.%Y, %H:%M') }}</td>
+      <td>{{ user.posts }}</td>
+    </tr>
+    {% endfor -%}
+  </table>
+  {{ pagination }}
+{% endblock %}

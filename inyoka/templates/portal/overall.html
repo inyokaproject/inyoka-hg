@@ -1,0 +1,65 @@
+{#
+    portal/overall.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    This is the base layout for all portal pages.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+
+{% set active_app = 'portal' %}
+{% set navi_type  = 'both' %}
+{% set styles = ['portal.css'] + styles %}
+
+{% macro feed_button link -%}
+  <a href="{{ link }}" class="feed_icon"><img src="{{ href('static', 'img', 'feed.png') }}" alt="Newsfeed" /></a>
+{%- endmacro %}
+
+{% block content %}
+  {% block portal_content %}
+
+  {% endblock %}
+{% endblock %}
+
+{% block navigation %}
+  <!--<img src="{{ href('static', 'img', 'portal', 'getubuntu.png') }}" alt="Hol' dir Ubuntu" />-->
+  <h3 class="navi_ubuntu"><a href="{# XXX #}http://www.ubuntu.com">Ubuntu</a></h3>
+  <ul>
+    <li class="getubuntu"><a href="#{# XXX #}">Hol dir Ubuntu!</a></li>
+    <li><a href="{{ href('wiki', 'Was ist Ubuntu') }}">Was ist Ubuntu?</a></li>
+    <li><a href="{{ href('wiki', 'Ubuntu FAQ') }}">Häufig gestellte Fragen</a></li>
+    <li><a href="{{ href('wiki', 'Download') }}">Downloads</a></li>
+    <li><a href="http://verein.ubuntu-de.org/">Verein</a></li>
+  </ul>
+  <h3 class="navi_ubuntuusers"><a href="{{ href('portal') }}">ubuntuusers.de</a></h3>
+  <ul>
+    <li><a href="{{ href('wiki', 'Verwaltung', 'ubuntuusers') }}">Über ubuntuusers.de</a></li>
+    <li><a href="{{ href('portal', 'users') }}">Mitgliederliste</a></li>
+    <li><a href="{{ href('portal', 'groups') }}">Gruppenliste</a></li>
+    <li><a href="{{ href('wiki', 'Verwaltung', 'Spenden') }}">Spenden</a></li>
+    <li><a href="#{# XXX #}">Kontakt</a></li>
+    <li><a href="{{ href('portal', 'search') }}">Suche</a></li>
+    <li><a href="{% if USER.is_authenticated() %}{{ href('pastebin') }}{% else %}{{ href('pastebin', 'browse') }}{% endif %}">No Paste Service</a></li>
+    <li><a href="{{ href('portal', 'whoisonline') }}">Wer ist online?</a></li>
+  </ul>
+  <h3 class="navi_forum">{{ feed_button(href('portal', 'feeds', _anchor='forum')) }}<a href="{{ href('forum') }}">Forum</a></h3>
+  <ul>
+    <li><a href="{{ href('wiki', 'Verwaltung', 'Moderatoren-Team', 'Forenregeln') }}">Forenregeln</a></li>
+    <li><a href="{{ href('wiki', 'Verwaltung', 'Moderatoren-Team', 'Richtig_Fragen') }}">Richtig Fragen</a></li>
+  </ul>
+  <h3 class="navi_wiki">{{ feed_button(href('portal', 'feeds', _anchor='wiki')) }}<a href="{{ href('wiki') }}">Wiki</a></h3>
+  <ul>
+    <li><a href="{{ href('wiki', 'Galerie') }}">Galerie</a></li>
+    <li><a href="{{ href('wiki', 'Links') }}">Links</a></li>
+  </ul>
+  <h3 class="navi_ikhaya">{{ feed_button(href('portal', 'feeds', _anchor='ikhaya')) }}<a href="{{ href('ikhaya') }}">Ikhaya</a></h3>
+  <ul>
+    <li><a href="{{ href('ikhaya', 'suggest') }}">Artikel vorschlagen</a></li>
+  </ul>
+  <h3 class="navi_planet">{{ feed_button(href('portal', 'feeds', _anchor='planet')) }}<a href="{{ href('planet') }}">Planet</a></h3>
+  <ul>
+    <li><a href="{{ href('planet', 'suggest') }}">Blog vorschlagen</a></li>
+  </ul>
+{% endblock %}

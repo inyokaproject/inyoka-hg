@@ -1,0 +1,210 @@
+/**
+ * style.portal
+ * ~~~~~~~~~~~~
+ *
+ * The styles for the portal.
+ *
+ * :copyright: 2007 by Armin Ronacher, Benjamin Wiegand, Christopher Grebs.
+ * :license: GNU GPL.
+ */
+
+h3 {
+    border-bottom: 1px solid #e0c99d;
+    color: #444;
+}
+
+.content p {
+    margin-left: 0.4em;
+}
+
+img.cat {
+  float: right;
+  margin: 0.5em 0 0.5em 0.5em;
+}
+
+.articles {
+  margin: 0.7em 0 0.7em 1em;
+  border-collapse: collapse;
+}
+
+.article {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #D4D4D4;
+  font-size: 0.9em;
+  margin: 0.3em;
+  padding: 1em;
+  cursor: pointer;
+  background-image: url(../img/portal/boxbg.png);
+  background-position: top;
+  background-repeat: repeat-x;
+}
+
+.article .date {
+  float: right;
+  font-weight: bold;
+}
+
+.article a {
+  font-weight: bold;
+  text-decoration: none;
+  border-bottom: 1px solid #D4D4D4;
+}
+
+.article p {
+  color: #333;
+}
+
+
+.search_sidebar {
+  float: right;
+  padding: 0.4em;
+  margin: 0 0 1em 1em;
+  border: dotted 1px #ccc;
+  width: 10.0em;
+  text-align: center;
+}
+
+.search_sidebar ul {
+  list-style-type: none;
+  padding: 0px;
+}
+
+.search_sidebar ul li {
+  margin: 0.5em 0.0em;
+  text-align: center;
+}
+
+.search_ext dd, .search_ext dt {
+  margin: 0.5em 0.0em;
+}
+
+.search_ext dd {
+  margin-left: 1.0em;
+}
+
+table.search_results .date {
+    width: 15em;
+}
+
+table.search_results .user {
+    width: 10em;
+}
+
+table.search_results .area {
+    width: 7em;
+}
+
+table.search_results .score {
+    text-align: right;
+    width: 6em;
+}
+
+/*** Usermap ******************************************************************/
+div.usermap {
+  width: 100%;
+  height: 400px;
+  border: 1px solid #ccc;
+}
+
+
+/*** View Profile *************************************************************/
+/* Experimental user info table styles */
+
+/* New list version */
+
+/* Second table version */
+table.userinfo {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.userinfo th {
+  text-align: left;
+  font-weight: bold;
+  background-color: #eee;
+  color: #666;
+}
+
+table.userinfo th, 
+table.userinfo td {
+  width: 33%;
+  padding: 0.2em;
+  border: 1px dotted #ccc;
+}
+
+/* User Control Panel *******************************************************/
+
+table.usercp_control {
+  text-align: center;
+  border:none;
+}
+
+table.usercp_control td {
+  border: 1px dotted #E3D6C4;
+  padding: 0;
+}
+
+table.usercp_control td a {
+  text-decoration: none;
+  color: #888;
+  display: block;
+  padding: 10px;
+}
+
+table.usercp_control td:hover a {
+  color: #444;
+}
+
+img.usercp_avatar {
+  float: right;
+}
+
+/* Some additional features for non ie users */
+table.usercp_control a img {
+  opacity: 0.6;
+}
+table.usercp_control a:hover img {
+  opacity: 1;
+}
+
+table.usercp_subscriptions td.first, th.first {
+  width: 75%;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+table.usercp_subscriptions td.second, th.second {
+  width: 25%;
+  text-align: center;
+}
+
+/* Private Messages **********************************************************/
+
+div.prvmsg {
+  border: 1px solid #ccc;
+  padding: .5em;
+  background: #f2f2f2;
+  margin-top: 1em;
+}
+
+div.prvmsg img.avatar {
+  float: right;
+}
+
+div.prvmsg dl.prvmsg_header dt {
+  float: left;
+  width: 6em;
+  color: #666;
+}
+
+div.prvmsg dl.prvmsg_header dd {
+  margin-bottom: .2em;
+}
+
+div.prvmsg div.prvmsg_body {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: .2em;
+  clear: right;
+}

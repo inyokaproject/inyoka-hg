@@ -1,0 +1,37 @@
+{#
+    admin/pages.html
+    ~~~~~~~~~~~~~~~~
+
+    This is the overview of the static pages configuration.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Planet</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>Blogs</h3>
+<table class="static_pages">
+  <thead>
+  <tr>
+    <th>Name</th>
+  </tr>
+  </thead>
+  <tbody>
+  {%- for blog in blogs %}
+  <tr>
+    <td><a href="{{ blog|url('edit') }}">{{ blog.name|e }}</a></td>
+  </tr>
+  {%- else %}
+  <tr>
+    <td colspan="3">Es existiert noch kein Blog, <a href="{{ href('admin', 'planet', 'new') }}">erstelle</a> jetzt den ersten!</td>
+  </tr>
+  {%- endfor %}
+  </tbody>
+</table>
+<a href="{{ href('admin', 'planet', 'new') }}">Neuen Blog erstellen</a>
+{% endblock %}

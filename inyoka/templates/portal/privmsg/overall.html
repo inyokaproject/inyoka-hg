@@ -1,0 +1,26 @@
+{#
+    portal/privmsg/overall.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = title_trace + ['Private Nachrichten'] %}
+
+{% block appheader %}
+  <h1>Private Nachrichten</h1>
+  <h2>{{ title_trace[:-1]|join(' » ') or 'Übersicht' }}</h2>
+{% endblock %}
+
+{% block opt_tabbar_navigation %}
+  <ul>
+    <li><a href="{{ href('portal', 'privmsg', 'inbox') }}"{{ selected == 'inbox' and ' class="active"' or '' }}>Posteingang</a></li>
+    <li><a href="{{ href('portal', 'privmsg', 'sent') }}"{{ selected == 'sent' and ' class="active"' or '' }}>Gesendet</a></li>
+    <li><a href="{{ href('portal', 'privmsg', 'archive') }}"{{ selected == 'archive' and ' class="active"' or '' }}>Archiv</a></li>
+    <li><a href="{{ href('portal', 'privmsg', 'trash') }}"{{ selected == 'trash' and ' class="active"' or '' }}>Papierkorb</a></li>
+    <li><a href="{{ href('portal', 'privmsg', 'new') }}"{{ selected == 'new' and ' class="active"' or '' }}>Neue Nachricht</a></li>
+  </ul>
+{% endblock %}
+

@@ -1,0 +1,38 @@
+{#
+    ikhaya/index.html
+    ~~~~~~~~~~~~~~~~~
+
+    This page shows some of the latest ikhaya entries.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'ikhaya/page.html' %}
+{% set navigation_trace =  [
+  (href('ikhaya', 'suggest'), 'Artikel vorschlagen')
+  ] %}
+{% set title_trace = ['Artikel vorschlagen'] %}
+{% set scripts = ['WikiEditor.js'] %}
+{% set styles = ['editor.css'] %}
+{% block ikhaya_content %}
+  <h2>Artikel vorschlagen</h2>
+  <p>
+    Du willst, dass wir etwas Bestimmtes im Ikhaya veröffentlichen?
+    Eine wichtige Nachricht ist noch nicht online?
+    Du hast einen Erfahrungsbericht, den Du anderen zugänglich machen willst?
+    Du möchtest eine Software vorstellen?
+    Dann schreibe Deinen Beitrag hier!
+  </p>
+  <form action="" method="post">
+    {{ h.render_form(form, 'title', 'intro', 'text') }}
+    <p>
+      <input type="submit" value="Abschicken" />
+    </p>
+  </form>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var text = new WikiEditor('textarea[@name="text"]');
+    var intro = new WikiEditor('textarea[@name="intro"]');
+    /* ]]> */
+  </script>
+{% endblock %}

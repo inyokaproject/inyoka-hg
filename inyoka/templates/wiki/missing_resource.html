@@ -1,0 +1,22 @@
+{#
+    wiki/missing_resource.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This is rendered if some resource does not exist. This most likely
+    will happen if someone
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+
+{% extends 'wiki/page.html' %}
+{% set title_trace = ['Fehlende Ressource'] %}
+{% block wiki_content %}
+  <h2>Fehlende Ressource</h2>
+  <p>
+    Die gewünschte Ressource wurde nicht gefunden. Möglicherweise bist du
+    einem Link mit ungültigen Parametern gefolgt. Als Lösung für das Problem
+    kannst du versuchen die <a href="?">URL ohne Parameter</a> zu öffnen.
+  </p>
+{% endblock %}

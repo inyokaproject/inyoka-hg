@@ -1,0 +1,21 @@
+{#
+    portal/_login_form
+    ~~~~~~~~~~~~~~~~~~
+
+    This macro renders the login formular.
+    :Parameters:
+
+        form
+            This has to be an instance of `LoginForm`
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+<form action="" method="post" class="loginform">
+  {{ h.render_form(form, 'username', 'password', 'permanent') }}
+  <div class="actions">
+    <input type="hidden" name="redirect" value="{{ REQUEST.GET['redirect']|e(true) }}" />
+    <button type="submit" id="login">Login</button>
+    <button type="reset" id="reset">Zurücksetzen</button>
+  </div>
+</form>

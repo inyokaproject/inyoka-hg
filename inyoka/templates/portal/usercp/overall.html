@@ -1,0 +1,28 @@
+{#
+    portal/usercp/overall.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows the user control panel overall page.
+
+    :copyright: 2007 by Christopher Grebs, Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = title_trace + ['Verwaltungscenter'] %}
+{% block appheader %}
+  <h1>Verwaltung</h1>
+  <h2>{{ title_trace[:-1]|join(' » ') or 'Übersicht' }}</h2>
+{% endblock %}
+
+{% block opt_tabbar_navigation %}
+  <ul>
+    <li><a href="{{ href('portal', 'usercp') }}"{{ selected == None and ' class="active"' or '' }}>Übersicht</a></li>
+    <li><a href="{{ href('portal', 'usercp', 'profile') }}"{{ selected == 'profile' and ' class="active"' or '' }}>Profil</a></li>
+    <li><a href="{{ href('portal', 'usercp', 'settings') }}"{{ selected == 'settings' and ' class="active"' or '' }}>Benutzereinstellungen</a></li>
+    <li><a href="{{ href('portal', 'usercp', 'password') }}"{{ selected == 'password' and ' class="active"' or '' }}>Passwort ändern</a></li>
+    <li><a href="{{ href('portal', 'usercp', 'subscriptions') }}"{{ selected == 'subscriptions' and ' class="active"' or '' }}>Benachrichtigungen</a></li>
+    <li><a href="{{ href('portal', 'usercp', 'deactivate') }}"{{ selected == 'deactivate' and ' class="active"' or '' }}>Deaktivieren</a></li>
+  </ul>
+{% endblock %}
+

@@ -1,0 +1,79 @@
+{#
+    forum/index.html
+    ~~~~~~~~~~~~~~~~
+
+    This is the forum's index page that shows all root-forums and their
+    first-level subforums. It also displays some information about the
+    forums like the last post and the overall topic / post count.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'forum/page.html' %}
+{% if not is_index %}
+  {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
+  {% set navigation_trace = [
+      (categories[0]|url, categories[0].name|capitalize|e),
+    ] + navigation_trace %}
+{% else %}
+{% set title_trace = ['Index'] %}
+  {% set feeds = [
+    ('Forum - Nur Überschrift', href('forum', 'feeds/title/25')),
+    ('Forum - Nur Einleitung', href('forum', 'feeds/short/25')),
+    ('Forum - Ganzer Beitrag', href('forum', 'feeds/full/25'))
+  ] %}
+{% endif %}
+
+{% block forum_content %}
+  {%- if categories %}
+  {%- for category in categories %}
+  <table class="category">
+    <thead>
+      <tr><th colspan="5"><a href="{{ category|url }}">{{ category.name|e }}</a></th></tr>
+    </thead>
+    <tbody>
+      {%- if category.children %}
+      <tr>
+        <th class="forum" colspan="2">Forum</th>
+        <th class="topic_count">Themen</th>
+        <th class="post_count">Beiträge</th>
+        <th class="last_post">Letzter Beitrag</th>
+      </tr>
+      {%- endif -%}
+      {%- for forum in category.children -%}
+      <tr>
+        <td class="icon">
+          <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+        </td>
+        <td class="forum">
+          <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
+          {%- if forum.description %}
+          <p class="description">{{ forum.description|e }}</p> 
+          {%- endif %}
+          {%- if forum.children %}
+          <p class="subforums">Subforen:
+          {%- for subforum in forum.children %}
+            <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
+          {%- endfor %}
+          </p>
+          {%- endif %}
+        </td>
+        <td class="topic_count">{{ forum.topic_count }}</td>
+        <td class="post_count">{{ forum.post_count }}</td>
+        <td class="last_post">
+        {%- if forum.last_post -%}
+        <a href="{{ forum.last_post|url}}" class="date">{{ forum.last_post.pub_date.strftime('%d.%m.%Y, %H:%M') }}</a><br />
+        <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author }}</a>
+        {%- else %}---
+        {%- endif %}</td>
+      </tr>
+      {%- else %}
+      <tr><td colspan="4">Diese Kategorie enthält keine Foren.</td></tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+  {%- endfor %}
+  {%- else %}
+    <p>Keine Kategorien</p>
+  {%- endif %}
+{% endblock %}

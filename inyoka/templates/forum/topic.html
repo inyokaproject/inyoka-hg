@@ -1,0 +1,157 @@
+{#
+    forum/topic.html
+    ~~~~~~~~~~~~~~~~
+
+    This page shows a single topic.
+    It displays the posts and some informations about their authors.
+    It is "paginated".
+
+    :copyright: 2007 by Maximilian Trescher, Benjamin Wiegand.
+    :license GNU GPL
+    
+#}
+{% extends 'forum/page.html' %}
+
+{% set title_trace = [topic.title|e]%}
+{% set navigation_trace =  [
+    (forum|url, forum.name),
+    (topic|url, topic.title)
+  ] + navigation_trace %}
+{% set name = 'Thema „%s“ - ' % topic.title|e %}
+{% set feeds = [
+  (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/25')),
+  (name ~ 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/25')),
+  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/25'))
+] %}
+
+{% macro moderation_bar %}
+  <tr>
+    <td colspan="2" class="moderation">
+      Thema: 
+      <a href="{{ topic|url('split') }}" class="split">Aufteilen</a>, 
+      <a href="{{ topic|url('move') }}" class="move">Verschieben</a>, 
+      {%- if topic.locked %}
+      <a href="{{ topic|url('unlock') }}" class="unlock">Entsperren</a>, 
+      {%- else %}
+      <a href="{{ topic|url('lock') }}" class="lock">Sperren</a>, 
+      {%- endif %}
+      {%- if topic.hidden %}
+      <a href="{{ topic|url('restore') }}" class="restore">Wiederherstellen</a>,
+      <a href="{{ topic|url('delete') }}" class="delete">Löschen</a>
+      {%- else %}
+      <a href="{{ topic|url('hide') }}" class="hide">Verbergen</a>
+      {%- endif %}
+    </td>
+  </tr>
+{% endmacro %}
+
+{% block forum_navigation %}
+  <ul class="table_tabs">
+    {# XXX: use icons for these actions in the top bar because it's too big - entequak #}
+    <li><a href="{{ topic|url('reply') }}">Neue Antwort erstellen</a></li>
+    <li><a href="{{ topic|url('subscribe') }}">Bei neuen Beiträgen {% if is_subscribed %}nicht mehr {% endif %}benachrichtigen</a></li>
+    {%- if topic.solved %}
+      <li><a href="{{ topic|url('unsolve') }}">Thema als ungelöst markieren</a></li>
+    {%- else %}
+      <li><a href="{{ topic|url('solve') }}">Thema als gelöst markieren</a></li>
+    {%- endif %}
+    <li><a href="{{ topic|url('report') }}">Thema melden</a></li>
+  </ul>
+{% endblock %}
+
+{% block forum_content %}
+  {%- if polls %}
+  <form action="" method="post">
+    {%- for pid, poll in polls.iteritems() %}
+    <strong>{{ poll.question|e }}</strong>
+    <ul>
+      {%- for oid, option in poll.options.iteritems() %}
+      <li>
+        {%- if not poll.participated %}
+        <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
+               name="poll_{{ pid }}" id="poll_{{ oid }}"
+               value="{{ oid }}" />
+        {%- endif %}
+        <label{% if not poll.participated %} for="poll_{{ oid }}"{% endif %}>
+          {{ option.name|e }}: {{ option.percent }}%
+          ({{ option.votes }} Stimmen)
+        </label>
+      </li>
+      {%- endfor %}
+    </ul>
+    {%- if loop.last and can_vote %}
+    <input type="submit" name="vote" value="Abstimmen" />
+    {%- endif %}
+    {%- endfor %}
+  </form>
+  {%- endif %}
+  <table class="topic">
+    <thead>
+      <tr>
+        <th colspan="2">{{ topic.title|e }} </th>
+      </tr>
+      {{ moderation_bar() }}
+      <tr>
+        <td class="topic_{{ topic.solved and 'solved' or 'unsolved' }}" colspan="2">
+          <div style="float:right;">Gehe zu Seite {{ pagination }}</div>
+          Status: {{ topic.solved and 'gelöst' or 'ungelöst' }},
+          Ubuntu-Version: {{ topic.get_ubuntu_version() }}
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+    {%- for post in posts %}
+      {# XXX: Does this create a sql query each time inside loop? #}
+      {%- set attachments = post.attachment_set.all() %}      
+      <tr id="post{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
+        <td class="author">
+          <a href="{{ post.author|url }}">{{ post.author|e }}</a>
+          {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
+          <img src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
+          {%- endif %}
+        </td>
+        <td class="post">
+          <div class="postinfo">
+            <span class="postactions">
+              <a href="{{ post|url('edit') }}">Bearbeiten</a>
+              <a href="{{ post|url('quote') }}">Zitieren</a>
+              {%- if post.hidden %}
+              <a href="{{ post|url('restore') }}">Wiederherstellen</a>
+              <a href="{{ post|url('delete') }}">Endgültig löschen</a>
+              {%- else %}
+              <a href="{{ post|url('hide') }}">Verbergen</a>
+              {%- endif %}
+            </span>
+            <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="return false">
+              <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
+            </a>
+            Verfasst: {{ post.pub_date.strftime('%d.%m.%Y, %H:%M') }}
+          </div>
+          {{ post.rendered_text }}
+          {{ h.render_attachments(attachments) }}
+          {%- if post.author.signature and not USER.settings['hide_signatures'] %}
+            <hr />
+            {{ post.author.rendered_signature }}
+          {%- endif %}
+        </td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+    <tfoot>
+      {{ moderation_bar() }}
+    </tfoot>
+  </table>
+  <ul class="navi_tabbar_bottom">
+    <li><a href="{{ topic|url('reply') }}">Neue Antwort erstellen</a></li>
+    <li><a href="{{ topic|url('subscribe') }}">Bei neuen Beiträgen {% if is_subscribed %}nicht mehr {% endif %}benachrichtigen</a></li>
+    {%- if topic.solved %}
+    <li><a href="{{ topic|url('unsolve') }}">Thema als ungelöst markieren</a></li>
+    {%- else %}
+    <li><a href="{{ topic|url('solve') }}">Thema als gelöst markieren</a></li>
+    {%- endif %}
+    <li><a href="{{ topic|url('report') }}">Thema melden</a></li>
+  </ul>
+  <div class="pagination">
+    Gehe zu Seite {{ pagination }}
+  </div>
+{% endblock %}

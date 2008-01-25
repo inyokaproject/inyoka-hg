@@ -1,0 +1,207 @@
+/**
+ * js.DateTime
+ * ~~~~~~~~~~~
+ *
+ * This replaces a DateTime text field with a nice user-friendly gui including
+ * a calendar and a table to select the clock.
+ * It's based on django code that implements a similar widget for the admin
+ * panel.
+ *
+ * :copyright: 2007 by Benjamin Wiegand, Django Project.
+ * :license: GNU GPL.
+ */
+
+/* create a closure for all of our stuff so that we don't export the
+   helper functions and variables.  The only thing that is defined as
+   a global is the `DateTimeEditor`. */
+
+(function() {
+  var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
+
+  function IsLeapYear(year) {
+    return (((year % 4) == 0) && ((year % 100) != 0) || ((year % 400) == 0));
+  }
+
+  function getDaysInMonth(month, year) {
+    var days;
+    if ($.inArray(month, [1, 3, 5, 7, 8, 10, 12]) != -1) {
+      days = 31;
+    } else if ($.inArray(month, [4, 6, 9, 11]) != -1) {
+      days = 30;
+    } else if (month == 2 && IsLeapYear(year)) {
+      days = 29;
+    } else {
+      days = 28;
+    }
+    return days;
+  }
+
+  DateTimeField = function(editor) {
+    var self = this;
+    this.input = $(editor).css('display', 'none');
+    this.readDateTime();
+    this.calendarMonth = this.currentMonth;
+    this.calendarYear = this.currentYear;
+    this.container = $('<table class="datetime"></table>');
+    var row = $('<tr></tr>').appendTo(this.container);
+    this.calendar = $('<td></td>').appendTo(row);
+    this.timetable = $('<td></td>').appendTo(row);
+    this.drawCalendar();
+    this.drawTimetable();
+    this.input.parent().append(this.container);
+  }
+
+  DateTimeField.prototype = {
+    readDateTime: function() {
+      var dateTimeRegex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/
+      dateTimeRegex.exec(this.input.val())
+      var today = new Date();
+      this.currentYear = RegExp.$1 || today.getFullYear();
+      this.currentMonth = RegExp.$2 || today.getMonth() + 1;
+      this.currentDay = RegExp.$3 || today.getDate();
+      this.currentHour = RegExp.$4 || today.getHours();
+      this.currentMinute = RegExp.$5 || today.getMinutes();
+      this.currentSecond = RegExp.$6 || today.getSeconds();
+    },
+    writeDateTime: function() {
+      this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay + ' ' +
+                     this.currentHour + ':' + this.currentMinute + ':' + this.currentSecond);
+    },
+    toggle: function() {
+      this.container.toggle();
+    },
+    drawTimetable: function() {
+      var self = this;
+      var timetable = $('<table class="timetable"></table>').append(
+        $('<tr><th class="caption">Uhrzeit</th></tr>')
+      );
+      this.timetable.append(timetable);
+      var times = [
+        ['Jetzt', [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()]],
+        ['Mitternacht', ['00', '00', '00']],
+        ['6 Uhr', ['06', '00', '00']],
+        ['Mittag', ['12', '00', '00']],
+        ['18 Uhr', ['18', '00', '00']]
+      ];
+      $.each(times, function(i, time) {
+        timetable.append($('<tr></tr>').append($('<td></td>').append(
+          $('<a></a>').text(time[0]).click(function() {
+            self.currentHour = time[1][0];
+            self.currentMinute = time[1][1];
+            self.currentSecond = time[1][2];
+            self.hourField.val(time[1][0]);
+            self.minuteField.val(time[1][1]);
+            self.secondField.val(time[1][2]);
+            self.writeDateTime();
+          })
+        )));
+      })
+      function _() {
+        self.currentHour = self.hourField.val();
+        self.currentMinute = self.minuteField.val();
+        self.currentSecond = self.secondField.val();
+        self.writeDateTime();
+      }
+      var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable));
+      this.hourField = $('<input type="text"></input>').appendTo(col).val(this.currentHour).change(_);
+      this.minuteField = $('<input type="text"></input>').appendTo(col).val(this.currentMinute).change(_);
+      this.secondField = $('<input type="text"></input>').appendTo(col).val(this.currentSecond).change(_);
+    },
+    drawCalendar: function() {
+      var self = this;
+      var month = parseInt(this.calendarMonth);
+      var year = parseInt(this.calendarYear);
+      this.calendar.children().remove();
+      var calendar = $('<table class="calendar"></table>').append(
+        $('<tr></tr>').append(
+          $('<th colspan="7" class="caption"></th>').append(
+            $('<a class="calendarnav-next"></a>').text('>').click(function() {
+              self.drawNextMonth()
+            }),
+            $('<a class="calendarnav-previous"></a>').text('<').click(function() {
+              self.drawPreviousMonth()
+            }),
+            months[month-1] + ' ' + year
+          )
+        )
+      );
+      var tbody = $('<tbody></tbody>').appendTo(calendar);
+      var row = $('<tr></tr>').appendTo(tbody);
+
+      // draw days-of-week header
+      $.each(days_of_week, function(i, d) {
+        row.append($('<th class="weekday"></th>').text(d));
+      })
+
+      var starting_pos = new Date(year, month-1, 1).getDay();
+      var days = getDaysInMonth(month, year);
+
+      // Draw blanks before first of month
+      var row = $('<tr></tr>').appendTo(tbody);
+      for (var i = 0; i < starting_pos; i++) {
+        $('<td style="background-color: #f3f3f3;"></td>').appendTo(row);
+      }
+
+      // Draw days of month
+      var currentDay = 1;
+      for (var i = starting_pos; currentDay <= days; i++) {
+        if (i % 7 == 0 && currentDay != 1) {
+          row = $('<tr></tr>').appendTo(tbody);
+        }
+        var td = $('<td></td>').append(
+            $('<a></a>').text(currentDay).click(function() {
+              $('.selected', $(this).parent().parent().parent()).removeClass('selected');
+              $(this).parent().addClass('selected');
+              self.currentDay = $(this).text();
+              self.currentMonth = month;
+              self.currentYear = year;
+              self.writeDateTime();
+            })
+        ).appendTo(row);
+        if (year == this.currentYear && month == this.currentMonth && currentDay == this.currentDay) {
+          td.addClass('selected');
+        }
+        currentDay++;
+      }
+
+      // Draw blanks after end of month (optional, but makes code valid)
+      while (row.children().length < 7) {
+        row.append($('<td class="nonday"></td>'));
+      }
+
+      this.calendar.append(calendar);
+    },
+    drawDate: function(month, year) {
+      this.calendarMonth = month;
+      this.calendarYear = year;
+      this.drawCalendar();
+    },
+    drawPreviousMonth: function() {
+      if (this.calendarMonth == 1) {
+        this.calendarMonth = 12;
+        this.calendarYear--;
+      } else {
+        this.calendarMonth--;
+      }
+      this.drawCalendar();
+    },
+    drawNextMonth: function() {
+      if (this.calendarMonth == 12) {
+        this.calendarMonth = 1;
+        this.calendarYear++;
+      } else {
+        this.calendarMonth++;
+      }
+      this.drawCalendar();
+    },
+    drawPreviousYear: function() {
+      this.calendarYear--;
+      this.drawCalendar();
+    },
+    drawNextYear: function() {
+      this.calendarYear++;
+      this.drawCalendar();
+    }
+  }
+})()

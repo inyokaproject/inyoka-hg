@@ -1,0 +1,47 @@
+{#
+    pastebin/display.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This template shows a single pastebin entry and displays a list of actions
+    the user can execute.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'pastebin/page.html' %}
+
+{% set title_trace = [entry.title|e] %}
+{% set navigation_trace = [entry|url, entry.title|e)] %}
+{% set styles = ['highlight.css'] %}
+{% set scripts = ['jQuery.js', 'Pastebin.js'] %}
+
+{% block navigation %}
+  {{ tab_navigation('browse') }}
+{% endblock %}
+
+{% block paste_content %}
+  <dl>
+    <dt>Titel:</dt>
+    <dd>{{ entry.title|e }}</dd>
+    <dt>Autor:</dt>
+    <dd><a href="{{ entry.author.get_absolute_url() }}">{{ entry.author.username|e }}</a></dd>
+    <dt>Datum:</dt>
+    <dd>{{ entry.pub_date|datetimeformat }}</dd>
+    <dt>Aktionen:</dt>
+    <dd class="paste_actions">
+      <ul><li><a href="{{ entry|url('raw') }}">Eintrag als Text anzeigen</a></li></ul>
+    </dd>
+    {%- if entry.referrer_list %}
+    <dt>Seiten, die auf diesen Paste verweisen:</dt>
+    <dd><ul>
+    {%- for link in entry.referrer_list %}
+      <li>{{ link|urlize(60) }}</li>
+    {%- endfor %}
+    </ul></dd>
+    {%- endif %}
+    <dt>Code:</dt>
+    <dd>
+      {{ entry.rendered_code }}
+    </dd>
+  </dl>
+{% endblock %}

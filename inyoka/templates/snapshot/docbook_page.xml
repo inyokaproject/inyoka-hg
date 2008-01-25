@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<chapter id="{{ page.name|e|lower }}">
+  <title>{{ page.name|e }}</title>
+  {{ content }}
+</chapter>

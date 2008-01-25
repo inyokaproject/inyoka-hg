@@ -1,0 +1,38 @@
+{#
+    admin/index.html
+    ~~~~~~~~~~~~~~~~
+
+    This page shows the index page for the administration center.
+
+    :copyright: 2007 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+{% extends 'admin/overall.html' %}
+
+{% block admin_content %}
+  <table class="admin_control">
+    <tr>
+      {{ admin_button(href('admin', 'config'), 'configuration', 'Allgemeine Konfiguration') }}
+      {{ admin_button(href('admin', 'ikhaya'), 'ikhaya', 'Ikhaya') }}
+    </tr>
+    <tr>
+      {{ admin_button(href('admin', 'planet'), 'planet', 'Planet') }}
+      {{ admin_button(href('admin', 'pages'), 'pages', 'Statische Seiten') }}
+    </tr>
+      <!--
+      <td>
+        <a href="{{ href('admin', 'forum') }}">
+          <img src="{{ href('static', 'img', 'admin', 'category_forum.png') }}" alt="Forum Administration" /><br>
+          Forum Administration
+        </a>
+      </td>
+      <td>
+        <a href="{{ href('admin', 'users') }}">
+          <img src="{{ href('static', 'img', 'admin', 'category_users.png') }}" alt="Benutzer Administration" /><br />
+          Benutzer Administration
+        </a>
+      </td>
+      -->
+  </table>
+{% endblock %}

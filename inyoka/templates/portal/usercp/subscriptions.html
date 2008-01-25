@@ -1,0 +1,47 @@
+{#
+    portal/usercp/subscriptions.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows all subscriptions of the user and let him
+    manage them.
+    
+    :copyright: 2007 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/usercp/overall.html' %}
+{% set title_trace = ['Benutzereinstellungen'] %}
+{% set selected = 'subscriptions' %}
+
+
+{% block appheader %}
+  <h1>Verwaltung</h1>
+  <h2>Benachrichtigungen</h2>
+{% endblock %}
+{% block portal_content %}
+<h4>Abonnements</h4>
+<form class="usercp_form" method="post" action="">
+  <table class="usercp_subscriptions">
+    <tr>
+      <th class="first">Name</th>
+      <th class="second">Abonnement löschen</th>
+    </tr>
+    {%- for sub in subscriptions %}
+    <tr>
+      <td class="first">
+        {%- if sub.topic -%}
+        Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
+        {%- elif sub.wiki_page -%}
+        Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>
+        {%- endif -%}
+      </td>
+      <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>
+    </tr>
+    {%- endfor %}
+  </table>
+  <div>
+    <input type="reset" value="Änderungen aufheben" />
+    <input type="submit" value="Änderungen bestätigen" />
+  </div>
+</form>
+{% endblock %}

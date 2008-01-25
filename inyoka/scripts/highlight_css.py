@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    inyoka.scripts.highlight_css
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The generate_highligh_css() function generates the css file for the
+    ubuntuusers human highlighting style and writes it into the static
+    directory.
+    It's first argument should be a css expression for the element that
+    contains the code to highlight.
+    It should only be called manually.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+"""
+from os.path import join
+from pygments.formatters import HtmlFormatter
+from inyoka.utils.highlight import HumanStyle
+from django.conf import settings
+
+
+def generate_highlight_css(elm='.syntax'):
+    formatter = HtmlFormatter(style=HumanStyle)
+    path = join(settings.BASE_PATH, 'static/style/highlight.css')
+    f = file(path, 'w+')
+    f.write(formatter.get_style_defs(elm))
+    f.close()
+
+
+if __name__ == '__main__':
+    generate_highlight_css()

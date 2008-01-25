@@ -1,0 +1,34 @@
+{#
+    forum/page.html
+    ~~~~~~~~~~~~~~~
+
+    This template is included by all forum templates and adds the elements
+    they all use (stylesheets etc).
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'overall.html' %}
+
+{% set title_trace = title_trace + ['Forum'] %}
+{% set navigation_trace = [(href('forum'), 'Forum')] + navigation_trace %}
+{% set active_app = 'forum' %}
+{% set styles = ['forum.css'] + styles %}
+{% set navi_type = 'tabbar'%}
+
+{% block appheader %}
+  <h1>Forum</h1>
+  <h2>{{ title_trace[:-1]|join(' » ') }}</h2>
+{% endblock %}
+
+{% block navigation %}
+  {%- block forum_navigation %}
+  
+  {%- endblock %}
+{% endblock %}
+
+{% block content %}
+  {%- block forum_content %}
+
+  {%- endblock %}
+{%- endblock %}

@@ -1,0 +1,83 @@
+{#
+    portal/privmsg/index.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Display a list of private messages.
+
+    :copyright: 2007 by Christoph Hack, Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'portal/privmsg/overall.html' %}
+{% set styles = styles + ['portal.css'] %}
+{% set selected=folder.id %}
+{% set title_trace = [folder.name] %}
+
+{% block portal_content %}
+  <table>
+    <tbody>
+      <tr>
+        <th class="subject">Betreff</th>
+        <th class="author">Von</th>
+        <th class="recipients">An</th>
+        <th class="date">Datum</th>
+        <th class="actions">Aktionen</th>
+      </tr>
+      {% for entry in entries %}
+      <tr>
+        <td>{% if not entry.read %}<strong>{% endif -%}
+        <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
+        {% if not entry.read %}</strong>{% endif %}</td>
+        <td><a href="{{ entry.message.author|url }}">
+          {{ entry.message.author|e }}</a></td>
+        <td>
+          <a href="{{ entry.message.recipients[0]|url }}">
+            {{ entry.message.recipients[0]|e }}</a>
+          {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
+        <td>{{ entry.message.pub_date|e }}</td>
+        <td>
+          {% if not entry.is_own_message %}
+          <a href="{{ entry|url }}?action=reply" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
+          {% endif %}
+          <img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" title="Weiterleiten" />
+          {% if not entry.in_archive %}
+          <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
+          {% endif %}
+          <a href="{{ entry|url }}?action=delete" title="Löschen"><img src="{{ href('static', 'img/icons/small/delete.png') }}" alt="Löschen" /></a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Derzeit befinden sich noch keine Nachrichten
+        in diesem Ordner.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if message %}
+    <div class="prvmsg">
+      <img class="avatar" src="{{ message.author.avatar_url|e }}" />
+      <dl class="prvmsg_header">
+        <dt>Von:</dd>
+        <dd><a href="{{ message.author|url }}">{{ message.author }}</a></dd>
+        <dt>An:</dt>
+        <dd>{% for user in message.recipients -%}
+          <a href="{{ user|url }}">{{ user|e }}</a>
+          {%- if not loop.last %}, {% endif %}{% else %}...{% endfor %}</dd>
+        <dt>Betreff:</dt>
+        <dd>{{ message.subject|e }}</dd>
+        <dt>Datum:</dt>
+        <dd>{{ message.pub_date|e }}</dd>
+      </dl>
+      <div class="prvmsg_body">
+        {{ message.rendered_text }}
+      </div>
+    </div>
+    <a href="?action=delete">Nachricht löschen</a>
+    {% if folder.id == 'trash' %}
+    <a href="?action=revert">Wiederherstellen</a>
+    {% elif folder.id != 'archive' %}
+    <a href="?action=archive">Archivieren</a>
+    {% endif %}
+  {% endif %}
+{% endblock %}

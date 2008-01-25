@@ -1,0 +1,80 @@
+{#
+    portal/usercp/settings.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This page shows the user control panel settings page.
+
+    :copyright: 2007 by Christopher Grebs, Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/usercp/overall.html' %}
+{% set title_trace = ['Benutzereinstellungen'] %}
+{% set scripts = ['WikiEditor.js'] %}
+{% set styles = ['editor.css'] %}
+{% set selected = 'profile' %}
+
+{% block portal_content %}
+<form enctype="multipart/form-data" class="usercp_form" method="post" action="">
+  <h3>Profileinstellungen</h3>
+  <dl>
+    <dt>Avatar:</dt>
+    <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
+    <dd>{{ form.avatar }}</dd>
+    <dd class="note">
+      Beachte, dass der Avatar maximal <strong>{{ SETTINGS.AVATAR_SIZE[0] }} x {{ SETTINGS.AVATAR_SIZE[1] }}</strong> Pixel groß sein darf.<br />
+      Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
+      Um also eine gute Bildqualität zu erreichen, richte dich bitte danach, den Avatar nicht diese Größe überschreiten zu lassen.
+    </dd>
+    <dd>{{ form.delete_avatar }} Aktuellen Avatar löschen</dd>
+    <dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>
+    <dt>E-Mail:</dt>
+    <dd>{{ form.email }}{{ h.field_errors(form.errors.email) }}</dd>
+    <dt>Jabber:</dt>
+    <dd>{{ form.jabber }}{{ h.field_errors(form.errors.jabber) }}</dd>
+    <dt>ICQ:</dt>
+    <dd>{{ form.icq }}{{ h.field_errors(form.errors.icq) }}</dd>
+    <dt>MSN Messenger:</dt>
+    <dd>{{ form.msn }}{{ h.field_errors(form.errors.msn) }}</dd>
+    <dt>AIM:</dt>
+    <dd>{{ form.aim }}{{ h.field_errors(form.errors.aim) }}</dd>
+    <dt>Yahoo Instant Messenger</dt>
+    <dd>{{ form.yim }}{{ h.field_errors(form.errors.yim) }}</dd>
+  </dl>
+  <h3>Sonstige Einstellungen</h3>
+  <dl>
+    <dt>Wohnort:</dt>
+    <dd>{{ form.location }}{{ h.field_errors(form.errors.location) }}</dd>
+    <dt>Beruf:</dt>
+    <dd>{{ form.occupation }}{{ h.field_errors(form.errors.occupation) }}</dd>
+    <dt>Interessen:</dt>
+    <dd>{{ form.interests }}{{ h.field_errors(form.errors.interests) }}</dd>
+    <dt>Internetseite:</dt>
+    <dd>{{ form.website }}{{ h.field_errors(form.errors.website) }}</dd>
+    <dt>Benachrichtigung über</dt>
+    <dd>{{ form.notify }}{{ h.field_errors(form.errors.notify) }}</dd>
+    <dt>Oberfläche</dt>
+    <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">Avatare ausblenden</label>
+        {{ h.field_errors(form.errors.hide_avatar) }}</dd>
+    <dd>{{ form.hide_signatures }} <label for="id_hide_signatures">Signaturen ausblenden</label>
+        {{ h.field_errors(form.errors.hide_signatures) }}</dd>
+  </dl>
+  <h3>Signatur</h3>
+  <p class="note">
+    Dies ist ein Text, der an jeden Beitrag von dir angehängt wird.<br />
+    Er darf nicht mehr als {{ SETTINGS.SIGNATURE_LENGTH }} Zeichen enthalten.
+  </p>
+  <p>
+    {{ form.signature }}
+    {# XXX: just use a somewhat smaller version #}
+    <script type="text/javascript">
+      var editor = new WikiEditor('textarea[@name="signature"]')
+    </script>
+  </p>
+  {{ h.field_errors(form.errors.signature) }}
+  <p>
+    <input type="reset" value="Zurücksetzen" />
+    <input type="submit" value="Absenden" />
+  </p>
+</form>
+{% endblock %}

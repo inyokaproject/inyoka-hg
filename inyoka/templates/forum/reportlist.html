@@ -1,0 +1,57 @@
+{#
+    forum/reportlist.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    The moderators can see all reported topics on this page.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license GNU GPL
+    
+#}
+
+{% extends 'forum/page.html' %}
+{% set title_trace = ['Gemeldete Themen'] %}
+{% set navigation_trace =  [
+  (href('forum', 'reported_topics'), 'Gemeldete Themen')
+  ] + navigation_trace %}
+
+{% block forum_content %}
+<form action="" method="post">
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2">Thema</th>
+        <th>Gemeldet von</th>
+        <th>Begründung</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for topic in topics %}
+      <tr>
+        <td>
+          <input type="checkbox" name="selected" value="{{ topic.id }}" />
+        </td>
+        <td>
+          <a href="{{ topic|url }}">{{ topic.title|e }}</a>
+        </td>
+        <td>
+          <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a>
+        </td>
+        <td>
+          {{ topic.reported|e }}
+        </td>
+      </tr>
+      {%- else %}
+      <tr>
+        <td colspan="4">
+          Es gibt zurzeit keine gemeldeten Themen.
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+  <div>
+    <input type="submit" value="Ausgewählte Themen als bearbeitet markieren" />
+  </div>
+</form>
+{% endblock %}

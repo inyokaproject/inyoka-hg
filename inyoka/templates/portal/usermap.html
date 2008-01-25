@@ -1,0 +1,26 @@
+{#
+    portal/usermap.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    Display a google maps powered usermap.
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Benutzerkarte'] %}
+{% set styles = styles %}
+{% set scripts = scripts + ['UserMap.js', 'GMarkerManager.js'] %}
+{% block html_head %}
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ apikey|e(true)
+    }}" type="text/javascript"></script>
+  {{ super() }}
+{% endblock %}
+{% block appheader %}
+  <h1>Benutzerkarte</h1>
+  <h2>Wer kommt von wo?</h2>
+{% endblock %}
+{% block portal_content %}
+  <div class="usermap"></div>
+{% endblock %}

@@ -1,0 +1,64 @@
+/**
+ * style.login
+ * ~~~~~~~~~~~
+ *
+ * The login styles
+ *
+ * :copyright: 2007 by ...
+ * :license: GNU GPL.
+ */
+
+.loginform {
+  margin-bottom: 1em;
+}
+
+/* move those two to main.css? --maix */
+
+.errorlist {
+  color:#A00;
+}
+
+dl dd li, dl dd ul {
+  margin-left:-0.5em;
+}
+
+/*.content {
+  background-image: url('../img/portal/member.png');
+  text-align: center;
+}*/
+
+/* Login Form *****************************************************************/
+
+/*.loginform dl * {
+  margin: 0;
+  padding: 0;
+}
+
+.loginform dl dd {
+  margin-bottom: 1em;
+}
+
+.loginform button {
+  padding: 0.5em 10px 0.5em 34px;
+  margin-right: 10px;
+  background-position: left center;
+  background-repeat: no-repeat;
+  border: 1px solid #555;
+}
+
+.loginform dd.input {
+  margin-bottom:0.0em;
+}
+
+.loginform dd.help {
+  margin-top: 0px;
+  font-size: 0.9em;
+}
+
+.loginform button#login {
+  background-image: url('../img/portal/login_icon.png');
+}
+
+.loginform button#reset {
+  background-image: url('../img/portal/reset_icon.png');
+}*/

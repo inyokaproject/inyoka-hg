@@ -1,0 +1,74 @@
+{#
+    portal/search.html
+    ~~~~~~~~~~~~~~~~~~
+
+    This page displays an advanced search formular.
+
+    :copyright: 2007 by Christoph Hack.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{%- set styles = styles + ['portal.css'] -%}
+{% set title_trace = ['Suche'] %}
+{% set title = 'Suche' %}
+
+{% block appheader %}
+  <h1>Suche</h1>
+  <h2>Neue Suchabfrage</h2>
+{% endblock %}
+
+{% block portal_content %}
+  <script type="text/javascript">
+    /*<![CDATA[*/
+    addSearchTerm = function(label, value) {
+      var query = $('#id_query');
+      var val = query.val();
+      val += ((val.length > 0 && val.charAt(val.length - 1) != ' ')
+              ? ' ' : '') + label + ':"' + value + '"';
+      var q = query.val(val).focus()[0];
+
+      if (typeof q.selectionStart != 'undefined') {
+        q.selectionStart = val.length - value.length -  1;
+        q.selectionEnd = val.length - 1;
+      }
+      // TODO: Internet Explorer Support
+      return false;
+    }
+    /*]]>*/
+  </script>
+  <form action="{{ href('portal', 'search') }}" method="get" class="search_ext">
+
+  <div class="search_sidebar">
+    <h3>Suchoptionen</h3>
+    <ul>
+      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('titel', 'Titel');">Titelsuche</a></li>
+      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('author', 'Benutzername');">Autorensuche</a></li>
+      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('tag', 'Tag');">Tagsuche</a></li>
+    </ul>
+
+    <input type="checkbox" name="collapse" value="true" id="search_collapse" />
+    <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>
+  </div>
+
+  <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
+  Die Suche berücksichtigt keine Groß- und Kleinschreibung und mehrere
+  Suchausdrücke können mit <strong>UND</strong> bzw. <strong>ODER</strong>
+  kombiniert und mit <strong>NICHT</strong> negiert werden, wobei
+  gegebenenfalls eine Klammer zu setzen ist. Komplexere Suchabfragen sind über
+  die Auswahl rechts möglich.</p>
+
+  <dl>
+    <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
+    <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
+    <dt><label for="id_date_begin">Zeitraum:</label></dt>
+    <dd>{{ searchform.date_begin }} bis {{ searchform.date_end }}<br />
+      <span class="meta">z.B.: &quot;2008-12-31&quot; oder
+      &quot;2008-12-31 17:00&quot;</span></dd>
+    <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
+  </dl>
+  <div class="actions">
+    <input type="submit" value="Suchen" />
+  </div>
+  </form>
+{% endblock %}

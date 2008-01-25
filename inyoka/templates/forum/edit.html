@@ -1,0 +1,139 @@
+{#
+    forum/edit.html
+    ~~~~~~~~~~~~~~~
+
+    This page shows displays a formular where the user can create either
+    create a new thread or write / edit a post. 
+
+    :copyright: 2007 by Maximilian Trescher, ostcar (ubuntuusers.de),
+                        Benjamin Wiegand
+    :license GNU GPL
+    
+#}
+
+{% extends 'forum/page.html' %}
+{% if isnewtopic %}
+  {% set title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
+  {% set navigation_trace =  [
+    (forum|url, forum.name),
+    (forum|url('newtopic'), 'Neues Thema')
+    ] %}
+{% elif isnewpost %}
+  {% set title_trace = ['Neue Antwort in „%s“'|format(topic.title|e)] %}
+  {% set navigation_trace =  [
+    (forum|url, forum.name),
+    (topic|url, topic.title),
+    (topic|url('reply'), 'Neue Antwort')
+    ] %}
+{% elif isedit %}
+  {% set title_trace = ['Posting bearbeiten']%}
+{% endif %}
+{% set scripts = ['WikiEditor.js', 'forum.js'] %}
+{% set styles = ['editor.css'] %}
+
+{% block forum_content %}
+  <form action="" method="post" enctype="multipart/form-data" class="new_topic">
+    <h2>{{ title_trace[0] }}</h2>
+    <dl>
+      {%- if isnewtopic %}
+      {%- if not article %}
+      <dt>Titel:</dt>
+      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
+      <dt>Ubuntu-Version:</dt>
+      <dd>
+        {{ form.ubuntu_distro }}{{ h.field_errors(form.errors.ubuntu_distro) }}
+        {{ form.ubuntu_version }}{{ h.field_errors(form.errors.ubuntu_version) }}
+      </dd>
+      {%- else %}
+      <input type="hidden" name="title" value="{{ article.name }}" />
+      {%- endif %}
+      {%- endif %}
+      <dt>Text:</dt>
+      <dd>{{ form.text }}{{ h.field_errors(form.errors.text) }}</dd>
+      {# when enter is pressed the first submit button is used #}
+      {# XXX: I'm sure that a better sollution exists for this #}
+      <dd style="display: none"><input type="submit" value="Absenden" name="send" /></dd>
+      {%- if isnewtopic or isfirstpost %}
+      <dt class="collapse" id="newtopic_polls">Umfragen:</dt>
+      {%- if polls %}
+      <dd class="newtopic_polls_sub">Bestehende Umfragen:
+        <ul>
+          {%- for poll in polls %}
+          <li>{{ poll.question|e }} <button name="delete_poll" value="{{ poll.id }}">Löschen</button></li>
+          {%- endfor %}
+        </ul>
+      </dd>
+      {%- endif %}
+      <dd class="newtopic_polls_sub">Frage: {{ poll_form.question }} {{ h.field_errors(poll_form.errors.question) }}</dd>
+      <dd class="newtopic_polls_sub">{{ poll_form.multiple }} <label for="id_multiple">Mehrfachantworten erlauben</label></dd>
+      {%- for option in options %}
+      <dd class="newtopic_polls_sub newtopic_polls_replies">Antwort {{ loop.index }}: <input type="text" name="options" value="{{ option }}" />
+        {%- if loop.last %}
+        <input type="submit" name="add_option" value="Weitere Antwort" id="id_add_option" />
+        {%- endif -%}
+      </dd>
+      {%- endfor %}
+      <dd class="newtopic_polls_sub"><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
+      {%- endif %}
+      <dt class="collapse" id="newtopic_attachments">Dateianhänge:</dt>
+      <dd class="newtopic_attachments_sub">{{ h.attachment_form(attach_form, attachments) }}</dd>
+      {%- if isnewtopic or isfirstpost %}
+      <dt>Optionen:</dt>
+      <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
+      {%- endif %}
+      <dd>
+        {{ form.att_ids }}
+        {{ form.polls }}
+        <input type="submit" value="Absenden" name="send" />
+        <input type="submit" value="Vorschau" name="preview" />
+      </dd>
+    </dl>
+    {%- if preview %}
+    <h2>Vorschau</h2>
+    <div class="preview">{{ preview }}</div>
+    {%- endif %}
+  </form>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var editor = new WikiEditor('textarea[@name="text"]');
+    (function() {
+      var
+        editor = $('textarea[@name="text"]'),
+        output = $('<div class="preview"></div>')
+      var preview = $('<div></div>')
+        .hide()
+        .append('<h2>Vorschau</h2>')
+        .append(output);
+
+      $('form input[@name="preview"]').click(function() {
+        preview.hide();
+        $.get('/?__service__=wiki.render_preview', {
+          text: editor.val()
+        }, function(data) {
+          output.html(data);
+          preview.slideDown('fast');
+        });
+        return false;
+      }).parent().parent().parent().append(preview);
+    })();
+    /* ]]> */
+  </script>
+  {%- if isnewpost %}
+  <table class="topic">
+    <thead>
+      <tr><th colspan="2">Letzte Einträge</th></tr>
+    </thead>
+    <tbody>
+      {%- for post in posts %}
+      <tr>
+        <td class="author">
+            <a href="{{ post.author|url }}">{{ post.author|e }}</a><br />
+            {{ post.pub_date|datetimeformat }}
+        </td>
+        <td class="post">{{ post.rendered_text }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+  {%- endif %}
+{% endblock %}

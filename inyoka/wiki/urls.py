@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+"""
+    inyoka.wiki.urls
+    ~~~~~~~~~~~~~~~~
+
+    URL list for the wiki.
+
+    :copyright: 2007 by Armin Ronacher.
+    :license: GNU GPL.
+"""
+from django.conf.urls.defaults import patterns
+
+
+urlpatterns = patterns('inyoka.wiki.views',
+    (r'^$', 'index'),
+    (r'^_image$', 'get_image_resource'),
+    (r'^(.+?)$', 'show_page')
+)
+
+
+handler404 = 'inyoka.wiki.views.missing_resource'
+handler500 = 'inyoka.portal.views.internal_server_error'
+require_trailing_slash = False

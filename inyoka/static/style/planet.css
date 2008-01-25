@@ -1,0 +1,97 @@
+/**
+ * style.planet
+ * ~~~~~~~~~~~~
+ *
+ * The style for the Planet.
+ *
+ * :copyright: 2007 by Armin Ronacher.
+ * :license: GNU GPL.
+ */
+
+.navi_sidebar .navi_planet { background-image: url('../img/icons/planet.png'); }
+.navi_sidebar .navi_blogs  { background-image: url('../img/icons/blogs.png'); }
+
+div.articles .day h2 {
+  font-size: 2.4em;
+  margin: 0.4em 0 0 0;
+}
+
+
+div.articles div.article {
+  margin: 1.5em 0 1.5em 0;
+  padding: 0;
+  background: url(../img/planet/bubble-left.png) repeat-y 136px top;
+}
+
+div.articles div.article div.author {
+  background: url(../img/planet/bubble-nipple.png) no-repeat right top;
+  float: left;
+  margin: 30px 0 0 0;
+  padding: 0 20px 30px 0;
+  text-align: center;
+  position: relative;
+  width: 120px;
+}
+
+div.articles div.article div.author a {
+  color: #888;
+  text-decoration: none;
+}
+
+div.articles div.article div.contents {
+  background: url(../img/planet/bubble-top-left.png) no-repeat left top;
+  margin-left: 136px;
+}
+
+div.articles div.article div.head {
+  background: url(../img/planet/bubble-top.png) repeat-x left top;
+  margin: 0 0 0 12px;
+}
+
+div.articles div.article div.head h3 {
+  background: url(../img/planet/bubble-top-right.png) no-repeat right top;
+  margin: 0;
+  padding: 20px 0 0 18px;
+  font-family: 'Trebuchet MS', sans-serif;
+  font-size: 1.6em;
+  font-weight: normal;
+}
+
+div.articles div.article div.head h3 a {
+  color: black;
+  text-decoration: none;
+}
+
+div.articles div.article div.text {
+  background: url(../img/planet/bubble-right.png) repeat-y right top;
+  padding: 10px 30px 0 30px;
+}
+
+div.articles div.article p {
+  margin: 0;
+  padding: 0.5em 0 0.5em 0;
+}
+
+div.articles div.article div.meta {
+  background: url(../img/planet/bubble-bottom.png) repeat-x left bottom;
+  margin-right: 20px;
+}
+
+div.articles div.article div.meta p {
+  background: url(../img/planet/bubble-bottom-left.png) no-repeat left bottom;
+  text-align: right;
+  font-size: 0.9em;
+  padding: 10px 10px 20px 0;
+}
+
+div.articles div.article div.meta p a {
+  text-decoration: none;
+}
+
+div.articles div.article div.meta p a:hover {
+  text-decoration: underline;
+}
+
+div.articles div.article div.post {
+  background: url(../img/planet/bubble-bottom-right.png) no-repeat right bottom;
+}

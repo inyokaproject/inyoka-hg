@@ -1,0 +1,54 @@
+{#
+    ikhaya/index.html
+    ~~~~~~~~~~~~~~~~~
+
+    This page shows some of the latest ikhaya entries.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'ikhaya/page.html' %}
+
+{% if category %}
+  {% set name = 'Kategorie %s - '|format(category.name) %}
+  {% set feeds = [
+    (name ~ 'Nur Überschrift', href('ikhaya', 'feeds', category.slug, 'title/25')),
+    (name ~ 'Nur Einleitung', href('ikhaya', 'feeds', category.slug, 'short/25')),
+    (name ~ 'Ganzer Beitrag', href('ikhaya', 'feeds', category.slug, 'full/25')),
+  ] %}
+{% else %}
+  {% set feeds = [
+    ('Ikhaya - Nur Überschrift', href('ikhaya', 'feeds/title/25')),
+    ('Ikhaya - Nur Einleitung', href('ikhaya', 'feeds/short/25')),
+    ('Ikhaya - Ganzer Beitrag', href('ikhaya', 'feeds/full/25'))
+    ] %}
+{% endif %}
+
+{% block ikhaya_content %}
+  {%- if articles %}
+  <ul class="articles">
+    {%- for article in articles %}
+    <li class="article{{ article.hidden and ' hidden' or '' }}">
+      <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
+      {%- if article.icon %}
+      <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
+      {%- endif %}
+      {{ article.rendered_intro }} 
+      <p class="meta">
+        geschrieben von <a href="{{ article.author|url }}">{{ article.author.username|e }}</a>
+        {{ article.pub_date|specificdatetimeformat(true) }}
+        in <a href="{{ article.category|url }}">{{ article.category.name }}</a>
+        {%- if article.edit_count %} — {{ article.edit_count }} Mal bearbeitet.{% endif %} |
+        <a href="{{ article|url('edit') }}">Bearbeiten</a>
+      </p>
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- else %}
+  <p>Keine Artikel vorhanden.</p>
+  {%- endif %}
+
+  <div class="pagination">
+    {{ pagination }}
+  </div>
+{% endblock %}
