@@ -105,7 +105,7 @@
       {%- set attachments = post.attachment_set.all() %}      
       <tr id="post{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
-          <a href="{{ post.author|url }}">{{ post.author|e }}</a>
+          <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}

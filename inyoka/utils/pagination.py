@@ -8,10 +8,11 @@
 
     Usage::
 
-        >>> pagination = Pagination(Model.objects.all(),
+        >>> pagination = Pagination(request,
+                                    Model.objects.all(),
         ...                         page_number,
-        ...                         href('ikhaya'),
-        ...                         per_page)
+        ...                         per_page,
+                                    optional_link)
         >>> # the database entries on this page
         >>> objects = pagination.get_objects()
         >>> # the generated HTML code for the pagination
@@ -24,14 +25,16 @@
 """
 import math
 from django.http import Http404 as PageNotFound
+from inyoka.utils.urls import get_query_string
 
 
 class Pagination(object):
 
-    def __init__(self, query, page, link, per_page=10):
+    def __init__(self, request, query, page, per_page=10, link=None):
         self.query = query
         self.page = int(page)
-        self.link = link
+        self.link = link or request.path
+        self.parameters = get_query_string(request.get_full_path())
         self.per_page = per_page
 
     def get_objects(self):
@@ -60,6 +63,8 @@ class Pagination(object):
                     link = self.link
                 else:
                     link = '%s%d/' % (self.link, num)
+                if self.parameters:
+                    link += '?%s' % self.parameters
                 if num == self.page:
                     template = active
                 else:

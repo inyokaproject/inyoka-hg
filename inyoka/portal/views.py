@@ -619,8 +619,7 @@ def memberlist(request, page=1):
     `page` represents the current page in the pagination.
     """
     table = Sortable(User.objects.all(), request.GET, 'id')
-    pagination = Pagination(table.get_objects(), page,
-                            href('portal', 'users'), 15)
+    pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {
@@ -638,8 +637,7 @@ def grouplist(request, page=1):
     `page` represents the current page in the pagination.
     """
     table = Sortable(Group.objects.all(), request.GET, 'name')
-    pagination = Pagination(table.get_objects(), page,
-                            href('portal', 'groups'), 15)
+    pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppenliste an.',
                      'Gruppenliste')
     return {
@@ -658,8 +656,7 @@ def group(request, name, page=1):
     users = group.user_set
 
     table = Sortable(users, request.GET, 'id')
-    pagination = Pagination(table.get_objects(), page,
-                            href('portal', 'groups', escape(name)), 15)
+    pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (
         href('portal', 'groups', escape(name)),
@@ -811,3 +808,7 @@ def about_inyoka(request):
     """Render a inyoka information page."""
     set_session_info(request, u'informiert sich über <a href="%s">'
                      u'Inyoka</a>' % href('portal', 'inyoka'))
+
+
+def calendar(request):
+    pass
