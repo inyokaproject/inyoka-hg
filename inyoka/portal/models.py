@@ -235,7 +235,7 @@ class Subscription(models.Model):
 
 
 class CalendarItem(models.Model):
-    category = models.ForeignKey(CalendarCategory)
+    category = models.ForeignKey("CalendarCategory")
     title = models.CharField(max_length=100)
     description = models.TextField()
     date = models.DateTimeField()
