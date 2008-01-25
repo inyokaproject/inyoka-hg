@@ -13,7 +13,8 @@
 {% set title_trace = ['Artikelvorschläge'] %}
 {% set navigation_trace = [
     (href('ikhaya', 'suggestions'), 'Artikelvorschläge')
-  ] %}
+    ] %}
+{% set styles = ['forum.css'] %}
 
 {% block ikhaya_content %}
 <h2>Artikelvorschläge</h2>
@@ -21,28 +22,33 @@
   Hier siehst du alle {{ suggestion_count }} Artikelvorschläge, die noch nicht bearbeitet wurden.
 </p>
 <form action="" method="post">
-  <table>
+  <table class="topic">
     <thead>
       <tr>
         <th>Autor</th>
         <th>Artikel</th>
-        <th>Aktionen</th>
       </tr>
     </thead>
     <tbody>
       {%- for suggestion in suggestions %}
       <tr>
-        <td>
+        <td class="author">
           <a href="{{ suggestion.author|url }}">{{ suggestion.author.username }}</a>
+          {%- if suggestion.author.avatar and not USER.settings['hide_avatars'] %}
+          <img src="{{ suggestion.author.avatar_url }}" alt="Avatar von {{ suggestion.author.username|e }}" />
+          {%- endif %}
         </td>
-        <td>
+        <td class="post">
+          <div class="postinfo">
+            <span class="postactions">
+              <a href="?delete={{ suggestion.id }}">Löschen</a>
+              <a href="{{ href('ikhaya', 'add', suggestion.id) }}">Artikel erstellen</a>
+            </span>
+            Verfasst: {{ suggestion.pub_date.strftime('%d.%m.%Y %H:%M') }}
+          </div>
           <h3 class="title">{{ suggestion.title|e }}</h3>
           <div class="intro">{{ suggestion.rendered_intro }}</div>
           {{ suggestion.rendered_text }}
-        </td>
-        <td>
-          <a href="?delete={{ suggestion.id }}">Löschen</a>
-          <a href="{{ href('ikhaya', 'add', suggestion.id) }}">Artikel erstellen</a>
         </td>
       </tr>
       {%- else %}

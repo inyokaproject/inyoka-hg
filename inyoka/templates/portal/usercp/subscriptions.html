@@ -19,7 +19,7 @@
   <h2>Benachrichtigungen</h2>
 {% endblock %}
 {% block portal_content %}
-<h4>Abonnements</h4>
+<h3>Abonnements</h3>
 <form class="usercp_form" method="post" action="">
   <table class="usercp_subscriptions">
     <tr>
@@ -36,6 +36,12 @@
         {%- endif -%}
       </td>
       <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>
+    </tr>
+    {%- else %}
+    <tr>
+      <td colspan="2">
+        Du hast bisher noch keine Themen oder Artikel abonniert
+      </td>
     </tr>
     {%- endfor %}
   </table>

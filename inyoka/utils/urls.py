@@ -93,3 +93,8 @@ def is_save_domain(url):
     if scheme not in ('http', 'https', 'ftp'):
         return False
     return ('.' + netloc).endswith('.' + settings.BASE_DOMAIN_NAME)
+
+
+def get_query_string(url):
+    """Return the query string of a url"""
+    return urlparse(url)[4]
