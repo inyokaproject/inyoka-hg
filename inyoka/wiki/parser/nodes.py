@@ -157,6 +157,9 @@ class BaseNode(object):
     #: True if this is a text node
     is_text_node = False
 
+    #: allowed in signatures?
+    allowed_in_signatures = False
+
     #: This is true of the node contains raw data. Raw data is data that is
     #: never processed by a transformer. For example if you don't want
     #: to have typographical quotes this is the flag to alter. Use this only
@@ -235,6 +238,7 @@ class Text(Node):
     """
 
     is_text_node = True
+    allowed_in_signatures = True
 
     def __init__(self, text=u''):
         self.text = text
@@ -253,6 +257,8 @@ class HTML(Node):
     """
     Raw HTML snippet.
     """
+
+    allowed_in_signatures = True
 
     def __init__(self, html=u'', block_level=True):
         self.html = html
@@ -275,6 +281,7 @@ class MetaData(Node):
     """
 
     is_block_tag = True
+    allowed_in_signatures = True
 
     def __init__(self, key, values):
         self.key = key
@@ -287,6 +294,7 @@ class Newline(Node):
     """
 
     text = u'\n'
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.markup('\\\\')
@@ -487,6 +495,8 @@ class InternalLink(Element):
     Page to page links.
     """
 
+    allowed_in_signatures = True
+
     def __init__(self, page, children=None, force_existing=False, id=None,
                  style=None, class_=None):
         page = normalize_pagename(page)
@@ -530,6 +540,8 @@ class InterWikiLink(Element):
     Link to other wikis.
     """
 
+    allowed_in_signatures = True
+
     def __init__(self, wiki, page, children=None, id=None, style=None,
                  class_=None):
         if not children:
@@ -571,6 +583,8 @@ class Link(Element):
     """
     External or anchor links.
     """
+
+    allowed_in_signatures = True
 
     def __init__(self, url, children=None, title=None, id=None,
                  style=None, class_=None):
@@ -730,6 +744,7 @@ class Quote(Element):
     """
     is_block_tag = True
     allows_paragraphs = True
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.quote()
@@ -756,6 +771,7 @@ class Preformatted(Element):
     """
     is_block_tag = True
     is_raw = True
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.raw()
@@ -821,6 +837,8 @@ class Strong(Element):
     return a <strong> tag which is usually bold.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u"'''")
         Element.generate_markup(self, w)
@@ -845,6 +863,8 @@ class Emphasized(Element):
     Like `Strong`, but with slightly less importance. Usually rendered
     with an italic font face.
     """
+
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.markup(u"''")
@@ -872,6 +892,7 @@ class Code(Element):
     are not touched by the altering translators.
     """
     is_raw = True
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.markup(u"``")
@@ -900,6 +921,8 @@ class Underline(Element):
     also allowed to not render this element in a special way.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u"__")
         Element.generate_markup(self, w)
@@ -927,6 +950,8 @@ class Stroke(Element):
     This element marks deleted text.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u"--(")
         Element.generate_markup(self, w)
@@ -946,6 +971,8 @@ class Small(Element):
     It's usually rendered in a smaller font.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u"~-")
         Element.generate_markup(self, w)
@@ -964,6 +991,8 @@ class Big(Element):
     The opposite of Small, but it doesn't give the element a real emphasis.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u"~+")
         Element.generate_markup(self, w)
@@ -981,6 +1010,8 @@ class Sub(Element):
     """
     Marks text as subscript.
     """
+
+    allowed_in_signatures = True
 
     def generate_markup(self, w):
         w.markup(u',,')
@@ -1006,6 +1037,8 @@ class Sup(Element):
     Marks text as superscript.
     """
 
+    allowed_in_signatures = True
+
     def generate_markup(self, w):
         w.markup(u'^^')
         Element.generate_markup(self, w)
@@ -1030,6 +1063,8 @@ class Color(Element):
     Gives the embedded text a color. Like `Underline` it just exists because
     of backwards compatibility (this time to phpBB).
     """
+
+    allowed_in_signatures = True
 
     def __init__(self, value, children=None, id=None, style=None,
                  class_=None):
@@ -1088,6 +1123,8 @@ class Font(Element):
     Gives the embedded text a font face. Like `Underline` it just exists
     because of backwards compatibility.
     """
+
+    allowed_in_signatures = True
 
     def __init__(self, faces, children=None, id=None, style=None,
                  class_=None):

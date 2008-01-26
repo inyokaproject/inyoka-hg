@@ -105,6 +105,7 @@ ACTIVATION_HOURS = 48
 
 # Signature length
 SIGNATURE_LENGTH = 400
+SIGNATURE_LINES = 4
 
 # A tuple that defines the maximum avatar size
 # define it as (width, height)
