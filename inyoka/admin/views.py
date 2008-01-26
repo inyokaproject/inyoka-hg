@@ -487,7 +487,7 @@ def forums_edit(request, slug=None):
 
 @templated('admin/users.html')
 def users(request):
-    if 'user' in request.POST:
+    if request.method == 'POST':
         try:
             user = User.objects.get(username=request.POST.get('user'))
         except User.DoesNotExist:
