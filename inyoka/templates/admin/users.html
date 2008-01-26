@@ -20,9 +20,11 @@
 
 
 {% block admin_content %}
-<p>Wähle im Folgenden einen Benutzer aus, den du Editieren möchtest:</p>
-<input type="text" id="user_query" />
-<a href="" class="choose_user">Auswählen</a>
+<p>Wähle den Benutzer aus, den du editieren möchtest:</p>
+<form action="" action="post">
+<input type="text" id="user_query" name="user" />
+<input type="submit" value="Auswählen" />
+</form>
 
 <script type="text/javascript">
   (function () {
@@ -37,10 +39,6 @@
         'delay': 40, 'maxItemsToShow': 15, 'selectFirst': true, 
         'matchSubset': 1, 'matchContains': 1, 'autoFill': 1,
         'cacheLength': 10, 'lineSeperator': '\n',
-    });
-
-    $('.choose_user').click(function() {
-      $('a.choose_user').attr('href', '?q=' + getUsername())
     });
   })();
 </script>

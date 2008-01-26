@@ -16,12 +16,13 @@ from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
-from inyoka.portal.utils import simple_check_login, check_login
+from inyoka.portal.utils import simple_check_login, check_login, \
+                                abort_access_denied
 from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated
+from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -36,6 +37,8 @@ from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                AddAttachmentForm, EditPostForm, AddPollForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
+from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
+                             have_privilege, get_privileges
 
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -82,8 +85,9 @@ def index(request, category=None):
     else:
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
+
     return {
-        'categories': list(categories),
+        'categories': filter_invisible(request.user, categories),
         'is_index':   not category
     }
 
@@ -94,15 +98,17 @@ def forum(request, slug, page=1):
     Return a single forum to show a topic list.
     """
     f = Forum.objects.get(slug=slug)
-    if f.parent == None:
+    if f.parent is None:
         return HttpResponseRedirect(href('forum'))
+    if not have_privilege(request.user, f, 'read'):
+        return abort_access_denied(request)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
     return {
-        'forum':        f,
+        'forum':        filter_invisible(request.user, f),
         'topics':       list(pagination.get_objects()),
         'pagination':   pagination.generate()
     }
@@ -117,13 +123,15 @@ def viewtopic(request, topic_slug, page=1):
     see these topics.
     """
     t = Topic.objects.get(slug=topic_slug)
+    privileges = get_forum_privileges(request.user, t.forum)
+    if not privileges['read']:
+        return abort_access_denied(request)
     if t.hidden:
-        if False:
+        if not privileges['moderate']:
             # XXX: don't show the topic if the user isn't a moderator
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
-        else:
-            flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
+        flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -141,7 +149,9 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     v = request.POST.get('poll_%s' % poll['id'])
                 if v:
-                    if poll['participated']:
+                    if privileges['vote']:
+                        return abort_access_denied(request)
+                    elif poll['participated']:
                         flash(u'Sie haben bereits an dieser Abstimmung '
                               u'teilgenommen.')
                         continue
@@ -191,8 +201,6 @@ def viewtopic(request, topic_slug, page=1):
     }
 
 
-@check_login(message=u'Du musst eingeloggt sein, um einen Beitrag zu '
-                     u'schreiben')
 @templated('forum/edit.html')
 def newpost(request, topic_slug=None, quote_id=None):
     """
@@ -211,10 +219,13 @@ def newpost(request, topic_slug=None, quote_id=None):
         t = p.topic
     else:
         t = Topic.objects.get(slug=topic_slug)
-    if t.locked:
+    privileges = get_forum_privileges(request.user, t.forum)
+    if t.locked and not privileges['moderator']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
                u'von einem Moderator geschlossen wurde.'))
         return HttpResponseRedirect(t.get_absolute_url())
+    elif not privileges['reply']:
+        return abort_access_denied(request)
     posts = t.post_set.all().exclude(text='').order_by('-pub_date')[:10]
     attach_form = AddAttachmentForm()
 
@@ -226,6 +237,8 @@ def newpost(request, topic_slug=None, quote_id=None):
         attachments = list(Attachment.objects.filter(id__in=att_ids,
                                                      post_null=True))
         if 'attach' in request.POST:
+            if 'upload' not in privileges:
+                return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
@@ -244,6 +257,8 @@ def newpost(request, topic_slug=None, quote_id=None):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
+            if 'upload' not in privileges or 'delete' not in privileges:
+                return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att_ids.remove(id)
             att = filter(lambda a: a.id == id, attachments)[0]
@@ -288,13 +303,12 @@ def newpost(request, topic_slug=None, quote_id=None):
         'form':        form,
         'attach_form': attach_form,
         'attachments': list(attachments),
+        'can_attach':  'upload' in privileges,
         'isnewpost' :  True,
         'preview':     preview
     }
 
 
-@check_login(message=u'Du musst eingeloggt sein, um ein neues Thema zu '
-                     u'erstellen')
 @templated('forum/edit.html')
 def newtopic(request, slug=None, article=None):
     """
@@ -333,6 +347,10 @@ def newtopic(request, slug=None, article=None):
         # we don't allow posting in categories
         return HttpResponseRedirect(href('forum'))
 
+    privileges = get_forum_privileges(request.user, f)
+    if 'create' not in privileges:
+        return abort_access_denied(request)
+
     attach_form = AddAttachmentForm()
     poll_form = AddPollForm()
 
@@ -353,6 +371,8 @@ def newtopic(request, slug=None, article=None):
         options = request.POST.getlist('options')
 
         if 'attach' in request.POST:
+            if 'upload' not in privileges:
+                return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
@@ -371,6 +391,8 @@ def newtopic(request, slug=None, article=None):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
+            if 'upload' not in privileges or 'delete' not in privileges:
+                return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att_ids.remove(id)
             att = filter(lambda a: a.id == id, attachments)[0]
@@ -380,6 +402,8 @@ def newtopic(request, slug=None, article=None):
 
         elif 'add_poll' in request.POST:
             # the user added a new poll
+            if 'create_poll' not in privileges:
+                return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             if poll_form.is_valid():
                 d = poll_form.cleaned_data
@@ -394,10 +418,14 @@ def newtopic(request, slug=None, article=None):
                 options = ['', '']
 
         elif 'add_option' in request.POST:
+            if 'create_poll' not in privileges:
+                return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             options.append('')
 
         elif 'delete_poll' in request.POST:
+            if 'create_poll' not in privileges or not 'delete' in privileges:
+                return abort_access_denied(request)
             # the user deleted a poll
             poll_id = int(request.POST['delete_poll'])
             poll = filter(lambda v: v.id == poll_id, polls)[0]
@@ -465,6 +493,7 @@ def newtopic(request, slug=None, article=None):
         'forum':       f,
         'attach_form': attach_form,
         'attachments': list(attachments),
+        'can_attach':  'upload' in privileges,
         'poll_form':   poll_form,
         'polls':       polls,
         'options':     options,
@@ -474,7 +503,6 @@ def newtopic(request, slug=None, article=None):
     }
 
 
-@check_login(message=u'Du musst eingeloggt sein, um deine Beiträge zu ändern')
 @templated('forum/edit.html')
 def edit(request, post_id):
     """
@@ -483,6 +511,9 @@ def edit(request, post_id):
     polls and the options (e.g. sticky) of the topic.
     """
     post = Post.objects.get(id=post_id)
+    privileges = get_forum_privileges(request.user, post.topic.forum)
+    if 'edit' not in privileges:
+        return abort_access_denied(request)
     is_first_post = post.topic.first_post_id == post.id
     attach_form = AddAttachmentForm()
     if is_first_post:
@@ -493,6 +524,8 @@ def edit(request, post_id):
     if request.method == 'POST':
         form = EditPostForm(request.POST)
         if 'attach' in request.POST:
+            if 'upload' not in privileges:
+                return abort_access_denied(request)
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
                 d = attach_form.cleaned_data
@@ -517,6 +550,8 @@ def edit(request, post_id):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
+            if 'upload' not in privileges or 'delete' not in privileges:
+                return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att = filter(lambda a: a.id == id, attachments)[0]
             att.delete()
@@ -524,6 +559,8 @@ def edit(request, post_id):
             flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
 
         elif is_first_post and 'add_poll' in request.POST:
+            if 'create_poll' not in privileges:
+                return abort_access_denied(request)
             # the user added a new poll
             poll_form = AddPollForm(request.POST)
             if poll_form.is_valid():
@@ -542,10 +579,14 @@ def edit(request, post_id):
                 options = ['', '']
 
         elif is_first_post and 'add_option' in request.POST:
+            if 'create_poll' not in privileges:
+                return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             options.append('')
 
         elif is_first_post and 'delete_poll' in request.POST:
+            if 'create_poll' not in privileges or not 'delete' in privileges:
+                return abort_access_denied(request)
             # the user deleted a poll
             poll_id = int(request.POST['delete_poll'])
             poll = filter(lambda p: p.id == poll_id, polls)[0]
@@ -591,6 +632,8 @@ def edit(request, post_id):
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
     t = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, f.forum, 'read'):
+        abort_access_denied(request)
     if solved is not None:
         t.solved = solved
         flash(u'Das Thema wurde als %s markiert' % (solved and u'gelöst' or \
@@ -610,6 +653,8 @@ def subscribe_topic(request, topic_slug):
     If there isn't such a subscription, a new one is created.
     """
     t = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, t.forum, 'read'):
+        return abort_access_denied(request)
     try:
         s = Subscription.objects.get(user=request.user, topic=t)
     except Subscription.DoesNotExist:
@@ -630,6 +675,8 @@ def subscribe_topic(request, topic_slug):
 def report(request, topic_slug):
     """Change the report_status of a topic and redirect to it"""
     t = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, t.forum, 'read'):
+        return abort_access_denied(request)
     if t.reported:
         flash(u'Dieses Thema wurde bereits gemeldet; die Moderatoren werden '
               u'sich in Kürze darum kümmern.')
@@ -654,7 +701,6 @@ def report(request, topic_slug):
     }
 
 
-#TODO Check if user is a moderator
 @templated('forum/reportlist.html')
 def reportlist(request):
     """Get a list of all reported topics"""
@@ -671,12 +717,19 @@ def reportlist(request):
             Topic.objects.mark_as_done(d['selected'])
             topics = filter(lambda t: str(t.id) not in d['selected'], topics)
             flash(u'Die gewählten Themen wurden als bearbeitet markiert.',
-                                                                         True)
+                  True)
     else:
         form = ReportListForm()
         _add_field_choices()
+
+    privileges = get_privileges(user, forums)
+    visible_topics = []
+    for topic in topics:
+        if privileges.get(topic.forum_id, {'moderator': False})['moderator']:
+            visible_topics.append(topic)
+
     return {
-        'topics':   list(topics),
+        'topics':   visible_topics,
         'form':     form
     }
 
@@ -699,15 +752,26 @@ def movetopic(request, topic_slug):
     """Move a topic into another forum"""
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
-        form.fields['forum_id'].choices = [(f.id, f.name) for f in
-                            Forum.objects.get_forums().exclude(id=t.forum.id)]
+        form.fields['forum_id'].choices = [(f.id, f.name) for f in forums]
+
     t = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, t.forum, 'moderate'):
+        return abort_access_denied()
+
+    forums = filter_visible(request.user, Forum.objects.get_forms()
+                            .exclude(id=t.forum.id), 'read')
+    mapping = dict((x.id, x) for x in forums)
+    if not mapping:
+        return abort_access_denied(request)
+
     if request.method == 'POST':
         form = MoveTopicForm(request.POST)
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            f = Forum.objects.get(id=data['forum_id'])
+            f = mapping.get(data['forum_id'])
+            if f is None:
+                return abort_access_denied(request)
             Topic.objects.move(t, f)
             # send a notification to the topic author to inform him about
             # the new forum.
@@ -742,6 +806,8 @@ def splittopic(request, topic_slug):
 
     t = Topic.objects.get(slug=topic_slug)
     posts = t.post_set.all()
+    if not have_privilege(request.user, t.forum, 'moderate'):
+        return abort_access_denied(request)
 
     if request.method == 'POST':
         form = SplitTopicForm(request.POST)
@@ -777,6 +843,8 @@ def hide_post(request, post_id):
     users can't see it anymore (moderators still can).
     """
     post = Post.objects.get(id=post_id)
+    if not have_privilege(request.user, post.topic.forum, 'moderate'):
+        return abort_access_denied(request)
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
               u'werden.')
@@ -794,6 +862,8 @@ def restore_post(request, post_id):
     normal users again.
     """
     post = Post.objects.get(id=post_id)
+    if not have_privilege(request.user, post.topic.forum, 'moderate'):
+        return abort_access_denied(request)
     post.hidden = False
     post.save()
     flash(u'Der Beitrag %s wurde wieder sichtbar gemacht.' % post_id,
@@ -808,6 +878,8 @@ def delete_post(request, post_id):
     """
     # XXX: Only administrators are allowed to do this, not moderators
     post = Post.objects.get(id=post_id)
+    if not have_privilege(request.user, post.topic.forum, 'delete'):
+        return abort_access_denied(request)
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
               u'werden.', success=False)
@@ -829,6 +901,8 @@ def hide_topic(request, topic_slug):
     users can't see it anymore (moderators still can).
     """
     topic = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, topic.forum, 'moderate'):
+        return abort_access_denied(request)
     topic.hidden = True
     topic.save()
     flash(u'Das Thema „%s“ wurde unsichtbar gemacht.' % topic.title,
@@ -842,6 +916,8 @@ def restore_topic(request, topic_slug):
     normal users again.
     """
     topic = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, topic.forum, 'moderate'):
+        return abort_access_denied(request)
     topic.hidden = False
     topic.save()
     flash(u'Das Thema „%s“ wurde wieder sichtbar gemacht.' % topic.title,
@@ -856,6 +932,8 @@ def delete_topic(request, topic_slug):
     """
     # XXX: Only administrators are allowed to do this, not moderators
     topic = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, topic.forum, 'moderate'):
+        return abort_access_denied(request)
     if 'message-yes' in request.POST:
         topic.delete()
         flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
@@ -891,6 +969,8 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
 
     if component == 'topic':
         topic = get_object_or_404(Topic, slug=slug)
+        if not have_privilege(request.user, topic.forum, 'read'):
+            return abort_access_denied()
         posts = topic.post_set.order_by('-pub_date')[:count]
         feed = FeedBuilder(
             title=u'ubuntuusers Thema – „%s“' % topic.title,
@@ -937,6 +1017,8 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 rights=href('portal', 'lizenz'),
             )
 
+        if not have_privilege(request.user, forum, 'read'):
+            return abort_access_denied()
         topics = topics.order_by('-id')[:count]
 
         for topic in topics:

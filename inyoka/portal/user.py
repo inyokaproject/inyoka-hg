@@ -33,6 +33,11 @@ from inyoka.middlewares.registry import r
 UNUSABLE_PASSWORD = '!'
 
 
+class _callable_bool(int):
+    def __call__(self):
+        return self
+
+
 def get_hexdigest(salt, raw_password):
     """
     Returns a string of the hexdigest of the given plaintext password and salt
@@ -157,12 +162,8 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
-    def is_anonymous(self):
-        """A logged in user is not anonymus."""
-        return False
-
-    def is_authenticated(self):
-        return True
+    is_anonymous = property(lambda x: _callable_bool(0))
+    is_authenticated = property(lambda x: _callable_bool(1))
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""

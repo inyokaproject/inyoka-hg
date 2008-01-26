@@ -1041,7 +1041,7 @@ class Voter(models.Model):
 
 class Privilege(models.Model):
     group = models.ForeignKey(Group, null=True)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, null=True, related_name='forum_privileges')
     forum = models.ForeignKey(Forum)
     can_read = models.BooleanField(default=False)
     can_reply = models.BooleanField(default=False)
@@ -1051,4 +1051,6 @@ class Privilege(models.Model):
     can_delete = models.BooleanField(default=False)
     can_sticky = models.BooleanField(default=False)
     can_vote = models.BooleanField(default=False)
+    can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
+    can_moderate = models.BooleanField(default=False)
