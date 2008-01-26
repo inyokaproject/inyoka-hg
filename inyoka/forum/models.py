@@ -796,7 +796,10 @@ class Topic(models.Model):
     def get_read_status(self, user):
         if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
             return  user.is_anonymous() or self.last_post_id <= user.forum_last_read
-        read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
+        try:
+            read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
+        except:
+            read_status = set()
         print read_status
         if self.last_post.id in read_status:
             return True
