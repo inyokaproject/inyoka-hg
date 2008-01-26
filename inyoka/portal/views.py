@@ -31,7 +31,6 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.decorators import check_login
 from inyoka.utils.notification import send_notification
 from inyoka.utils.user import check_activation_key, send_activation_mail, \
                               send_new_user_password, authenticate, \
@@ -48,6 +47,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  CalendarItem
 from inyoka.portal.user import User, Group, deactivate_user
+from inyoka.portal.utils import check_login
 
 
 @templated('errors/404.html')

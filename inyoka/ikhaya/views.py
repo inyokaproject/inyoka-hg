@@ -13,12 +13,12 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from inyoka.portal.views import not_found as global_not_found
+from inyoka.portal.utils import check_login
 from inyoka.utils.urls import href
 from inyoka.utils.http import templated
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.decorators import check_login
 from inyoka.ikhaya.forms import SuggestArticleForm
 from inyoka.ikhaya.models import Category, Article, Suggestion
 

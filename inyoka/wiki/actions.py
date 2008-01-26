@@ -29,7 +29,6 @@ from inyoka.utils.http import templated, TemplateResponse, AccessDeniedResponse
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.decorators import simple_check_login
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.wiki.models import Page, Revision
@@ -39,6 +38,7 @@ from inyoka.wiki.utils import get_title, normalize_pagename
 from inyoka.wiki.acl import require_privilege, has_privilege, \
      test_changes_allowed, PrivilegeTest
 from inyoka.portal.models import Subscription
+from inyoka.portal.utils import simple_check_login
 
 
 def context_modifier(request, context):

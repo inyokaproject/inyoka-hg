@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    inyoka.utils.decorators
-    ~~~~~~~~~~~~~~~~~~~~~~~
+    inyoka.portal.utils
+    ~~~~~~~~~~~~~~~~~~~
 
-    This module contains decorators for view-functions.
+    Utilities for the portal.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href

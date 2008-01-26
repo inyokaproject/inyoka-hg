@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
+from inyoka.portal.utils import simple_check_login, check_login
 from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
@@ -25,7 +26,6 @@ from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.decorators import simple_check_login, check_login
 from inyoka.utils.notification import send_notification
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.models import Page as WikiPage
