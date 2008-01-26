@@ -143,7 +143,7 @@ class FeedBuilder(object):
             if False in map(lambda e: bool(e.author), self.entries):
                 self.author = ({'name': u'unbekannter Autor'},)
 
-        if not self.updated:
+        if not self.updated and self.entries:
             self.updated = sorted([entry.updated for entry in
                                    self.entries])[-1]
 
@@ -151,9 +151,10 @@ class FeedBuilder(object):
         yield u'<feed xmlns="http://www.w3.org/2005/Atom">\n'
         yield '  ' + _make_text_block('title', self.title, self.title_type)
         yield u'  <id>%s</id>\n' % escape(self.id_)
-        yield u'  <updated>%s</updated>\n' % \
-            (self.updated.strftime('%Y-%m-%dT%H:%M:%S') + \
-            (self.updated.strftime('%z') or 'Z'))
+        if self.entries:
+            yield u'  <updated>%s</updated>\n' % \
+                (self.updated.strftime('%Y-%m-%dT%H:%M:%S') + \
+                (self.updated.strftime('%z') or 'Z'))
         if self.url:
             yield u'  <link href="%s" />\n' % escape(self.url)
         if self.feed_url:
