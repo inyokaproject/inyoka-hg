@@ -812,6 +812,10 @@ class Topic(models.Model):
             read_status = set()
         if not self.last_post.id in read_status:
             read_status.add(self.last_post.id)
+            maxid = Post.objects.get_max_id()
+            if user.forum_last_read < max - settings.FORUM_LIMIT_UNREAD:
+                user.forum_last_read = max - settings.FORUM_LIMIT_UNREAD//2
+                read_status = set([x for x in read_status if x > ruser.forum_last_read])
             user.forum_read_status = cPickle.dumps(read_status)
             user.save()
 
