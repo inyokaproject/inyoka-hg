@@ -8,3 +8,45 @@
  * :license: GNU GPL.
  */
 
+
+div.content {
+    padding: 0;
+    border: none;
+}
+
+table.forum td.icon {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    width: 40px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+table.forum tr.entry p.name {
+    margin: 0;
+    padding: 0 0 5px 0;
+    font-weight: bold;
+}
+
+table.forum tr.entry td.forum {
+    padding: 8px;
+}
+
+table.forum tr.entry p.description,
+table.forum tr.entry p.subforums {
+    font-size: 0.8em;
+    margin: 0;
+    padding: 4px 0 3px 5px;
+}
+
+table.forum td.posts {
+    text-align: center;
+    color: #888;
+    width: 140px;
+}
+
+table.forum td.last_post {
+    text-align: right;
+    width: 200px;
+    padding: 5px 15px 5px 0;
+}

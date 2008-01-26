@@ -120,14 +120,27 @@ table td {
   background-color: #fff;
 }
 
+table tr.head th,
 table thead th {
-  background-image: url('../img/table-header.png');
-  background-repeat: repeat-x;
-  background-color: #f5f1e6;
-  padding: 0.4em;
-  text-align: center;
-  color: #000;
-  vertical-align:middle;
+    background-image: url('../img/table-header.png');
+    background-repeat: repeat-x;
+    background-color: #f5f1e6;
+    padding: 0.6em 0 0.4em 0;
+    text-align: center;
+    color: #000;
+    vertical-align:middle;
+}
+
+table tr.empty td {
+    color: #444;
+    background-color: #eee;
+    padding: 8px;
+    text-align: center;
+}
+
+table tr.head a {
+    color: black;
+    text-decoration: none;
 }
 
 table thead th a {
@@ -320,14 +333,12 @@ table.syntaxtable td.linenos {
 
 button.navi_toggle_down, button.navi_toggle_up {
   display: block;
-  width: 32px;
-  height: 2.4em;
   float: left;
-  padding: 0.0em 0.4em;
-  margin-right: 0.4em;
   background-repeat: no-repeat;
   background-position: center center;
-  margin: 0;
+  width: 24px;
+  height: 24px;
+  margin: -2px 4px -2px -2px;
   border: 0;
   background-color: transparent;
 }
@@ -338,6 +349,12 @@ button.navi_toggle_down {
 
 button.navi_toggle_up {
   background-image: url(../img/toggle_sidebar_up.png);
+}
+
+button.navi_toggle_down:hover, button.navi_toggle_up:hover {
+  background-color: #F5DAC1;
+  border: 1px solid #E6A66B;
+  cursor: pointer;
 }
 
 .navi_sidebar {
@@ -504,19 +521,16 @@ button.navi_toggle_up {
 }
 
 .pathbar {
-  margin: 0.0em 20px 1.0em;
-  padding: 0 0.5em 0 0.5em;
-  color: #888;
+  background-color: #fafafa;
+  border: 1px solid #bbb;
+  padding: 5px 5px 5px 8px;
   font-size: 0.85em;
-  line-height: 2.4em;
-  border: dotted 1px #bbb;
-  background-color: #f6f6f6;
+  margin: 0 20px 1em;
 }
 
-.pathbar a {
-  color: #333;
-  text-decoration: underline;
-  font-weight: normal;
+.pathbar p.trace {
+  margin: 0;
+  padding: 4px 0 2px 0;
 }
 
 .search {
@@ -563,7 +577,7 @@ button.navi_toggle_up {
 
 .search .search_expander {
   cursor: pointer;
-  margin-top: -24px;
+  margin-top: -20px;
   position: absolute;
   background-image: url(../img/search_expander.png);
   background-position: 11px 13px;
@@ -574,7 +588,7 @@ button.navi_toggle_up {
 
 .search ul.search_area {
   position: absolute;
-  margin-top: 23px;
+  margin-top: 19px;
   line-height: 1em;
   list-style: none;
   border: solid 1px #888;
