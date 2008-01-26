@@ -491,6 +491,31 @@ class Element(Container):
         return rv
 
 
+class Span(Element):
+    """
+    Inline general text element
+    """
+
+    allowed_in_signatures = True
+
+    def __init__(self, children=None, id=None,
+                 style=None, class_=None):
+        Element.__init__(self, children, id, style, class_)
+
+
+    def prepare_html(self):
+        yield build_html_tag(u'span',
+            rel=rel,
+            id=self.id,
+            style=self.style,
+            classes=(class_, self.class_),
+        )
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</span>'
+
+
+
 class InternalLink(Element):
     """
     Page to page links.
@@ -588,13 +613,29 @@ class Link(Element):
     allowed_in_signatures = True
 
     def __init__(self, url, children=None, title=None, id=None,
-                 style=None, class_=None):
+                 style=None, class_=None, shorten=False):
         if not children:
-            children = [Text(url)]
+            if shorten and len(url) > 40:
+                if url.startswith('http://'):
+                    children = [
+                        Span([Text('http://')], class_='longlinkhide'),
+                        Text(url[7:17]),
+                        Span([Text(url[17:-10])], class_='longlinkhide'),
+                        Text(url[-10:]),
+                    ]
+                else:
+                    children = [
+                        Text(url[:10]),
+                        Span([Text(url[10:-10])], class_='longlinkhide'),
+                        Text(url[-10:]),
+                    ]
+            else:
+                children = [Text(url)]
         Element.__init__(self, children, id, style, class_)
         self.title = title
         self.scheme, self.netloc, self.path, self.params, self.querystring, \
             self.anchor = urlparse(url)
+        
 
     @property
     def href(self):
