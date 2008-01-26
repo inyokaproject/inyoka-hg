@@ -15,6 +15,7 @@
     :license GNU GPL
     
 #}
+{% if can_attach %}
 {% if attachments %}
 <ul>
   {%- for att in attachments %}
@@ -34,3 +35,4 @@
 <p>{{ form.override }} <label for="id_override">Bestehenden Anhang
   gleichen Namens überschreiben</label></p>
 <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
+{% endif %}

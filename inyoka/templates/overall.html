@@ -129,9 +129,7 @@
     </form>
     {%- else %}
     <div class="message{% if message.success == true %} success{% elif message.success == false %} fail{% endif %}">
-      <span>
-        {{ message.text }}
-      </span>
+      {{ message.text }}
     </div>
     {%- endif %}
     {%- endfor %}
