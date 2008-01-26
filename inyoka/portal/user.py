@@ -114,6 +114,7 @@ class UserManager(models.Manager):
 
     def get_anonymous_user(self):
         if not _ANONYMOUS_USER:
+            global _ANONYMOUS_USER
             _ANONYMOUS_USER = User.objects.get(id=1)
         return _ANONYMOUS_USER
 
