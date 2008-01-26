@@ -110,17 +110,15 @@ def logout(request):
     except KeyError:
         pass
     if hasattr(request, 'user'):
-        from inyoka.portal.user import AnonymousUser
-        request.user = AnonymousUser()
+        request.user = User.objects.get_anonymous_user()
 
 
 def get_user(request):
-    from inyoka.portal.user import AnonymousUser
     try:
         user_id = request.session[SESSION_KEY]
         user = User.objects.get(pk=user_id)
     except (User.DoesNotExist, KeyError):
-        user = AnonymousUser()
+        user = User.objects.get_anonymous_user()
     return user
 
 # circular imports
