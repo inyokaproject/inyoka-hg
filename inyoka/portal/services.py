@@ -9,6 +9,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from inyoka.portal.user import User
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils import get_random_password
 

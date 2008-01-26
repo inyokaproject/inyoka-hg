@@ -50,7 +50,6 @@ def check_password(raw_password, enc_password):
     return hsh == get_hexdigest(salt, raw_password)
 
 
-
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
 
@@ -140,6 +139,10 @@ class User(models.Model):
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
 
     #XXX: permissions
+
+    # forum attribues
+    forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
+    forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
 
     def save(self):
         """

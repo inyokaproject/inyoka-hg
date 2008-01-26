@@ -14,11 +14,12 @@
   <table class="admin_control">
     <tr>
       {{ admin_button(href('admin', 'config'), 'configuration', 'Allgemeine Konfiguration') }}
-      {{ admin_button(href('admin', 'ikhaya'), 'ikhaya', 'Ikhaya') }}
+      {{ admin_button(href('admin', 'users'), 'users', 'Benutzerkonfiguration') }}
+      {{ admin_button(href('admin', 'pages'), 'pages', 'Statische Seiten') }}
     </tr>
     <tr>
+      {{ admin_button(href('admin', 'ikhaya'), 'ikhaya', 'Ikhaya') }}
       {{ admin_button(href('admin', 'planet'), 'planet', 'Planet') }}
-      {{ admin_button(href('admin', 'pages'), 'pages', 'Statische Seiten') }}
     </tr>
       <td>
         <a href="{{ href('admin', 'forum') }}">

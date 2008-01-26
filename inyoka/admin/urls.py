@@ -37,6 +37,10 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^ikhaya/icons/delete/(?P<icon>.+)/$', 'ikhaya_icon_delete'),
     (r'^forum/$', 'forums'),
     (r'^forum/new/$', 'forums_edit'),
+    (r'^ikhaya/icons/delete/(?P<icon>.+)/$', 'ikhaya_icon_delete'),
+    (r'^users/$', 'users'),
+    (r'^users/(?P<username>.*)/$', 'edit_user'),
+    (r'^_search_user_query/$', '_on_search_user_query'),
 )
 
 handler404 = 'inyoka.portal.views.not_found'

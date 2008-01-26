@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 from datetime import datetime
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
@@ -21,8 +21,9 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditForumForm
+                               ConfigurationForm, EditForumForm, EditUserForm
 from inyoka.portal.models import StaticPage
+from inyoka.portal.user import User
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.models import Forum
@@ -344,6 +345,7 @@ def ikhaya_icon_edit(request, icon=None):
         'form': form,
         'icon': icon
     }
+<<<<<<< /home/ossi/src/inyoka/inyoka/admin/views.py.orig.
 
 @templated('admin/forums.html')
 def forums(request):
@@ -407,3 +409,54 @@ def forums_edit(request, slug=None):
     return {
         'form': form,
     }
+||||||| /tmp/views.py~base.bSofmG
+=======
+
+
+@templated('admin/users.html')
+def users(request):
+    if 'q' in request.GET:
+        try:
+            user = User.objects.get(username=request.GET.get('q'))
+        except User.DoesNotExist:
+            flash(u'Der Benutzer %s existiert nicht.' % request.GET.get('q'))
+        else:
+            return HttpResponseRedirect(href('admin', 'users', user.username))
+    return {}
+
+
+def _on_search_user_query(request):
+    #XXX: cache the results?
+    qs = User.objects.filter(username__startswith=request.GET.get('q', ''))
+    return HttpResponse('\n'.join(
+        x.username for x in qs
+    ))
+
+
+@templated('admin/edit_user.html')
+def edit_user(request, username):
+    user = User.objects.filter(username=username).select_related()
+    values = user.values()[0]
+    form = EditUserForm(values)
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            user = user.get()
+            for key in ('username', 'password', 'is_active', 'date_joined',
+                        'website', 'interests', 'location', 'jabber', 'icq',
+                        'msn', 'aim', 'yim', 'signature', 'coordinates',
+                        'post_count'):
+                setattr(user, key, data[key])
+                if data['avatar']:
+                    user.save_avatar(data['avatar'])
+                user.save()
+            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
+            if user.username != username:
+                return HttpResponseRedirect(href('admin', 'users', user.username))
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!')
+    return {
+        'form': form
+    }
+>>>>>>> /tmp/views.py~other.Y8yDms
