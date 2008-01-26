@@ -68,7 +68,7 @@ def get_flashed_messages():
         return []
     flash_buffer = [FlashMessage(x[0], x[1], x[3], x[4]) for x in
                     session.get('flashed_messages', ())]
-    del session['flashed_messages']
+    session.pop('flashed_messages', None)
     r.request.flash_message_buffer = flash_buffer
     return flash_buffer
 

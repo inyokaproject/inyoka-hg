@@ -1016,7 +1016,7 @@ class Voter(models.Model):
 
 class Privilege(models.Model):
     group = models.ForeignKey(Group, null=True)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, null=True, related_name='forum_privileges')
     forum = models.ForeignKey(Forum)
     can_read = models.BooleanField(default=False)
     can_reply = models.BooleanField(default=False)
