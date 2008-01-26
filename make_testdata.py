@@ -80,7 +80,9 @@ def make_users():
 def make_forum(users):
     print 'Creating forum test data'
     forums = []
-    from inyoka.forum.models import Forum, Topic
+    admin = User.objects.get(username="admin")
+    from inyoka.forum.models import Forum, Topic, Privilege
+    from inyoka.forum.acl import PRIVILEGES
     for _ in xrange(8):
         parent = None
         if randint(1, 6) != 6:
@@ -90,6 +92,7 @@ def make_forum(users):
                 pass
         f = Forum(name=title(), parent=parent)
         f.save()
+        Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
         forums.append(f)
         if parent != None:
             for _ in xrange(randint(1, 15)):

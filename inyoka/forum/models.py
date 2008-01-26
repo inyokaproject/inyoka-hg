@@ -11,6 +11,7 @@
 from __future__ import division
 import re
 import random
+import cPickle
 from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
@@ -580,6 +581,14 @@ class Forum(models.Model):
                 return False
         return True
 
+    def mark_read(self, user):
+        forums = [self]
+        while forums:
+            forum = forums.pop()
+            for topic in forum.topics:
+                topic.mark_read(user)
+            forums.extend(forum.children)
+
     def __unicode__(self):
         return self.name
 
@@ -785,7 +794,31 @@ class Topic(models.Model):
         return u' '.join(out)
 
     def get_read_status(self, user):
-        return user.is_anonymous() or self.last_post_id <= user.forum_last_read
+        if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
+            return  user.is_anonymous() or self.last_post_id <= user.forum_last_read
+        try:
+            read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
+        except:
+            read_status = set()
+        print read_status
+        if self.last_post.id in read_status:
+            return True
+        else:
+            return False
+
+    def mark_read(self, user):
+        print "mark read" + self.slug
+        try:
+            read_status = cPickle.loads(str(user.forum_read_status))
+        except:
+            read_status = set()
+        print read_status
+        if not self.last_post.id in read_status:
+            read_status.add(self.last_post.id)
+            user.forum_read_status = cPickle.dumps(read_status)
+            print user.forum_read_status
+            user.save()
+        print "mark ende"
 
     def __unicode__(self):
         return self.title
@@ -1016,7 +1049,7 @@ class Voter(models.Model):
 
 class Privilege(models.Model):
     group = models.ForeignKey(Group, null=True)
-    user = models.ForeignKey(User, null=True)
+    user = models.ForeignKey(User, null=True, related_name='forum_privileges')
     forum = models.ForeignKey(Forum)
     can_read = models.BooleanField(default=False)
     can_reply = models.BooleanField(default=False)
@@ -1026,4 +1059,6 @@ class Privilege(models.Model):
     can_delete = models.BooleanField(default=False)
     can_sticky = models.BooleanField(default=False)
     can_vote = models.BooleanField(default=False)
+    can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
+    can_moderate = models.BooleanField(default=False)
