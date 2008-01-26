@@ -8,8 +8,8 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['datetimefield.css'] %}
-{% set scripts = ['DateTime.js'] %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
 {% if not date %}
   {% set navigation_trace = [
@@ -38,6 +38,7 @@
 <script type="text/javascript">
   /* <![CDATA[ */
   var date = new DateTimeField('input[@name="date"]');
+  var text = new WikiEditor('textarea[@name="description"]');
   /* ]]> */
 </script>
 {% endblock %}
