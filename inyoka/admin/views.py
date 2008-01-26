@@ -454,7 +454,7 @@ def forums_edit(request, slug=None):
                 if int(data['parent']) != -1:
                     f.parent = Forum.objects.get(id=data['parent'])
                 f.save()
-                flash(u'Das Forum wurde erfolgreich angepasst, bzw angelegt')
+                flash(u'Das Forum wurde erfolgreich angepasst bzw. angelegt')
             except Forum.DoesNotExist:
                 flash(u'Forum %s existiert nicht' %data['parent'])
                 return {  'form': form }
@@ -478,11 +478,12 @@ def forums_edit(request, slug=None):
 
 @templated('admin/users.html')
 def users(request):
-    if 'q' in request.GET:
+    if 'user' in request.POST:
         try:
-            user = User.objects.get(username=request.GET.get('q'))
+            user = User.objects.get(username=request.POST.get('user'))
         except User.DoesNotExist:
-            flash(u'Der Benutzer %s existiert nicht.' % request.GET.get('q'))
+            flash(u'Der Benutzer %s existiert nicht.' 
+                  % escape(request.POST.get('user')))
         else:
             return HttpResponseRedirect(href('admin', 'users', user.username))
     return {}
@@ -491,6 +492,9 @@ def users(request):
 def _on_search_user_query(request):
     #XXX: cache the results?
     qs = User.objects.filter(username__startswith=request.GET.get('q', ''))
+    if len(qs) > 10:
+        qs = []
+    
     return HttpResponse('\n'.join(
         x.username for x in qs
     ))
