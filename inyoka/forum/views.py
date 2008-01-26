@@ -36,6 +36,7 @@ from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                AddAttachmentForm, EditPostForm, AddPollForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
+from inyoka.forum.acl import filter_invisible
 
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -82,8 +83,9 @@ def index(request, category=None):
     else:
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
+
     return {
-        'categories': list(categories),
+        'categories': filter_invisible(request.user, categories),
         'is_index':   not category
     }
 
