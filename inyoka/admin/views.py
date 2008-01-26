@@ -345,7 +345,6 @@ def ikhaya_icon_edit(request, icon=None):
         'form': form,
         'icon': icon
     }
-<<<<<<< /home/ossi/src/inyoka/inyoka/admin/views.py.orig.
 
 @templated('admin/forums.html')
 def forums(request):
@@ -409,9 +408,6 @@ def forums_edit(request, slug=None):
     return {
         'form': form,
     }
-||||||| /tmp/views.py~base.bSofmG
-=======
-
 
 @templated('admin/users.html')
 def users(request):
@@ -459,4 +455,3 @@ def edit_user(request, username):
     return {
         'form': form
     }
->>>>>>> /tmp/views.py~other.Y8yDms
