@@ -814,12 +814,14 @@ def about_inyoka(request):
 @templated('portal/calendar.html')
 def calendar(request, year=None, month=None):
     now = datetime.now()
-    year = year or now.year
-    month = month or now.month
+    year = int(year or now.year)
+    month = int(month or now.month)
     dates = CalendarItem.objects.filter(date__year=year, date__month=month) \
                         .order_by('date')
-    
     return {
         'dates': dates,
-        'prev': ''
+        'prev': ('portal', 'calendar', '%s-%s' % (month > 1 and year or year
+                                         - 1, month > 1 and month - 1 or 12)),
+        'next': ('portal', 'calendar', '%s-%s' % (month < 12 and year or year
+                                          + 1, month < 12 and month + 1 or 1))
     }
