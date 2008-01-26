@@ -28,6 +28,7 @@
   {%- for forum in table.get_objects() %}
   <tr>
     <td><a href="{{ forum|url('edit') }}">{{ forum.name|e }}</a></td>
+    <td><a href="{{ forum.parent|url }}">{{ forum.parent.name|e }}</a></td>
   </tr>
   {%- else %}
   <tr>

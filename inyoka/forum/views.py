@@ -220,9 +220,10 @@ def newpost(request, topic_slug=None, quote_id=None):
     if request.method == 'POST':
         form = NewPostForm(request.POST)
         att_ids = [int(id) for id in request.POST['att_ids'].split(',') if id]
-        # XXX: check for post = None to be sure that the user can't "hijack"
+        # check for post = None to be sure that the user can't "hijack"
         # other attachments.
-        attachments = list(Attachment.objects.filter(id__in=att_ids))
+        attachments = list(Attachment.objects.filter(id__in=att_ids,
+                                                     post_null=True))
         if 'attach' in request.POST:
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
