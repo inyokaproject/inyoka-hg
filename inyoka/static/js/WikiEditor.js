@@ -45,24 +45,27 @@
   /**
    * Helper function that creates a button object.
    */
-  var button = function(id, title, callback) {
+  var button = function(id, title, callback, profiles) {
     return function(editor) {
-      return $('<a href="#" class="button" />')
-        .attr('id', 'button-' + id)
-        .attr('title', title)
-        .append($('<span />').text(title))
-        .click(function(evt) {
-          evt.preventDefault();
-          callback.call(editor, evt);
-        });
+      if (!profiles || $.inArray(editor.profile, profiles))
+        return $('<a href="#" class="button" />')
+          .attr('id', 'button-' + id)
+          .attr('title', title)
+          .append($('<span />').text(title))
+          .click(function(evt) {
+            evt.preventDefault();
+            callback.call(editor, evt);
+          });
     }
   };
 
   /**
    * helper function that creates a dropdown object.
    */
-  var dropdown = function(id, title, items, callback) {
+  var dropdown = function(id, title, items, callback, profiles) {
     return function(editor) {
+      if (profiles && $.inArray(editor.profile, profiles))
+        return;
       var dropdown = $('<select />')
         .attr('id', 'dropdown-' + id)
         .attr('title', title)
@@ -128,16 +131,23 @@
         if (delim.length > 0)
           this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
         evt.target.selectedIndex = 0;
-    }),
-    button('bold', 'Fetter Text', insert("'''%s'''")),
-    button('italic', 'Kursiver Text', insert("''%s''")),
-    button('underlined', 'Unterstrichener Text', insert('__%s__')),
-    button('stroke', 'Durchgeschtrichener Text', insert('--(%s)--')),
-    button('code', 'Code', insert("``%s``")),
-    button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code')),
-    button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname')),
+    }, ['wiki']),
+    button('bold', 'Fetter Text', insert("'''%s'''"),
+           ['wiki', 'forum', 'small']),
+    button('italic', 'Kursiver Text', insert("''%s''"),
+           ['wiki', 'forum', 'small']),
+    button('underlined', 'Unterstrichener Text', insert('__%s__'),
+           ['wiki', 'forum', 'small']),
+    button('stroke', 'Durchgeschtrichener Text', insert('--(%s)--'),
+           ['wiki', 'forum']),
+    button('code', 'Code', insert("``%s``"),
+           ['wiki', 'forum', 'small']),
+    button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
+           ['wiki', 'forum']),
+    button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
+           ['wiki', 'forum']),
     button('external-link', 'Externer Link', insert('[%s]',
-           'http://www.example.org/')),
+           'http://www.example.org/'), ['wiki', 'forum', 'small']),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
       if (selection.length) {
@@ -147,9 +157,12 @@
         });
         this.setSelection(lines.join('\n') + '\n');
       }
-    }),
-    button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname')),
+    }, ['wiki', 'forum']),
+    button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
+           ['wiki', 'forum']),
     (function(editor) {
+      if (!$.inArray(editor.profile, ['wiki', 'forum']))
+        return;
       var result = $('<div />');
       button('color', 'Farbe', function(evt) {
         colorbox.slideToggle('fast');
@@ -168,6 +181,8 @@
       return result;
     }),
     (function(editor) {
+      if (!$.inArray(editor.profile, ['wiki', 'forum', 'small']))
+        return;
       var result = $('<div />');
       button('smilies', 'Smilies', function(evt) {
         smileybox.slideToggle('fast');
@@ -191,12 +206,12 @@
     }),
     button('date', 'Datum', function(evt) {
       this.insertTag('[[Datum(%s)]]', formatISO8601(new Date()));
-    }),
+    }, ['wiki']),
     button('sig', 'Signatur', function(evt) {
       this.insertText(' --- ' + (this.username ?
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
-    }),
+    }, ['wiki']),
     dropdown('macro', 'Macro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
         item('[[TagListe(%s)]]', 'Tag-Liste'),
@@ -217,7 +232,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }),
+    }, ['wiki']),
     button('shrink', 'Verkleinern', function(evt) {
       if (this.textarea[0].rows >= 6)
         this.textarea[0].rows -= 3;
@@ -239,8 +254,9 @@
    * Represents the wiki editor.  It's created with a jQuery object
    * or expression for the textarea.
    */
-  WikiEditor = function(editor) {
+  WikiEditor = function(editor, profile) {
     var self = this, t;
+    this.proile = profile || 'small';
     this.username = null;
     this.smilies = null;
     $.getJSON('/?__service__=portal.get_current_user', function(user) {
@@ -256,7 +272,7 @@
     /* create toolbar based on button layout */
     t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
     var bar = toolbar();
-    for (var i = 0, n = bar.length, x; i != n; i++)
+    for (var i = 0, n = bar.length, x; i != n; ++i)
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
   };
