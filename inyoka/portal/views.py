@@ -45,7 +45,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
                                 ChangePasswordForm, SubscriptionForm, \
                                 UserCPProfileForm, NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
-                                 PrivateMessageEntry, PRIVMSG_FOLDERS
+                                 PrivateMessageEntry, PRIVMSG_FOLDERS, \
+                                 CalendarItem
 from inyoka.portal.user import User, Group, deactivate_user
 
 
@@ -810,5 +811,12 @@ def about_inyoka(request):
                      u'Inyoka</a>' % href('portal', 'inyoka'))
 
 
-def calendar(request):
-    pass
+@templated('portal/calendar.html')
+def calendar(request, year=None, month=None):
+    now = datetime.now()
+    year = year or now.year
+    month = month or now.month
+    dates = CalendarItem.object.filter(date__year=year, date__month=month)
+    return {
+        'dates': dates
+    }
