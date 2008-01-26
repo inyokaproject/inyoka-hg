@@ -1,0 +1,47 @@
+{#
+    admin/users.html
+    ~~~~~~~~~~~~~~~~
+
+    user administration interface.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'pages'), 'Statische Seiten'),
+] %}
+{% set scripts = scripts + ['jQuery.autocomplete.js'] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<p>Wähle im Folgenden einen Benutzer aus, den du Editieren möchtest:</p>
+<input type="text" id="user_query" />
+<a href="" class="choose_user">Auswählen</a>
+
+<script type="text/javascript">
+  (function () {
+    var getUsername = function() {
+      var value = $('#user_query').attr('value');
+      value = (typeof value == 'undefined') ? '' : value;
+      return value;
+    }
+
+    $('#user_query').autocomplete("/_search_user_query",
+      { // some options applied to the autocomplete jQuery plugin.
+        'delay': 40, 'maxItemsToShow': 15, 'selectFirst': true, 
+        'matchSubset': 1, 'matchContains': 1, 'autoFill': 1,
+        'cacheLength': 10, 'lineSeperator': '\n',
+    });
+
+    $('.choose_user').click(function() {
+      $('a.choose_user').attr('href', '?q=' + getUsername())
+    });
+  })();
+</script>
+{% endblock %}
