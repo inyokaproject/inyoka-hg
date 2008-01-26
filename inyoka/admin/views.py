@@ -365,6 +365,13 @@ def forums_edit(request, slug=None):
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Forum.objects.all()]
         form.fields['parent'].choices = [(-1,"Kategorie")] + categories
+    def _check_forum_slug():
+        try:
+            Forum.objects.get(slug=data['slug'])
+            flash(u'Slug nichts gut')
+            return {  'form': form }
+        except Forum.DoesNotExist:
+            f.slug = data['slug']
 
     if request.method == 'POST':
         form = EditForumForm(request.POST)
@@ -376,12 +383,11 @@ def forums_edit(request, slug=None):
             else:
                 f = Forum.objects.get(slug=slug)
             f.name = data['name']
-            try:
-                Forum.objects.get(slug=data['slug'])
-                flash(u'Slug nichts gut')
-                return {  'form': form }
-            except Forum.DoesNotExist:
-                f.slug = data['slug']
+            if slug is None:
+                _check_forum_slug()
+            else:
+                if f.slug != slug
+                    _check_forum_slug()
             f.description = data['description']
             try:
                 if int(data['parent']) != -1:
