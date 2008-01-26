@@ -11,6 +11,7 @@
 from __future__ import division
 import re
 import random
+import marshal
 from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
@@ -785,7 +786,23 @@ class Topic(models.Model):
         return u' '.join(out)
 
     def get_read_status(self, user):
+        try:
+            read_status = marshal.loads(user.forum_read_status)         #get set of read posts from user object
+        except:
+            read_status = set()
+        if self.id in read_status:
+            return True
         return user.is_anonymous() or self.last_post_id <= user.forum_last_read
+
+    def mark_read(self, user):
+        try:
+            read_status = marshal.loads(user.forum_read_status)
+        except:
+            read_status = set()
+        if not self.last_post.id in read_status:
+            read_status.add(self.last_post.id)
+            user.forum_read_status = marshal.dumps(read_status)
+            user.save()
 
     def __unicode__(self):
         return self.title

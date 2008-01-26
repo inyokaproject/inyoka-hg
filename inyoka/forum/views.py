@@ -176,6 +176,7 @@ def viewtopic(request, topic_slug, page=1):
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
     if request.user.is_authenticated():
+        t.mark_read(request.user)
         subscribed = bool(Subscription.objects.filter(
             topic=t, user=request.user))
     return {
