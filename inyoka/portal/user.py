@@ -295,6 +295,7 @@ class AnonymousUser(object):
     __hash__ = lambda s: 1
     is_anonymous = lambda s: True
     is_authenticated = lambda s: False
+    forum_last_read = 0
 
     def __init__(self):
         pass

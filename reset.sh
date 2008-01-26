@@ -1,7 +1,8 @@
 #!/bin/bash
+DBNAME=$(python -c 'from django.conf import settings; print settings.DATABASE_NAME')
 django-admin.py dbshell <<EOF
-	drop database ubuntuusers;
-	create database ubuntuusers;
+	drop database ${DBNAME};
+	create database ${DBNAME};
 EOF
 django-admin.py syncdb --noinput
 django-admin.py shell --plain >> /dev/null <<EOF

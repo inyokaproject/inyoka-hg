@@ -240,6 +240,13 @@ class CalendarItem(models.Model):
     date = models.DateTimeField()
     author = models.ForeignKey(User)
 
+    def get_absolute_url(self, action='show'):
+        return href(*{
+            # XXX
+            'show': (),
+            'edit': ('admin', 'ikhaya', 'dates', 'edit', self.id)
+        }[action])
+
 
 # import it down here because of circular dependencies
 from inyoka.wiki.parser import parse
