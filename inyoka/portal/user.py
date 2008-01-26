@@ -289,7 +289,7 @@ class AnonymousUser(object):
     __eq__ = lambda s, o: isinstance(o, s.__class__)
     __ne__ = lambda s, o: not s.__eq__(o)
     __hash__ = lambda s: 1
-    is_anonymus = lambda s: True
+    is_anonymous = lambda s: True
     is_authenticated = lambda s: False
 
     def __init__(self):
