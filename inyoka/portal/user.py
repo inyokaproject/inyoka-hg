@@ -50,7 +50,6 @@ def check_password(raw_password, enc_password):
     return hsh == get_hexdigest(salt, raw_password)
 
 
-
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
 
