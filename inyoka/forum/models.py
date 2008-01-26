@@ -800,25 +800,20 @@ class Topic(models.Model):
             read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
         except:
             read_status = set()
-        print read_status
         if self.last_post.id in read_status:
             return True
         else:
             return False
 
     def mark_read(self, user):
-        print "mark read" + self.slug
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
-        print read_status
         if not self.last_post.id in read_status:
             read_status.add(self.last_post.id)
             user.forum_read_status = cPickle.dumps(read_status)
-            print user.forum_read_status
             user.save()
-        print "mark ende"
 
     def __unicode__(self):
         return self.title
