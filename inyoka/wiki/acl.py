@@ -25,7 +25,7 @@
     :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
-from inyoka.portal.user import User, AnonymousUser
+from inyoka.portal.user import User
 from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href
 from inyoka.utils.http import AccessDeniedResponse
@@ -136,7 +136,7 @@ def get_privilege_flags(user, page_name):
     must be in a normalized state.
     """
     if user is None:
-        user = AnonymousUser()
+        user = User.objects.get_anonymous_user()
     elif isinstance(user, basestring):
         user = User.objects.get(username=user)
     groups = GroupContainer(user, page_name)

@@ -109,7 +109,7 @@ def pages_delete(request, page_key):
         if 'message-yes' in request.POST:
             page.delete()
             flash(u'Die Seite „%s“ wurde erfolgreich gelöscht'
-                  % page.title)
+                  % escape(page.title))
     else:
         flash(u'Möchtest du die Seite „%s“ wirklich löschen?'
               % escape(page.title), dialog=True,
@@ -253,6 +253,20 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         'category_icons': category_icons,
         'article': article
     }
+
+
+def ikhaya_article_delete(request, article):
+    article = Article.objects.get(slug=article)
+    if request.method == 'POST':
+        if 'message-yes' in request.POST:
+            article.delete()
+            flash(u'Der Artikel „%s“ wurde erfolgreich gelöscht'
+                  % escape(article.subject))
+    else:
+        flash(u'Möchtest du den Artikel „%s“ wirklich löschen?'
+              % escape(article.subject), dialog=True,
+              dialog_url=url_for(article, 'delete'))
+    return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
 @templated('admin/ikhaya_categories.html')
