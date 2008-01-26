@@ -140,6 +140,9 @@ class User(models.Model):
 
     #XXX: permissions
 
+    # forum attribues
+    forum_last_read = models.IntegerField('Letzter gelesener Post', default=0)
+
     def save(self):
         """
         Save method that pickles `self.settings` before and cleanup
@@ -288,7 +291,7 @@ class AnonymousUser(object):
     __eq__ = lambda s, o: isinstance(o, s.__class__)
     __ne__ = lambda s, o: not s.__eq__(o)
     __hash__ = lambda s: 1
-    is_anonymus = lambda s: True
+    is_anonymous = lambda s: True
     is_authenticated = lambda s: False
 
     def __init__(self):

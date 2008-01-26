@@ -70,8 +70,7 @@ def raw(request, entry_id):
 
 @templated('pastebin/browse.html')
 def browse(request, page=1):
-    pagination = Pagination(Entry.objects.all(), page,
-                            href('pastebin', 'browse'), 10)
+    pagination = Pagination(request, Entry.objects.all(), page)
     set_session_info(request, u'schaut sich die Paste-Liste an.',
                      'Paste-Liste')
     return {

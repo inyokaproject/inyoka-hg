@@ -49,7 +49,7 @@ def context_modifier(request, context):
 
 
 @templated('ikhaya/index.html', modifier=context_modifier)
-def index(req, year=None, month=None, category_slug=None, page=1):
+def index(request, year=None, month=None, category_slug=None, page=1):
     """Shows a few articles by different criteria"""
     category = None
     if year and month:
@@ -75,7 +75,7 @@ def index(req, year=None, month=None, category_slug=None, page=1):
     articles = articles.order_by('-pub_date')
 
     link = href('ikhaya', *link)
-    pagination = Pagination(articles, page, link, per_page=15)
+    pagination = Pagination(request, articles, page, 15, link)
 
     return {
         'articles':      list(pagination.get_objects()),
@@ -85,7 +85,7 @@ def index(req, year=None, month=None, category_slug=None, page=1):
 
 
 @templated('ikhaya/detail.html', modifier=context_modifier)
-def detail(req, slug):
+def detail(request, slug):
     """Shows a single article."""
     # XXX: do not show this article if the user doesn't have
     # some special ikhaya privileges
@@ -98,7 +98,7 @@ def detail(req, slug):
 
 
 @templated('ikhaya/archive.html', modifier=context_modifier)
-def archive(req):
+def archive(request):
     """Shows the archive index."""
     months = Article.published.dates('pub_date', 'month')
     return {

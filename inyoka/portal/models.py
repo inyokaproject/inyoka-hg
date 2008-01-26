@@ -234,5 +234,12 @@ class Subscription(models.Model):
         )
 
 
+class CalendarItem(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    date = models.DateTimeField()
+    author = models.ForeignKey(User)
+
+
 # import it down here because of circular dependencies
 from inyoka.wiki.parser import parse

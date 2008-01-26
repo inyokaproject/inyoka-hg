@@ -103,6 +103,11 @@ class TopicManager(models.Manager):
         post.save()
         topic.last_post = post
         topic.first_post = post
+        parent = topic.forum
+        while parent is not None:
+            parent.last_post = post
+            parent.save()
+            parent = parent.parent
         topic.register()
         topic.save()
         return topic
@@ -553,6 +558,20 @@ class Forum(models.Model):
         self.topic_count = self.topic_count or 0
         super(Forum, self).save()
 
+    def get_read_status(self, user):
+        if self.last_post_id <= user.forum_last_read:
+            return True
+        # TODO: optimizing!
+        for forum in self.forum_set.all():
+            if not forum.last_post_id <= user.forum_last_read and \
+               not forum.get_read_status(user):
+                    return False
+        for topic in self.topic_set.all():
+            if not topic.last_post_id <= user.forum_last_read and \
+               not topic.get_read_status(user):
+                    return False
+        return False
+
     def __unicode__(self):
         return self.name
 
@@ -756,6 +775,9 @@ class Topic(models.Model):
             out.append(u'%s (%s)' % (UBUNTU_VERSIONS[self.ubuntu_version],
                                     self.ubuntu_version))
         return u' '.join(out)
+
+    def get_read_status(self, user):
+        return self.last_post_id <= user.forum_last_read
 
     def __unicode__(self):
         return self.title
