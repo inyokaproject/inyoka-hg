@@ -5,7 +5,7 @@
 
     Database models for the forum.
 
-    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher.
+    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
@@ -297,6 +297,27 @@ class PostManager(models.Manager):
         row = cur.fetchone()
         return row and row[0] or 0
 
+    def get_latest(self):
+        """
+        Fetch the latest topics (cached).
+        """
+        posts = cache.get('forum_latest')
+        if posts is not None:
+            return posts
+        cur = connection.cursor()
+        cur.execute('''
+            select p.id
+              from forum_topic t, forum_post p
+             where p.id = t.last_post_id
+          order by p.pub_date desc
+             limit 500
+        ''')
+        posts = []
+        for row in cur.fetchall():
+            print row[0]
+            posts.append(Post.objects.select_related().get(id__exact=row[0]))
+        cache.set('forum_latest', posts, 30)
+        return posts
 
 class AttachmentManager(models.Manager):
     """
@@ -536,6 +557,7 @@ class Forum(models.Model):
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
     offtopic = models.BooleanField(default=False)
+    community_forum = models.BooleanField('Community-Forum', default=False)
 
     def get_absolute_url(self, action='show'):
         return href(*{

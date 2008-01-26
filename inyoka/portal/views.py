@@ -292,6 +292,9 @@ def search(request):
     f = SearchForm(request.REQUEST)
     if f.is_valid():
         d = f.cleaned_data
+        show_community = request.GET.get('show_community',
+            request.user.show_community) in ("true", True)
+        print "community", show_community, request.user.show_community
         results = search_system.query(
             d['area'] and d['area'] != 'all'
                 and '(%s) AND area:%s' % (d['query'], d['area']) \
@@ -301,10 +304,11 @@ def search(request):
         )
         if len(results.results ) > 0:
             return TemplateResponse('portal/search_results.html', {
-                'query':        d['query'],
-                'highlight':    results.highlight_string,
-                'area':         d['area'],
-                'results':      results
+                'query':            d['query'],
+                'highlight':        results.highlight_string,
+                'area':             d['area'],
+                'results':          results,
+                'show_community':   show_community
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %

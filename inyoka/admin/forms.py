@@ -66,11 +66,11 @@ class EditIconForm(forms.Form):
 class EditUserForm(forms.Form):
     # personal informations
     username = forms.CharField(label=u'Benutzername', max_length=30)
-    password = forms.CharField(label=u'Passwort-Hash', max_length=128)
+    new_password = forms.CharField(label=u'Neues Passwort', max_length=128,
+        required=False, help_text=(u'Ändert das Benutzerpasswort. '
+                                   u'Bitte nur angeben, wenn benötigt.'))
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
-    #groups = forms.MultipleChoiceField(label=u'Gruppen', choices=[], required=False)
-    post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
 
     # notification informations
@@ -83,13 +83,12 @@ class EditUserForm(forms.Form):
     # misc other things
     signature = forms.CharField(label=u'Signatur', required=False,
                                 widget=forms.Textarea)
-    coordinates = forms.CharField('Koordinaten', required=False)
+    coordinates = forms.CharField(label=u'Koordinaten', required=False)
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
 
-    forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
-        widget=forms.CheckboxSelectMultiple, required=False)
+    forum_privileges = forms.MultipleChoiceField(required=False)
 
 
 class EditDateForm(forms.Form):

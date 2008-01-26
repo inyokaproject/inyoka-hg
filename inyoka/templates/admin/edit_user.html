@@ -8,6 +8,9 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
 ] %}
@@ -20,18 +23,29 @@
 
 {% block admin_content %}
 <form action="" method="post">
-  <h3>Persönliche Daten</h3>
-    {# TODO: groups #}
-    {{ h.render_form(form, 'username', 'password', 'is_active',
-                     'date_joined', 'website',
-                     'interests', 'location') }}
+  <h2>Einstellungen von {{ user.username }}</h2>
+  <h3>Forum-Einstellungen</h3>
+  <p>
+    {% if user_groups %}
+    Der Bentuzer {{ user.username }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
+    {% else %}
+    Der Bentuzer {{ user.username }} gehört keinen Gruppen an.
+    {% endif %}
+  </p>
+  {{ h.render_form(form, 'username', 'is_active', 'date_joined') }}
+  <h3>Persönliche Details von {{ user.username }}</h3>
+  {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
   <h3>Benachrichtigungs-Einstellungen</h3>
     {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
   <h3>Sonstige Einstellungen</h3>
-    {{ h.render_form(form, 'signature', 'coordinates', 'avatar', 'post_count') }}
-  <h3>Forum Privilegien</h3>
-    {{ h.render_form(form, 'forum_privileges') }}
+    {{ h.render_form(form, 'signature', 'coordinates', 'avatar') }}
   <button type="submit" id="submit">Speichern</button>
   <button type="reset" id="reset">Zurücksetzen</button>
 </form>
+<script type="text/javascript">
+  /* <![CDATA[ */
+  var signature = new WikiEditor('textarea[@name="signature"]');
+  var date = new DateTimeField('input[@name="date_joined"]');
+  /* ]]> */
+</script>
 {% endblock %}

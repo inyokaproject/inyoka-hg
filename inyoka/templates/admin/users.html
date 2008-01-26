@@ -27,6 +27,7 @@
 </form>
 
 <script type="text/javascript">
+  /* <![CDATA[ */
   (function () {
     $('#user_query').autocomplete("/_search_user_query",
       { // some options applied to the autocomplete jQuery plugin.
@@ -35,5 +36,6 @@
         'cacheLength': 10, 'lineSeperator': '\n',
     });
   })();
+  /* ]]> */
 </script>
 {% endblock %}
