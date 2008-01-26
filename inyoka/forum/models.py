@@ -23,7 +23,7 @@ from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.middlewares.registry import r
-from inyoka.portal.user import User
+from inyoka.portal.user import User, Group
 
 
 POSTS_PER_PAGE = 10
@@ -349,6 +349,7 @@ class AttachmentManager(models.Manager):
 
 
 class PollManager(models.Manager):
+
     def create(self, question, options, limit=None, multiple=False,
                topic_id=None):
         now = datetime.now()
@@ -981,3 +982,18 @@ class PollOption(models.Model):
 class Voter(models.Model):
     voter = models.ForeignKey(User)
     poll = models.ForeignKey(Poll)
+
+
+class Privilege(models.Model):
+    group = models.ForeignKey(Group, null=True)
+    user = models.ForeignKey(User, null=True)
+    forum = models.ForeignKey(Forum)
+    can_read = models.BooleanField(default=False)
+    can_reply = models.BooleanField(default=False)
+    can_create = models.BooleanField(default=False)
+    can_edit = models.BooleanField(default=False)
+    can_revert = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+    can_sticky = models.BooleanField(default=False)
+    can_vote = models.BooleanField(default=False)
+    can_upload = models.BooleanField(default=False)
