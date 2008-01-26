@@ -26,6 +26,7 @@ from django.db.models.manager import EmptyManager
 from inyoka.utils import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
+from inyoka.utils import djangoext
 from inyoka.middlewares.registry import r
 
 
@@ -142,7 +143,7 @@ class User(models.Model):
 
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
-    forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
+    forum_read_status = djangoext.BinaryField('Gelesene Beiträge', blank=True)
 
     def save(self):
         """
@@ -294,6 +295,7 @@ class AnonymousUser(object):
     __hash__ = lambda s: 1
     is_anonymous = lambda s: True
     is_authenticated = lambda s: False
+    forum_last_read = 0
 
     def __init__(self):
         pass

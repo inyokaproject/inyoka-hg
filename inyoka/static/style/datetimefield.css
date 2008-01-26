@@ -29,6 +29,14 @@
   width: 1px;
 }
 
+.calendar span {
+  cursor: pointer;
+}
+
+.calendar input {
+  width: 5em;
+}
+
 .timetable {
   border-collapse: collapse;
   width: 15em;

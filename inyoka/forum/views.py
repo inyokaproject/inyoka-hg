@@ -220,9 +220,10 @@ def newpost(request, topic_slug=None, quote_id=None):
     if request.method == 'POST':
         form = NewPostForm(request.POST)
         att_ids = [int(id) for id in request.POST['att_ids'].split(',') if id]
-        # XXX: check for post = None to be sure that the user can't "hijack"
+        # check for post = None to be sure that the user can't "hijack"
         # other attachments.
-        attachments = list(Attachment.objects.filter(id__in=att_ids))
+        attachments = list(Attachment.objects.filter(id__in=att_ids,
+                                                     post_null=True))
         if 'attach' in request.POST:
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
@@ -962,3 +963,14 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     response = feed.get_atom_response()
     cache.set(key, response.content, 600)
     return response
+
+
+def markread(request, slug=None):
+    """
+    Mark either all or only the given forum as read.
+    """
+    user = request.user
+    if user.is_authenticated():
+        user.forum_last_read = Post.objects.get_max_id()
+        user.save()
+    return HttpResponseRedirect(href('forum'))

@@ -21,12 +21,13 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditUserForm, EditDateForm
+                               ConfigurationForm, EditUserForm, EditDateForm, \
+                               EditForumForm
 from inyoka.portal.models import StaticPage, CalendarItem
 from inyoka.portal.user import User
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
-
+from inyoka.forum.models import Forum
 
 @templated('admin/index.html')
 def index(request):

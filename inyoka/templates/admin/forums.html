@@ -22,12 +22,14 @@
   <thead>
   <tr>
     <th>{{ table.get_html('name', 'Name') }}</th>
+    <th>{{ table.get_html('forum_forum.name', 'Elternforum', related=true) }}</th>
   </tr>
   </thead>
   <tbody>
   {%- for forum in table.get_objects() %}
   <tr>
     <td><a href="{{ forum|url('edit') }}">{{ forum.name|e }}</a></td>
+    <td>{% if forum.parent %}<a href="{{ forum.parent|url }}">{{ forum.parent.name|e }}{% else %}-{% endif %}</a></td>
   </tr>
   {%- else %}
   <tr>
