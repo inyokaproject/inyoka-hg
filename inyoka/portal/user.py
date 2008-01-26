@@ -113,10 +113,22 @@ class UserManager(models.Manager):
         return user
 
     def get_anonymous_user(self):
+        global _ANONYMOUS_USER
         if not _ANONYMOUS_USER:
-            global _ANONYMOUS_USER
             _ANONYMOUS_USER = User.objects.get(id=1)
         return _ANONYMOUS_USER
+
+    def get_system_user(self):
+        """
+        This returns the system user that is controlled by inyoka itself. It
+        is the sender for welcome notices, it updates the antispam list and
+        is the owner for log entries in the wiki triggered by inyoka itself.
+        """
+        try:
+            return User.objects.get(username=settings.INYOKA_SYSTEM_USER)
+        except User.DoesNotExist:
+            return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
+                                            settings.INYOKA_SYSTEM_USER_EMAIL)
 
 
 class User(models.Model):
@@ -151,6 +163,10 @@ class User(models.Model):
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
 
     #XXX: permissions
+
+    # the user can access the admin panel
+    is_manager = models.BooleanField('Teammitglied (kann ins Admin-Panel)',
+                                     default=False)
 
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
@@ -274,19 +290,6 @@ def deactivate_user(user):
         user.signature = user.coordinates = user.location = \
         user.occupation = user.interests = user.website = ''
     user.save()
-
-
-def get_system_user():
-    """
-    This returns the system user that is controlled by inyoka itself. It
-    is the sender for welcome notices, it updates the antispam list and
-    is the owner for log entries in the wiki triggered by inyoka itself.
-    """
-    try:
-        return User.objects.get(username=settings.INYOKA_SYSTEM_USER)
-    except User.DoesNotExist:
-        return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
-                                        settings.INYOKA_SYSTEM_USER_EMAIL)
 
 
 from inyoka.wiki.parser import parse, render, RenderContext

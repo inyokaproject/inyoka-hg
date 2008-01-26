@@ -94,6 +94,9 @@ IMAGEMAGICK_PATH = ''
 # wiki settings
 WIKI_MAIN_PAGE = 'Startseite'
 
+# forum settings
+FORUM_LIMIT_UNREAD = 10000
+
 # the id of the ikhaya team group
 IKHAYA_GROUP_ID = 1
 
