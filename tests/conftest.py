@@ -39,6 +39,7 @@ settings.configure(**test_settings)
 
 from django.test.utils import create_test_db, destroy_test_db
 from inyoka.utils.search import search
+from inyoka.portal.user import User
 from shutil import rmtree
 
 
@@ -46,6 +47,8 @@ class Directory(py.test.collect.Directory):
 
     def setup(self):
         create_test_db(False, True)
+        # create a basic admin user for testing the user models
+        User.objects.register_user('admin', 'admin@example.org', 'default', False)
         search.get_connection(True)
 
     def teardown(self):
