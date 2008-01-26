@@ -1026,5 +1026,6 @@ class Privilege(models.Model):
     can_delete = models.BooleanField(default=False)
     can_sticky = models.BooleanField(default=False)
     can_vote = models.BooleanField(default=False)
+    can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
     can_moderate = models.BooleanField(default=False)

@@ -16,7 +16,7 @@ from inyoka.portal.utils import decor
 
 
 PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
-              'sticky', 'vote', 'upload', 'moderate']
+              'sticky', 'vote', 'create_poll', 'upload', 'moderate']
 
 
 def get_forum_privileges(user, forum):
@@ -52,11 +52,11 @@ def have_privilege(user, forum, privilege):
     return privilege in get_forum_privileges(user, forum)
 
 
-def filter_invisible(user, forums):
+def filter_invisible(user, forums, priv='read'):
     """Filter a user."""
     privileges = get_privileges(user, forums)
     result = []
     for forum in forums:
-        if privileges.get(forum.id, {'read': False}):
+        if privileges.get(forum.id, {priv: False})[priv]:
             result.append(forum)
     return result
