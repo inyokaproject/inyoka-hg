@@ -87,3 +87,10 @@ class EditUserForm(forms.Form):
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
+
+
+class EditDateForm(forms.Form):
+    date = forms.DateTimeField(input_formats=DATETIME_INPUT_FORMATS,
+                               initial=datetime.now())
+    title = forms.CharField()
+    description = forms.CharField(widget=forms.Textarea)

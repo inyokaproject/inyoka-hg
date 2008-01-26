@@ -21,5 +21,19 @@
       {{ admin_button(href('admin', 'ikhaya'), 'ikhaya', 'Ikhaya') }}
       {{ admin_button(href('admin', 'planet'), 'planet', 'Planet') }}
     </tr>
+      <td>
+        <a href="{{ href('admin', 'forum') }}">
+          <img src="{{ href('static', 'img', 'admin', 'category_forum.png') }}" alt="Forum Administration" /><br>
+          Forum Administration
+        </a>
+      </td>
+      <!--
+      <td>
+        <a href="{{ href('admin', 'users') }}">
+          <img src="{{ href('static', 'img', 'admin', 'category_users.png') }}" alt="Benutzer Administration" /><br />
+          Benutzer Administration
+        </a>
+      </td>
+      -->
   </table>
 {% endblock %}
