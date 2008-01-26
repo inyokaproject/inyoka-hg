@@ -962,3 +962,14 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     response = feed.get_atom_response()
     cache.set(key, response.content, 600)
     return response
+
+
+def markread(request, slug=None):
+    """
+    Mark either all or only the given forum as read.
+    """
+    user = request.user
+    if user.is_authenticated():
+        user.forum_last_read = Post.objects.get_max_id()
+        user.save()
+    return HttpResponseRedirect(href('forum'))
