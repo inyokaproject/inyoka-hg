@@ -47,7 +47,7 @@
       {%- endif %}
       <tr>
         <td class="icon">
-          <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+          {{ forum.get_read_status(USER)|e }}<img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
         </td>
         <td class="forum">
           <a href="{{ subforum|url }}" class="forum_title">{{ subforum.name|e }}</a>
@@ -86,7 +86,7 @@
       {%- endif %}
       <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
-          {{ topic_icon(topic) }}
+          {{ topic.get_read_status(USER)|e }}{{ topic_icon(topic) }}
         </td>
         <td class="topic">
           {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}

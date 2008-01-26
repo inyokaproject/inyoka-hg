@@ -141,6 +141,9 @@ class User(models.Model):
 
     #XXX: permissions
 
+    # forum attribues
+    forum_last_read = models.IntegerField('Letzter gelesener Post', default=0)
+
     def save(self):
         """
         Save method that pickles `self.settings` before and cleanup
