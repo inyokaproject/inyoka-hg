@@ -14,13 +14,14 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import check_login
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated
+from inyoka.utils.html import escape
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
-from inyoka.ikhaya.forms import SuggestArticleForm
-from inyoka.ikhaya.models import Category, Article, Suggestion
+from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
+from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 
 
 def not_found(request, err_message=None):
@@ -92,8 +93,23 @@ def detail(request, slug):
     article = Article.objects.get(slug=slug)
     if article.hidden:
         flash(u'Dieser Artikel ist für normale Benutzer nicht sichtbar.')
+    if request.method == 'POST':
+        form = EditCommentForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            c = Comment(**data)
+            c.article = article
+            c.author = request.user
+            c.pub_date = datetime.now()
+            c.save()
+            flash(u'Der Kommentar „%s“ wurde erstellt.' % escape(c.title))
+            return HttpResponseRedirect(url_for(article))
+    else:
+        form = EditCommentForm()
     return {
-        'article':  article
+        'article':  article,
+        'comments': list(article.comment_set.all()),
+        'form': form
     }
 
 
