@@ -72,7 +72,7 @@
         <li><a href="{{ href('admin') }}">Adminbereich</a></li>
       </ul>
       <ul class="navi_global">
-        {%- if USER.is_authenticated() %}
+        {%- if USER.is_authenticated %}
         <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
         <li><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></li>
         <li>
