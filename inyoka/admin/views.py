@@ -25,17 +25,20 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditForumForm
 from inyoka.portal.models import StaticPage, CalendarItem
 from inyoka.portal.user import User
+from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.models import Forum
 
 
 
+@require_manager
 @templated('admin/index.html')
 def index(request):
     return {}
 
 
+@require_manager
 @templated('admin/configuration.html')
 def config(request):
     if request.method == 'POST':
@@ -52,6 +55,7 @@ def config(request):
     }
 
 
+@require_manager
 @templated('admin/pages.html')
 def pages(request):
     sortable = Sortable(StaticPage.objects.all(), request.GET, '-key')
@@ -61,6 +65,7 @@ def pages(request):
     }
 
 
+@require_manager
 @templated('admin/pages_edit.html')
 def pages_edit(request, page=None):
     if page:
@@ -101,6 +106,7 @@ def pages_edit(request, page=None):
     }
 
 
+@require_manager
 def pages_delete(request, page_key):
     if not page_key:
         flash(u'Es wurde keine Seite zum löschen ausgewählt.')
@@ -117,6 +123,7 @@ def pages_delete(request, page_key):
     return HttpResponseRedirect(href('admin', 'pages'))
 
 
+@require_manager
 @templated('admin/planet.html')
 def planet(request):
     return {
@@ -124,6 +131,7 @@ def planet(request):
     }
 
 
+@require_manager
 @templated('admin/planet_edit.html')
 def planet_edit(request, blog=None):
     if blog:
@@ -164,11 +172,13 @@ def planet_edit(request, blog=None):
     }
 
 
+@require_manager
 @templated('admin/ikhaya.html')
 def ikhaya(request):
     pass
 
 
+@require_manager
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
     sortable = Sortable(Article.objects.all(), request.GET, '-pub_date')
@@ -180,6 +190,7 @@ def ikhaya_articles(request, page=1):
     }
 
 
+@require_manager
 @templated('admin/ikhaya_article_edit.html')
 def ikhaya_article_edit(request, article=None, suggestion_id=None):
     """
@@ -255,6 +266,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     }
 
 
+@require_manager
 def ikhaya_article_delete(request, article):
     article = Article.objects.get(slug=article)
     if request.method == 'POST':
@@ -269,6 +281,7 @@ def ikhaya_article_delete(request, article):
     return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
+@require_manager
 @templated('admin/ikhaya_categories.html')
 def ikhaya_categories(request):
     sortable = Sortable(Category.objects.all(), request.GET, '-name')
@@ -277,6 +290,7 @@ def ikhaya_categories(request):
     }
 
 
+@require_manager
 @templated('admin/ikhaya_category_edit.html')
 def ikhaya_category_edit(request, category=None):
     """
@@ -322,6 +336,7 @@ def ikhaya_category_edit(request, category=None):
     }
 
 
+@require_manager
 @templated('admin/ikhaya_icons.html')
 def ikhaya_icons(request):
     sortable = Sortable(Icon.objects.all(), request.GET, 'identifier')
@@ -330,6 +345,7 @@ def ikhaya_icons(request):
     }
 
 
+@require_manager
 @templated('admin/ikhaya_icon_edit.html')
 def ikhaya_icon_edit(request, icon=None):
     """
@@ -363,6 +379,7 @@ def ikhaya_icon_edit(request, icon=None):
     }
 
 
+@require_manager
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
@@ -372,7 +389,7 @@ def forums(request):
 
 
 @templated('admin/forums_edit.html')
-def forums_edit(request, slug=None):
+def forums_edit(request, id=None):
     """
     Display an interface to let the user create or edit an forum .
     If `suggestion_id` is given, the new forum is based on a special
@@ -383,10 +400,11 @@ def forums_edit(request, slug=None):
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Forum.objects.all()]
         form.fields['parent'].choices = [(-1,"Kategorie")] + categories
+
     def _check_forum_slug():
         try:
             Forum.objects.get(slug=data['slug'])
-            flash(u'Slug nichts gut')
+            flash(u'Bitte einen anderen Slug eingeben')
             return {  'form': form }
         except Forum.DoesNotExist:
             f.slug = data['slug']
@@ -396,16 +414,16 @@ def forums_edit(request, slug=None):
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            if slug is None:
+            if id is None:
                 f = Forum()
             else:
-                f = Forum.objects.get(slug=slug)
+                f = Forum.objects.get(id=id)
             f.name = data['name']
             f.position = data['position']
-            if slug is None:
+            if id is None:
                 _check_forum_slug()
             else:
-                if f.slug != slug:
+                if f.slug != data['slug']:
                     _check_forum_slug()
             f.description = data['description']
             try:
@@ -419,86 +437,21 @@ def forums_edit(request, slug=None):
             return HttpResponseRedirect(href('admin', 'forum'))
 
     else:
-        if slug is None:
+        if id is None:
             form = EditForumForm()
         else:
-            f = Forum.objects.get(slug=slug)
+            f = Forum.objects.get(id=id)
             form = EditForumForm({
                 'name': f.name,
                 'slug': f.slug,
                 'description': f.description,
-                'parent': f.parent,
+                'parent': f.parent_id,
                 'position': f.position
             })
         _add_field_choices()
     return {
         'form': form,
     }
-
-@templated('admin/forums.html')
-def forums(request):
-    sortable = Sortable(Forum.objects.all(), request.GET, '-name')
-    return {
-        'table': sortable
-    }
-
-
-@templated('admin/forums_edit.html')
-def forums_edit(request, slug=None):
-    """
-    Display an interface to let the user create or edit an forum .
-    If `suggestion_id` is given, the new forum is based on a special
-    article suggestion made by a user. After saving it, the suggestion will be
-    deleted automatically.
-    """
-
-    def _add_field_choices():
-        categories = [(c.id, c.name) for c in Forum.objects.all()]
-        form.fields['parent'].choices = [(-1,"Kategorie")] + categories
-
-    if request.method == 'POST':
-        form = EditForumForm(request.POST)
-        _add_field_choices()
-        if form.is_valid():
-            data = form.cleaned_data
-            if slug is None:
-                f = Forum()
-            else:
-                f = Forum.objects.get(slug=slug)
-            f.name = data['name']
-            try:
-                Forum.objects.get(slug=data['slug'])
-                flash(u'Slug nichts gut')
-                return {  'form': form }
-            except Forum.DoesNotExist:
-                f.slug = data['slug']
-            f.description = data['description']
-            try:
-                if int(data['parent']) != -1:
-                    f.parent = Forum.objects.get(id=data['parent'])
-                f.save()
-                flash(u'Das Forum wurde erfolgreich angepasst bzw. angelegt')
-            except Forum.DoesNotExist:
-                flash(u'Forum %s existiert nicht' %data['parent'])
-                return {  'form': form }
-            return HttpResponseRedirect(href('admin', 'forum'))
-
-    else:
-        if slug is None:
-            form = EditForumForm()
-        else:
-            f = Forum.objects.get(slug=slug)
-            form = EditForumForm({
-                'name': f.name,
-                'slug': f.slug,
-                'description': f.description,
-                'parent': f.parent
-            })
-        _add_field_choices()
-    return {
-        'form': form,
-    }
-
 
 @templated('admin/users.html')
 def users(request):
@@ -513,21 +466,24 @@ def users(request):
     return {}
 
 
+@require_manager
 def _on_search_user_query(request):
     #XXX: cache the results?
-    qs = User.objects.filter(username__startswith=request.GET.get('q', ''))
+    qs = User.objects.filter(username__startswith=request.GET.get('q', ''))[:11]
     if len(qs) > 10:
-        qs = []
+        qs[10] = '...'
     return HttpResponse('\n'.join(
         x.username for x in qs
     ))
 
 
+@require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
     user = User.objects.filter(username=username).select_related()
     values = user.values()[0]
     form = EditUserForm(values)
+    form.base_fields['forum_privileges'].choices = (('gr', 'Gruppe'), ('du', 'Duuu'))
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
         if form.is_valid():
@@ -536,7 +492,7 @@ def edit_user(request, username):
             for key in ('username', 'password', 'is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates',
-                        'post_count'):
+                        'post_count', 'gpgkey'):
                 setattr(user, key, data[key])
                 if data['avatar']:
                     user.save_avatar(data['avatar'])
@@ -546,11 +502,15 @@ def edit_user(request, username):
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!')
+    user = user.get()
     return {
+        'user': user,
+        'user_groups': user.groups.all(),
         'form': form
     }
 
 
+@require_manager
 @templated('admin/ikhaya_dates.html')
 def ikhaya_dates(request):
     sortable = Sortable(CalendarItem.objects.all(), request.GET, 'title')
@@ -559,6 +519,7 @@ def ikhaya_dates(request):
     }
 
 
+@require_manager
 @templated('admin/ikhaya_date_edit.html')
 def ikhaya_date_edit(request, date=None):
     """

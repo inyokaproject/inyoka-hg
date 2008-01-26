@@ -1,0 +1,34 @@
+{% macro render_forum(forum) %}
+  <tr class="entry">
+    <td class="icon">
+      {% if forum.get_read_status(USER) %}
+        <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+      {% else %}
+        <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
+      {% endif %}
+    </td>
+    <td class="forum">
+      <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
+      {%- if forum.description %}
+      <p class="description">{{ forum.description|e }}</p> 
+      {%- endif %}
+      {%- if forum.children %}
+      <p class="subforums">Subforen:
+      {%- for subforum in forum.children %}
+        <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
+      {%- endfor %}
+      </p>
+      {%- endif %}
+    </td>
+    <td class="posts">
+      {{ forum.topic_count }} /
+      {{ forum.post_count }}
+    </td>
+    <td class="last_post">
+    {%- if forum.last_post -%}
+    {{ forum.last_post.pub_date|datetimeformat }}<br />
+    von <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author }}</a>
+    {%- else %}---
+    {%- endif %}</td>
+  </tr>
+{% endmacro %}

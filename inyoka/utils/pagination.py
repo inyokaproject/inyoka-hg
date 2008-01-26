@@ -51,7 +51,10 @@ class Pagination(object):
                  threshold=3):
         was_ellipsis = False
         result = []
-        total = self.query.count() - 1
+        if isinstance(self.query, list):
+            total = len(self.query)
+        else:
+            total = self.query.count() - 1
         pages = total // self.per_page + 1
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\

@@ -723,7 +723,7 @@ def reportlist(request):
         form = ReportListForm()
         _add_field_choices()
 
-    privileges = get_privileges(user, forums)
+    privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
         if privileges.get(topic.forum_id, {'moderator': False})['moderator']:
@@ -1065,3 +1065,22 @@ def markread(request, slug=None):
         user.forum_read_status = ''
         user.save()
     return HttpResponseRedirect(href('forum'))
+
+
+@templated('forum/latest.html')
+def latest(request, page=1):
+    """
+    Return a list of the latest posts.
+    """
+    all = Post.objects.get_latest()
+    posts = []
+    for post in all:
+        if post.id < request.user.forum_last_read:
+            break
+        posts.append(post)
+    pagination = Pagination(request, posts, page, 20,
+        href('forum', 'latest'))
+    return {
+        'posts': pagination.get_objects(),
+        'pagination': pagination.generate()
+    }

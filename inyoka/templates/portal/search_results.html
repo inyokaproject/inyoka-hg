@@ -18,10 +18,25 @@
 
 {% block portal_content %}
   <p>
-    In der nachfolgenden Tabelle sind sämtliche Suchergbnisse für die Abfrage
+    In der nachfolgenden Tabelle sind die Suchergbnisse für die Abfrage
     „{{ query|e }}“. Solltest du nicht fündig geworden sein kannst du eine
     <a href="/search/">neue Suche</a> mit veränderten Suchwörtern starten.
   </p>
+  {% if show_community %}
+    <p>
+      Community-Beiträge werden angezeigt:
+      <a href="{{ href('portal', 'search', query=query, area=area, show_community="false") }}">
+        Ausblenden
+      </a>
+    </p>
+  {% else %}
+  <p>
+    Community-Beiträge sind aus Gründen der Übersichtlichkeit ausgeblendet:
+    <a href="{{ href('portal', 'search', query=query, area=area, show_community="true") }}">
+      Alles anzeigen
+    </a>
+  </p>
+  {% endif %}
   <table class="search_results">
     <thead>
       <tr>

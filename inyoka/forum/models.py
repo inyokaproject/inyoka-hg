@@ -5,7 +5,7 @@
 
     Database models for the forum.
 
-    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher.
+    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
@@ -297,6 +297,27 @@ class PostManager(models.Manager):
         row = cur.fetchone()
         return row and row[0] or 0
 
+    def get_latest(self):
+        """
+        Fetch the latest topics (cached).
+        """
+        posts = cache.get('forum_latest')
+        if posts is not None:
+            return posts
+        cur = connection.cursor()
+        cur.execute('''
+            select p.id
+              from forum_topic t, forum_post p
+             where p.id = t.last_post_id
+          order by p.pub_date desc
+             limit 500
+        ''')
+        posts = []
+        for row in cur.fetchall():
+            print row[0]
+            posts.append(Post.objects.select_related().get(id__exact=row[0]))
+        cache.set('forum_latest', posts, 30)
+        return posts
 
 class AttachmentManager(models.Manager):
     """
@@ -536,12 +557,13 @@ class Forum(models.Model):
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
     offtopic = models.BooleanField(default=False)
+    community_forum = models.BooleanField('Community-Forum', default=False)
 
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('forum', self.parent and 'forum' or 'category', self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
-            'edit': ('admin', 'forum', self.slug, 'edit')
+            'edit': ('admin', 'forum', 'edit', self.id)
         }[action])
 
     @property
@@ -840,6 +862,7 @@ class Post(models.Model):
     """
     objects = PostManager()
     text = models.TextField('Text')
+    rendered_text = models.TextField('RenderedText')
     author = models.ForeignKey(User, verbose_name='Autor',
                                related_name='posts')
     pub_date = models.DateTimeField('Datum')
@@ -849,12 +872,8 @@ class Post(models.Model):
     hidden = models.BooleanField(u'Verborgen', default=False)
     xapian_docid = models.IntegerField(default=0)
 
-    @property
-    def rendered_text(self):
-        return self.render_text()
-
     def render_text(self, request=None, format='html', nocache=False):
-        context = RenderContext(request or r.request)
+        context = RenderContext(request or r.request, simplified=True)
         if nocache or self.id is None or format != 'html':
             return parse(self.text).render(context, format)
         key = 'forum/post/%s' % self.id
@@ -865,6 +884,7 @@ class Post(models.Model):
         return render(instructions, context)
 
     def save(self):
+        self.rendered_text = self.render_text()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
         self.update_search()
