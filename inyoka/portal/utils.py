@@ -36,8 +36,16 @@ def check_login(message=None):
             args = {'next': 'http://%s%s' % (req.get_host(), req.path)}
             return HttpResponseRedirect(href('portal', 'login', **args))
         return decor(decorator, func)
-
     return _wrapper
+
+
+def require_manager(f):
+    """Require that the user is logged in and is a manager."""
+    def decorator(request, *args, **kwargs):
+        if request.user.is_manager:
+            return f(request, *args, **kwargs)
+        return abort_access_denied()
+    return simple_check_login(decor(decorator, f))
 
 
 def simple_check_login(f):
@@ -53,7 +61,6 @@ def simple_check_login(f):
             return f(*args, **kwargs)
         args = {'next': 'http://%s%s' % (req.get_host(), req.path)}
         return HttpResponseRedirect(href('portal', 'login', **args))
-
     return decor(decorator, f)
 
 

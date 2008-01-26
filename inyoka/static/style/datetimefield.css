@@ -109,7 +109,14 @@
   color: #999;
 }
 
-.calendar-shortcuts { background:white; font-size:10px; line-height:11px; border-top:1px solid #eee; padding:3px 0 4px; color:#ccc; }
+.calendar-shortcuts {
+  background: white;
+  font-size:10px;
+  line-height:11px;
+  border-top:1px solid #eee;
+  padding:3px 0 4px;
+  color:#ccc; 
+}
 
 .calendarnav-previous {
   float: left;

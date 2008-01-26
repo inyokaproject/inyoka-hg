@@ -51,7 +51,7 @@ def get_privileges(user, forums):
 
 def have_privilege(user, forum, privilege):
     """Check if a user has a privilege on a resource."""
-    return privilege in get_forum_privileges(user, forum)
+    return bool(get_forum_privileges(user, forum).get(privilege, False))
 
 
 def filter_invisible(user, forums, priv='read'):
