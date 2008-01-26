@@ -15,7 +15,13 @@
 <dl>  
   {%- for field in fields %}
   {%- if form[field] %}
-  <dt><label for="{{ form[field].auto_id }}">{{ form[field].label }}:</label></dt>
+  <dt>
+    <label for="{{ form[field].auto_id }}">{{ form[field].label }}:</label>
+    {% if form[field].help_text %}
+    <br />
+    <em>{{ form[field].help_text }}</em>
+    {% endif %}
+  </dt>
   <dd>{{ form[field] }} {{ h.field_errors(form.errors[field]) }}</dd>
   {%- endif %}
   {%- endfor %}

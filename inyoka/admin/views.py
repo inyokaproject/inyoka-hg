@@ -528,6 +528,7 @@ def edit_user(request, username):
     user = User.objects.filter(username=username).select_related()
     values = user.values()[0]
     form = EditUserForm(values)
+    form.base_fields['forum_privileges'].choices = (('gr', 'Gruppe'), ('du', 'Duuu'))
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
         if form.is_valid():
@@ -546,7 +547,10 @@ def edit_user(request, username):
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!')
+    user = user.get()
     return {
+        'user': user,
+        'user_groups': user.groups.all(),
         'form': form
     }
 
