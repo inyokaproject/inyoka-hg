@@ -11,13 +11,13 @@
 from datetime import datetime
 from django.http import HttpResponseRedirect, HttpResponse
 from inyoka.portal.views import not_found
+from inyoka.portal.utils import simple_check_login
 from inyoka.pastebin.forms import AddPasteForm
 from inyoka.pastebin.models import Entry
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.decorators import simple_check_login
 
 
 @simple_check_login
