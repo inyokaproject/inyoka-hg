@@ -569,7 +569,7 @@ class Forum(models.Model):
         super(Forum, self).save()
 
     def get_read_status(self, user):
-        if self.last_post_id <= user.forum_last_read:
+        if self.last_post_id <= user.forum_last_read or user.is_anonymous():
             return True
         # TODO: optimizing!
         for forum in self.forum_set.all():
