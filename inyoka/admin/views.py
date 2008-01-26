@@ -29,6 +29,7 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.models import Forum
 
+
 @templated('admin/index.html')
 def index(request):
     return {}
@@ -346,12 +347,14 @@ def ikhaya_icon_edit(request, icon=None):
         'icon': icon
     }
 
+
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
     return {
         'table': sortable
     }
+
 
 @templated('admin/forums_edit.html')
 def forums_edit(request, slug=None):
@@ -413,13 +416,15 @@ def forums_edit(request, slug=None):
         _add_field_choices()
     return {
         'form': form,
-    }
+
+
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
     return {
         'table': sortable
     }
+
 
 @templated('admin/forums_edit.html')
 def forums_edit(request, slug=None):
@@ -477,6 +482,7 @@ def forums_edit(request, slug=None):
         'form': form,
     }
 
+
 @templated('admin/users.html')
 def users(request):
     if 'q' in request.GET:
@@ -515,7 +521,9 @@ def edit_user(request, username):
                 if data['avatar']:
                     user.save_avatar(data['avatar'])
                 user.save()
-            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
+            flash(
+                u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
+                % user.username, True)
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
@@ -567,4 +575,3 @@ def ikhaya_date_edit(request, date=None):
         'form': form,
         'date': date
     }
-
