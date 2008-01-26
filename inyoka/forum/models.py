@@ -862,6 +862,7 @@ class Post(models.Model):
     """
     objects = PostManager()
     text = models.TextField('Text')
+    rendered_text = models.TextField('RenderedText')
     author = models.ForeignKey(User, verbose_name='Autor',
                                related_name='posts')
     pub_date = models.DateTimeField('Datum')
@@ -871,12 +872,8 @@ class Post(models.Model):
     hidden = models.BooleanField(u'Verborgen', default=False)
     xapian_docid = models.IntegerField(default=0)
 
-    @property
-    def rendered_text(self):
-        return self.render_text()
-
     def render_text(self, request=None, format='html', nocache=False):
-        context = RenderContext(request or r.request)
+        context = RenderContext(request or r.request, simplified=True)
         if nocache or self.id is None or format != 'html':
             return parse(self.text).render(context, format)
         key = 'forum/post/%s' % self.id
@@ -887,6 +884,7 @@ class Post(models.Model):
         return render(instructions, context)
 
     def save(self):
+        self.rendered_text = self.render_text()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
         self.update_search()

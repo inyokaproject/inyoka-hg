@@ -103,16 +103,16 @@
         </p>
       </form>{# .search #}
 
-      {%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
+      <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
         navigation_trace %}
         <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
           %} »{% endif %}
-      {%- endfor %}
+      {%- endfor %}</p>
       <div style="clear:both;"></div>
     </div>{# .pathbar #}
 
     {%- if GLOBAL_MESSAGE %}
-    <div class="message"><strong>Information:</strong> {{ GLOBAL_MESSAGE }}</div>
+    <div class="message">{{ GLOBAL_MESSAGE }}</div>
     {%- endif %}
 
     {%- for message in MESSAGES %}

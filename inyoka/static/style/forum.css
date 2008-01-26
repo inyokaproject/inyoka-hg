@@ -4,314 +4,49 @@
  *
  * The styles for the forum.
  *
- * :copyright: 2007 by Armin Ronacher, Benjamin Wiegand, Christopher Grebs.
+ * :copyright: 2008 by Armin Ronacher.
  * :license: GNU GPL.
  */
- 
-/*** Global *******************************************************************/
 
-.content_tabbar {
-  border: none;
-  padding: 0.0em;
+
+div.content {
+    padding: 0;
+    border: none;
 }
 
-.navi_tabbar ul.table_tabs li {
-  margin-bottom:0px;
+table.forum td.icon {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    width: 40px;
+    text-align: center;
+    vertical-align: middle;
 }
 
-.navi_tabbar ul.table_tabs li a:hover {
-  border:solid 1px #ccc;
+table.forum tr.entry p.name {
+    margin: 0;
+    padding: 0 0 5px 0;
+    font-weight: bold;
 }
 
-ul.navi_tabbar_bottom {
-  font-size: 0.85em;
+table.forum tr.entry td.forum {
+    padding: 8px;
 }
 
-ul.navi_tabbar_bottom {
-  float: right;
-  list-style-type: none;
+table.forum tr.entry p.description,
+table.forum tr.entry p.subforums {
+    font-size: 0.8em;
+    margin: 0;
+    padding: 4px 0 3px 5px;
 }
 
-ul.navi_tabbar_bottom li {
-  float: left;
-  margin-left: 3px;
-  margin-top:-1px;
+table.forum td.posts {
+    text-align: center;
+    color: #888;
+    width: 140px;
 }
 
-ul.navi_tabbar_bottom li a {
-  display: block;
-  border: 1px solid  #ccc;
-  padding: 0.2em 0.4em;
-  text-decoration: none;
+table.forum td.last_post {
+    text-align: right;
+    width: 200px;
+    padding: 5px 15px 5px 0;
 }
-
-ul.navi_tabbar_bottom li a.active {
-  font-weight: bold;
-  background-position: top right;
-  background-color: #f2f2f2;
-  border-color: #999;
-  border-top: solid 1px #fff;
-  padding: 0.2em 0.7em;
-}
-
-ul.navi_tabbar_bottom li a:hover {
-  color: #664400;
-}
-
-/*** Overview / Index *********************************************************/
-
-table.category .forum, 
-table.category .topic {
-  width: 55%;
-}
-
-table.category .topic_count,
-table.category .post_count,
-table.category .view_count {
-  width: 10%;
-  text-align: center;
-}
-
-table.category .last_post {
-  width: 25%;
-  text-align: center;
-}
-
-table.category td.forum p {
-  margin: 0;
-  padding: 0.1em 0.0em;
-  text-align: left;
-}
-
-table.category td.forum p.description {
-  font-size: 0.9em;
-}
-
-table.category td.forum p.subforums {
-  font-size: 0.9em;
-  padding: 0.5em 0 0 1em;
-  color: #444;
-}
-
-table.category td.last_post .date {
-  font-size: 0.9em;
-}
-
-/*** Forum ********************************************************************/
-
-table.forum {
-  margin-bottom: 0px;
-}
-
-table.forum tbody th.title {
-  text-align: center;
-  border-bottom: none;
-}
-
-table.forum .forum, 
-table.forum .topic {
-  width: 55%;
-  border-top: none;
-}
-
-table.forum .topic_count,
-table.forum .post_count,
-table.forum .view_count {
-  width: 10%;
-  text-align: center;
-  border-top: none;
-}
-
-table.forum .last_post {
-  width: 25%;
-  text-align: center;
-  border-top: none;
-}
-
-table.forum td.forum p {
-  margin: 0;
-  padding: 0.3em 0.0em;
-}
-
-table.forum td.forum p.description {
-  font-size: 0.9em;
-  color: #444;
-}
-
-table.forum td.forum p.subforums {
-  font-size: 0.9em;
-  padding: 0.5em 0 0 1em;
-}
-
-table.forum td.topic p {
-  margin: 0;
-  padding: 0.3em 0.0em;
-}
-
-table.forum td.topic p.description {
-  font-size: 0.9em;
-  color: #444;
-}
-
-table.forum td.topic p.subforums {
-  font-size: 0.9em;
-  padding: 0.5em 0 0 1em;
-}
-
-table.forum td.last_post .date {
-  font-size: 0.9em;
-}
-
-table.forum tr.reported, table.forum tr.reported td {
-  background-color: #FFDDDD !important;
-}
-
-/*** Topic ********************************************************************/
-
-table.topic {
-  margin-bottom: 0px;
-}
-
-table.topic td.topic_solved,
-table.topic td.topic_unsolved {
-  padding-left: 32px;
-  background-position: left center;
-  background-repeat: no-repeat;
-}
-
-table.topic td.topic_solved {
-  background-image: url('../img/forum_solved.png');
-}
-
-table.topic td.topic_unsolved {
-  background-image: url('../img/forum_unsolved.png');
-}
-
-table.topic td.author {
-  border-right: 1px solid #ccc;
-  background-color: #F4F4F4;
-  width: 10%;
-  vertical-align: top;  
-}
-
-table.topic td.author a {
-  color: #000000;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-table.topic .postinfo {
-  border-bottom: 1px solid #CCCCCC;
-  font-size: 0.8em;
-  padding-bottom: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-table.topic .postinfo .postactions {
-  float: right;
-  margin-right: 0.5em;
-}
-
-table td.split {
-  background-color: #ffd;
-  border: 1px solid #CCC;
-  width: 1px;
-  vertical-align: middle;
-  text-align: center;
-}
-
-/*** New Topic ****************************************************************/
-
-form.new_topic {
-  margin: 0 0 2em 0;
-  padding: 15px 20px;
-  margin-bottom: 1.0em;
-  border: solid 1px #ccc;
-}
-
-div.preview {
-  border: 1px solid #ccc;
-  margin: 20px 0 20px 0;
-  padding: 10px 20px 10px 20px;
-  background-color: #f8f8f8;
-  background-image: url(../img/draft.png);
-}
-
-.newtopic-link {
-  background: url(../img/forum/new-topic.png) no-repeat;
-  padding-left: 18px;
-}
-
-/*** Other Stuff *************************************************************/
-
-.pagination {
-  border: solid 1px #ccc;
-  padding: 0.3em;
-  margin-top: 2.0em;
-  text-align: right;
-}
-
-.pagination .newtopic-link {
-  display: block;
-  float: left;
-}
-
-/*.moderation {
-  float: right;
-  margin: 0.5em; 
-}*/
-
-.moderation {
-  text-align:right;
-  padding:0.2em;
-}
-
-.moderation a {
-  padding-left: 18px;
-  background-repeat: no-repeat;
-  background-position: left center;
-}
-
-.moderation a.delete {
-  background-image: url(../img/forum/delete.png);
-}
-
-.moderation a.lock {
-  background-image: url(../img/forum/lock.png);
-}
-
-.moderation a.unlock {
-  background-image: url(../img/forum/unlock.png);
-}
-
-.moderation a.split {
-  background-image: url(../img/forum/split.png);
-}
-
-.moderation a.move {
-  background-image: url(../img/forum/move.png);
-}
-
-.moderation a.restore {
-  background-image: url(../img/forum/restore.png);
-}
-
-.moderation a.hide {
-  background-image: url(../img/forum/hide.png);
-}
-
-.collapsed_header, .expanded_header {
-  padding-left: 16px;
-  background-repeat: no-repeat;
-  background-position: left center;
-}
-
-.collapsed_header {
-  background-image: url(../img/collapsed.png);
-}
-
-.expanded_header {
-  background-image: url(../img/expanded.png);
-}
-
-

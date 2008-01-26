@@ -723,7 +723,7 @@ def reportlist(request):
         form = ReportListForm()
         _add_field_choices()
 
-    privileges = get_privileges(user, forums)
+    privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
         if privileges.get(topic.forum_id, {'moderator': False})['moderator']:

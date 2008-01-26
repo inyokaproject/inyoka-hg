@@ -15,7 +15,7 @@
 {% set navigation_trace = [
     (href('admin'), 'Adminbereich')
   ] + navigation_trace %}
-{% set title_trace = [navigation_trace[-1][1], 'Adminbereich'] + title_trace %}
+{% set title_trace = ['Adminbereich'] + title_trace %}
 
 {% macro admin_button(link, icon, name) %}
   <td>
