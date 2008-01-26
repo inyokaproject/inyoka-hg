@@ -265,12 +265,22 @@ class UserCPProfileForm(forms.Form):
     occupation = forms.CharField(label='Beruf', required=False)
     interests = forms.CharField(label='Interessen', required=False)
     website = forms.URLField(label='Webseite', required=False)
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel', 
+                              max_length=10, required=False)
+        
+    def clean_gpgkey(self):
+        gpgkey = self.cleaned_data.get('gpgkey', '').upper()
+        if gpgkey.startswith('0X'):
+           gpgkey = gpgkey[2:]
+        return gpgkey
 
     def clean_signature(self):
+        signature = self.cleaned_data.get('signature', '')
         try:
-            validate_signature(self.cleaned_data.get('signature', ''))
+            validate_signature(signature)
         except SignatureError, e:
             raise forms.ValidationError(e.message)
+        return signature
 
 
 class SearchForm(forms.Form):
