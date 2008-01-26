@@ -85,7 +85,6 @@ from django.db import models, connection
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.html import escape
-from inyoka.portal.user import get_system_user
 from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
      get_close_matches, get_title, pagename_join
 from inyoka.wiki.parser import nodes
@@ -528,7 +527,7 @@ class PageManager(models.Manager):
             att.save()
             attachment = att
         if user is None:
-            user = get_system_user()
+            user = User.objects.get_system_user()
         elif user.is_anonymous():
             user = None
         if remote_addr is None:
@@ -1041,7 +1040,7 @@ class Page(models.Model):
             att.save()
             attachment = att
         if user is None:
-            user = get_system_user()
+            user = User.objects.get_system_user()
         elif user.is_anonymous():
             user = None
         if change_date is None:

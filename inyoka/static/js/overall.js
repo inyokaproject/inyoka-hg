@@ -45,6 +45,7 @@ $(document).ready(function() {
       $currentAreaName = $('select.search_area option[@selected]').html(),
       areaPopup = $('<ul class="search_area" />'),
       searchArea = $('select.search_area').hide();
+      $('.search_query').addClass('area_' + $currentSearchArea);
     $('form.search')
       .submit(function() {
         var url = $(this).attr('action'), tmp;

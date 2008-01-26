@@ -1059,7 +1059,9 @@ def markread(request, slug=None):
     if slug:
         forum = Forum.objects.get(slug=slug)
         forum.mark_read(user)
+        return HttpResponseRedirect(url_for(forum))
     else:
         user.forum_last_read = Post.objects.get_max_id()
+        user.forum_read_status = ''
         user.save()
     return HttpResponseRedirect(href('forum'))
