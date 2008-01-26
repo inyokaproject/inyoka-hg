@@ -30,9 +30,8 @@
   {%- for forum in table.get_objects() %}
   <tr>
     <td><a href="{{ forum|url('edit') }}">{{ forum.name|e }}</a></td>
-    <td>{% if forum.parent %}<a href="{{ forum.parent|url('edit') }}">{{ forum.parent.name|e }}</a>{% else %}None{% endif %}</td>
+    <td>{% if forum.parent %}<a href="{{ forum.parent|url('edit') }}">{{ forum.parent.name|e }}</a>{% else %}-{% endif %}</td>
     <td>{{ forum.position|e }}</td>
-    <td>{% if forum.parent %}<a href="{{ forum.parent|url }}">{{ forum.parent.name|e }}{% else %}-{% endif %}</a></td>
   </tr>
   {%- else %}
   <tr>
