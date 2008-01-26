@@ -286,6 +286,15 @@ class PostManager(models.Manager):
 
         return t
 
+    def get_max_id(self):
+        cur = connection.cursor()
+        cur.execute('''
+            select max(p.id)
+              from forum_post p;
+        ''')
+        row = cur.fetchone()
+        return row and row[0] or 0
+
 
 class AttachmentManager(models.Manager):
     """
