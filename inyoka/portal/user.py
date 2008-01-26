@@ -118,6 +118,18 @@ class UserManager(models.Manager):
             _ANONYMOUS_USER = User.objects.get(id=1)
         return _ANONYMOUS_USER
 
+    def get_system_user(self):
+        """
+        This returns the system user that is controlled by inyoka itself. It
+        is the sender for welcome notices, it updates the antispam list and
+        is the owner for log entries in the wiki triggered by inyoka itself.
+        """
+        try:
+            return User.objects.get(username=settings.INYOKA_SYSTEM_USER)
+        except User.DoesNotExist:
+            return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
+                                            settings.INYOKA_SYSTEM_USER_EMAIL)
+
 
 class User(models.Model):
     """User model that contains all informations about an user."""
@@ -274,19 +286,6 @@ def deactivate_user(user):
         user.signature = user.coordinates = user.location = \
         user.occupation = user.interests = user.website = ''
     user.save()
-
-
-def get_system_user():
-    """
-    This returns the system user that is controlled by inyoka itself. It
-    is the sender for welcome notices, it updates the antispam list and
-    is the owner for log entries in the wiki triggered by inyoka itself.
-    """
-    try:
-        return User.objects.get(username=settings.INYOKA_SYSTEM_USER)
-    except User.DoesNotExist:
-        return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
-                                        settings.INYOKA_SYSTEM_USER_EMAIL)
 
 
 from inyoka.wiki.parser import parse, render, RenderContext

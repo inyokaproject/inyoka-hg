@@ -816,7 +816,10 @@ def calendar(request, year=None, month=None):
     now = datetime.now()
     year = year or now.year
     month = month or now.month
-    dates = CalendarItem.object.filter(date__year=year, date__month=month)
+    dates = CalendarItem.objects.filter(date__year=year, date__month=month) \
+                        .order_by('date')
+    
     return {
-        'dates': dates
+        'dates': dates,
+        'prev': ''
     }
