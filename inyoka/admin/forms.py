@@ -100,4 +100,3 @@ class EditForumForm(forms.Form):
     slug = forms.CharField(label=u'Slug', max_length=100, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'description', required=False)
     parent = forms.ChoiceField(label=u'Eltern Forum', required=False)
-

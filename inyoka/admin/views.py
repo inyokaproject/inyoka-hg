@@ -29,6 +29,8 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.models import Forum
 
+
+
 @templated('admin/index.html')
 def index(request):
     return {}
@@ -346,12 +348,14 @@ def ikhaya_icon_edit(request, icon=None):
         'icon': icon
     }
 
+
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
     return {
         'table': sortable
     }
+
 
 @templated('admin/forums_edit.html')
 def forums_edit(request, slug=None):
@@ -414,12 +418,15 @@ def forums_edit(request, slug=None):
     return {
         'form': form,
     }
+
+
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
     return {
         'table': sortable
     }
+
 
 @templated('admin/forums_edit.html')
 def forums_edit(request, slug=None):
@@ -477,13 +484,14 @@ def forums_edit(request, slug=None):
         'form': form,
     }
 
+
 @templated('admin/users.html')
 def users(request):
     if 'user' in request.POST:
         try:
             user = User.objects.get(username=request.POST.get('user'))
         except User.DoesNotExist:
-            flash(u'Der Benutzer %s existiert nicht.' 
+            flash(u'Der Benutzer %s existiert nicht.'
                   % escape(request.POST.get('user')))
         else:
             return HttpResponseRedirect(href('admin', 'users', user.username))
@@ -495,7 +503,6 @@ def _on_search_user_query(request):
     qs = User.objects.filter(username__startswith=request.GET.get('q', ''))
     if len(qs) > 10:
         qs = []
-    
     return HttpResponse('\n'.join(
         x.username for x in qs
     ))
@@ -571,4 +578,3 @@ def ikhaya_date_edit(request, date=None):
         'form': form,
         'date': date
     }
-

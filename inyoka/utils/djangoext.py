@@ -29,4 +29,3 @@ class BinaryField(Field):
             return 'bytea' % self.__dict__
         if 'mysql' in creation_db:
             return 'BLOB' % self.__dict__
-
