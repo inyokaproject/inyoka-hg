@@ -40,9 +40,9 @@ def get_privileges(user, forums):
     ''' % (fields, ', '.join(['%s'] * len(forum_ids))),
         (tuple(forum_ids) + (user.id,)))
     result = {}
+    for forum_id in forum_ids:
+        result[forum_id] = dict.fromkeys(PRIVILEGES, False)
     for row in cur.fetchall():
-        if row[0] not in result:
-            result[row[0]] = dict.fromkeys(PRIVILEGES, False)
         for key, item in izip(PRIVILEGES, row[1:]):
             if item:
                 result[row[0]][key] = True
