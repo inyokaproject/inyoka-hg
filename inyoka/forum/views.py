@@ -971,7 +971,12 @@ def markread(request, slug=None):
     Mark either all or only the given forum as read.
     """
     user = request.user
-    if user.is_authenticated():
+    if user.is_anonymous():
+        return
+    if slug:
+        forum = Forum.objects.get(slug=slug)
+        forum.mark_read(user)
+    else:
         user.forum_last_read = Post.objects.get_max_id()
         user.save()
     return HttpResponseRedirect(href('forum'))

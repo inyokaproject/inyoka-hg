@@ -581,6 +581,14 @@ class Forum(models.Model):
                 return False
         return True
 
+    def mark_read(self, user):
+        forums = [self]
+        while forums:
+            forum = forums.pop()
+            for topic in forum.topics:
+                topic.mark_read(user)
+            forums.extend(forum.children)
+
     def __unicode__(self):
         return self.name
 
