@@ -186,6 +186,7 @@ def viewtopic(request, topic_slug, page=1):
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
     if request.user.is_authenticated():
+        t.mark_read(request.user)
         subscribed = bool(Subscription.objects.filter(
             topic=t, user=request.user))
     return {
@@ -1052,7 +1053,12 @@ def markread(request, slug=None):
     Mark either all or only the given forum as read.
     """
     user = request.user
-    if user.is_authenticated:
+    if user.is_anonymous():
+        return
+    if slug:
+        forum = Forum.objects.get(slug=slug)
+        forum.mark_read(user)
+    else:
         user.forum_last_read = Post.objects.get_max_id()
         user.save()
     return HttpResponseRedirect(href('forum'))

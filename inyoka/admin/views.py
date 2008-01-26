@@ -387,6 +387,7 @@ def forums_edit(request, slug=None):
             else:
                 f = Forum.objects.get(slug=slug)
             f.name = data['name']
+            f.position = data['position']
             if slug is None:
                 _check_forum_slug()
             else:
@@ -412,13 +413,13 @@ def forums_edit(request, slug=None):
                 'name': f.name,
                 'slug': f.slug,
                 'description': f.description,
-                'parent': f.parent
+                'parent': f.parent,
+                'position': f.position
             })
         _add_field_choices()
     return {
         'form': form,
     }
-
 
 @templated('admin/forums.html')
 def forums(request):
@@ -487,7 +488,7 @@ def forums_edit(request, slug=None):
 
 @templated('admin/users.html')
 def users(request):
-    if 'user' in request.POST:
+    if request.method == 'POST':
         try:
             user = User.objects.get(username=request.POST.get('user'))
         except User.DoesNotExist:
