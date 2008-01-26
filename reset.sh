@@ -7,6 +7,7 @@ EOF
 django-admin.py syncdb --noinput
 django-admin.py shell --plain >> /dev/null <<EOF
 from inyoka.portal.user import User
+User(username='Anonymous', password='').save()
 u = User.objects.register_user('admin', 'admin@example.org', 'default', False)
 u.is_staff=True
 u.is_superuser = True
