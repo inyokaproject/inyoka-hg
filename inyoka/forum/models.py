@@ -516,7 +516,7 @@ class Forum(models.Model):
     """
     objects = ForumManager()
     name = models.CharField('Name', max_length=100)
-    slug = models.CharField('Slug', max_length=100, blank=True)
+    slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
     description = models.TextField('Beschreibung', max_length=500, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True,
                                verbose_name='Elternforum')
@@ -529,7 +529,8 @@ class Forum(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('forum', self.parent and 'forum' or 'category', self.slug),
-            'newtopic': ('forum', 'forum', self.slug, 'newtopic')
+            'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
+            'edit': ('forum', 'forum', self.slug, 'edit')
         }[action])
 
     @property

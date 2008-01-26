@@ -1,0 +1,75 @@
+{#
+    templates.admin.ikhaya_edit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Template for editing or creating an Ikhaya article
+
+    :copyright: 2007 by Marian Sigler, Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+
+
+{% if not article %}
+  {% set navigation_trace = [
+      (href('forum', 'add'), 'Forum erstellen')
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (article|url('edit'), 'Forum „%s“ bearbeiten'|format(Forum.name|e))
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'forum'), 'Forum'),
+  ] + navigation_trace %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" class="forum">
+  {{ h.render_form(form, 'name', 'slug','description', 'parent') }}
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+
+<script type="text/javascript">
+  /* <![CDATA[ */
+  var text = new WikiEditor('textarea[@name="text"]');
+  var intro = new WikiEditor('textarea[@name="intro"]');
+  var date = new DateTimeField('input[@name="pub_date"]');
+
+  var intro_skipped = false;
+  $('#id_intro').keyup(function () {
+    var value = intro.textarea.val();
+    if ((value.substr(-2) == '\n\n' || value.substr(-4) == '\r\n\r\n')
+        && (! intro_skipped)) {
+      $('#id_text').focus();
+      intro.textarea.val(value.substr(0, value.length - 2));
+      intro_skipped = true;
+    }
+  })
+
+  var category_icons = {
+    {%- for k, v in category_icons.iteritems() %}
+    '{{ k }}': '{{ v }}',
+    {%- endfor %}
+  };
+  
+  $('#id_category').change(function () {
+    var category = $('#id_category').val();
+    if (category in category_icons) {
+      icons = document.getElementById('id_icon');
+      $('#id_icon').children().each(function(i, opt) {
+        if (opt.value == category_icons[category]) {
+          $('#id_icon')[0].selectedIndex = i;
+        }
+      })
+    }
+  });
+  $(function() { $('#id_category').change() });
+  /* ]]> */
+</script>
+{%- endblock %}
