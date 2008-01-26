@@ -62,11 +62,6 @@ class EditIconForm(forms.Form):
     identifier = forms.CharField(label=u'Bezeichner', max_length=100)
     img = forms.FileField(label=u'Bild')
 
-class EditForumForm(forms.Form):
-    name = forms.CharField(label=u'Name', max_length=100)
-    slug = forms.CharField(label=u'Slug', max_length=100, required=False)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'description', required=False)
-    parent = forms.ChoiceField(label=u'Eltern Forum', required=False)
 
 class EditUserForm(forms.Form):
     # personal informations
@@ -92,3 +87,10 @@ class EditUserForm(forms.Form):
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
+
+
+class EditDateForm(forms.Form):
+    date = forms.DateTimeField(input_formats=DATETIME_INPUT_FORMATS,
+                               initial=datetime.now())
+    title = forms.CharField()
+    description = forms.CharField(widget=forms.Textarea)
