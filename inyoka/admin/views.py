@@ -385,7 +385,7 @@ def forums_edit(request, slug=None):
             if slug is None:
                 _check_forum_slug()
             else:
-                if f.slug != slug
+                if f.slug != slug:
                     _check_forum_slug()
             f.description = data['description']
             try:
