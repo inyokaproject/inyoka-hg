@@ -12,10 +12,11 @@ from itertools import izip
 from django.db import connection
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum
+from inyoka.portal.utils import decor
 
 
 PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
-              'sticky', 'vote', 'upload']
+              'sticky', 'vote', 'upload', 'moderate']
 
 
 def get_forum_privileges(user, forum):

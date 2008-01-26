@@ -4,7 +4,7 @@ django-admin.py dbshell <<EOF
 	create database ubuntuusers;
 EOF
 django-admin.py syncdb --noinput
-django-admin.py shell >> /dev/null <<EOF
+django-admin.py shell --plain >> /dev/null <<EOF
 from inyoka.portal.user import User
 u = User.objects.register_user('admin', 'admin@example.org', 'default', False)
 u.is_staff=True

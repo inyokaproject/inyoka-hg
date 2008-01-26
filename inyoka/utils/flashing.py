@@ -47,13 +47,15 @@ def unflash(classifier):
     session['flashed_messages'] = [item for item in session.get(
                                    'flashed_messages', ())
                                    if item[2] != classifier]
+    if not session['flashed_messages']:
+        del session['flashed_messages']
 
 
 def clear():
     """Clear the whole flash buffer."""
     session = getattr(r.request, 'session', None)
     if session is not None:
-        session['flashed_messages'] = []
+        session.pop('flashed_messages', None)
 
 
 def get_flashed_messages():
@@ -66,12 +68,14 @@ def get_flashed_messages():
         return []
     flash_buffer = [FlashMessage(x[0], x[1], x[3], x[4]) for x in
                     session.get('flashed_messages', ())]
-    session['flashed_messages'] = []
+    del session['flashed_messages']
     r.request.flash_message_buffer = flash_buffer
     return flash_buffer
 
 
 class FlashMessage(object):
+    __slots__ = ('text', 'success', 'dialog', 'dialog_url')
+
     def __init__(self, text, success=None, dialog=False, dialog_url=None):
         self.text = text
         self.success = success

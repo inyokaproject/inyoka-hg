@@ -16,12 +16,13 @@ from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
-from inyoka.portal.utils import simple_check_login, check_login
+from inyoka.portal.utils import simple_check_login, check_login, \
+                                abort_access_denied
 from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated
+from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -36,7 +37,8 @@ from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                AddAttachmentForm, EditPostForm, AddPollForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
-from inyoka.forum.acl import filter_invisible
+from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
+                             have_privilege
 
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -96,15 +98,17 @@ def forum(request, slug, page=1):
     Return a single forum to show a topic list.
     """
     f = Forum.objects.get(slug=slug)
-    if f.parent == None:
+    if f.parent is None:
         return HttpResponseRedirect(href('forum'))
+    if not have_privilege(request.user, f, 'read'):
+        return abort_access_denied(request)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
     return {
-        'forum':        f,
+        'forum':        filter_invisible(request.user, f),
         'topics':       list(pagination.get_objects()),
         'pagination':   pagination.generate()
     }
@@ -119,13 +123,15 @@ def viewtopic(request, topic_slug, page=1):
     see these topics.
     """
     t = Topic.objects.get(slug=topic_slug)
+    privileges = get_forum_privileges(request.user, t.forum)
+    if not privileges['read']:
+        return abort_access_denied(request)
     if t.hidden:
-        if False:
+        if not privileges['moderate']:
             # XXX: don't show the topic if the user isn't a moderator
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
-        else:
-            flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
+        flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -143,7 +149,9 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     v = request.POST.get('poll_%s' % poll['id'])
                 if v:
-                    if poll['participated']:
+                    if privileges['vote']:
+                        return abort_access_denied(request)
+                    elif poll['participated']:
                         flash(u'Sie haben bereits an dieser Abstimmung '
                               u'teilgenommen.')
                         continue
@@ -212,10 +220,13 @@ def newpost(request, topic_slug=None, quote_id=None):
         t = p.topic
     else:
         t = Topic.objects.get(slug=topic_slug)
-    if t.locked:
+    privileges = get_forum_privileges(request.user, t.forum)
+    if t.locked and not privileges['moderator']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
                u'von einem Moderator geschlossen wurde.'))
         return HttpResponseRedirect(t.get_absolute_url())
+    elif not privileges['reply']:
+        return abort_access_denied(request)
     posts = t.post_set.all().exclude(text='').order_by('-pub_date')[:10]
     attach_form = AddAttachmentForm()
 
@@ -226,6 +237,8 @@ def newpost(request, topic_slug=None, quote_id=None):
         # other attachments.
         attachments = list(Attachment.objects.filter(id__in=att_ids))
         if 'attach' in request.POST:
+            if 'upload' not in privileges:
+                return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
@@ -288,6 +301,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         'form':        form,
         'attach_form': attach_form,
         'attachments': list(attachments),
+        'can_attach':  'upload' in privileges,
         'isnewpost' :  True,
         'preview':     preview
     }
@@ -333,6 +347,10 @@ def newtopic(request, slug=None, article=None):
         # we don't allow posting in categories
         return HttpResponseRedirect(href('forum'))
 
+    privileges = get_forum_privileges(request.user, f)
+    if 'create' not in privileges:
+        return abort_access_denied(request)
+
     attach_form = AddAttachmentForm()
     poll_form = AddPollForm()
 
@@ -353,6 +371,8 @@ def newtopic(request, slug=None, article=None):
         options = request.POST.getlist('options')
 
         if 'attach' in request.POST:
+            if 'upload' not in privileges:
+                return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
@@ -465,6 +485,7 @@ def newtopic(request, slug=None, article=None):
         'forum':       f,
         'attach_form': attach_form,
         'attachments': list(attachments),
+        'can_attach':  'upload' in privileges,
         'poll_form':   poll_form,
         'polls':       polls,
         'options':     options,
