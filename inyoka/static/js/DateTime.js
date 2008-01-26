@@ -122,7 +122,32 @@
             $('<a class="calendarnav-previous"></a>').text('<').click(function() {
               self.drawPreviousMonth()
             }),
-            months[month-1] + ' ' + year
+            $('<span>' + months[month-1] + ' ' + year + '</span>').click(function() {
+              $(this).hide().after(
+                $('<input type="text" />')
+                  .val(month + '-' + year)
+                  .change(function() {
+                    var dayRegex = /(\d{1,2})-(\d{1,2})-(\d+)/
+                    dayRegex.exec($(this).val())
+                    if (RegExp.$1) {
+                      self.drawDate(RegExp.$3, RegExp.$2, RegExp.$1);
+                    } else {
+                      var monthRegex = /(\d{1,2})-(\d+)/
+                      monthRegex.exec($(this).val())
+                      if (RegExp.$1) {
+                        self.drawDate(RegExp.$2, RegExp.$1);
+                      }
+                    }
+                  })
+                  .keypress(function(evt) {
+                    if (evt.keyCode == 13) {
+                      $(this).change();
+                      return false;
+                    }
+                  })
+              );
+              $(this).next().focus();
+            })
           )
         )
       );
@@ -150,14 +175,14 @@
           row = $('<tr></tr>').appendTo(tbody);
         }
         var td = $('<td></td>').append(
-            $('<a></a>').text(currentDay).click(function() {
-              $('.selected', $(this).parent().parent().parent()).removeClass('selected');
-              $(this).parent().addClass('selected');
-              self.currentDay = $(this).text();
-              self.currentMonth = month;
-              self.currentYear = year;
-              self.writeDateTime();
-            })
+          $('<a></a>').text(currentDay).click(function() {
+            $('.selected', $(this).parent().parent().parent()).removeClass('selected');
+            $(this).parent().addClass('selected');
+            self.currentDay = $(this).text();
+            self.currentMonth = month;
+            self.currentYear = year;
+            self.writeDateTime();
+          })
         ).appendTo(row);
         if (year == this.currentYear && month == this.currentMonth && currentDay == this.currentDay) {
           td.addClass('selected');
@@ -172,10 +197,20 @@
 
       this.calendar.append(calendar);
     },
-    drawDate: function(month, year) {
-      this.calendarMonth = month;
-      this.calendarYear = year;
-      this.drawCalendar();
+    drawDate: function(year, month, day) {
+      day = parseInt(day);
+      month = parseInt(month);
+      year = parseInt(year);
+      if (month > 0 && month < 13) { 
+        this.calendarMonth = month;
+        this.calendarYear = year;
+        if (day) {
+          this.currentDay = day;
+          this.currentMonth = month;
+          this.currentYear = year;
+        }
+        this.drawCalendar();
+      }
     },
     drawPreviousMonth: function() {
       if (this.calendarMonth == 1) {
