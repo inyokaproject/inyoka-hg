@@ -47,7 +47,11 @@
       {%- endif %}
       <tr>
         <td class="icon">
-          {{ forum.get_read_status(USER)|e }}<img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+          {% if forum.get_read_status(USER) %}
+            <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+          {% else %}
+            <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
+          {% endif %}
         </td>
         <td class="forum">
           <a href="{{ subforum|url }}" class="forum_title">{{ subforum.name|e }}</a>
@@ -86,7 +90,11 @@
       {%- endif %}
       <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
-          {{ topic.get_read_status(USER)|e }}{{ topic_icon(topic) }}
+          {% if topic.get_read_status(USER) %}
+            {{ topic_icon(topic) }}
+          {% else %}
+            new
+          {% endif %}
         </td>
         <td class="topic">
           {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}

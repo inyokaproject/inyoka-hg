@@ -43,7 +43,11 @@
       {%- for forum in category.children -%}
       <tr>
         <td class="icon">
-          {{ forum.get_read_status(USER)|e }}<img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+          {% if forum.get_read_status(USER) %}
+            <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+          {% else %}
+            <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
+          {% endif %}
         </td>
         <td class="forum">
           <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
