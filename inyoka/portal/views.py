@@ -364,7 +364,7 @@ def usercp_profile(request):
             data = form.cleaned_data
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email'):
+                        'interests', 'website', 'email', 'gpgkey'):
                 setattr(request.user, key, data[key])
             if data['delete_avatar']:
                 request.user.delete_avatar()

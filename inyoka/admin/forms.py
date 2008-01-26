@@ -71,6 +71,9 @@ class EditUserForm(forms.Form):
                                    u'Bitte nur angeben, wenn benötigt.'))
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
+
+    #groups = forms.MultipleChoiceField(label=u'Gruppen', choices=[], required=False)
+    post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
 
     # notification informations
@@ -87,6 +90,15 @@ class EditUserForm(forms.Form):
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel', 
+                              max_length=10, required=False)
+
+    def clean_gpgkey(self):
+        gpgkey = self.cleaned_data.get('gpgkey', '').upper()
+        if gpgkey.startswith('0X'):
+           gpgkey = gpgkey[2:]
+        return gpgkey
+
 
     forum_privileges = forms.MultipleChoiceField(required=False)
 

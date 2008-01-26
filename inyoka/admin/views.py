@@ -492,7 +492,7 @@ def edit_user(request, username):
             for key in ('username', 'password', 'is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates',
-                        'post_count'):
+                        'post_count', 'gpgkey'):
                 setattr(user, key, data[key])
                 if data['avatar']:
                     user.save_avatar(data['avatar'])
