@@ -453,16 +453,6 @@ def forums_edit(request, id=None):
         'form': form,
     }
 
-
-@require_manager
-@templated('admin/forums.html')
-def forums(request):
-    sortable = Sortable(Forum.objects.all(), request.GET, '-name')
-    return {
-        'table': sortable
-    }
-
-
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
