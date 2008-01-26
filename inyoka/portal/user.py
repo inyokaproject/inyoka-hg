@@ -113,8 +113,8 @@ class UserManager(models.Manager):
         return user
 
     def get_anonymous_user(self):
+        global _ANONYMOUS_USER
         if not _ANONYMOUS_USER:
-            global _ANONYMOUS_USER
             _ANONYMOUS_USER = User.objects.get(id=1)
         return _ANONYMOUS_USER
 
@@ -163,6 +163,10 @@ class User(models.Model):
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
 
     #XXX: permissions
+
+    # the user can access the admin panel
+    is_manager = models.BooleanField('Teammitglied (kann ins Admin-Panel)',
+                                     default=False)
 
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
