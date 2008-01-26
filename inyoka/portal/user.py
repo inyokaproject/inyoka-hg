@@ -168,7 +168,7 @@ class User(models.Model):
         return self.username
 
     is_anonymous = property(lambda x: _callable_bool(x.id == 1))
-    is_authenticated = property(lambda x: not x.is_anonymous)
+    is_authenticated = property(lambda x: _callable_bool(not x.is_anonymous))
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
