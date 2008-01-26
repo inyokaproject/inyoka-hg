@@ -366,6 +366,14 @@ def forums_edit(request, slug=None):
         except Forum.DoesNotExist:
             f.slug = data['slug']
 
+    def _issubforum(forum, parentforum):
+        if forum == parentforum:
+            return False
+        for parent in Forum.objects.filter(parent=forum):
+            if not _issubforum(parent, parentforum):
+                return False
+        return True
+
     if request.method == 'POST':
         form = EditForumForm(request.POST)
         _add_field_choices()
@@ -384,7 +392,11 @@ def forums_edit(request, slug=None):
             f.description = data['description']
             try:
                 if int(data['parent']) != -1:
-                    f.parent = Forum.objects.get(id=data['parent'])
+                    if _issubforum(f, Forum.objects.get(id=data['parent'])):
+                        f.parent = Forum.objects.get(id=data['parent'])
+                    else:
+                        flash(u'Der ausgewählte Parent ist ein Sub-Forum dieses Forums')
+                        return {  'form': form }
                 f.save()
                 flash(u'Das Forum wurde erfolgreich angepasst, bzw angelegt')
             except Forum.DoesNotExist:
