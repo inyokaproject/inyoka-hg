@@ -29,7 +29,7 @@ def check_login(message=None):
     def _wrapper(func):
         def decorator(*args, **kwargs):
             req = args[0]
-            if req.user.is_authenticated():
+            if req.user.is_authenticated:
                 return func(*args, **kwargs)
             if message is not None:
                 flash(message)
@@ -49,9 +49,17 @@ def simple_check_login(f):
     """
     def decorator(*args, **kwargs):
         req = args[0]
-        if req.user.is_authenticated():
+        if req.user.is_authenticated:
             return f(*args, **kwargs)
         args = {'next': 'http://%s%s' % (req.get_host(), req.path)}
         return HttpResponseRedirect(href('portal', 'login', **args))
 
     return decor(decorator, f)
+
+
+def abort_access_denied(request):
+    """Abort with an access denied message or go to login."""
+    if request.user.is_anonymous:
+        args = {'next': 'http://%s%s' % (request.get_host(), request.path)}
+        return HttpResponseRedirect(href('portal', 'login', **args))
+    return AccessDeniedResponse()

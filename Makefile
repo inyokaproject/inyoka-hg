@@ -40,7 +40,7 @@ shell:
 	@django-admin.py shell
 
 mysql:
-	@mysql -uubuntu_de ubuntuusers -pG3h31m!
+	@mysql -uroot ubuntuusers
 
 clean-files:
 	find . -name '*.pyc' -exec rm -f {} +
