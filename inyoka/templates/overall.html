@@ -58,6 +58,7 @@
 
     <div class="appheader">
       {%- if not hide_quicklinks %}
+      {%- if USER.is_manager %}
       <ul class="mod_navi">
         {%- if report_count %}
         <li><strong><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen ({{ report_count }})</a></strong></li>
@@ -71,6 +72,7 @@
         {%- endif %}
         <li><a href="{{ href('admin') }}">Adminbereich</a></li>
       </ul>
+      {%- endif %}
       <ul class="navi_global">
         {%- if USER.is_authenticated %}
         <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
