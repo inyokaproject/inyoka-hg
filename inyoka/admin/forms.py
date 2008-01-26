@@ -102,6 +102,6 @@ class EditDateForm(forms.Form):
 class EditForumForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=100)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'description', required=False)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'Beschreibung', required=False)
     parent = forms.ChoiceField(label=u'Elternforum', required=False)
-    position = forms.IntegerField(label=u'Position',)
+    position = forms.IntegerField(label=u'Position', initial=0)

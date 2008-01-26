@@ -563,7 +563,7 @@ class Forum(models.Model):
         return href(*{
             'show': ('forum', self.parent and 'forum' or 'category', self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
-            'edit': ('admin', 'forum', self.slug, 'edit')
+            'edit': ('admin', 'forum', 'edit', self.id)
         }[action])
 
     @property
