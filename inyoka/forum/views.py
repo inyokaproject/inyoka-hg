@@ -103,7 +103,7 @@ def forum(request, slug, page=1):
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
     topics = Topic.objects.by_forum(f.id)
-    pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
@@ -182,7 +182,7 @@ def viewtopic(request, topic_slug, page=1):
     else:
         polls = None
 
-    pagination = Pagination(request, posts, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t))
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
