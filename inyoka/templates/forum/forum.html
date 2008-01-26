@@ -33,7 +33,7 @@
       <tr><th colspan="5" class="category">{{ forum.name|e }}</th></tr>
     </thead>
     <tbody>
-      {%- for subforum in forum.children %}
+      {%- for subforum in subforums %}
       {%- if loop.first %}
       <tr>
         <th colspan="5" class="title">Subforen</th>

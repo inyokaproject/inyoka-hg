@@ -25,6 +25,8 @@ def get_forum_privileges(user, forum):
 
 
 def get_privileges(user, forums):
+    if not forums:
+        return {}
     forum_ids = [x.id for x in forums]
     fields = ', '.join('p.can_' + x for x in PRIVILEGES)
     cur = connection.cursor()
