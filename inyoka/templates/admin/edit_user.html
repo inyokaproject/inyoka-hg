@@ -1,0 +1,58 @@
+{#
+    admin/edit_user.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Just edit an user...
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'pages'), 'Statische Seiten'),
+] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<form action="" method="post">
+  <h3>Persönliche Daten</h3>
+    {# TODO: groups #}
+    {{ h.render_form(form, 'username', 'password', 'is_active',
+                     'date_joined', 'website',
+                     'interests', 'location') }}
+  <h3>Benachrichtigungs-Einstellungen</h3>
+    {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
+  <h3>Sonstige Einstellungen</h3>
+    {{ h.render_form(form, 'signature', 'coordinates', 'avatar', 'post_count') }}
+  <button type="submit" id="submit">Speichern</button>
+  <button type="reset" id="reset">Zurücksetzen</button>
+</form>
+
+<!--
+<script type="text/javascript">
+  //$('div.user_settings_toggle').hide();
+  (function () {
+    var getUsername = function() {
+      var value = $('#user_query').attr('value');
+      value = (typeof value == 'undefined') ? '' : value;
+    }
+
+    $('#user_query').autocomplete("/_search_user_query",
+      { // some options applied to the autocomplete jQuery plugin.
+        'delay': 40, 'maxItemsToShow': 15, 'selectFirst': true, 
+        'matchSubset': 1, 'matchContains': 1, 'autoFill': 1,
+        'cacheLength': 10, 'lineSeperator': '\n',
+    });
+
+    $('#choose_user').click(function() {
+      var tmp = $('<div/>').load('/users/?q=' + getUsername());
+      $('div.user_settings_toggle').append($('div.user_settings_toggle', tmp));
+    });
+  })();
+</script> -->
+{% endblock %}

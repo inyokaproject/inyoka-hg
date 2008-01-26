@@ -43,7 +43,7 @@ class EditArticleForm(forms.Form):
                             label=u'Einleitung')
     text = forms.CharField(widget=forms.Textarea(attrs={'rows': 15}),
                            label=u'Text')
-    author = UserField(label=u'Autor', initial=r.request.user.username)
+    author = UserField(label=u'Autor', initial=(r.request and r.request.user.username or ''))
     category = forms.ChoiceField(label=u'Kategorie')
     icon = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
@@ -61,3 +61,29 @@ class EditCategoryForm(forms.Form):
 class EditIconForm(forms.Form):
     identifier = forms.CharField(label=u'Bezeichner', max_length=100)
     img = forms.FileField(label=u'Bild')
+
+
+class EditUserForm(forms.Form):
+    # personal informations
+    username = forms.CharField(label=u'Benutzername', max_length=30)
+    password = forms.CharField(label=u'Passwort-Hash', max_length=128)
+    is_active = forms.BooleanField(label=u'Aktiv', required=False)
+    date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
+    #groups = forms.MultipleChoiceField(label=u'Gruppen', choices=[], required=False)
+    post_count = forms.IntegerField(label=u'Beiträge', required=False)
+    avatar = forms.ImageField(label=u'Avatar', required=False)
+
+    # notification informations
+    jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
+    icq = forms.CharField(label=u'ICQ', max_length=16, required=False)
+    msn = forms.CharField(label=u'MSN', max_length=200, required=False)
+    aim = forms.CharField(label=u'AIM', max_length=200, required=False)
+    yim = forms.CharField(label=u'YIM', max_length=200, required=False)
+
+    # misc other things
+    signature = forms.CharField(label=u'Signatur', required=False,
+                                widget=forms.Textarea)
+    coordinates = forms.CharField('Koordinaten', required=False)
+    location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
+    interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
+    website = forms.URLField(label=u'Webseite', required=False)
