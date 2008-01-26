@@ -12,6 +12,7 @@ from django import newforms as forms
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
 from inyoka.utils.urls import href
+from inyoka.wiki.parser import validate_signature, SignatureError
 
 
 #: Some constants used for ChoiceFields
@@ -264,6 +265,12 @@ class UserCPProfileForm(forms.Form):
     occupation = forms.CharField(label='Beruf', required=False)
     interests = forms.CharField(label='Interessen', required=False)
     website = forms.URLField(label='Webseite', required=False)
+
+    def clean_signature(self):
+        try:
+            validate_signature(self.cleaned_data.get('signature', ''))
+        except SignatureError, e:
+            raise forms.ValidationError(e.message)
 
 
 class SearchForm(forms.Form):

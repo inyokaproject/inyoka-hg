@@ -186,15 +186,15 @@ def validate_signature(signature):
             for n in node.children:
                 _walk(n)
             if not node.allowed_in_signatures:
-                raise SignatureError(u'Deine Signature enhält nicht '
-                                     u'erlaubte Syntax-Elemente.')
+                raise SignatureError(u'Deine Signature enhält '
+                                     u'unerlaubte Syntax-Elemente.')
         return node
     text = _walk(parse(signature)).text.strip()
     if len(text) > settings.SIGNATURE_LENGTH:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
                              settings.SIGNATURE_LENGTH - len(text)))
-    elif len(text).splitlines() > settings.SIGNATURE_LINES:
+    elif len(text.splitlines()) > settings.SIGNATURE_LINES:
         raise SignatureError(u'Deine Signatur darf maximal aus %d '
                              u'Zeilen bestehen' % settings.SIGNATURE_LINES)
 

@@ -469,6 +469,7 @@ class Document(Container):
     """
     allows_paragraphs = True
     is_document = True
+    allowed_in_signatures = True
 
 
 class Element(Container):
@@ -668,6 +669,7 @@ class Paragraph(Element):
     (except of block level stuff)
     """
     is_block_tag = True
+    allowed_in_signatures = True
 
     @property
     def text(self):
