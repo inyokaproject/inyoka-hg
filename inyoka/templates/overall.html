@@ -50,9 +50,6 @@
           <a href="{{ href(app) }}">{{ app|capitalize }}</a>
         </li>
         {%- endfor %}
-        <li class="community{% if active_app == 'community' %} active{% endif %}">
-          <a href="{{ href('forum', 'community') }}">Talk</a>
-        </li>
       </ul>{# .tabbar #}
     </div>{# .header #}
 
