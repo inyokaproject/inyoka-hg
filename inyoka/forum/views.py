@@ -108,7 +108,8 @@ def forum(request, slug, page=1):
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
     return {
-        'forum':        filter_invisible(request.user, f),
+        'forum':        f,
+        'subforums':    filter_invisible(request.user, f.children),
         'topics':       list(pagination.get_objects()),
         'pagination':   pagination.generate()
     }
