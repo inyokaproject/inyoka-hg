@@ -99,5 +99,5 @@ class EditForumForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=100)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'description', required=False)
-    parent = forms.ChoiceField(label=u'Eltern Forum', required=False)
-
+    parent = forms.ChoiceField(label=u'Elternforum', required=False)
+    position = forms.IntegerField(label=u'Position',)
