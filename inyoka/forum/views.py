@@ -726,7 +726,7 @@ def reportlist(request):
     privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
-        if privileges.get(topic.forum_id, {'moderator': False})['moderator']:
+        if privileges.get(topic.forum_id, {}).get('moderator'):
             visible_topics.append(topic)
 
     return {
