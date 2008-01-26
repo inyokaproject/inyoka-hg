@@ -66,7 +66,7 @@
 <div class="topic_box_content">
 <div class="pagination">Gehe zu Seite {{ pagination }}</div>
 
-    Status: {{ topic.solved and 'gelöst' or 'ungelöst' }}
+Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ topic.solved and 'gelöst' or 'ungelöst' }}</span>
     <span class="linklist">|</span>
     Ubuntu-Version: {{ topic.get_ubuntu_version() }} <br />
     {{ moderation_actions() }}
@@ -113,16 +113,16 @@
         </td>
         <td class="post">
           <div class="postinfo">
-            <span class="postactions">
-              <a href="{{ post|url('edit') }}">Bearbeiten</a>
-              <a href="{{ post|url('quote') }}">Zitieren</a>
+            <div class="linklist floatright">
+              <a href="{{ post|url('edit') }}" class="action action_edit">Bearbeiten</a> |
+              <a href="{{ post|url('quote') }}" class="action action_quote">Zitieren</a> |
               {%- if post.hidden %}
-              <a href="{{ post|url('restore') }}">Wiederherstellen</a>
-              <a href="{{ post|url('delete') }}">Endgültig löschen</a>
+              <a href="{{ post|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
+              <a href="{{ post|url('delete') }}" class="action action_delete">Endgültig löschen</a>
               {%- else %}
-              <a href="{{ post|url('hide') }}">Verbergen</a>
+              <a href="{{ post|url('hide') }}" class="action action_hide">Verbergen</a>
               {%- endif %}
-            </span>
+            </div>
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="return false">
               <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
             </a>

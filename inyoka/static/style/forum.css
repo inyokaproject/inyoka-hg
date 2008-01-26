@@ -57,9 +57,13 @@ table.forum td.last_post {
     border-right: 1px solid #cccccc;
 }
 
+.floatright{
+    float: right;
+}
+
 .topic_box {
     border: 1px solid #cccccc;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
     padding: 0px;
 }
 
@@ -81,6 +85,18 @@ table.forum td.last_post {
 
 .linklist {
     color: #cccccc;
+}
+
+.status_solved {
+    background-repeat: no-repeat;
+    background-image: url('../img/forum_solved.png');
+    padding-left: 25px;
+}
+
+.status_unsolved {
+    background-repeat: no-repeat;
+    background-image: url('../img/forum_unsolved.png');
+    padding-left: 25px;;
 }
 
 .action {
@@ -113,7 +129,7 @@ table.forum td.last_post {
     background-image: url('../img/forum/hide.png');
 }
 .action_reply {
-    background-image: url('../img/forum/reply.png');
+    background-image: url('../img/forum/unlock.png');
 }
 .action_subscribe {
     background-image: url('../img/forum/unlock.png');
@@ -125,5 +141,12 @@ table.forum td.last_post {
     background-image: url('../img/forum/unlock.png');
 }
 .action_report {
+    background-image: url('../img/forum/unlock.png');
+}
+
+.action_edit {
+    background-image: url('../img/forum/unlock.png');
+}
+.action_quote {
     background-image: url('../img/forum/unlock.png');
 }
