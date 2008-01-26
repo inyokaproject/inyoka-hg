@@ -30,6 +30,7 @@ from inyoka.middlewares.registry import r
 
 
 UNUSABLE_PASSWORD = '!'
+_ANONYMOUS_USER = None
 
 
 class _callable_bool(int):
@@ -111,6 +112,11 @@ class UserManager(models.Manager):
 
         return user
 
+    def get_anonymous_user(self):
+        if not _ANONYMOUS_USER:
+            _ANONYMOUS_USER = User.objects.get(id=1)
+        return _ANONYMOUS_USER
+
 
 class User(models.Model):
     """User model that contains all informations about an user."""
@@ -161,8 +167,8 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
-    is_anonymous = property(lambda x: _callable_bool(0))
-    is_authenticated = property(lambda x: _callable_bool(1))
+    is_anonymous = property(lambda x: _callable_bool(x.id == 1))
+    is_authenticated = property(lambda x: not x.is_anonymous)
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
@@ -280,37 +286,6 @@ def get_system_user():
     except User.DoesNotExist:
         return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
                                         settings.INYOKA_SYSTEM_USER_EMAIL)
-
-
-class AnonymousUser(object):
-    """Represents a not logged in user."""
-    id = None
-    username = ''
-    is_active = False
-    groups = property(lambda s: EmptyManager())
-    __unicode__ = lambda s: u'AnonymusUser'
-    __str__ = lambda s: 'AnonymusUser'
-    __eq__ = lambda s, o: isinstance(o, s.__class__)
-    __ne__ = lambda s, o: not s.__eq__(o)
-    __hash__ = lambda s: 1
-    is_anonymous = lambda s: True
-    is_authenticated = lambda s: False
-    forum_last_read = 0
-
-    def __init__(self):
-        pass
-
-    def save(self):
-        raise NotImplementedError
-
-    def delete(self):
-        raise NotImplementedError
-
-    def set_password(self, raw_password):
-        raise NotImplementedError
-
-    def check_password(self, raw_password):
-        raise NotImplementedError
 
 
 from inyoka.wiki.parser import parse, render, RenderContext
