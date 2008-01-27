@@ -882,13 +882,13 @@ class Parser(object):
                     if not row.class_:
                         row.class_ = u' '.join(args) or None
                     row.style = attrs.get('rowstyle')
-                cell.class_ = attrs.get('class') or None
+                cell.class_ = attrs.get('cellclass') or None
                 cell.colspan = attrs.get('colspan', 0)
                 cell.rowspan = attrs.get('rowspan', 0)
                 cell.align = attrs.get('align')
                 if cell.align not in ('left', 'right', 'center'):
                     cell.align = None
-                cell.align = attrs.get('valign')
+                cell.valign = attrs.get('valign')
                 if cell.valign not in ('top', 'middle', 'bottom'):
                     cell.valign = None
                 if cell_type == 'normal':
