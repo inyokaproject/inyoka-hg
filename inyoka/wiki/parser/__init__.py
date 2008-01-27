@@ -763,7 +763,7 @@ class Parser(object):
         Returns a `Link` node.
         """
         target = stream.expect('free_link').value
-        return nodes.Link(target)
+        return nodes.Link(target, shorten=True)
 
     def parse_newline(self, stream):
         """

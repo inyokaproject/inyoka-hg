@@ -23,8 +23,9 @@ class PageEditForm(forms.Form):
     `note`
         A textfield for the change note.
     """
-    text = forms.CharField(widget=forms.Textarea)
-    note = forms.CharField(max_length=512, required=False)
+    text = forms.CharField(widget=forms.Textarea(attrs={'rows':20, 'cols':50}))
+    note = forms.CharField(max_length=512, required=False,
+                           widget=forms.TextInput(attrs={'size': 50}))
 
     def clean_text(self):
         if 'text' in self.cleaned_data:
