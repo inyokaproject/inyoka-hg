@@ -150,7 +150,7 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     v = request.POST.get('poll_%s' % poll['id'])
                 if v:
-                    if privileges['vote']:
+                    if not privileges['vote']:
                         return abort_access_denied(request)
                     elif poll['participated']:
                         flash(u'Sie haben bereits an dieser Abstimmung '
@@ -742,7 +742,7 @@ def reportlist(request):
     privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
-        if privileges.get(topic.forum_id, {}).get('moderator'):
+        if have_privilege(request.user, topic.forum, 'moderate'):
             visible_topics.append(topic)
 
     return {
