@@ -46,7 +46,11 @@
 {% macro topic_actions %}
     <span class="linklist">
         <a href="{{ topic|url('reply') }}" class="action action_reply" >Neue Antwort erstellen</a> |
-        <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen {% if is_subscribed %}nicht mehr {% endif %}benachrichtigen</a> |
+        {%- if is_subscribed %}
+        <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">Bei neuen Beiträgen nicht mehr benachrichtigen</a> |
+        {%- else %}
+        <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen benachrichtigen</a> |
+        {%- endif %}
         {%- if topic.solved %}
         <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">Thema als ungelöst markieren</a> |
         {%- else %}
@@ -55,24 +59,6 @@
         <a href="{{ topic|url('report') }}" class="action action_report">Thema melden</a>
     </span>
 {% endmacro %}
-
-{% block forum_navigation %}
-  <ul class="table_tabs">
-    {# XXX: use icons for these actions in the top bar because it's too big - entequak #}
-    <li><a href="{{ topic|url('reply') }}">Neue Antwort erstellen</a></li>
-    {%- if is_subscribed %}
-    <li><a href="{{ topic|url('subscribe') }}">Bei neuen Beiträgen nicht mehr benachrichtigen</a></li>
-    {% else %}
-    <li><a href="{{ topic|url('unsubscribe') }}">Bei neuen Beiträgen benachrichtigen</a></li>
-    {%- endif %}
-    {%- if topic.solved %}
-      <li><a href="{{ topic|url('unsolve') }}">Thema als ungelöst markieren</a></li>
-    {%- else %}
-      <li><a href="{{ topic|url('solve') }}">Thema als gelöst markieren</a></li>
-    {%- endif %}
-    <li><a href="{{ topic|url('report') }}">Thema melden</a></li>
-  </ul>
-{% endblock %}
 
 {% block forum_content %}
 
