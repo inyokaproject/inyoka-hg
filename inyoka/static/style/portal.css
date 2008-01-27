@@ -208,3 +208,24 @@ div.prvmsg div.prvmsg_body {
   padding: .2em;
   clear: right;
 }
+
+/* User Control Panel *******************************************************/
+table.calendar td {
+  border: 0px solid #CCC;
+}
+
+table.calendar td.day {
+  font-weight: bold;
+  border-width: 1px 1px 0 0;
+  background-color: #EEE;
+}
+
+table.calendar td.noday {
+  border-width: 0 1px 0 0;
+  background-color: #EEE;
+}
+
+table.calendar td.time {
+  background-color: #f1dfc8;
+  border-width: 0 1px 0 0;
+}

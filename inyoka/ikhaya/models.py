@@ -13,7 +13,7 @@ from datetime import datetime
 from django.db import models, connection
 from django.core.cache import cache
 from inyoka.portal.user import User
-from inyoka.wiki.parser import parse, RenderContext
+from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils import slugify, striptags
 from inyoka.utils.urls import href
 from inyoka.utils.search import search, Document
@@ -259,3 +259,25 @@ class Suggestion(models.Model):
         # XXX: Cache
         context = RenderContext(r.request)
         return parse(self.intro).render(context, 'html')
+
+
+class Comment(models.Model):
+    article = models.ForeignKey(Article)
+    title = models.CharField(max_length=100)
+    text = models.TextField()
+    author = models.ForeignKey(User)
+    pub_date = models.DateTimeField()
+
+    def get_absolute_url(self, action='show'):
+        return href('ikhaya', self.article.slug,
+                    _anchor='comment_%s' % self.id)
+
+    @property
+    def rendered_text(self):
+        context = RenderContext(r.request)
+        key = 'ikhaya/comment/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.text).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)

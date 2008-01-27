@@ -16,3 +16,8 @@ class SuggestArticleForm(forms.Form):
     intro = forms.CharField(label=u'Einleitung',
                             widget=forms.Textarea({'rows': 3}))
     text = forms.CharField(label=u'Text', widget=forms.Textarea)
+
+
+class EditCommentForm(forms.Form):
+    title = forms.CharField(label=u'Titel', max_length=100)
+    text = forms.CharField(label=u'Text', widget=forms.Textarea)

@@ -10,6 +10,7 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
+{% include 'forum/_forum.html' %}
 {% if not is_index %}
   {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% set navigation_trace = [
@@ -26,57 +27,17 @@
 
 {% block forum_content %}
   {%- if categories %}
+  <table class="forum">
   {%- for category in categories %}
-  <table class="category">
-    <thead>
-      <tr><th colspan="5"><a href="{{ category|url }}">{{ category.name|e }}</a></th></tr>
-    </thead>
-    <tbody>
-      {%- if category.children %}
-      <tr>
-        <th class="forum" colspan="2">Forum</th>
-        <th class="topic_count">Themen</th>
-        <th class="post_count">Beiträge</th>
-        <th class="last_post">Letzter Beitrag</th>
-      </tr>
-      {%- endif -%}
-      {%- for forum in category.children -%}
-      <tr>
-        <td class="icon">
-          {% if forum.get_read_status(USER) %}
-            <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
-          {% else %}
-            <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
-          {% endif %}
-        </td>
-        <td class="forum">
-          <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
-          {%- if forum.description %}
-          <p class="description">{{ forum.description|e }}</p> 
-          {%- endif %}
-          {%- if forum.children %}
-          <p class="subforums">Subforen:
-          {%- for subforum in forum.children %}
-            <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
-          {%- endfor %}
-          </p>
-          {%- endif %}
-        </td>
-        <td class="topic_count">{{ forum.topic_count }}</td>
-        <td class="post_count">{{ forum.post_count }}</td>
-        <td class="last_post">
-        {%- if forum.last_post -%}
-        <a href="{{ forum.last_post|url}}" class="date">{{ forum.last_post.pub_date.strftime('%d.%m.%Y, %H:%M') }}</a><br />
-        <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author }}</a>
-        {%- else %}---
-        {%- endif %}</td>
-      </tr>
-      {%- else %}
-      <tr><td colspan="4">Diese Kategorie enthält keine Foren.</td></tr>
-      {%- endfor %}
-    </tbody>
-  </table>
+    <tr class="head"><th colspan="5"><a href="{{ category|url
+      }}">{{ category.name|e }}</a></th></tr>
+    {%- for forum in category.children -%}
+      {{ render_forum(forum) }}
+    {%- else %}
+      <tr class="empty"><td colspan="4">Diese Kategorie enthält keine Foren.</td></tr>
+    {%- endfor %}
   {%- endfor %}
+  </table>
   {%- else %}
     <p>Keine Kategorien</p>
   {%- endif %}

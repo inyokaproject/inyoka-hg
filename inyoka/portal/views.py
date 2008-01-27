@@ -292,6 +292,9 @@ def search(request):
     f = SearchForm(request.REQUEST)
     if f.is_valid():
         d = f.cleaned_data
+        show_community = request.GET.get('show_community',
+            request.user.show_community) in ("true", True)
+        print "community", show_community, request.user.show_community
         results = search_system.query(
             d['area'] and d['area'] != 'all'
                 and '(%s) AND area:%s' % (d['query'], d['area']) \
@@ -301,10 +304,11 @@ def search(request):
         )
         if len(results.results ) > 0:
             return TemplateResponse('portal/search_results.html', {
-                'query':        d['query'],
-                'highlight':    results.highlight_string,
-                'area':         d['area'],
-                'results':      results
+                'query':            d['query'],
+                'highlight':        results.highlight_string,
+                'area':             d['area'],
+                'results':          results,
+                'show_community':   show_community
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %
@@ -360,7 +364,7 @@ def usercp_profile(request):
             data = form.cleaned_data
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email'):
+                        'interests', 'website', 'email', 'gpgkey'):
                 setattr(request.user, key, data[key])
             if data['delete_avatar']:
                 request.user.delete_avatar()
@@ -814,12 +818,14 @@ def about_inyoka(request):
 @templated('portal/calendar.html')
 def calendar(request, year=None, month=None):
     now = datetime.now()
-    year = year or now.year
-    month = month or now.month
+    year = int(year or now.year)
+    month = int(month or now.month)
     dates = CalendarItem.objects.filter(date__year=year, date__month=month) \
                         .order_by('date')
-    
     return {
         'dates': dates,
-        'prev': ''
+        'prev': ('portal', 'calendar', '%s-%s' % (month > 1 and year or year
+                                         - 1, month > 1 and month - 1 or 12)),
+        'next': ('portal', 'calendar', '%s-%s' % (month < 12 and year or year
+                                          + 1, month < 12 and month + 1 or 1))
     }

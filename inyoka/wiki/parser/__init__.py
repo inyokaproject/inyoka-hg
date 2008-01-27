@@ -290,20 +290,12 @@ def _parse_align_args(args, kwargs):
             else:
                 for x in 'left', 'right', 'center':
                     if args[x] is not None:
-                        attributes['ausrichtung'] = {
-                            'left':     'links',
-                            'right':    'rechts',
-                            'center':   'zentriert'
-                        }.get(x)
+                        attributes['align'] = x
                         break
                 else:
                     for x in 'top', 'middle', 'bottom':
                         if args[x] is not None:
-                            attributes['vausrichtung'] = {
-                                'top':      'oben',
-                                'middle':   'mitte',
-                                'bottom':   'unten'
-                            }.get(x)
+                            attributes['valign'] = x
                             break
 
     return attributes, args_left
@@ -884,26 +876,22 @@ class Parser(object):
                     stream.next()
                 attrs, args = _parse_align_args(args, kwargs)
                 if cell_type == 'tablefirst':
-                    table.class_ = attrs.get('tabellenklasse') or None
-                    table.style = attrs.get('tabellenstil')
+                    table.class_ = attrs.get('tableclass') or None
+                    table.style = attrs.get('tablestyle')
                 if cell_type in ('tablefirst', 'rowfirst'):
-                    row.class_ = attrs.get('zeilenklasse') or None
+                    row.class_ = attrs.get('rowclass') or None
                     if not row.class_:
                         row.class_ = u' '.join(args) or None
-                    row.style = attrs.get('zeilenstil')
-                cell.class_ = attrs.get('zellklasse') or None
-                cell.colspan = attrs.get('spalten', 0)
-                cell.rowspan = attrs.get('zeilen', 0)
-                cell.align = {
-                    'links':        'left',
-                    'rechts':       'right',
-                    'zentriert':    'center'
-                }.get(attrs.get('ausrichtung'))
-                cell.valign = {
-                    'oben':         'top',
-                    'mitte':        'middle',
-                    'unten':        'bottom'
-                }.get(attrs.get('vausrichtung'))
+                    row.style = attrs.get('rowstyle')
+                cell.class_ = attrs.get('class') or None
+                cell.colspan = attrs.get('cols', 0)
+                cell.rowspan = attrs.get('rows', 0)
+                cell.align = attrs.get('align')
+                if cell.align not in ('left', 'right', 'center'):
+                    cell.align = None
+                cell.align = attrs.get('valign')
+                if cell.valign not in ('top', 'middle', 'bottom'):
+                    cell.valign = None
                 if cell_type == 'normal':
                     if not cell.class_:
                         cell.class_ = u' '.join(args) or None
@@ -948,21 +936,17 @@ class Parser(object):
             if stream.current.type == 'box_def_end':
                 stream.next()
             attrs, args = _parse_align_args(args, kwargs)
-            box.align = {
-                'links':        'left',
-                'rechts':       'right',
-                'zentriert':    'center'
-            }.get(attrs.get('ausrichtung'))
-            box.valign = {
-                'oben':         'top',
-                'mitte':        'middle',
-                'unten':        'bottom'
-            }.get(attrs.get('vausrichtung'))
+            box.align = attrs.get('align')
+            if box.align not in ('left', 'right', 'center'):
+                box.align = None
+            box.align = attrs.get('valign')
+            if box.valign not in ('top', 'middle', 'bottom'):
+                box.valign = None
             box.class_ = attrs.get('klasse')
             if not box.class_:
                 box.class_ = u' '.join(args)
-            box.style = attrs.get('stil')
-            box.title = attrs.get('titel')
+            box.style = attrs.get('style')
+            box.title = attrs.get('title')
 
         while stream.current.type != 'box_end':
             box.children.append(self.parse_node(stream))

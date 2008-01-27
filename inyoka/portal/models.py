@@ -247,6 +247,19 @@ class CalendarItem(models.Model):
             'edit': ('admin', 'ikhaya', 'dates', 'edit', self.id)
         }[action])
 
+    @property
+    def rendered_description(self):
+        context = RenderContext(r.request)
+        key = 'ikhaya/date/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.description).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
+
+    def save(self):
+        cache.delete('ikhaya/date/%s' % self.id)
+
 
 # import it down here because of circular dependencies
-from inyoka.wiki.parser import parse
+from inyoka.wiki.parser import parse, render, RenderContext

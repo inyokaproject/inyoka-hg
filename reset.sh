@@ -9,8 +9,7 @@ django-admin.py shell --plain >> /dev/null <<EOF
 from inyoka.portal.user import User
 User(username='Anonymous', password='').save()
 u = User.objects.register_user('admin', 'admin@example.org', 'default', False)
-u.is_staff=True
-u.is_superuser = True
+u.is_manager = True
 u.save()
 EOF
 echo "Created superuser 'admin:default'"

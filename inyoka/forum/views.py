@@ -103,7 +103,7 @@ def forum(request, slug, page=1):
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
     topics = Topic.objects.by_forum(f.id)
-    pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
@@ -182,7 +182,7 @@ def viewtopic(request, topic_slug, page=1):
     else:
         polls = None
 
-    pagination = Pagination(request, posts, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t))
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
@@ -723,10 +723,10 @@ def reportlist(request):
         form = ReportListForm()
         _add_field_choices()
 
-    privileges = get_privileges(user, forums)
+    privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
-        if privileges.get(topic.forum_id, {'moderator': False})['moderator']:
+        if privileges.get(topic.forum_id, {}).get('moderator'):
             visible_topics.append(topic)
 
     return {
@@ -1065,3 +1065,22 @@ def markread(request, slug=None):
         user.forum_read_status = ''
         user.save()
     return HttpResponseRedirect(href('forum'))
+
+
+@templated('forum/latest.html')
+def latest(request, page=1):
+    """
+    Return a list of the latest posts.
+    """
+    all = Post.objects.get_latest()
+    posts = []
+    for post in all:
+        if post.id < request.user.forum_last_read:
+            break
+        posts.append(post)
+    pagination = Pagination(request, posts, page, 20,
+        href('forum', 'latest'))
+    return {
+        'posts': pagination.get_objects(),
+        'pagination': pagination.generate()
+    }

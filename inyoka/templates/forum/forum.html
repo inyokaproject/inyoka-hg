@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
+{% include 'forum/_forum.html' %}
 
 {% set title_trace = [forum.name|e] %}
 {% set name = 'Forum „%s“ - ' % forum.name|e %}
@@ -30,64 +31,18 @@
 {% block forum_content %}
   <table class="forum">
     <thead>
-      <tr><th colspan="5" class="category">{{ forum.name|e }}</th></tr>
+      <tr><th colspan="4" class="category">{{ forum.name|e }}</th></tr>
     </thead>
     <tbody>
-      {%- for subforum in subforums %}
-      {%- if loop.first %}
-      <tr>
-        <th colspan="5" class="title">Subforen</th>
-      </tr>
-      <tr>
-        <th class="forum" colspan="2">Forum</th>
-        <th class="topic_count">Themen</th>
-        <th class="post_count">Beiträge</th>
-        <th class="last_post">Letzter Beitrag</th>
-      </tr>
-      {%- endif %}
-      <tr>
-        <td class="icon">
-          {% if subforum.get_read_status(USER) %}
-            <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
-          {% else %}
-            <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
-          {% endif %}
-        </td>
-        <td class="forum">
-          <a href="{{ subforum|url }}" class="forum_title">{{ subforum.name|e }}</a>
-          <p class="description">{{ subforum.description|e }}</p> 
-          {% for subsubforum in subforum.children -%}
-          {%- if loop.first %}<p class="subforum">Subforen: {% endif -%}
-          <a href="{{ subsubforum|url }}">{{ subsubforum.name|e }}</a>
-          {%- if not loop.last %}, {% endif -%}
-          {%- if loop.last %}</p>{% endif -%}
-          {%- endfor %}
-        </td>
-        <td class="topic_count">{{ subforum.topic_count }}</td>
-        <td class="post_count">{{ subforum.post_count }}</td>
-        {# TODO: Show something more informing in last post. #}
-        <td class="last_post">
-          {%- if subforum.last_post %}
-          <a href="{{ subforum.last_post|url}}" class="date">
-            {{- subforum.last_post.pub_date|datetimeformat -}}
-          </a><br />
-          <a href="{{ subforum.last_post.author|url}}">{{ subforum.last_post.author }}</a>
-          {%- else %}---{% endif %}
-        </td>
-      </tr>
+    {%- for subforum in subforums %}
+      {{ render_forum(subforum) }}
     {% endfor %}
-      <tr>
-        <th colspan="5" class="title">Themen</th>
-      </tr>
+    <tr>
+      <th class="topic" colspan="2">Thema</th>
+      <th class="post_count">Antworten / Aufrufe</th>
+      <th class="last_post">Letzte Antwort</th>
+    </tr>
     {%- for topic in topics %}
-      {%- if loop.first %}
-      <tr>
-        <th class="topic" colspan="2">Thema</th>
-        <th class="post_count">Antworten</th>
-        <th class="view_count">Aufrufe</th>
-        <th class="last_post">Letzte Antwort</th>
-      </tr>
-      {%- endif %}
       <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
           {% if topic.get_read_status(USER) %}
@@ -109,8 +64,9 @@
             von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
           </p>
         </td>
-        <td class="post_count">{{ topic.post_count }}</td>
-        <td class="view_count">{{ topic.view_count }}</td>
+        <td class="post_count">
+          {{ topic.post_count }} / {{ topic.view_count }}
+        </td>
         <td class="last_post">{% if forum.last_post %}
           <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
@@ -120,7 +76,7 @@
     {% else %}
       <tr>
         <td colspan="5">
-          Es existieren noch keine Themen. <a href="{{ forum|url('newtopic') }}">Erstelle</a> doch das erste!</td>
+          Es existieren noch keine Themen. <a href="{{ forum|url('newtopic') }}">Erstelle</a> doch das Erste!</td>
       </tr>
     {% endfor %}
     </tbody>
