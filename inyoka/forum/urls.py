@@ -51,7 +51,8 @@ urlpatterns = patterns('inyoka.forum.views',
     (r'^markread/$', 'markread'),
     (r'^forum/(?P<slug>[^/]+)/markread/$', 'markread'),
     (r'^latest/$', 'latest'),
-    (r'^latest/(?P<page>\d+)/$', 'latest')
+    (r'^latest/(?P<page>\d+)/$', 'latest'),
+    (r'^community_rules/$', 'community_rules')
 )
 
 

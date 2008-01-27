@@ -102,6 +102,8 @@ def forum(request, slug, page=1):
         return HttpResponseRedirect(href('forum'))
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
+    if f.community_forum and not request.user.show_community:
+        return community_rules(request)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
@@ -133,6 +135,8 @@ def viewtopic(request, topic_slug, page=1):
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
+    if t.forum.community_forum and not request.user.show_community:
+        return community_rules(request)
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -1083,4 +1087,23 @@ def latest(request, page=1):
     return {
         'posts': pagination.get_objects(),
         'pagination': pagination.generate()
+    }
+
+@templated('forum/community_rules.html')
+def community_rules(request):
+    """
+    Show the rules of the community section.
+    """
+    user = request.user
+    if request.method == 'POST':
+        if request.POST.get('accept'):
+            user.show_community = True
+            user.save()
+            return HttpResponseRedirect(request.POST.get('goto_url'))
+        else:
+            request.user.show_community = False
+            request.user.save()
+            return HttpResponseRedirect(href('forum'))
+    return {
+        'goto_url': request.path
     }
