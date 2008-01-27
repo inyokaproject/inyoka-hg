@@ -633,7 +633,7 @@ def edit(request, post_id):
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
     t = Topic.objects.get(slug=topic_slug)
-    if not have_privilege(request.user, f.forum, 'read'):
+    if not have_privilege(request.user, t.forum, 'read'):
         abort_access_denied(request)
     if solved is not None:
         t.solved = solved
