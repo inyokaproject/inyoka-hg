@@ -50,3 +50,25 @@ img.icon {
   max-width: 200px;
   max-height: 120px;
 }
+
+ul {
+  list-style: none;
+}
+
+ul.comments li.comment {
+  border-style: solid;
+  border-color: #CCC;
+  border-width: 0 0 1px 0;
+  padding: 1em;
+}
+
+a.comment_link:hover {
+  background-color: #222;
+  color: #fff;
+}
+
+.tooltip {
+  background-color: #F9F9F9;
+  border: 1px solid #222;
+  padding: 0.5em;
+}

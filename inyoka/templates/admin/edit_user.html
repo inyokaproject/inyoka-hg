@@ -38,7 +38,9 @@
   <h3>Benachrichtigungs-Einstellungen</h3>
     {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
   <h3>Sonstige Einstellungen</h3>
-    {{ h.render_form(form, 'signature', 'coordinates', 'avatar') }}
+    {{ h.render_form(form, 'signature', 'coordinates', 'avatar', 'post_count', 'gpgkey') }}
+  <h3>Forum Privilegien</h3>
+    {{ h.render_form(form, 'forum_privileges') }}
   <button type="submit" id="submit">Speichern</button>
   <button type="reset" id="reset">Zurücksetzen</button>
 </form>

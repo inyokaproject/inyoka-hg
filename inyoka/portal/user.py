@@ -157,6 +157,7 @@ class User(models.Model):
     coordinates = models.CharField('Koordinaten', max_length=255,
                                    blank=True)
     location = models.CharField('Wohnort', max_length=200, blank=True)
+    gpgkey = models.CharField('GPG-Key', max_length=10, blank=True)    
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
@@ -289,7 +290,7 @@ def deactivate_user(user):
     user.is_active = 0
     user.avatar = None
     user.icq = user.jabber = user.msn = user.aim = user.yim = \
-        user.signature = user.coordinates = user.location = \
+        user.signature = user.coordinates = user.gpgkey = user.location = \
         user.occupation = user.interests = user.website = ''
     user.save()
 

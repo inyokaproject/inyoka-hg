@@ -103,7 +103,7 @@ def forum(request, slug, page=1):
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
     topics = Topic.objects.by_forum(f.id)
-    pagination = Pagination(request, topics, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
@@ -182,7 +182,7 @@ def viewtopic(request, topic_slug, page=1):
     else:
         polls = None
 
-    pagination = Pagination(request, posts, page, POSTS_PER_PAGE)
+    pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t))
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
@@ -633,7 +633,7 @@ def edit(request, post_id):
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
     t = Topic.objects.get(slug=topic_slug)
-    if not have_privilege(request.user, f.forum, 'read'):
+    if not have_privilege(request.user, t.forum, 'read'):
         abort_access_denied(request)
     if solved is not None:
         t.solved = solved
@@ -742,7 +742,7 @@ def reportlist(request):
     privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
-        if privileges.get(topic.forum_id, {'moderator': False})['moderator']:
+        if privileges.get(topic.forum_id, {}).get('moderator'):
             visible_topics.append(topic)
 
     return {
@@ -775,8 +775,8 @@ def movetopic(request, topic_slug):
     if not have_privilege(request.user, t.forum, 'moderate'):
         return abort_access_denied()
 
-    forums = filter_visible(request.user, Forum.objects.get_forms()
-                            .exclude(id=t.forum.id), 'read')
+    forums = filter_invisible(request.user, Forum.objects.get_forums()
+                              .exclude(id=t.forum.id), 'read')
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)

@@ -83,7 +83,7 @@ def make_forum(users):
     admin = User.objects.get(username="admin")
     from inyoka.forum.models import Forum, Topic, Privilege
     from inyoka.forum.acl import PRIVILEGES
-    for _ in xrange(8):
+    for _ in xrange(7):
         parent = None
         if randint(1, 6) != 6:
             try:
@@ -95,7 +95,7 @@ def make_forum(users):
         Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
         forums.append(f)
         if parent != None:
-            for _ in xrange(randint(1, 15)):
+            for _ in xrange(randint(1, 3)):
                 t = Topic.objects.create(f, title(), text(), author=
                                          choice(users), pub_date=randtime())
                 for _ in xrange(randint(1, 10)):

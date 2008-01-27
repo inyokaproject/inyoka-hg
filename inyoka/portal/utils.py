@@ -11,6 +11,7 @@
 from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href
 from inyoka.utils.flashing import flash
+from inyoka.utils.http import AccessDeniedResponse
 
 
 def decor(decorator, base):
@@ -44,7 +45,7 @@ def require_manager(f):
     def decorator(request, *args, **kwargs):
         if request.user.is_manager:
             return f(request, *args, **kwargs)
-        return abort_access_denied()
+        return abort_access_denied(request)
     return simple_check_login(decor(decorator, f))
 
 
