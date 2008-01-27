@@ -46,7 +46,11 @@
 {% macro topic_actions %}
     <span class="linklist">
         <a href="{{ topic|url('reply') }}" class="action action_reply" >Neue Antwort erstellen</a> |
-        <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen {% if is_subscribed %}nicht mehr {% endif %}benachrichtigen</a> |
+        {%- if is_subscribed %}
+        <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">Bei neuen Beiträgen nicht mehr benachrichtigen</a> |
+        {%- else %}
+        <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen benachrichtigen</a> |
+        {%- endif %}
         {%- if topic.solved %}
         <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">Thema als ungelöst markieren</a> |
         {%- else %}
@@ -55,9 +59,6 @@
         <a href="{{ topic|url('report') }}" class="action action_report">Thema melden</a>
     </span>
 {% endmacro %}
-
-{% block forum_navigation %}
-{% endblock %}
 
 {% block forum_content %}
 

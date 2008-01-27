@@ -31,10 +31,14 @@ class Session(SecureCookie):
 
     @property
     def session_key(self):
-        if not 'session_key' in self:
-            self['session_key'] = md5('%s%s%s' % (random(), time(),
-                                      settings.SECRET_KEY)).hexdigest()
-        return self['session_key']
+        if '_auth_user_id' in self:
+            self.pop('_sk', None)
+            return self['_auth_user_id']
+        elif not '_sk' in self:
+            self['_sk'] = md5('%s%s%s' % (random(), time(),
+                              settings.SECRET_KEY)).digest() \
+                              .encode('base64').strip(' =')
+        return self['_sk']
 
 
 class AdvancedSessionMiddleware(object):

@@ -701,7 +701,8 @@ class Topic(models.Model):
             'hide': ('forum', 'topic', self.slug, 'hide'),
             'solve': ('forum', 'topic', self.slug, 'solve'),
             'unsolve': ('forum', 'topic', self.slug, 'unsolve'),
-            'subscribe': ('forum', 'topic', self.slug, 'subscribe')
+            'subscribe': ('forum', 'topic', self.slug, 'subscribe'),
+            'unsubscribe': ('forum', 'topic', self.slug, 'unsubscribe')
         }[action])
 
     def save(self):
