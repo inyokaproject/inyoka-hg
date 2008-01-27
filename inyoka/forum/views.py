@@ -663,6 +663,22 @@ def subscribe_topic(request, topic_slug):
         Subscription(user=request.user, topic=t).save()
         flash(u'Du wirst ab jetzt bei neuen Beiträgen in diesem Thema '
               u'benachrichtigt.')
+    return HttpResponseRedirect(url_for(t))
+
+
+@simple_check_login
+def unsubscribe_topic(request, topic_slug):
+    """
+    If the user has already subscribed to this topic, this view removes it.
+    If there isn't such a subscription, a new one is created.
+    """
+    t = Topic.objects.get(slug=topic_slug)
+    if not have_privilege(request.user, t.forum, 'read'):
+        return abort_access_denied(request)
+    try:
+        s = Subscription.objects.get(user=request.user, topic=t)
+    except Subscription.DoesNotExist:
+        pass
     else:
         # there's already a subscription for this topic, remove it
         s.delete()

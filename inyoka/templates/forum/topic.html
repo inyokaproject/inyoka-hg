@@ -49,7 +49,11 @@
   <ul class="table_tabs">
     {# XXX: use icons for these actions in the top bar because it's too big - entequak #}
     <li><a href="{{ topic|url('reply') }}">Neue Antwort erstellen</a></li>
-    <li><a href="{{ topic|url('subscribe') }}">Bei neuen Beiträgen {% if is_subscribed %}nicht mehr {% endif %}benachrichtigen</a></li>
+    {%- if is_subscribed %}
+    <li><a href="{{ topic|url('subscribe') }}">Bei neuen Beiträgen nicht mehr benachrichtigen</a></li>
+    {% else %}
+    <li><a href="{{ topic|url('unsubscribe') }}">Bei neuen Beiträgen benachrichtigen</a></li>
+    {%- endif %}
     {%- if topic.solved %}
       <li><a href="{{ topic|url('unsolve') }}">Thema als ungelöst markieren</a></li>
     {%- else %}
