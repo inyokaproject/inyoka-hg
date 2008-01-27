@@ -10,7 +10,7 @@
 
 $(function() {
   $('ul.comments > li.comment > p').each(function(i, comment) {
-    $(comment).html($(comment).html().replace(/@(\d+)/g, '<a href="#$1" class="comment_link">@$1</a>'));
+    $(comment).html($(comment).html().replace(/@(\d+)/g, '<a href="#comment_$1" class="comment_link">@$1</a>'));
   });
   $('.comment_link').mouseover(function() {
     var id = $(this).html().slice(1);
