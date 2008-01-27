@@ -102,6 +102,8 @@ def forum(request, slug, page=1):
         return HttpResponseRedirect(href('forum'))
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
+    if f.community_forum and not request.user.show_community:
+        return community_rules(request)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
@@ -133,6 +135,8 @@ def viewtopic(request, topic_slug, page=1):
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
+    if t.forum.community_forum and not request.user.show_community:
+        return community_rules(request)
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -150,7 +154,7 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     v = request.POST.get('poll_%s' % poll['id'])
                 if v:
-                    if privileges['vote']:
+                    if not privileges['vote']:
                         return abort_access_denied(request)
                     elif poll['participated']:
                         flash(u'Sie haben bereits an dieser Abstimmung '
@@ -742,7 +746,7 @@ def reportlist(request):
     privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = []
     for topic in topics:
-        if privileges.get(topic.forum_id, {}).get('moderator'):
+        if have_privilege(request.user, topic.forum, 'moderate'):
             visible_topics.append(topic)
 
     return {
@@ -1099,4 +1103,23 @@ def latest(request, page=1):
     return {
         'posts': pagination.get_objects(),
         'pagination': pagination.generate()
+    }
+
+@templated('forum/community_rules.html')
+def community_rules(request):
+    """
+    Show the rules of the community section.
+    """
+    user = request.user
+    if request.method == 'POST':
+        if request.POST.get('accept'):
+            user.show_community = True
+            user.save()
+            return HttpResponseRedirect(request.POST.get('goto_url'))
+        else:
+            request.user.show_community = False
+            request.user.save()
+            return HttpResponseRedirect(href('forum'))
+    return {
+        'goto_url': request.path
     }

@@ -50,6 +50,8 @@ $(document).ready(function() {
       .submit(function() {
         var url = $(this).attr('action'), tmp;
         if (tmp = $('input.search_query').val()) {
+          if ($('input.search_query').hasClass('default_value'))
+            tmp = '';
           url += '?query=' + encodeURIComponent(tmp);
           if ($currentSearchArea != 'all')
             url += '&area=' + $currentSearchArea;
