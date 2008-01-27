@@ -47,7 +47,8 @@
    */
   var button = function(id, title, callback, profiles) {
     return function(editor) {
-      if (!profiles || $.inArray(editor.profile, profiles))
+      console.log(profiles, editor.profile);
+      if (!profiles || $.inArray(editor.profile, profiles) > -1)
         return $('<a href="#" class="button" />')
           .attr('id', 'button-' + id)
           .attr('title', title)
@@ -256,7 +257,7 @@
    */
   WikiEditor = function(editor, profile) {
     var self = this, t;
-    this.proile = profile || 'small';
+    this.profile = profile || 'small';
     this.username = null;
     this.smilies = null;
     $.getJSON('/?__service__=portal.get_current_user', function(user) {
