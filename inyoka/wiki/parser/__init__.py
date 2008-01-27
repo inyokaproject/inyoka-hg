@@ -284,8 +284,7 @@ def _parse_align_args(args, kwargs):
 
             for x in 'colspan', 'rowspan':
                 if args[x] is not None:
-                    attributes[x == 'colspan' and 'spalten' or 'zeilen'] =\
-                        int(args[x])
+                    attributes[x] = int(args[x])
                     break
             else:
                 for x in 'left', 'right', 'center':
@@ -884,8 +883,8 @@ class Parser(object):
                         row.class_ = u' '.join(args) or None
                     row.style = attrs.get('rowstyle')
                 cell.class_ = attrs.get('class') or None
-                cell.colspan = attrs.get('cols', 0)
-                cell.rowspan = attrs.get('rows', 0)
+                cell.colspan = attrs.get('colspan', 0)
+                cell.rowspan = attrs.get('rowspan', 0)
                 cell.align = attrs.get('align')
                 if cell.align not in ('left', 'right', 'center'):
                     cell.align = None

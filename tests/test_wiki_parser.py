@@ -150,7 +150,7 @@ def test_table_row_classes():
 
 def test_table_cell_classes():
     """Test the table cell classes."""
-    tree = parse('||<zellklasse=foo>1||<bar>2||')
+    tree = parse('||<cellclass=foo>1||<bar>2||')
     assert tree == nodes.Document([
         nodes.Table([
             nodes.TableRow([
