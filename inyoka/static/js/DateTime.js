@@ -39,7 +39,7 @@
 
   DateTimeField = function(editor) {
     var self = this;
-    this.input = $(editor).css('display', 'none');
+    this.input = $(editor).hide();
     this.readDateTime();
     this.calendarMonth = this.currentMonth;
     this.calendarYear = this.currentYear;
@@ -237,6 +237,10 @@
     drawNextYear: function() {
       this.calendarYear++;
       this.drawCalendar();
+    },
+    destroy: function() {
+      this.container.remove();
+      this.input.show();
     }
   }
 })()
