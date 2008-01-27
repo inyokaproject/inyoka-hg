@@ -49,7 +49,7 @@
     </tr>
     <tr>
       <th>GPG-Schlüssel</th>
-      <td>{{ user.gpgkey }}</td>
+      <td>{% if user.gpgkey %}0x{{ user.gpgkey }}{% endif %}</td>
     </tr>
     <tr>
       <th>Wohnort</th>
