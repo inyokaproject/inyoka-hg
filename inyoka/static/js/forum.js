@@ -23,34 +23,20 @@ $(document).ready(function () {
       .click(toggle)
       .css('cursor', 'pointer');
     toggle_state[this.id] = true;
+  }).click(function() {
+    if (toggle_state[this.id]) {
+      $(this).addClass('expanded_header').removeClass('collapsed_header');
+      $('.' + this.id + '_sub').slideDown('normal');
+      toggle_state[this.id] = false;
+    } else {
+      $(this).addClass('collapsed_header').removeClass('expanded_header');
+      $('.' + this.id + '_sub').slideUp('normal');
+      toggle_state[this.id] = true;
+    }
   });
   
   $('#id_add_option').click(add_reply);
 });
-
-
-function debug(s)
-{
-  $('#debug').append(s + '\n');
-}
-
-
-function toggle()
-{
-  if (toggle_state[this.id])
-  {
-    $(this).addClass('expanded_header').removeClass('collapsed_header');
-    $('.' + this.id + '_sub').slideDown('normal');
-    toggle_state[this.id] = false;
-  }
-  else
-  {
-    $(this).addClass('collapsed_header').removeClass('expanded_header');
-    $('.' + this.id + '_sub').slideUp('normal');
-    toggle_state[this.id] = true;
-  }
-}
-
 
 function add_reply() {
   count = $('.newtopic_polls_replies').length;
