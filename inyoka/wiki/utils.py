@@ -381,12 +381,17 @@ def clean_thumbnail_cache():
     return deleted
 
 
-def quote_text(text):
+def quote_text(text, author=None):
     """
     Returns the wiki syntax quoted version of `text`.
+    If the optional argument `author` is given, a written-by info is
+    prepended.
     """
-    return u'\n'.join('>' + (not line.startswith('>') and ' ' or '') + line
-                      for line in text.split('\n'))
+    by = author and (u"'''%s''' schrieb:\n" % author.username) or u''
+    return by + u'\n'.join(
+        '>' + (not line.startswith('>') and ' ' or '') + line
+        for line in text.split('\n')
+    )
 
 
 class ArgumentCollector(type):

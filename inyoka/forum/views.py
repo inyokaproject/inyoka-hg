@@ -222,8 +222,17 @@ def newpost(request, topic_slug=None, quote_id=None):
     if quote_id:
         p = Post.objects.get(id=quote_id)
         t = p.topic
+        quotes = [p]
     else:
+        quotes = []
         t = Topic.objects.get(slug=topic_slug)
+
+    # check for multi quote
+    if request.COOKIES.get('multi_quote'):
+        quotes += Post.objects.filter(topic__id=t.id, id__in=[
+            int(i) for i in request.COOKIES['multi_quote'].split(',')
+        ])
+
     privileges = get_forum_privileges(request.user, t.forum)
     if t.locked and not privileges['moderator']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
@@ -290,11 +299,15 @@ def newpost(request, topic_slug=None, quote_id=None):
                     })
                     send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
                                       % t.title, text)
-                return HttpResponseRedirect(t.get_absolute_url())
+                resp = HttpResponseRedirect(t.get_absolute_url())
+                # delete multi quote data
+                resp.delete_cookie('multi_quote')
+                return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
     else:
-        if quote_id:
-            form = NewPostForm(initial={'text': quote_text(p.text)})
+        if quotes:
+            text = '\n\n'.join(quote_text(p.text, p.author) for p in quotes)
+            form = NewPostForm(initial={'text': text})
         else:
             form = NewPostForm()
         attachments = []

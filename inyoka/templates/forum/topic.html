@@ -12,7 +12,8 @@
 #}
 {% extends 'forum/page.html' %}
 
-{% set title_trace = [topic.title|e]%}
+{% set title_trace = [topic.title|e] %}
+{% set scripts =  ['newtopic.js'] %}
 {% set navigation_trace =  [
     (forum|url, forum.name),
     (topic|url, topic.title)
@@ -116,7 +117,8 @@ Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ to
           <div class="postinfo">
             <div class="linklist floatright">
               <a href="{{ post|url('edit') }}" class="action action_edit">Bearbeiten</a> |
-              <a href="{{ post|url('quote') }}" class="action action_quote">Zitieren</a> |
+              <a href="{{ post|url('quote') }}" class="action action_quote">direktes Zitat</a> |
+              <a href="#" style="display: none" class="action action_mark_quote" id="quote{{ post.id }}">Zitat</a> |
               {%- if post.hidden %}
               <a href="{{ post|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
               <a href="{{ post|url('delete') }}" class="action action_delete">Endgültig löschen</a>
