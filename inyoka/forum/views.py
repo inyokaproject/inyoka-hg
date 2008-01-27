@@ -759,8 +759,8 @@ def movetopic(request, topic_slug):
     if not have_privilege(request.user, t.forum, 'moderate'):
         return abort_access_denied()
 
-    forums = filter_invisible(request.user, Forum.objects.get_forms()
-                            .exclude(id=t.forum.id), 'read')
+    forums = filter_invisible(request.user, Forum.objects.get_forums()
+                              .exclude(id=t.forum.id), 'read')
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
