@@ -14,11 +14,12 @@ from random import randint, choice
 from datetime import datetime
 from jinja.constants import LOREM_IPSUM_WORDS
 from django.conf import settings
-from inyoka.portal.user import User
+from inyoka.portal.user import User, Group
 
 MARKS = ('.', ';', '!', '?')
 WORDS = LOREM_IPSUM_WORDS.split(' ')
-
+WORDS = ['<script>alert("XSS")</script>', '"><script>alert("XSS")</script><"',
+         "'><script>alert('XSS')</script><'", '">', "'>"]
 
 def word():
     return choice(WORDS)
@@ -58,18 +59,38 @@ def randtime():
     return datetime.fromtimestamp(randint(0, math.floor(time.time())))
 
 
-def make_users():
+def make_groups():
+    print 'Creating groups'
+    groups = []
+    for _ in xrange(10):
+        groups.append(Group(name=word() + str(randint(1, 999999)), is_public=bool(randint(0, 1))))
+        groups[-1].save()
+    return groups
+
+def make_users(groups):
     print 'Creating users'
     names = []
     for _ in xrange(30):
         while True:
-            name = word()
+            name = (str(randint(0, 99999)) + word())[:30]
             if name not in names:
                 names.append(name)
                 break
         u = User.objects.register_user(
             name, '%s@ubuntuusers.local' % name, name, False)
         u.date_joined = randtime()
+        u.last_login = randtime()
+        for _ in xrange(randint(0, 5)):
+            u.groups.add(choice(groups))
+        u.post_count = randint(0, 1000)
+        u.jabber = '%s@%s.%s' % (word(), word(), word())
+        u.icq = word()[:16]
+        u.msn = word()
+        u.aim = word()
+        u.signature = words()
+        u.occupation = word()
+        u.interests = word()
+        u.website = u'http://xyz%s.de' % word()
         if not randint(0, 3):
             u.is_active = False
         u.save()
@@ -90,16 +111,16 @@ def make_forum(users):
                 parent = choice(forums)
             except IndexError:
                 pass
-        f = Forum(name=title(), parent=parent)
+        f = Forum(name=title() + str(randint(1, 9999)), parent=parent)
         f.save()
         Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
         forums.append(f)
         if parent != None:
             for _ in xrange(randint(1, 3)):
-                t = Topic.objects.create(f, title(), text(), author=
+                t = Topic.objects.create(f, title()[:100], text(), author=
                                          choice(users), pub_date=randtime())
                 for _ in xrange(randint(1, 10)):
-                    t.reply(text(), choice(users), randtime())
+                    t.reply(sentences(min=1, max=10), choice(users), randtime())
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)
     f.save()
@@ -111,7 +132,7 @@ def make_ikhaya(users):
     print 'Creating ikhaya test data'
     from inyoka.ikhaya.models import Category, Article
     for _ in xrange(5):
-        c = Category(name=title())
+        c = Category(name='%s%s' % (randint(1, 9999), title()))
         c.save()
         for _ in xrange(5):
             a = Article(
@@ -127,6 +148,6 @@ def make_ikhaya(users):
             a.save()
 
 
-users = list(make_users())
+users = list(make_users(make_groups()))
 make_forum(users)
 make_ikhaya(users)

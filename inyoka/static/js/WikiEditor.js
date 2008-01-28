@@ -242,6 +242,7 @@
       this.textarea[0].focus();
     }),
     button('enlarge', 'Vergrößern', function(evt) {
+      console.log(this.textarea);
       if (isNaN(this.textarea[0].rows) || this.textarea[0].rows < .5)
         this.textarea[0].rows = 6;
       else
