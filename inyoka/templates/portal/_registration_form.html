@@ -26,10 +26,9 @@
    <dt>CAPTCHA</dt>
     <dd class="captcha"><img src="{{ href('portal', '_captcha') }}" alt="XXX: Hinweis auf Audio Version" />
         <a href="">neues Captcha erzeugen</a></dd>
-    <dd>Bitte gebe den Code von obigem Bild hier ein:</dd>
+    <dd>Bitte gib den Code von obigem Bild hier ein:</dd>
     <dd>{{ form.captcha }}{{ h.field_errors(form.errors.captcha) }}</dd>
     <dd>
-      <input type="reset" value="Zurücksetzen" />
       <input type="submit" value="Registrieren" />
     </dd>
   </dl>

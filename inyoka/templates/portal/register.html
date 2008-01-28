@@ -16,4 +16,7 @@
 {% endblock %}
 {% block portal_content %}
   {{ h.render_register_form(form) }}
+  <script type="text/javascript">
+    $(function() { $('#id_username').focus(); });
+  </script>
 {% endblock %}

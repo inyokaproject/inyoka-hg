@@ -170,41 +170,44 @@ class LostPasswordForm(forms.Form):
     It's similar to the register form and uses
     a hidden and a visible image CAPTCHA too.
     """
-    username = forms.CharField(label=u'Benutzername')
-    email = forms.EmailField(label=u'E-Mail')
+    username = forms.CharField(label=u'Benutzername', required=False)
+    email = forms.EmailField(label=u'E-Mail', required=False)
     captcha = forms.CharField(label='CAPTCHA')
     captcha_solution = None
     hidden_captcha = forms.CharField(label='', widget=forms.HiddenInput,
                                      required=False)
 
-    def clean_username(self):
-        """Check if the entered user exists."""
-        user = None
-        if 'username' in self.cleaned_data:
+    def clean(self):
+        data = super(self.__class__, self).clean()
+        if 'username' in data and 'email' in data \
+            and data['username'] and data['email']:
             try:
-                user = User.objects.get(username=self.cleaned_data['username'])
+                self.user = User.objects.get(username=data['username'], email=data['email'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
-                    'Der Benutzername existiert nicht, bitte <a href="%s">'
-                    'registriere</a> dich' % href('portal', 'register')
+                    u'Der angegebene Benutzername und die angegebene '
+                    u'E-Mail-Adresse stimmen nicht überein!'
                 )
-            return self.cleaned_data['username']
-
-    def clean_email(self):
-        """
-        Check if the entered mail adress belongs to the entered username.
-        """
-        if not 'email' in self.cleaned_data:
-            raise forms.ValidationError('Du hast keine E-Mail angegeben!')
+        elif 'username' in data and data['username']:
+            try:
+                self.user = User.objects.get(username=data['username'])
+            except User.DoesNotExist:
+                raise forms.ValidationError(
+                    u'Einen Benutzer „%s“ gibt es nicht!' % data['username']
+                )
+        elif 'email' in data and data['email']:
+            try:
+                self.user = User.objects.get(email=data['email'])
+            except User.DoesNotExist:
+                raise forms.ValidationError(
+                    u'Einen Benutzer mit der E-Mail-Adresse „%s“ '
+                    u'gibt es nicht!' % data['email']
+                )
         else:
-            try:
-                user = User.objects.get(email=self.cleaned_data['email'])
-            except User.DoesNotExist:
-                raise forms.ValidationError(
-                    u'Die eingegebene E-Mail stimmt nicht mit der des '
-                    u'Benutzers überein'
-                )
-        return self.cleaned_data['email']
+            raise forms.ValidationError(
+                u'Bitte entweder einen Benutzernamen oder eine E-Mail-Adresse '
+                u'angeben!'
+            )
 
     def clean_captcha(self):
         """Validate the CAPTCHA image"""
@@ -267,7 +270,7 @@ class UserCPProfileForm(forms.Form):
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                               max_length=10, required=False)
-
+        
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
         if gpgkey.startswith('0X'):

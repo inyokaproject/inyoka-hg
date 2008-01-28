@@ -209,12 +209,9 @@ def lost_password(request):
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
             data = form.cleaned_data
-            send_new_user_password(User.objects.get(
-                username=data['username'],
-                email=data['email']))
-            flash(u'Ein neues Passwort für den Benutzer „%s“'
-                  u' wurde an „%s“ versandt' % (
-                  escape(data['username']), escape(data['email'])), True)
+            send_new_user_password(form.user)
+            flash(u'Es wurde ein neues Passwort an deine E-Mail-Adresse '
+                  u'gesendet!', True)
 
             # clean up request.session
             del request.session['captcha_solution']
