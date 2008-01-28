@@ -158,6 +158,7 @@ class Article(models.Model):
 
     def _render(self, text):
         """Render a text that belongs to this Article to HTML"""
+        print self.is_xhtml
         if self.is_xhtml:
             return text
         node = parse(text)

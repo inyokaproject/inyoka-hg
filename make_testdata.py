@@ -143,7 +143,7 @@ def make_ikhaya(users):
                 intro=intro(),
                 text=text(),
                 public=True,
-                is_xhtml=True
+                is_xhtml=False
             )
             a.save()
 

@@ -31,13 +31,13 @@
     <li class="article{{ article.hidden and ' hidden' or '' }}">
       <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
       {%- if article.icon %}
-      <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
+      <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier|e }}" />
       {%- endif %}
       {{ article.rendered_intro }} 
       <p class="meta">
         geschrieben von <a href="{{ article.author|url }}">{{ article.author.username|e }}</a>
         {{ article.pub_date|specificdatetimeformat(true) }}
-        in <a href="{{ article.category|url }}">{{ article.category.name }}</a>
+        in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a>
         {%- if article.edit_count %} — {{ article.edit_count }} Mal bearbeitet.{% endif %} |
         <a href="{{ article|url('edit') }}">Bearbeiten</a>
       </p>
