@@ -58,6 +58,7 @@ def check_password(raw_password, enc_password):
 
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
+    is_public = models.BooleanField('Öffentliches Profil')
 
     def get_absolute_url(self):
         return href('portal', 'groups', self.name)
@@ -146,7 +147,7 @@ class User(models.Model):
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
 
     # profile attributes
-    post_count = models.IntegerField(u'Beiträge', default=0)
+    post_count = models.IntegerField(u'Beiträge', default=0, null=True)
     avatar = models.ImageField('Avatar', upload_to='portal/avatars',
                                 blank=True, null=True)
     jabber = models.CharField('Jabber', max_length=200, blank=True)
@@ -158,7 +159,7 @@ class User(models.Model):
     coordinates = models.CharField('Koordinaten', max_length=255,
                                    blank=True)
     location = models.CharField('Wohnort', max_length=200, blank=True)
-    gpgkey = models.CharField('GPG-Key', max_length=10, blank=True)    
+    gpgkey = models.CharField('GPG-Key', max_length=10, blank=True)
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)

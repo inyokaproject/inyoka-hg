@@ -14,7 +14,7 @@ from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
-from inyoka.utils.flashing import flash
+from inyoka.utils.flashing import flash, DEFAULT_FLASH_BUTTONS
 from inyoka.utils.html import escape
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
@@ -22,14 +22,23 @@ from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
                                ConfigurationForm, EditUserForm, EditDateForm, \
-                               EditForumForm
+                               EditForumForm, EditGroupForm
 from inyoka.portal.models import StaticPage, CalendarItem
-from inyoka.portal.user import User
+from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
+from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum
 
+IKHAYA_ARTICLE_DELETE_BUTTONS = [
+    {'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
+     'value': 'Löschen'},
+    {'type': 'submit', 'class': 'message-depublicate',
+     'name': 'message-depublicate', 'value': 'Veröffentlichung aufheben'},
+    {'type': 'submit', 'class': 'message-no', 'name': 'message-no',
+     'value': 'Abbrechen'}
+]
 
 
 @require_manager
@@ -270,14 +279,20 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
 def ikhaya_article_delete(request, article):
     article = Article.objects.get(slug=article)
     if request.method == 'POST':
-        if 'message-yes' in request.POST:
+        if 'message-depublicate' in request.POST:
+            article.public = False
+            article.save()
+            flash(u'Die Veröffentlichung des Artikels „%s“ wurde aufgehoben.'
+                  % escape(article.subject))
+        elif 'message-yes' in request.POST:
             article.delete()
             flash(u'Der Artikel „%s“ wurde erfolgreich gelöscht'
                   % escape(article.subject))
     else:
         flash(u'Möchtest du den Artikel „%s“ wirklich löschen?'
               % escape(article.subject), dialog=True,
-              dialog_url=url_for(article, 'delete'))
+              dialog_url=url_for(article, 'delete'),
+              dialog_buttons=IKHAYA_ARTICLE_DELETE_BUTTONS)
     return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
@@ -453,6 +468,7 @@ def forums_edit(request, id=None):
         'form': form,
     }
 
+
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
@@ -480,32 +496,52 @@ def _on_search_user_query(request):
 @require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
-    user = User.objects.filter(username=username).select_related()
-    values = user.values()[0]
-    form = EditUserForm(values)
-    form.base_fields['forum_privileges'].choices = (('gr', 'Gruppe'), ('du', 'Duuu'))
+    user = User.objects.get(username=username)
+    form = EditUserForm(model_to_dict(user))
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            user = user.get()
-            for key in ('username', 'password', 'is_active', 'date_joined',
+            for key in ('username', 'is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates',
-                        'post_count', 'gpgkey'):
+                        'gpgkey'):
                 setattr(user, key, data[key])
                 if data['avatar']:
                     user.save_avatar(data['avatar'])
+                if data['new_password']:
+                    user.set_password(data['new_password'])
                 user.save()
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!')
-    user = user.get()
     return {
         'user': user,
         'user_groups': user.groups.all(),
+        'form': form
+    }
+
+
+@templated('admin/groups.html')
+def groups(request):
+    return {
+        'groups': Group.objects.all()
+    }
+
+
+@templated('admin/groups_edit.html')
+def groups_edit(request, id=None):
+    new = id is not None
+    if request.method == 'POST':
+        form = EditGroupForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            print "xxxxxxxxxx %s" % data
+    else:
+        form = EditGroupForm()
+    return {
         'form': form
     }
 

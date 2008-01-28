@@ -3,7 +3,7 @@
     inyoka.form.acl
     ~~~~~~~~~~~~~~~
 
-    Auth foo for forum.
+    Authentification systen for the forum.
 
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
@@ -18,6 +18,20 @@ from inyoka.portal.utils import decor
 PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
               'sticky', 'vote', 'create_poll', 'upload', 'moderate']
 
+PRIVILEGES_DETAILS = [
+    ('read', 'kann lesen'),
+    ('reply', 'kann antworten'),
+    ('create', 'kann Erstellen'),
+    ('edit', 'kann editieren'),
+    ('revert', 'kann revidieren'),
+    ('delete', 'kann löschen'),
+    ('sticky', 'kann anpinnen'),
+    ('vote', 'kann voten'),
+    ('create', 'kann Umfragen erstellen'),
+    ('upload', 'kann Attachments nutzen'),
+    ('moderate', 'kann moderieren')
+]
+
 
 def get_forum_privileges(user, forum):
     """Get a dict of all the privileges for a user."""
@@ -25,6 +39,7 @@ def get_forum_privileges(user, forum):
 
 
 def get_privileges(user, forums):
+    """Return all privileges of the applied forums for the `user`"""
     if not forums:
         return {}
     forum_ids = [x.id for x in forums]
@@ -55,7 +70,7 @@ def have_privilege(user, forum, privilege):
 
 
 def filter_invisible(user, forums, priv='read'):
-    """Filter a user."""
+    """Filter all forums where the user has a privilege on it."""
     privileges = get_privileges(user, forums)
     result = []
     for forum in forums:

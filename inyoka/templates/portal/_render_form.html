@@ -12,7 +12,9 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 #}
-<dl>  
+{% if not inline %}
+<dl>
+{% endif %}
   {%- for field in fields %}
   {%- if form[field] %}
   <dt>
@@ -25,4 +27,6 @@
   <dd>{{ form[field] }} {{ h.field_errors(form.errors[field]) }}</dd>
   {%- endif %}
   {%- endfor %}
+{% if not inline or last %}
 </dl>
+{% endif %}

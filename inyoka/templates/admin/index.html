@@ -22,13 +22,9 @@
       {{ admin_button(href('admin', 'planet'), 'planet', 'Planet') }}
       {{ admin_button(href('admin', 'forum'), 'forum', 'Forum') }}
     </tr>
-	      <!--
-      <td>
-        <a href="{{ href('admin', 'users') }}">
-          <img src="{{ href('static', 'img', 'admin', 'category_users.png') }}" alt="Benutzer-Administration" /><br />
-          Benutzer-Administration
-        </a>
-      </td>
-      -->
+    <tr>
+      {{ admin_button(href('admin', 'groups'), 'groups', 'Gruppenkonfiguration') }}
+      <td></td><td></td>
+    </tr>
   </table>
 {% endblock %}

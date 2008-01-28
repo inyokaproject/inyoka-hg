@@ -12,8 +12,12 @@ from inyoka.utils.templating import partial_renderable
 
 
 @partial_renderable('portal/_render_form.html')
-def render_form(form, *fields):
+def render_form(form, *fields, **kwargs):
+    inline = kwargs.get('inline', False)
+    last = kwargs.get('last', False) and inline
     return {
+        'last': last,
+        'inline': inline,
         'form':   form,
         'fields': fields
     }

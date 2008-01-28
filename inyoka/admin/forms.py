@@ -12,6 +12,7 @@ from datetime import datetime
 from django import newforms as forms
 from inyoka.middlewares.registry import r
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS
+from inyoka.forum.acl import PRIVILEGES_DETAILS
 
 
 class ConfigurationForm(forms.Form):
@@ -90,7 +91,7 @@ class EditUserForm(forms.Form):
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
-    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel', 
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                               max_length=10, required=False)
 
     def clean_gpgkey(self):
@@ -100,7 +101,14 @@ class EditUserForm(forms.Form):
         return gpgkey
 
 
-    forum_privileges = forms.MultipleChoiceField(required=False)
+    forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
+        required=False, choices=PRIVILEGES_DETAILS)
+
+
+class EditGroupForm(forms.Form):
+    name = forms.CharField(label=u'Gruppenname', max_length=80)
+    forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
+                                                 required=False)
 
 
 class EditDateForm(forms.Form):
