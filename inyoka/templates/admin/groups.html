@@ -1,0 +1,38 @@
+{#
+    admin/groups.html
+    ~~~~~~~~~~~~~~~~~
+
+    Select a group to edit.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'groups'), 'Gruppen'),
+] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Gruppen</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<h3>Gruppenadministration</h3>
+{% if not groups %}
+<p>Aktuell existieren keine Gruppen. <a href="{{ href('admin', 'groups', 'new') }}">erstelle</a> die erste Gruppe.</p>
+{% else %}
+<p>Wähle eine Gruppe aus, die du editieren möchtest:</p>
+<form action="" method="post">
+  <select name="groups" size="5">
+    {% for group in groups %}
+    <option>{{ group.name }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" id="user_query" name="user" />
+  <input type="submit" value="Auswählen" />
+</form>
+{% endif %}
+{% endblock %}

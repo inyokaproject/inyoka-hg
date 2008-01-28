@@ -1,0 +1,28 @@
+{#
+    admin/groups.html
+    ~~~~~~~~~~~~~~~~~
+
+
+    Edit/Create a new group.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'groups'), 'Gruppen'),
+] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Gruppen</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>Gruppenkonfiguration</h3>
+<form action="" method="post">
+  {{ h.render_form(form, 'name', 'is_public') }}
+  <input type="submit" value="Auswählen" />
+</form>
+{% endblock %}
