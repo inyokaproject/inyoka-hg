@@ -140,7 +140,6 @@ class User(models.Model):
         validator_list=[validators.isAlphaNumeric])
     email = models.EmailField('E-Mail-Adresse', blank=True, unique=True)
     password = models.CharField('Passwort', max_length=128)
-    new_password = models.CharField('Neues Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.now)
     date_joined = models.DateTimeField('Angemeldet', default=datetime.datetime.now)
