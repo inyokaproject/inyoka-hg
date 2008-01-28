@@ -54,19 +54,18 @@
 
   DateTimeField.prototype = {
     readDateTime: function() {
-      var dateTimeRegex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/
+      var dateTimeRegex = /(\d{4})-(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2}):(\d{2})/
       dateTimeRegex.exec(this.input.val())
       var today = new Date();
       this.currentYear = RegExp.$1 || today.getFullYear();
       this.currentMonth = RegExp.$2 || today.getMonth() + 1;
       this.currentDay = RegExp.$3 || today.getDate();
-      this.currentHour = RegExp.$4 || today.getHours();
-      this.currentMinute = RegExp.$5 || today.getMinutes();
-      this.currentSecond = RegExp.$6 || today.getSeconds();
+      this.currentTime = [RegExp.$4 || today.getHours(), RegExp.$5 || today.getMinutes(),
+                          RegExp.$6 || today.getSeconds()].join(':');
     },
     writeDateTime: function() {
       this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay + ' ' +
-                     this.currentHour + ':' + this.currentMinute + ':' + this.currentSecond);
+                     this.currentTime)
     },
     toggle: function() {
       this.container.toggle();
@@ -77,36 +76,31 @@
         $('<tr><th class="caption">Uhrzeit</th></tr>')
       );
       this.timetable.append(timetable);
+      var now = new Date();
       var times = [
-        ['Jetzt', [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()]],
-        ['Mitternacht', ['00', '00', '00']],
-        ['6 Uhr', ['06', '00', '00']],
-        ['Mittag', ['12', '00', '00']],
-        ['18 Uhr', ['18', '00', '00']]
+        ['Jetzt', [now.getHours(), now.getMinutes(), now.getSeconds()].join(':')],
+        ['Mitternacht', '00:00:00'],
+        ['6 Uhr', '06:00:00'],
+        ['Mittag', '12:00:00'],
+        ['18 Uhr', '18:00:00']
       ];
       $.each(times, function(i, time) {
         timetable.append($('<tr></tr>').append($('<td></td>').append(
           $('<a></a>').text(time[0]).click(function() {
-            self.currentHour = time[1][0];
-            self.currentMinute = time[1][1];
-            self.currentSecond = time[1][2];
-            self.hourField.val(time[1][0]);
-            self.minuteField.val(time[1][1]);
-            self.secondField.val(time[1][2]);
+            self.currentTime = time[1];
+            self.timeField.val(time[1]);
             self.writeDateTime();
           })
         )));
       })
-      function _() {
-        self.currentHour = self.hourField.val();
-        self.currentMinute = self.minuteField.val();
-        self.currentSecond = self.secondField.val();
-        self.writeDateTime();
-      }
       var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable));
-      this.hourField = $('<input type="text"></input>').appendTo(col).val(this.currentHour).change(_);
-      this.minuteField = $('<input type="text"></input>').appendTo(col).val(this.currentMinute).change(_);
-      this.secondField = $('<input type="text"></input>').appendTo(col).val(this.currentSecond).change(_);
+      this.timeField = $('<input type="text"></input>')
+        .appendTo(col)
+        .val(this.currentTime)
+        .change(function() {
+          self.currentTime = self.timeField.val();
+          self.writeDateTime();
+        });
     },
     drawCalendar: function() {
       var self = this;

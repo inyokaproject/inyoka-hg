@@ -32,16 +32,20 @@
     Der Bentuzer {{ user.username }} gehört keinen Gruppen an.
     {% endif %}
   </p>
+  <dl>
   {{ h.render_form(form, 'username', 'is_active', 'forum_privileges', inline=true) }}
-  {{ h.render_form(form, 'date_joined', inline=true, last=true) }}
+  {{ h.render_form(form, 'date_joined', inline=true) }}
+  </dl>
   <h3>Persönliche Details von {{ user.username }}</h3>
   {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
   <h3>Benachrichtigungs-Einstellungen</h3>
     {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
   <h3>Sonstige Einstellungen</h3>
     {{ h.render_form(form, 'signature', 'coordinates', 'avatar', 'gpgkey') }}
-  <button type="submit" id="submit">Speichern</button>
-  <button type="reset" id="reset">Zurücksetzen</button>
+  <p>
+    <button type="submit" id="submit">Speichern</button>
+    <button type="reset" id="reset">Zurücksetzen</button>
+  </p>
 </form>
 <script type="text/javascript">
   /* <![CDATA[ */

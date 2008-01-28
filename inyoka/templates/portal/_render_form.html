@@ -19,12 +19,13 @@
   {%- if form[field] %}
   <dt>
     <label for="{{ form[field].auto_id }}">{{ form[field].label }}:</label>
-    {% if form[field].help_text %}
-    <br />
-    <em>{{ form[field].help_text }}</em>
-    {% endif %}
   </dt>
-  <dd>{{ form[field] }} {{ h.field_errors(form.errors[field]) }}</dd>
+  <dd>
+    {{ form[field] }} {{ h.field_errors(form.errors[field]) }}
+    {%- if form[field].help_text %}
+    <p class="note">{{ form[field].help_text }}</p>
+    {%- endif %}
+  </dd>
   {%- endif %}
   {%- endfor %}
 {% if not inline or last %}

@@ -43,7 +43,8 @@
 }
 
 .timetable td input {
-  width: 2em;
+  width: 6em;
+  text-align: center;
 }
 
 .calendar th.caption, .timetable th.caption {

@@ -51,6 +51,9 @@
   </ul>
   {%- if USER.is_authenticated %}
   <h4><a name="new_comment">Kommentar schreiben</a></h4>
+  <p class="note">
+
+  </p>
   <form action="{{ article|url }}#new_comment" method="post">
     {{ h.render_form(form, 'title', 'text') }}
     <p>

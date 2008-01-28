@@ -16,9 +16,10 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS
 
 
 class ConfigurationForm(forms.Form):
-    global_message = forms.CharField(label=u'Globale Nachricht', widget=
-                                     forms.Textarea(attrs={'rows': 3}),
-                                     required=False)
+    global_message = forms.CharField(label=u'Globale Nachricht',
+        widget=forms.Textarea(attrs={'rows': 3}), required=False,
+        help_text = u'Diese Nachricht wird auf allen Seiten über dem Inhalt '
+                   u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer.')
 
 
 class EditStaticPageForm(forms.Form):
