@@ -55,8 +55,10 @@
           }}{% if doc.highlight %}?highlight={{ highlight|urlencode|e
           }}{% endif %}">{{ doc.title|e }}</a></td>
         <td class="user">{% if doc.user
-          %}{% if doc.user %}
-          <a href="{{ doc.user|e }}">{{ doc.user|e }}</a>
+          %}{% if doc.user and doc.user_url %}
+          <a href="{{ doc.user_url }}">{{ doc.user|e }}</a>
+          {% elif doc.user %}
+          <a href="{{ doc.user|url }}">{{ doc.user|e }}</a>
           {% else %}{{ doc.user|e }}{% endif %}
           {% else %}Anonymous{% endif %}</td>
         <td class="date">{{ doc.date|datetimeformat|e }}</td>
