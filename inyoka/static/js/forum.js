@@ -33,7 +33,15 @@ $(document).ready(function () {
   });
   
   $('#id_add_option').click(add_reply);
+
+  // expand and collapse button for categories
+  $('table.forum tr.head a').before('<a href="#" class="collapse"></a>');
+  $('table.forum tr.head a.collapse')
+    .click(function() {
+        $('table.forum tr.entry').toggle();
+    });
 });
+
 
 function add_reply() {
   count = $('.newtopic_polls_replies').length;

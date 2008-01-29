@@ -150,3 +150,12 @@ table.forum td.last_post {
 .action_quote {
     background-image: url('../img/forum/unlock.png');
 }
+
+a.collapse {
+    float: right;
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-image: url('../img/icons/small/collapse.png');
+    margin-right: .5em;
+}
