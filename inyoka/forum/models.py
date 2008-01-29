@@ -314,7 +314,6 @@ class PostManager(models.Manager):
         ''')
         posts = []
         for row in cur.fetchall():
-            print row[0]
             posts.append(Post.objects.select_related().get(id__exact=row[0]))
         cache.set('forum_latest', posts, 30)
         return posts

@@ -57,5 +57,4 @@ def handle_area(area):
 
 @search_handler(u'category', u'kategorie')
 def handle_category(category):
-    print "blubber"
     return xapian.Query(u'C%s' % category.lower())
