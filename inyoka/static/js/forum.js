@@ -38,7 +38,18 @@ $(document).ready(function () {
   $('table.forum tr.head a').before('<a href="#" class="collapse"></a>');
   $('table.forum tr.head a.collapse')
     .click(function() {
-        $('table.forum tr.entry').toggle();
+        var inside = false;
+        var tr = $(this).parent().parent().get(0);
+        if ($(this).hasClass('collapse'))
+          $(this).removeClass('collapse').addClass('expand');
+        else
+          $(this).removeClass('expand').addClass('collapse');
+        $('table.forum tr').each(function() {
+          if ($(this).hasClass('head'))
+            inside = tr.innerHTML == $(this).html()
+          if (inside && $(this).hasClass('entry'))
+            $(this).toggle();
+        })
     });
 });
 
