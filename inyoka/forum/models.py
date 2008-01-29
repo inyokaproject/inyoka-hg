@@ -21,7 +21,7 @@ from django.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils import slugify
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.middlewares.registry import r
@@ -871,7 +871,6 @@ class Post(models.Model):
     #: Moderators can set hidden to True which means that normal users aren't
     #: able to see the post anymore.
     hidden = models.BooleanField(u'Verborgen', default=False)
-    xapian_docid = models.IntegerField(default=0)
 
     def render_text(self, request=None, format='html', nocache=False):
         context = RenderContext(request or r.request, simplified=True)
@@ -894,18 +893,16 @@ class Post(models.Model):
         """
         This updates the xapian search index.
         """
-        doc = search.create_document('forum', self.xapian_docid)
-        doc.clear()
-        doc['title'] = self.topic.title
-        doc['text'] = self.text
-        doc['author'] = self.author
-        doc['date'] = self.pub_date
-        doc['topic'] = self.topic.id
-        doc['area'] = 'Forum'
-        doc.save()
-        if self.xapian_docid != doc.docid:
-            self.xapian_docid = doc.docid
-            models.Model.save(self)
+        search.store(
+            component='f',
+            uid = self.id,
+            title = self.topic.title,
+            author = self.author_id,
+            date = self.pub_date,
+            collapse = self.topic_id,
+            category = [p.slug for p in self.topic.forum.parents],
+            text = self.text
+        )
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -1083,3 +1080,15 @@ class Privilege(models.Model):
     can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
     can_moderate = models.BooleanField(default=False)
+
+
+def recv_post(post_id):
+    post = Post.objects.select_related(2).get(id=post_id)
+    return {
+        'title': post.topic.title,
+        'user': post.author,
+        'date': post.pub_date,
+        'url': url_for(post),
+        'component': u'Forum'
+    }
+search.register_result_handler('f', recv_post)

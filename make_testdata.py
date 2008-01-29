@@ -18,8 +18,8 @@ from inyoka.portal.user import User, Group
 
 MARKS = ('.', ';', '!', '?')
 WORDS = LOREM_IPSUM_WORDS.split(' ')
-WORDS = ['<script>alert("XSS")</script>', '"><script>alert("XSS")</script><"',
-         "'><script>alert('XSS')</script><'", '">', "'>"]
+#WORDS = ['<script>alert("XSS")</script>', '"><script>alert("XSS")</script><"',
+#         "'><script>alert('XSS')</script><'", '">', "'>"]
 
 def word():
     return choice(WORDS)

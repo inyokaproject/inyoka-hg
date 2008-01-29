@@ -228,6 +228,8 @@ class Document(object):
 
     def save(self):
         """Save the changes on this document."""
+        print "xxx"
+        return
         self._doc.add_value(0, self.type_id)
         connection = search.get_connection(True)
         if self.docid is None:
@@ -292,18 +294,21 @@ class SearchResult(object):
     This class holds all search results.
     """
 
-    def __init__(self, mset, query, page, per_page):
+    def __init__(self, mset, query, page, per_page, handlers={}):
         self.matches_estimated = mset.get_matches_estimated()
         self.page = page
         self.page_count = self.matches_estimated / per_page + 1
         self.per_page = per_page
         self.results = []
         for match in mset:
-            doc = search.get_document(match.get_docid())
-            if doc is None or doc.type_id == 'doc':
+            full_id = match.get_document().get_value(0).split(':')
+            try:
+                data = handlers[full_id[0]](full_id[1])
+            except ObjectDoesNotExist:
+                print 'ObjectDoesNotExist:', full_id
                 continue
-            doc['score'] = match[xapian.MSET_PERCENT]
-            self.results.append(doc)
+            data['score'] = match[xapian.MSET_PERCENT]
+            self.results.append(data)
         self.terms = []
         t = query.get_terms_begin()
         while t != query.get_terms_end():
@@ -330,6 +335,7 @@ class SearchSystem(object):
         self.connections = WeakKeyDictionary()
         self.doctypes = {}
         self.prefix_handlers = {}
+        self.result_handlers = {}
 
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
@@ -344,6 +350,9 @@ class SearchSystem(object):
             connection = self.connections[thread]
             connection.reopen()
         return connection
+
+    def register_result_handler(self, component, handler):
+        self.result_handlers[component] = handler
 
     def register(self, doctype):
         """Register a new document type."""
@@ -387,17 +396,73 @@ class SearchSystem(object):
             d1 = date_begin and mktime(date_begin.timetuple()) or 0
             d2 = date_end and mktime(date_end.timetuple()) or \
                  mktime(datetime.now().timetuple())
-            range = xapian.Query(xapian.Query.OP_VALUE_RANGE, 1,
+            range = xapian.Query(xapian.Query.OP_VALUE_RANGE, 2,
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
         if collapse:
-            enq.set_collapse_key(2)
+            enq.set_collapse_key(1)
         enq.set_query(qry)
         offset = (page - 1) * per_page
         mset = enq.get_mset(offset, per_page, per_page * 3)
-        return SearchResult(mset, qry, page, per_page)
+        return SearchResult(mset, qry, page, per_page, self.result_handlers)
 
+    def store(self, **data):
+        doc = xapian.Document()
+        pos = 0
+
+        # identification (required)
+        full_id = (data['component'].lower(), data['uid'])
+        doc.add_term('P%s' % full_id[0])
+        doc.add_term('Q%s:%d' % full_id)
+        doc.add_value(0, '%s:%d' % full_id)
+
+        # collapse key (optional)
+        if data.get('collapse'):
+            doc.add_value(1, '%s:%s' % (full_id[0], data['collapse']))
+
+        # title (optional)
+        if data.get('title'):
+            title = list(tokenize(data['title']))
+            for token in title:
+                doc.add_posting(token, pos)
+                pos += 1
+            pos += 20
+            for token in title:
+                doc.add_posting('T%s' % token, pos)
+                pos += 1
+            pos += 20
+
+        # user (optional)
+        if data.get('user'):
+            doc.add_term('U%d' % data['user'])
+
+        # date (optional)
+        if data.get('date'):
+            time = xapian.sortable_serialise(mktime(data['date'].timetuple()))
+            doc.add_value(2, time)
+
+        # category (optional)
+        if data.get('category'):
+            categories = data.get('category')
+            if isinstance(categories, (str, unicode)):
+                categories = [categories]
+            for category in categories:
+                doc.add_term('C%s' % category.lower())
+
+        # text (optional, can contain multiple items)
+        if data.get('text'):
+            text = data['text']
+            if isinstance(text, (str, unicode)):
+                text = [text]
+            for block in text:
+                for token in tokenize(block):
+                    doc.add_posting(token, pos)
+                    pos += 1
+                pos += 20
+
+        connection = self.get_connection(True)
+        connection.replace_document('Q%s:%d' % full_id, doc)
 
 # setup the singleton instance
 search = None
@@ -410,3 +475,4 @@ def search_handler(*prefixes):
         search.register_handler(prefixes, f)
         return f
     return decorate
+

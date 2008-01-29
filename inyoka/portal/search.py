@@ -113,4 +113,11 @@ def handle_title(title):
 @search_handler(u'area', u'bereich')
 def handle_area(area):
     """Normalize the name of the area."""
-    return xapian.Query(u'A%s' % area.strip().lower())
+    map = {
+        'forum': 'f',
+        'wiki': 'w',
+        'ikhaya': 'i',
+        'planet': 'p',
+    }
+    component = map.get(area.strip().lower())
+    return component and xapian.Query(u'P%s' % component)

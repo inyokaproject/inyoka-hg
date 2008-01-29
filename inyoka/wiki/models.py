@@ -90,7 +90,7 @@ from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
 from inyoka.wiki.parser import nodes
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
@@ -742,18 +742,12 @@ class Page(models.Model):
         topic
             A foreign key to the topic that belongs to this wiki page.
 
-        xapian_docid
-            The xapian doc_id of this page. It's used by the search and might
-            change over time. This attribute exists just for the `search`
-            module and should be ignored.
-
         rev
             If the page is bound this points to a `Revision` otherwise `None`.
     """
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True)
     topic = models.ForeignKey(Topic, blank=True, null=True)
-    xapian_docid = models.IntegerField(default=0)
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -903,19 +897,14 @@ class Page(models.Model):
             MetaData(page=self, key=key, value=value).save()
 
         # searchindex
-        doc = search.create_document('wiki', self.xapian_docid)
-        doc.clear()
-        doc['title'] = rev.title
-        doc['text'] = meta['text']
-        if rev.user:
-            doc['author'] = rev.user.id
-        doc['date'] = rev.change_date
-        doc['area'] = 'Wiki'
-        doc.save()
-
-        if doc.docid != self.xapian_docid:
-            self.xapian_docid = doc.docid
-            models.Model.save(self)
+        search.store(
+            component='w',
+            uid=self.id,
+            title=rev.title,
+            author=rev.user_id,
+            date=rev.change_date,
+            text=meta['text']
+        )
 
     def prune(self):
         """Clear the page cache."""
@@ -1256,3 +1245,15 @@ class MetaData(models.Model):
     page = models.ForeignKey(Page)
     key = models.CharField(max_length=30)
     value = models.CharField(max_length=512)
+
+
+def recv_page(page_id):
+    rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
+    return {
+        'title': rev.title,
+        'user': rev.user,
+        'date': rev.change_date,
+        'url': url_for(rev.page),
+        'component': u'Wiki'
+    }
+search.register_result_handler('w', recv_page)
