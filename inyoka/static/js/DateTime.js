@@ -13,7 +13,7 @@
 
 /* create a closure for all of our stuff so that we don't export the
    helper functions and variables.  The only thing that is defined as
-   a global is the `DateTimeEditor`. */
+   a global is the `DateTimeField`. */
 
 (function() {
   var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];

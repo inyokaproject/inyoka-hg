@@ -1,15 +1,12 @@
 /*
     static.js.forum
-    ~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~
 
     JavaScript for the forum.
 
     :copyright: 2007 by Marian Sigler.
     :license: GNU GPL.
 */
-
-// javascript:v = ''; for (k in $('body')) v += k + ', '; alert(v);
-
 
 toggle_state = {};
 

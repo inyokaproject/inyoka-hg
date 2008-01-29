@@ -28,7 +28,7 @@ from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
-from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
+from inyoka.forum.acl import PRIVILEGES_DETAILS
 from inyoka.forum.models import Forum
 
 IKHAYA_ARTICLE_DELETE_BUTTONS = [
@@ -520,7 +520,8 @@ def edit_user(request, username):
     return {
         'user': user,
         'user_groups': user.groups.all(),
-        'form': form
+        'form': form,
+        'permissions': PRIVILEGES_DETAILS
     }
 
 
