@@ -9,7 +9,7 @@
 #}
 {% extends 'admin/overall.html' %}
 {% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js', 'Permissions.js'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
@@ -33,7 +33,9 @@
     {% endif %}
   </p>
   <dl>
-  {{ h.render_form(form, 'username', 'is_active', 'forum_privileges', inline=true) }}
+  {{ h.render_form(form, 'username', 'is_active', inline=true) }}
+    <dt>Forum-Privilegien:</dt>
+    <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}
   </dl>
   <h3>Persönliche Details von {{ user.username }}</h3>
@@ -42,11 +44,6 @@
   {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
   <h3>Sonstige Einstellungen</h3>
   {{ h.render_form(form, 'signature', 'coordinates', 'avatar', 'gpgkey') }}
-  <h3>Rechte</h3>
-  <dl>
-    <dt>Forum:</dt>
-    <dd id="forum_rights">Javascript muss aktiviert sein!</dd>
-  </dl>
   <p>
     <button type="submit" id="submit">Speichern</button>
     <button type="reset" id="reset">Zurücksetzen</button>
@@ -56,13 +53,8 @@
   /* <![CDATA[ */
   var signature = new WikiEditor('textarea[@name="signature"]');
   var date = new DateTimeField('input[@name="date_joined"]');
-  var rights = new PermissionBox('#forum_rights', [
-  //  [  slug       name      permissions ]
-      ['forum_1', 'Forum 1', ['read', 'reply', 'sticky', 'create']],
-      ['bla', 'Bla', ['reply', 'edit']],
-      ['foo', 'foo', ['read', 'moderate', 'edit']],
-      ['bar', 'bar', ['write']]
-    ], {{ permissions|jsonencode }});
+  var rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
+    {{ forum_privileges|jsonencode }});
   /* ]]> */
 </script>
 {% endblock %}

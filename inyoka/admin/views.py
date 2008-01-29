@@ -28,8 +28,9 @@ from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
-from inyoka.forum.acl import PRIVILEGES_DETAILS
-from inyoka.forum.models import Forum
+from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
+from inyoka.forum.models import Forum, Privilege
+
 
 IKHAYA_ARTICLE_DELETE_BUTTONS = [
     {'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
@@ -496,7 +497,19 @@ def _on_search_user_query(request):
 @require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
+    #TODO: check for expensive SQL-Queries and other performance problems...
+    #      ... this should be cleaned up -- it's damn unreadable for now...
+    def _set_privileges():
+        for v in value:
+            setattr(privilege, 'can_' + v, True)
+            for v in PRIVILEGES:
+                if not v in value:
+                    setattr(privilege, 'can_' + v, False)
+
     user = User.objects.get(username=username)
+    forum_privileges = dict((x.forum.slug, (x.forum.name, [p for p in dict(
+        PRIVILEGES_DETAILS).keys() if getattr(x, 'can_%s' % p)]))
+        for x in user.forum_privileges.select_related(depth=1))
     form = EditUserForm(model_to_dict(user))
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
@@ -511,6 +524,23 @@ def edit_user(request, username):
                     user.save_avatar(data['avatar'])
                 if data['new_password']:
                     user.set_password(data['new_password'])
+                #XXX: find a somewhat better method to find all `forum_permission-*` post-args...
+                for key, value in request.POST.iteritems():
+                    if key.startswith('forum_privileges-'):
+                        forum_slug = key.split('-', 1)[1]
+                        #XXX: remove dublicate code...
+                        try:
+                            privilege = Privilege.objects.get(forum__slug=forum_slug)
+                            privilege.user = user
+                            privilege.forum = Forum.objects.get(slug=forum_slug)
+                            _set_privileges()
+                        except Privilege.DoesNotExist:
+                            privilege = Privilege(
+                                user=user,
+                                forum=Forum.objects.get(slug=forum_slug)
+                            )
+                            _set_privileges()
+                        privilege.save()
                 user.save()
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
             if user.username != username:
@@ -521,7 +551,8 @@ def edit_user(request, username):
         'user': user,
         'user_groups': user.groups.all(),
         'form': form,
-        'permissions': PRIVILEGES_DETAILS
+        'user_forum_privileges': [[k, v[0], v[1]] for k, v in forum_privileges.iteritems()],
+        'forum_privileges': PRIVILEGES_DETAILS,
     }
 
 
