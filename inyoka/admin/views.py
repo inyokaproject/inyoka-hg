@@ -507,9 +507,6 @@ def edit_user(request, username):
                     setattr(privilege, 'can_' + v, False)
 
     user = User.objects.get(username=username)
-    forum_privileges = dict((x.forum.slug, (x.forum.name, [p for p in dict(
-        PRIVILEGES_DETAILS).keys() if getattr(x, 'can_%s' % p)]))
-        for x in user.forum_privileges.select_related(depth=1))
     form = EditUserForm(model_to_dict(user))
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
@@ -546,12 +543,19 @@ def edit_user(request, username):
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
-            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!')
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+
+    forum_privileges = [
+        (x.forum.slug, x.forum.name, filter(lambda p:
+          getattr(x, 'can_' + p, False), [p[0] for p in PRIVILEGES_DETAILS]))
+        for x in user.forum_privileges.select_related(depth=1)
+    ]
+
     return {
         'user': user,
         'user_groups': user.groups.all(),
         'form': form,
-        'user_forum_privileges': [[k, v[0], v[1]] for k, v in forum_privileges.iteritems()],
+        'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
     }
 
