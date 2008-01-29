@@ -46,7 +46,7 @@ $(document).ready(function () {
           $(this).removeClass('expand').addClass('collapse');
         $('table.forum tr').each(function() {
           if ($(this).hasClass('head'))
-            inside = tr.innerHTML == $(this).html()
+            inside = tr == $(this).get(0);
           if (inside && $(this).hasClass('entry'))
             $(this).toggle();
         })
