@@ -8,5 +8,3 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-# initialize search module
-import inyoka.planet.search

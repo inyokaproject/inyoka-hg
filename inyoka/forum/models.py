@@ -895,13 +895,14 @@ class Post(models.Model):
         """
         search.store(
             component='f',
-            uid = self.id,
-            title = self.topic.title,
-            author = self.author_id,
-            date = self.pub_date,
-            collapse = self.topic_id,
-            category = [p.slug for p in self.topic.forum.parents],
-            text = self.text
+            uid=self.id,
+            title=self.topic.title,
+            author=self.author_id,
+            date=self.pub_date,
+            collapse=self.topic_id,
+            category=[p.slug for p in self.topic.forum.parents] + \
+                [self.topic.forum.slug],
+            text=self.text
         )
 
     def get_absolute_url(self, action='show'):

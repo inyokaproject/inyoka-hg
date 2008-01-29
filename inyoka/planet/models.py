@@ -5,7 +5,7 @@
 
     Database models for the planet.
 
-    :copyright: 2007 by Benjamin Wiegand, maix.
+    :copyright: 2007 by Benjamin Wiegand, maix, Christoph Hac, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 import os
@@ -16,7 +16,7 @@ from django.conf import settings
 from django.db import models
 from inyoka.utils import striptags
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.search import search, Document
+from inyoka.utils.search import search
 
 
 class Blog(models.Model):

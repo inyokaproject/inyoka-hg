@@ -5,7 +5,7 @@
 
     Database models for ikhaya.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007 by Benjamin Wiegand, Christoph Hack
     :license: GNU GPL, see LICENSE for more details.
 """
 import random
@@ -16,7 +16,7 @@ from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils import slugify, striptags
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.search import search, Document
+from inyoka.utils.search import search
 from inyoka.middlewares.registry import r
 
 

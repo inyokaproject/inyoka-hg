@@ -172,123 +172,6 @@ class QueryParser(object):
         return xapian.Query()
 
 
-class DocumentMeta(type):
-    """
-    Metaclass for collecting the getter and setter methods. In
-    addition, the document type gets registered.
-    """
-    def __new__(cls, name, bases, dct):
-        setters = {}
-        getters = {}
-        ndct = {}
-        for base in reversed(bases):
-            if isinstance(base, DocumentMeta):
-                setters.update(base._setters)
-                getters.update(base._getters)
-        for key, value in dct.iteritems():
-            if key.startswith('set_'):
-                setters[key[4:]] = value
-            elif key.startswith('get_') and key != 'get_absolute_url':
-                getters[key[4:]] = value
-            else:
-                ndct[key] = value
-        ndct['_setters'] = setters
-        ndct['_getters'] = getters
-        assert ndct.get('type_id'), \
-               'Each Document must have an unique type id!'
-        doctype = type.__new__(cls, name, bases, ndct)
-        if search is not None:
-            search.register(doctype)
-        return doctype
-
-
-class Document(object):
-    """
-    Wraps a Xapian Document. Implementions should subclass this.
-    """
-    __metaclass__ = DocumentMeta
-    type_id = 'doc'
-
-    def __init__(self, docid=None):
-        self.docid = docid or None
-        if self.docid:
-            connection = search.get_connection()
-            try:
-                self._doc = connection.get_document(self.docid)
-            except xapian.DocNotFoundError:
-                self._doc = xapian.Document()
-        else:
-            self._doc = xapian.Document()
-        self._termpos = 0
-
-    def clear(self):
-        """Call this when reusing a document."""
-        self._doc = xapian.Document()
-        self._termpos = 0
-
-    def save(self):
-        """Save the changes on this document."""
-        print "xxx"
-        return
-        self._doc.add_value(0, self.type_id)
-        connection = search.get_connection(True)
-        if self.docid is None:
-            self.docid = connection.add_document(self._doc)
-        else:
-            connection.replace_document(self.docid, self._doc)
-        connection.flush()
-        return self.docid
-
-    def delete(self):
-        """Delete this document from the database."""
-        assert self.docid is not None
-        connection = search.get_connection(True)
-        connection.delete_document(self.docid)
-
-    def add_postings(self, stream, prefix=''):
-        """
-        Add all postings from the stream in the right order. All postings
-        and the prefix (if given) must be normalized!
-        """
-        for posting in stream:
-            if isinstance(posting, unicode):
-                posting = posting.encode('utf-8')
-            self._doc.add_posting('%s%s' % (prefix, posting), self._termpos)
-            self._termpos += 1
-        self._termpos += 15
-
-    def add_terms(self, stream, prefix=''):
-        """
-        Add all terms from the stream, extended with the given prefix. All
-        terms and the prefix (if given) must be normalized!
-        """
-        for term in stream:
-            if isinstance(term, unicode):
-                term = term.encode('utf-8')
-            self._doc.add_term('%s%s' % (prefix, term))
-
-    def set_score(self, value):
-        self._score = value
-
-    def get_score(self):
-        return self._score
-
-    def get_doctype(self):
-        return self.type_id
-
-    def __getitem__(self, name):
-        getter = self._getters.get(name)
-        if getter is not None:
-            return getter(self)
-        return None
-
-    def __setitem__(self, name, value):
-        setter = self._setters.get(name)
-        if setter is None:
-            raise AttributeError, 'No setter for item "%s"' % name
-        setter(self, value)
-
-
 class SearchResult(object):
     """
     This class holds all search results.
@@ -305,7 +188,6 @@ class SearchResult(object):
             try:
                 data = handlers[full_id[0]](full_id[1])
             except ObjectDoesNotExist:
-                print 'ObjectDoesNotExist:', full_id
                 continue
             data['score'] = match[xapian.MSET_PERCENT]
             self.results.append(data)
@@ -333,7 +215,6 @@ class SearchSystem(object):
             raise TypeError('cannot create %r instances, use the search '
                             "object instead" % self.__class__.__name__)
         self.connections = WeakKeyDictionary()
-        self.doctypes = {}
         self.prefix_handlers = {}
         self.result_handlers = {}
 
@@ -352,13 +233,13 @@ class SearchSystem(object):
         return connection
 
     def register_result_handler(self, component, handler):
+        """
+        Register a result hanlder for retrieving results from the
+        database.
+        """
         self.result_handlers[component] = handler
 
-    def register(self, doctype):
-        """Register a new document type."""
-        self.doctypes[doctype.type_id] = doctype
-
-    def register_handler(self, prefixes, handler):
+    def register_prefix_handler(self, prefixes, handler):
         """
         Register a prefix handler which can be used to search for
         spezific terms in the database. Instead of a simple prefix->value
@@ -368,20 +249,6 @@ class SearchSystem(object):
         """
         for prefix in prefixes:
             self.prefix_handlers[prefix] = handler
-
-    def get_document(self, docid):
-        db = self.get_connection()
-        xapdoc = db.get_document(docid)
-        doctype = self.doctypes.get(xapdoc.get_value(0), Document)
-        try:
-            return doctype(docid)
-        except ObjectDoesNotExist:
-            pass
-            # delete document automatically?
-        return None
-
-    def create_document(self, doctype, docid=None):
-        return self.doctypes.get(doctype, Document)(docid)
 
     def parse_query(self, query):
         """Parse a query."""
@@ -472,7 +339,7 @@ search = SearchSystem()
 def search_handler(*prefixes):
     """A decorator which registers the search handler."""
     def decorate(f):
-        search.register_handler(prefixes, f)
+        search.register_prefix_handler(prefixes, f)
         return f
     return decorate
 

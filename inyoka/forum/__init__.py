@@ -8,6 +8,3 @@
 """
 # publish the jinja macros
 from inyoka.forum import macros
-
-# initialize search
-import inyoka.forum.search

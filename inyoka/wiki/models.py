@@ -988,6 +988,7 @@ class Page(models.Model):
             note
                 The change note for the revision. If not given it will be
                 empty.
+:q
 
             attachment
                 see `attachment_filename`
