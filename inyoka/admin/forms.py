@@ -102,10 +102,6 @@ class EditUserForm(forms.Form):
         return gpgkey
 
 
-    forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
-        required=False, choices=PRIVILEGES_DETAILS)
-
-
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',

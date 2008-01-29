@@ -21,49 +21,47 @@ WORDS = LOREM_IPSUM_WORDS.split(' ')
 #WORDS = ['<script>alert("XSS")</script>', '"><script>alert("XSS")</script><"',
 #         "'><script>alert('XSS')</script><'", '">', "'>"]
 
-def word():
-    return choice(WORDS)
+def word(markup=True):
+    word = choice(WORDS)
+    modifiers = ['[:%s:]', "'''%s'''", "''%s''", '__%s__', '[http://ubuntuusers.de %s]']
+    if markup:
+        for modifier in modifiers:
+            if randint(1,  5) == 1:
+                word = modifier % word
+    return word
 
-
-def words(min=4, max=20):
+def words(min=4, max=20, markup=True):
     ws = []
     for i in xrange(randint(min, max)):
-        w = word()
+        w = word(markup)
         if i == 0:
             w = w.capitalize()
         ws.append(w)
     return '%s%s' % (' '.join(ws), choice(MARKS))
 
-
-def sentences(min=5, max=100):
+def sentences(min=5, max=100, markup=True):
     s_list = []
     nls = ['\n\n', '\n\n\n\n', '\n', '']
     for i in xrange(randint(min, max)):
         s_list.append(
-            words() + choice(nls)
+            words(markup) + choice(nls)
         )
     return ' '.join(s_list)
 
+def title(markup=True):
+    return words(2, 3, markup)
 
-def title():
-    return words(2, 3)
-
-
-def intro():
-    return sentences(min=3, max=10)
-
-def text():
-    return sentences()
+def intro(markup=True):
+    return sentences(min=3, max=10, markup=markup)
 
 def randtime():
     return datetime.fromtimestamp(randint(0, math.floor(time.time())))
-
 
 def make_groups():
     print 'Creating groups'
     groups = []
     for _ in xrange(10):
-        groups.append(Group(name=word() + str(randint(1, 999999)), is_public=bool(randint(0, 1))))
+        groups.append(Group(name=choice(WORDS), is_public=bool(randint(0, 1))))
         groups[-1].save()
     return groups
 
@@ -72,7 +70,7 @@ def make_users(groups):
     names = []
     for _ in xrange(30):
         while True:
-            name = (str(randint(0, 99999)) + word())[:30]
+            name = choice(WORDS)[:30]
             if name not in names:
                 names.append(name)
                 break
@@ -111,13 +109,13 @@ def make_forum(users):
                 parent = choice(forums)
             except IndexError:
                 pass
-        f = Forum(name=title() + str(randint(1, 9999)), parent=parent)
+        f = Forum(name=title(markup=False), parent=parent)
         f.save()
         Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
         forums.append(f)
         if parent != None:
             for _ in xrange(randint(1, 3)):
-                t = Topic.objects.create(f, title()[:100], text(), author=
+                t = Topic.objects.create(f, title(markup=False)[:100], sentences(min=1, max=10), author=
                                          choice(users), pub_date=randtime())
                 for _ in xrange(randint(1, 10)):
                     t.reply(sentences(min=1, max=10), choice(users), randtime())
@@ -132,16 +130,16 @@ def make_ikhaya(users):
     print 'Creating ikhaya test data'
     from inyoka.ikhaya.models import Category, Article
     for _ in xrange(5):
-        c = Category(name='%s%s' % (randint(1, 9999), title()))
+        c = Category(name=title(markup=False))
         c.save()
         for _ in xrange(5):
             a = Article(
                 pub_date=randtime(),
                 author=choice(users),
-                subject=title(),
+                subject=title(markup=False),
                 category=c,
                 intro=intro(),
-                text=text(),
+                text=sentences(),
                 public=True,
                 is_xhtml=False
             )

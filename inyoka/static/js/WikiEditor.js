@@ -47,7 +47,6 @@
    */
   var button = function(id, title, callback, profiles) {
     return function(editor) {
-      console.log(profiles, editor.profile);
       if (!profiles || $.inArray(editor.profile, profiles) > -1)
         return $('<a href="#" class="button" />')
           .attr('id', 'button-' + id)
@@ -242,7 +241,6 @@
       this.textarea[0].focus();
     }),
     button('enlarge', 'Vergrößern', function(evt) {
-      console.log(this.textarea);
       if (isNaN(this.textarea[0].rows) || this.textarea[0].rows < .5)
         this.textarea[0].rows = 6;
       else
