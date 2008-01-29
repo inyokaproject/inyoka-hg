@@ -287,6 +287,7 @@ def recv_article(article_id):
         'user': article.author,
         'date': article.pub_date,
         'url': url_for(article),
-        'component': u'Ikhaya'
+        'component': u'Ikhaya',
+        'highlight': True
     }
 search.register_result_handler('i', recv_article)

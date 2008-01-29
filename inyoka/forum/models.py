@@ -1100,6 +1100,7 @@ def recv_post(post_id):
         'user': post.author,
         'date': post.pub_date,
         'url': url_for(post),
-        'component': u'Forum'
+        'component': u'Forum',
+        'highlight': True
     }
 search.register_result_handler('f', recv_post)

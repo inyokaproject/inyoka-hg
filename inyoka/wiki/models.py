@@ -1255,6 +1255,7 @@ def recv_page(page_id):
         'user': rev.user,
         'date': rev.change_date,
         'url': url_for(rev.page),
-        'component': u'Wiki'
+        'component': u'Wiki',
+        'highlight': True
     }
 search.register_result_handler('w', recv_page)
