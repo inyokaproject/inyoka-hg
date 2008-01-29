@@ -901,7 +901,7 @@ class Page(models.Model):
             component='w',
             uid=self.id,
             title=rev.title,
-            author=rev.user_id,
+            user=rev.user_id,
             date=rev.change_date,
             text=meta['text']
         )

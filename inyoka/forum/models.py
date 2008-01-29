@@ -593,9 +593,12 @@ class Forum(models.Model):
         super(Forum, self).save()
 
     def get_read_status(self, user):
+        """
+        Determine the read status of the whole forum for a specific
+        user.
+        """
         if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
             return True
-        # TODO: optimizing!
         for forum in self.forum_set.all():
             if not forum.get_read_status(user):
                 return False
@@ -605,6 +608,10 @@ class Forum(models.Model):
         return True
 
     def mark_read(self, user):
+        """
+        Mark all topics in this forum and all related subforums as
+        read for the specificed user.
+        """
         forums = [self]
         while forums:
             forum = forums.pop()
@@ -830,6 +837,9 @@ class Topic(models.Model):
             return False
 
     def mark_read(self, user):
+        """
+        Mark the current topic as read for a given user.
+        """
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
@@ -897,7 +907,7 @@ class Post(models.Model):
             component='f',
             uid=self.id,
             title=self.topic.title,
-            author=self.author_id,
+            user=self.author_id,
             date=self.pub_date,
             collapse=self.topic_id,
             category=[p.slug for p in self.topic.forum.parents] + \

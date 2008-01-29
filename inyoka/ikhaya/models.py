@@ -169,12 +169,12 @@ class Article(models.Model):
         """
         search.store(
             component='i',
-            uid = self.id,
-            title = self.subject,
-            author = self.author_id,
-            date = self.pub_date,
-            category = self.category.slug,
-            text = self.text
+            uid=self.id,
+            title=self.subject,
+            user=self.author_id,
+            date=self.pub_date,
+            category=self.category.slug,
+            text=self.text
         )
 
     def save(self):
