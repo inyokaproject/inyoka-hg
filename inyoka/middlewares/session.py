@@ -77,6 +77,10 @@ class AdvancedSessionMiddleware(object):
         except AttributeError:
             return response
 
+        # we can remove the session key if the user is logged in
+        if '_sk' in request.session and 'uid' in request.session:
+            del request.session['_sk']
+
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
             if request.session.get('_perm'):
                 expires_time = request.session.get('_ex', 0)

@@ -281,6 +281,7 @@ class User(models.Model):
         self.last_login = datetime.datetime.now()
         self.save()
         request.session['uid'] = self.id
+        request.session.pop('_sk', None)
         request.user = self
 
 
