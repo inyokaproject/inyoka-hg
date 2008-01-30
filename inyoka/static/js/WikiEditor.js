@@ -106,7 +106,7 @@
     var t;
     return (
       date.getUTCFullYear() + '-' +
-      (t = date.getUTCMonth(), t < 10 ? '0' : '') + t + '-' +
+      (t = date.getUTCMonth(), t < 9 ? '0' : '') + (t + 1) + '-' +
       (t = date.getUTCDate(), t < 10 ? '0' : '') + t + 'T' +
       (t = date.getUTCHours(), t < 10 ? '0' : '') + t + ':' +
       (t = date.getUTCMinutes(), t < 10 ? '0' : '') + t + ':' +

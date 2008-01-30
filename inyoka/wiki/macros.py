@@ -169,7 +169,7 @@ class RecentChanges(Macro):
     """
 
     arguments = (
-        ('pro_seite', int, 100),
+        ('per_page', int, 100),
     )
 
     def __init__(self, per_page):
@@ -230,15 +230,15 @@ class TableOfContents(TreeMacro):
     """
     stage = 'final'
     arguments = (
-        ('maximale_tiefe', int, 3),
-        ('typ', {
-            u'ungeordnet':      'unordered',
-            u'arabisch0':       'arabiczero',
-            u'arabisch':        'arabic',
-            u'alphabeth':       'alphalower',
-            u'ALPHABETH':       'alphaupper',
-            u'römisch':         'romanlower',
-            u'RÖMISCH':         'romanupper'
+        ('max_depth', int, 3),
+        ('type', {
+            'unordered':    'unordered',
+            'arabic0':      'arabiczero',
+            'arabic':       'arabic',
+            'alphabeth':    'alphalower',
+            'ALPHABETH':    'alphaupper',
+            'roman':        'romanlower',
+            'ROMAN':        'romanupper'
         }, 'arabic')
     )
 
@@ -285,9 +285,9 @@ class PageList(Macro):
 
     is_block_tag = True
     arguments = (
-        ('muster', unicode, ''),
-        (u'schreibungsabhängig', bool, True),
-        (u'titel_kürzen', bool, False)
+        ('pattern', unicode, ''),
+        ('case_sensitive', bool, True),
+        ('shorten_title', bool, False)
     )
 
     def __init__(self, pattern, case_sensitive, shorten_title):
@@ -316,7 +316,7 @@ class AttachmentList(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
+        ('page', unicode, ''),
     )
 
     def __init__(self, page):
@@ -407,7 +407,7 @@ class SimilarPages(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
+        ('page', unicode, ''),
     )
 
     def __init__(self, page_name):
@@ -443,7 +443,7 @@ class TagCloud(Macro):
 
     is_block_tag = True
     arguments = (
-        ('maximal', int, 100),
+        ('max', int, 100),
     )
 
     def __init__(self, max):
@@ -514,8 +514,8 @@ class Include(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
-        ('ruhig', bool, False)
+        ('page', unicode, ''),
+        ('silent', bool, False)
     )
 
     def __init__(self, page, silent):
@@ -591,10 +591,10 @@ class Picture(Macro):
     """
 
     arguments = (
-        ('bild', unicode, u''),
-        (u'ausmaße', unicode, u''),
-        ('ausrichtung', unicode, u''),
-        ('ersatztext', unicode, u'')
+        ('picture', unicode, u''),
+        ('size', unicode, u''),
+        ('align', unicode, u''),
+        ('alt', unicode, u'')
     )
 
     def __init__(self, target, dimensions, alignment, alt):
@@ -619,11 +619,9 @@ class Picture(Macro):
                 self.height = None
         else:
             self.width = self.height = None
-        self.align = {
-            'links':        'left',
-            'rechts':       'right',
-            'zentriert':    'center'
-        }.get(alignment)
+        self.align = alignment
+        if self.align not in ('left', 'right', 'center'):
+            self.align = None
 
     def build_node(self, context, format):
         target = self.target
@@ -645,7 +643,7 @@ class Date(Macro):
     """
 
     arguments = (
-        ('datum', unicode, None),
+        ('date', unicode, None),
     )
 
     def __init__(self, date):
@@ -678,7 +676,7 @@ class NewPages(Macro):
     """
 
     arguments = (
-        ('monate', int, 3),
+        ('months', int, 3),
     )
 
     def __init__(self, months):
