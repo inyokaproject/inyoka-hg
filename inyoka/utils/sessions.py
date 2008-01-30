@@ -11,9 +11,11 @@
 """
 import time
 from datetime import datetime, timedelta
+from django.http import HttpResponseRedirect
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
+from inyoka.utils.http import DirectResponse
 
 
 SESSION_DELTA = 300
@@ -102,3 +104,31 @@ def make_permanent(request):
 def close_with_browser(request):
     """Close the session with the end of the browser session."""
     request.session.pop('_perm', None)
+
+
+def test_session_cookie(request):
+    """
+    Test if the session cookie works.  This is used in login and register
+    to inform the user about an inproperly configured browser.  If the
+    cookie doesn't work a link is returned to retry the configuration.
+    """
+    if request.session.new:
+        arguments = request.GET.copy()
+        if '_cookie_set' not in request.GET:
+            request.session['test_cookie'] = True
+            arguments['_cookie_set'] = 'yes'
+            this_url = 'http://%s%s%s' % (
+                request.get_host(),
+                request.path,
+                arguments and '?' + arguments.urlencode() or ''
+            )
+            raise DirectResponse(HttpResponseRedirect(this_url))
+        arguments.pop('_cookie_set', None)
+        retry_link = 'http://%s%s%s' % (
+            request.get_host(),
+            request.path,
+            arguments and '?' + arguments.urlencode() or ''
+        )
+    else:
+        retry_link = None
+    return retry_link

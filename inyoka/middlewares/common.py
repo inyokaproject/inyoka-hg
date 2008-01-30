@@ -23,6 +23,7 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from inyoka.utils import import_string, INYOKA_REVISION
+from inyoka.utils.http import DirectResponse
 
 
 # Set up virtual url modules for static and media
@@ -81,6 +82,10 @@ class CommonServicesMiddleware(CommonMiddleware):
                 if request.GET:
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, DirectResponse):
+            return exception.response
 
     def process_response(self, request, response):
         """
