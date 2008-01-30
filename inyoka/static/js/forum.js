@@ -43,11 +43,21 @@ $(document).ready(function () {
         return false;
     });
   var re_slug = /\/category\/([^/]+)\//;
+
+  // revert the last stored collapse status from the cookie
   $('table.forum tr.head a').each(function() {
+    var status = $.cookie('forum_collapse');
+    status = status ? status.split('/') : [];
     m = re_slug.exec($(this).attr('href'));
     if (m) {
-      var tr = $(this).parent().parent().get(0);
-      collapse(tr);
+      var collapsed = false;
+      for (i = 0; i < status.length; i++) {
+        if (status[i] == m[1]) {
+          var tr = $(this).parent().parent().get(0);
+          collapse(tr);
+          continue;
+        }
+      }        
     }
     });
 });
@@ -62,14 +72,26 @@ function add_reply() {
   return false;
 }
 
-
+// collapse a forum category and save the status as cookie
 function collapse(tr) {
   var inside = false;
   var link = $(tr).find('a.collapse');
-  if (link.length > 0)
+  var status = $.cookie('forum_collapse');
+  status = status ? status.split('/') : new Array();
+  var re_slug = /\/category\/([^/]+)\//;
+  var m = re_slug.exec($($(tr).find('a').get(1)).attr('href'));
+  for (i = 0; i < status.length; i++) {
+    if (status[i] == m[1]) {
+      status.splice(i, 1);
+      break;
+    }
+  }
+  if (link.length > 0) {
     link.removeClass('collapse').addClass('expand');
-  else 
+    status.push(m[1]);
+  } else 
     $(tr).find('a.expand').removeClass('expand').addClass('collapse');
+  $.cookie('forum_collapse', status.join('/'));
   $('table.forum tr').each(function() {
   if ($(this).hasClass('head'))
     inside = tr == $(this).get(0);
