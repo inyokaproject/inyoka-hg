@@ -25,7 +25,8 @@
     <li>sonst noch was?</li>
   </ul>
   <p>
-  <form method="post" action="{{ href('forum', 'community_rules') }}">
+  {{ message.text|e }}
+  <form method="post" action="{{ message|url }}">
     <input type="hidden" name="goto_url" value="{{ goto_url|e }}" />
     <input type="submit" name="accept" value="Gelesen und akzeptiert" />
     <input type="submit" name="cancel" value="Ablehnen" />

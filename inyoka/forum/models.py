@@ -556,7 +556,9 @@ class Forum(models.Model):
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
     offtopic = models.BooleanField(default=False)
-    community_forum = models.BooleanField('Community-Forum', default=False)
+
+    welcome_message = models.ForeignKey('WelcomeMessage', null=True,
+                                        blank=True)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -617,6 +619,18 @@ class Forum(models.Model):
             for topic in forum.topics:
                 topic.mark_read(user)
             forums.extend(forum.children)
+
+    def get_welcome_message(self, user):
+        """
+        Return a unread welcome message if exists.
+        """
+        forums = self.parents
+        forums.append(self)
+        read = set()
+        for f in forums:
+            if f.welcome_message_id is not None and \
+               f.welcome_message_id in read:
+                return f.welcome_message
 
     def __unicode__(self):
         return self.name
@@ -1090,6 +1104,20 @@ class Privilege(models.Model):
     can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
     can_moderate = models.BooleanField(default=False)
+
+
+class WelcomeMessage(models.Model):
+    """
+    This class can be used, to attach additional Welcome-Messages to
+    a category or forum. That might be usefull for greeting the users or
+    explaining extra rules. The message will be displayed only once for
+    each user.
+    """
+    text = models.TextField('Nachricht')
+
+    def get_absolute_url(self):
+        f = self.forum_set.all()[0]
+        return '%swelcome/' % url_for(f)
 
 
 def recv_post(post_id):

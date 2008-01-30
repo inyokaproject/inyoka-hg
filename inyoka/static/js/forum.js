@@ -38,18 +38,17 @@ $(document).ready(function () {
   $('table.forum tr.head a').before('<a href="#" class="collapse"></a>');
   $('table.forum tr.head a.collapse')
     .click(function() {
-        var inside = false;
         var tr = $(this).parent().parent().get(0);
-        if ($(this).hasClass('collapse'))
-          $(this).removeClass('collapse').addClass('expand');
-        else
-          $(this).removeClass('expand').addClass('collapse');
-        $('table.forum tr').each(function() {
-          if ($(this).hasClass('head'))
-            inside = tr == $(this).get(0);
-          if (inside && $(this).hasClass('entry'))
-            $(this).toggle();
-        })
+        collapse(tr);
+        return false;
+    });
+  var re_slug = /\/category\/([^/]+)\//;
+  $('table.forum tr.head a').each(function() {
+    m = re_slug.exec($(this).attr('href'));
+    if (m) {
+      var tr = $(this).parent().parent().get(0);
+      collapse(tr);
+    }
     });
 });
 
@@ -63,3 +62,18 @@ function add_reply() {
   return false;
 }
 
+
+function collapse(tr) {
+  var inside = false;
+  var link = $(tr).find('a.collapse');
+  if (link.length > 0)
+    link.removeClass('collapse').addClass('expand');
+  else 
+    $(tr).find('a.expand').removeClass('expand').addClass('collapse');
+  $('table.forum tr').each(function() {
+  if ($(this).hasClass('head'))
+    inside = tr == $(this).get(0);
+  if (inside && $(this).hasClass('entry'))
+    $(this).toggle();
+  });
+}

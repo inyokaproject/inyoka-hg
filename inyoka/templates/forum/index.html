@@ -10,6 +10,7 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
+{% set scripts = ['jQuery.Cookie.js'] + scripts %}
 {% include 'forum/_forum.html' %}
 {% if not is_index %}
   {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
