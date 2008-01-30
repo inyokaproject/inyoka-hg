@@ -1211,6 +1211,21 @@ class Revision(models.Model):
     def get_absolute_url(self):
         return href('wiki', self.page.name, rev=self.id)
 
+    def revert(self, note=None, user=None, remote_addr=None):
+        """Revert this revision and make it the current one."""
+        newest_rev = self.page.revisions.latest()
+        if self == newest_rev:
+            return self
+        note = (note and note + ' ' or '') + ('[%s wiederhergestellt]' %
+                                              unicode(self))
+        new_rev = Revision(page=self.page, text=self.text, user=user or
+                           self.user, change_date=datetime.now(),
+                           note=note, deleted=False, remote_addr=
+                           remote_addr or '127.0.0.1',
+                           attachment=self.attachment)
+        new_rev.save()
+        return new_rev
+
     def save(self):
         """Save the revision and invalidate the cache."""
         models.Model.save(self)

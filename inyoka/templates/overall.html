@@ -53,114 +53,116 @@
       </ul>{# .tabbar #}
     </div>{# .header #}
 
-    <div class="appheader">
-      {%- if not hide_quicklinks %}
-      {%- if USER.is_manager %}
-      <ul class="mod_navi">
-        {%- if report_count %}
-        <li><strong><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen ({{ report_count }})</a></strong></li>
-        {%- else %}
-        <li><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen</a></li>
-        {%- endif %}
-        {%- if suggestion_count %}
-        <li><strong><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge ({{ suggestion_count }})</a></strong></li>
-        {%- else %}
-        <li><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge</a></li>
-        {%- endif %}
-        <li><a href="{{ href('admin') }}">Adminbereich</a></li>
-      </ul>
-      {%- endif %}
-      <ul class="navi_global">
-        {%- if USER.is_authenticated %}
-        <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
-        <li><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></li>
-        <li>
-          {%- if pm_count %}
-          <strong><a href="{{ href('portal', 'privmsg')}}">Private Nachrichten ({{ pm_count }})</a></strong>
+    <div class="body">
+      <div class="appheader">
+        {%- if not hide_quicklinks %}
+        {%- if USER.is_manager %}
+        <ul class="mod_navi">
+          {%- if report_count %}
+          <li><strong><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen ({{ report_count }})</a></strong></li>
           {%- else %}
-          <a href="{{ href('portal', 'privmsg') }}">Private Nachrichten</a>
+          <li><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen</a></li>
           {%- endif %}
-        </li>
-        {%- else %}
-        <li><a href="{{ href('portal', 'login', next=CURRENT_URL) }}">Login</a></li>
-        <li><a href="{{ href('portal', 'register') }}">Registrieren</a></li>
+          {%- if suggestion_count %}
+          <li><strong><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge ({{ suggestion_count }})</a></strong></li>
+          {%- else %}
+          <li><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge</a></li>
+          {%- endif %}
+          <li><a href="{{ href('admin') }}">Adminbereich</a></li>
+        </ul>
         {%- endif %}
-      </ul>{# .navi_global #}
-      {%- endif %}
-      {% block appheader %}{% endblock %}
-    </div>{# .appheader #}
+        <ul class="navi_global">
+          {%- if USER.is_authenticated %}
+          <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
+          <li><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></li>
+          <li>
+            {%- if pm_count %}
+            <strong><a href="{{ href('portal', 'privmsg')}}">Private Nachrichten ({{ pm_count }})</a></strong>
+            {%- else %}
+            <a href="{{ href('portal', 'privmsg') }}">Private Nachrichten</a>
+            {%- endif %}
+          </li>
+          {%- else %}
+          <li><a href="{{ href('portal', 'login', next=CURRENT_URL) }}">Login</a></li>
+          <li><a href="{{ href('portal', 'register') }}">Registrieren</a></li>
+          {%- endif %}
+        </ul>{# .navi_global #}
+        {%- endif %}
+        {% block appheader %}{% endblock %}
+      </div>{# .appheader #}
 
-    <div class="pathbar">
-      <form action="{{ href('portal', 'search') }}" method="get" class="search">
+      <div class="pathbar">
+        <form action="{{ href('portal', 'search') }}" method="get" class="search">
+          <p>
+            <input type="text" name="q" class="search_query" />
+            <select name="area" class="search_area">
+              <option value="all" {% if active_app == 'portal' %} selected="selected" {% endif %}>Überall</option>
+              <option value="forum" {% if active_app == 'forum' %} selected="selected" {% endif %}>Forum</option>
+              <option value="wiki" {% if active_app == 'wiki' %} selected="selected" {% endif %}>Wiki</option>
+              <option value="ikhaya" {% if active_app == 'ikhaya' %} selected="selected" {% endif %}>Ikhaya</option>
+              <option value="planet" {% if active_app == 'planet' %} selected="selected" {% endif %}>Planet</option>
+            </select>
+            <input type="submit" value="Suchen" class="search_submit" />
+          </p>
+        </form>{# .search #}
+
+        <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
+          navigation_trace %}
+          <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
+            %} »{% endif %}
+        {%- endfor %}</p>
+        <div style="clear:both;"></div>
+      </div>{# .pathbar #}
+
+      {%- if GLOBAL_MESSAGE %}
+      <div class="message">{{ GLOBAL_MESSAGE }}</div>
+      {%- endif %}
+
+      {%- for message in MESSAGES %}
+      {%- if message.dialog %}
+      <form class="message" action="{% if message.dialog_url != none %}{{ message.dialog_url }}{% else %}{{ CURRENT_URL }}{% endif %}" method="post">
+        <p>{{ message.text }}</p>
         <p>
-          <input type="text" name="q" class="search_query" />
-          <select name="area" class="search_area">
-            <option value="all" {% if active_app == 'portal' %} selected="selected" {% endif %}>Überall</option>
-            <option value="forum" {% if active_app == 'forum' %} selected="selected" {% endif %}>Forum</option>
-            <option value="wiki" {% if active_app == 'wiki' %} selected="selected" {% endif %}>Wiki</option>
-            <option value="ikhaya" {% if active_app == 'ikhaya' %} selected="selected" {% endif %}>Ikhaya</option>
-            <option value="planet" {% if active_app == 'planet' %} selected="selected" {% endif %}>Planet</option>
-          </select>
-          <input type="submit" value="Suchen" class="search_submit" />
+          {% for button in message.dialog_buttons %}
+          <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
+          {% endfor %}
         </p>
-      </form>{# .search #}
-
-      <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
-        navigation_trace %}
-        <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
-          %} »{% endif %}
-      {%- endfor %}</p>
-      <div style="clear:both;"></div>
-    </div>{# .pathbar #}
-
-    {%- if GLOBAL_MESSAGE %}
-    <div class="message">{{ GLOBAL_MESSAGE }}</div>
-    {%- endif %}
-
-    {%- for message in MESSAGES %}
-    {%- if message.dialog %}
-    <form class="message" action="{% if message.dialog_url != none %}{{ message.dialog_url }}{% else %}{{ CURRENT_URL }}{% endif %}" method="post">
-      <p>{{ message.text }}</p>
-      <p>
-        {% for button in message.dialog_buttons %}
-        <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
-        {% endfor %}
-      </p>
-    </form>
-    {%- else %}
-    <div class="message{% if message.success == true %} success{% elif message.success == false %} fail{% endif %}">
-      {{ message.text }}
-    </div>
-    {%- endif %}
-    {%- endfor %}
-
-    <div class="page_content">
-      {%- if navi_type -%}
-      {%- if navi_type == 'tabbar' %}
-      <div class="navi_tabbar navigation">
+      </form>
       {%- else %}
-      <div class="navi_sidebar navigation">
-      {%- endif %}
-        {% block navigation %}{% endblock %}
-      </div>{# .navi_tabbar .navi_sidebar .content #}
-      
-      {%- if navi_type == 'both' %}
-      <div class="navi_tabbar navigation">
-      {% block opt_tabbar_navigation %}{% endblock %}
+      <div class="message{% if message.success == true %} success{% elif message.success == false %} fail{% endif %}">
+        {{ message.text }}
       </div>
       {%- endif %}
-      
-      {%- if navi_type == 'tabbar' %}
-      <div class="content_tabbar content">
-      {%- else %}
-      <div class="content_sidebar content">
-      {%- endif %}
-      {%- else %}
-      <div class="content">
-      {%- endif %}
-        {%- block content %}{% endblock %}
-      </div>{# .content_tabbar .content_sidebar .content #}
-    </div>{# .page_content #}
+      {%- endfor %}
+
+      <div class="page_content">
+        {%- if navi_type -%}
+        {%- if navi_type == 'tabbar' %}
+        <div class="navi_tabbar navigation">
+        {%- else %}
+        <div class="navi_sidebar navigation">
+        {%- endif %}
+          {% block navigation %}{% endblock %}
+        </div>{# .navi_tabbar .navi_sidebar .content #}
+        
+        {%- if navi_type == 'both' %}
+        <div class="navi_tabbar navigation">
+        {% block opt_tabbar_navigation %}{% endblock %}
+        </div>
+        {%- endif %}
+        
+        {%- if navi_type == 'tabbar' %}
+        <div class="content_tabbar content">
+        {%- else %}
+        <div class="content_sidebar content">
+        {%- endif %}
+        {%- else %}
+        <div class="content">
+        {%- endif %}
+          {%- block content %}{% endblock %}
+        </div>{# .content_tabbar .content_sidebar .content #}
+      </div>{# .page_content #}
+    </div>{# .body #}
 
     <div class="footer">
       <ul>

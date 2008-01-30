@@ -94,7 +94,7 @@
   var insert = function(format, def) {
     return function(evt) {
       return this.insertTag(format, (typeof def == 'undefined')
-                            ? 'Formattierter Text' : def);
+                            ? 'Formattierter Text' : def);
     };
   }
 
@@ -106,7 +106,7 @@
     var t;
     return (
       date.getUTCFullYear() + '-' +
-      (t = date.getUTCMonth(), t < 10 ? '0' : '') + t + '-' +
+      (t = date.getUTCMonth(), t < 9 ? '0' : '') + (t + 1) + '-' +
       (t = date.getUTCDate(), t < 10 ? '0' : '') + t + 'T' +
       (t = date.getUTCHours(), t < 10 ? '0' : '') + t + ':' +
       (t = date.getUTCMinutes(), t < 10 ? '0' : '') + t + ':' +
@@ -303,7 +303,7 @@
       evt.preventDefault();
       var pos = this.getCurrentLine().length;
       var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
-      for (var s = ''; pos < indent && (s += ' '); pos++);
+      for (var s = ''; pos < indent && (s += ' '); ++pos);
       this.insertText(s);
     }
   };
@@ -319,8 +319,8 @@
       args = (format instanceof Array) ? format : format.split('%s', 2);
 
     var
-      before = args[0] || '',
-      after = args[1] || '';
+      before = args[0] || '',
+      after = args[1] || '';
 
     if (typeof t.selectionStart != 'undefined') {
       var

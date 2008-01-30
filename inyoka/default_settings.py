@@ -70,7 +70,7 @@ ROOT_URLCONF = 'inyoka.portal.urls'
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = False
+USE_I18N = True
 
 # Absolute path to the directory that holds media and the URL
 MEDIA_ROOT = join(BASE_PATH, 'media')

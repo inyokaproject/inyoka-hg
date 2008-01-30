@@ -166,6 +166,36 @@ def do_missing_page(request, name):
 
 
 @require_privilege('edit')
+def do_revert(request, name):
+    """
+    The revert action has no template, it uses a flashed form.
+    """
+    try:
+        rev = int(request.GET['rev'])
+    except (KeyError, ValueError):
+        raise PageNotFound()
+    page = Page.objects.get_by_name_and_rev(name, rev)
+    url = href('wiki', name, rev=page.rev.id)
+    if request.method == 'POST':
+        if 'cancel' in request.FORM:
+            flash('Wiederherstellen abgebrochen.')
+        else:
+            new_revision = page.rev.revert(request.POST.get('note'),
+                                           request.user,
+                                           request.META.get('REMOTE_ADDR'))
+            if new_revision == page.rev:
+                flash(u'Keine Änderungen durchgeführt, da die Revision '
+                      u'bereits die aktuelle ist.', success=False)
+            else:
+                flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
+                      escape(unicode(page.rev)), success=True)
+            url = href('wiki', name)
+    else:
+        flash(render_template('wiki/action_revert.html', {'page': page}))
+    return HttpResponseRedirect(url)
+
+
+@require_privilege('edit')
 @templated('wiki/action_edit.html', modifier=context_modifier)
 def do_edit(request, name):
     """
@@ -585,11 +615,12 @@ PAGE_ACTIONS = {
     'metaexport':   do_metaexport,
     'log':          do_log,
     'diff':         do_diff,
+    'revert':       do_revert,
     'edit':         do_edit,
     'backlinks':    do_backlinks,
     'export':       do_export,
     'attach':       do_attach,
     'prune':        do_prune,
     'manage':       do_manage,
-    'subscribe':    do_subscribe,
+    'subscribe':    do_subscribe
 }
