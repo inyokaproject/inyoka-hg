@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import re
+from urllib import unquote
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
@@ -231,7 +232,7 @@ def newpost(request, topic_slug=None, quote_id=None):
     # check for multi quote
     if request.COOKIES.get('multi_quote'):
         quotes += Post.objects.filter(topic__id=t.id, id__in=[
-            int(i) for i in request.COOKIES['multi_quote'].split(',')
+            int(i) for i in unquote(request.COOKIES['multi_quote']).split(',')
         ])
 
     privileges = get_forum_privileges(request.user, t.forum)
