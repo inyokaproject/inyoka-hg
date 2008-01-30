@@ -34,6 +34,7 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
 from inyoka.wiki.models import Page, Revision
 from inyoka.utils import human_number, parse_iso8601, \
      format_datetime, format_time, natural_date
+from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
 
 
@@ -219,6 +220,11 @@ class RecentChanges(Macro):
             ]))
 
             for rev in revisions:
+                if rev.user:
+                    author = nodes.Link(url_for(rev.user), [
+                             nodes.Text(rev.user.username)])
+                else:
+                    author = nodes.Text(rev.remote_addr)
                 table.children.append(nodes.TableRow([
                     nodes.TableCell([
                         nodes.Text(format_time(rev.change_date))
@@ -226,10 +232,7 @@ class RecentChanges(Macro):
                     nodes.TableCell([
                         nodes.InternalLink(rev.page.name)
                     ], class_='page'),
-                    nodes.TableCell([
-                        nodes.Text(rev.user and rev.user.username or
-                                   rev.remote_addr)
-                    ], class_='author'),
+                    nodes.TableCell([author], class_='author'),
                     nodes.TableCell([
                         nodes.Text(rev.note or u'')
                     ], class_='note')
