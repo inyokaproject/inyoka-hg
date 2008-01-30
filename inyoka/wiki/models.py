@@ -326,20 +326,6 @@ class PageManager(models.Manager):
         return [x[1] for x in get_close_matches(name, [x[0] for x in
                 self._get_object_list(False) if not x[1]], n)]
 
-    def get_recent_changes(self, page=1, per_page=30):
-        """
-        Get a list of recent changes.
-        """
-        revisions = Revision.objects.select_related(depth=1) \
-                                    .order_by('-change_date') \
-                                    [(page - 1) * per_page:per_page]
-        result = []
-        for rev in revisions:
-            page = rev.page
-            page.rev = rev
-            result.append(page)
-        return result
-
     def get_by_name(self, name, nocache=False):
         """
         Return a page with the most recent revision. This should be used

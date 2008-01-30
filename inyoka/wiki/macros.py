@@ -31,9 +31,10 @@ from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
      ArgumentCollector
-from inyoka.wiki.models import Page
+from inyoka.wiki.models import Page, Revision
 from inyoka.utils import human_number, parse_iso8601, \
      format_datetime, format_time, natural_date
+from inyoka.utils.pagination import Pagination
 
 
 def get_macro(name, args, kwargs):
@@ -169,7 +170,7 @@ class RecentChanges(Macro):
     """
 
     arguments = (
-        ('per_page', int, 100),
+        ('per_page', int, 50),
     )
 
     def __init__(self, per_page):
@@ -187,13 +188,27 @@ class RecentChanges(Macro):
 
         days = []
         days_found = set()
-        for page in Page.objects.get_recent_changes(page_num, self.per_page):
-            d = page.rev.change_date
+
+        def link_func(page_num, parameters):
+            if page_num == 1:
+                parameters.pop('page', None)
+            else:
+                parameters['page'] = str(page_num)
+            rv = href('wiki', context.wiki_page)
+            if parameters:
+                rv += '?' + parameters.urlencode()
+            return rv
+        pagination = Pagination(context.request, Revision.objects.
+                                select_related(depth=1), page_num,
+                                self.per_page, link_func)
+
+        for revision in pagination.get_objects():
+            d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
                 days.append((date(*key), []))
                 days_found.add(key)
-            days[-1][1].append(page.rev)
+            days[-1][1].append(revision)
 
         table = nodes.Table(class_='recent_changes')
         for day, revisions in days:
@@ -219,6 +234,14 @@ class RecentChanges(Macro):
                         nodes.Text(rev.note or u'')
                     ], class_='note')
                 ]))
+
+        # if rendering to html we add a pagination, pagination is stupid fo
+        # docbook and other static representations ;)
+        if format == 'html':
+            return '<div class="recent_changes">%s%s</div>' % (
+                table.render(context, format),
+                '<div class="pagination">%s</div>' % pagination.generate()
+            )
 
         return table
 
