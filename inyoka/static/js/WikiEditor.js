@@ -161,7 +161,7 @@
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum']),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('color', 'Farbe', function(evt) {
@@ -185,7 +185,7 @@
       return result;
     }),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum', 'small']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('smilies', 'Smilies', function(evt) {
