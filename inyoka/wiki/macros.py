@@ -170,7 +170,7 @@ class RecentChanges(Macro):
     """
 
     arguments = (
-        ('per_page', int, 5),
+        ('per_page', int, 50),
     )
 
     def __init__(self, per_page):
