@@ -17,7 +17,6 @@
           $.each(privileges, function(i, perm) {
             select.append($('<option></option>').val(perm[0]).text(perm[1]));
           });
-          console.log(mapping, $(this).val());
           select.val(mapping[$(this).val()]);
           self.container.append(select);
         };
