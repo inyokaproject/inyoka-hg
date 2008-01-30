@@ -270,11 +270,21 @@
       });
 
     /* create toolbar based on button layout */
-    t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
+    t = $('<ul class="toolbar" />').prependTo(this.textarea.parent()).hide();
     var bar = toolbar();
     for (var i = 0, n = bar.length, x; i != n; ++i)
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
+
+    /* if we use the small profile, we hide the toolbar by default */
+    if (this.profile == 'small')
+      this.textarea.focus(function() {
+        t.slideDown('fast');
+      }).blur(function() {
+        t.slideUp('fast');
+      });
+    else
+      t.show();
   };
 
   /**
