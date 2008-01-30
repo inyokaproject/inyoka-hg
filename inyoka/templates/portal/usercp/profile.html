@@ -42,25 +42,8 @@
     <dd>{{ form.yim }}{{ h.field_errors(form.errors.yim) }}</dd>
   </dl>
   <h3>Sonstige Einstellungen</h3>
-  <dl>
-    <dt>Wohnort:</dt>
-    <dd>{{ form.location }}{{ h.field_errors(form.errors.location) }}</dd>
-    <dt>Beruf:</dt>
-    <dd>{{ form.occupation }}{{ h.field_errors(form.errors.occupation) }}</dd>
-    <dt>Interessen:</dt>
-    <dd>{{ form.interests }}{{ h.field_errors(form.errors.interests) }}</dd>
-    <dt>Internetseite:</dt>
-    <dd>{{ form.website }}{{ h.field_errors(form.errors.website) }}</dd>
-    <dt>GPG-Schlüssel:</dt>
-    <dd>{{ form.gpgkey }}{{ h.field_errors(form.errors.gpgkey) }}</dd>
-    <dt>Benachrichtigung über</dt>
-    <dd>{{ form.notify }}{{ h.field_errors(form.errors.notify) }}</dd>
-    <dt>Oberfläche</dt>
-    <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">Avatare ausblenden</label>
-        {{ h.field_errors(form.errors.hide_avatar) }}</dd>
-    <dd>{{ form.hide_signatures }} <label for="id_hide_signatures">Signaturen ausblenden</label>
-        {{ h.field_errors(form.errors.hide_signatures) }}</dd>
-  </dl>
+  {{ h.render_form(form, 'location', 'occupation', 'interests', 'website',
+                         'gpgkey') }}
   <h3>Signatur</h3>
   <p class="note">
     Dies ist ein Text, der an jeden Beitrag von dir angehängt wird.<br />

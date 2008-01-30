@@ -267,7 +267,10 @@ class UserCPProfileForm(forms.Form):
     interests = forms.CharField(label='Interessen', required=False)
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
-                              max_length=10, required=False)
+                 max_length=10, required=False, help_text=u'Hier kannst du '
+                 u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
+                 u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
+                 u'_of_Trust">hier</a>.')
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
