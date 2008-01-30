@@ -563,7 +563,7 @@ def groups_edit(request, id=None):
         form = EditGroupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            print "xxxxxxxxxx %s" % data
+            # XXX: print "xxxxxxxxxx %s" % data
     else:
         form = EditGroupForm()
     return {
