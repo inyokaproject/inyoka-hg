@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import re
+from urllib import unquote
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
@@ -33,7 +34,7 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-                                Post, get_ubuntu_version, Poll
+                                Post, get_ubuntu_version, Poll, WelcomeMessage
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                AddAttachmentForm, EditPostForm, AddPollForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
@@ -102,7 +103,8 @@ def forum(request, slug, page=1):
         return HttpResponseRedirect(href('forum'))
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
-    if f.community_forum and not request.user.show_community:
+    msg = f.get_welcome_message(request.user)
+    if msg is not None:
         return community_rules(request)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
@@ -135,8 +137,8 @@ def viewtopic(request, topic_slug, page=1):
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
-    if t.forum.community_forum and not request.user.show_community:
-        return community_rules(request)
+    #if t.forum.community_forum and not request.user.show_community:
+    #    return community_rules(request)
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -190,7 +192,7 @@ def viewtopic(request, topic_slug, page=1):
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         t.mark_read(request.user)
         subscribed = bool(Subscription.objects.filter(
             topic=t, user=request.user))
@@ -230,7 +232,7 @@ def newpost(request, topic_slug=None, quote_id=None):
     # check for multi quote
     if request.COOKIES.get('multi_quote'):
         quotes += Post.objects.filter(topic__id=t.id, id__in=[
-            int(i) for i in request.COOKIES['multi_quote'].split(',')
+            int(i) for i in unquote(request.COOKIES['multi_quote']).split(',')
         ])
 
     privileges = get_forum_privileges(request.user, t.forum)
@@ -1087,13 +1089,15 @@ def markread(request, slug=None):
     Mark either all or only the given forum as read.
     """
     user = request.user
-    if user.is_anonymous():
+    if user.is_anonymous:
         return
     if slug:
         forum = Forum.objects.get(slug=slug)
         forum.mark_read(user)
+        flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name)
         return HttpResponseRedirect(url_for(forum))
     else:
+        flash(u'Allen Foren wurden als gelesen markiert.')
         user.forum_last_read = Post.objects.get_max_id()
         user.forum_read_status = ''
         user.save()
@@ -1118,12 +1122,19 @@ def latest(request, page=1):
         'pagination': pagination.generate()
     }
 
-@templated('forum/community_rules.html')
-def community_rules(request):
+@templated('forum/welcome.html')
+def welcome(request, msg_id=None, slug=None):
     """
-    Show the rules of the community section.
+    Show a welcome message on the first visit to greet the users or
+    inform him about special rules.
     """
     user = request.user
+    goto_url = request.path
+    if msg_id is None:
+        f = Forum.objects.get(slug=slug)
+        msg_id = f.welcome_message_id
+        goto_url = url_for(f)
+    msg = WelcomeMessage.objects.get(id=msg_id)
     if request.method == 'POST':
         if request.POST.get('accept'):
             user.show_community = True
@@ -1134,5 +1145,6 @@ def community_rules(request):
             request.user.save()
             return HttpResponseRedirect(href('forum'))
     return {
-        'goto_url': request.path
+        'goto_url': goto_url,
+        'message': msg
     }

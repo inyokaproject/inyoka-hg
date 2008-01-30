@@ -31,6 +31,7 @@ from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
+from inyoka.utils.pagination import Pagination
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
@@ -163,6 +164,35 @@ def do_missing_page(request, name):
         } for x in sorted(Page.objects.find_by_metadata('X-Link', name),
                           key=lambda x: x.title.lower())]
     }
+
+
+@require_privilege('edit')
+def do_revert(request, name):
+    """The revert action has no template, it uses a flashed form."""
+    try:
+        rev = int(request.GET['rev'])
+    except (KeyError, ValueError):
+        raise PageNotFound()
+    url = href('wiki', name)
+    page = Page.objects.get_by_name_and_rev(name, rev)
+    latest_rev = page.revisions.latest()
+    if latest_rev == page.rev:
+        flash(u'Keine Änderungen durchgeführt, da die Revision '
+              u'bereits die aktuelle ist.', success=False)
+    elif request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash('Wiederherstellen abgebrochen.')
+            url = href('wiki', name, rev=page.rev.id)
+        else:
+            new_revision = page.rev.revert(request.POST.get('note'),
+                                           request.user,
+                                           request.META.get('REMOTE_ADDR'))
+            flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
+                  escape(unicode(page.rev)), success=True)
+            url = href('wiki', name)
+    else:
+        flash(render_template('wiki/action_revert.html', {'page': page}))
+    return HttpResponseRedirect(url)
 
 
 @require_privilege('edit')
@@ -338,8 +368,24 @@ def do_log(request, name):
             The list of revisions ordered by date. The newest revision
             first.
     """
+    try:
+        pagination_page = int(request.GET['page'])
+    except (ValueError, KeyError):
+        pagination_page = 1
     page = Page.objects.get(name=name)
-    revisions = page.revisions.all()
+
+    def link_func(p, parameters):
+        if p == 1:
+            parameters.pop('page', None)
+        else:
+            parameters['page'] = str(p)
+        rv = url_for(page)
+        if parameters:
+            rv += '?' + parameters.urlencode()
+        return rv
+
+    pagination = Pagination(request, page.revisions.all(), pagination_page,
+                            20, link_func)
     set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
                      u'href="%s">%s</a>“' % (
                         escape(url_for(page)),
@@ -347,7 +393,8 @@ def do_log(request, name):
                     "%s' Revisionen" % escape(page.title))
     return {
         'page':         page,
-        'revisions':    list(revisions)
+        'revisions':    pagination.get_objects(),
+        'pagination':   pagination
     }
 
 
@@ -585,11 +632,12 @@ PAGE_ACTIONS = {
     'metaexport':   do_metaexport,
     'log':          do_log,
     'diff':         do_diff,
+    'revert':       do_revert,
     'edit':         do_edit,
     'backlinks':    do_backlinks,
     'export':       do_export,
     'attach':       do_attach,
     'prune':        do_prune,
     'manage':       do_manage,
-    'subscribe':    do_subscribe,
+    'subscribe':    do_subscribe
 }

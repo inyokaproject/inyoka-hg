@@ -68,3 +68,11 @@ class AccessDeniedResponse(TemplateResponse):
     """
     def __init__(self):
         TemplateResponse.__init__(self, 'errors/403.html', {}, status=403)
+
+
+class DirectResponse(Exception):
+
+    def __init__(self, response):
+        Exception.__init__(self, response)
+        self.message = 'direct response %r' % response
+        self.response = response

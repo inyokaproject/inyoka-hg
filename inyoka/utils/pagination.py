@@ -25,7 +25,6 @@
 """
 import math
 from django.http import Http404 as PageNotFound
-from inyoka.utils.urls import get_query_string
 
 
 class Pagination(object):
@@ -33,9 +32,26 @@ class Pagination(object):
     def __init__(self, request, query, page, per_page=10, link=None):
         self.query = query
         self.page = int(page)
-        self.link = link or request.path
-        self.parameters = get_query_string(request.get_full_path())
         self.per_page = per_page
+        self.parameters = request.GET
+
+        if link is None:
+            link_base = request.path
+        elif not isinstance(link, basestring):
+            self.link_func = link
+            return
+        else:
+            link_base = link or request.path
+
+        def link_func(page, parameters):
+            if page == 1:
+                rv = link_base
+            else:
+                rv = '%s%d/' % (link_base, page)
+            if parameters:
+                rv += '?' + parameters.urlencode()
+            return rv
+        self.link_func = link_func
 
     def get_objects(self):
         idx = (self.page - 1) * self.per_page
@@ -56,18 +72,14 @@ class Pagination(object):
         else:
             total = self.query.count() - 1
         pages = total // self.per_page + 1
+        params = self.parameters.copy()
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
                abs(self.page - num) < math.ceil(threshold / 2.0):
                 if result and result[-1] != ellipsis:
                     result.append(commata)
                 was_space = False
-                if num == 1:
-                    link = self.link
-                else:
-                    link = '%s%d/' % (self.link, num)
-                if self.parameters:
-                    link += '?%s' % self.parameters
+                link = self.link_func(num, params)
                 if num == self.page:
                     template = active
                 else:

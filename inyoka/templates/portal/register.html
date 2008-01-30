@@ -15,8 +15,16 @@
   <h2>Registrieren</h2>
 {% endblock %}
 {% block portal_content %}
+  {% if cookie_error %}
+    <div class="message fail">
+      Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
+      sich auf ubuntuusers.de registrieren und anzumelden.  Bitte aktiviere
+      Cookies im Browser und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
+    </div>
+  {% else %}
   {{ h.render_register_form(form) }}
-  <script type="text/javascript">
+  {% endif %}
+    <script type="text/javascript">
     $(function() { $('#id_username').focus(); });
   </script>
 {% endblock %}

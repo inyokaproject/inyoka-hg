@@ -47,7 +47,6 @@
    */
   var button = function(id, title, callback, profiles) {
     return function(editor) {
-      console.log(profiles, editor.profile);
       if (!profiles || $.inArray(editor.profile, profiles) > -1)
         return $('<a href="#" class="button" />')
           .attr('id', 'button-' + id)
@@ -55,7 +54,7 @@
           .append($('<span />').text(title))
           .click(function(evt) {
             evt.preventDefault();
-            callback.call(editor, evt);
+            return callback.call(editor, evt);
           });
     }
   };
@@ -95,7 +94,7 @@
   var insert = function(format, def) {
     return function(evt) {
       return this.insertTag(format, (typeof def == 'undefined')
-                            ? 'Formattierter Text' : def);
+                            ? 'Formattierter Text' : def);
     };
   }
 
@@ -107,7 +106,7 @@
     var t;
     return (
       date.getUTCFullYear() + '-' +
-      (t = date.getUTCMonth(), t < 10 ? '0' : '') + t + '-' +
+      (t = date.getUTCMonth(), t < 9 ? '0' : '') + (t + 1) + '-' +
       (t = date.getUTCDate(), t < 10 ? '0' : '') + t + 'T' +
       (t = date.getUTCHours(), t < 10 ? '0' : '') + t + ':' +
       (t = date.getUTCMinutes(), t < 10 ? '0' : '') + t + ':' +
@@ -162,11 +161,12 @@
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum']),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('color', 'Farbe', function(evt) {
         colorbox.slideToggle('fast');
+        return false;
       })(editor).appendTo(result);
       var colorbox = $('<ul class="colorbox" />').appendTo(result).hide();
       $.each(COLORS, function() {
@@ -174,19 +174,23 @@
         $('<li />')
           .css('background-color', color)
           .click(function() {
-            colorbox.slideUp('fast');
             editor.insertTag('[color=' + color + ']%s[/color]', 'Eingefärbter Text');
           })
           .appendTo(colorbox);
       });
+      $(document).click(function() {
+        if (colorbox.is(':visible'))
+          colorbox.slideUp('fast');
+      });
       return result;
     }),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum', 'small']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('smilies', 'Smilies', function(evt) {
         smileybox.slideToggle('fast');
+        return false;
       })(editor).appendTo(result);
       var smileybox = $('<ul class="smileybox" />').appendTo(result).hide();
       $.getJSON('/?__service__=wiki.get_smilies', function(smilies) {
@@ -197,11 +201,14 @@
               .attr('src', src)
               .attr('alt', code)
               .click(function() {
-                smileybox.slideUp('fast');
                 editor.insertText(' ' + code + ' ');
               }))
             .appendTo(smileybox);
         });
+      });
+      $(document).click(function() {
+        if (smileybox.is(':visible'))
+          smileybox.slideUp('fast');
       });
       return result;
     }),
@@ -242,7 +249,6 @@
       this.textarea[0].focus();
     }),
     button('enlarge', 'Vergrößern', function(evt) {
-      console.log(this.textarea);
       if (isNaN(this.textarea[0].rows) || this.textarea[0].rows < .5)
         this.textarea[0].rows = 6;
       else
@@ -305,7 +311,7 @@
       evt.preventDefault();
       var pos = this.getCurrentLine().length;
       var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
-      for (var s = ''; pos < indent && (s += ' '); pos++);
+      for (var s = ''; pos < indent && (s += ' '); ++pos);
       this.insertText(s);
     }
   };
@@ -321,8 +327,8 @@
       args = (format instanceof Array) ? format : format.split('%s', 2);
 
     var
-      before = args[0] || '',
-      after = args[1] || '';
+      before = args[0] || '',
+      after = args[1] || '';
 
     if (typeof t.selectionStart != 'undefined') {
       var

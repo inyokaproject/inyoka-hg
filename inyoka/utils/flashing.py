@@ -20,7 +20,7 @@ DEFAULT_FLASH_BUTTONS = [
 
 
 def flash(message, success=None, classifier=None, dialog=False,
-          dialog_url=None, dialog_buttons=None):
+          dialog_url=None, dialog_buttons=None, session=None):
     """
     Flash a message (can contain XHTML).  If ``success`` is True, the flashbar
     will be green, if it's False, it will be red and if it's undefined it will
@@ -43,16 +43,17 @@ def flash(message, success=None, classifier=None, dialog=False,
 
     Each button needs to specify a type, class, name and value.
     """
-    session = getattr(r.request, 'session', None)
     if session is None:
-        return False
+        session = getattr(r.request, 'session', None)
+        if session is None:
+            return False
     dialog_buttons = dialog_buttons or DEFAULT_FLASH_BUTTONS
-    if not 'flashed_messages' in session:
-        session['flashed_messages'] = [
+    if not 'flmsg' in session:
+        session['flmsg'] = [
             (message, success, classifier, dialog, dialog_url, dialog_buttons)
         ]
     else:
-        session['flashed_messages'].append(
+        session['flmsg'].append(
             (message, success, classifier, dialog, dialog_url, dialog_buttons)
         )
         session.modified = True
@@ -64,18 +65,18 @@ def unflash(classifier):
     session = getattr(r.request, 'session', None)
     if session is None:
         return
-    session['flashed_messages'] = [item for item in session.get(
-                                   'flashed_messages', ())
+    session['flmsg'] = [item for item in session.get(
+                                   'flmsg', ())
                                    if item[2] != classifier]
-    if not session['flashed_messages']:
-        del session['flashed_messages']
+    if not session['flmsg']:
+        del session['flmsg']
 
 
 def clear():
     """Clear the whole flash buffer."""
     session = getattr(r.request, 'session', None)
     if session is not None:
-        session.pop('flashed_messages', None)
+        session.pop('flmsg', None)
 
 
 def get_flashed_messages():
@@ -87,8 +88,8 @@ def get_flashed_messages():
     if session is None:
         return []
     flash_buffer = [FlashMessage(x[0], x[1], x[3], x[4], x[5]) for x in
-                    session.get('flashed_messages', ())]
-    session.pop('flashed_messages', None)
+                    session.get('flmsg', ())]
+    session.pop('flmsg', None)
     r.request.flash_message_buffer = flash_buffer
     return flash_buffer
 

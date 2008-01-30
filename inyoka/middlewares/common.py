@@ -23,6 +23,7 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from inyoka.utils import import_string, INYOKA_REVISION
+from inyoka.utils.http import DirectResponse
 
 
 # Set up virtual url modules for static and media
@@ -82,13 +83,17 @@ class CommonServicesMiddleware(CommonMiddleware):
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
 
+    def process_exception(self, request, exception):
+        if isinstance(exception, DirectResponse):
+            return exception.response
+
     def process_response(self, request, response):
         """
         Hook our X-Powered header in. (and an easteregg header).
         """
         response = CommonMiddleware.process_response(self, request, response)
         if INYOKA_REVISION:
-            powered_by = 'Inyoka/rev-%d' % INYOKA_REVISION
+            powered_by = 'Inyoka/rev-%s' % INYOKA_REVISION
         else:
             powered_by = 'Inyoka'
         response['X-Powered-By'] = powered_by

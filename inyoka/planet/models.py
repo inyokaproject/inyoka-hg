@@ -5,7 +5,7 @@
 
     Database models for the planet.
 
-    :copyright: 2007 by Benjamin Wiegand, maix.
+    :copyright: 2007 by Benjamin Wiegand, maix, Christoph Hac, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 import os
@@ -15,8 +15,8 @@ from StringIO import StringIO
 from django.conf import settings
 from django.db import models
 from inyoka.utils import striptags
-from inyoka.utils.urls import href
-from inyoka.utils.search import search, Document
+from inyoka.utils.urls import href, url_for
+from inyoka.utils.search import search
 
 
 class Blog(models.Model):
@@ -88,7 +88,6 @@ class Entry(models.Model):
     updated = models.DateTimeField()
     author = models.CharField(max_length=50)
     author_homepage = models.URLField(blank=True, null=True)
-    xapian_docid = models.IntegerField(default=0, blank=True)
 
     def __unicode__(self):
         return u'%s / %s' % (
@@ -107,20 +106,18 @@ class Entry(models.Model):
         """
         This updates the xapian search index.
         """
-        doc = search.create_document('planet', self.xapian_docid)
-        doc.clear()
-        doc['title'] = self.title
-        doc['text'] = self.simplified_text
-        doc['date'] = self.updated
-        doc['area'] = 'Planet'
-        doc.save()
-        if self.xapian_docid != doc.docid:
-            self.xapian_docid = doc.docid
-            models.Model.save(self)
+        search.store(
+            component='p',
+            uid=self.id,
+            title=self.title,
+            text=self.simplified_text,
+            date=self.pub_date,
+            category=self.blog.name
+        )
 
     def save(self):
-        self.update_search()
         super(Entry, self).save()
+        self.update_search()
 
     def delete(self):
         """
@@ -134,3 +131,16 @@ class Entry(models.Model):
         verbose_name_plural = u'Einträge'
         get_latest_by = 'pub_date'
         ordering = ('-pub_date',)
+
+
+def recv_entry(entry_id):
+    entry = Entry.objects.select_related(1).get(id=entry_id)
+    return {
+        'title': entry.title,
+        'user': entry.blog.name,
+        'user_url': entry.blog.blog_url,
+        'date': entry.pub_date,
+        'url': url_for(entry),
+        'component': u'Planet'
+    }
+search.register_result_handler('p', recv_entry)

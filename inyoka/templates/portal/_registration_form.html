@@ -39,7 +39,7 @@
         .click(function() {
           var uid = Math.random().toString().substring(2, 10);
           $('dd.captcha img')
-            .attr('src', captcha_url + '#rnd-' + uid);
+            .attr('src', captcha_url + '?rnd-' + uid);
           return false;
         });
     })();

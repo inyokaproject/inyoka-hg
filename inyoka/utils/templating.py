@@ -68,7 +68,7 @@ jinja_env.filters.update(
 def populate_context_defaults(context):
     """Fill in context defaults."""
     request = r.request
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         key = 'portal/pm_count/%s' % request.user.id
         pms = cache.get(key)
         if pms is None:

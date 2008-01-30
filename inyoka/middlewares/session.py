@@ -31,9 +31,9 @@ class Session(SecureCookie):
 
     @property
     def session_key(self):
-        if '_auth_user_id' in self:
+        if 'uid' in self:
             self.pop('_sk', None)
-            return self['_auth_user_id']
+            return self['uid']
         elif not '_sk' in self:
             self['_sk'] = md5('%s%s%s' % (random(), time(),
                               settings.SECRET_KEY)).digest() \
@@ -54,11 +54,21 @@ class AdvancedSessionMiddleware(object):
 
     def process_request(self, request):
         data = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+        session = None
+        expired = False
         if data:
             session = Session.unserialize(data, settings.SECRET_KEY)
-        else:
+            if session.get('_ex', 0) < time():
+                session = None
+                expired = True
+        if session is None:
             session = Session(secret_key=settings.SECRET_KEY)
+            session['_ex'] = time() + settings.SESSION_COOKIE_AGE
         request.session = session
+        if expired:
+            from inyoka.utils.flashing import flash
+            flash(u'Deine Sitzung ist abgelaufen.  Du musst dich neu '
+                  u'anmelden.', session=session)
 
     def process_response(self, request, response):
         try:
@@ -66,13 +76,17 @@ class AdvancedSessionMiddleware(object):
         except AttributeError:
             return response
 
+        # we can remove the session key if the user is logged in
+        if '_sk' in request.session and 'uid' in request.session:
+            del request.session['_sk']
+
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
-            if request.session.get('is_permanent_session'):
-                max_age = settings.SESSION_COOKIE_AGE
-                expires_time = time() + settings.SESSION_COOKIE_AGE
+            if request.session.get('_perm'):
+                expires_time = request.session.get('_ex', 0)
+                max_age = max(expires_time - time(), 0)
                 expires = cookie_date(expires_time)
             else:
-                max_age = expires = None
+                expires = max_age = None
             response.set_cookie(settings.SESSION_COOKIE_NAME,
                                 request.session.serialize(),
                                 max_age=max_age, expires=expires,

@@ -31,9 +31,11 @@ from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
      ArgumentCollector
-from inyoka.wiki.models import Page
+from inyoka.wiki.models import Page, Revision
 from inyoka.utils import human_number, parse_iso8601, \
      format_datetime, format_time, natural_date
+from inyoka.utils.urls import url_for
+from inyoka.utils.pagination import Pagination
 
 
 def get_macro(name, args, kwargs):
@@ -169,7 +171,7 @@ class RecentChanges(Macro):
     """
 
     arguments = (
-        ('pro_seite', int, 100),
+        ('per_page', int, 50),
     )
 
     def __init__(self, per_page):
@@ -187,13 +189,27 @@ class RecentChanges(Macro):
 
         days = []
         days_found = set()
-        for page in Page.objects.get_recent_changes(page_num, self.per_page):
-            d = page.rev.change_date
+
+        def link_func(page_num, parameters):
+            if page_num == 1:
+                parameters.pop('page', None)
+            else:
+                parameters['page'] = str(page_num)
+            rv = href('wiki', context.wiki_page)
+            if parameters:
+                rv += '?' + parameters.urlencode()
+            return rv
+        pagination = Pagination(context.request, Revision.objects.
+                                select_related(depth=1), page_num,
+                                self.per_page, link_func)
+
+        for revision in pagination.get_objects():
+            d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
                 days.append((date(*key), []))
                 days_found.add(key)
-            days[-1][1].append(page.rev)
+            days[-1][1].append(revision)
 
         table = nodes.Table(class_='recent_changes')
         for day, revisions in days:
@@ -204,6 +220,11 @@ class RecentChanges(Macro):
             ]))
 
             for rev in revisions:
+                if rev.user:
+                    author = nodes.Link(url_for(rev.user), [
+                             nodes.Text(rev.user.username)])
+                else:
+                    author = nodes.Text(rev.remote_addr)
                 table.children.append(nodes.TableRow([
                     nodes.TableCell([
                         nodes.Text(format_time(rev.change_date))
@@ -211,14 +232,19 @@ class RecentChanges(Macro):
                     nodes.TableCell([
                         nodes.InternalLink(rev.page.name)
                     ], class_='page'),
-                    nodes.TableCell([
-                        nodes.Text(rev.user and rev.user.username or
-                                   rev.remote_addr)
-                    ], class_='author'),
+                    nodes.TableCell([author], class_='author'),
                     nodes.TableCell([
                         nodes.Text(rev.note or u'')
                     ], class_='note')
                 ]))
+
+        # if rendering to html we add a pagination, pagination is stupid fo
+        # docbook and other static representations ;)
+        if format == 'html':
+            return '<div class="recent_changes">%s%s</div>' % (
+                table.render(context, format),
+                '<div class="pagination">%s</div>' % pagination.generate()
+            )
 
         return table
 
@@ -230,15 +256,15 @@ class TableOfContents(TreeMacro):
     """
     stage = 'final'
     arguments = (
-        ('maximale_tiefe', int, 3),
-        ('typ', {
-            u'ungeordnet':      'unordered',
-            u'arabisch0':       'arabiczero',
-            u'arabisch':        'arabic',
-            u'alphabeth':       'alphalower',
-            u'ALPHABETH':       'alphaupper',
-            u'römisch':         'romanlower',
-            u'RÖMISCH':         'romanupper'
+        ('max_depth', int, 3),
+        ('type', {
+            'unordered':    'unordered',
+            'arabic0':      'arabiczero',
+            'arabic':       'arabic',
+            'alphabeth':    'alphalower',
+            'ALPHABETH':    'alphaupper',
+            'roman':        'romanlower',
+            'ROMAN':        'romanupper'
         }, 'arabic')
     )
 
@@ -285,9 +311,9 @@ class PageList(Macro):
 
     is_block_tag = True
     arguments = (
-        ('muster', unicode, ''),
-        (u'schreibungsabhängig', bool, True),
-        (u'titel_kürzen', bool, False)
+        ('pattern', unicode, ''),
+        ('case_sensitive', bool, True),
+        ('shorten_title', bool, False)
     )
 
     def __init__(self, pattern, case_sensitive, shorten_title):
@@ -316,7 +342,7 @@ class AttachmentList(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
+        ('page', unicode, ''),
     )
 
     def __init__(self, page):
@@ -407,7 +433,7 @@ class SimilarPages(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
+        ('page', unicode, ''),
     )
 
     def __init__(self, page_name):
@@ -443,7 +469,7 @@ class TagCloud(Macro):
 
     is_block_tag = True
     arguments = (
-        ('maximal', int, 100),
+        ('max', int, 100),
     )
 
     def __init__(self, max):
@@ -514,8 +540,8 @@ class Include(Macro):
 
     is_block_tag = True
     arguments = (
-        ('seite', unicode, ''),
-        ('ruhig', bool, False)
+        ('page', unicode, ''),
+        ('silent', bool, False)
     )
 
     def __init__(self, page, silent):
@@ -591,10 +617,10 @@ class Picture(Macro):
     """
 
     arguments = (
-        ('bild', unicode, u''),
-        (u'ausmaße', unicode, u''),
-        ('ausrichtung', unicode, u''),
-        ('ersatztext', unicode, u'')
+        ('picture', unicode, u''),
+        ('size', unicode, u''),
+        ('align', unicode, u''),
+        ('alt', unicode, u'')
     )
 
     def __init__(self, target, dimensions, alignment, alt):
@@ -619,11 +645,9 @@ class Picture(Macro):
                 self.height = None
         else:
             self.width = self.height = None
-        self.align = {
-            'links':        'left',
-            'rechts':       'right',
-            'zentriert':    'center'
-        }.get(alignment)
+        self.align = alignment
+        if self.align not in ('left', 'right', 'center'):
+            self.align = None
 
     def build_node(self, context, format):
         target = self.target
@@ -645,7 +669,7 @@ class Date(Macro):
     """
 
     arguments = (
-        ('datum', unicode, None),
+        ('date', unicode, None),
     )
 
     def __init__(self, date):
@@ -678,7 +702,7 @@ class NewPages(Macro):
     """
 
     arguments = (
-        ('monate', int, 3),
+        ('months', int, 3),
     )
 
     def __init__(self, months):

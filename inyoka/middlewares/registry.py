@@ -48,18 +48,18 @@ class IsolatedRegistry(object):
 
     def __init__(self, singleton, name):
         self.__singleton = singleton
-        self.__name = name
+        self.__name__ = name
 
     def __getattr__(self, name):
-        storage = getattr(self.__singleton, self.__name)
+        storage = getattr(self.__singleton, self.__name__)
         if storage is not None:
             return storage.get(name)
 
     def __setattr__(self, name, value):
-        storage = getattr(self.__singleton, self.__name)
+        storage = getattr(self.__singleton, self.__name__)
         if storage is None:
             storage = {}
-            setattr(self.__singleton, self.__name, storage)
+            setattr(self.__singleton, self.__name__, storage)
         storage[name] = value
 
 
@@ -68,6 +68,10 @@ class RegistryMiddleware(object):
     def process_request(self, request):
         _locals.request = request
         _locals.storage = {}
+
+    def process_response(self, request, response):
+        _locals.request = _locals.storage = None
+        return response
 
 
 r = object.__new__(Registry)

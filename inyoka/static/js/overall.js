@@ -72,7 +72,8 @@ $(document).ready(function() {
                   $currentAreaName = $(this).html();
                   $('.search_query').removeClass('area_' + $currentSearchArea);
                   $currentSearchArea = currentArea;
-                  $currentAreaName = $('select.search_area option[@value=' + $currentSearchArea + ']').html()
+                  $currentAreaName = $('select.search_area option[@value=' +
+                                       $currentSearchArea + ']').html()
                   $('.search_query').addClass('area_' + $currentSearchArea);
                   $('li', areaPopup).each(function() {
                     $(this).removeClass('active');
@@ -86,9 +87,9 @@ $(document).ready(function() {
                 item.addClass('active');
             });
             areaPopup.prependTo('form.search');
-            
           }
           else areaPopup.toggle();
+          return false;
         }));
       $('.search_query').addClass('search_query_js')
         .blur(function() {
@@ -104,12 +105,17 @@ $(document).ready(function() {
           }
         });
       $('.search_query').val('').blur();
+    $(document).click(function() {
+      if (areaPopup.is(':visible'))
+        areaPopup.hide();
+    });
   })();
 
   // add a sidebar toggler if there is an sidebar
   (function() {
     var sidebar = $('.navi_sidebar');
-    var togglebutton = $('<button class="navi_toggle_up" title="Navigation ausblenden" ></button>');
+    var togglebutton = $('<button class="navi_toggle_up" title="Navigation ' +
+                         'ausblenden" ></button>');
     if (sidebar.length) togglebutton
       .click(function() {
         var content = $('.content_sidebar');

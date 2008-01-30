@@ -21,7 +21,7 @@ from django.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils import slugify
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.middlewares.registry import r
@@ -314,7 +314,6 @@ class PostManager(models.Manager):
         ''')
         posts = []
         for row in cur.fetchall():
-            print row[0]
             posts.append(Post.objects.select_related().get(id__exact=row[0]))
         cache.set('forum_latest', posts, 30)
         return posts
@@ -557,7 +556,9 @@ class Forum(models.Model):
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
     offtopic = models.BooleanField(default=False)
-    community_forum = models.BooleanField('Community-Forum', default=False)
+
+    welcome_message = models.ForeignKey('WelcomeMessage', null=True,
+                                        blank=True)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -593,9 +594,12 @@ class Forum(models.Model):
         super(Forum, self).save()
 
     def get_read_status(self, user):
-        if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
+        """
+        Determine the read status of the whole forum for a specific
+        user.
+        """
+        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
             return True
-        # TODO: optimizing!
         for forum in self.forum_set.all():
             if not forum.get_read_status(user):
                 return False
@@ -605,12 +609,28 @@ class Forum(models.Model):
         return True
 
     def mark_read(self, user):
+        """
+        Mark all topics in this forum and all related subforums as
+        read for the specificed user.
+        """
         forums = [self]
         while forums:
             forum = forums.pop()
             for topic in forum.topics:
                 topic.mark_read(user)
             forums.extend(forum.children)
+
+    def get_welcome_message(self, user):
+        """
+        Return a unread welcome message if exists.
+        """
+        forums = self.parents
+        forums.append(self)
+        read = set()
+        for f in forums:
+            if f.welcome_message_id is not None and \
+               f.welcome_message_id in read:
+                return f.welcome_message
 
     def __unicode__(self):
         return self.name
@@ -818,8 +838,8 @@ class Topic(models.Model):
         return u' '.join(out)
 
     def get_read_status(self, user):
-        if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
-            return  user.is_anonymous() or self.last_post_id <= user.forum_last_read
+        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
+            return  user.is_anonymous or self.last_post_id <= user.forum_last_read
         try:
             read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
         except:
@@ -830,6 +850,9 @@ class Topic(models.Model):
             return False
 
     def mark_read(self, user):
+        """
+        Mark the current topic as read for a given user.
+        """
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
@@ -871,7 +894,6 @@ class Post(models.Model):
     #: Moderators can set hidden to True which means that normal users aren't
     #: able to see the post anymore.
     hidden = models.BooleanField(u'Verborgen', default=False)
-    xapian_docid = models.IntegerField(default=0)
 
     def render_text(self, request=None, format='html', nocache=False):
         context = RenderContext(request or r.request, simplified=True)
@@ -894,18 +916,17 @@ class Post(models.Model):
         """
         This updates the xapian search index.
         """
-        doc = search.create_document('forum', self.xapian_docid)
-        doc.clear()
-        doc['title'] = self.topic.title
-        doc['text'] = self.text
-        doc['author'] = self.author
-        doc['date'] = self.pub_date
-        doc['topic'] = self.topic.id
-        doc['area'] = 'Forum'
-        doc.save()
-        if self.xapian_docid != doc.docid:
-            self.xapian_docid = doc.docid
-            models.Model.save(self)
+        search.store(
+            component='f',
+            uid=self.id,
+            title=self.topic.title,
+            user=self.author_id,
+            date=self.pub_date,
+            collapse=self.topic_id,
+            category=[p.slug for p in self.topic.forum.parents] + \
+                [self.topic.forum.slug],
+            text=self.text
+        )
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -1083,3 +1104,30 @@ class Privilege(models.Model):
     can_create_poll = models.BooleanField(default=False)
     can_upload = models.BooleanField(default=False)
     can_moderate = models.BooleanField(default=False)
+
+
+class WelcomeMessage(models.Model):
+    """
+    This class can be used, to attach additional Welcome-Messages to
+    a category or forum. That might be usefull for greeting the users or
+    explaining extra rules. The message will be displayed only once for
+    each user.
+    """
+    text = models.TextField('Nachricht')
+
+    def get_absolute_url(self):
+        f = self.forum_set.all()[0]
+        return '%swelcome/' % url_for(f)
+
+
+def recv_post(post_id):
+    post = Post.objects.select_related(2).get(id=post_id)
+    return {
+        'title': post.topic.title,
+        'user': post.author,
+        'date': post.pub_date,
+        'url': url_for(post),
+        'component': u'Forum',
+        'highlight': True
+    }
+search.register_result_handler('f', recv_post)

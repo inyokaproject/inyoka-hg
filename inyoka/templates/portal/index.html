@@ -68,15 +68,15 @@
   {{ feed_button(href('portal', 'feeds', _anchor='ikhaya')) }}
   <h3>Neues von ubuntuusers.de</h3>
   <div class="articles">
-  {%- for article in ikhaya_latest %}
+    {%- for article in ikhaya_latest %}
     <div class="article" onclick="document.location.href='{{ article|url }}'">
       <div class="date">{{ article.pub_date|datetimeformat }}</div>
       <a href="{{ article|url }}">{{ article.subject|e }}</a>
       <p>
-        {{ article.intro|truncate(250, true)|e }}
+        {{ article.simplified_intro|truncate(250, true)|e }}
       </p>
     </div>
-  {%- endfor %}
+    {%- endfor %}
   </div>
   {%- endif %}
 {% endblock %}

@@ -8,3 +8,6 @@
 """
 # publish the jinja macros
 from inyoka.portal import macros
+
+# publish search extensions
+from inyoka.portal import search

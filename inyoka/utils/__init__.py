@@ -43,18 +43,23 @@ _iso8601_re = re.compile(
 
 def _get_inyoka_revision():
     """Get the inyoka version."""
-    fn = os.path.join(os.path.dirname(__file__), os.pardir, '.svn', 'entries')
-    if os.path.exists(fn):
-        f = file(fn, 'r')
-        try:
-            for x in xrange(4):
-                version = f.readline()
-            try:
-                return int(version.strip())
-            except ValueError:
-                pass
-        finally:
-            f.close()
+    import inyoka
+    from subprocess import Popen, PIPE
+    hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
+               cwd=os.path.dirname(inyoka.__file__))
+    hg.stdin.close()
+    hg.stderr.close()
+    rv = hg.stdout.read()
+    hg.stdout.close()
+    hg.wait()
+    hg_node = None
+    if hg.wait() == 0:
+        for line in rv.splitlines():
+            p = line.split(':', 1)
+            if len(p) == 2 and p[0].lower().strip() == 'changeset':
+                hg_node = p[1].strip()
+                break
+    return hg_node
 INYOKA_REVISION = _get_inyoka_revision()
 del _get_inyoka_revision
 

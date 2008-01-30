@@ -11,6 +11,7 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
+from md5 import new as md5
 from datetime import datetime
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -22,7 +23,8 @@ from django.shortcuts import get_object_or_404
 from inyoka.utils import get_random_password, human_number
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
-                                  make_permanent, get_user_record
+                                  make_permanent, get_user_record, \
+                                  test_session_cookie
 from inyoka.utils.urls import href, url_for, is_save_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
@@ -32,9 +34,8 @@ from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
-from inyoka.utils.user import check_activation_key, send_activation_mail, \
-                              send_new_user_password, authenticate, \
-                              login as do_login, logout as do_logout
+from inyoka.portal.utils import check_activation_key, send_activation_mail, \
+                                send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
@@ -98,11 +99,13 @@ def whoisonline(request):
 def register(request):
     """Register a new user."""
     redirect = request.GET.get('next') or href('portal')
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet.', False)
         return HttpResponseRedirect(redirect)
 
-    if request.method == 'POST':
+    cookie_error_link = test_session_cookie(request)
+
+    if request.method == 'POST' and cookie_error_link is None:
         form = RegisterForm(request.POST)
         request.session['register_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
@@ -132,7 +135,9 @@ def register(request):
     set_session_info(request, u'registriert sich',
                      'registriere dich auch')
     return {
-        'form': form
+        'form':         form,
+        'cookie_error': cookie_error_link is not None,
+        'retry_link':   cookie_error_link
     }
 
 
@@ -140,7 +145,7 @@ def get_captcha(request):
     """little CAPTCHA view for the register dialog."""
     response = HttpResponse(content_type='image/png')
     captcha = Captcha()
-    request.session['captcha_solution'] = captcha.solution
+    request.session['captcha_solution'] = md5(captcha.solution).digest()
     captcha.render_image().save(response, 'PNG')
     return response
 
@@ -256,24 +261,27 @@ def login(request):
     """Login dialog that supports permanent logins"""
     redirect = is_save_domain(request.GET.get('next', '')) and \
                  request.GET['next'] or href('portal')
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet!', False)
         return HttpResponseRedirect(redirect)
 
+    # enforce an existing session
+    cookie_error_link = test_session_cookie(request)
+
     failed = inactive = False
-    if request.method == 'POST':
+    if request.method == 'POST' and cookie_error_link is None:
         form = LoginForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            user = authenticate(username=data['username'],
-                                password=data['password'])
+            user = User.objects.authenticate(username=data['username'],
+                                             password=data['password'])
             if user is not None:
                 if user.is_active:
                     if data['permanent']:
                         make_permanent(request)
                     # username matches password and user is active
                     flash(u'Du hast dich erfolgreich angemeldet.', True)
-                    do_login(request, user)
+                    user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
 
@@ -283,9 +291,11 @@ def login(request):
         form = LoginForm()
 
     d = {
-        'form':     form,
-        'failed':   failed,
-        'inactive': inactive,
+        'form':         form,
+        'failed':       failed,
+        'inactive':     inactive,
+        'cookie_error': cookie_error_link is not None,
+        'retry_link':   cookie_error_link
     }
     if failed:
         d['username'] = data['username']
@@ -295,8 +305,8 @@ def login(request):
 def logout(request):
     """Simple logout view that flashes if the process was done
     successfull or not (e.g if the user wasn't logged in)."""
-    if request.user.is_authenticated():
-        do_logout(request)
+    if request.user.is_authenticated:
+        User.objects.logout(request)
         flash(u'Du hast dich erfolgreich abgemeldet.', True)
     else:
         flash(u'Du warst nicht eingeloggt', False)
@@ -313,7 +323,6 @@ def search(request):
         d = f.cleaned_data
         show_community = request.GET.get('show_community',
             request.user.show_community) in ("true", True)
-        print "community", show_community, request.user.show_community
         results = search_system.query(
             d['area'] and d['area'] != 'all'
                 and '(%s) AND area:%s' % (d['query'], d['area']) \

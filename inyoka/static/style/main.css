@@ -18,8 +18,17 @@
 }
 
 body {
-  font-family: 'Bitstream Vera Sans', 'Verdana', sans-serif;
+  font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
   font-size: 0.95em;
+}
+
+html, body {
+  background-color: #f2f2f2;
+}
+
+div.body {
+  background-color: white;
+  padding: 10px 0 20px 0;
 }
 
 :link, :visited {
@@ -242,7 +251,6 @@ table.syntaxtable td.linenos {
 .header {
   height: 106px;
   background-image: url(../img/header.jpg);
-  margin-bottom: 0.2em;
 }
 
 .header img {
@@ -475,8 +483,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   color: #666;
   font-family: 'Trebuchet MS',sans-serif;
   font-size: 2.6em;
-  margin:0.2em;
-  margin-left:0.0em;
+  margin: 0 0 0.2em 0;
 }
 
 .appheader h2 {
@@ -487,7 +494,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .navi_global {
-  margin: 0.4em 0 0 0;
+  margin: 0;
   float: right;
   list-style-type: none;
 }
@@ -495,7 +502,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 .mod_navi {
   margin-top: 2em;
   float: right;
-  position:absolute;
+  position: absolute;
   right: 1em;
   list-style-type: none;
 }
@@ -656,8 +663,6 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 /*** Footer *******************************************************************/
 
 .footer {
-  margin: 2em 0 0 0;
-  background-color: #F2F2F2;
   border-top: 1px solid #AAA;
   clear: both;
   color: #555;
@@ -797,3 +802,50 @@ div.not_found img {
   color: #888;
 }
 
+/* Autocomplete styles */
+.ac_results {
+	padding: 0px;
+	border: 1px solid WindowFrame;
+	background-color: Window;
+	overflow: hidden;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ac_results iframe {
+	display:none;/*sorry for IE5*/
+	display/**/:block;/*sorry for IE5*/
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	filter:mask();
+	width:3000px;
+	height:3000px;
+}
+
+.ac_results li {
+	margin: 0px;
+	padding: 2px 5px;
+	cursor: pointer;
+	display: block;
+	width: 100%;
+	font: menu;
+	font-size: 12px;
+	overflow: hidden;
+}
+
+.ac_loading {
+	background : Window url('./indicator.gif') right center no-repeat;
+}
+
+.ac_over {
+	background-color: Highlight;
+	color: HighlightText;
+}

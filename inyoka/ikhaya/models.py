@@ -5,7 +5,7 @@
 
     Database models for ikhaya.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007 by Benjamin Wiegand, Christoph Hack
     :license: GNU GPL, see LICENSE for more details.
 """
 import random
@@ -15,8 +15,8 @@ from django.core.cache import cache
 from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils import slugify, striptags
-from inyoka.utils.urls import href
-from inyoka.utils.search import search, Document
+from inyoka.utils.urls import href, url_for
+from inyoka.utils.search import search
 from inyoka.middlewares.registry import r
 
 
@@ -109,7 +109,6 @@ class Article(models.Model):
     public = models.BooleanField('Veröffentlicht')
     slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
-    xapian_docid = models.IntegerField(default=0, blank=True)
 
     @property
     def rendered_text(self):
@@ -158,7 +157,6 @@ class Article(models.Model):
 
     def _render(self, text):
         """Render a text that belongs to this Article to HTML"""
-        print self.is_xhtml
         if self.is_xhtml:
             return text
         node = parse(text)
@@ -168,17 +166,15 @@ class Article(models.Model):
         """
         This updates the xapian search index.
         """
-        doc = search.create_document('ikhaya', self.xapian_docid)
-        doc.clear()
-        doc['title'] = self.subject
-        doc['text'] = self.simplified_intro
-        doc['text'] = self.simplified_text
-        doc['author'] = self.author
-        doc['date'] = self.pub_date
-        doc['area'] = 'Ikhaya'
-        doc.save()
-        if self.xapian_docid != doc.docid:
-            self.xapian_docid = doc.docid
+        search.store(
+            component='i',
+            uid=self.id,
+            title=self.subject,
+            user=self.author_id,
+            date=self.pub_date,
+            category=self.category.slug,
+            text=self.text
+        )
 
     def save(self):
         """
@@ -220,8 +216,8 @@ class Article(models.Model):
                     random.random()
                 )[:50]
 
-        self.update_search()
         super(Article, self).save()
+        self.update_search()
 
         # now that we have the article id we can put it into the slug
         if suffix_id:
@@ -282,3 +278,15 @@ class Comment(models.Model):
             instructions = parse(self.text).compile('html')
             cache.set(key, instructions)
         return render(instructions, context)
+
+def recv_article(article_id):
+    article = Article.objects.select_related(1).get(id=article_id)
+    return {
+        'title': article.subject,
+        'user': article.author,
+        'date': article.pub_date,
+        'url': url_for(article),
+        'component': u'Ikhaya',
+        'highlight': True
+    }
+search.register_result_handler('i', recv_article)

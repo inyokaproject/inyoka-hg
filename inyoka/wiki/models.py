@@ -90,7 +90,7 @@ from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
 from inyoka.wiki.parser import nodes
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
@@ -326,20 +326,6 @@ class PageManager(models.Manager):
         return [x[1] for x in get_close_matches(name, [x[0] for x in
                 self._get_object_list(False) if not x[1]], n)]
 
-    def get_recent_changes(self, page=1, per_page=30):
-        """
-        Get a list of recent changes.
-        """
-        revisions = Revision.objects.select_related(depth=1) \
-                                    .order_by('-change_date') \
-                                    [(page - 1) * per_page:per_page]
-        result = []
-        for rev in revisions:
-            page = rev.page
-            page.rev = rev
-            result.append(page)
-        return result
-
     def get_by_name(self, name, nocache=False):
         """
         Return a page with the most recent revision. This should be used
@@ -528,7 +514,7 @@ class PageManager(models.Manager):
             attachment = att
         if user is None:
             user = User.objects.get_system_user()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             user = None
         if remote_addr is None:
             remote_addr = '127.0.0.1'
@@ -742,18 +728,12 @@ class Page(models.Model):
         topic
             A foreign key to the topic that belongs to this wiki page.
 
-        xapian_docid
-            The xapian doc_id of this page. It's used by the search and might
-            change over time. This attribute exists just for the `search`
-            module and should be ignored.
-
         rev
             If the page is bound this points to a `Revision` otherwise `None`.
     """
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True)
     topic = models.ForeignKey(Topic, blank=True, null=True)
-    xapian_docid = models.IntegerField(default=0)
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -903,19 +883,14 @@ class Page(models.Model):
             MetaData(page=self, key=key, value=value).save()
 
         # searchindex
-        doc = search.create_document('wiki', self.xapian_docid)
-        doc.clear()
-        doc['title'] = rev.title
-        doc['text'] = meta['text']
-        if rev.user:
-            doc['author'] = rev.user.id
-        doc['date'] = rev.change_date
-        doc['area'] = 'Wiki'
-        doc.save()
-
-        if doc.docid != self.xapian_docid:
-            self.xapian_docid = doc.docid
-            models.Model.save(self)
+        search.store(
+            component='w',
+            uid=self.id,
+            title=rev.title,
+            user=rev.user_id,
+            date=rev.change_date,
+            text=meta['text']
+        )
 
     def prune(self):
         """Clear the page cache."""
@@ -999,6 +974,7 @@ class Page(models.Model):
             note
                 The change note for the revision. If not given it will be
                 empty.
+:q
 
             attachment
                 see `attachment_filename`
@@ -1041,7 +1017,7 @@ class Page(models.Model):
             attachment = att
         if user is None:
             user = User.objects.get_system_user()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             user = None
         if change_date is None:
             change_date = datetime.now()
@@ -1221,6 +1197,18 @@ class Revision(models.Model):
     def get_absolute_url(self):
         return href('wiki', self.page.name, rev=self.id)
 
+    def revert(self, note=None, user=None, remote_addr=None):
+        """Revert this revision and make it the current one."""
+        note = (note and note + ' ' or '') + ('[%s wiederhergestellt]' %
+                                              unicode(self))
+        new_rev = Revision(page=self.page, text=self.text, user=user or
+                           self.user, change_date=datetime.now(),
+                           note=note, deleted=False, remote_addr=
+                           remote_addr or '127.0.0.1',
+                           attachment=self.attachment)
+        new_rev.save()
+        return new_rev
+
     def save(self):
         """Save the revision and invalidate the cache."""
         models.Model.save(self)
@@ -1256,3 +1244,16 @@ class MetaData(models.Model):
     page = models.ForeignKey(Page)
     key = models.CharField(max_length=30)
     value = models.CharField(max_length=512)
+
+
+def recv_page(page_id):
+    rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
+    return {
+        'title': rev.title,
+        'user': rev.user,
+        'date': rev.change_date,
+        'url': url_for(rev.page),
+        'component': u'Wiki',
+        'highlight': True
+    }
+search.register_result_handler('w', recv_page)
