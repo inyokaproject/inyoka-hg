@@ -31,6 +31,7 @@ from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
+from inyoka.utils.pagination import Pagination
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
@@ -172,21 +173,22 @@ def do_revert(request, name):
         rev = int(request.GET['rev'])
     except (KeyError, ValueError):
         raise PageNotFound()
+    url = href('wiki', name)
     page = Page.objects.get_by_name_and_rev(name, rev)
-    url = href('wiki', name, rev=page.rev.id)
-    if request.method == 'POST':
-        if 'cancel' in request.FORM:
+    latest_rev = page.revisions.latest()
+    if latest_rev == page.rev:
+        flash(u'Keine Änderungen durchgeführt, da die Revision '
+              u'bereits die aktuelle ist.', success=False)
+    elif request.method == 'POST':
+        if 'cancel' in request.POST:
             flash('Wiederherstellen abgebrochen.')
+            url = href('wiki', name, rev=page.rev.id)
         else:
             new_revision = page.rev.revert(request.POST.get('note'),
                                            request.user,
                                            request.META.get('REMOTE_ADDR'))
-            if new_revision == page.rev:
-                flash(u'Keine Änderungen durchgeführt, da die Revision '
-                      u'bereits die aktuelle ist.', success=False)
-            else:
-                flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
-                      escape(unicode(page.rev)), success=True)
+            flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
+                  escape(unicode(page.rev)), success=True)
             url = href('wiki', name)
     else:
         flash(render_template('wiki/action_revert.html', {'page': page}))
@@ -366,8 +368,18 @@ def do_log(request, name):
             The list of revisions ordered by date. The newest revision
             first.
     """
+    try:
+        pagination_page = int(request.GET['page'])
+    except (ValueError, KeyError):
+        pagination_page = 1
     page = Page.objects.get(name=name)
-    revisions = page.revisions.all()
+
+    def link_func(p, parameters):
+        parameters['page'] = str(p)
+        return url_for(page) + '?' + parameters.urlencode()
+
+    pagination = Pagination(request, page.revisions.all(), pagination_page,
+                            20, link_func)
     set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
                      u'href="%s">%s</a>“' % (
                         escape(url_for(page)),
@@ -375,7 +387,8 @@ def do_log(request, name):
                     "%s' Revisionen" % escape(page.title))
     return {
         'page':         page,
-        'revisions':    list(revisions)
+        'revisions':    pagination.get_objects(),
+        'pagination':   pagination
     }
 
 

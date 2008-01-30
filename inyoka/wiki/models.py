@@ -1213,9 +1213,6 @@ class Revision(models.Model):
 
     def revert(self, note=None, user=None, remote_addr=None):
         """Revert this revision and make it the current one."""
-        newest_rev = self.page.revisions.latest()
-        if self == newest_rev:
-            return self
         note = (note and note + ' ' or '') + ('[%s wiederhergestellt]' %
                                               unicode(self))
         new_rev = Revision(page=self.page, text=self.text, user=user or
