@@ -16,6 +16,7 @@
     (topic|url, topic.title),
     (topic|url('split'), 'Thema aufteilen')
   ] + navigation_trace %}
+{% set scripts = scripts + ['jQuery.autocomplete.js'] %}
 
 {% block forum_content %}
   <form action="" method="post" class="new_topic">
@@ -95,4 +96,12 @@
       </tbody>
     </table>
   </form>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    (function () {
+      $('#id_topic_slug').autocomplete('/?__service__=forum.get_topic_autocompletion', {
+        delay: 40, cacheLength: 10});
+    })();
+    /* ]]> */
+  </script>
 {% endblock %}

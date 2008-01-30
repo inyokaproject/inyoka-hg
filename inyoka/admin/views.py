@@ -484,17 +484,6 @@ def users(request):
 
 
 @require_manager
-def _on_search_user_query(request):
-    #XXX: cache the results?
-    qs = User.objects.filter(username__startswith=request.GET.get('q', ''))[:11]
-    if len(qs) > 10:
-        qs[10] = '...'
-    return HttpResponse('\n'.join(
-        x.username for x in qs
-    ))
-
-
-@require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
     #TODO: check for expensive SQL-Queries and other performance problems...

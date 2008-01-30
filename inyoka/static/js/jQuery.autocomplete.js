@@ -269,17 +269,13 @@ $.autocomplete = function(input, options) {
 		}
 	};
 
-	function parseData(data) {
-		if (!data) return null;
-		var parsed = [];
-		var rows = data.split(options.lineSeparator);
-		for (var i=0; i < rows.length; i++) {
-			var row = $.trim(rows[i]);
-			if (row) {
-				parsed[parsed.length] = row.split(options.cellSeparator);
-			}
-		}
-		return parsed;
+	function normalizeData(data) {
+		if (!data)
+      return null;
+		for (var i = 0, n = data.length; i != n; ++i)
+      if (!(data[i] instanceof Array))
+        data[i] = [data[i]];
+		return data;
 	};
 
 	function dataToDom(data) {
@@ -321,26 +317,26 @@ $.autocomplete = function(input, options) {
 		if (!options.matchCase) q = q.toLowerCase();
 		var data = options.cacheLength ? loadFromCache(q) : null;
 		// recieve the cached data
-		if (data) {
+		if (data)
 			receiveData(q, data);
 		// if an AJAX url has been supplied, try loading the data now
-		} else if( (typeof options.url == "string") && (options.url.length > 0) ){
-			$.get(makeUrl(q), function(data) {
-				data = parseData(data);
+		else if ((typeof options.url == "string") && (options.url.length > 0))
+			$.getJSON(makeUrl(q), function(data) {
+        data = normalizeData(data);
 				addToCache(q, data);
 				receiveData(q, data);
 			});
 		// if there's been no data found, remove the loading class
-		} else {
+		else {
 			$input.removeClass(options.loadingClass);
 		}
 	};
 
 	function makeUrl(q) {
-		var url = options.url + "?q=" + encodeURI(q);
-		for (var i in options.extraParams) {
+		var url = options.url + (options.url.indexOf('?') < 0 ? '?' : '&')
+                          + 'q=' + encodeURI(q);
+		for (var i in options.extraParams)
 			url += "&" + i + "=" + encodeURI(options.extraParams[i]);
-		}
 		return url;
 	};
 
@@ -387,18 +383,17 @@ $.autocomplete = function(input, options) {
 
 		if (!options.matchCase) q = q.toLowerCase();
 		var data = options.cacheLength ? loadFromCache(q) : null;
-		if (data) {
+		if (data)
 			findValueCallback(q, data);
-		} else if( (typeof options.url == "string") && (options.url.length > 0) ){
-			$.get(makeUrl(q), function(data) {
-				data = parseData(data)
+		else if ((typeof options.url == "string") && (options.url.length > 0))
+			$.getJSON(makeUrl(q), function(data) {
+				data = normalizeData(data)
 				addToCache(q, data);
 				findValueCallback(q, data);
 			});
-		} else {
+		else
 			// no matches
 			findValueCallback(q, null);
-		}
 	}
 
 	function findValueCallback(q, data){
@@ -466,21 +461,19 @@ $.fn.autocomplete = function(url, options, data) {
 	// Set default values for required options
 	options.inputClass = options.inputClass || "ac_input";
 	options.resultsClass = options.resultsClass || "ac_results";
-	options.lineSeparator = options.lineSeparator || "\n";
-	options.cellSeparator = options.cellSeparator || "|";
 	options.minChars = options.minChars || 1;
-	options.delay = options.delay || 400;
-	options.matchCase = options.matchCase || 0;
-	options.matchSubset = options.matchSubset || 1;
-	options.matchContains = options.matchContains || 0;
+	options.delay = options.delay || 50;
+	options.matchCase = options.matchCase || false;
+	options.matchSubset = options.matchSubset || true;
+	options.matchContains = options.matchContains || false;
 	options.cacheLength = options.cacheLength || 1;
 	options.mustMatch = options.mustMatch || 0;
 	options.extraParams = options.extraParams || {};
 	options.loadingClass = options.loadingClass || "ac_loading";
-	options.selectFirst = options.selectFirst || false;
+	options.selectFirst = options.selectFirst || true;
 	options.selectOnly = options.selectOnly || false;
 	options.maxItemsToShow = options.maxItemsToShow || -1;
-	options.autoFill = options.autoFill || false;
+	options.autoFill = options.autoFill || true;
 	options.width = parseInt(options.width, 10) || 0;
 
 	this.each(function() {

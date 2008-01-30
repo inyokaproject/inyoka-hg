@@ -22,19 +22,17 @@
 {% block admin_content %}
 <p>Wähle den Benutzer aus, den du editieren möchtest:</p>
 <form action="" method="post">
-  <input type="text" id="user_query" name="user" />
-  <input type="submit" value="Auswählen" />
+  <p>
+    <input type="text" id="user_query" name="user" />
+    <input type="submit" value="Auswählen" />
+  </p>
 </form>
 
 <script type="text/javascript">
   /* <![CDATA[ */
   (function () {
-    $('#user_query').autocomplete("/_search_user_query",
-      { // some options applied to the autocomplete jQuery plugin.
-        'delay': 40, 'maxItemsToShow': 15, 'selectFirst': true, 
-        'matchSubset': 1, 'matchContains': 1, 'autoFill': 1,
-        'cacheLength': 10, 'lineSeperator': '\n',
-    });
+    $('#user_query').autocomplete("/?__service__=admin.get_user_autocompletion", {
+      delay: 40, maxItemsToShow: 15, cacheLength: 10});
   })();
   /* ]]> */
 </script>
