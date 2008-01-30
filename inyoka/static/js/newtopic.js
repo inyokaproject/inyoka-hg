@@ -1,30 +1,13 @@
 $(function() {
   function get_quote_cookie() {
-    var name = 'multi_quote=';
-    var i = 0;
-    while (i < document.cookie.length)
-    {
-      val_idx = i + name.length;
-      if (document.cookie.substring(i, val_idx) == name) {
-        var val_end = document.cookie.indexOf (';', val_idx);
-        if (val_end == -1) {
-          val_end = document.cookie.length;
-        }
-        return document.cookie.substring(val_idx, val_end).split(',');
-      }
-      i = document.cookie.indexOf(' ', i) + 1;
-      if (i == 0) {
-        break;
-      }
-    }
-    return [];
+    return $.cookie('multi_quote') ? $.cookie('multi_quote').split(',') : [];
   }
 
   function set_quote_cookie(ids) {
     if (ids.length == 0) {
-      document.cookie = 'multi_quote=x; expires=Thu, 01-Jan-70 00:00:01 GMT;path=/;';
+      $.cookie('multi_quote', '', {expires: 'Thu, 01-Jan-70 00:00:01 GMT', path: '/'});
     } else {
-      document.cookie = 'multi_quote=' + ids.join(',') + '; path=/;';
+      $.cookie('multi_quote', ids.join(','), {path: '/'});
     }
   }
 
