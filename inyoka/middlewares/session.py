@@ -31,9 +31,9 @@ class Session(SecureCookie):
 
     @property
     def session_key(self):
-        if '_auth_user_id' in self:
+        if 'uid' in self:
             self.pop('_sk', None)
-            return self['_auth_user_id']
+            return self['uid']
         elif not '_sk' in self:
             self['_sk'] = md5('%s%s%s' % (random(), time(),
                               settings.SECRET_KEY)).digest() \
