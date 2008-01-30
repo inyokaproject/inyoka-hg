@@ -8,6 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand, Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
+from md5 import new as md5
 from django import newforms as forms
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
@@ -75,7 +76,7 @@ class RegisterForm(forms.Form):
 
         `captcha_solution` is filled by the portal/register view."""
         captcha = self.cleaned_data.get('captcha', '')
-        if captcha and captcha == self.captcha_solution:
+        if captcha and md5(captcha).digest() == self.captcha_solution:
             return True
         else:
             raise forms.ValidationError('Die Eingabe des Captchas war nicht korrekt!')

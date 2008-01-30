@@ -11,6 +11,7 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
+from md5 import new as md5
 from datetime import datetime
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -138,7 +139,7 @@ def get_captcha(request):
     """little CAPTCHA view for the register dialog."""
     response = HttpResponse(content_type='image/png')
     captcha = Captcha()
-    request.session['captcha_solution'] = captcha.solution
+    request.session['captcha_solution'] = md5(captcha.solution).digest()
     captcha.render_image().save(response, 'PNG')
     return response
 

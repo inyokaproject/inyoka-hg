@@ -8,6 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
 """
+from md5 import new as md5
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from inyoka.utils.urls import href
