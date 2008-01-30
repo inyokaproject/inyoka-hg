@@ -375,8 +375,14 @@ def do_log(request, name):
     page = Page.objects.get(name=name)
 
     def link_func(p, parameters):
-        parameters['page'] = str(p)
-        return url_for(page) + '?' + parameters.urlencode()
+        if p == 1:
+            parameters.pop('page', None)
+        else:
+            parameters['page'] = str(p)
+        rv = url_for(page)
+        if parameters:
+            rv += '?' + parameters.urlencode()
+        return rv
 
     pagination = Pagination(request, page.revisions.all(), pagination_page,
                             20, link_func)
