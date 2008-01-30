@@ -23,7 +23,8 @@ from django.shortcuts import get_object_or_404
 from inyoka.utils import get_random_password, human_number
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
-                                  make_permanent, get_user_record
+                                  make_permanent, get_user_record, \
+                                  test_session_cookie
 from inyoka.utils.urls import href, url_for, is_save_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
@@ -101,7 +102,9 @@ def register(request):
         flash(u'Du bist bereits angemeldet.', False)
         return HttpResponseRedirect(redirect)
 
-    if request.method == 'POST':
+    cookie_error_link = test_session_cookie(request)
+
+    if request.method == 'POST' and cookie_error_link is None:
         form = RegisterForm(request.POST)
         request.session['register_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
@@ -131,7 +134,9 @@ def register(request):
     set_session_info(request, u'registriert sich',
                      'registriere dich auch')
     return {
-        'form': form
+        'form':         form,
+        'cookie_error': cookie_error_link is not None,
+        'retry_link':   cookie_error_link
     }
 
 
@@ -241,8 +246,11 @@ def login(request):
         flash(u'Du bist bereits angemeldet!', False)
         return HttpResponseRedirect(redirect)
 
+    # enforce an existing session
+    cookie_error_link = test_session_cookie(request)
+
     failed = inactive = False
-    if request.method == 'POST':
+    if request.method == 'POST' and cookie_error_link is None:
         form = LoginForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
@@ -264,9 +272,11 @@ def login(request):
         form = LoginForm()
 
     d = {
-        'form':     form,
-        'failed':   failed,
-        'inactive': inactive,
+        'form':         form,
+        'failed':       failed,
+        'inactive':     inactive,
+        'cookie_error': cookie_error_link is not None,
+        'retry_link':   cookie_error_link
     }
     if failed:
         d['username'] = data['username']
