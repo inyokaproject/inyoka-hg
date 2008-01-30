@@ -9,9 +9,13 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.http import HttpResponseRedirect
+from django.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import AccessDeniedResponse
+from inyoka.utils.captcha import generate_word
+from inyoka.portal.user import User
+from inyoka.utils.templating import render_template
 
 
 def decor(decorator, base):
@@ -71,3 +75,62 @@ def abort_access_denied(request):
         args = {'next': 'http://%s%s' % (request.get_host(), request.path)}
         return HttpResponseRedirect(href('portal', 'login', **args))
     return AccessDeniedResponse()
+
+
+def gen_activation_key(user):
+    """
+    Create a new activation key.
+    It's a md5 hash from the user id, the username,
+    the users email and our secret key.
+
+    :Parameters:
+        user
+            An user object from the user the key
+            will be generated for.
+    """
+    return md5('%d%s%s%s' % (
+        user.id, user.username,
+        settings.SECRET_KEY,
+        user.email
+    )).hexdigest()
+
+
+def check_activation_key(user, key):
+    """
+    Check if an activation key is correct
+
+    :Parameters:
+        user
+            An user object a new key will be generated for.
+            (For checking purposes)
+        key
+            The key that needs to be checked for the *user*.
+    """
+    return key == gen_activation_key(user)
+
+
+def send_activation_mail(user):
+    """send an activation mail"""
+    from django.core.mail import send_mail
+    message = render_template('mails/activation_mail.txt', {
+        'username':         user.username,
+        'email':            user.email,
+        'activation_key':   gen_activation_key(user)
+    })
+    send_mail('ubuntuusers.de - Aktivierung des Benutzers %s'
+              % user.username,
+              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
+
+
+def send_new_user_password(user):
+    from django.core.mail import send_mail
+    password = generate_word()
+    user.set_password(password)
+    user.save()
+    message = render_template('mails/new_user_password.txt', {
+        'username': user.username,
+        'email':    user.email,
+        'password':   password
+    })
+    send_mail((u'ubuntuusers.de - Aktivierung des Benutzers %s' % user.username),
+              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])

@@ -21,7 +21,7 @@ SESSION_DELTA = 300
 
 def set_session_info(request, action, category=None):
     """Set the session info."""
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         #XXX: re-type the user in moderator, superuser and so on...
         user_type = 'user'
         subject = (request.user.username, user_type, url_for(request.user))
@@ -96,9 +96,9 @@ def get_sessions(order_by='-last_change'):
 
 def make_permanent(request):
     """Make this session a permanent one."""
-    request.session['is_permanent_session'] = True
+    request.session['_perm'] = True
 
 
 def close_with_browser(request):
     """Close the session with the end of the browser session."""
-    request.session['is_permanent_session'] = False
+    request.session.pop('_perm', None)

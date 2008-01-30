@@ -22,7 +22,6 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.core import validators
-from django.db.models.manager import EmptyManager
 from inyoka.utils import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
@@ -31,11 +30,6 @@ from inyoka.middlewares.registry import r
 
 UNUSABLE_PASSWORD = '!'
 _ANONYMOUS_USER = None
-
-
-class _callable_bool(int):
-    def __call__(self):
-        return self
 
 
 def get_hexdigest(salt, raw_password):
@@ -113,6 +107,18 @@ class UserManager(models.Manager):
 
         return user
 
+    def logout(self, request):
+        request.session.pop('uid', None)
+        request.user = self.get_anonymous_user()
+
+    def authenticate(self, username, password):
+        try:
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                return user
+        except User.DoesNotExist:
+            return None
+
     def get_anonymous_user(self):
         global _ANONYMOUS_USER
         if not _ANONYMOUS_USER:
@@ -188,8 +194,8 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
-    is_anonymous = property(lambda x: _callable_bool(x.id == 1))
-    is_authenticated = property(lambda x: _callable_bool(not x.is_anonymous))
+    is_anonymous = property(lambda x: x.id == 1)
+    is_authenticated = property(lambda x: not x.is_anonymous)
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
@@ -271,6 +277,12 @@ class User(models.Model):
             'privmsg': ('portal', 'privmsg', 'new', self.username)
         }[action])
 
+    def login(self, request):
+        self.last_login = datetime.datetime.now()
+        self.save()
+        request.session['uid'] = self.id
+        request.user = self
+
 
 def deactivate_user(user):
     """
@@ -297,4 +309,4 @@ def deactivate_user(user):
 
 
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils.user import send_activation_mail
+from inyoka.portal.utils import send_activation_mail

@@ -167,9 +167,7 @@ def do_missing_page(request, name):
 
 @require_privilege('edit')
 def do_revert(request, name):
-    """
-    The revert action has no template, it uses a flashed form.
-    """
+    """The revert action has no template, it uses a flashed form."""
     try:
         rev = int(request.GET['rev'])
     except (KeyError, ValueError):
