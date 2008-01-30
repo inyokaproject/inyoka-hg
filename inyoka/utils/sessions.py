@@ -23,6 +23,12 @@ SESSION_DELTA = 300
 
 def set_session_info(request, action, category=None):
     """Set the session info."""
+    # if the session is new we don't add an entry.  it could be that
+    # the user has no cookie support and that would fill our session
+    # table with dozens of entries
+    if request.session.new:
+        return
+
     if request.user.is_authenticated:
         #XXX: re-type the user in moderator, superuser and so on...
         user_type = 'user'
