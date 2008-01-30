@@ -134,13 +134,15 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.gzip.GZipMiddleware',
     'inyoka.middlewares.session.AdvancedSessionMiddleware',
     'inyoka.middlewares.auth.AuthMiddleware',
-    'django.middleware.doc.XViewMiddleware',
     'inyoka.middlewares.services.ServiceMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
     'inyoka.middlewares.common.CommonServicesMiddleware',
     'inyoka.middlewares.registry.RegistryMiddleware',
-    'inyoka.middlewares.highlighter.HighlighterMiddleware'
+    'inyoka.middlewares.highlighter.HighlighterMiddleware',
+    'inyoka.middlewares.security.SecurityMiddleware'
 )
 
 TEMPLATE_DIRS = (
