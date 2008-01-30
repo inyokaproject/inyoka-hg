@@ -28,7 +28,7 @@
 
 {% block forum_content %}
   {%- if categories %}
-  <table class="forum">
+  <table class="forum{% if is_index %} collapsible{% endif %}">
   {%- for category in categories %}
     <tr class="head"><th colspan="5"><a href="{{ category|url
       }}">{{ category.name|e }}</a></th></tr>

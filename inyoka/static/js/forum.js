@@ -35,8 +35,8 @@ $(document).ready(function () {
   $('#id_add_option').click(add_reply);
 
   // expand and collapse button for categories
-  $('table.forum tr.head a').before('<a href="#" class="collapse"></a>');
-  $('table.forum tr.head a.collapse')
+  $('table.collapsible tr.head a').before('<a href="#" class="collapse"></a>');
+  $('table.collapsible tr.head a.collapse')
     .click(function() {
         var tr = $(this).parent().parent().get(0);
         collapse(tr);
@@ -45,7 +45,7 @@ $(document).ready(function () {
   var re_slug = /\/category\/([^/]+)\//;
 
   // revert the last stored collapse status from the cookie
-  $('table.forum tr.head a').each(function() {
+  $('table.collapsible tr.head a').each(function() {
     var status = $.cookie('forum_collapse');
     status = status ? status.split('/') : [];
     m = re_slug.exec($(this).attr('href'));
@@ -92,7 +92,7 @@ function collapse(tr) {
   } else 
     $(tr).find('a.expand').removeClass('expand').addClass('collapse');
   $.cookie('forum_collapse', status.join('/'));
-  $('table.forum tr').each(function() {
+  $('table.collapsible tr').each(function() {
   if ($(this).hasClass('head'))
     inside = tr == $(this).get(0);
   if (inside && ($(this).hasClass('entry') || $(this).hasClass('empty')))
