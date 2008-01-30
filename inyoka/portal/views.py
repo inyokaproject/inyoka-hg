@@ -241,6 +241,29 @@ def login(request):
         flash(u'Du bist bereits angemeldet!', False)
         return HttpResponseRedirect(redirect)
 
+    # enforce an existing session
+    if request.session.new:
+        arguments = request.GET.copy()
+        if '_cookie_set' not in request.GET:
+            request.session['test_cookie'] = True
+            arguments['_cookie_set'] = 'yes'
+            this_url = 'http://%s%s%s' % (
+                request.get_host(),
+                request.path,
+                arguments and '?' + arguments.urlencode() or ''
+            )
+            return HttpResponseRedirect(this_url)
+        arguments.pop('_cookie_set', None)
+        retry_link = 'http://%s%s%s' % (
+            request.get_host(),
+            request.path,
+            arguments and '?' + arguments.urlencode() or ''
+        )
+        cookie_error = True
+    else:
+        cookie_error = False
+        retry_link = None
+
     failed = inactive = False
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -264,9 +287,11 @@ def login(request):
         form = LoginForm()
 
     d = {
-        'form':     form,
-        'failed':   failed,
-        'inactive': inactive,
+        'form':         form,
+        'failed':       failed,
+        'inactive':     inactive,
+        'cookie_error': cookie_error,
+        'retry_link':   retry_link
     }
     if failed:
         d['username'] = data['username']

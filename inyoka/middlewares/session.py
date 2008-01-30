@@ -64,7 +64,6 @@ class AdvancedSessionMiddleware(object):
         if session is None:
             session = Session(secret_key=settings.SECRET_KEY)
             session['_ex'] = time() + settings.SESSION_COOKIE_AGE
-            session.modified = False
         request.session = session
         if expired:
             from inyoka.utils.flashing import flash

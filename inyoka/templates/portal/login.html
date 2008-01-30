@@ -34,7 +34,14 @@
       bitte eine Nachricht an ... {# XXX: E-Mail #}
     </div>
     {% endif %}
-  {% endif %}  
+  {% endif %}
+  {% if cookie_error %}
+    <div class="message fail">
+      Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
+      sich auf ubuntuusers.de anzumelden.  Bitte aktiviere Cookies im Browser
+      und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
+    </div>
+  {% else %}
   <form action="" method="post" class="loginform">
     <dl>
       <dt><label for="id_username">{{ form.username.label }}</label></dt>
@@ -60,7 +67,8 @@
       </ul>
       </dd>
   </dl>
-<script type="text/javascript">
-  $(function() { $('#id_username').focus(); });
-</script>
+  <script type="text/javascript">
+    $(function() { $('#id_username').focus(); });
+  </script>
+  {% endif %}
 {% endblock %}
