@@ -95,7 +95,7 @@ function collapse(tr) {
   $('table.forum tr').each(function() {
   if ($(this).hasClass('head'))
     inside = tr == $(this).get(0);
-  if (inside && $(this).hasClass('entry'))
+  if (inside && ($(this).hasClass('entry') || $(this).hasClass('empty')))
     $(this).toggle();
   });
 }
