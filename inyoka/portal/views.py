@@ -32,9 +32,8 @@ from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
-from inyoka.utils.user import check_activation_key, send_activation_mail, \
-                              send_new_user_password, authenticate, \
-                              login as do_login, logout as do_logout
+from inyoka.portal.utils import check_activation_key, send_activation_mail, \
+                                send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
@@ -97,7 +96,7 @@ def whoisonline(request):
 def register(request):
     """Register a new user."""
     redirect = request.GET.get('next') or href('portal')
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet.', False)
         return HttpResponseRedirect(redirect)
 
@@ -237,7 +236,7 @@ def login(request):
     """Login dialog that supports permanent logins"""
     redirect = is_save_domain(request.GET.get('next', '')) and \
                  request.GET['next'] or href('portal')
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet!', False)
         return HttpResponseRedirect(redirect)
 
@@ -246,15 +245,15 @@ def login(request):
         form = LoginForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            user = authenticate(username=data['username'],
-                                password=data['password'])
+            user = User.objects.authenticate(username=data['username'],
+                                             password=data['password'])
             if user is not None:
                 if user.is_active:
                     if data['permanent']:
                         make_permanent(request)
                     # username matches password and user is active
                     flash(u'Du hast dich erfolgreich angemeldet.', True)
-                    do_login(request, user)
+                    user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
 
@@ -276,8 +275,8 @@ def login(request):
 def logout(request):
     """Simple logout view that flashes if the process was done
     successfull or not (e.g if the user wasn't logged in)."""
-    if request.user.is_authenticated():
-        do_logout(request)
+    if request.user.is_authenticated:
+        User.objects.logout(request)
         flash(u'Du hast dich erfolgreich abgemeldet.', True)
     else:
         flash(u'Du warst nicht eingeloggt', False)

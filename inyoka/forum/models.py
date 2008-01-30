@@ -596,7 +596,7 @@ class Forum(models.Model):
         Determine the read status of the whole forum for a specific
         user.
         """
-        if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
+        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
             return True
         for forum in self.forum_set.all():
             if not forum.get_read_status(user):
@@ -824,8 +824,8 @@ class Topic(models.Model):
         return u' '.join(out)
 
     def get_read_status(self, user):
-        if user.is_anonymous() or self.last_post_id <= user.forum_last_read:
-            return  user.is_anonymous() or self.last_post_id <= user.forum_last_read
+        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
+            return  user.is_anonymous or self.last_post_id <= user.forum_last_read
         try:
             read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
         except:

@@ -528,7 +528,7 @@ class PageManager(models.Manager):
             attachment = att
         if user is None:
             user = User.objects.get_system_user()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             user = None
         if remote_addr is None:
             remote_addr = '127.0.0.1'
@@ -1031,7 +1031,7 @@ class Page(models.Model):
             attachment = att
         if user is None:
             user = User.objects.get_system_user()
-        elif user.is_anonymous():
+        elif user.is_anonymous:
             user = None
         if change_date is None:
             change_date = datetime.now()

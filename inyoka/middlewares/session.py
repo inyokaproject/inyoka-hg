@@ -54,11 +54,22 @@ class AdvancedSessionMiddleware(object):
 
     def process_request(self, request):
         data = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+        session = None
+        expired = False
         if data:
             session = Session.unserialize(data, settings.SECRET_KEY)
-        else:
+            if session.get('_ex', 0) < time():
+                session = None
+                expired = True
+        if session is None:
             session = Session(secret_key=settings.SECRET_KEY)
+            session['_ex'] = time() + settings.SESSION_COOKIE_AGE
+            session.modified = False
         request.session = session
+        if expired:
+            from inyoka.utils.flashing import flash
+            flash(u'Deine Sitzung ist abgelaufen.  Du musst dich neu '
+                  u'anmelden.', session=session)
 
     def process_response(self, request, response):
         try:
@@ -67,12 +78,12 @@ class AdvancedSessionMiddleware(object):
             return response
 
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
-            if request.session.get('is_permanent_session'):
-                max_age = settings.SESSION_COOKIE_AGE
-                expires_time = time() + settings.SESSION_COOKIE_AGE
+            if request.session.get('_perm'):
+                expires_time = session.get('_ex', 0)
+                max_age = max(expires_time - time(), 0)
                 expires = cookie_date(expires_time)
             else:
-                max_age = expires = None
+                expires = max_age = None
             response.set_cookie(settings.SESSION_COOKIE_NAME,
                                 request.session.serialize(),
                                 max_age=max_age, expires=expires,
