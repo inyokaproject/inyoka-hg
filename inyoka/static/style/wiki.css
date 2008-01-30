@@ -53,26 +53,6 @@ p.meta {
     float: none;
 }
 
-/*table.revisions {
-    width: 100%;
-    margin: 1em 0 1em 0;
-    border-collapse: collapse;
-}
-
-table.revisions tr th {
-    background-color: #bbb;
-    border: 1px solid #bbb;
-    color: white;
-    padding: 0.3em;
-    text-align: left;
-}
-
-table.revisions tr td {
-    padding: 0.3em;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-}*/
-
 table.revisions .date {
     width: 15em;
 }
@@ -92,6 +72,36 @@ table.revisions .old_rev {
 
 table.revisions .new_rev {
     text-align: left;
+}
+
+table.revisions .actions a {
+    float: right;
+    display: block;
+    margin: 0 4px 0 0;
+    width: 24px;
+    height: 24px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+table.revisions .actions a:hover {
+    background-color: #f2f2f2;
+}
+
+table.revisions .actions a span {
+    display: none;
+}
+
+table.revisions .actions a.view {
+    background-image: url(../img/icons/search.png);
+}
+
+table.revisions .actions a.revert {
+    background-image: url(../img/icons/revert.png);
+}
+
+table.revisions .actions a.raw {
+    background-image: url(../img/icons/raw.png);
 }
 
 table.diff {

@@ -94,7 +94,7 @@
   var insert = function(format, def) {
     return function(evt) {
       return this.insertTag(format, (typeof def == 'undefined')
-                            ? 'Formattierter Text' : def);
+                            ? 'Formattierter Text' : def);
     };
   }
 
@@ -303,7 +303,7 @@
       evt.preventDefault();
       var pos = this.getCurrentLine().length;
       var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
-      for (var s = ''; pos < indent && (s += ' '); pos++);
+      for (var s = ''; pos < indent && (s += ' '); ++pos);
       this.insertText(s);
     }
   };
@@ -319,8 +319,8 @@
       args = (format instanceof Array) ? format : format.split('%s', 2);
 
     var
-      before = args[0] || '',
-      after = args[1] || '';
+      before = args[0] || '',
+      after = args[1] || '';
 
     if (typeof t.selectionStart != 'undefined') {
       var

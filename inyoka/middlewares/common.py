@@ -88,7 +88,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         """
         response = CommonMiddleware.process_response(self, request, response)
         if INYOKA_REVISION:
-            powered_by = 'Inyoka/rev-%d' % INYOKA_REVISION
+            powered_by = 'Inyoka/rev-%s' % INYOKA_REVISION
         else:
             powered_by = 'Inyoka'
         response['X-Powered-By'] = powered_by

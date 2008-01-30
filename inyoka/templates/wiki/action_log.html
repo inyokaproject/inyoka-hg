@@ -45,6 +45,7 @@
           <input type="submit" value="Vergleichen" />
           <input type="hidden" name="action" value="diff" />
         </th>
+        <th class="actions">Aktionen</th>
       </tr>
     {%- for revision in revisions %}
       <tr>
@@ -59,6 +60,13 @@
           if loop.index == 2 or revisions|count == 1 %} checked="checked"{% endif %} /></td>
         <td class="new_rev"><input type="radio" name="new_rev" value="{{ revision.id }}"{%
           if loop.index == 1 %} checked="checked"{% endif %} /></td>
+        <td class="actions">
+          <a href="{{ revision|url|e }}" class="view" title="Ansehen"><span>ansehen</span></a>
+          <a href="?action=revert&amp;rev={{ revision.id }}" class="revert"
+             title="Wiederherstellen"><span>wiederherstellen</span></a>
+          <a href="?action=export&amp;format=raw&amp;rev={{ revision.id }}" class="raw"
+             title="Rowformat"><span>Rohformat</span></a>
+        </td>
       </tr>
     {%- endfor %}
     </table>
