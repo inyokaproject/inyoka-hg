@@ -13,7 +13,9 @@
 import datetime
 from md5 import md5
 from sha import sha
+import random, string
 from django.conf import settings
+from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 
 
@@ -67,15 +69,15 @@ def send_activation_mail(user):
 
 def send_new_user_password(user):
     from django.core.mail import send_mail
-    password = generate_word()
-    user.set_password(password)
+    new_password_key = ''.join(random.choice(string.lowercase + string.digits) for _ in range(24))
+    user.new_password_key = new_password_key
     user.save()
     message = render_template('mails/new_user_password.txt', {
-        'username': user.username,
-        'email':    user.email,
-        'password':   password
+        'username':         user.username,
+        'email':            user.email,
+        'new_password_url': href('portal', 'lost_password', user.username, new_password_key),
     })
-    send_mail((u'ubuntuusers.de - Aktivierung des Benutzers %s' % user.username),
+    send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
 
 

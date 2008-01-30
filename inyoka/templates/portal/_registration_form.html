@@ -24,8 +24,8 @@
    <dd>{{ form.hidden_captcha }}</dd>
    <dd>{{ h.field_errors(form.errors.hidden_captcha) }}</dd>
    <dt>CAPTCHA</dt>
-    <dd class="captcha"><img src="{{ href('portal', '_captcha') }}" alt="XXX: Hinweis auf Audio Version" />
-        <a href="">neues Captcha erzeugen</a></dd>
+    <dd class="captcha"><img src="{{ href('portal', '_captcha') }}" alt="XXX: Hinweis auf Audio-Version" />
+        <a href="/register/">neues Captcha erzeugen</a></dd>{# XXX: better non-js solution (keep the stuff entered above) #}
     <dd>Bitte gib den Code von obigem Bild hier ein:</dd>
     <dd>{{ form.captcha }}{{ h.field_errors(form.errors.captcha) }}</dd>
     <dd>

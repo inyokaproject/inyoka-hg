@@ -36,6 +36,10 @@ input {
   padding: 1px 3px;
 }
 
+input[type=submit] {
+  border-color: #000; /* #TODO: could be more beautiful */
+}
+
 textarea {
   border: 1px solid #AAA;
   width:100%;

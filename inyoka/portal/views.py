@@ -42,7 +42,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
                                 UserCPSettingsForm, PrivateMessageForm, \
                                 DeactivateUserForm, LostPasswordForm, \
                                 ChangePasswordForm, SubscriptionForm, \
-                                UserCPProfileForm, NOTIFICATION_CHOICES
+                                UserCPProfileForm, SetNewPasswordForm, \
+                                NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  CalendarItem
@@ -201,8 +202,6 @@ def lost_password(request):
     View for the lost password dialog.
     It generates a new random password and sends it via mail.
     """
-    redirect = href('portal', 'login')
-
     if request.method == 'POST':
         form = LostPasswordForm(request.POST)
         request.session['lost_password_form_data'] = request.POST
@@ -210,13 +209,13 @@ def lost_password(request):
         if form.is_valid():
             data = form.cleaned_data
             send_new_user_password(form.user)
-            flash(u'Es wurde ein neues Passwort an deine E-Mail-Adresse '
-                  u'gesendet!', True)
+            flash(u'Es wurde eine E-Mail mit weiteren Anweisungen an deine '
+                  u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
             del request.session['captcha_solution']
             del request.session['lost_password_form_data']
-            return HttpResponseRedirect(redirect)
+            return HttpResponseRedirect(href('portal'))
     else:
         if 'lost_password_form_data' in request.session:
             form = LostPasswordForm(request.session['lost_password_form_data'])
@@ -226,7 +225,30 @@ def lost_password(request):
     return {
         'form': form
     }
+    #TODO: maybe we should limit that to some days
 
+
+@templated('portal/set_new_password.html')
+def set_new_password(request, username, new_password_key):
+    if request.method == 'POST':
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            data['user'].set_password(data['password'])
+            data['user'].new_password_key = ''
+            data['user'].save()
+            flash('Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
+                  'einloggen.', True)
+            return HttpResponseRedirect(href('portal', 'login'))
+    else:
+        form = SetNewPasswordForm(initial={
+            'username': username,
+            'new_password_key': new_password_key,
+        })
+    return {
+        'form': form,
+        'username': username,
+    }
 
 
 @templated('portal/login.html')

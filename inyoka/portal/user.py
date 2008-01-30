@@ -138,13 +138,15 @@ class User(models.Model):
 
     username = models.CharField('Benutzername', max_length=30, unique=True,
         validator_list=[validators.isAlphaNumeric])
-    email = models.EmailField('E-Mail-Adresse', blank=True, unique=True)
+    #email = models.EmailField('E-Mail-Adresse', blank=True, unique=True)
+    # allow @localhost addresses for easier testing
+    email = models.CharField('E-Mail-Adresse', blank=True, unique=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.now)
     date_joined = models.DateTimeField('Angemeldet', default=datetime.datetime.now)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
-    new_password_confirm = models.CharField(u'Bestätigungskey für ein neues '
+    new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
     # profile attributes
