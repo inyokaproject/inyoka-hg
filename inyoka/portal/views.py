@@ -202,6 +202,10 @@ def lost_password(request):
     View for the lost password dialog.
     It generates a new random password and sends it via mail.
     """
+    if request.user.is_authenticated:
+        flash(u'Du bist bereits angemeldet!', False)
+        return HttpResponseRedirect(href('portal'))
+
     if request.method == 'POST':
         form = LostPasswordForm(request.POST)
         form.captcha_solution = request.session.get('captcha_solution')
@@ -212,7 +216,6 @@ def lost_password(request):
                   u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
-            del request.session['captcha_solution']
             return HttpResponseRedirect(href('portal'))
     else:
         form = LostPasswordForm()
