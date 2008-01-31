@@ -28,7 +28,6 @@ from inyoka.utils.sessions import get_sessions, set_session_info, \
 from inyoka.utils.urls import href, url_for, is_save_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
-from inyoka.utils.captcha import Captcha
 from inyoka.utils.flashing import flash
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
@@ -105,7 +104,9 @@ def register(request):
 
     cookie_error_link = test_session_cookie(request)
 
-    if request.method == 'POST' and cookie_error_link is None:
+    form = RegisterForm()
+    if request.method == 'POST' and cookie_error_link is None and \
+       'renew_captcha' not in request.POST:
         form = RegisterForm(request.POST)
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
@@ -120,10 +121,8 @@ def register(request):
                         escape(data['username']), escape(data['email'])), True)
 
             # clean up request.session
-            del request.session['captcha_solution']
+            request.session.pop('captcha_solution', None)
             return HttpResponseRedirect(redirect)
-    else:
-        form = RegisterForm()
 
     set_session_info(request, u'registriert sich',
                      'registriere dich auch')
@@ -132,17 +131,6 @@ def register(request):
         'cookie_error': cookie_error_link is not None,
         'retry_link':   cookie_error_link
     }
-
-
-def get_captcha(request):
-    """little CAPTCHA view for the register and lostpassword dialog."""
-    response = HttpResponse(content_type='image/png')
-    captcha = Captcha()
-    h = md5.new(settings.SECRET_KEY)
-    h.update(captcha.solution)
-    request.session['captcha_solution'] = h.digest()
-    captcha.render_image().save(response, 'PNG')
-    return response
 
 
 def activate(request, action='', username='', activation_key=''):

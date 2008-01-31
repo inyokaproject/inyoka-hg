@@ -14,6 +14,7 @@ from django.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
 from inyoka.utils.urls import href
+from inyoka.utils.forms import EmptyTextInput
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -45,7 +46,8 @@ SEARCH_SORT_CHOICES = (
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
     username = forms.CharField(label='Benutzername')
-    password = forms.CharField(label='Passwort', widget=forms.PasswordInput)
+    password = forms.CharField(label='Passwort', widget=
+        forms.PasswordInput(render_value=False))
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
                                    widget=forms.CheckboxInput)
 
@@ -64,10 +66,11 @@ class RegisterForm(forms.Form):
     #email = forms.EmailField(label='E-Mail')
     # allow @localhost urls for easier testing
     email = forms.CharField(label='E-Mail')
-    password = forms.CharField(label='Passwort', widget=forms.PasswordInput)
+    password = forms.CharField(label='Passwort', widget=
+        forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Passwortbestätigung',
-                                       widget=forms.PasswordInput)
-    captcha = forms.CharField(label='CAPTCHA')
+        widget=forms.PasswordInput(render_value=False))
+    captcha = forms.CharField(label='CAPTCHA', widget=EmptyTextInput)
     captcha_solution = None
     hidden_captcha = forms.CharField(label='', widget=forms.HiddenInput,
                                      required=False)
@@ -84,8 +87,7 @@ class RegisterForm(forms.Form):
             h.update(captcha)
             if h.digest() == self.captcha_solution:
                 return True
-        else:
-            raise forms.ValidationError('Die Eingabe des Captchas war nicht korrekt!')
+        raise forms.ValidationError('Die Eingabe des CAPTCHAs war nicht korrekt!')
 
     def clean_hidden_captcha(self):
         """
@@ -181,7 +183,7 @@ class LostPasswordForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', required=False)
     #email = forms.EmailField(label=u'E-Mail', required=False)
     email = forms.CharField(label=u'E-Mail', required=False)
-    captcha = forms.CharField(label='CAPTCHA')
+    captcha = forms.CharField(label='CAPTCHA', widget=EmptyTextInput)
     captcha_solution = None
     hidden_captcha = forms.CharField(label='', widget=forms.HiddenInput,
                                      required=False)
@@ -226,8 +228,7 @@ class LostPasswordForm(forms.Form):
             h.update(captcha)
             if h.digest() == self.captcha_solution:
                 return True
-        else:
-            raise forms.ValidationError('Die Eingabe des Captchas war nicht korrekt!')
+        raise forms.ValidationError('Die Eingabe des CAPTCHAs war nicht korrekt!')
 
     def clean_hidden_captcha(self):
         """

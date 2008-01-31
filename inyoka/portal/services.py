@@ -9,9 +9,12 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import md5
+from django.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils import get_random_password
+from inyoka.utils.captcha import Captcha
 
 
 def on_get_current_user(request):
@@ -51,8 +54,17 @@ def on_get_random_password(request):
     return {'password': get_random_password()}
 
 
+def on_get_captcha(request):
+    captcha = Captcha()
+    h = md5.new(settings.SECRET_KEY)
+    h.update(captcha.solution)
+    request.session['captcha_solution'] = h.digest()
+    return captcha.get_response()
+
+
 dispatcher = SimpleDispatcher(
     get_current_user=on_get_current_user,
     get_usermap_markers=on_get_usermap_markers,
     get_random_password=on_get_random_password,
+    get_captcha=on_get_captcha
 )

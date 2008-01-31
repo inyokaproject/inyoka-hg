@@ -13,6 +13,7 @@
 import random
 import colorsys
 import math
+from django.http import HttpResponse
 from os import listdir
 from os.path import abspath, join, dirname, pardir
 from PIL import ImageFont, ImageDraw, Image, ImageChops, ImageColor
@@ -80,6 +81,11 @@ class Captcha(object):
         for layer in self.layers:
             image = layer.render(image)
         return image
+
+    def get_response(self, size=None):
+        response = HttpResponse(content_type='image/png')
+        self.render_image(size=None).save(response, 'PNG')
+        return response
 
 
 class Layer(object):

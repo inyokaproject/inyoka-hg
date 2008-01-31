@@ -133,8 +133,8 @@ $(document).ready(function() {
     $('form').submit(function() {
       if (submitted)
         return false;
-      $('input[@type="submit"]').attr('disabled', true);
+      $('input[@type="submit"]').addClass('disabled');
       submitted = true;
     });
-  })();
+  });
 });

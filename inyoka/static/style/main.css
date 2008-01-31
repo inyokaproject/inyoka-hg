@@ -100,7 +100,7 @@ form dt {
     margin: 1em 0 0 0;
 }
 
-form input[disabled] {
+form input.disabled {
     color: #888;
 }
 
