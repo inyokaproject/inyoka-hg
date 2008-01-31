@@ -24,7 +24,12 @@ form_re = re.compile(r'<form\s+.*?method=[\'"]post[\'"].*?>(?i)')
 class SecurityMiddleware(object):
 
     def _make_token(self, request):
-        h = hmac.new(settings.SECRET_KEY, str(request.session.session_key))
+        # we can't use the session key here unfortunately because the
+        # users without cookie will get a new session key every darn
+        # request.  That also means that we lose a bit of security
+        # here :-(
+        salt = request.session.get('uid')
+        h = hmac.new(settings.SECRET_KEY, str(salt))
         h.update(request.META.get('HTTP_USER_AGENT', ''))
         return h.hexdigest()
 

@@ -128,6 +128,8 @@ $(document).ready(function() {
   })();
 
   // use javascript to deactivate the submit button on click
+  // we don't make the elements really disabled because then
+  // the button won't appear in the form data transmitted
   (function() {
     var submitted = false;
     $('form').submit(function() {
@@ -136,5 +138,5 @@ $(document).ready(function() {
       $('input[@type="submit"]').addClass('disabled');
       submitted = true;
     });
-  });
+  })();
 });
