@@ -27,9 +27,9 @@
   <h3>Forum-Einstellungen</h3>
   <p>
     {% if user_groups %}
-    Der Bentuzer {{ user.username }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
+    Der Benutzer {{ user.username }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
     {% else %}
-    Der Bentuzer {{ user.username }} gehört keinen Gruppen an.
+    Der Benutzer {{ user.username }} gehört keinen Gruppen an.
     {% endif %}
   </p>
   <dl>
