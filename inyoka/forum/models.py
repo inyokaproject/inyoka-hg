@@ -926,6 +926,7 @@ class Post(models.Model):
             collapse=self.topic_id,
             category=[p.slug for p in self.topic.forum.parents] + \
                 [self.topic.forum.slug],
+            auth=[self.topic.forum_id, self.topic.hidden],
             text=self.text
         )
 

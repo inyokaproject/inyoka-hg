@@ -16,7 +16,7 @@ from weakref import WeakKeyDictionary
 from threading import currentThread as get_current_thread
 from time import mktime
 from datetime import datetime
-from cPicke import dumps, loads
+from cPickle import dumps, loads
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.utils.parsertools import TokenStream
@@ -280,10 +280,9 @@ class SearchSystem(object):
             enq.set_collapse_key(1)
         enq.set_query(qry)
         offset = (page - 1) * per_page
-        mset = enq.get_mset(offset, per_page, per_page * 3)
 
-        # XXX: forum auth test
-        auth = self.auth_deciders['f'](user)
+        auth = AuthMatchDecider(user, self.auth_deciders)
+        mset = enq.get_mset(offset, per_page, per_page * 3, None, auth)
 
         return SearchResult(mset, qry, page, per_page, self.result_handlers)
 
@@ -360,3 +359,17 @@ def search_handler(*prefixes):
         return f
     return decorate
 
+
+class AuthMatchDecider(xapian.MatchDecider):
+
+    def __init__(self, user, deciders):
+        xapian.MatchDecider.__init__(self)
+        self.deciders = dict((k, d(user)) for k, d in deciders.iteritems())
+
+    def __call__(self, doc):
+        component = doc.get_value(0).split(':')[0]
+        auth = doc.get_value(3)
+        decider = self.deciders.get(component)
+        if auth and decider is not None:
+            return decider(loads(auth))
+        return True

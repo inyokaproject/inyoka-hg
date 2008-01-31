@@ -27,7 +27,7 @@
     <dd class="captcha"><img src="/?__service__=portal.get_captcha" alt="" /></dd>
     <dd>Bitte gib den Code von obigem Bild hier ein:</dd>
     <dd>{{ form.captcha }}
-        <input type="submit" name="renew_captcha" value="Neues CAPTCHA erzeugen" />
+        <input type="submit" name="renew_captcha" value="Neues CAPTCHA erzeugen" /> {# TODO: data must not disappear without js #}
         {{ h.field_errors(form.errors.captcha) }}</dd>
     <dd>
       <input type="submit" value="Registrieren" />

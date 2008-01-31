@@ -10,6 +10,19 @@
 
 {% extends 'admin/overall.html' %}
 
+{% block admin_navigation %}
+  <h3>Übersicht</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'config') }}">Allgemein</a></li>
+    <li><a href="{{ href('admin', 'users') }}">Benutzerkonfiguration</a></li>
+    <li><a href="{{ href('admin', 'pages') }}">Statische Seiten</a></li>
+    <li><a href="{{ href('admin', 'ikhaya') }}">Ikhaya</a></li>
+    <li><a href="{{ href('admin', 'planet') }}">Planet</a></li>
+    <li><a href="{{ href('admin', 'forum') }}">Forum</a></li>
+    <li><a href="{{ href('admin', 'groups') }}">Gruppenkonfiguration</a></li>
+  </ul>
+{% endblock %}
+
 {% block admin_content %}
   <table class="admin_control">
     <tr>
