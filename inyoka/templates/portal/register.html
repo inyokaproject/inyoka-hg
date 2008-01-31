@@ -24,4 +24,7 @@
   {% else %}
   {{ h.render_register_form(form) }}
   {% endif %}
+    <script type="text/javascript">
+    $(function() { $('#id_username').focus(); });
+  </script>
 {% endblock %}

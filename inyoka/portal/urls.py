@@ -38,10 +38,11 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^whoisonline/$', 'whoisonline'),
     (r'^inyoka/$', 'about_inyoka'),
     (r'^register/$', 'register'),
-    (r'^register/(?P<action>activate|delete)/(?P<username>.*?)/'
+    (r'^register/(?P<action>activate|delete)/(?P<username>[^/]+)/'
      r'(?P<activation_key>.*?)/$', 'activate'),
-    (r'^register/resend/(?P<username>.*?)/$', 'resend_activation_mail'),
+    (r'^register/resend/(?P<username>[^/]+)/$', 'resend_activation_mail'),
     (r'^lost_password/$', 'lost_password'),
+    (r'^lost_password/(?P<username>[^/]+)/(?P<new_password_key>[a-z0-9]+)/$', 'set_new_password'),
     (r'^_captcha/$', 'get_captcha'),
     (r'^feeds/$', 'feedselector'),
     (r'^feeds/(?P<app>[^/]+)/$', 'feedselector'),
