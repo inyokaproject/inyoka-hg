@@ -146,22 +146,24 @@ def planet(request):
 def planet_edit(request, blog=None):
     if blog:
         blog = Blog.objects.get(id=blog)
+        new = False
+    else:
+        new = True
 
     if request.method == 'POST':
         form = EditBlogForm(request.POST, request.FILES)
         if form.is_valid():
             d = form.cleaned_data
             if not blog:
-                blog = Blog(**d)
-            else:
-                for k in ('name', 'description', 'blog_url', 'feed_url'):
-                    setattr(blog, k, d[k])
+                blog = Blog()
+            for k in ('name', 'description', 'blog_url', 'feed_url'):
+                setattr(blog, k, d[k])
             if d['delete_icon']:
                 blog.delete_icon()
             if d['icon']:
                 blog.save_icon(d['icon'])
             blog.save()
-            if not blog:
+            if new:
                 flash(u'Der Blog „<a href="%s">%s</a>“ '
                       u'wurde erfolgreich erstellt.' % (
                         url_for(blog), escape(blog.name)))

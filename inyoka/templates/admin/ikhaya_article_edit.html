@@ -36,7 +36,9 @@
                          'icon', 'pub_date', 'slug', 'public') }}
   <p>
     <input type="submit" value="Speichern" />
+    {%- if article %}
     <a href="{{ article|url('delete') }}">Löschen</a>
+    {%- endif %}
   </p>
 </form>
 
