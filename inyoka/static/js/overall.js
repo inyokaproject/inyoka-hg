@@ -126,4 +126,15 @@ $(document).ready(function() {
         return false;
       }).insertAfter('form.search');
   })();
+
+  // use javascript to deactivate the submit button on click
+  (function() {
+    var submitted = false;
+    $('form').submit(function() {
+      if (submitted)
+        return false;
+      $('input[@type="submit"]').attr('disabled', true);
+      submitted = true;
+    });
+  })();
 });
