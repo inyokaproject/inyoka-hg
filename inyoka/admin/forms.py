@@ -19,7 +19,8 @@ class ConfigurationForm(forms.Form):
     global_message = forms.CharField(label=u'Globale Nachricht',
         widget=forms.Textarea(attrs={'rows': 3}), required=False,
         help_text = u'Diese Nachricht wird auf allen Seiten über dem Inhalt '
-                   u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer.')
+                    u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer. '
+                    u'HTML ist hier erlaubt.')
 
 
 class EditStaticPageForm(forms.Form):

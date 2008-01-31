@@ -15,7 +15,7 @@ import colorsys
 import math
 from os import listdir
 from os.path import abspath, join, dirname, pardir
-from PIL import ImageFont, ImageDraw, Image
+from PIL import ImageFont, ImageDraw, Image, ImageChops
 
 
 resource_path = abspath(join(dirname(__file__), pardir, 'res'))
@@ -99,19 +99,33 @@ class TextLayer(Layer):
     def __init__(self, text, min_size=32, max_size=48):
         self.text = text
         self.alignment = (random.random(), random.random())
-        self.text_color = random_color(saturation=0, lumination=0.1)
+        self.text_color = random_color(saturation=0.3, lumination=0.8)
+        self.transparency = random.randint(20, 70)
         f = get_random_resource('fonts')
         self.font = ImageFont.truetype(get_random_resource('fonts'),
                                        random.randrange(min_size, max_size))
 
     def render(self, image):
-        text_layer = Image.new('RGBA', image.size, (255, 255, 255, 0))
-        draw = ImageDraw.Draw(text_layer)
+        text_layer = Image.new('RGB', image.size, (0, 0, 0))
+        alpha = Image.new('L', image.size, 0)
+
+        # draw grayscale image white on black
+        text_image = Image.new('L', image.size, 0)
+        draw = ImageDraw.Draw(text_image)
         text_size = self.font.getsize(self.text)
         x = int((image.size[0] - text_size[0]) * self.alignment[0] + 0.5)
         y = int((image.size[1] - text_size[1]) * self.alignment[1] + 0.5)
-        draw.text((x, y), self.text, font=self.font, fill=self.text_color)
-        image.paste(text_layer, Image.new('L', image.size, 50))
+        draw.text((x, y), self.text, font=self.font,
+                  fill=255 - self.transparency)
+
+        # colorize the text and calculate the alpha channel
+        alpha = ImageChops.lighter(alpha, text_image)
+        color_layer = Image.new('RGBA', image.size, self.text_color)
+        mask = Image.eval(text_image, lambda x: 255 * (x != 0))
+        text_layer = Image.composite(color_layer, text_layer, mask)
+
+        # paste the text on the image with the correct alphachannel
+        image.paste(text_layer, alpha)
         return image
 
 
