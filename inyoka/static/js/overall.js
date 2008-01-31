@@ -94,15 +94,13 @@ $(document).ready(function() {
       $('.search_query').addClass('search_query_js')
         .blur(function() {
           var e = $(this);
-          if (e.val() == '') {
+          if (e.val() == '')
             e.addClass('default_value').val($currentAreaName);
-          }
         })
         .focus(function() {
           var e = $(this);
-          if (e.hasClass('default_value')) {
+          if (e.hasClass('default_value'))
             e.val('').removeClass('default_value');
-          }
         });
       $('.search_query').val('').blur();
     $(document).click(function() {
