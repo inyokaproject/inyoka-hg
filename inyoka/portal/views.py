@@ -11,7 +11,7 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
-from md5 import new as md5
+import md5
 from datetime import datetime
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -28,7 +28,6 @@ from inyoka.utils.sessions import get_sessions, set_session_info, \
 from inyoka.utils.urls import href, url_for, is_save_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
-from inyoka.utils.captcha import Captcha
 from inyoka.utils.flashing import flash
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
@@ -43,7 +42,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
                                 UserCPSettingsForm, PrivateMessageForm, \
                                 DeactivateUserForm, LostPasswordForm, \
                                 ChangePasswordForm, SubscriptionForm, \
-                                UserCPProfileForm, NOTIFICATION_CHOICES
+                                UserCPProfileForm, SetNewPasswordForm, \
+                                NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  CalendarItem
@@ -104,9 +104,10 @@ def register(request):
 
     cookie_error_link = test_session_cookie(request)
 
-    if request.method == 'POST' and cookie_error_link is None:
+    form = RegisterForm()
+    if request.method == 'POST' and cookie_error_link is None and \
+       'renew_captcha' not in request.POST:
         form = RegisterForm(request.POST)
-        request.session['register_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
             data = form.cleaned_data
@@ -120,16 +121,8 @@ def register(request):
                         escape(data['username']), escape(data['email'])), True)
 
             # clean up request.session
-            del request.session['captcha_solution']
-            del request.session['register_form_data']
+            request.session.pop('captcha_solution', None)
             return HttpResponseRedirect(redirect)
-    else:
-        if 'register_form_data' in request.session:
-            # the form was posted at least once
-            # so restore the posted data
-            form = RegisterForm(request.session['register_form_data'])
-        else:
-            form = RegisterForm()
 
     set_session_info(request, u'registriert sich',
                      'registriere dich auch')
@@ -138,15 +131,6 @@ def register(request):
         'cookie_error': cookie_error_link is not None,
         'retry_link':   cookie_error_link
     }
-
-
-def get_captcha(request):
-    """little CAPTCHA view for the register dialog."""
-    response = HttpResponse(content_type='image/png')
-    captcha = Captcha()
-    request.session['captcha_solution'] = md5(captcha.solution).digest()
-    captcha.render_image().save(response, 'PNG')
-    return response
 
 
 def activate(request, action='', username='', activation_key=''):
@@ -206,35 +190,51 @@ def lost_password(request):
     View for the lost password dialog.
     It generates a new random password and sends it via mail.
     """
-    redirect = href('portal', 'login')
+    if request.user.is_authenticated:
+        flash(u'Du bist bereits angemeldet!', False)
+        return HttpResponseRedirect(href('portal'))
 
     if request.method == 'POST':
         form = LostPasswordForm(request.POST)
-        request.session['lost_password_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
             data = form.cleaned_data
-            send_new_user_password(User.objects.get(
-                username=data['username'],
-                email=data['email']))
-            flash(u'Ein neues Passwort für den Benutzer „%s“'
-                  u' wurde an „%s“ versandt' % (
-                  escape(data['username']), escape(data['email'])), True)
+            send_new_user_password(form.user)
+            flash(u'Es wurde eine E-Mail mit weiteren Anweisungen an deine '
+                  u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
-            del request.session['captcha_solution']
-            del request.session['lost_password_form_data']
-            return HttpResponseRedirect(redirect)
+            return HttpResponseRedirect(href('portal'))
     else:
-        if 'lost_password_form_data' in request.session:
-            form = LostPasswordForm(request.session['lost_password_form_data'])
-        else:
-            form = LostPasswordForm()
+        form = LostPasswordForm()
 
     return {
         'form': form
     }
+    #TODO: maybe we should limit that to some days
 
+
+@templated('portal/set_new_password.html')
+def set_new_password(request, username, new_password_key):
+    if request.method == 'POST':
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            data['user'].set_password(data['password'])
+            data['user'].new_password_key = ''
+            data['user'].save()
+            flash('Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
+                  'einloggen.', True)
+            return HttpResponseRedirect(href('portal', 'login'))
+    else:
+        form = SetNewPasswordForm(initial={
+            'username': username,
+            'new_password_key': new_password_key,
+        })
+    return {
+        'form': form,
+        'username': username,
+    }
 
 
 @templated('portal/login.html')

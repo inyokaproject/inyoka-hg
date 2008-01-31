@@ -508,7 +508,7 @@ class Span(Element):
             rel=rel,
             id=self.id,
             style=self.style,
-            classes=(class_, self.class_),
+            class_=self.class_,
         )
         for item in Element.prepare_html(self):
             yield item
@@ -618,19 +618,19 @@ class Link(Element):
             if shorten and len(url) > 40:
                 if url.startswith('http://'):
                     children = [
-                        Span([Text('http://')], class_='longlinkhide'),
-                        Text(url[7:17]),
-                        Span([Text(url[17:-10])], class_='longlinkhide'),
-                        Text(url[-10:]),
+                        Span([Text('http://')], class_='longlinkcollapse'),
+                        Text(url[7:22]),
+                        Span([Text(url[22:])], class_='longlinkcollapse'),
                     ]
                 else:
                     children = [
-                        Text(url[:10]),
-                        Span([Text(url[10:-10])], class_='longlinkhide'),
-                        Text(url[-10:]),
+                        Text(url[:22]),
+                        Span([Text(url[22:])], class_='longlinkcollapse'),
                     ]
             else:
                 children = [Text(url)]
+            if title == None:
+                title = url
         Element.__init__(self, children, id, style, class_)
         self.title = title
         self.scheme, self.netloc, self.path, self.params, self.querystring, \

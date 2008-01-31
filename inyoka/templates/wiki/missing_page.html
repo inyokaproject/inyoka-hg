@@ -25,7 +25,7 @@
     </p>
     <ul>
     {%- for link in backlinks %}
-      <li><a href="{{ href('wiki', link.page_name)|e
+      <li><a href="{{ href('wiki', link.name)|e
         }}">{{ link.title|e }}</a></li>
     {%- endfor %}
     </ul>
@@ -39,7 +39,7 @@
   {%- if similar %}
     <ul>
     {%- for link in similar %}
-      <li><a href="{{ href('wiki', link.page_name)|e
+      <li><a href="{{ href('wiki', link.name)|e
         }}">{{ link.title|e }}</a></li>
     {%- endfor %}
     </ul>

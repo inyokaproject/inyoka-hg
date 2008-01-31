@@ -23,7 +23,7 @@ $(document).ready(function() {
   // hide search words on click
   $('a.hide_searchwords')
     .click(function() {
-      $(this).parent().parent().slideUp('slow');
+      $(this).parent().slideUp('slow');
       $('span.highlight').removeClass('highlight');
       return false;
     });
@@ -94,15 +94,13 @@ $(document).ready(function() {
       $('.search_query').addClass('search_query_js')
         .blur(function() {
           var e = $(this);
-          if (e.val() == '') {
+          if (e.val() == '')
             e.addClass('default_value').val($currentAreaName);
-          }
         })
         .focus(function() {
           var e = $(this);
-          if (e.hasClass('default_value')) {
+          if (e.hasClass('default_value'))
             e.val('').removeClass('default_value');
-          }
         });
       $('.search_query').val('').blur();
     $(document).click(function() {
@@ -125,5 +123,18 @@ $(document).ready(function() {
         togglebutton.toggleClass('navi_toggle_down')
         return false;
       }).insertAfter('form.search');
+  })();
+
+  // use javascript to deactivate the submit button on click
+  // we don't make the elements really disabled because then
+  // the button won't appear in the form data transmitted
+  (function() {
+    var submitted = false;
+    $('form').submit(function() {
+      if (submitted)
+        return false;
+      $('input[@type="submit"]').addClass('disabled');
+      submitted = true;
+    });
   })();
 });

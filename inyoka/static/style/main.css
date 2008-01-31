@@ -45,6 +45,22 @@ input {
   padding: 1px 3px;
 }
 
+input[type="submit"], input[type="button"], input[type="reset"] {
+  border-color: #777;
+  background-color: #eee;
+}
+
+input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
+  border: 1px #aaa inset;
+  background-color: #f2f2f2!important;
+}
+
+input.disabled, input.disabled:active {
+  color: #888!important;
+  background-color: #e2e2e2!important;
+  border: 1px solid #ccc!important;
+}
+
 textarea {
   border: 1px solid #AAA;
   width:100%;

@@ -50,7 +50,7 @@ def urldecode(url, charset='utf-8'):
     return result
 
 
-def href(_module, *parts, **query):
+def href(_module='portal', *parts, **query):
     """Generates an internal URL for different subdomains."""
     anchor = query.pop('_anchor', None)
     module = import_string('inyoka.%s.urls' % _module)

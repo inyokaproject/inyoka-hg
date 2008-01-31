@@ -100,6 +100,8 @@ def cleanup_html(string, sanitize=True, fragment=True, stream=False,
                  filter_optional_tags=False, id_prefix=None,
                  update_anchor_links=True, output_format='xhtml'):
     """Clean up some html and convert it to HTML/XHTML."""
+    if not string.strip():
+        return u''
     tree = parse_html(string, fragment)
     walker = treewalkers.getTreeWalker('simpletree')(tree)
     walker = CleanupFilter(walker, id_prefix, update_anchor_links)
