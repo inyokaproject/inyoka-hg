@@ -31,6 +31,12 @@ DATETIME_INPUT_FORMATS = (
 )
 
 
+class EmptyTextInput(forms.TextInput):
+
+    def render(self, name, value, attrs=None):
+        return super(EmptyTextInput, self).render(name, u'', attrs)
+
+
 class MultiField(forms.Field):
     """
     This field validates a bunch of values using zero, one or more fields.

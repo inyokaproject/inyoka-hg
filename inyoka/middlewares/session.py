@@ -31,9 +31,9 @@ class Session(SecureCookie):
 
     @property
     def session_key(self):
-        if '_auth_user_id' in self:
+        if 'uid' in self:
             self.pop('_sk', None)
-            return self['_auth_user_id']
+            return self['uid']
         elif not '_sk' in self:
             self['_sk'] = md5('%s%s%s' % (random(), time(),
                               settings.SECRET_KEY)).digest() \
@@ -59,12 +59,12 @@ class AdvancedSessionMiddleware(object):
         if data:
             session = Session.unserialize(data, settings.SECRET_KEY)
             if session.get('_ex', 0) < time():
+                print session, data
                 session = None
                 expired = True
         if session is None:
             session = Session(secret_key=settings.SECRET_KEY)
             session['_ex'] = time() + settings.SESSION_COOKIE_AGE
-            session.modified = False
         request.session = session
         if expired:
             from inyoka.utils.flashing import flash
@@ -76,6 +76,10 @@ class AdvancedSessionMiddleware(object):
             modified = request.session.modified
         except AttributeError:
             return response
+
+        # we can remove the session key if the user is logged in
+        if '_sk' in request.session and 'uid' in request.session:
+            del request.session['_sk']
 
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
             if request.session.get('_perm'):

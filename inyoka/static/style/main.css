@@ -45,6 +45,22 @@ input {
   padding: 1px 3px;
 }
 
+input[type="submit"], input[type="button"], input[type="reset"] {
+  border-color: #777;
+  background-color: #eee;
+}
+
+input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
+  border: 1px #aaa inset;
+  background-color: #f2f2f2!important;
+}
+
+input.disabled, input.disabled:active {
+  color: #888!important;
+  background-color: #e2e2e2!important;
+  border: 1px solid #ccc!important;
+}
+
 textarea {
   border: 1px solid #AAA;
   width:100%;
@@ -798,3 +814,50 @@ div.not_found img {
   color: #888;
 }
 
+/* Autocomplete styles */
+.ac_results {
+	padding: 0px;
+	border: 1px solid WindowFrame;
+	background-color: Window;
+	overflow: hidden;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ac_results iframe {
+	display:none;/*sorry for IE5*/
+	display/**/:block;/*sorry for IE5*/
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	filter:mask();
+	width:3000px;
+	height:3000px;
+}
+
+.ac_results li {
+	margin: 0px;
+	padding: 2px 5px;
+	cursor: pointer;
+	display: block;
+	width: 100%;
+	font: menu;
+	font-size: 12px;
+	overflow: hidden;
+}
+
+.ac_loading {
+	background : Window url('./indicator.gif') right center no-repeat;
+}
+
+.ac_over {
+	background-color: Highlight;
+	color: HighlightText;
+}

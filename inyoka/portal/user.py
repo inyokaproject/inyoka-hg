@@ -144,15 +144,19 @@ class User(models.Model):
 
     username = models.CharField('Benutzername', max_length=30, unique=True,
         validator_list=[validators.isAlphaNumeric])
-    email = models.EmailField('E-Mail-Adresse', blank=True, unique=True)
+    #email = models.EmailField('E-Mail-Adresse', blank=True, unique=True)
+    # allow @localhost addresses for easier testing
+    email = models.CharField('E-Mail-Adresse', blank=True, unique=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.now)
     date_joined = models.DateTimeField('Angemeldet', default=datetime.datetime.now)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
+    new_password_key = models.CharField(u'Bestätigungskey für ein neues '
+        u'Passwort', blank=True, null=True, max_length=32)
 
     # profile attributes
-    post_count = models.IntegerField(u'Beiträge', default=0, null=True)
+    post_count = models.IntegerField(u'Beiträge', default=0)
     avatar = models.ImageField('Avatar', upload_to='portal/avatars',
                                 blank=True, null=True)
     jabber = models.CharField('Jabber', max_length=200, blank=True)
@@ -164,7 +168,7 @@ class User(models.Model):
     coordinates = models.CharField('Koordinaten', max_length=255,
                                    blank=True)
     location = models.CharField('Wohnort', max_length=200, blank=True)
-    gpgkey = models.CharField('GPG-Key', max_length=10, blank=True)
+    gpgkey = models.CharField('GPG-Key', max_length=8, blank=True)    
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
@@ -179,8 +183,8 @@ class User(models.Model):
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
     forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
-    show_community = models.BooleanField('Community Beiträge ausblenden', default=False)
-    accept_community_policy = models.BooleanField('Community Richtlinien akzeptieren', default=False)
+    show_community = models.BooleanField('Community-Beiträge anzeigen', default=False)
+    accept_community_policy = models.BooleanField('Community-Richtlinien akzeptiert', default=False)
 
     def save(self):
         """
@@ -281,6 +285,7 @@ class User(models.Model):
         self.last_login = datetime.datetime.now()
         self.save()
         request.session['uid'] = self.id
+        request.session.pop('_sk', None)
         request.user = self
 
 

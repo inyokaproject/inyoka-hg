@@ -23,7 +23,7 @@ $(document).ready(function() {
   // hide search words on click
   $('a.hide_searchwords')
     .click(function() {
-      $(this).parent().parent().slideUp('slow');
+      $(this).parent().slideUp('slow');
       $('span.highlight').removeClass('highlight');
       return false;
     });
@@ -72,7 +72,8 @@ $(document).ready(function() {
                   $currentAreaName = $(this).html();
                   $('.search_query').removeClass('area_' + $currentSearchArea);
                   $currentSearchArea = currentArea;
-                  $currentAreaName = $('select.search_area option[@value=' + $currentSearchArea + ']').html()
+                  $currentAreaName = $('select.search_area option[@value=' +
+                                       $currentSearchArea + ']').html()
                   $('.search_query').addClass('area_' + $currentSearchArea);
                   $('li', areaPopup).each(function() {
                     $(this).removeClass('active');
@@ -86,30 +87,33 @@ $(document).ready(function() {
                 item.addClass('active');
             });
             areaPopup.prependTo('form.search');
-            
           }
           else areaPopup.toggle();
+          return false;
         }));
       $('.search_query').addClass('search_query_js')
         .blur(function() {
           var e = $(this);
-          if (e.val() == '') {
+          if (e.val() == '')
             e.addClass('default_value').val($currentAreaName);
-          }
         })
         .focus(function() {
           var e = $(this);
-          if (e.hasClass('default_value')) {
+          if (e.hasClass('default_value'))
             e.val('').removeClass('default_value');
-          }
         });
       $('.search_query').val('').blur();
+    $(document).click(function() {
+      if (areaPopup.is(':visible'))
+        areaPopup.hide();
+    });
   })();
 
   // add a sidebar toggler if there is an sidebar
   (function() {
     var sidebar = $('.navi_sidebar');
-    var togglebutton = $('<button class="navi_toggle_up" title="Navigation ausblenden" ></button>');
+    var togglebutton = $('<button class="navi_toggle_up" title="Navigation ' +
+                         'ausblenden" ></button>');
     if (sidebar.length) togglebutton
       .click(function() {
         var content = $('.content_sidebar');
@@ -119,5 +123,18 @@ $(document).ready(function() {
         togglebutton.toggleClass('navi_toggle_down')
         return false;
       }).insertAfter('form.search');
+  })();
+
+  // use javascript to deactivate the submit button on click
+  // we don't make the elements really disabled because then
+  // the button won't appear in the form data transmitted
+  (function() {
+    var submitted = false;
+    $('form').submit(function() {
+      if (submitted)
+        return false;
+      $('input[@type="submit"]').addClass('disabled');
+      submitted = true;
+    });
   })();
 });

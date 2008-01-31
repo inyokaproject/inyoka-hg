@@ -5,9 +5,11 @@
 
     Utilities for the portal.
 
-    :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
+    :copyright: 2008 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
 """
+from md5 import new as md5
+import random, string
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from inyoka.utils.urls import href
@@ -29,7 +31,7 @@ def check_login(message=None):
     """
     This function can be used as a decorator to check whether the user is
     logged in or not. Also it's possible to send the user a message if
-    hes' logged out and needs to login.
+    he's logged out and needs to login.
     """
     def _wrapper(func):
         def decorator(*args, **kwargs):
@@ -124,13 +126,16 @@ def send_activation_mail(user):
 
 def send_new_user_password(user):
     from django.core.mail import send_mail
-    password = generate_word()
-    user.set_password(password)
+    new_password_key = ''.join(random.choice(string.lowercase + string.digits)
+							   for _ in range(24))
+    user.new_password_key = new_password_key
     user.save()
     message = render_template('mails/new_user_password.txt', {
-        'username': user.username,
-        'email':    user.email,
-        'password':   password
+        'username':         user.username,
+        'email':            user.email,
+        'new_password_url': href('portal', 'lost_password',
+                                 user.username, new_password_key),
     })
-    send_mail((u'ubuntuusers.de - Aktivierung des Benutzers %s' % user.username),
+    send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
+

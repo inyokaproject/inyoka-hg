@@ -379,8 +379,10 @@ class PageManager(models.Manager):
         kwargs = {'key': key}
         if value is not None:
             kwargs['value'] = value
-        return [x.page for x in MetaData.objects.select_related(depth=1).
-                filter(**kwargs)]
+        rv = [x.page for x in MetaData.objects.select_related(depth=1).
+              filter(**kwargs)]
+        rv.sort(key=lambda x: x.name)
+        return rv
 
     def find_by_tag(self, tag):
         """Return a list of page names tagged with `tag`."""
@@ -974,7 +976,6 @@ class Page(models.Model):
             note
                 The change note for the revision. If not given it will be
                 empty.
-:q
 
             attachment
                 see `attachment_filename`

@@ -54,7 +54,7 @@
           .append($('<span />').text(title))
           .click(function(evt) {
             evt.preventDefault();
-            callback.call(editor, evt);
+            return callback.call(editor, evt);
           });
     }
   };
@@ -161,11 +161,12 @@
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum']),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('color', 'Farbe', function(evt) {
         colorbox.slideToggle('fast');
+        return false;
       })(editor).appendTo(result);
       var colorbox = $('<ul class="colorbox" />').appendTo(result).hide();
       $.each(COLORS, function() {
@@ -173,19 +174,23 @@
         $('<li />')
           .css('background-color', color)
           .click(function() {
-            colorbox.slideUp('fast');
             editor.insertTag('[color=' + color + ']%s[/color]', 'Eingefärbter Text');
           })
           .appendTo(colorbox);
       });
+      $(document).click(function() {
+        if (colorbox.is(':visible'))
+          colorbox.slideUp('fast');
+      });
       return result;
     }),
     (function(editor) {
-      if (!$.inArray(editor.profile, ['wiki', 'forum', 'small']))
+      if (editor.profile != 'forum')
         return;
       var result = $('<div />');
       button('smilies', 'Smilies', function(evt) {
         smileybox.slideToggle('fast');
+        return false;
       })(editor).appendTo(result);
       var smileybox = $('<ul class="smileybox" />').appendTo(result).hide();
       $.getJSON('/?__service__=wiki.get_smilies', function(smilies) {
@@ -196,11 +201,14 @@
               .attr('src', src)
               .attr('alt', code)
               .click(function() {
-                smileybox.slideUp('fast');
                 editor.insertText(' ' + code + ' ');
               }))
             .appendTo(smileybox);
         });
+      });
+      $(document).click(function() {
+        if (smileybox.is(':visible'))
+          smileybox.slideUp('fast');
       });
       return result;
     }),

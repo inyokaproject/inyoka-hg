@@ -1,0 +1,22 @@
+{#
+    errors/400_csrf.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Rendered on CSRF attempts.
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Fehlerhafte Abfrage'] %}
+{% block appheader %}
+  <h1>Fehlerhafte Abfrage</h1>
+  <h2>400 Bad Request</h2>
+{% endblock %}
+{% block portal_content %}
+  <p>
+    Der Browser hat keinen oder einen fehlerhaften Kontrollschlüssel übertragen
+    und die Weiterverarbeitung wurde aus Sicherheitsgründen abgebrochen.
+  </p>
+{% endblock %}

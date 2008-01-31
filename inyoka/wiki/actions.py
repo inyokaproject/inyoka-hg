@@ -32,6 +32,7 @@ from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.feeds import FeedBuilder
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
@@ -384,6 +385,20 @@ def do_log(request, name):
             rv += '?' + parameters.urlencode()
         return rv
 
+    if request.GET.get('format') == 'atom':
+        feed = FeedBuilder(
+            title=u'Seitenrevisionen von „%s“' % page.name,
+            url=url_for(page),
+            feed_url=request.build_absolute_uri(),
+            rights=href('portal', 'lizenz')
+        )
+
+        for rev in page.revisions.all()[:15]:
+            feed.add(title=rev.title, url=url_for(rev),
+                     author=rev.user and rev.user.username or rev.remote_addr,
+                     published=rev.change_date, updated=rev.change_date)
+        return feed.get_atom_response()
+
     pagination = Pagination(request, page.revisions.all(), pagination_page,
                             20, link_func)
     set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
@@ -391,6 +406,7 @@ def do_log(request, name):
                         escape(url_for(page)),
                         escape(page.title)),
                     "%s' Revisionen" % escape(page.title))
+
     return {
         'page':         page,
         'revisions':    pagination.get_objects(),
