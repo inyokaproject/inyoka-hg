@@ -8,3 +8,6 @@
 """
 # publish the jinja macros
 from inyoka.forum import macros
+
+# register seach components
+from inyoka.forum import acl

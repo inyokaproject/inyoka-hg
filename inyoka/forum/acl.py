@@ -13,6 +13,7 @@ from django.db import connection
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum
 from inyoka.portal.utils import decor
+from inyoka.utils.search import search
 
 
 PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
@@ -77,3 +78,17 @@ def filter_invisible(user, forums, priv='read'):
         if privileges.get(forum.id, {priv: False})[priv]:
             result.append(forum)
     return result
+
+
+class SearchAuthDecider(object):
+    """Decides whetever a user can display a search result or not."""
+
+    def __init__(self, user):
+        privs = get_privileges(user, Forum.objects.all())
+        self.privs = dict((key, priv['read']) for key, priv in privs.iteritems())
+        print self.privs
+
+    def call(self, doc):
+        return self.privs.get(int(doc.get_value(0).split(':')[1]), False)
+
+search.register_auth_decider('f', SearchAuthDecider)

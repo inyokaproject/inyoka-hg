@@ -16,6 +16,7 @@ from weakref import WeakKeyDictionary
 from threading import currentThread as get_current_thread
 from time import mktime
 from datetime import datetime
+from cPicke import dumps, loads
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.utils.parsertools import TokenStream
@@ -217,6 +218,7 @@ class SearchSystem(object):
         self.connections = WeakKeyDictionary()
         self.prefix_handlers = {}
         self.result_handlers = {}
+        self.auth_deciders = {}
 
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
@@ -250,11 +252,18 @@ class SearchSystem(object):
         for prefix in prefixes:
             self.prefix_handlers[prefix] = handler
 
+    def register_auth_decider(self, component, decider):
+        """
+        Register a AuthDecider for filtering Search results with
+        insufficient privileges.
+        """
+        self.auth_deciders[component] = decider
+
     def parse_query(self, query):
         """Parse a query."""
         return QueryParser(self.prefix_handlers).parse(query)
 
-    def query(self, query, page=1, per_page=20, date_begin=None,
+    def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True):
         """Search for something."""
         enq = xapian.Enquire(self.get_connection())
@@ -272,6 +281,10 @@ class SearchSystem(object):
         enq.set_query(qry)
         offset = (page - 1) * per_page
         mset = enq.get_mset(offset, per_page, per_page * 3)
+
+        # XXX: forum auth test
+        auth = self.auth_deciders['f'](user)
+
         return SearchResult(mset, qry, page, per_page, self.result_handlers)
 
     def store(self, **data):
@@ -308,6 +321,10 @@ class SearchSystem(object):
         if data.get('date'):
             time = xapian.sortable_serialise(mktime(data['date'].timetuple()))
             doc.add_value(2, time)
+
+        # authentification informations (optional)
+        if data.get('auth'):
+            doc.add_value(3, dumps(data['auth']))
 
         # category (optional)
         if data.get('category'):

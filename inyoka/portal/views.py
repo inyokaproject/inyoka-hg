@@ -304,7 +304,7 @@ def search(request):
         d = f.cleaned_data
         show_community = request.GET.get('show_community',
             request.user.show_community) in ("true", True)
-        results = search_system.query(
+        results = search_system.query(request.user,
             d['area'] and d['area'] != 'all'
                 and '(%s) AND area:%s' % (d['query'], d['area']) \
                 or d['query'],
