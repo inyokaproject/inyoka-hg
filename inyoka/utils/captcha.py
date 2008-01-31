@@ -280,7 +280,7 @@ class SolidColor(Layer):
         if color is None:
             color = random_color(0.2, random.random() > 0.5 and 0.3 or 0.7)
         self.color = ImageColor.getrgb(color)
-        if colorsys.rgb_to_hls(*[x / 255.0 for x in self.color])[-1] > 0.5:
+        if colorsys.rgb_to_hls(*[x / 255.0 for x in self.color])[1] > 0.5:
             self.bg = 'light'
 
     def render(self, image):
