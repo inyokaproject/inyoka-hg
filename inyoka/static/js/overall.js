@@ -23,7 +23,7 @@ $(document).ready(function() {
   // hide search words on click
   $('a.hide_searchwords')
     .click(function() {
-      $(this).parent().parent().slideUp('slow');
+      $(this).parent().slideUp('slow');
       $('span.highlight').removeClass('highlight');
       return false;
     });

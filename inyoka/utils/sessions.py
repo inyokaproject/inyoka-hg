@@ -121,7 +121,6 @@ def test_session_cookie(request):
     if request.session.new:
         arguments = request.GET.copy()
         if '_cookie_set' not in request.GET:
-            request.session['test_cookie'] = True
             arguments['_cookie_set'] = 'yes'
             this_url = 'http://%s%s%s' % (
                 request.get_host(),

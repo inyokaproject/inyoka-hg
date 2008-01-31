@@ -9,12 +9,13 @@
     created from generators.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
+    :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 import re
 import hmac
 from django.conf import settings
+from inyoka.utils.http import TemplateResponse
 
 
 form_re = re.compile(r'<form\s+.*?method=[\'"]post[\'"].*?>(?i)')
@@ -26,6 +27,9 @@ class SecurityMiddleware(object):
         h = hmac.new(settings.SECRET_KEY, str(request.session.session_key))
         h.update(request.META.get('HTTP_USER_AGENT', ''))
         return h.hexdigest()
+
+    def _abort_with_csrf_error(self):
+        return TemplateResponse('errors/400_csrf.html', {}, 400)
 
     def process_request(self, request):
         if request.method == 'POST':

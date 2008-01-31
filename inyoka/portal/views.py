@@ -11,7 +11,7 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
-from md5 import new as md5
+import md5
 from datetime import datetime
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -106,7 +106,6 @@ def register(request):
 
     if request.method == 'POST' and cookie_error_link is None:
         form = RegisterForm(request.POST)
-        request.session['register_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
             data = form.cleaned_data
@@ -121,15 +120,9 @@ def register(request):
 
             # clean up request.session
             del request.session['captcha_solution']
-            del request.session['register_form_data']
             return HttpResponseRedirect(redirect)
     else:
-        if 'register_form_data' in request.session:
-            # the form was posted at least once
-            # so restore the posted data
-            form = RegisterForm(request.session['register_form_data'])
-        else:
-            form = RegisterForm()
+        form = RegisterForm()
 
     set_session_info(request, u'registriert sich',
                      'registriere dich auch')
@@ -141,10 +134,12 @@ def register(request):
 
 
 def get_captcha(request):
-    """little CAPTCHA view for the register dialog."""
+    """little CAPTCHA view for the register and lostpassword dialog."""
     response = HttpResponse(content_type='image/png')
     captcha = Captcha()
-    request.session['captcha_solution'] = md5(captcha.solution).digest()
+    h = md5.new(settings.SECRET_KEY)
+    h.update(captcha.solution)
+    request.session['captcha_solution'] = h.digest()
     captcha.render_image().save(response, 'PNG')
     return response
 
@@ -210,7 +205,6 @@ def lost_password(request):
 
     if request.method == 'POST':
         form = LostPasswordForm(request.POST)
-        request.session['lost_password_form_data'] = request.POST
         form.captcha_solution = request.session.get('captcha_solution')
         if form.is_valid():
             data = form.cleaned_data
@@ -223,13 +217,9 @@ def lost_password(request):
 
             # clean up request.session
             del request.session['captcha_solution']
-            del request.session['lost_password_form_data']
             return HttpResponseRedirect(redirect)
     else:
-        if 'lost_password_form_data' in request.session:
-            form = LostPasswordForm(request.session['lost_password_form_data'])
-        else:
-            form = LostPasswordForm()
+        form = LostPasswordForm()
 
     return {
         'form': form
