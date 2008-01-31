@@ -15,7 +15,7 @@ import colorsys
 import math
 from os import listdir
 from os.path import abspath, join, dirname, pardir
-from PIL import ImageFont, ImageDraw, Image, ImageChops
+from PIL import ImageFont, ImageDraw, Image, ImageChops, ImageColor
 
 
 resource_path = abspath(join(dirname(__file__), pardir, 'res'))
@@ -68,10 +68,10 @@ class Captcha(object):
         self.solution = solution
         self.layers = [
             RandomBackground(),
-            RandomDistortion(),
-            TextLayer(self.solution),
-            SineWarp()
+            RandomDistortion()
         ]
+        text_layer = TextLayer(self.solution, bg=self.layers[0].bg)
+        self.layers.extend((text_layer, SineWarp()))
 
     def render_image(self, size=None):
         if size is None:
@@ -86,6 +86,7 @@ class Layer(object):
     """
     Baseclass for a captcha layer.
     """
+    bg = 'dark'
 
     def render(self, image):
         return image
@@ -95,12 +96,17 @@ class TextLayer(Layer):
     """
     Add text to the captcha.
     """
+    bg = 'transparent'
 
-    def __init__(self, text, min_size=32, max_size=48):
+    def __init__(self, text, min_size=32, max_size=48, bg='dark'):
         self.text = text
         self.alignment = (random.random(), random.random())
-        self.text_color = random_color(saturation=0.3, lumination=0.8)
-        self.transparency = random.randint(20, 70)
+        if bg == 'dark':
+            color = random_color(saturation=0.3, lumination=0.8)
+        else:
+            color = random_color(saturation=0.1, lumination=0.1)
+        self.text_color = color
+        self.transparency = random.randint(20, 60)
         f = get_random_resource('fonts')
         self.font = ImageFont.truetype(get_random_resource('fonts'),
                                        random.randrange(min_size, max_size))
@@ -136,6 +142,8 @@ class CombinedLayer(Layer):
 
     def __init__(self, layers):
         self.layers = layers
+        if layers:
+            self.bg = layers[0].bg
 
     def render(self, image):
         for layer in self.layers:
@@ -149,19 +157,22 @@ class RandomBackground(CombinedLayer):
     """
 
     def __init__(self):
-        layers = [random.choice([SolidColor, Picture])()]
+        layers = [random.choice([SolidColor, DarkBackground,
+                                 LightBackground])()]
         for x in xrange(random.randrange(1, 4)):
             layers.append(random.choice([
                 NoiseBackground,
                 GridBackground
             ])())
         CombinedLayer.__init__(self, layers)
+        self.bg = layers[0].bg
 
 
 class RandomDistortion(CombinedLayer):
     """
     Selects a random distortion.
     """
+    background = 'transparent'
 
     def __init__(self):
         layers = []
@@ -178,8 +189,8 @@ class Picture(Layer):
     Add a background to the captcha.
     """
 
-    def __init__(self):
-        self.image = Image.open(get_random_resource('backgrounds'))
+    def __init__(self, picture):
+        self.image = Image.open(picture)
         self.offset = (random.random(), random.random())
 
     def render(self, image):
@@ -192,11 +203,25 @@ class Picture(Layer):
         return image
 
 
+class LightBackground(Picture):
+    bg = 'light'
+
+    def __init__(self):
+        Picture.__init__(self, get_random_resource('backgrounds/light'))
+
+
+class DarkBackground(Picture):
+
+    def __init__(self):
+        Picture.__init__(self, get_random_resource('backgrounds/dark'))
+
+
 class NoiseBackground(Layer):
     """
     Add some noise as background. You can combine this with another
     background layer.
     """
+    bg = 'transparent'
 
     def __init__(self, saturation=0.1, num_dots=None):
         self.saturation = saturation
@@ -220,6 +245,7 @@ class GridBackground(Layer):
     Add a grid as background. You can combine this with another
     background layer.
     """
+    bg = 'transparent'
 
     def __init__(self, size=None, color=None):
         if size is None:
@@ -252,8 +278,10 @@ class SolidColor(Layer):
 
     def __init__(self, color=None):
         if color is None:
-            color = random_color(0.2, 0.4)
-        self.color = color
+            color = random_color(0.2, random.random() > 0.5 and 0.3 or 0.7)
+        self.color = ImageColor.getrgb(color)
+        if colorsys.rgb_to_hls(*[x / 255.0 for x in self.color])[-1] > 0.5:
+            self.bg = 'light'
 
     def render(self, image):
         image.paste(self.color)
@@ -262,6 +290,7 @@ class SolidColor(Layer):
 
 class WigglyBlocks(Layer):
     """Randomly select and shift blocks of the image"""
+    bg = 'transparent'
 
     def __init__(self, block_size=None, sigma=0.01, iterations=None):
         if block_size is None:
@@ -300,6 +329,7 @@ class WarpBase(Layer):
     This warping engine runs a grid of points through this transform and uses
     PIL's mesh transform to warp the image.
     """
+    bg = 'transparent'
     filtering = Image.BILINEAR
     resolution = 10
 
