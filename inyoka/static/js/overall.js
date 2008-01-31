@@ -23,7 +23,7 @@ $(document).ready(function() {
   // hide search words on click
   $('a.hide_searchwords')
     .click(function() {
-      $(this).parent().parent().slideUp('slow');
+      $(this).parent().slideUp('slow');
       $('span.highlight').removeClass('highlight');
       return false;
     });
@@ -125,5 +125,16 @@ $(document).ready(function() {
         togglebutton.toggleClass('navi_toggle_down')
         return false;
       }).insertAfter('form.search');
+  })();
+
+  // use javascript to deactivate the submit button on click
+  (function() {
+    var submitted = false;
+    $('form').submit(function() {
+      if (submitted)
+        return false;
+      $('input[@type="submit"]').attr('disabled', true);
+      submitted = true;
+    });
   })();
 });

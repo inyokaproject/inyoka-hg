@@ -59,6 +59,7 @@ class AdvancedSessionMiddleware(object):
         if data:
             session = Session.unserialize(data, settings.SECRET_KEY)
             if session.get('_ex', 0) < time():
+                print session, data
                 session = None
                 expired = True
         if session is None:

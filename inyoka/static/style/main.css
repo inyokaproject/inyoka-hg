@@ -100,6 +100,10 @@ form dt {
     margin: 1em 0 0 0;
 }
 
+form input[disabled] {
+    color: #888;
+}
+
 blockquote {
   border-left: solid 3px #888;
   font-style: italic;

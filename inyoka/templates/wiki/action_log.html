@@ -13,6 +13,9 @@
 {% extends 'wiki/page.html' %}
 {% set title_trace = [page.title|e, 'Versionen'] %}
 {% set action = 'log' %}
+{% set feeds = [
+  ('Seitenrevisionen', '?action=log&format=atom')
+] %}
 {% block wiki_content %}
   {% set latest_rev = revisions[0] -%}
   <p>

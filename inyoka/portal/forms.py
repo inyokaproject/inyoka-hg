@@ -8,8 +8,9 @@
     :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-from md5 import new as md5
+import md5
 from django import newforms as forms
+from django.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
 from inyoka.utils.urls import href
@@ -78,8 +79,11 @@ class RegisterForm(forms.Form):
 
         `captcha_solution` is filled by the portal/register view."""
         captcha = self.cleaned_data.get('captcha', '')
-        if captcha and md5(captcha).digest() == self.captcha_solution:
-            return True
+        if captcha:
+            h = md5.new(settings.SECRET_KEY)
+            h.update(captcha)
+            if h.digest() == self.captcha_solution:
+                return True
         else:
             raise forms.ValidationError('Die Eingabe des Captchas war nicht korrekt!')
 
@@ -217,8 +221,11 @@ class LostPasswordForm(forms.Form):
     def clean_captcha(self):
         """Validate the CAPTCHA image"""
         captcha = self.cleaned_data.get('captcha', '')
-        if captcha and captcha == self.captcha_solution:
-            return True
+        if captcha:
+            h = md5.new(settings.SECRET_KEY)
+            h.update(captcha)
+            if h.digest() == self.captcha_solution:
+                return True
         else:
             raise forms.ValidationError('Die Eingabe des Captchas war nicht korrekt!')
 
@@ -299,7 +306,10 @@ class UserCPProfileForm(forms.Form):
     interests = forms.CharField(label='Interessen', required=False)
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
-                              max_length=10, required=False)
+                 max_length=10, required=False, help_text=u'Hier kannst du '
+                 u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
+                 u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
+                 u'_of_Trust">hier</a>.')
         
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
