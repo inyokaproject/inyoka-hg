@@ -15,7 +15,7 @@ from inyoka.utils import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.flashing import flash, DEFAULT_FLASH_BUTTONS
-from inyoka.utils.html import escape
+from inyoka.utils.html import escape, cleanup_html
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
@@ -54,10 +54,10 @@ def config(request):
     if request.method == 'POST':
         form = ConfigurationForm(request.POST)
         if form.is_valid():
-            data = form.cleaned_data
-            for key in ('global_message',):
-                storage[key] = data[key]
+            html = cleanup_html(form.cleaned_data['global_message'])
+            storage['global_message'] = html
             flash(u'Die Einstellungen wurden gespeichert.', True)
+            return HttpResponseRedirect(href('admin', 'config'))
     else:
         form = ConfigurationForm(initial=storage.get_many(['global_message']))
     return {
