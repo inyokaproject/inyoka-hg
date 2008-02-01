@@ -372,4 +372,6 @@ class AuthMatchDecider(xapian.MatchDecider):
         decider = self.deciders.get(component)
         if auth and decider is not None:
             return decider(loads(auth))
+        else:
+            print "ignoring", doc.get_value(0), self.deciders
         return True

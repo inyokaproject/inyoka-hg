@@ -29,6 +29,7 @@ from inyoka.portal.user import User
 from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href
 from inyoka.utils.http import AccessDeniedResponse
+from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
 
 
@@ -223,3 +224,17 @@ def test_changes_allowed(user, page_name, old_text, new_text):
                 for value in node.values:
                     metadata.add((node.key, value))
     return old == new
+
+
+class WikiSearchAuthDecider(object):
+    """Decides whetever a user can display a search result or not."""
+
+    def __init__(self, user):
+        #TODO: fetch all relevant wiki privilegues for the given user
+        pass
+
+    def __call__(self, auth):
+        #TODO: determine read privilege for the article
+        return True
+
+search.register_auth_decider('w', WikiSearchAuthDecider)
