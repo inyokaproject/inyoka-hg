@@ -108,6 +108,7 @@ class GroupContainer(object):
         self.user = user
         self.page = page_name
         self.cache = None
+        self._fully_loaded = False
         self.extra = set([GROUP_ALL, user.is_authenticated and
                           GROUP_REGISTERED or GROUP_UNREGISTERED])
 
@@ -120,6 +121,7 @@ class GroupContainer(object):
                (item.startswith('@') and item[1:] in self.cache):
                 self.cache.add(GROUP_OWNER)
                 break
+        self._fully_loaded = True
 
     def __contains__(self, obj):
         if obj in self.extra:
@@ -129,7 +131,32 @@ class GroupContainer(object):
         return obj in self.cache
 
 
-def get_privilege_flags(user, page_name):
+class PrivilegeTest(object):
+    """
+    Efficient way for multiple privilege tests for one users to many
+    pages (eg: search auth decider).
+    """
+
+    def __init__(self, user):
+        self.user = user
+        self.groups = set(x['name'] for x in self.user.groups.values('name'))
+        self.groups.update([GROUP_ALL, user.is_authenticated and
+                            GROUP_REGISTERED or GROUP_UNREGISTERED])
+
+    def get_privilege_flags(self, page_name):
+        groups = self.get_group_test(page_name)
+        return get_privilege_flags(self.user, page_name, groups)
+
+    def get_privileges(self, page_name):
+        groups = self.get_group_test(page_name)
+        return get_privileges(self.user, page_name, groups)
+
+    def has_privilege(self, page_name, privilege):
+        groups = self.get_group_test(page_name)
+        return has_privilege(self.user, page_name, groups)
+
+
+def get_privilege_flags(user, page_name, groups=None):
     """
     Return an integer with the privilege flags for a user for the given
     page name. Like any other page name depending function the page name
@@ -139,7 +166,8 @@ def get_privilege_flags(user, page_name):
         user = User.objects.get_anonymous_user()
     elif isinstance(user, basestring):
         user = User.objects.get(username=user)
-    groups = GroupContainer(user, page_name)
+    if groups is None:
+        groups = GroupContainer(user, page_name)
 
     rules = storage.acl
     if not rules:
@@ -153,20 +181,20 @@ def get_privilege_flags(user, page_name):
     return privileges
 
 
-def get_privileges(user, page_name):
+def get_privileges(user, page_name, groups=None):
     """
     Get a dict with the privileges a user has for a page (or doesn't).  `user`
     must be a user object or `None` in which case the privileges for an
     anonymous user are returned.
     """
     result = {}
-    flags = get_privilege_flags(user, page_name)
+    flags = get_privilege_flags(user, page_name, groups)
     for name, flag in privilege_map.iteritems():
         result[name] = (flags & flag) != 0
     return result
 
 
-def has_privilege(user, page_name, privilege):
+def has_privilege(user, page_name, privilege, groups=None):
     """
     Check if a user has a special privilege on a page. If you want to check
     for multiple privileges (for example if you want to display what a user
@@ -175,7 +203,7 @@ def has_privilege(user, page_name, privilege):
     """
     if isinstance(privilege, basestring):
         privilege = privilege_map[privilege]
-    return (get_privilege_flags(user, page_name) & privilege) != 0
+    return (get_privilege_flags(user, page_name, groups) & privilege) != 0
 
 
 def require_privilege(privilege):
