@@ -43,9 +43,6 @@
     gespeichert. Um auf einen Anhang zu verweisen kannst du entweder
     auf die entprechende Wikiseite verlinken oder das Bild mit dem
     <code>[[Bild()]]</code>-Makro direkt einbinden.</p>
-    {%- else %}
-    <p>Derzeit gibt es noch keine Dateianhänge zu dieser Seite.</p>
-    {%- endif %}
     <ul class="attachments">
     {%- for attachment in attachments %}
       <li>
@@ -58,5 +55,8 @@
       </li>
     {%- endfor %}
     </ul>
+    {%- else %}
+    <p>Derzeit gibt es noch keine Dateianhänge zu dieser Seite.</p>
+    {%- endif %}
   </div>
 {% endblock %}

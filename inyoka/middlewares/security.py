@@ -18,7 +18,7 @@ from django.conf import settings
 from inyoka.utils.http import TemplateResponse
 
 
-form_re = re.compile(r'<form\s+.*?method=[\'"]post[\'"].*?>(?i)')
+form_re = re.compile(r'<form\s+.*?method=[\'"]post[\'"][^>]*?>(?is)')
 
 
 class SecurityMiddleware(object):
