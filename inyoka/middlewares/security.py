@@ -14,11 +14,13 @@
 """
 import re
 import hmac
+import pickle
 from django.conf import settings
 from inyoka.utils.http import TemplateResponse
 
 
 form_re = re.compile(r'<form\s+.*?method=[\'"]post[\'"][^>]*?>(?is)')
+FORWARD_THRESHOLD = 1024 * 1024
 
 
 class SecurityMiddleware(object):
@@ -33,9 +35,6 @@ class SecurityMiddleware(object):
         h.update(request.META.get('HTTP_USER_AGENT', ''))
         return h.hexdigest()
 
-    def _abort_with_csrf_error(self):
-        return TemplateResponse('errors/400_csrf.html', {}, 400)
-
     def process_request(self, request):
         if request.method == 'POST':
             csrf_token = self._make_token(request)
@@ -44,7 +43,7 @@ class SecurityMiddleware(object):
                 if csrf_token != submitted_token:
                     raise ValueError()
             except (KeyError, ValueError):
-                return self._abort_with_csrf_error()
+                return TemplateResponse('errors/400_csrf.html', {})
 
     def process_response(self, request, response):
         if response['content-type'].startswith('text/html') and \
