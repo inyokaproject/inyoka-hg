@@ -172,6 +172,7 @@ class Article(models.Model):
             title=self.subject,
             user=self.author_id,
             date=self.pub_date,
+            auth=self.pub_date,
             category=self.category.slug,
             text=self.text
         )
@@ -290,3 +291,16 @@ def recv_article(article_id):
         'highlight': True
     }
 search.register_result_handler('i', recv_article)
+
+
+class ArticleSearchAuthDecider(object):
+    """Decides whetever a user can display a search result or not."""
+
+    def __init__(self, user):
+        self.now = datetime.now()
+
+    def __call__(self, auth):
+        rval = auth <= self.now
+        print rval
+        return rval
+search.register_auth_decider('i', ArticleSearchAuthDecider)

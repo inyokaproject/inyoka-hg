@@ -304,12 +304,17 @@ def search(request):
         d = f.cleaned_data
         show_community = request.GET.get('show_community',
             request.user.show_community) in ("true", True)
-        results = search_system.query(
-            d['area'] and d['area'] != 'all'
-                and '(%s) AND area:%s' % (d['query'], d['area']) \
-                or d['query'],
+        area = {
+            'wiki': 'w',
+            'forum': 'f',
+            'ikhaya': 'i',
+            'planet': 'p'
+        }.get(d['area'])
+        results = search_system.query(request.user,
+            d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
-            date_begin=d['date_begin'], date_end=d['date_end']
+            date_begin=d['date_begin'], date_end=d['date_end'],
+            component=area
         )
         if len(results.results ) > 0:
             return TemplateResponse('portal/search_results.html', {

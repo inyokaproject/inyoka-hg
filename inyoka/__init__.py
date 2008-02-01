@@ -106,7 +106,7 @@
         diffing yet but allows to download pastes.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christian Hack,
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christian Hack,
                 Benjamin Wiegand, Maximilian Trescher.
     :license: GNU GPL.
 """

@@ -225,15 +225,7 @@ class AccessControlList(BaseStorage):
 
     def extract_data(self, text):
         from inyoka.wiki import acl
-        privileges = {
-            'lesen':            acl.PRIV_READ,
-            'bearbeiten':       acl.PRIV_EDIT,
-            'erstellen':        acl.PRIV_CREATE,
-            'hochladen':        acl.PRIV_ATTACH,
-            u'löschen':         acl.PRIV_DELETE,
-            'verwalten':        acl.PRIV_MANAGE,
-            'alle_hochladen':   acl.PRIV_ATTACH_DANGEROUS
-        }
+        privileges = acl.privilege_map
 
         groups = ['*']
         for line in text.splitlines():
@@ -255,9 +247,9 @@ class AccessControlList(BaseStorage):
             add_privs = del_privs = 0
             for s in bits[1].split(','):
                 s = s.strip().lower()
-                if s in ('alles', '-nichts'):
+                if s in ('all', '-none'):
                     add_privs = acl.PRIV_ALL
-                elif s in ('-alles', 'nichts'):
+                elif s in ('-all', 'none'):
                     del_privs = acl.PRIV_ALL
                 else:
                     if s.startswith('-'):

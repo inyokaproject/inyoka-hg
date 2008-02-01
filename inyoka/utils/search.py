@@ -16,6 +16,7 @@ from weakref import WeakKeyDictionary
 from threading import currentThread as get_current_thread
 from time import mktime
 from datetime import datetime
+from cPickle import dumps, loads
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.utils.parsertools import TokenStream
@@ -217,6 +218,7 @@ class SearchSystem(object):
         self.connections = WeakKeyDictionary()
         self.prefix_handlers = {}
         self.result_handlers = {}
+        self.auth_deciders = {}
 
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
@@ -250,15 +252,26 @@ class SearchSystem(object):
         for prefix in prefixes:
             self.prefix_handlers[prefix] = handler
 
+    def register_auth_decider(self, component, decider):
+        """
+        Register a AuthDecider for filtering Search results with
+        insufficient privileges.
+        """
+        self.auth_deciders[component] = decider
+
     def parse_query(self, query):
         """Parse a query."""
         return QueryParser(self.prefix_handlers).parse(query)
 
-    def query(self, query, page=1, per_page=20, date_begin=None,
-              date_end=None, collapse=True):
+    def query(self, user, query, page=1, per_page=20, date_begin=None,
+              date_end=None, collapse=True, component=None):
         """Search for something."""
         enq = xapian.Enquire(self.get_connection())
         qry = self.parse_query(query)
+        if component:
+            print component.lower(), type(component), type(qry)
+            qry = xapian.Query(xapian.Query.OP_FILTER, qry,
+                               xapian.Query('P%s' % component.lower()))
         if date_begin or date_end:
             d1 = date_begin and mktime(date_begin.timetuple()) or 0
             d2 = date_end and mktime(date_end.timetuple()) or \
@@ -271,7 +284,10 @@ class SearchSystem(object):
             enq.set_collapse_key(1)
         enq.set_query(qry)
         offset = (page - 1) * per_page
-        mset = enq.get_mset(offset, per_page, per_page * 3)
+
+        auth = AuthMatchDecider(user, self.auth_deciders)
+        mset = enq.get_mset(offset, per_page, per_page * 3, None, auth)
+
         return SearchResult(mset, qry, page, per_page, self.result_handlers)
 
     def store(self, **data):
@@ -309,6 +325,10 @@ class SearchSystem(object):
             time = xapian.sortable_serialise(mktime(data['date'].timetuple()))
             doc.add_value(2, time)
 
+        # authentification informations (optional)
+        if data.get('auth'):
+            doc.add_value(3, dumps(data['auth']))
+
         # category (optional)
         if data.get('category'):
             categories = data.get('category')
@@ -343,3 +363,19 @@ def search_handler(*prefixes):
         return f
     return decorate
 
+
+class AuthMatchDecider(xapian.MatchDecider):
+
+    def __init__(self, user, deciders):
+        xapian.MatchDecider.__init__(self)
+        self.deciders = dict((k, d(user)) for k, d in deciders.iteritems())
+
+    def __call__(self, doc):
+        component = doc.get_value(0).split(':')[0]
+        auth = doc.get_value(3)
+        decider = self.deciders.get(component)
+        if auth and decider is not None:
+            return decider(loads(auth))
+        else:
+            print "ignoring", doc.get_value(0), self.deciders
+        return True

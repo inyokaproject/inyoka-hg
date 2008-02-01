@@ -267,6 +267,24 @@ class PageManager(models.Manager):
         finally:
             cursor.close()
 
+    def get_owned(self, owners):
+        """
+        Return all the pages a user or some group (prefixed with ``@`` own).
+        The return value will be a list of page names, not page objects.
+
+        Reverse method of `get_owners`.
+        """
+        cursor = connection.cursor()
+        cursor.execute('''
+            select p.name from wiki_metadata m, wiki_page p
+             where m.key = 'X-Owner' and m.page_id = p.id and
+                   m.value in (%s);
+        ''' % ', '.join(['%s'] % len(owners)), owners)
+        try:
+            return set(x[0] for x in cursor.fetchall())
+        finally:
+            cursor.close()
+
     def get_orphans(self):
         """
         Return a list of orphaned pages. The return value will be a list

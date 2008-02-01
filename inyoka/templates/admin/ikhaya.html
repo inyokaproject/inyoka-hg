@@ -15,6 +15,17 @@
 <h1>Administration</h1>
 <h2>Ikhaya</h2>
 {% endblock %}
+
+{% block admin_navigation %}
+  <h3>Ikhaya</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'ikhaya', 'articles') }}">Artikel</a></li>
+    <li><a href="{{ href('admin', 'ikhaya', 'categories') }}">Kategorien</a></li>
+    <li><a href="{{ href('admin', 'ikhaya', 'icons') }}">Icons</a></li>
+    <li><a href="{{ href('admin', 'ikhaya', 'dates') }}">Termine</a></li>
+  </ul>
+{% endblock %}
+
 {% block admin_content %}
   <table class="admin_control">
     <tr>
