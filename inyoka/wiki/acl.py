@@ -31,6 +31,7 @@ from inyoka.utils.urls import href
 from inyoka.utils.http import AccessDeniedResponse
 from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
+from inyoka.wiki.models import Page
 
 
 #: metadata users without the `PRIV_MANAGE` privilege can edit.

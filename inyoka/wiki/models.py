@@ -909,6 +909,7 @@ class Page(models.Model):
             title=rev.title,
             user=rev.user_id,
             date=rev.change_date,
+            auth=rev.page.name,
             text=meta['text']
         )
 
