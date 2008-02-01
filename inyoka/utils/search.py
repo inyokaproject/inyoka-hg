@@ -264,10 +264,14 @@ class SearchSystem(object):
         return QueryParser(self.prefix_handlers).parse(query)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
-              date_end=None, collapse=True):
+              date_end=None, collapse=True, component=None):
         """Search for something."""
         enq = xapian.Enquire(self.get_connection())
         qry = self.parse_query(query)
+        if component:
+            print component.lower(), type(component), type(qry)
+            qry = xapian.Query(xapian.Query.OP_FILTER, qry,
+                               xapian.Query('P%s' % component.lower()))
         if date_begin or date_end:
             d1 = date_begin and mktime(date_begin.timetuple()) or 0
             d2 = date_end and mktime(date_end.timetuple()) or \
@@ -372,4 +376,6 @@ class AuthMatchDecider(xapian.MatchDecider):
         decider = self.deciders.get(component)
         if auth and decider is not None:
             return decider(loads(auth))
+        else:
+            print "ignoring", doc.get_value(0), self.deciders
         return True
