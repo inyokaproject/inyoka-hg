@@ -258,6 +258,7 @@ class CalendarItem(models.Model):
         return render(instructions, context)
 
     def save(self):
+        super(self.__class__, self).save()
         cache.delete('ikhaya/date/%s' % self.id)
 
 

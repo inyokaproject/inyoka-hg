@@ -17,12 +17,14 @@
     <dd>{{ form.confirm_password }}{{ h.field_errors(form.errors.confirm_password) }}</dd>
     <dt>E-Mail:</dt>
     <dd>{{ form.email }}{{ h.field_errors(form.errors.email) }}</dd>
+    <dd class="help_text">Ohne E-Mail-Adresse kannst du dir kein neues Passwort schicken lassen, wenn du es vergisst. Sie wird von uns auch garantiert nicht weitergegeben.</dd>
     <dt>Nutzungshinweise:</dt>
     {# include the agreement letter #}
     <dd>{{ form.terms_of_usage }} Ich bestätige den <a href="{{ href('portal', 'lizenz') }}">Lizenztext</a> gelesen zu haben und erkläre mich mit der Veröffentlichung unter dieser Lizenz einverstanden.<br />Durch das Abschließen der Registrierung stimme ich den <a href="{{ href('portal', 'nutzungsbedingungen') }}">Nutzungsbedingungen</a> ebenfalls zu.<br />
     {{ h.field_errors(form.errors.tua) }}</dd>
     <dd>{{ form.hidden_captcha }}</dd>
     <dd>{{ h.field_errors(form.errors.hidden_captcha) }}</dd>
+    <dd class="hidden"><input type="submit" /></dd><!-- at enter the first submit button is used -->
     <dt>CAPTCHA</dt>
     <dd class="captcha"><img src="/?__service__=portal.get_captcha" alt="" /></dd>
     <dd>Bitte gib den Code von obigem Bild hier ein:</dd>

@@ -48,7 +48,7 @@
     </ul>
 
     <input type="checkbox" name="collapse" value="true" id="search_collapse" />
-    <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>
+    <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>{# TODO: this must stay the same when submitted #}
   </div>
 
   <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
@@ -63,8 +63,8 @@
     <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
     <dt><label for="id_date_begin">Zeitraum:</label></dt>
     <dd>{{ searchform.date_begin }} bis {{ searchform.date_end }}<br />
-      <span class="meta">z.B.: &quot;2008-12-31&quot; oder
-      &quot;2008-12-31 17:00&quot;</span></dd>
+      <span class="help_text">z.B. <code>2008-12-31</code> oder
+      <code>2008-12-31 17:00</code></span></dd>
     <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
   </dl>
   <div class="actions">

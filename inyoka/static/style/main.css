@@ -805,8 +805,12 @@ div.not_found img {
   float: right;
 }
 
-.hidden * {
+.hidden * { /* this is for hidden topics, etc. use hide to really hide stuff */
   color: #888 !important;
+} 
+
+.hide {
+  display: none;
 }
 
 .help_text {
