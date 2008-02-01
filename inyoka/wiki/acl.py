@@ -53,11 +53,13 @@ PRIV_NONE = 0
 PRIV_DEFAULT = PRIV_ALL = 63
 
 #: because we use different names in the german frontend these
-#: constants hold the name used in the frontend.
-GROUP_ALL = 'Alle'
-GROUP_REGISTERED = 'Registriert'
-GROUP_UNREGISTERED = 'Unregistriert'
-GROUP_OWNER = 'Besitzer'
+#: constants hold the name used in the frontend.  i call bullshit,
+#: we use english names again and the constants are left as an
+#: exercise for the reader.
+GROUP_ALL = 'all'
+GROUP_REGISTERED = 'registered'
+GROUP_UNREGISTERED = 'unregistered'
+GROUP_OWNER = 'owner'
 
 #: used by the decorator
 privilege_map = {
@@ -132,7 +134,7 @@ class GroupContainer(object):
         return obj in self.cache
 
 
-class PrivilegeTest(object):
+class MultiPrivilegeTest(object):
     """
     Efficient way for multiple privilege tests for one users to many
     pages (eg: search auth decider).
@@ -143,17 +145,23 @@ class PrivilegeTest(object):
         self.groups = set(x['name'] for x in self.user.groups.values('name'))
         self.groups.update([GROUP_ALL, user.is_authenticated and
                             GROUP_REGISTERED or GROUP_UNREGISTERED])
+        self.owned_pages = set(Page.objects.get_owned(self.groups))
+
+    def get_groups(self, page_name):
+        if page_name in self.owned_pages:
+            return self.groups & set([GROUP_OWNER])
+        return self.groups
 
     def get_privilege_flags(self, page_name):
-        groups = self.get_group_test(page_name)
+        groups = self.get_groups(page_name)
         return get_privilege_flags(self.user, page_name, groups)
 
     def get_privileges(self, page_name):
-        groups = self.get_group_test(page_name)
+        groups = self.get_groups(page_name)
         return get_privileges(self.user, page_name, groups)
 
     def has_privilege(self, page_name, privilege):
-        groups = self.get_group_test(page_name)
+        groups = self.get_groups(page_name)
         return has_privilege(self.user, page_name, groups)
 
 
@@ -162,6 +170,8 @@ def get_privilege_flags(user, page_name, groups=None):
     Return an integer with the privilege flags for a user for the given
     page name. Like any other page name depending function the page name
     must be in a normalized state.
+
+    :param groups: used internally by the `MultiPrivilegeTest`
     """
     if user is None:
         user = User.objects.get_anonymous_user()
@@ -187,6 +197,8 @@ def get_privileges(user, page_name, groups=None):
     Get a dict with the privileges a user has for a page (or doesn't).  `user`
     must be a user object or `None` in which case the privileges for an
     anonymous user are returned.
+
+    :param groups: used internally by the `MultiPrivilegeTest`
     """
     result = {}
     flags = get_privilege_flags(user, page_name, groups)
@@ -201,6 +213,8 @@ def has_privilege(user, page_name, privilege, groups=None):
     for multiple privileges (for example if you want to display what a user
     can do or not do) you should use `get_privileges` which is faster for
     multiple checks and also returns it automatically as a dict.
+
+    :param groups: used internally by the `MultiPrivilegeTest`
     """
     if isinstance(privilege, basestring):
         privilege = privilege_map[privilege]
@@ -258,11 +272,10 @@ class WikiSearchAuthDecider(object):
     """Decides whetever a user can display a search result or not."""
 
     def __init__(self, user):
-        #TODO: fetch all relevant wiki privilegues for the given user
-        pass
+        self.test = MultiPrivilegeTest(user)
 
-    def __call__(self, auth):
-        #TODO: determine read privilege for the article
-        return True
+    def __call__(self, page_name):
+        return self.test.has_privilege(page_name, PRIV_READ)
+
 
 search.register_auth_decider('w', WikiSearchAuthDecider)
