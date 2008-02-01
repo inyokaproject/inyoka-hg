@@ -47,7 +47,6 @@ PRIV_CREATE = 4
 PRIV_ATTACH = 8
 PRIV_DELETE = 16
 PRIV_MANAGE = 32
-PRIV_ATTACH_DANGEROUS = 64
 
 #: keep this updated when adding privileges
 PRIV_NONE = 0

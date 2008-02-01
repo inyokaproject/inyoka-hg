@@ -15,8 +15,20 @@
   <h2>400 Bad Request</h2>
 {% endblock %}
 {% block portal_content %}
+  <h2>Fehlerhafte Abfrage</h2>
   <p>
     Der Browser hat keinen oder einen fehlerhaften Kontrollschlüssel übertragen
     und die Weiterverarbeitung wurde aus Sicherheitsgründen abgebrochen.
+  </p>
+  <p>
+    Dieser Fehler tritt normalerweise auf, wenn versucht wurde Daten
+    automatisiert auf den Server zu übertragen.  In seltenen Fällen kann dies
+    auch passieren, wenn die Browserkonfiguration verändert wurde, während die
+    Formulardaten übertragen wurden.
+  </p>
+  <p>
+    In manchen Browsern ist es möglich durch klicken auf "Zurück" und dann
+    "Aktualliseren" einen neuen Kontrollschlüssel anzufordern um das Absenden
+    erneut durchzuführen.
   </p>
 {% endblock %}

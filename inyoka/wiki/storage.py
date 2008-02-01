@@ -27,10 +27,6 @@
     ``X-Behave: Access-Control-List``
         This storage contains ACL information
 
-    ``X-Behave: Dangerous-File-Extensions``
-        This storage contains a list of file extensions users without the
-        special `PRIV_ATTACH_DANGEROUS` privilege are not allowed to upload.
-
     Storage objects are read only because they combine the information from
     multiple pages.
 
@@ -204,17 +200,6 @@ class InterwikiMap(DictStorage):
     behavior_key = 'Interwiki-Map'
 
 
-class DangerousFileExtensions(SetStorage):
-    """
-    Holds a number of dangerous file extensions (with or without dot).
-    """
-    behavior_key = 'Dangerous-File-Extensions'
-
-    def extract_data(self, text):
-        for extension in SetStorage.extract_data(self, text):
-            yield extension.lstrip('.')
-
-
 class AccessControlList(BaseStorage):
     """
     This storage holds the access control lists for the whole wiki. The rules
@@ -276,6 +261,5 @@ class AccessControlList(BaseStorage):
 storage = StorageManager(
     smilies=SmileyMap,
     interwiki=InterwikiMap,
-    dangerous_file_extensions=DangerousFileExtensions,
     acl=AccessControlList
 )
