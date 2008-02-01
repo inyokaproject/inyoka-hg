@@ -533,9 +533,12 @@ def do_attach(request, name):
         ``form``
             An `AddAttachmentForm` instance.
     """
+    page = Page.objects.get_by_name(name)
+    if page.rev.attachment_id is not None:
+        flash('Anhänge in Anhänge sind nicht erlaubt!')
+        return HttpResponseRedirect(url_for(page))
     attachments = Page.objects.get_attachment_list(name)
     attachments = [Page.objects.get_by_name(i) for i in attachments]
-    page = Page.objects.get_by_name(name)
     context = {
         'page':        Page.objects.get_by_name(name),
         'attachments': attachments,
