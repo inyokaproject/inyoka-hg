@@ -162,7 +162,7 @@ class MultiPrivilegeTest(object):
 
     def has_privilege(self, page_name, privilege):
         groups = self.get_groups(page_name)
-        return has_privilege(self.user, page_name, groups)
+        return has_privilege(self.user, page_name, privilege, groups)
 
 
 def get_privilege_flags(user, page_name, groups=None):
