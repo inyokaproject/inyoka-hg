@@ -271,7 +271,7 @@ class Event(models.Model):
         i = 0
         while True:
             try:
-                Event.objects.get(slug=slug):
+                Event.objects.get(slug=slug)
             except Event.DoesNotExist:
                 break
             else:
