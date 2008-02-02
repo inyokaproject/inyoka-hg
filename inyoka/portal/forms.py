@@ -301,10 +301,10 @@ class UserCPProfileForm(forms.Form):
     yim = forms.CharField(label='Yahoo Instant Messenger', required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    coordinates_long = models.DecimalField(label='Koordinaten (Breite)',
+    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
                        required=False, min_value=-90, max_value=90)
-    coordinates_lat = models.DecimalField(label=u'Koordinaten (Länge)',
-                      required=False, min_value=-180, max_value=180))
+    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180)
     location = forms.CharField(label='Wohnort', required=False)
     occupation = forms.CharField(label='Beruf', required=False)
     interests = forms.CharField(label='Interessen', required=False)
@@ -314,7 +314,7 @@ class UserCPProfileForm(forms.Form):
                  u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
                  u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
                  u'_of_Trust">hier</a>.')
-        
+
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
         if gpgkey.startswith('0X'):
