@@ -236,21 +236,24 @@ class Subscription(models.Model):
 
 
 class Event(models.Model):
-    title = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True) # the first part (date) may change!!!
+    changed = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
     time = models.TimeField(null=True) # None means the event is the whole day
     description = models.TextField()
     author = models.ForeignKey(User)
-    location = models.CharField(max_length=100)
-    coordinates_long = models.FloatField('Koordinaten (Breite)')
-    coordinates_lat = models.FloatField(u'Koordinaten (Länge)')
+    location = models.CharField(max_length=40)
+    location_town = models.CharField(max_length=20)
+    location_long = models.FloatField('Koordinaten (Breite)', blank=True)
+    location_lat = models.FloatField(u'Koordinaten (Länge)', blank=True)
     
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            # XXX
-            'show': (),
-            'edit': ('admin', 'ikhaya', 'dates', 'edit', self.id)
+            'show': ('portal', 'calendar', self.slug),
+            'edit': ('admin', 'ikhaya', 'event', 'edit', self.id)
         }[action])
 
     @property
@@ -264,8 +267,20 @@ class Event(models.Model):
         return render(instructions, context)
 
     def save(self):
+        slug = self.date.strftime('%Y/%m/%d') + slugify(self.name)
+        i = 0
+        while True:
+            try:
+                Event.objects.get(slug=slug):
+            except Event.DoesNotExist:
+                break
+            else:
+                i += 1
+                slug = self.date.strftime('%Y/%m/%d') + slugify(self.name) + \
+                       ('-%d' % i)
+        self.slug = slug
         super(self.__class__, self).save()
-        cache.delete('ikhaya/date/%s' % self.id)
+        cache.delete('ikhaya/event/%s' % self.id)
 
 
 # import it down here because of circular dependencies

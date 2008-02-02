@@ -30,7 +30,7 @@ def on_get_current_user(request):
 def on_get_usermap_markers(request):
     """Return markers for the usermap."""
     markers = []
-    for user in User.objects.exclude(coordinates_long=None)
+    for user in User.objects.exclude(coordinates_long=None) \
                             .exclude(coordinates_lat=None):
         long = user.coordinates_long
         lat = user.coordinates_lat

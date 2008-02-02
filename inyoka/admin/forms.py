@@ -89,15 +89,17 @@ class EditUserForm(forms.Form):
     # misc other things
     signature = forms.CharField(label=u'Signatur', required=False,
                                 widget=forms.Textarea)
-    coordinates_long = models.DecimalField(label='Koordinaten (Breite)',
+    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
                        required=False, min_value=-90, max_value=90)
-    coordinates_lat = models.DecimalField(label=u'Koordinaten (Länge)',
-                      required=False, min_value=-180, max_value=180))
-    location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
-    interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
+    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180)
+    location = forms.CharField(label=u'Wohnort', max_length=200,
+                               required=False)
+    interests = forms.CharField(label=u'Interessen', max_length=200,
+                                required=False)
     website = forms.URLField(label=u'Webseite', required=False)
-    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
-                              max_length=10, required=False)
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
+                              label=u'GPG-Schlüssel',  max_length=10)
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()

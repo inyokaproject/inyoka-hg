@@ -23,7 +23,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
                                ConfigurationForm, EditUserForm, EditDateForm, \
                                EditForumForm, EditGroupForm
-from inyoka.portal.models import StaticPage, CalendarItem
+from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
@@ -576,7 +576,7 @@ def groups_edit(request, id=None):
 @require_manager
 @templated('admin/ikhaya_dates.html')
 def ikhaya_dates(request):
-    sortable = Sortable(CalendarItem.objects.all(), request.GET, 'title')
+    sortable = Sortable(Event.objects.all(), request.GET, 'title')
     return {
         'table': sortable
     }
@@ -589,13 +589,13 @@ def ikhaya_date_edit(request, date=None):
     Display an interface to let the user create or edit a date.
     """
     if date:
-        date = CalendarItem.objects.get(id=date)
+        date = Event.objects.get(id=date)
     if request.method == 'POST':
         form = EditDateForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             if not date:
-                date = CalendarItem()
+                date = Event()
             date.date = data['date']
             date.title = data['title']
             date.author_id = request.user.id

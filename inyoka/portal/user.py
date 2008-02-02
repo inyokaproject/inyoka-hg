@@ -165,12 +165,10 @@ class User(models.Model):
     aim = models.CharField('AIM', max_length=200, blank=True)
     yim = models.CharField('YIM', max_length=200, blank=True)
     signature = models.TextField('Signatur', blank=True)
-    coordinates_long = models.FloatField('Koordinaten (Breite)', blank=True,
-                                        null=True)
-    coordinates_lat = models.FloatField(u'Koordinaten (Länge)', blank=True,
-                                       null=True)
+    coordinates_long = models.FloatField('Koordinaten (Breite)', blank=True, null=True)
+    coordinates_lat = models.FloatField(u'Koordinaten (Länge)', blank=True, null=True)
     location = models.CharField('Wohnort', max_length=200, blank=True)
-    gpgkey = models.CharField('GPG-Key', max_length=8, blank=True)    
+    gpgkey = models.CharField('GPG-Key', max_length=8, blank=True)
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
