@@ -46,7 +46,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
                                 NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
-                                 CalendarItem
+                                 Event
 from inyoka.portal.user import User, Group, deactivate_user
 from inyoka.portal.utils import check_login
 
@@ -834,7 +834,7 @@ def calendar(request, year=None, month=None):
     now = datetime.now()
     year = int(year or now.year)
     month = int(month or now.month)
-    dates = CalendarItem.objects.filter(date__year=year, date__month=month) \
+    dates = Event.objects.filter(date__year=year, date__month=month) \
                         .order_by('date')
     return {
         'dates': dates,
