@@ -13,20 +13,9 @@
 {% set name = 'Community Regel' %}
 
 {% block forum_content %}
-  <h1>Regeln für den Community Bereich</h1>
-  <p>Um eine bessere Übersicht im Forum zu ermöglichen, haben wir
-  uns entschlossen Beiträge der Community, die keine Support Anfragen
-  sind, in einen eigenen Bereich zu sammeln.</p>
-  <p>Da es hier auch oft zu heftigen, aber auch spannende, Diskussionen
-  kommen kann, gibt es ein paar zusätzliche Regeln:</p>
-  <ul>
-    <li>keine Politik Themen</li>
-    <li>keine Beleidigungen</li>
-    <li>sonst noch was?</li>
-  </ul>
-  <p>
-  {{ message.text|e }}
-  <form method="post" action="{{ message|url }}">
+  <h1>{{ message.title|e }}</h1>
+  {{ message.rendered_text }}
+  <form method="post" action="{{ forum|url('welcome') }}">
     <input type="hidden" name="goto_url" value="{{ goto_url|e }}" />
     <input type="submit" name="accept" value="Gelesen und akzeptiert" />
     <input type="submit" name="cancel" value="Ablehnen" />

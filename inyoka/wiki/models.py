@@ -279,7 +279,7 @@ class PageManager(models.Manager):
             select p.name from wiki_metadata m, wiki_page p
              where m.key = 'X-Owner' and m.page_id = p.id and
                    m.value in (%s);
-        ''' % ', '.join(['%s'] % len(owners)), owners)
+        ''' % ', '.join(['%s'] * len(owners)), list(owners))
         try:
             return set(x[0] for x in cursor.fetchall())
         finally:
@@ -909,6 +909,7 @@ class Page(models.Model):
             title=rev.title,
             user=rev.user_id,
             date=rev.change_date,
+            auth=rev.page.name,
             text=meta['text']
         )
 

@@ -31,6 +31,7 @@ from inyoka.utils.urls import href
 from inyoka.utils.http import AccessDeniedResponse
 from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
+from inyoka.wiki.models import Page
 
 
 #: metadata users without the `PRIV_MANAGE` privilege can edit.
@@ -46,7 +47,6 @@ PRIV_CREATE = 4
 PRIV_ATTACH = 8
 PRIV_DELETE = 16
 PRIV_MANAGE = 32
-PRIV_ATTACH_DANGEROUS = 64
 
 #: keep this updated when adding privileges
 PRIV_NONE = 0
@@ -162,7 +162,7 @@ class MultiPrivilegeTest(object):
 
     def has_privilege(self, page_name, privilege):
         groups = self.get_groups(page_name)
-        return has_privilege(self.user, page_name, groups)
+        return has_privilege(self.user, page_name, privilege, groups)
 
 
 def get_privilege_flags(user, page_name, groups=None):

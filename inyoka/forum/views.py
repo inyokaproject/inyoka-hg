@@ -103,9 +103,9 @@ def forum(request, slug, page=1):
         return HttpResponseRedirect(href('forum'))
     if not have_privilege(request.user, f, 'read'):
         return abort_access_denied(request)
-    msg = f.get_welcome_message(request.user)
-    if msg is not None:
-        return community_rules(request)
+    fmsg = f.find_welcome(request.user)
+    if fmsg is not None:
+        return welcome(request, fmsg.slug, request.path)
     topics = Topic.objects.by_forum(f.id)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
@@ -137,8 +137,9 @@ def viewtopic(request, topic_slug, page=1):
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
-    #if t.forum.community_forum and not request.user.show_community:
-    #    return community_rules(request)
+    fmsg = t.forum.find_welcome(request.user)
+    if fmsg is not None:
+        return welcome(request, fmsg.slug, request.path)
     t.touch()
     posts = t.post_set.all().exclude(text='')
 
@@ -1104,47 +1105,43 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
-@templated('forum/latest.html')
-def latest(request, page=1):
+@templated('forum/newposts.html')
+def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    all = Post.objects.get_latest()
+    all = Post.objects.get_new_posts()
     posts = []
     for post in all:
         if post.id < request.user.forum_last_read:
             break
         posts.append(post)
     pagination = Pagination(request, posts, page, 20,
-        href('forum', 'latest'))
+        href('forum', 'newposts'))
     return {
         'posts': pagination.get_objects(),
         'pagination': pagination.generate()
     }
 
+
 @templated('forum/welcome.html')
-def welcome(request, msg_id=None, slug=None):
+def welcome(request, slug, path=None):
     """
     Show a welcome message on the first visit to greet the users or
     inform him about special rules.
     """
     user = request.user
-    goto_url = request.path
-    if msg_id is None:
-        f = Forum.objects.get(slug=slug)
-        msg_id = f.welcome_message_id
-        goto_url = url_for(f)
-    msg = WelcomeMessage.objects.get(id=msg_id)
+    forum = Forum.objects.get(slug=slug)
+    goto_url = path or url_for(forum)
     if request.method == 'POST':
-        if request.POST.get('accept'):
-            user.show_community = True
-            user.save()
+        accepted = request.POST.get('accept', False)
+        forum.read_welcome(request.user, accepted)
+        if accepted:
             return HttpResponseRedirect(request.POST.get('goto_url'))
         else:
-            request.user.show_community = False
-            request.user.save()
             return HttpResponseRedirect(href('forum'))
     return {
         'goto_url': goto_url,
-        'message': msg
+        'message': forum.welcome_message,
+        'forum': forum
     }
