@@ -1,0 +1,36 @@
+{#
+    wiki/action_attachments_edit.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This template is used to edit an existing attachment
+
+    :copyright: 2007 by Christoph Hack.
+    :license: GNU GPL.
+#}
+
+
+{% extends 'wiki/page.html' %}
+
+{% set title_trace = [page.title|e] %}
+{% set action = 'manage' %}
+
+{% block wiki_content %}
+  <h1 class="pagetitle">Dateianhang bearbeiten</h1>
+
+  <div id="page">
+    <form action="{{ page|url('edit') }}" method="post"
+      enctype="multipart/form-data" id="form_addattachment">
+      <p><label for="id_attachment">Neuer Dateianhang:</label>
+      {{ form.attachment }}</p>
+      <p><label for="id_text">Beschreibung:</label>
+        {{ form.text }}</p>
+      <p><label for="id_note">Änderungsnotiz:</label>
+        {{ form.note }}</p>
+      <div style="display: none">  
+        {{ form.filename }} {{ form.override }}
+      </div>  
+      <p><input type="submit" value="Anhang bearbeiten" />
+         <input type="submit" name="cancel" value="Abbrechen" /></p>
+    </form>
+  </div>
+{% endblock %}

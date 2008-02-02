@@ -63,3 +63,14 @@ class AddAttachmentForm(forms.Form):
     text = forms.CharField(label='Description', widget=forms.Textarea,
                            required=False)
     note = forms.CharField(max_length=512, required=False)
+
+
+class EditAttachmentForm(forms.Form):
+    """
+    A formular for editing existing Attachments. For a more detailed
+    description, have a look at the AddAttachmentForm.
+    """
+    attachment = forms.FileField(required=False)
+    text = forms.CharField(label='Description', widget=forms.Textarea,
+                           required=False)
+    note = forms.CharField(max_length=512, required=False)

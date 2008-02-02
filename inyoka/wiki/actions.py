@@ -34,7 +34,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.wiki.models import Page, Revision
-from inyoka.wiki.forms import PageEditForm, AddAttachmentForm
+from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.utils import get_title, normalize_pagename
 from inyoka.wiki.acl import require_privilege, has_privilege, \
@@ -231,6 +231,9 @@ def do_edit(request, name):
         page = None
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
+
+    if page.rev.attachment:
+        return do_attach_edit(request, page.name)
 
     # form defaults
     form_data = request.POST.copy()
@@ -604,6 +607,36 @@ def do_attach(request, name):
                         escape(page.title)))
     return context
 
+
+@require_privilege('attach')
+@templated('wiki/action_attach_edit.html', modifier=context_modifier)
+def do_attach_edit(request, name):
+    page = Page.objects.get_by_name(name)
+    form = EditAttachmentForm({
+        'text': page.rev.text.value,
+    })
+    if request.method == 'POST':
+        form = EditAttachmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            d = form.cleaned_data
+            attachment = None
+            attachment_filename = None
+            if d['attachment']:
+                attachment = d['attachment'].content
+                attachment_filename = d['attachment'].filename or \
+                                        page.rev.attachment.filename
+            page.edit(user=request.user,
+                        text=d.get('text', page.rev.text.value),
+                        remote_addr=request.META.get('remote_addr'),
+                        note=d.get('note', u''),
+                        attachment_filename=attachment_filename,
+                        attachment=attachment)
+            flash('Der Dateianhang wurde erfolgreich bearbeitet.')
+            return HttpResponseRedirect(url_for(page))
+    return {
+        'form': form,
+        'page': page
+    }
 
 def do_prune(request, name):
     """Clear the page cache."""

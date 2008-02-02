@@ -1057,7 +1057,9 @@ class Page(models.Model):
            (not deleted and rev and rev.deleted):
             cache.delete('wiki/object_list')
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
+        if action == 'edit':
+            return href('wiki', self.name, action='edit')
         return href('wiki', self.name)
 
     def __unicode__(self):
