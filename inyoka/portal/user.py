@@ -165,8 +165,8 @@ class User(models.Model):
     aim = models.CharField('AIM', max_length=200, blank=True)
     yim = models.CharField('YIM', max_length=200, blank=True)
     signature = models.TextField('Signatur', blank=True)
-    coordinates = models.CharField('Koordinaten', max_length=255,
-                                   blank=True)
+    coordinates_long = models.FloatField('Koordinaten (Breite)', blank=True)
+    coordinates_lat = models.FloatField(u'Koordinaten (Länge)', blank=True)
     location = models.CharField('Wohnort', max_length=200, blank=True)
     gpgkey = models.CharField('GPG-Key', max_length=8, blank=True)    
     occupation = models.CharField('Beruf', max_length=200, blank=True)
@@ -307,9 +307,9 @@ def deactivate_user(user):
 
     _set_anonymous_name()
     user.is_active = 0
-    user.avatar = None
+    user.avatar = user.coordinates_long = user.coordinates_lat = None
     user.icq = user.jabber = user.msn = user.aim = user.yim = \
-        user.signature = user.coordinates = user.gpgkey = user.location = \
+        user.signature = user.gpgkey = user.location = \
         user.occupation = user.interests = user.website = ''
     user.save()
 

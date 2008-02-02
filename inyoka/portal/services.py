@@ -30,15 +30,10 @@ def on_get_current_user(request):
 def on_get_usermap_markers(request):
     """Return markers for the usermap."""
     markers = []
-    for user in User.objects.exclude(coordinates=''):
-        try:
-            parts = user.coordinates.split(',')
-            lat = float(parts[0].strip())
-            long = float(parts[1].strip())
-        except (ValueError, IndexError, TypeError):
-            user.coordinates = ''
-            user.save()
-            continue
+    for user in User.objects.exclude(coordinates_long=None)
+                            .exclude(coordinates_lat=None):
+        long = user.coordinates_long
+        lat = user.coordinates_lat
         markers.append({
             'type':     'user',
             'detail': {

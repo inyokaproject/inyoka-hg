@@ -242,9 +242,9 @@ class Event(models.Model):
     description = models.TextField()
     author = models.ForeignKey(User)
     location = models.CharField(max_length=100)
-    coordinates_long = models.FloatField()
-    coordinates_lat = models.FloatField()
-
+    coordinates_long = models.FloatField('Koordinaten (Breite)')
+    coordinates_lat = models.FloatField(u'Koordinaten (Länge)')
+    
 
     def get_absolute_url(self, action='show'):
         return href(*{

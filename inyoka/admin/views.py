@@ -505,8 +505,8 @@ def edit_user(request, username):
             data = form.cleaned_data
             for key in ('username', 'is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
-                        'msn', 'aim', 'yim', 'signature', 'coordinates',
-                        'gpgkey'):
+                        'msn', 'aim', 'yim', 'signature', 'coordinates_long',
+                        'coordinates_lat', 'gpgkey'):
                 setattr(user, key, data[key])
                 if data['avatar']:
                     user.save_avatar(data['avatar'])

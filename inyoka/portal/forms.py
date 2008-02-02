@@ -301,7 +301,10 @@ class UserCPProfileForm(forms.Form):
     yim = forms.CharField(label='Yahoo Instant Messenger', required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    #TODO: coordinates = models.CharField
+    coordinates_long = models.DecimalField(label='Koordinaten (Breite)',
+                       required=False, min_value=-90, max_value=90)
+    coordinates_lat = models.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180))
     location = forms.CharField(label='Wohnort', required=False)
     occupation = forms.CharField(label='Beruf', required=False)
     interests = forms.CharField(label='Interessen', required=False)

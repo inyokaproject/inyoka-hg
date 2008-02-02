@@ -89,7 +89,10 @@ class EditUserForm(forms.Form):
     # misc other things
     signature = forms.CharField(label=u'Signatur', required=False,
                                 widget=forms.Textarea)
-    coordinates = forms.CharField(label=u'Koordinaten', required=False)
+    coordinates_long = models.DecimalField(label='Koordinaten (Breite)',
+                       required=False, min_value=-90, max_value=90)
+    coordinates_lat = models.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180))
     location = forms.CharField(label=u'Wohnort', max_length=200, required=False)
     interests = forms.CharField(label=u'Interessen', max_length=200, required=False)
     website = forms.URLField(label=u'Webseite', required=False)
