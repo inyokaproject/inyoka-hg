@@ -22,17 +22,10 @@
     „{{ query|e }}“. Solltest du nicht fündig geworden sein kannst du eine
     <a href="/search/">neue Suche</a> mit veränderten Suchwörtern starten.
   </p>
-  {% if show_community %}
-    <p>
-      Community-Beiträge werden angezeigt:
-      <a href="{{ href('portal', 'search', query=query, area=area, show_community="false") }}">
-        Ausblenden
-      </a>
-    </p>
-  {% else %}
+  {% if not show_all %}
   <p>
-    Community-Beiträge sind aus Gründen der Übersichtlichkeit ausgeblendet:
-    <a href="{{ href('portal', 'search', query=query, area=area, show_community="true") }}">
+    Aus Gründen der Übersichtlichkeit wurden manche Beiträge ausgeblendet:
+    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true") }}">
       Alles anzeigen
     </a>
   </p>

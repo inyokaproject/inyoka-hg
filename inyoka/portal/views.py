@@ -302,8 +302,7 @@ def search(request):
     f = SearchForm(request.REQUEST)
     if f.is_valid():
         d = f.cleaned_data
-        show_community = request.GET.get('show_community',
-            request.user.show_community) in ("true", True)
+        show_all = request.GET.get('show_all') == 'true'
         area = {
             'wiki': 'w',
             'forum': 'f',
@@ -322,7 +321,7 @@ def search(request):
                 'highlight':        results.highlight_string,
                 'area':             d['area'],
                 'results':          results,
-                'show_community':   show_community
+                'show_all':         show_all
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %

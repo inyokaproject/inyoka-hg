@@ -300,7 +300,5 @@ class ArticleSearchAuthDecider(object):
         self.now = datetime.now()
 
     def __call__(self, auth):
-        rval = auth <= self.now
-        print rval
-        return rval
+        return auth <= self.now
 search.register_auth_decider('i', ArticleSearchAuthDecider)

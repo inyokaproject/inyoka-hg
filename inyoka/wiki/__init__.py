@@ -85,3 +85,6 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+
+# register search auth decider
+import inyoka.wiki.acl
