@@ -3,10 +3,11 @@
     inyoka.portal.models
     ~~~~~~~~~~~~~~~~~~~~
 
-    Model for the portal.
+    Models for the portal.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christopher Grebs,
-                                  Benjamin Wiegand, Christoph Hack.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs,
+                                  Benjamin Wiegand, Christoph Hack,
+                                  Marian Sigler.
     :license: GNU GPL.
 """
 from sha import sha
@@ -234,11 +235,16 @@ class Subscription(models.Model):
         )
 
 
-class CalendarItem(models.Model):
-    title = models.CharField(max_length=100)
+class Event(models.Model):
+    title = models.CharField(max_length=50)
+    date = models.DateField()
+    time = models.TimeField(null=True) # None means the event is the whole day
     description = models.TextField()
-    date = models.DateTimeField()
     author = models.ForeignKey(User)
+    location = models.CharField(max_length=100)
+    coordinates_long = models.FloatField()
+    coordinates_lat = models.FloatField()
+
 
     def get_absolute_url(self, action='show'):
         return href(*{
