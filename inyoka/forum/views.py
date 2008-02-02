@@ -1105,23 +1105,24 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
-@templated('forum/latest.html')
-def latest(request, page=1):
+@templated('forum/newposts.html')
+def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    all = Post.objects.get_latest()
+    all = Post.objects.get_new_posts()
     posts = []
     for post in all:
         if post.id < request.user.forum_last_read:
             break
         posts.append(post)
     pagination = Pagination(request, posts, page, 20,
-        href('forum', 'latest'))
+        href('forum', 'newposts'))
     return {
         'posts': pagination.get_objects(),
         'pagination': pagination.generate()
     }
+
 
 @templated('forum/welcome.html')
 def welcome(request, slug, path=None):

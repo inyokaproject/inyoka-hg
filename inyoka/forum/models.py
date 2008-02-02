@@ -297,11 +297,11 @@ class PostManager(models.Manager):
         row = cur.fetchone()
         return row and row[0] or 0
 
-    def get_latest(self):
+    def get_new_posts(self):
         """
         Fetch the latest topics (cached).
         """
-        posts = cache.get('forum_latest')
+        posts = cache.get('forum/newposts')
         if posts is not None:
             return posts
         cur = connection.cursor()
@@ -310,13 +310,14 @@ class PostManager(models.Manager):
               from forum_topic t, forum_post p
              where p.id = t.last_post_id
           order by p.pub_date desc
-             limit 500
+             limit 1000
         ''')
         posts = []
         for row in cur.fetchall():
             posts.append(Post.objects.select_related().get(id__exact=row[0]))
-        cache.set('forum_latest', posts, 30)
+        cache.set('forum/newposts', posts, 30)
         return posts
+
 
 class AttachmentManager(models.Manager):
     """
