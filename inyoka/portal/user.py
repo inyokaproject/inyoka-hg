@@ -181,10 +181,11 @@ class User(models.Model):
                                      default=False)
 
     # forum attribues
-    forum_last_read = models.IntegerField('Letzter gelesener Post', default=0, blank=True)
+    forum_last_read = models.IntegerField('Letzter gelesener Post',
+                                          default=0, blank=True)
     forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
-    show_community = models.BooleanField('Community-Beiträge anzeigen', default=False)
-    accept_community_policy = models.BooleanField('Community-Richtlinien akzeptiert', default=False)
+    forum_welcome = models.TextField('Gelesene Willkommensnachrichten',
+                                     blank=True)
 
     def save(self):
         """

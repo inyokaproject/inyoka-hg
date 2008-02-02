@@ -564,6 +564,7 @@ class Forum(models.Model):
         return href(*{
             'show': ('forum', self.parent and 'forum' or 'category', self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
+            'welcome': ('forum', 'forum', self.slug, 'welcome'),
             'edit': ('admin', 'forum', 'edit', self.id)
         }[action])
 
@@ -620,17 +621,34 @@ class Forum(models.Model):
                 topic.mark_read(user)
             forums.extend(forum.children)
 
-    def get_welcome_message(self, user):
+    def find_welcome(self, user):
         """
-        Return a unread welcome message if exists.
+        Return a forum with an unread welcome message if exits.
+        The message itself, can be retrieved late, by reading the
+        welcome_message attribute.
         """
         forums = self.parents
         forums.append(self)
-        read = set()
-        for f in forums:
-            if f.welcome_message_id is not None and \
-               f.welcome_message_id in read:
-                return f.welcome_message
+        read = user.is_authenticated and user.forum_welcome and \
+                set(int(i) for i in user.forum_welcome.split(',')) \
+                or set()
+        for forum in forums:
+            if forum.welcome_message_id is not None and \
+               forum.id not in read:
+                return forum
+        return None
+
+    def read_welcome(self, user, read=True):
+        if user.is_anonymous:
+            return
+        status = user.forum_welcome and \
+                set(int(i) for i in user.forum_welcome.split(',')) or set()
+        if read:
+            status.add(self.id)
+        else:
+            status.discard(self.id)
+        user.forum_welcome = ','.join(str(i) for i in status)
+        user.save()
 
     def __unicode__(self):
         return self.name
@@ -1115,11 +1133,17 @@ class WelcomeMessage(models.Model):
     explaining extra rules. The message will be displayed only once for
     each user.
     """
+    title = models.CharField(max_length=120)
     text = models.TextField('Nachricht')
+    rendered_text = models.TextField('Gerenderte Nachricht')
 
-    def get_absolute_url(self):
-        f = self.forum_set.all()[0]
-        return '%swelcome/' % url_for(f)
+    def save(self):
+        self.rendered_text = self.render_text()
+        super(WelcomeMessage, self).save()
+
+    def render_text(self, request=None, format='html'):
+        context = RenderContext(request or r.request, simplified=True)
+        return parse(self.text).render(context, format)
 
 
 def recv_post(post_id):
