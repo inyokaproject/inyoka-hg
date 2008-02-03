@@ -1,0 +1,20 @@
+
+.active {
+    font-weight: bold;
+}
+
+ul.switcher {
+    text-align: center;
+}
+ul.switcher li {
+    list-style: none;
+    display: inline;
+}
+ul.switcher li:before {
+    content: ' | ';
+    color: #AAA;
+    font-weight: normal;
+}
+ul.switcher li:first-child:before {
+    content: '';
+}
