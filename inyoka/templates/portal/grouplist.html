@@ -15,10 +15,10 @@
   <h2>Gruppenliste</h2>
 {% endblock %}
 {% block content %}
-  <h2>Gruppen</h2>
+  <h3>Gruppen</h3>
   <p>
     Insgesamt gibt es
-    {%- trans count=group_count -%}
+    {% trans count=group_count -%}
       <strong>{{ count }}</strong> Gruppe
     {%- pluralize -%}
       <strong>{{ count }}</strong> Gruppen

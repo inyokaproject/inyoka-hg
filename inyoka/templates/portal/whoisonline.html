@@ -15,6 +15,7 @@
 {% endblock %}
 
 {% block portal_content %}
+  <h3>Wer ist online?</h3>
   <p>
     {% trans all=sessions.all %}
     Momentan ist <strong>{{ all }}</strong> Benutzer online,
@@ -34,21 +35,24 @@
     <strong>{{ guests }}</strong> Gäste.
     {% endtrans %}
   </p>
-  Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern am {{ record_time|datetimeformat }}.
+  <p>
+    Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern am, die
+    {{ record_time|specificdatetimeformat(true) }} gleichzeitig online waren.
+  </p>
   {%- if sessions.sessions %}
   <ul>
-  {% for session in sessions.sessions %}
+    {%- for session in sessions.sessions %}
     <li>
-    {% if session.link -%}
-      <a href="{{ session.link|e }}" class="{{ session.type }}">{{ session.text|e or 'Gast' }}</a>
-    {% else %}
+      {%- if session.link %}
+      <a href="{{ session.link }}" class="{{ session.type }}">{{ session.text|e or 'Gast' }}</a>
+      {%- else %}
       <span class="{{ session.type }}">{{ session.text|e or 'Gast' }}</span>
-    {%- endif %}
-    {{ session.action }}
-    <small>({{ session.last_change|timedeltaformat(true) }})</small>
-    {% if session.category %} (<a href="{{ session.action_link|e }}">{{ session.category|e }}</a>){% endif %}
+      {%- endif %}
+      {{ session.action }}
+      <small>({{ session.last_change|timedeltaformat(true) }})</small>
+      {% if session.category %} (<a href="{{ session.action_link|e }}">{{ session.category|e }}</a>){% endif %}
     </li>
-  {%- endfor %}
+    {%- endfor %}
   </ul>
   {%- endif %}
 {% endblock %}

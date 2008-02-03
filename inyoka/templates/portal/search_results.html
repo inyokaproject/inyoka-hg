@@ -17,19 +17,20 @@
 {% endblock %}
 
 {% block portal_content %}
+  <h3>Suche</h3>
   <p>
     In der nachfolgenden Tabelle sind die Suchergbnisse für die Abfrage
     „{{ query|e }}“. Solltest du nicht fündig geworden sein kannst du eine
     <a href="/search/">neue Suche</a> mit veränderten Suchwörtern starten.
   </p>
-  {% if not show_all %}
-  <p>
+  {%- if not show_all %}
+  <div class="message">
     Aus Gründen der Übersichtlichkeit wurden manche Beiträge ausgeblendet:
-    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true") }}">
+    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true")|e }}">
       Alles anzeigen
     </a>
-  </p>
-  {% endif %}
+  </div>
+  {%- endif %}
   <table class="search_results">
     <thead>
       <tr>

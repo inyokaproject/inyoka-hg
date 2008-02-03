@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block portal_content %}  
-  <h2>{{ user.username|e }}</h2>
+  <h3>{{ user.username|e }}</h3>
   <table class="userinfo">
     <tr>
       <th>Name</th>
@@ -97,12 +97,13 @@
       </td>
     </tr>
   </table>
-
   {%- if wikipage %}
-  <h3>Benutzerseite (<a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">{{ wikipage and 'bearbeiten'}}</a>)</h3>
+  {{ wikipage }} (<a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">bearbeiten</a>)
     {{ wikipage }}
   {%- else %}
-  <h3>Benutzerseite</h3>
-    <p>Der Benutzer „{{ user.username|e }}“ hat noch keine eigene Benutzerseite. <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">Anlegen</a></p>
+  <p>
+    Der Benutzer „{{ user.username|e }}“ hat noch keine eigene Benutzerseite.
+    <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">Anlegen</a>
+  </p>
   {%- endif %}
 {% endblock %}
