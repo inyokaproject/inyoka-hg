@@ -4,7 +4,7 @@
   <Description>Ubuntuusers ({{ app|capitalize }})</Description>
   <Tags></Tags>
   <Contact></Contact>
-  <Url type="text/html" template="{{ href('portal', 'search/') }}?query={searchTerms}&amp;area={{ app }}" />
+  <Url type="text/html" template="{{ href('portal', 'search/') }}?query={searchTerms}{% if app != 'portal' %}&amp;area={{ app }}{% endif %}" />
   {# <Url type="application/x-suggestions+json" template="" /> -#}
   <Image height="16" width="16" type="image/x-icon">{{ href('static', 'img/favicon.ico') }}</Image>
   <OutputEncoding>UTF-8</OutputEncoding>
