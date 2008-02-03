@@ -30,8 +30,10 @@ def on_toggle_categories(request):
             hidden_categories.add(int(id))
         except ValueError:
             pass
-    request.user.settings['hidden_forum_categories'] = hidden_categories
-    print hidden_categories
+    if not hidden_categories:
+        request.user.settings.pop('hidden_forum_categories', None)
+    else:
+        request.user.settings['hidden_forum_categories'] = hidden_categories
     request.user.save()
     return True
 
