@@ -48,7 +48,7 @@ $(document).ready(function () {
       return false;
     })})();
 
-  // expand and collapse button for categories
+  /* expand and collapse button for categories */
   (function() {
     var toggleState = {};
     $('<a href="#" class="collapse" />')
@@ -66,6 +66,16 @@ $(document).ready(function () {
         $.get('/?__service__=forum.toggle_categories', {hidden: hidden});
         return false;
       })
-      .prependTo('table.category_box tr.head a')
+      .prependTo('table.category_box tr.head a');
+  
+    /* this function is used by the index template */
+    hideForumCategories = function(hidden_categories) {
+      $('table.category_box tr.head').each(function() {
+        if ($.inArray(this.id.substr(9), hidden_categories) >= 0) {
+          $(this).nextUntil('tr.head').hide();
+          $('a.collapse', this).addClass('collapsed');
+        }
+      });
+    };
   })();
 });
