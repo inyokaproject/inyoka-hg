@@ -1,5 +1,5 @@
 {% macro render_forum(forum) %}
-  <tr class="entry">
+  <tr class="entry category-{{ forum.parent.id }}">
     <td class="icon">
       {% if forum.get_read_status(USER) %}
         <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />

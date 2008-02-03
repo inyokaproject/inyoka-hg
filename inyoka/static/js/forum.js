@@ -74,6 +74,19 @@ function add_reply() {
 
 // collapse a forum category and save the status as cookie
 function collapse(tr) {
+  var cid = $(tr).attr('id');
+  var collapsed = $(tr).find('a').hasClass('expand');
+  if (collapsed) {
+    $(tr).find('a.expand').removeClass('expand').addClass('collapse');
+    $('tr.'+cid).show();
+  }
+  else {
+    $(tr).find('a.collapse').removeClass('collapse').addClass('expand');
+    $('tr.'+cid).hide();
+  }
+  return;
+
+  // XXX: old collapse code follows here:
   var inside = false;
   var link = $(tr).find('a.collapse');
   var status = $.cookie('forum_collapse');
