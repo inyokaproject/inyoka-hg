@@ -13,6 +13,7 @@
 
 {% set title_trace = [page.title|e] %}
 {% set action = 'manage' %}
+{% set scripts = ['WikiEditor.js'] + scripts %}
 
 {% block wiki_content %}
   <h1 class="pagetitle">Dateianhang bearbeiten</h1>
@@ -32,5 +33,10 @@
       <p><input type="submit" value="Anhang bearbeiten" />
          <input type="submit" name="cancel" value="Abbrechen" /></p>
     </form>
+    <script type="text/javascript">
+      /* <![CDATA[ */
+      var text = new WikiEditor('textarea[@name="text"]');
+      /* ]]> */
+    </script>
   </div>
 {% endblock %}
