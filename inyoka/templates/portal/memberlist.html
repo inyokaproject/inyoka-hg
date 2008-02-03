@@ -15,7 +15,12 @@
   <h2>Mitgliederliste</h2>
 {% endblock %}
 {% block content %}
-  <h2>Mitglieder</h2>
+  <h3>Mitglieder</h3>
+  <p>
+    Hier siehst du alle registrierten Benutzer, die ubuntuusers.de zur Zeit hat.
+    Die Benutzer, die im Moment online sind, kannst du auf
+    <a href="{{ href('portal', 'whoisonline') }}">dieser Seite</a> sehen.
+  </p> 
   <table>
     <tr>
       <th>{{ table.get_html('id', '#') }}</th>
@@ -30,8 +35,8 @@
       <td>
         <a href="{{ user|url }}">{{ user.username|e }}</a></td>
       <td>{{ user.location }}</td>
-      <td>{{ user.date_joined.strftime('%d.%m.%Y, %H:%M') }}</td>
-      <td>{{ user.posts }}</td>
+      <td>{{ user.date_joined.strftime('%d.%m.%Y') }}</td>
+      <td>{{ user.post_count }}</td>
     </tr>
     {% endfor -%}
   </table>

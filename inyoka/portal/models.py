@@ -248,7 +248,6 @@ class Event(models.Model):
     location_town = models.CharField(max_length=20)
     location_long = models.FloatField('Koordinaten (Breite)', blank=True)
     location_lat = models.FloatField(u'Koordinaten (Länge)', blank=True)
-    
 
     def get_absolute_url(self, action='show'):
         return href(*{

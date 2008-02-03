@@ -232,7 +232,7 @@ def do_edit(request, name):
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
 
-    if page.rev.attachment:
+    if page and page.rev.attachment:
         return do_attach_edit(request, page.name)
 
     # form defaults

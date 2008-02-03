@@ -14,7 +14,7 @@ from django.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
 from inyoka.utils.urls import href
-from inyoka.utils.forms import EmptyTextInput
+from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -65,41 +65,18 @@ class RegisterForm(forms.Form):
     username = forms.CharField(label='Benutzername')
     #email = forms.EmailField(label='E-Mail')
     # allow @localhost urls for easier testing
-    email = forms.CharField(label='E-Mail')
+    email = forms.CharField(label='E-Mail', help_text=u'Wir benötigen deine '
+        u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
+        u'deines vergessen haben solltest. ubuntuusers.de <a href="%s">'
+        u'garantiert</a>, dass sie nicht weitergegeben wird.' % href('portal',
+                                                               'datenschutz'))
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Passwortbestätigung',
         widget=forms.PasswordInput(render_value=False))
-    captcha = forms.CharField(label='CAPTCHA', widget=EmptyTextInput)
-    captcha_solution = None
-    hidden_captcha = forms.CharField(label='', widget=forms.HiddenInput,
-                                     required=False)
+    captcha = CaptchaField(label='CAPTCHA')
+    hidden_captcha = HiddenCaptchaField(required=False)
     terms_of_usage = forms.BooleanField(widget=forms.CheckboxInput)
-
-    def clean_captcha(self):
-        """
-        Validate the captcha image
-
-        `captcha_solution` is filled by the portal/register view."""
-        captcha = self.cleaned_data.get('captcha', '')
-        if captcha:
-            h = md5.new(settings.SECRET_KEY)
-            h.update(captcha)
-            if h.digest() == self.captcha_solution:
-                return True
-        raise forms.ValidationError('Die Eingabe des CAPTCHAs war nicht korrekt!')
-
-    def clean_hidden_captcha(self):
-        """
-        Validates if the user is be a bot or not.
-        """
-        if not self.cleaned_data.get('hidden_captcha', False):
-            return True
-        else:
-            raise forms.ValidationError(
-                u'Du hast ein unsichtbares Feld ausgefüllt und wurdest '
-                u'deshalb als Bot identifiziert!'
-            )
 
     def clean_username(self):
         """
@@ -183,10 +160,8 @@ class LostPasswordForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', required=False)
     #email = forms.EmailField(label=u'E-Mail', required=False)
     email = forms.CharField(label=u'E-Mail', required=False)
-    captcha = forms.CharField(label='CAPTCHA', widget=EmptyTextInput)
-    captcha_solution = None
-    hidden_captcha = forms.CharField(label='', widget=forms.HiddenInput,
-                                     required=False)
+    captcha = CaptchaField(label='CAPTCHA')
+    hidden_captcha = HiddenCaptchaField(required=False)
 
     def clean(self):
         data = super(self.__class__, self).clean()
@@ -220,28 +195,6 @@ class LostPasswordForm(forms.Form):
                 u'angeben!'
             )
 
-    def clean_captcha(self):
-        """Validate the CAPTCHA image"""
-        captcha = self.cleaned_data.get('captcha', '')
-        if captcha:
-            h = md5.new(settings.SECRET_KEY)
-            h.update(captcha)
-            if h.digest() == self.captcha_solution:
-                return True
-        raise forms.ValidationError('Die Eingabe des CAPTCHAs war nicht korrekt!')
-
-    def clean_hidden_captcha(self):
-        """
-        Validates if the user is a bot or not.
-        """
-        if not self.cleaned_data.get('hidden_captcha', False):
-            return True
-        else:
-            raise forms.ValidationError(
-                u'Du hast ein unsichtbares Feld ausgefüllt und wurdest '
-                u'deshalb als Bot identifiziert!'
-            )
-
 
 class SetNewPasswordForm(forms.Form):
     username = forms.CharField(widget=forms.HiddenInput)
@@ -254,13 +207,11 @@ class SetNewPasswordForm(forms.Form):
     def clean(self):
         data = super(self.__class__, self).clean()
         if data['password'] != data['password_confirm']:
-            raise forms.ValidationError(u'Die Passwörter stimmen nicht überein!')
-        print
-        for x in dir(self['password']):
-            print x, self['password'].__getattribute__(x)
-        print
+            raise forms.ValidationError(u'Die Passwörter stimmen nicht '
+                                        u'überein!')
         try:
-            data['user'] = User.objects.get(username=self['username'].data, new_password_key=self['new_password_key'].data)
+            data['user'] = User.objects.get(username=self['username'].data,
+                               new_password_key=self['new_password_key'].data)
         except User.DoesNotExist:
             raise forms.ValidationError(u'Der Benutzer konnte nicht gefunden '
                                         u'werden oder der Bestätigungskey '
