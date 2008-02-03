@@ -826,18 +826,24 @@ def about_inyoka(request):
     set_session_info(request, u'informiert sich über <a href="%s">'
                      u'Inyoka</a>' % href('portal', 'inyoka'))
 
+@templated('portal/calendar_month.html')
+def calendar_month(self, year, month):
+    year = int(year)
+    month = int(month)
 
-@templated('portal/calendar.html')
-def calendar(request, year=None, month=None):
-    now = datetime.now()
-    year = int(year or now.year)
-    month = int(month or now.month)
-    dates = Event.objects.filter(date__year=year, date__month=month) \
-                        .order_by('date')
+    MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
     return {
-        'dates': dates,
-        'prev': ('portal', 'calendar', '%s-%s' % (month > 1 and year or year
-                                         - 1, month > 1 and month - 1 or 12)),
-        'next': ('portal', 'calendar', '%s-%s' % (month < 12 and year or year
-                                          + 1, month < 12 and month + 1 or 1))
+        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'year': year,
+        'month': month,
     }
+
+
+
+
+
+
+
+
+
+
