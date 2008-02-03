@@ -406,7 +406,6 @@ def forums(request):
     }
 
 
-@require_manager
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):
     """
@@ -473,7 +472,6 @@ def forums_edit(request, id=None):
     }
 
 
-@require_manager
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
@@ -553,7 +551,6 @@ def edit_user(request, username):
     }
 
 
-@require_manager
 @templated('admin/groups.html')
 def groups(request):
     return {
@@ -561,10 +558,16 @@ def groups(request):
     }
 
 
-@require_manager
 @templated('admin/groups_edit.html')
 def groups_edit(request, id=None):
     new = id is not None
+    if request.method == 'POST':
+        form = EditGroupForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            # XXX: print "xxxxxxxxxx %s" % data
+    else:
+        form = EditGroupForm()
     return {
         'form': form
     }
