@@ -28,7 +28,7 @@
 {% elif isedit %}
   {% set title_trace = ['Posting bearbeiten']%}
 {% endif %}
-{% set scripts = ['WikiEditor.js', 'forum.js'] %}
+{% set scripts = ['WikiEditor.js'] %}
 {% set styles = ['editor.css'] %}
 
 {% block forum_content %}
@@ -54,9 +54,9 @@
       {# XXX: I'm sure that a better sollution exists for this #}
       <dd style="display: none"><input type="submit" value="Absenden" name="send" /></dd>
       {%- if isnewtopic or isfirstpost %}
-      <dt class="collapse" id="newtopic_polls">Umfragen:</dt>
+      <dt class="collapse">Umfragen:</dt>
       {%- if polls %}
-      <dd class="newtopic_polls_sub">Bestehende Umfragen:
+      <dd>Bestehende Umfragen:
         <ul>
           {%- for poll in polls %}
           <li>{{ poll.question|e }} <button name="delete_poll" value="{{ poll.id }}">Löschen</button></li>
@@ -64,19 +64,19 @@
         </ul>
       </dd>
       {%- endif %}
-      <dd class="newtopic_polls_sub">Frage: {{ poll_form.question }} {{ h.field_errors(poll_form.errors.question) }}</dd>
-      <dd class="newtopic_polls_sub">{{ poll_form.multiple }} <label for="id_multiple">Mehrfachantworten erlauben</label></dd>
+      <dd>Frage: {{ poll_form.question }} {{ h.field_errors(poll_form.errors.question) }}</dd>
+      <dd>{{ poll_form.multiple }} <label for="id_multiple">Mehrfachantworten erlauben</label></dd>
       {%- for option in options %}
-      <dd class="newtopic_polls_sub newtopic_polls_replies">Antwort {{ loop.index }}: <input type="text" name="options" value="{{ option }}" />
+      <dd class="newtopic_polls_replies">Antwort {{ loop.index }}: <input type="text" name="options" value="{{ option }}" />
         {%- if loop.last %}
         <input type="submit" name="add_option" value="Weitere Antwort" id="id_add_option" />
         {%- endif -%}
       </dd>
       {%- endfor %}
-      <dd class="newtopic_polls_sub"><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
+      <dd><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
       {%- endif %}
-      <dt class="collapse" id="newtopic_attachments">Dateianhänge:</dt>
-      <dd class="newtopic_attachments_sub">{{ h.attachment_form(attach_form, attachments) }}</dd>
+      <dt class="collapse">Dateianhänge:</dt>
+      <dd>{{ h.attachment_form(attach_form, attachments) }}</dd>
       {%- if isnewtopic or isfirstpost %}
       <dt>Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>

@@ -12,26 +12,19 @@
 $(document).ready(function () {
 
   /* collapsable elements for the input forms */
-  (function() {
-    var toggle_state = {};
-    $('.collapse').each(function () {
-      $('.' + this.id + '_sub').hide();
-      $(this)
-        .addClass('collapsed_header')
-        .click(toggle)
-        .css('cursor', 'pointer');
-      toggle_state[this.id] = true;
-    }).click(function() {
-      if (toggle_state[this.id]) {
-        $(this).addClass('expanded_header').removeClass('collapsed_header');
-        $('.' + this.id + '_sub').slideDown('normal');
-        toggle_state[this.id] = false;
-      } else {
-        $(this).addClass('collapsed_header').removeClass('expanded_header');
-        $('.' + this.id + '_sub').slideUp('normal');
-        toggle_state[this.id] = true;
-      }
-    })})();
+  $('dt.collapse').each(function() {
+    var children = $(this).nextWhile('dd').hide();
+    $(this).click(function() {
+      var lastChanged = 0;
+      $(this).toggleClass('collapsed');
+      (function next() {
+        $(children[lastChanged]).slideToggle(30, function() {
+          if (++lastChanged < children.length)
+            next();
+        });
+      })();
+    }).addClass('collapse').addClass('collapsed');
+  });
   
   /* poll helpers */
   (function() {
