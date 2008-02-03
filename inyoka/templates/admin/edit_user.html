@@ -37,6 +37,7 @@
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}
+  <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
   </dl>
   <h3>Persönliche Details von {{ user.username }}</h3>
   {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
@@ -51,9 +52,21 @@
 <script type="text/javascript">
   /* <![CDATA[ */
   var signature = new WikiEditor('textarea[@name="signature"]');
-  var date = new DateTimeField('input[@name="date_joined"]');
-  var rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
+  var date_joined = null;
+  var forum_rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
     {{ forum_privileges|jsonencode }});
+
+  var dj_ui_switcher = $('.date_joined_ui_switcher');
+  dj_ui_switcher.click(function() {
+    if (date_joined instanceof DateTimeField) {
+      date_joined.destroy();
+      date_joined = null;
+      dj_ui_switcher.text('grafischen Editor aktivieren');
+    } else {
+      date_joined = new DateTimeField('input[@name="date_joined"]');
+      dj_ui_switcher.text('grafischen Editor deaktivieren');
+    }
+  })
   /* ]]> */
 </script>
 {% endblock %}
