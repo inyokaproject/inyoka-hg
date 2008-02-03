@@ -150,7 +150,7 @@ class User(models.Model):
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.now)
-    date_joined = models.DateTimeField('Angemeldet', default=datetime.datetime.now)
+    date_joined = models.DateTimeField('Anmeldedatum', default=datetime.datetime.now)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
