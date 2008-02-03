@@ -571,6 +571,7 @@ def privmsg(request, folder=None, entry_id=None):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg_new(request, username=None):
+    form = PrivateMessageForm()
     if request.method == 'POST':
         form = PrivateMessageForm(request.POST)
         if form.is_valid():
@@ -586,7 +587,7 @@ def privmsg_new(request, username=None):
                               for r in recipients]
             except User.DoesNotExist:
                 recipients = None
-                flash('XXX Mindestens einen der Benutzer gibts nicht!', False)
+                flash('Der Benutzer wurde nicht gefunden', False)
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user
@@ -610,7 +611,7 @@ def privmsg_new(request, username=None):
         if request.GET.get('reply_to'):
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,
-                    message=request.GET.get('reply_to'))
+                    message=int(request.GET.get('reply_to')))
                 msg = entry.message
                 data['subject'] = msg.subject.startswith(u'Re: ') and \
                                   msg.subject or u'Re: %s' % msg.subject
@@ -618,12 +619,10 @@ def privmsg_new(request, username=None):
                 data['text'] = u'%s schrieb:\n%s' % (
                     msg.author.username,
                     '\n'.join('> %s' % l for l in msg.text.splitlines()))
-            except PrivateMessageEntry.DoesNotExist:
+            except (PrivateMessageEntry.DoesNotExist, ValueError):
                 pass
         if username:
             form = PrivateMessageForm(initial={'recipient': username})
-        else:
-            form = PrivateMessageForm(data)
     return {
         'form': form
     }
