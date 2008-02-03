@@ -60,16 +60,3 @@ select.permissions, select.forums {
 select.permissions option, select.forums option {
   padding: 0.2em 0.8em;
 }
-
-select[name="groups"] {
-  margin: 20px;
-  margin-top: 0px;
-}
-
-span.date_joined_ui_switcher {
-  margin: 10px;
-  cursor: pointer;
-  background-color: #ccc;
-  display: inline;
-
-}
