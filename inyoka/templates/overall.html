@@ -27,7 +27,13 @@
     <link rel="alternate" href="{{ url|e }}" title="{{ title|e }}" type="application/atom+xml" />
     {%- endfor %}
     <link rel="shortcut icon" href="{{ href('static', 'img/favicon.ico') }}" />
-    <script type="text/javascript">
+    <link rel="search" type="application/opensearchdescription+xml" title="Ubuntuusers" href="{{ href('portal', 'opensearch/portal/') }}"> 
+    {%- for app in ('forum', 'wiki', 'ikhaya', 'planet') %}
+    {%- if app == active_app %}
+    <link rel="search" type="application/opensearchdescription+xml" title="Ubuntuusers - {{ app|capitalize }}" href="{{ href('portal', 'opensearch/' + app + '/') }}"> 
+    {%- endif -%}
+    {%- endfor %}
+   <script type="text/javascript">
     /*<![CDATA[*/
       var
         $STATIC_URL = {{ href('static')|jsonencode }},

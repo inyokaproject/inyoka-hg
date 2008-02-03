@@ -13,6 +13,7 @@
 
 {% set title_trace = [page.title|e] %}
 {% set action = 'manage' %}
+{% set styles = ['editor.css'] + styles %}
 {% set scripts = ['WikiEditor.js'] + scripts %}
 
 {% block wiki_content %}
@@ -23,13 +24,10 @@
       enctype="multipart/form-data" id="form_addattachment">
       <p><label for="id_attachment">Neuer Dateianhang:</label>
       {{ form.attachment }}</p>
-      <p><label for="id_text">Beschreibung:</label>
-        {{ form.text }}</p>
-      <p><label for="id_note">Änderungsnotiz:</label>
+      <p><label for="id_text">Beschreibung:</label><br style="clear:both" /></p>
+      <p>{{ form.text }}</p>
+        <p><label for="id_note">Änderungsnotiz:</label><br />
         {{ form.note }}</p>
-      <div style="display: none">  
-        {{ form.filename }} {{ form.override }}
-      </div>  
       <p><input type="submit" value="Anhang bearbeiten" />
          <input type="submit" name="cancel" value="Abbrechen" /></p>
     </form>
