@@ -65,8 +65,10 @@
           if loop.index == 1 %} checked="checked"{% endif %} /></td>
         <td class="actions">
           <a href="{{ revision|url|e }}" class="view" title="Ansehen"><span>ansehen</span></a>
+          {%- if can.edit %}
           <a href="?action=revert&amp;rev={{ revision.id }}" class="revert"
              title="Wiederherstellen"><span>wiederherstellen</span></a>
+          {%- endif %}
           <a href="?action=export&amp;format=raw&amp;rev={{ revision.id }}" class="raw"
              title="Rowformat"><span>Rohformat</span></a>
         </td>
