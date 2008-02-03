@@ -838,12 +838,10 @@ def calendar_month(self, year, month):
         'month': month,
     }
 
-
-
-
-
-
-
-
-
-
+@templated('portal/open_search.xml', content_type='text/xml; charset=utf-8')
+def open_search(self, app):
+    if app not in ('wiki', 'forum', 'planet', 'ikahaya'):
+        app='portal'
+    return {
+        'app': app
+    }

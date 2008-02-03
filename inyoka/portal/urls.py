@@ -47,6 +47,7 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^feeds/(?P<app>[^/]+)/$', 'feedselector'),
     (r'^calendar/$', 'calendar_overview'),
     (r'^calendar/(?P<year>\d{4})/(?P<month>\d{2})/$', 'calendar_month'),
+    (r'^opensearch/(?P<app>[a-z]+)/$', 'open_search'),
     # static pages
     (r'^([-A-Za-z_]+)/$', 'static_page'),
 )

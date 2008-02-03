@@ -38,6 +38,12 @@
     {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'overall.js'] + scripts %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
+    <link rel="search" type="application/opensearchdescription+xml" title="Ubuntuusers" href="{{ href('portal', 'opensearch/portal/') }}"> 
+    {%- for app in ('forum', 'wiki', 'ikhaya', 'planet') %}
+    {%- if app == active_app %}
+    <link rel="search" type="application/opensearchdescription+xml" title="Ubuntuusers - {{ app|capitalize }}" href="{{ href('portal', 'opensearch/' + app + '/') }}"> 
+    {%- endif -%}
+    {%- endfor %}
     {%- endblock %}
   </head>
   <body>
