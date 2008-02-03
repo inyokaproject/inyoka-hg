@@ -13,9 +13,9 @@ $(document).ready(function () {
 
   /* collapsable elements for the input forms */
   $('dt.collapse').each(function() {
-    var children = $(this).nextWhile('dd').hide();
+    $(this).nextWhile('dd').hide();
     $(this).click(function() {
-      var lastChanged = 0;
+      var children = $(this).nextWhile('dd'), lastChanged = 0;
       $(this).toggleClass('collapsed');
       (function next() {
         $(children[lastChanged]).slideToggle(30, function() {
