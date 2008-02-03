@@ -127,10 +127,7 @@ SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 # more useful in the production environment
 CACHE_BACKEND = 'locmem:///'
 
-# We only load templates from the template folder
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source'
 )
 
 MIDDLEWARE_CLASSES = (

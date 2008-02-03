@@ -12,6 +12,7 @@
 {% set navigation_trace = [
     (href('admin', 'groups'), 'Gruppen'),
 ] %}
+{% set scripts = scripts + ['jQuery.autocomplete.js'] %}
 
 {% block appheader %}
 <h1>Administration</h1>
@@ -24,15 +25,31 @@
 {% if not groups %}
 <p>Aktuell existieren keine Gruppen. <a href="{{ href('admin', 'groups', 'new') }}">erstelle</a> die erste Gruppe.</p>
 {% else %}
-<p>Wähle eine Gruppe aus, die du editieren möchtest:</p>
 <form action="" method="post">
+  <p>Gib den Namen der Gruppe an:</p>
+  <input type="text" id="group_query" name="user" />
+  <input type="submit" value="Auswählen" />
+
+  <p>Oder wähle eine Gruppe aus, die du editieren möchtest:</p>
   <select name="groups" size="5">
     {% for group in groups %}
     <option>{{ group.name }}</option>
     {% endfor %}
   </select>
-  <input type="text" id="user_query" name="user" />
+
   <input type="submit" value="Auswählen" />
 </form>
+<p>
+  Oder <a href="{{ href('admin', 'groups', 'new') }}">lege eine neue Gruppe</a> an.
+</p>
+
+<script type="text/javascript">
+  /* <![CDATA[ */
+  (function () {
+    $('#group_query').autocomplete("/?__service__=admin.get_group_autocompletion", {
+      delay: 40, maxItemsToShow: 15, cacheLength: 10});
+  })();
+  /* ]]> */
+</script>
 {% endif %}
 {% endblock %}
