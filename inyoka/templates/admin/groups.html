@@ -26,6 +26,7 @@
 {% else %}
 <p>Wähle eine Gruppe aus, die du editieren möchtest:</p>
 <form action="" method="post">
+  <div>
   <select name="groups" size="5">
     {% for group in groups %}
     <option>{{ group.name }}</option>
@@ -33,6 +34,7 @@
   </select>
   <input type="text" id="user_query" name="user" />
   <input type="submit" value="Auswählen" />
+  </div>
 </form>
 {% endif %}
 {% endblock %}
