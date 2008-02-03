@@ -14,6 +14,8 @@
 
 {% set title_trace = [page.title|e] %}
 {% set action = 'manage' %}
+{% set styles = ['editor.css'] + styles %}
+{% set scripts = ['WikiEditor.js'] + scripts %}
 
 {% block wiki_content %}
   <h1 class="pagetitle">Dateianhang hinzufügen</h1>
@@ -25,8 +27,8 @@
         {{ form.attachment }}</p>
       <p><label for="id_filename">Umbenennen auf:</label>
         {{ form.filename }}</p>
-      <p><label for="id_text">Beschreibung:</label>
-        {{ form.text }}</p>
+      <p><label for="id_text">Beschreibung:</label><br clear="both" /></p>
+        <p>{{ form.text }}</p>
       <p><label for="id_note">Änderungsnotiz:</label>
         {{ form.note }}</p>
       <p>{{ form.override }} <label for="id_override">Bestehenden Anhang
@@ -34,6 +36,12 @@
       <p><input type="submit" value="Anhang hochladen" />
          <input type="submit" name="cancel" value="Abbrechen" /></p>
     </form>
+    <script type="text/javascript">
+      /* <![CDATA[ */
+      var text = new WikiEditor('textarea[@name="text"]');
+      /* ]]> */
+    </script>
+
 
     <h2>Vorhandene Dateianhänge</h2>
     {%- if attachments %}
