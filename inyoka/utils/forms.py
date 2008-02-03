@@ -9,10 +9,14 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
+import md5
+from django.conf import settings
 from django import newforms as forms
+from django.newforms.widgets import Input
 import django.db.models.base
 from inyoka.portal.user import User
-
+from inyoka.utils.urls import href
+from inyoka.middlewares.registry import r
 
 DATETIME_INPUT_FORMATS = (
     '%d.%m.%Y %H:%M', # default output format
@@ -29,12 +33,6 @@ DATETIME_INPUT_FORMATS = (
     '%d.%m.%y, %H:%M:%S',
     '%d.%m.%y, %H:%M',
 )
-
-
-class EmptyTextInput(forms.TextInput):
-
-    def render(self, name, value, attrs=None):
-        return super(EmptyTextInput, self).render(name, u'', attrs)
 
 
 class MultiField(forms.Field):
@@ -77,3 +75,39 @@ class UserField(forms.CharField):
             return User.objects.get(username=value)
         except:
             raise forms.ValidationError(u'Diesen Benutzer gibt es nicht')
+
+
+class CaptchaWidget(Input):
+    input_type = 'text'
+
+    def render(self, name, value, attrs=None):
+        input = Input.render(self, name, u'', attrs)
+        return (u'<img src="%s" class="captcha" alt="Captcha" /><br />'
+                u'Bitte gib den Code des obigen Bildes hier ein: <br />%s '
+                u'<input type="submit" name="renew_captcha" value="Neuen Code'
+                u' erzeugen" />') % (href('portal', __service__=
+                                   'portal.get_captcha'), input)
+
+
+class CaptchaField(forms.Field):
+    widget = CaptchaWidget
+
+    def clean(self, value):
+        solution = r.request.session.get('captcha_solution')
+        h = md5.new(settings.SECRET_KEY)
+        h.update(value)
+        if h.digest() == solution:
+            return True
+        raise forms.ValidationError(u'Die Eingabe des Captchas war nicht '
+                                    u'korrekt')
+
+
+class HiddenCaptchaField(forms.Field):
+    widget = forms.HiddenInput
+
+    def clean(self, value):
+        if not value:
+            return True
+        else:
+            raise forms.ValidationError(u'Du hast ein unsichtbares Feld '
+                    u'ausgefüllt und wurdest deshalb als Bot identifiziert.')

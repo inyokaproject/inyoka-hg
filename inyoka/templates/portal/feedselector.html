@@ -18,6 +18,7 @@
   <h2>Feed auswählen</h2>
 {% endblock %}
 {% block portal_content %}
+  <h3>Feed generieren</h3>
   {%- if not app %}
   <ul class="toc">
     <li><a href="#forum">Forum</a></li>
@@ -29,7 +30,7 @@
   
   {%- if not app or app == 'forum' %}
   <form action="/feeds/forum/" method="post" id="forum">
-  <h3>Forum</h3>
+  <h4>Forum</h4>
   
   <dl>
     <dt>Was</dt>
@@ -91,14 +92,14 @@
   {%- endif %}
   {%- if not app or app == 'wiki' %}
   <form action="/feeds/wiki/" method="post" id="wiki">
-  <h3>Wiki</h3>
+  <h4>Wiki</h4>
   </form>
   
   
   {%- endif %}
   {%- if not app or app == 'ikhaya' %}
   <form action="/feeds/ikhaya/" method="post" id="ikhaya">
-  <h3>Ikhaya</h3>
+  <h4>Ikhaya</h4>
   
   <dl>
     <dt>Was</dt>
@@ -135,7 +136,7 @@
   {%- endif %}
   {%- if not app or app == 'planet' %}
   <form action="/feeds/planet/" method="post" id="planet">
-  <h3>Planet</h3>
+  <h4>Planet</h4>
   <dl>
     <dt>Wie</dt>
     <dd>

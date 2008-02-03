@@ -16,44 +16,46 @@
   <h2>Login</h2>
 {% endblock %}
 {% block portal_content %}
-  {% if failed %}
-    {% if not inactive %}
-    <div class="message fail">
-      Du konntest nicht eingeloggt werden, da das Passwort für den Benutzer
-      „{{ username|e }}“ falsch war oder der Benutzer nicht existiert.
-    </div>
-    {% else %}
-    <div class="message fail">
-      Du konntest nicht eingeloggt werden, da der Benutzer „{{ username|e
-      }}“ derzeit inaktiv ist. Das liegt wahrscheinlich daran, dass du den
-      Aktivierungslink in der Bestätigungsmail, die dir nach der
-      Registrierung zugeschickt wurde, nicht aufgerufen hast. Solltest du
-      diese Mail nicht bekommen haben, kannst du sie <a href="
-      {{- href('portal', 'register', 'resend', username) -}}
-      ">erneut anfordern</a>. Falls es weiterhin nicht funktioniert, schreibe
-      bitte eine Nachricht an ... {# XXX: E-Mail #}
-    </div>
-    {% endif %}
-  {% endif %}
-  {% if cookie_error %}
-    <div class="message fail">
-      Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
-      sich auf ubuntuusers.de anzumelden.  Bitte aktiviere Cookies im Browser
-      und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
-    </div>
-    <p>
-      Nähere Informationen zu Cookies finden sich in
-      <a href="/datenschutz/">der Datenschutzerklärung</a>.
-    </p>
-  {% else %}
+  <h3>Login</h3>
+  {%- if failed %}
+  {%- if not inactive %}
+  <div class="message fail">
+    Du konntest nicht eingeloggt werden, da das Passwort für den Benutzer
+    „{{ username|e }}“ falsch war oder der Benutzer nicht existiert.
+  </div>
+  {%- else %}
+  <div class="message fail">
+    Du konntest nicht eingeloggt werden, da der Benutzer „{{ username|e  }}“
+    derzeit inaktiv ist. Das liegt wahrscheinlich daran, dass du den
+    Aktivierungslink in der Bestätigungsmail, die dir nach der
+    Registrierung zugeschickt wurde, nicht aufgerufen hast. Solltest du
+    diese Mail nicht bekommen haben, kannst du sie <a href="
+    {{- href('portal', 'register', 'resend', username) -}}
+    ">erneut anfordern</a>. Falls es weiterhin nicht funktioniert, schreibe
+    bitte eine Nachricht an ... {# XXX: E-Mail #}
+  </div>
+  {%- endif %}
+  {%- endif %}
+  {%- if cookie_error %}
+  <div class="message fail">
+    Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
+    sich auf ubuntuusers.de anzumelden.  Bitte aktiviere Cookies im Browser
+    und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
+  </div>
+  <p>
+    Nähere Informationen zu Cookies finden sich in
+    <a href="/datenschutz/">der Datenschutzerklärung</a>.
+  </p>
+  {%- else %}
+  <p>
+    Hier kannst du dich mit deinem Benutzer einloggen, wenn du dich schon 
+    <a href="{{ href('portal', 'register') }}">registriert hast</a>.
+    Falls du dein Passwort vergessen hast, kannst du dir <a href="
+    {{- href('portal', 'lost_password') }}">hier</a> ein neues zuschicken lassen.
+  </p>
   <form action="" method="post" class="loginform">
     <dl>
-      <dt><label for="id_username">{{ form.username.label }}</label></dt>
-      <dd class="input">{{ form.username }}{{ form.errors.username }}</dd>
-
-      <dt><label for="id_password">{{ form.password.label }}</label></dt>
-      <dd class="input">{{ form.password }}{{ form.errors.password }}</dd>
-
+      {{ h.render_form(form, 'username', 'password', inline=true) }}
       <dd>{{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label></dd>
     </dl>
     <div class="actions">
@@ -62,17 +64,8 @@
     </div>
 
   </form>
-  <dl>
-    <dt>Weitere Aktionen</dt>
-      <dd>
-      <ul>
-        <li><a href="{{ href('portal', 'register') -}}">Noch nicht registriert?</a></li>
-        <li><a href="{{ href('portal', 'lost_password') }}">Passwort oder Benutzername vergessen?</a></li>
-      </ul>
-      </dd>
-  </dl>
   <script type="text/javascript">
     $(function() { $('#id_username').focus(); });
   </script>
-  {% endif %}
+  {%- endif %}
 {% endblock %}

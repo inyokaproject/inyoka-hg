@@ -15,13 +15,13 @@
   <h2>{{ group.name|e }}</h2>
 {% endblock %}
 {% block content %}
-  <h2>{{ group.name|e }}</h2>
+  <h3>{{ group.name|e }}</h3>
   <p>
     Die Gruppe „{{ group.name|e }}“ hat insgesamt
     {%- trans count=user_count %}
-      <strong>{{ count }}</strong> Mitglied.
+      <strong>{{ count }}</strong> Mitglied:
     {%- pluralize %}
-      <strong>{{ count }}</strong> Mitglieder.
+      <strong>{{ count }}</strong> Mitglieder:
     {%- endtrans %}
   </p>
   <table>

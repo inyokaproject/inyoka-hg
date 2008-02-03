@@ -4,7 +4,7 @@
 
     This page displays a formular where the user can register a new account.
 
-    :copyright: 2007 by Christopher Grebs.
+    :copyright: 2007 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 #}
 
@@ -15,20 +15,49 @@
   <h2>Registrieren</h2>
 {% endblock %}
 {% block portal_content %}
-  {% if cookie_error %}
-    <div class="message fail">
-      Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
-      sich auf ubuntuusers.de registrieren und anzumelden.  Bitte aktiviere
-      Cookies im Browser und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
-    </div>
+  <h3>Registrierung</h3>
+  {%- if cookie_error %}
+  <div class="message fail">
+    Aus Gründen der Sicherheit müssen Cookies im Browser aktiviert sein um
+    sich auf ubuntuusers.de registrieren und anzumelden.  Bitte aktiviere
+    Cookies im Browser und klicke auf <a href="{{ retry_link|e }}">fortfahren</a>.
+  </div>
+  <p>
+    Nähere Informationen zu Cookies finden sich in <a href="
+    {{- href('portal', 'datenschutz') }}">der Datenschutzerklärung</a>.
+  </p>
+  {%- else %}
+  <form action="" method="post">
+    <dl>
+      {{ h.render_form(form, 'username', 'password', 'confirm_password',
+                             'email', inline=true)}}
+      <dt>Nutzungshinweise:</dt>
+      {# include the agreement letter #}
+      <dd>{{ form.terms_of_usage }} Ich bestätige den <a href="{{ href('portal', 'lizenz') }}">Lizenztext</a> gelesen zu haben und erkläre mich mit der Veröffentlichung unter dieser Lizenz einverstanden.<br />Durch das Abschließen der Registrierung stimme ich den <a href="{{ href('portal', 'nutzungsbedingungen') }}">Nutzungsbedingungen</a> ebenfalls zu.<br />
+      {{ h.field_errors(form.errors.terms_of_usage) }}</dd>
+      <dd>{{ form.hidden_captcha }}</dd>
+      <dd>{{ h.field_errors(form.errors.hidden_captcha) }}</dd>
+      <dd style="display: none"><input type="submit" /></dd><!-- at enter the first submit button is used -->
+      {{ h.render_form(form, 'captcha', inline=true) }}
+    </dl>
     <p>
-      Nähere Informationen zu Cookies finden sich in
-      <a href="/datenschutz/">der Datenschutzerklärung</a>.
+      <input type="submit" value="Registrieren" />
     </p>
-  {% else %}
-  {{ h.render_register_form(form) }}
-  {% endif %}
     <script type="text/javascript">
-    $(function() { $('#id_username').focus(); });
-  </script>
+      /*<![CDATA[*/
+      (function() {
+        var captcha_url = $('img.captcha').attr('src');
+        $('input[@name="renew_captcha"]')
+          .click(function() {
+            var uid = Math.random().toString().substring(2, 10);
+            $('img.captcha')
+              .attr('src', captcha_url + '&rnd=' + uid);
+            return false;
+          });
+        $('#id_username').focus();
+      })();
+      /*]]>*/
+    </script>
+  </form>
+  {%- endif %}
 {% endblock %}

@@ -238,6 +238,17 @@ span.highlight {
   color: #444;
 }
 
+.note_link {
+  font-size: 0.9em;
+  padding-left: 1.0em;
+  color: #444;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.note_link:hover {
+  color: #111;
+}
+
 table.syntaxtable {
   border: 1px solid #DDDDDD;
   border-collapse: collapse;

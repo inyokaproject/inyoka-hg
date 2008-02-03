@@ -27,23 +27,3 @@ def render_form(form, *fields, **kwargs):
 def field_errors(errors):
     """Render an error dict to HTML"""
     return {'errors': errors}
-
-
-@partial_renderable('portal/_login_form.html')
-def render_login_form(form):
-    return {'form': form}
-
-
-@partial_renderable('portal/_registration_form.html')
-def render_register_form(form):
-    return {'form': form}
-
-
-@partial_renderable('portal/_lost_password_form.html')
-def render_lost_password_form(form):
-    return {'form': form}
-
-
-@partial_renderable('portal/usercp/_change_password_form.html')
-def render_change_password_form(form):
-    return {'form': form}
