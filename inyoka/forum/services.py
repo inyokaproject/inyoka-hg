@@ -21,6 +21,23 @@ def on_get_topic_autocompletion(request):
     return [x.slug for x in qs]
 
 
+def on_toggle_category(request):
+    if request.user.is_anonymous:
+        return False
+    try:
+        category_id = int(request.args['id'])
+    except (ValueError, KeyError):
+        return False
+    categories = request.user.settings.get('hidden_forum_categories', set())
+    if request.args.get('hide', 'false'):
+        categories.discard(category_id)
+    else:
+        categories.add(category_id)
+    request.user.save()
+    return True
+
+
 dispatcher = SimpleDispatcher(
-    get_topic_autocompletion=on_get_topic_autocompletion
+    get_topic_autocompletion=on_get_topic_autocompletion,
+    toggle_category=on_toggle_category
 )
