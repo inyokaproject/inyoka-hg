@@ -98,8 +98,10 @@
     </tr>
   </table>
   {%- if wikipage %}
-  {{ wikipage }} (<a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">bearbeiten</a>)
-    {{ wikipage }}
+  {{ wikipage }}
+  <p>
+    (<a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">bearbeiten</a>)
+  </p>
   {%- else %}
   <p>
     Der Benutzer „{{ user.username|e }}“ hat noch keine eigene Benutzerseite.
