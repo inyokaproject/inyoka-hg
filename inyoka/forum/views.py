@@ -243,7 +243,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         ])
 
     privileges = get_forum_privileges(request.user, t.forum)
-    if t.locked and not privileges['moderator']:
+    if t.locked and not privileges['moderate']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
                u'von einem Moderator geschlossen wurde.'))
         return HttpResponseRedirect(t.get_absolute_url())
