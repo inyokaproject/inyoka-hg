@@ -1,0 +1,24 @@
+{#
+    wiki/action_rename.html
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    This template is (unlike the other action templates) not a full HTML page
+    but flashed to the show action.  So keep it small, it's in a cookie!
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+-#}
+
+
+<form action="{{ href('wiki', page.name, rev=page.rev.id, action='rename')|e
+      }}" method="post">
+  <p><small>
+    Beim Umbenennen wird die Seite über alle Revisionen hinweg umbenannt als
+    hätte sie diesen Namen immer gehabt.  Unter der alten Seite wird dann
+    ein Redirect zum neuen Namen eingerichtet.
+  </small></p>
+  <p>Neuer Seitenname:</p>
+  <p><input type="text" name="new_name" size="30" value="{{ new_name|e(true) }}" />
+     <input type="submit" value="Umbenennen" />{#
+   #}<input type="submit" name="cancel" value="Abbrechen" /></p>
+</form>

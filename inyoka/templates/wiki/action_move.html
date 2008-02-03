@@ -1,0 +1,24 @@
+{#
+    wiki/action_move.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    This template is (unlike the other action templates) not a full HTML page
+    but flashed to the show action.  So keep it small, it's in a cookie!
+
+    :copyright: 2008 by Armin Ronacher.
+    :license: GNU GPL.
+-#}
+
+
+<form action="{{ href('wiki', page.name, rev=page.rev.id, action='move')|e
+      }}" method="post">
+  <p><small>
+    Beim Verschieben werden zukünftige Revisionen einen neuen Namen erhalten,
+    der bisherige Revisionsverlauf bleibt allerdings unter dem alten Namen
+    erreichbar.
+  </small></p>
+  <p>Neuer Seitenname:</p>
+  <p><input type="text" name="new_name" size="30" value="{{ new_name|e(true) }}" />
+     <input type="submit" value="Verschieben" />{#
+   #}<input type="submit" name="cancel" value="Abbrechen" /></p>
+</form>
