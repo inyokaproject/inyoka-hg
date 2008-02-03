@@ -44,4 +44,17 @@
   {%- else %}
     <p>Keine Kategorien</p>
   {%- endif %}
+  {% if hidden_categories %}
+  <script type="text/javascript">
+    $(function() {
+      var hidden_categories = {{ hidden_categories|jsonencode }};
+      $('table.category_box tr.head').each(function() {
+        if ($.inArray(this.id.substr(9), hidden_categories) > 0) {
+          $(this).nextUntil('tr.head').hide();
+          $('a.collapse', this).addClass('collapsed');
+        }
+      });
+    });
+  </script>
+  {% endif %}
 {% endblock %}

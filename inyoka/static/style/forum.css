@@ -151,7 +151,7 @@ table.forum td.last_post {
     background-image: url('../img/forum/unlock.png');
 }
 
-table.forum a.collapse, table.forum a.expand {
+table.forum a.collapse {
     float: right;
     width: 16px;
     height: 16px;
@@ -163,6 +163,6 @@ table.forum a.collapse {
     background-image: url('../img/icons/small/collapse.png');
 }
 
-table.forum a.expand {
+table.forum a.collapsed {
     background-image: url('../img/icons/small/expand.png');
 }

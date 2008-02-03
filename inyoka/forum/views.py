@@ -87,9 +87,15 @@ def index(request, category=None):
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
 
+    hidden_categories = []
+    if request.user.is_authenticated:
+        hidden_categories.extend(request.user.settings.get(
+            'hidden_forum_categories', ()))
+
     return {
-        'categories': filter_invisible(request.user, categories),
-        'is_index':   not category
+        'categories':           filter_invisible(request.user, categories),
+        'is_index':             not category,
+        'hidden_categories':    hidden_categories
     }
 
 

@@ -50,10 +50,20 @@ $(document).ready(function () {
 
   // expand and collapse button for categories
   (function() {
-    var toggleQueue = {};
+    var toggleState = {};
     $('<a href="#" class="collapse" />')
       .click(function() {
-        console.log(this);
+        var head = $(this).parent().parent().parent();
+        head.nextUntil('tr.head').toggle();
+        $(this).toggleClass('collapsed');
+        $('table.category_box tr.head').each(function() {
+          toggleState[this.id.substr(9)] = $('a.collapsed', this).length > 0;
+        });
+        var hidden = []
+        for (id in toggleState)
+          if (toggleState[id])
+            hidden.push(id);
+        $.get('/?__service__=forum.toggle_categories', {hidden: hidden});
         return false;
       })
       .prependTo('table.category_box tr.head a')

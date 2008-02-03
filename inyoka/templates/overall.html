@@ -35,7 +35,8 @@
         $BASE_DOMAIN_NAME = {{ SETTINGS.BASE_DOMAIN_NAME|jsonencode }};
     /*]]>*/
     </script>
-    {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'overall.js'] + scripts %}
+    {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
+                       'overall.js'] + scripts %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
     {%- endblock %}
