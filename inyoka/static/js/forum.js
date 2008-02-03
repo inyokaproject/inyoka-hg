@@ -23,7 +23,7 @@ $(document).ready(function () {
             next();
         });
       })();
-    }).addClass('collapse').addClass('collapsed');
+    }).addClass('collapse collapsed');
   });
   
   /* poll helpers */
