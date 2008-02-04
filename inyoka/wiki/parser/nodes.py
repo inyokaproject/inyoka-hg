@@ -512,7 +512,6 @@ class Span(Element):
 
     def prepare_html(self):
         yield build_html_tag(u'span',
-            rel=rel,
             id=self.id,
             style=self.style,
             class_=self.class_,
