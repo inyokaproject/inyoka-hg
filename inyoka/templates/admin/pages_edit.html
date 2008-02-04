@@ -4,7 +4,7 @@
 
     Formular for editing or writing a new page.
 
-    :copyright: 2008 by Christopher Grebs.
+    :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
@@ -21,18 +21,11 @@
     (href('admin', 'pages'), 'Statische Seiten')
   ] + navigation_trace %}
 {% block admin_content %}
+  <h3>{{ title_trace[0] }}</h3>
   <form action="" method="post">
-    <dl>
-      <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
-      <dt>Schlüssel:</dt>
-      <dd>{{ form.key }}{{ h.field_errors(form.errors.key) }}</dd>
-      <dt>Content:</dt>
-      {{ form.content }}
-      <p>
-        {{ h.field_errors(form.errors.content) }}
-      </p>
-    </dl>
-    <input type="submit" value="Speichern" />
+    {{ h.render_form(form, 'title', 'key', 'content') }}
+    <p>
+      <input type="submit" value="Speichern" />
+    </p>
   </form>
 {% endblock %}
