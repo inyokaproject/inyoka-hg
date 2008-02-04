@@ -269,7 +269,6 @@ class SearchSystem(object):
         enq = xapian.Enquire(self.get_connection())
         qry = self.parse_query(query)
         if component:
-            print component.lower(), type(component), type(qry)
             qry = xapian.Query(xapian.Query.OP_FILTER, qry,
                                xapian.Query('P%s' % component.lower()))
         if date_begin or date_end:
@@ -377,5 +376,6 @@ class AuthMatchDecider(xapian.MatchDecider):
         if auth and decider is not None:
             return decider(loads(auth))
         else:
-            print "ignoring", doc.get_value(0), self.deciders
+            # XXX:print "ignoring", doc.get_value(0), self.deciders
+            pass
         return True
