@@ -22,7 +22,8 @@ from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated, AccessDeniedResponse
+from inyoka.utils.http import templated, AccessDeniedResponse, \
+                              does_not_exist_is_404
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template

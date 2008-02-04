@@ -555,6 +555,7 @@ def do_backlinks(request, name):
 
 
 @require_privilege('read')
+@does_not_exist_is_404
 def do_export(request, name):
     """
     Export the given revision or the most recent one to the specified format
@@ -589,9 +590,10 @@ def do_export(request, name):
     """
     rev = request.GET.get('rev')
     if rev is None or not rev.isdigit():
-        page = Page.objects.get_by_name(name)
+        page = Page.objects.get_by_name(name, raise_on_deleted=True)
     else:
-        page = Page.objects.get_by_name_and_rev(name, rev)
+        page = Page.objects.get_by_name_and_rev(name, rev,
+                                                raise_on_deleted=True)
     ctx = {
         'fragment': request.GET.get('fragment', 'no') == 'yes',
         'page':     page
