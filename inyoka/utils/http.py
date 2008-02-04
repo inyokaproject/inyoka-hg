@@ -51,6 +51,19 @@ def templated(template_name, status=None, modifier=None,
     return decorator
 
 
+def does_not_exist_is_404(f):
+    """For untemplated pages a `DoesNotExist` to `404`."""
+    def proxy(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ObjectDoesNotExist:
+            raise PageNotFound()
+    proxy.__name__ = f.__name__
+    proxy.__module__ = f.__module__
+    proxy.__doc__ = f.__doc__
+    return proxy
+
+
 class TemplateResponse(HttpResponse):
     """
     Returns a rendered template as response.

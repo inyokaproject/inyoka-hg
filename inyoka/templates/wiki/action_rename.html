@@ -10,8 +10,7 @@
 -#}
 
 
-<form action="{{ href('wiki', page.name, rev=page.rev.id, action='rename')|e
-      }}" method="post">
+<form action="{{ href('wiki', page.name, action='rename')|e }}" method="post">
   <p><small>
     Beim Umbenennen wird die Seite über alle Revisionen hinweg umbenannt als
     hätte sie diesen Namen immer gehabt.  Unter der alten Seite wird dann

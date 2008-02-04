@@ -10,8 +10,7 @@
 -#}
 
 
-<form action="{{ href('wiki', page.name, rev=page.rev.id, action='move')|e
-      }}" method="post">
+<form action="{{ href('wiki', page.name, action='move')|e }}" method="post">
   <p><small>
     Beim Verschieben werden zukünftige Revisionen einen neuen Namen erhalten,
     der bisherige Revisionsverlauf bleibt allerdings unter dem alten Namen

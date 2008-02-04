@@ -22,6 +22,9 @@
     <li><a href="?action=rename">Seite umbenennen</a></li>
     <li><a href="?action=move">Seite verschieben</a></li>
     {%- endif %}
+    {%- if can.delete %}
+    <li><a href="?action=delete">Seite löschen</a></li>
+    {%- endif %}
     {%- if can.read %}
     <li><a href="?action=log">Versionen anzeigen</a></li>
     <li><a href="?action=backlinks">Backlinks anzeigen</a></li>

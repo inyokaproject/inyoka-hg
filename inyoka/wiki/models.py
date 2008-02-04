@@ -344,7 +344,7 @@ class PageManager(models.Manager):
         return [x[1] for x in get_close_matches(name, [x[0] for x in
                 self._get_object_list(False) if not x[1]], n)]
 
-    def get_by_name(self, name, nocache=False):
+    def get_by_name(self, name, nocache=False, raise_on_deleted=False):
         """
         Return a page with the most recent revision. This should be used
         from the view functions if no revision is defined because it sends
@@ -366,6 +366,8 @@ class PageManager(models.Manager):
                                       .latest()
             except Revision.DoesNotExist:
                 raise Page.DoesNotExist()
+            if rev.deleted and raise_on_deleted:
+                raise Page.DoesNotExist()
         if not nocache:
             try:
                 cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
@@ -376,15 +378,15 @@ class PageManager(models.Manager):
         page.rev = rev
         return page
 
-    def get_by_name_and_rev(self, name, rev):
+    def get_by_name_and_rev(self, name, rev, raise_on_deleted=False):
         """
         Works like `get_by_name` but selects a specific revision of a page,
         not the most recent one. If `rev` is `None`, `get_by_name` is called.
         """
         if rev is None:
-            return self.get_by_name(name, nocache=True)
+            return self.get_by_name(name, True, raise_on_deleted)
         rev = Revision.objects.select_related(depth=1).get(id=int(rev))
-        if rev.page.name != name:
+        if rev.page.name != name or (rev.deleted and raise_on_deleted):
             raise Page.DoesNotExist()
         rev.page.rev = rev
         return rev.page
@@ -1024,6 +1026,13 @@ class Page(models.Model):
             rev = self.revisions.latest()
         except Revision.DoesNotExist:
             rev = None
+        if deleted is None:
+            if rev:
+                deleted = rev.deleted
+            else:
+                deleted = False
+        if deleted:
+            text = ''
         if text is None:
             text = rev and rev.text or u''
         if isinstance(text, basestring):
@@ -1041,11 +1050,6 @@ class Page(models.Model):
             user = None
         if change_date is None:
             change_date = datetime.now()
-        if deleted is None:
-            if rev:
-                deleted = rev.deleted
-            else:
-                deleted = False
         if remote_addr is None:
             remote_addr = '127.0.0.1'
         self.rev = Revision(page=self, text=text, user=user,
