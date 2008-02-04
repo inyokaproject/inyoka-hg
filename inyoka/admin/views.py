@@ -536,11 +536,19 @@ def edit_user(request, username):
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
 
-    forum_privileges = [
-        (x.forum.slug, x.forum.name, filter(lambda p:
-          getattr(x, 'can_' + p, False), [p[0] for p in PRIVILEGES_DETAILS]))
-        for x in user.forum_privileges.select_related(depth=1)
-    ]
+    forum_privileges = []
+    forums = Forum.objects.all()
+    for forum in forums:
+        try:
+            privilege = Privilege.objects.get(forum=forum, user=user)
+            forum_privileges.append((forum.slug,
+                forum.name,
+                filter(lambda p: getattr(privilege, 'can_' + p, False),
+                        [p[0] for p in PRIVILEGES_DETAILS])
+                )
+            )
+        except Privilege.DoesNotExist:
+            forum_privileges.append((forum.slug, forum.name, []))
 
     return {
         'user': user,
