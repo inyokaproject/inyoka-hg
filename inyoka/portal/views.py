@@ -497,6 +497,7 @@ def usercp_deactivate(request):
     """
     This page allows the user to deactivate his account.
     """
+    #TODO: we should additionally send an email with a link etc  
     if request.method == 'POST':
         form = DeactivateUserForm(request.POST)
         if form.is_valid():
@@ -830,13 +831,20 @@ def about_inyoka(request):
 def calendar_month(self, year, month):
     year = int(year)
     month = int(month)
-
     MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+    
+    events = Event.objects.filter(date__year=year, date__month=month)\
+                          .order_by('date')
+
     return {
         'MONTHS': dict(list(enumerate(MONTHS))[1:]),
         'year': year,
         'month': month,
     }
+
+@templated('portal/calendar_overview.html')
+def calendar_overview(self):
+    pass #TODO
 
 @templated('portal/open_search.xml', content_type='text/xml; charset=utf-8')
 def open_search(self, app):

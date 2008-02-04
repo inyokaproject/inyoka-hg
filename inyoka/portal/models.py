@@ -22,7 +22,7 @@ from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.core import validators
 from django.db.models.manager import EmptyManager
-from inyoka.utils import deferred
+from inyoka.utils import deferred, slugify
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
@@ -241,13 +241,15 @@ class Event(models.Model):
     changed = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
-    time = models.TimeField(null=True) # None means the event is the whole day
+    time = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField()
     author = models.ForeignKey(User)
-    location = models.CharField(max_length=40)
-    location_town = models.CharField(max_length=20)
-    location_long = models.FloatField('Koordinaten (Breite)', blank=True)
-    location_lat = models.FloatField(u'Koordinaten (Länge)', blank=True)
+    location = models.CharField(max_length=40, blank=True)
+    location_town = models.CharField(max_length=20, blank=True)
+    location_long = models.FloatField('Koordinaten (Breite)',
+                                      blank=True, null=True)
+    location_lat = models.FloatField(u'Koordinaten (Länge)',
+                                     blank=True, null=True)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -280,6 +282,12 @@ class Event(models.Model):
         self.slug = slug
         super(self.__class__, self).save()
         cache.delete('ikhaya/event/%s' % self.id)
+
+    def __repr__(self):
+        return u'<Event %r (%s)>' % (
+            self.name,
+            self.date.strftime('%d.%m.%Y')
+        )
 
 
 # import it down here because of circular dependencies
