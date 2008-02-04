@@ -9,52 +9,7 @@
 */
 
 
-<<<<<<< /home/benjamin/Desktop/asd/mitsuhiko/inyoka/static/js/forum.js.orig.
 $(function () {
-//  $('body').prepend('<pre id="debug" style="width: 100%; border-width: 0; border-bottom-width: 1px; position: fixed; top: 0; left: 0;"></pre>');
-||||||| /tmp/forum.js~base.c9oj6n
-$(document).ready(function () {
-//  $('body').prepend('<pre id="debug" style="width: 100%; border-width: 0; border-bottom-width: 1px; position: fixed; top: 0; left: 0;"></pre>');
-=======
-$(document).ready(function () {
->>>>>>> /tmp/forum.js~other.EnwxhN
-
-<<<<<<< /home/benjamin/Desktop/asd/mitsuhiko/inyoka/static/js/forum.js.orig.
-  $('.collapse').each(function () {
-    $('.' + this.id + '_sub').hide();
-    $(this)
-      .addClass('collapsed_header')
-      .css('cursor', 'pointer');
-    toggle_state[this.id] = true;
-  }).click(function() {
-    if (toggle_state[this.id]) {
-      $(this).addClass('expanded_header').removeClass('collapsed_header');
-      $('.' + this.id + '_sub').slideDown('normal');
-      toggle_state[this.id] = false;
-    } else {
-      $(this).addClass('collapsed_header').removeClass('expanded_header');
-      $('.' + this.id + '_sub').slideUp('normal');
-      toggle_state[this.id] = true;
-    }
-||||||| /tmp/forum.js~base.c9oj6n
-  $('.collapse').each(function () {
-    $('.' + this.id + '_sub').hide();
-    $(this)
-      .addClass('collapsed_header')
-      .click(toggle)
-      .css('cursor', 'pointer');
-    toggle_state[this.id] = true;
-  }).click(function() {
-    if (toggle_state[this.id]) {
-      $(this).addClass('expanded_header').removeClass('collapsed_header');
-      $('.' + this.id + '_sub').slideDown('normal');
-      toggle_state[this.id] = false;
-    } else {
-      $(this).addClass('collapsed_header').removeClass('expanded_header');
-      $('.' + this.id + '_sub').slideUp('normal');
-      toggle_state[this.id] = true;
-    }
-=======
   /* collapsable elements for the input forms */
   $('dt.collapse').each(function() {
     $(this).nextWhile('dd').hide();
@@ -68,7 +23,6 @@ $(document).ready(function () {
         });
       })();
     }).addClass('collapse collapsed');
->>>>>>> /tmp/forum.js~other.EnwxhN
   });
   
   /* poll helpers */
