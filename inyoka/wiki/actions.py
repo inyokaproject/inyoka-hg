@@ -101,7 +101,7 @@ def do_show(request, name):
             ))
             return HttpResponseRedirect(href('wiki', redirect))
     if page.rev.deleted:
-        return do_missing_page(request, name)
+        return do_missing_page(request, name, page)
 
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (
@@ -130,7 +130,7 @@ def do_metaexport(request, name):
 
 
 @templated('wiki/missing_page.html', status=404, modifier=context_modifier)
-def do_missing_page(request, name):
+def do_missing_page(request, name, _page=None):
     """
     Called if a page does not exist yet but it was requested by show.
 
@@ -153,6 +153,7 @@ def do_missing_page(request, name):
             page with links.
     """
     return {
+        'page':         _page,
         'page_name':    name,
         'title':        get_title(name),
         'can_create':   has_privilege(request.user, name, 'create'),
@@ -543,7 +544,13 @@ def do_diff(request, name):
 @require_privilege('read')
 @templated('wiki/action_backlinks.html', modifier=context_modifier)
 def do_backlinks(request, name):
-    """Display a list of backlinks."""
+    """
+    Display a list of backlinks.
+
+    Because this is part of the pathbar that is displayed for deleted pages
+    it should not fail for deleted pages!  Additionally it probably makes
+    sense to track pages that link to a deleted page.
+    """
     page = Page.objects.get_by_name(name)
     set_session_info(request, u'vergleicht die Backlinks des Wiki Artikels '
                      u' „<a href="%s">%s</a>“' % (

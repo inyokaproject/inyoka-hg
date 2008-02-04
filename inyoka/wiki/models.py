@@ -366,8 +366,6 @@ class PageManager(models.Manager):
                                       .latest()
             except Revision.DoesNotExist:
                 raise Page.DoesNotExist()
-            if rev.deleted and raise_on_deleted:
-                raise Page.DoesNotExist()
         if not nocache:
             try:
                 cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
@@ -376,6 +374,8 @@ class PageManager(models.Manager):
             cache.set(key, rev, cachetime)
         page = rev.page
         page.rev = rev
+        if rev.deleted and raise_on_deleted:
+            raise Page.DoesNotExist()
         return page
 
     def get_by_name_and_rev(self, name, rev, raise_on_deleted=False):

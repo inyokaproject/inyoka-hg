@@ -185,6 +185,13 @@ class DeferredNode(BaseNode):
     this node in place with another one.
     """
 
+    def __init__(self, node):
+        self.node = node
+
+    @property
+    def is_block_tag(self):
+        return self.node.is_block_tag
+
     def become(self, other):
         self.__class__ = other.__class__
         self.__dict__ = other.__dict__
