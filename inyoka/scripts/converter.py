@@ -34,8 +34,8 @@ def convert_wiki():
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    for name in request.rootpage.getPageList():
-    #for name in ['Archiv/Apple Powerbook G4 Titanium']:
+    #for name in request.rootpage.getPageList():
+    for name in ['Benutzer/Schlaffi']:
         print name
         # XXX: add filter
         if 'Hardwaredatenbank' in name or 'Spelling' in name or 'Anwendetreffen' in name:
@@ -68,7 +68,10 @@ def convert_wiki():
                     new_page = InyokaPage.objects.create(name, text=text,
                                                          **kwargs)
                 else:
-                    new_page.edit(text=text, deleted=False, **kwargs)
+                    try:
+                        new_page.edit(text=text, deleted=False, **kwargs)
+                    except:
+                        print text
             elif line.action == 'ATTNEW':
                 att = line.extra
                 att_name = '%s/%s' % (name, att)
