@@ -9,14 +9,13 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from md5 import new as md5
-import random, string
+import random, string, calendar
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import AccessDeniedResponse
 from inyoka.utils.captcha import generate_word
-from inyoka.portal.user import User
 from inyoka.utils.templating import render_template
 
 
@@ -139,3 +138,36 @@ def send_new_user_password(user):
     send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
 
+
+def calendar_entries_for_month(year, month):
+    """
+    Return a list with all days in a month and the calendar entries grouped
+    by day (also make an entry in the list if there is no event)
+    """
+    days = {}
+    for i in range(1, calendar.monthrange(year, month)[1] + 1):
+        days[i] = []
+    events = Event.objects.filter(date__year=year, date__month=month)
+    for event in events:
+        days[event.date.day].append(event)
+    return events
+
+
+def group_by_day(entries):
+    """Group calendar entries by day."""
+    days = []
+    days_found = set()
+    for entry in entries:
+        key = (entry.date.year, entry.date.month, entry.date.day)
+        if key not in days_found:
+            days.append((key, []))
+            days_found.add(key)
+        days[-1][1].append(entry)
+
+    return [{
+        'date':     date(*key),
+        'articles': entries
+    } for key, entries in days]
+
+from inyoka.portal.models import Event
+from inyoka.portal.user import User
