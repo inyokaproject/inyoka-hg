@@ -25,7 +25,11 @@ from django.db.models.manager import EmptyManager
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
-
+from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.utils import deferred, slugify
+from inyoka.portal.user import User
+from inyoka.forum.models import Topic
+from inyoka.wiki.models import Page
 
 class SubscriptionManager(models.Manager):
     """
@@ -327,9 +331,3 @@ class SearchQueue(models.Model):
         ordering = ['id']
 
 
-# import it down here because of circular dependencies
-from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import deferred, slugify
-from inyoka.portal.user import User
-from inyoka.forum.models import Topic
-from inyoka.wiki.models import Page

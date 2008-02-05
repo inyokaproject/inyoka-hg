@@ -144,6 +144,7 @@ def calendar_entries_for_month(year, month):
     Return a list with all days in a month and the calendar entries grouped
     by day (also make an entry in the list if there is no event)
     """
+    from inyoka.portal.models import Event
     days = {}
     for i in range(1, calendar.monthrange(year, month)[1] + 1):
         days[i] = []
@@ -169,5 +170,3 @@ def group_by_day(entries):
         'articles': entries
     } for key, entries in days]
 
-from inyoka.portal.models import Event
-from inyoka.portal.user import User
