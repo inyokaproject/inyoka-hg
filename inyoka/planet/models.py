@@ -16,7 +16,7 @@ from django.conf import settings
 from django.db import models
 from inyoka.utils import striptags
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.search import search
+from inyoka.utils.search import search, SearchAdapter
 
 
 class Blog(models.Model):
@@ -106,14 +106,7 @@ class Entry(models.Model):
         """
         This updates the xapian search index.
         """
-        search.store(
-            component='p',
-            uid=self.id,
-            title=self.title,
-            text=self.simplified_text,
-            date=self.pub_date,
-            category=self.blog.name
-        )
+        search.queue('p', self.id)
 
     def save(self):
         super(Entry, self).save()
@@ -133,14 +126,29 @@ class Entry(models.Model):
         ordering = ('-pub_date',)
 
 
-def recv_entry(entry_id):
-    entry = Entry.objects.select_related(1).get(id=entry_id)
-    return {
-        'title': entry.title,
-        'user': entry.blog.name,
-        'user_url': entry.blog.blog_url,
-        'date': entry.pub_date,
-        'url': url_for(entry),
-        'component': u'Planet'
-    }
-#search.register_result_handler('p', recv_entry)
+class PlanetSearchAdapter(SearchAdapter):
+    type_id = 'p'
+
+    def recv(self, entry_id):
+        entry = Entry.objects.select_related(1).get(id=entry_id)
+        return {
+            'title': entry.title,
+            'user': entry.blog.name,
+            'user_url': entry.blog.blog_url,
+            'date': entry.pub_date,
+            'url': url_for(entry),
+            'component': u'Planet'
+        }
+
+    def store(self, entry_id):
+        entry = Entry.objects.select_related(1).get(id=entry_id)
+        search.store(
+            component='p',
+            uid=entry.id,
+            title=entry.title,
+            text=entry.simplified_text,
+            date=entry.pub_date,
+            category=entry.blog.name
+        )
+
+search.register(PlanetSearchAdapter())
