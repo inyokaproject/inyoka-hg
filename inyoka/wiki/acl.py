@@ -266,16 +266,3 @@ def test_changes_allowed(user, page_name, old_text, new_text):
                 for value in node.values:
                     metadata.add((node.key, value))
     return old == new
-
-
-class WikiSearchAuthDecider(object):
-    """Decides whetever a user can display a search result or not."""
-
-    def __init__(self, user):
-        self.test = MultiPrivilegeTest(user)
-
-    def __call__(self, page_name):
-        return self.test.has_privilege(page_name, PRIV_READ)
-
-
-search.register_auth_decider('w', WikiSearchAuthDecider)

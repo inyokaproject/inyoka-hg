@@ -143,4 +143,4 @@ def recv_entry(entry_id):
         'url': url_for(entry),
         'component': u'Planet'
     }
-search.register_result_handler('p', recv_entry)
+#search.register_result_handler('p', recv_entry)

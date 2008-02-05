@@ -19,6 +19,7 @@ from datetime import datetime
 from cPickle import dumps, loads
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
 from inyoka.utils.parsertools import TokenStream
 
 
@@ -178,7 +179,7 @@ class SearchResult(object):
     This class holds all search results.
     """
 
-    def __init__(self, mset, query, page, per_page, handlers={}):
+    def __init__(self, mset, query, page, per_page, adapters={}):
         self.matches_estimated = mset.get_matches_estimated()
         self.page = page
         self.page_count = self.matches_estimated / per_page + 1
@@ -186,8 +187,10 @@ class SearchResult(object):
         self.results = []
         for match in mset:
             full_id = match.get_document().get_value(0).split(':')
+            adapter = adapters[full_id[0]]
+            print "adapter", adapter
             try:
-                data = handlers[full_id[0]](full_id[1])
+                data = adapter.recv(full_id[1])
             except ObjectDoesNotExist:
                 continue
             data['score'] = match[xapian.MSET_PERCENT]
@@ -205,6 +208,8 @@ class SearchResult(object):
         return ' '.join(term for term in self.terms)
 
 
+
+
 class SearchSystem(object):
     """
     The central object that is used by applications to register their
@@ -217,8 +222,15 @@ class SearchSystem(object):
                             "object instead" % self.__class__.__name__)
         self.connections = WeakKeyDictionary()
         self.prefix_handlers = {}
-        self.result_handlers = {}
         self.auth_deciders = {}
+        self.adapters = {}
+
+    def index(self, component, docid):
+        self.adapters[component].store(docid)
+
+    def queue(self, component, docid):
+        from inyoka.portal.models import SearchQueue
+        SearchQueue.objects.append(component, docid)
 
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
@@ -234,12 +246,15 @@ class SearchSystem(object):
             connection.reopen()
         return connection
 
-    def register_result_handler(self, component, handler):
+    def register(self, adapter):
         """
-        Register a result hanlder for retrieving results from the
-        database.
+        Register a search adapter for indexing and retrieving.
         """
-        self.result_handlers[component] = handler
+        if not adapter.type_id:
+            raise ValueError('You must specify a type_id fot the adapter')
+        self.adapters[adapter.type_id] = adapter
+        if adapter.auth_decider:
+            self.auth_deciders[adapter.type_id] = adapter.auth_decider
 
     def register_prefix_handler(self, prefixes, handler):
         """
@@ -251,13 +266,6 @@ class SearchSystem(object):
         """
         for prefix in prefixes:
             self.prefix_handlers[prefix] = handler
-
-    def register_auth_decider(self, component, decider):
-        """
-        Register a AuthDecider for filtering Search results with
-        insufficient privileges.
-        """
-        self.auth_deciders[component] = decider
 
     def parse_query(self, query):
         """Parse a query."""
@@ -287,7 +295,7 @@ class SearchSystem(object):
         auth = AuthMatchDecider(user, self.auth_deciders)
         mset = enq.get_mset(offset, per_page, per_page * 3, None, auth)
 
-        return SearchResult(mset, qry, page, per_page, self.result_handlers)
+        return SearchResult(mset, qry, page, per_page, self.adapters)
 
     def store(self, **data):
         doc = xapian.Document()
@@ -379,3 +387,19 @@ class AuthMatchDecider(xapian.MatchDecider):
             # XXX:print "ignoring", doc.get_value(0), self.deciders
             pass
         return True
+
+
+class SearchAdapter(object):
+    type_id = None
+    auth_decider = None
+
+    @classmethod
+    def queue(self, docid):
+        from inyoka.portal.models import SearchQueue
+        SearchQueue.objects.append(self.type_id, docid)
+
+    def store(self, docid):
+        raise NotImplementedError('store')
+
+    def recv(self, docid):
+        raise NotImplementedError('recv')

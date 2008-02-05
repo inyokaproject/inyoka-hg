@@ -10,4 +10,4 @@
 from inyoka.forum import macros
 
 # register seach components
-from inyoka.forum import acl
+from inyoka.forum import search

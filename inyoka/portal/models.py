@@ -290,5 +290,46 @@ class Event(models.Model):
         )
 
 
+class SearchQueueManager(models.Manager):
+
+
+    def append(self, component, doc_id):
+        """Append an item to the queue for later indexing."""
+        item = self.model()
+        item.component = component
+        item.doc_id = doc_id
+        item.save()
+
+    def next(self, limit=None):
+        """Fetch the next elements from the queue"""
+        items = limit and self.all() or self.all()[:limit]
+        for item in items:
+            yield (item.id, item.component, item.doc_id)
+
+    def remove(self, last_id):
+        """
+        Remove all elements, which are smaller (or equal)
+        than last_id from the queue."""
+        cursor = connection.cursor()
+        cursor.execute('''
+            delete from portal_searchqueue
+                  where id <= %d
+        ''' % last_id)
+        cursor.close()
+        connection._commit()
+
+
+class SearchQueue(models.Model):
+    """
+    Managing a to-do list for asynchronous indexing.
+    """
+    objects = SearchQueueManager()
+    component = models.CharField(max_length=1)
+    doc_id = models.IntegerField()
+
+    class Meta:
+        ordering = ['id']
+
+
 # import it down here because of circular dependencies
 from inyoka.wiki.parser import parse, render, RenderContext

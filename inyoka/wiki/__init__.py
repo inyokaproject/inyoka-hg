@@ -87,4 +87,4 @@
 """
 
 # register search auth decider
-import inyoka.wiki.acl
+import inyoka.wiki.search
