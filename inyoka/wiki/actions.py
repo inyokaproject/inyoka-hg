@@ -23,9 +23,10 @@ from time import localtime
 from datetime import datetime
 from django.utils.html import escape
 from django.http import HttpResponseRedirect, Http404 as PageNotFound, \
-                        HttpResponse
+     HttpResponse
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.http import templated, TemplateResponse, AccessDeniedResponse
+from inyoka.utils.http import templated, does_not_exist_is_404, \
+     TemplateResponse, AccessDeniedResponse
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
@@ -100,7 +101,7 @@ def do_show(request, name):
             ))
             return HttpResponseRedirect(href('wiki', redirect))
     if page.rev.deleted:
-        return do_missing_page(request, name)
+        return do_missing_page(request, name, page)
 
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (
@@ -129,7 +130,7 @@ def do_metaexport(request, name):
 
 
 @templated('wiki/missing_page.html', status=404, modifier=context_modifier)
-def do_missing_page(request, name):
+def do_missing_page(request, name, _page=None):
     """
     Called if a page does not exist yet but it was requested by show.
 
@@ -152,6 +153,7 @@ def do_missing_page(request, name):
             page with links.
     """
     return {
+        'page':         _page,
         'page_name':    name,
         'title':        get_title(name),
         'can_create':   has_privilege(request.user, name, 'create'),
@@ -168,6 +170,7 @@ def do_missing_page(request, name):
 
 
 @require_privilege('edit')
+@does_not_exist_is_404
 def do_revert(request, name):
     """The revert action has no template, it uses a flashed form."""
     try:
@@ -189,7 +192,7 @@ def do_revert(request, name):
                                            request.user,
                                            request.META.get('REMOTE_ADDR'))
             flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
-                  escape(unicode(page.rev)), success=True)
+                  unicode(page.rev).title, success=True)
             url = href('wiki', name)
     else:
         flash(render_template('wiki/action_revert.html', {'page': page}))
@@ -197,9 +200,10 @@ def do_revert(request, name):
 
 
 @require_privilege('edit')
+@does_not_exist_is_404
 def do_move(request, name):
     """Move the most recent revision."""
-    page = Page.objects.get_by_name(name)
+    page = Page.objects.get_by_name(name, raise_on_deleted=True)
     new_name = request.GET.get('page_name') or page.name
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
@@ -214,9 +218,11 @@ def do_move(request, name):
                 original_text = page.rev.text
                 page.edit('# X-Redirect: %s\n' % new_name,
                           note='Umbenannt nach %s' % new_name,
+                          remote_addr=request.META.get('REMOTE_ADDR'),
                           user=request.user)
                 new_page = Page.objects.create(new_name, original_text,
-                           request.user, note='Umbenannt von %s' % page.name)
+                           request.user, note='Umbenannt von %s' % page.name,
+                           remote_addr=request.META.get('REMOTE_ADDR'))
                 flash('Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(new_page))
             else:
@@ -233,9 +239,10 @@ def do_move(request, name):
 
 
 @require_privilege('edit')
+@does_not_exist_is_404
 def do_rename(request, name):
     """Rename all revisions."""
-    page = Page.objects.get_by_name(name)
+    page = Page.objects.get_by_name(name, raise_on_deleted=True)
     new_name = request.GET.get('page_name') or page.name
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
@@ -248,10 +255,12 @@ def do_rename(request, name):
                 Page.objects.get_by_name(new_name)
             except Page.DoesNotExist:
                 page.name = new_name
-                page.edit(note='Umbenannt von %s' % name, user=request.user)
+                page.edit(note='Umbenannt von %s' % name, user=request.user,
+                          remote_addr=request.META.get('REMOTE_ADDR'))
                 old_text = '# X-Redirect: %s\n' % new_name
                 new_page = Page.objects.create(name, old_text, request.user,
-                           note='Umbenannt nach %s' % page.name)
+                           note='Umbenannt nach %s' % page.name,
+                           remote_addr=request.META.get('REMOTE_ADDR'))
                 flash('Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
@@ -425,6 +434,25 @@ def do_edit(request, name):
     }
 
 
+@require_privilege('delete')
+@does_not_exist_is_404
+def do_delete(request, name):
+    """Delete the page (deletes the last recent revision)."""
+    page = Page.objects.get_by_name(name, raise_on_deleted=True)
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash('Bearbeiten wurde abgebrochen')
+        else:
+            page.edit(user=request.user, deleted=True,
+                      remote_addr=request.META.get('REMOTE_ADDR'),
+                      note=request.POST.get('note', '') or
+                           'Seite wurde gelöscht')
+            flash('Seite wurde erfolgreich gelöscht', success=True)
+    else:
+        flash(render_template('wiki/action_delete.html', {'page': page}))
+    return HttpResponseRedirect(url_for(page))
+
+
 @require_privilege('read')
 @templated('wiki/action_log.html', modifier=context_modifier)
 def do_log(request, name):
@@ -516,7 +544,13 @@ def do_diff(request, name):
 @require_privilege('read')
 @templated('wiki/action_backlinks.html', modifier=context_modifier)
 def do_backlinks(request, name):
-    """Display a list of backlinks."""
+    """
+    Display a list of backlinks.
+
+    Because this is part of the pathbar that is displayed for deleted pages
+    it should not fail for deleted pages!  Additionally it probably makes
+    sense to track pages that link to a deleted page.
+    """
     page = Page.objects.get_by_name(name)
     set_session_info(request, u'vergleicht die Backlinks des Wiki Artikels '
                      u' „<a href="%s">%s</a>“' % (
@@ -528,6 +562,7 @@ def do_backlinks(request, name):
 
 
 @require_privilege('read')
+@does_not_exist_is_404
 def do_export(request, name):
     """
     Export the given revision or the most recent one to the specified format
@@ -562,9 +597,10 @@ def do_export(request, name):
     """
     rev = request.GET.get('rev')
     if rev is None or not rev.isdigit():
-        page = Page.objects.get_by_name(name)
+        page = Page.objects.get_by_name(name, raise_on_deleted=True)
     else:
-        page = Page.objects.get_by_name_and_rev(name, rev)
+        page = Page.objects.get_by_name_and_rev(name, rev,
+                                                raise_on_deleted=True)
     ctx = {
         'fragment': request.GET.get('fragment', 'no') == 'yes',
         'page':     page
@@ -759,6 +795,7 @@ PAGE_ACTIONS = {
     'move':         do_move,
     'rename':       do_rename,
     'edit':         do_edit,
+    'delete':       do_delete,
     'backlinks':    do_backlinks,
     'export':       do_export,
     'attach':       do_attach,

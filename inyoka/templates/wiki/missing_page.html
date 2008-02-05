@@ -13,12 +13,20 @@
 
 {% extends 'wiki/page.html' %}
 {% set title_trace = ['Fehlender Artikel', title|e] %}
+{% set action = 'show' %}
 {% block wiki_content %}
   <h2>Fehlender Artikel</h2>
+  {%- if not page %}
   <p>
-    Der Artikel mit dem Namen „{{ title|e }}“ existiert noch nicht oder
-    wurde von einem Wiki-Moderator gelöscht.
+    Der Artikel mit dem Namen „{{ title|e }}“ existiert noch nicht.
   </p>
+  {%- else %}
+  <p>
+    Der Artikel mit dem Namen „{{ title|e }}” wurde gelöscht.  Über das
+    Aktionsmenü kann er sowohl wiederhergestellt als auch neu erstellt
+    werden.
+  </p>
+  {%- endif %}
   {%- if backlinks %}
     <p>
       Die folgenden Seiten verweisen allerdings auf diese Seite:

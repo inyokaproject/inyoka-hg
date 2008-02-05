@@ -23,27 +23,27 @@
 
 {% block admin_content %}
 <form action="" method="post">
-  <h2>Einstellungen von {{ user.username }}</h2>
-  <h3>Forum-Einstellungen</h3>
+  <h3>{{ title_trace[0] }}</h3>
+  <h4>Forum-Einstellungen</h4>
   <p>
-    {% if user_groups %}
-    Der Benutzer {{ user.username }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
-    {% else %}
-    Der Benutzer {{ user.username }} gehört keinen Gruppen an.
-    {% endif %}
+    {%- if user_groups %}
+    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
+    {%- else %}
+    Der Benutzer {{ user.username|e }} gehört keinen Gruppen an.
+    {%- endif %}
   </p>
   <dl>
-  {{ h.render_form(form, 'username', 'is_active', inline=true) }}
+    {{ h.render_form(form, 'username', 'is_active', inline=true) }}
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}
   <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
   </dl>
-  <h3>Persönliche Details von {{ user.username }}</h3>
+  <h4>Persönliche Details von {{ user.username|e }}</h4>
   {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
-  <h3>Benachrichtigungs-Einstellungen</h3>
+  <h4>Benachrichtigungs-Einstellungen</h4>
   {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
-  <h3>Sonstige Einstellungen</h3>
+  <h4>Sonstige Einstellungen</h4>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>
     <button type="submit" id="submit">Speichern</button>

@@ -809,7 +809,7 @@ class Parser(object):
                                    u'Das Macro „%s“ konnte nicht '
                                    u'gefunden werden.' % name)
         elif macro.is_tree_processor:
-            placeholder = nodes.DeferredNode()
+            placeholder = nodes.DeferredNode(macro)
             self.deferred_macros[macro.stage].append((placeholder, macro))
             return placeholder
         elif macro.is_static:

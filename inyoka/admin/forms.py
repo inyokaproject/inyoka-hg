@@ -24,9 +24,12 @@ class ConfigurationForm(forms.Form):
 
 
 class EditStaticPageForm(forms.Form):
-    key = forms.CharField(label=u'Schlüssel', max_length=25, required=False)
+    key = forms.CharField(label=u'Schlüssel', max_length=25, required=False,
+                          help_text=u'Der Schlüssel bestimmt, unter welcher '
+                                    u'Adresse die Seite abrufbar ist.')
     title = forms.CharField(label=u'Titel', max_length=200)
-    content = forms.CharField(widget=forms.Textarea)
+    content = forms.CharField(widget=forms.Textarea, label=u'Inhalt',
+                              help_text=u'HTML ist erlaubt')
 
 
 class EditBlogForm(forms.Form):

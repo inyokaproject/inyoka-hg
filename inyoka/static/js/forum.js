@@ -9,8 +9,7 @@
 */
 
 
-$(document).ready(function () {
-
+$(function () {
   /* collapsable elements for the input forms */
   $('dt.collapse').each(function() {
     $(this).nextWhile('dd').hide();

@@ -9,7 +9,7 @@
 #}
 {% extends 'admin/overall.html' %}
 {% set navigation_trace = [
-    (href('admin', 'forum'), 'Forum'),
+    (href('admin', 'forum'), 'Foren'),
   ] %}
 {% block appheader %}
 <h1>Administration</h1>
@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block admin_content %}
-<h3>Foren</h3>
+<h3>{{ title_trace[0] }}</h3>
 <table>
   <thead>
   <tr>

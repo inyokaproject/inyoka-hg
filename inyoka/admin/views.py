@@ -161,6 +161,7 @@ def planet_edit(request, blog=None):
             if d['delete_icon']:
                 blog.delete_icon()
             if d['icon']:
+                blog.save()
                 blog.save_icon(d['icon'])
             blog.save()
             if new:

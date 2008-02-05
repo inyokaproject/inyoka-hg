@@ -22,17 +22,24 @@
     <li><a href="?action=rename">Seite umbenennen</a></li>
     <li><a href="?action=move">Seite verschieben</a></li>
     {%- endif %}
+    {%- if can.delete %}
+    <li><a href="?action=delete">Seite löschen</a></li>
+    {%- endif %}
     {%- if can.read %}
     <li><a href="?action=log">Versionen anzeigen</a></li>
     <li><a href="?action=backlinks">Backlinks anzeigen</a></li>
     {%- endif %}
+    {%- if can.read %}
     <li>Seite exportieren:
       <a href="?action=export&amp;format=raw">Rohformat</a>,
       <a href="?action=export&amp;format=html">HTML</a>,
       <a href="?action=export&amp;format=docbook">Docbook</a>,
       <a href="?action=export&amp;format=ast">AST</a></li>
     <li><a href="?action=metaexport">Metadaten exportieren</a></li>
+    {%- endif %}
+    {%- if can.attach %}
     <li><a href="?action=attach">Dateianhänge verwalten</a></li>
+    {%- endif %}
     <li><a href="?action=prune">Cache leeren</a></li>
   </ul>
 {% endblock %}

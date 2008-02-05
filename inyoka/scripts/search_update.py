@@ -18,9 +18,23 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.db.models import get_app, get_models
+from inyoka.portal.models import SearchQueue
+from inyoka.utils.search import search
 
 
-def update(app=None):
+def update(limit=None):
+    """
+    Update the next items from the queue. You should call this
+    function regularly (e.g. as cron).
+    """
+    last_id = 0
+    for id, component, doc_id in SearchQueue.objects.next():
+        search.index(component, doc_id)
+        last_id = id
+    SearchQueue.objects.remove(last_id)
+
+
+def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
     if app is not None:
         app = get_app(app)

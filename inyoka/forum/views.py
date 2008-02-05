@@ -13,7 +13,6 @@ from urllib import unquote
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
-from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
@@ -23,7 +22,8 @@ from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated, AccessDeniedResponse
+from inyoka.utils.http import templated, AccessDeniedResponse, \
+                              does_not_exist_is_404
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -991,6 +991,7 @@ def delete_topic(request, topic_slug):
     return HttpResponseRedirect(url_for(topic))
 
 
+@does_not_exist_is_404
 def feed(request, component='forum', slug=None, mode='short', count=25):
     """show the feeds for the forum"""
 
@@ -1011,7 +1012,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
         return HttpResponse(content, content_type=content_type)
 
     if component == 'topic':
-        topic = get_object_or_404(Topic, slug=slug)
+        topic = Topic.objects.get(slug=slug)
         if not have_privilege(request.user, topic.forum, 'read'):
             return abort_access_denied()
         posts = topic.post_set.order_by('-pub_date')[:count]
@@ -1043,7 +1044,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             )
     else:
         if slug:
-            forum = get_object_or_404(Forum, slug=slug)
+            forum = Forum.objects.get(slug=slug)
             topics = forum.topic_set
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,

@@ -173,14 +173,17 @@ class RecentChanges(Macro):
     arguments = (
         ('per_page', int, 50),
     )
+    is_block_tag = True
 
     def __init__(self, per_page):
         self.per_page = per_page
 
     def build_node(self, context, format):
         if not context.request or not context.wiki_page:
-            return nodes.Text(u'Letzte Änderungen können von hier aus '
-                              u'nicht dargestellt werden.')
+            return nodes.Paragraph([
+                nodes.Text(u'Letzte Änderungen können von hier aus '
+                           u'nicht dargestellt werden.')
+            ])
 
         try:
             page_num = int(context.request.GET['page'])
@@ -255,6 +258,7 @@ class TableOfContents(TreeMacro):
     there is also no title on it.
     """
     stage = 'final'
+    is_block_tag = True
     arguments = (
         ('max_depth', int, 3),
         ('type', {
