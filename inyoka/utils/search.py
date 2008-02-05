@@ -188,7 +188,6 @@ class SearchResult(object):
         for match in mset:
             full_id = match.get_document().get_value(0).split(':')
             adapter = adapters[full_id[0]]
-            print "adapter", adapter
             try:
                 data = adapter.recv(full_id[1])
             except ObjectDoesNotExist:
