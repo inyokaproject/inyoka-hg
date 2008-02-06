@@ -7,7 +7,7 @@
     This script converts all data of the old wiki, forum and portal to the new
     inyoka structure.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand.
+    :copyright: Copyright 2007 by Benjamin Wiegand and Florian Apolloner.
     :license: GNU GPL.
 """
 import sys
