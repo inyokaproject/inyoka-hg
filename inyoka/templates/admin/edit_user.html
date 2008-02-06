@@ -9,7 +9,7 @@
 #}
 {% extends 'admin/overall.html' %}
 {% set styles = styles + ['editor.css', 'datetimefield.css'] %}
-{% set scripts = scripts + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
+{% set scripts = scripts + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
@@ -23,18 +23,20 @@
 
 
 {% block admin_content %}
-<form action="" method="post">
+<form action="" method="post" id="user_edit_form">
   <h3>Einstellungen von {{ user.username|e }}</h3>
   <h4>Forum-Einstellungen</h4>
   <p>
     {% if user_groups %}
     Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
     {% else %}
-    Der Benutzer {{ user.username|e }} gehört keinen Gruppen an.
+    Der Benutzer {{ user.username|e }} gehört aktuell keinen Gruppen an.
     {% endif %}
-    <p>
-    <a href="{{ href('admin', 'users', 'groupedit', user.username)|e }}">Gruppenzugehörigkeiten von „{{ user.username|e }}“ editieren</a></p>
-  </p>
+    <h5>Gruppenzugehörigkeiten editieren:</h5>
+    <select multiple="multiple" name="user_groups_not_joined"></select>
+    <img src="{{ href('static', '/img/admin/add_item.png') }}" alt="Gruppen hinzufügen" class="item_add" />
+    <img src="{{ href('static', '/img/admin/remove_item.png') }}" alt="Gruppen entfernen" class="item_remove" />
+    <select multiple="multiple" name="user_groups_joined"></select>
   <dl>
   {{ h.render_form(form, 'username', 'is_active', inline=true) }}
     <dt>Forum-Privilegien:</dt>
@@ -51,7 +53,7 @@
   <h4>Sonstige Einstellungen</h4>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>
-    <button type="submit" id="submit">Speichern</button>
+    <input type="submit" value="Speichern" />
   </p>
 </form>
 <script type="text/javascript">
@@ -60,6 +62,10 @@
   var date_joined = null;
   var forum_rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
     {{ forum_privileges|jsonencode }});
+  var select_form = new GroupBox('#user_edit_box',
+    {{ joined_groups|sort|jsonencode }},
+    {{ not_joined_groups|sort|jsonencode }}
+  );
 
   var dj_ui_switcher = $('.date_joined_ui_switcher');
   dj_ui_switcher.click(function() {
