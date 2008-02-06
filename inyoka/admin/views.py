@@ -535,31 +535,6 @@ def users(request):
 
 
 @require_manager
-@templated('admin/users_groupedit.html')
-def users_groupedit(request, username):
-    groups = Group.objects.select_related(depth=1)
-    joined, not_joined = (list(), list())
-    if request.method == 'POST':
-        joined = [groups.get(name=gn) for gn in
-                  request.POST.getlist('user_groups_joined')]
-        not_joined = [groups.get(name=gn) for gn in
-                      request.POST.getlist('user_groups_not_joined')]
-        user = User.objects.get(username=username)
-        user.groups.remove(*not_joined)
-        user.groups.add(*joined)
-        user.save()
-
-    joined = joined or groups.filter(user__username=username)
-    not_joined = not_joined or [x for x in groups if not x in joined]
-
-    return {
-        'username': username,
-        'joined_groups': [g.name for g in joined],
-        'not_joined_groups': [g.name for g in not_joined]
-    }
-
-
-@require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
     #TODO: check for expensive SQL-Queries and other performance problems...
@@ -571,6 +546,7 @@ def edit_user(request, username):
                 if not v in value:
                     setattr(privilege, 'can_' + v, False)
 
+    #: check if the user exists
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
@@ -578,10 +554,15 @@ def edit_user(request, username):
               % escape(username))
         return HttpResponseRedirect(href('admin', 'users'))
     form = EditUserForm(model_to_dict(user))
+    groups = Group.objects.select_related(depth=1)
+    groups_joined, groups_not_joined = ([], [])
+
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
+        print request.POST
         if form.is_valid():
             data = form.cleaned_data
+            #: set the user attributes, avatar and forum privileges
             for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
@@ -591,11 +572,11 @@ def edit_user(request, username):
                     user.save_avatar(data['avatar'])
                 if data['new_password']:
                     user.set_password(data['new_password'])
-                #XXX: find a somewhat better method to find all `forum_permission-*` post-args...
+
+                #: forum privileges
                 for key, value in request.POST.iteritems():
                     if key.startswith('forum_privileges-'):
                         forum_slug = key.split('-', 1)[1]
-                        #XXX: remove dublicate code...
                         try:
                             privilege = Privilege.objects.get(forum__slug=forum_slug)
                             privilege.user = user
@@ -608,7 +589,19 @@ def edit_user(request, username):
                             )
                             _set_privileges()
                         privilege.save()
-                user.save()
+
+            # group editing
+            groups_joined = [groups.get(name=gn) for gn in
+                             request.POST.getlist('user_groups_joined')]
+            print "xxxxxxxx %s" % groups_joined
+            groups_not_joined = [groups.get(name=gn) for gn in
+                                request.POST.getlist('user_groups_not_joined')]
+            user = User.objects.get(username=username)
+            user.groups.remove(*groups_not_joined)
+            user.groups.add(*groups_joined)
+            #: save the user (XXX: groups seems to not be saved)
+            user.save()
+
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
@@ -629,12 +622,18 @@ def edit_user(request, username):
         except Privilege.DoesNotExist:
             forum_privileges.append((forum.slug, forum.name, []))
 
+    groups_joined = groups_joined or user.groups.all()
+    groups_not_joined = groups_not_joined or [x for x in groups
+                                              if not x in groups_joined]
+
     return {
         'user': user,
-        'user_groups': user.groups.all(),
         'form': form,
         'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
+        'user_groups': groups_joined,
+        'joined_groups': [g.name for g in groups_joined],
+        'not_joined_groups': [g.name for g in groups_not_joined]
     }
 
 

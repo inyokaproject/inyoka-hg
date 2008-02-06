@@ -26,7 +26,7 @@
   
     // add needed submit event 
     $($(container).find('input[@type="submit"]')[0])
-      .click(function() {
+      .submit(function() {
         $.each([self.user_not_joined, self.user_joined], function() {
           this.find('option').each(function() {
             this.selected = true;
