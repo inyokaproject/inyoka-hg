@@ -1151,7 +1151,7 @@ class Size(Element):
         self.size = size
 
     def generate_markup(self, w):
-        w.markup(u'[size=%s]' % self.value)
+        w.markup(u'[size=%s]' % self.size)
         Element.generate_markup(self, w)
         w.markup(u'[/size]')
 
