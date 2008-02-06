@@ -126,7 +126,7 @@ def send_activation_mail(user):
 def send_new_user_password(user):
     from django.core.mail import send_mail
     new_password_key = ''.join(random.choice(string.lowercase + string.digits)
-							   for _ in range(24))
+                               for _ in range(24))
     user.new_password_key = new_password_key
     user.save()
     message = render_template('mails/new_user_password.txt', {

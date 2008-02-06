@@ -8,11 +8,12 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
+{% set styles = styles + ['editor.css', 'datetimefield.css'] %}
+{% set scripts = scripts + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
 ] %}
 
 {% block appheader %}
@@ -23,17 +24,19 @@
 
 {% block admin_content %}
 <form action="" method="post">
-  <h3>{{ title_trace[0] }}</h3>
+  <h3>Einstellungen von {{ user.username|e }}</h3>
   <h4>Forum-Einstellungen</h4>
   <p>
-    {%- if user_groups %}
-    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
-    {%- else %}
+    {% if user_groups %}
+    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {{ user_groups|join(', ')|e }}
+    {% else %}
     Der Benutzer {{ user.username|e }} gehört keinen Gruppen an.
-    {%- endif %}
+    {% endif %}
+    <br />
+    <a href="{{ href('admin', 'users', 'addgroup', user.username)|e }}">„{{ user.username|e }}“ zu einer Gruppe hinzufügen</a>
   </p>
   <dl>
-    {{ h.render_form(form, 'username', 'is_active', inline=true) }}
+  {{ h.render_form(form, 'username', 'is_active', inline=true) }}
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}

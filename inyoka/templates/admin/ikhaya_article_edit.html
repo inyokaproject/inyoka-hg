@@ -25,6 +25,11 @@
     (href('admin', 'ikhaya', 'articles'), 'Artikel')
   ] + navigation_trace %}
 
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Ikhaya</h2>
+{% endblock %}
+
 {% block admin_content %}
 <h3>{{ title_trace[0] }}</h3>
 

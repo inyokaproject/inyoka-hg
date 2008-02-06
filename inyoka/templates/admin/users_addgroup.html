@@ -1,0 +1,38 @@
+{#
+    admin/users_addgroup.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Add an user to some new groups.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'addgroup', username|e), '„%s“ einer Gruppe hinzufügen'|format(username|e)),
+] %}
+{% set scripts = scripts + ['UserGroupBox.js'] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<form action="" method="post" id="user_addgroup_form">
+  <select multiple="multiple" name="user_groups_not_joined">
+  </select>
+  <select multiple="multiple" name="user_groups_joined">
+  </select>
+  <p>
+  <input type="submit" value="Änderungen bestätigen" />
+  </p>
+</form>
+
+<script type="text/javascript">
+  var select_form = new GroupBox('#user_addgroup_form', {{ joined_groups|sort|jsonencode }}, {{ not_joined_groups|sort|jsonencode }});
+</script>
+{% endblock %}
