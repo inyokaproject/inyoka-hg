@@ -905,15 +905,7 @@ class Page(models.Model):
             MetaData(page=self, key=key, value=value).save()
 
         # searchindex
-        search.store(
-            component='w',
-            uid=self.id,
-            title=rev.title,
-            user=rev.user_id,
-            date=rev.change_date,
-            auth=rev.page.name,
-            text=meta['text']
-        )
+        search.queue('w', self.id)
 
     def prune(self):
         """Clear the page cache."""
@@ -1270,16 +1262,3 @@ class MetaData(models.Model):
     page = models.ForeignKey(Page)
     key = models.CharField(max_length=30)
     value = models.CharField(max_length=512)
-
-
-def recv_page(page_id):
-    rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
-    return {
-        'title': rev.title,
-        'user': rev.user,
-        'date': rev.change_date,
-        'url': url_for(rev.page),
-        'component': u'Wiki',
-        'highlight': True
-    }
-search.register_result_handler('w', recv_page)

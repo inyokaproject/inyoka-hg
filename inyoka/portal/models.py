@@ -22,14 +22,14 @@ from django.utils.encoding import smart_str
 from django.core.cache import cache
 from django.core import validators
 from django.db.models.manager import EmptyManager
-from inyoka.utils import deferred, slugify
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
+from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.utils import deferred, slugify
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
-
 
 class SubscriptionManager(models.Manager):
     """
@@ -286,9 +286,48 @@ class Event(models.Model):
     def __repr__(self):
         return u'<Event %r (%s)>' % (
             self.name,
-            self.date.strftime('%d.%m.%Y')
+            self.date.strftime('%Y-%m-%d')
         )
 
 
-# import it down here because of circular dependencies
-from inyoka.wiki.parser import parse, render, RenderContext
+class SearchQueueManager(models.Manager):
+
+
+    def append(self, component, doc_id):
+        """Append an item to the queue for later indexing."""
+        item = self.model()
+        item.component = component
+        item.doc_id = doc_id
+        item.save()
+
+    def next(self, limit=None):
+        """Fetch the next elements from the queue"""
+        items = limit and self.all() or self.all()[:limit]
+        for item in items:
+            yield (item.id, item.component, item.doc_id)
+
+    def remove(self, last_id):
+        """
+        Remove all elements, which are smaller (or equal)
+        than last_id from the queue."""
+        cursor = connection.cursor()
+        cursor.execute('''
+            delete from portal_searchqueue
+                  where id <= %d
+        ''' % last_id)
+        cursor.close()
+        connection._commit()
+
+
+class SearchQueue(models.Model):
+    """
+    Managing a to-do list for asynchronous indexing.
+    """
+    objects = SearchQueueManager()
+    component = models.CharField(max_length=1)
+    doc_id = models.IntegerField()
+
+    class Meta:
+        ordering = ['id']
+
+

@@ -24,9 +24,12 @@ class ConfigurationForm(forms.Form):
 
 
 class EditStaticPageForm(forms.Form):
-    key = forms.CharField(label=u'Schlüssel', max_length=25, required=False)
+    key = forms.CharField(label=u'Schlüssel', max_length=25, required=False,
+                          help_text=u'Der Schlüssel bestimmt, unter welcher '
+                                    u'Adresse die Seite abrufbar ist.')
     title = forms.CharField(label=u'Titel', max_length=200)
-    content = forms.CharField(widget=forms.Textarea)
+    content = forms.CharField(widget=forms.Textarea, label=u'Inhalt',
+                              help_text=u'HTML ist erlaubt')
 
 
 class EditBlogForm(forms.Form):
@@ -78,6 +81,9 @@ class EditUserForm(forms.Form):
     #groups = forms.MultipleChoiceField(label=u'Gruppen', choices=[], required=False)
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
+
+    # ikhaya permission
+    is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
 
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)

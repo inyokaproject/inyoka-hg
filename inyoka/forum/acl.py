@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-    inyoka.form.acl
-    ~~~~~~~~~~~~~~~
+    inyoka.forum.acl
+    ~~~~~~~~~~~~~~~~
 
     Authentification systen for the forum.
 
@@ -78,17 +78,3 @@ def filter_invisible(user, forums, priv='read'):
         if privileges.get(forum.id, {priv: False})[priv]:
             result.append(forum)
     return result
-
-
-class ForumSearchAuthDecider(object):
-    """Decides whetever a user can display a search result or not."""
-
-    def __init__(self, user):
-        privs = get_privileges(user, Forum.objects.all())
-        self.privs = dict((key, priv['read']) for key, priv in privs.iteritems())
-
-    def __call__(self, auth):
-        # TODO: Hide hidden topics
-        return self.privs.get(auth[0], False)
-
-search.register_auth_decider('f', ForumSearchAuthDecider)

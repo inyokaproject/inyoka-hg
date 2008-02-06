@@ -936,18 +936,7 @@ class Post(models.Model):
         """
         This updates the xapian search index.
         """
-        search.store(
-            component='f',
-            uid=self.id,
-            title=self.topic.title,
-            user=self.author_id,
-            date=self.pub_date,
-            collapse=self.topic_id,
-            category=[p.slug for p in self.topic.forum.parents] + \
-                [self.topic.forum.slug],
-            auth=[self.topic.forum_id, self.topic.hidden],
-            text=self.text
-        )
+        search.queue('f', self.id)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -1145,16 +1134,3 @@ class WelcomeMessage(models.Model):
     def render_text(self, request=None, format='html'):
         context = RenderContext(request or r.request, simplified=True)
         return parse(self.text).render(context, format)
-
-
-def recv_post(post_id):
-    post = Post.objects.select_related(2).get(id=post_id)
-    return {
-        'title': post.topic.title,
-        'user': post.author,
-        'date': post.pub_date,
-        'url': url_for(post),
-        'component': u'Forum',
-        'highlight': True
-    }
-search.register_result_handler('f', recv_post)

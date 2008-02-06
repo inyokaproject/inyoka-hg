@@ -25,8 +25,13 @@
     (href('admin', 'ikhaya', 'articles'), 'Artikel')
   ] + navigation_trace %}
 
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Ikhaya</h2>
+{% endblock %}
+
 {% block admin_content %}
-<h2>{{ title_trace[0] }}</h2>
+<h3>{{ title_trace[0] }}</h3>
 
 <form action="" method="post" class="ikhaya">
   {%- if article.icon %}

@@ -1117,12 +1117,15 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
+    privs = get_privileges(request.user, Forum.objects.all())
+    privs = dict((key, priv['read']) for key, priv in privs.iteritems())
     all = Post.objects.get_new_posts()
     posts = []
     for post in all:
         if post.id < request.user.forum_last_read:
             break
-        posts.append(post)
+        if privs.get(post.topic.forum_id, False):
+            posts.append(post)
     pagination = Pagination(request, posts, page, 20,
         href('forum', 'newposts'))
     return {
@@ -1139,6 +1142,8 @@ def welcome(request, slug, path=None):
     """
     user = request.user
     forum = Forum.objects.get(slug=slug)
+    if not forum.welcome_message:
+        raise PageNotFound()
     goto_url = path or url_for(forum)
     if request.method == 'POST':
         accepted = request.POST.get('accept', False)

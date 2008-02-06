@@ -8,11 +8,12 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
+{% set styles = styles + ['editor.css', 'datetimefield.css'] %}
+{% set scripts = scripts + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'edit', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
 ] %}
 
 {% block appheader %}
@@ -23,27 +24,31 @@
 
 {% block admin_content %}
 <form action="" method="post">
-  <h2>Einstellungen von {{ user.username }}</h2>
-  <h3>Forum-Einstellungen</h3>
+  <h3>Einstellungen von {{ user.username|e }}</h3>
+  <h4>Forum-Einstellungen</h4>
   <p>
     {% if user_groups %}
-    Der Benutzer {{ user.username }} gehört den folgenden Gruppen an: {{ user_groups|join(', ') }}
+    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
     {% else %}
-    Der Benutzer {{ user.username }} gehört keinen Gruppen an.
+    Der Benutzer {{ user.username|e }} gehört keinen Gruppen an.
     {% endif %}
+    <p>
+    <a href="{{ href('admin', 'users', 'groupedit', user.username)|e }}">Gruppenzugehörigkeiten von „{{ user.username|e }}“ editieren</a></p>
   </p>
   <dl>
   {{ h.render_form(form, 'username', 'is_active', inline=true) }}
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
+    <dt>Ikhaya-Privilegien:</dt>
+    <dd>{{ form.is_ikhaya_writer }} {{ form.is_ikhaya_writer.label }}</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}
   <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
   </dl>
-  <h3>Persönliche Details von {{ user.username }}</h3>
+  <h4>Persönliche Details von {{ user.username|e }}</h4>
   {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
-  <h3>Benachrichtigungs-Einstellungen</h3>
+  <h4>Benachrichtigungs-Einstellungen</h4>
   {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
-  <h3>Sonstige Einstellungen</h3>
+  <h4>Sonstige Einstellungen</h4>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>
     <button type="submit" id="submit">Speichern</button>

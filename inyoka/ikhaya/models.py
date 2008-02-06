@@ -16,7 +16,7 @@ from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils import slugify, striptags
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.search import search
+from inyoka.utils.search import search, SearchAdapter
 from inyoka.middlewares.registry import r
 
 
@@ -166,16 +166,7 @@ class Article(models.Model):
         """
         This updates the xapian search index.
         """
-        search.store(
-            component='i',
-            uid=self.id,
-            title=self.subject,
-            user=self.author_id,
-            date=self.pub_date,
-            auth=self.pub_date,
-            category=self.category.slug,
-            text=self.text
-        )
+        IkhayaSearchAdapter.queue(self.id)
 
     def save(self):
         """
@@ -280,25 +271,44 @@ class Comment(models.Model):
             cache.set(key, instructions)
         return render(instructions, context)
 
-def recv_article(article_id):
-    article = Article.objects.select_related(1).get(id=article_id)
-    return {
-        'title': article.subject,
-        'user': article.author,
-        'date': article.pub_date,
-        'url': url_for(article),
-        'component': u'Ikhaya',
-        'highlight': True
-    }
-search.register_result_handler('i', recv_article)
-
 
 class ArticleSearchAuthDecider(object):
     """Decides whetever a user can display a search result or not."""
 
     def __init__(self, user):
         self.now = datetime.now()
+        self.priv = user.is_ikhaya_writer
 
     def __call__(self, auth):
-        return auth <= self.now
-search.register_auth_decider('i', ArticleSearchAuthDecider)
+        return self.priv or ((not auth[0]) and auth[1] <= self.now)
+
+
+class IkhayaSearchAdapter(SearchAdapter):
+    type_id = 'i'
+    auth_decider = ArticleSearchAuthDecider
+
+    def store(self, docid):
+        article = Article.objects.select_related(1).get(id=docid)
+        search.store(
+            component='i',
+            uid=article.id,
+            title=article.subject,
+            user=article.author_id,
+            date=article.pub_date,
+            auth=(article.hidden, article.pub_date),
+            category=article.category.slug,
+            text=[article.text, article.intro]
+        )
+
+    def recv(self, docid):
+        article = Article.objects.select_related(1).get(id=docid)
+        return {
+            'title': article.subject,
+            'user': article.author,
+            'date': article.pub_date,
+            'url': url_for(article),
+            'component': u'Ikhaya',
+            'highlight': True
+        }
+
+search.register(IkhayaSearchAdapter())
