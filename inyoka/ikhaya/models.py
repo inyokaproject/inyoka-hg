@@ -277,9 +277,10 @@ class ArticleSearchAuthDecider(object):
 
     def __init__(self, user):
         self.now = datetime.now()
+        self.priv = user.is_ikhaya_writer
 
     def __call__(self, auth):
-        return auth <= self.now
+        return self.priv or ((not auth[0]) and auth[1] <= self.now)
 
 
 class IkhayaSearchAdapter(SearchAdapter):
@@ -294,7 +295,7 @@ class IkhayaSearchAdapter(SearchAdapter):
             title=article.subject,
             user=article.author_id,
             date=article.pub_date,
-            auth=article.pub_date,
+            auth=(article.hidden, article.pub_date),
             category=article.category.slug,
             text=[article.text, article.intro]
         )

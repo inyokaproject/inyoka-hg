@@ -582,7 +582,7 @@ def edit_user(request, username):
         form = EditUserForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            for key in ('username', 'is_active', 'date_joined',
+            for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey'):

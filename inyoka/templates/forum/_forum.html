@@ -32,3 +32,20 @@
     {%- endif %}</td>
   </tr>
 {% endmacro %}
+
+{% macro topic_icon topic -%}
+<img src="
+{{- href('static', 'img', 'forum', 'topic' ) -}}
+{%- if not topic.get_read_status(USER) %}-new{% endif -%}
+{%- if topic.solved %}-solved{% endif -%}
+{#- TODO: watched -#}
+{%- if topic.hidden %}-hidden{% endif -%}
+{%- if topic.reported %}-reported{% endif -%}
+.png" alt="
+{%- if not topic.get_read_status(USER) %}ungelesenes {% endif -%}
+{%- if topic.solved %}gelöstes {% endif -%}
+{#- TODO: watched -#}
+{%- if topic.hidden %}verstecktes {% endif -%}
+{%- if topic.reported %}gemeldetes {% endif -%}
+Thema" />
+{%- endmacro %}
