@@ -116,19 +116,22 @@ def convert_wiki():
                       note=u'Automatische Konvertierung auf neue Syntax')
 
 def convert_forum():
+    from inyoka.forum.models import Forum
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
     from _mysql_exceptions import IntegrityError
     from inyoka.wiki import bbcode
     # Clear the users table
-    #User.objects.all().delete()
+    User.objects.all().delete()
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     conn = engine.connect()
     users_table = Table('%susers' % FORUM_PREFIX, meta, autoload=True)
+    print 'Converting userdata'
     odd_coordinates = []
     mail_error = []
+# TODO: select none.....
     s = select([users_table])
     result = conn.execute(s)
     for row in result:
@@ -189,7 +192,51 @@ def convert_forum():
             else:
                 print e
                 sys.exit(1)
-    print odd_coordinates, mail_error
+    #print odd_coordinates, mail_error
+    print 'Converting forum structue'
+    forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
+    categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
+    s = select([forums_table])
+    result = conn.execute(s)
+    forum_cat_map = {}
+    def build_dict(row, is_forum=True):
+        if is_forum:
+            data = {
+                'id': row.forum_id,
+                'name': row.forum_name,
+                'description': row.forum_desc,
+                'position': row.forum_order,
+                #TODO
+                #'last_post': ,
+                'post_count': row.forum_posts,
+                'topic_count': row.forum_topics,
+            }
+        else:
+            data = {
+                'name': row.cat_title,
+                'position': row.cat_order,
+            }
+        return data
+
+    for row in result:
+        data = build_dict(row)
+        f = Forum(**data)
+        f.save()
+        forum_cat_map.setdefault(row.cat_id, []).append(f)
+
+    s = select([categories_table])
+    result = conn.execute(s)
+    for row in result:
+        data = build_dict(row, False)
+        old_id = row.cat_id
+        cat = Forum(**data)
+        cat.save()
+        new_id = cat.id
+        for forum in forum_cat_map.get(old_id, []):
+            forum.parent_id = new_id
+            forum.save()
+
+    conn.close()
 
 if __name__ == '__main__':
     print 'Converting wiki data'
