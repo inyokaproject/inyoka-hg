@@ -13,7 +13,7 @@
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
-    (href('admin', 'users', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
+    (href('admin', 'users', 'edit', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
 ] %}
 
 {% block appheader %}
@@ -28,12 +28,12 @@
   <h4>Forum-Einstellungen</h4>
   <p>
     {% if user_groups %}
-    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {{ user_groups|join(', ')|e }}
+    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
     {% else %}
     Der Benutzer {{ user.username|e }} gehört keinen Gruppen an.
     {% endif %}
-    <br />
-    <a href="{{ href('admin', 'users', 'addgroup', user.username)|e }}">„{{ user.username|e }}“ zu einer Gruppe hinzufügen</a>
+    <p>
+    <a href="{{ href('admin', 'users', 'groupedit', user.username)|e }}">Gruppenzugehörigkeiten von „{{ user.username|e }}“ editieren</a></p>
   </p>
   <dl>
   {{ h.render_form(form, 'username', 'is_active', inline=true) }}

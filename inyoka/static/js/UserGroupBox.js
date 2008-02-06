@@ -35,18 +35,12 @@
         return true;
       });
     
-    // inject add/remove images
-    $('<img src="' + $STATIC_URL + 'img/admin/add_item.png" />')
-      .attr('alt', 'Gruppe hinzufügen')
-      .attr('class', 'item_add')
-      .insertAfter(this.user_not_joined)
+    // add add/remove events
+    $('img.item_add')
       .click(function() {
         self.move(self.user_not_joined, self.user_joined);
-      })
-    $('<img src="' + $STATIC_URL + 'img/admin/remove_item.png" />')
-      .attr('alt', 'Gruppe entfernen')
-      .attr('class', 'item_remove')
-      .insertBefore(this.user_joined)
+      });
+    $('img.item_remove')
       .click(function() {
         self.move(self.user_joined, self.user_not_joined);
       });

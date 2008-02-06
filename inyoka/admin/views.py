@@ -535,8 +535,8 @@ def users(request):
 
 
 @require_manager
-@templated('admin/users_addgroup.html')
-def users_addgroup(request, username):
+@templated('admin/users_groupedit.html')
+def users_groupedit(request, username):
     groups = Group.objects.select_related(depth=1)
     joined, not_joined = (list(), list())
     if request.method == 'POST':

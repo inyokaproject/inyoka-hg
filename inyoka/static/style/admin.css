@@ -70,14 +70,6 @@ select.permissions option, select.forums option {
 .item_remove {
   cursor: pointer;
 }
-.item_add {
-  margin-left: 10px;
-  margin-right: 20px;
-}
-.item_remove {
-  margin-right: 10px;
-  margin-left: 20px;
-}
 
 select[name="user_groups_joined"],
 select[name="user_groups_not_joined"] {
