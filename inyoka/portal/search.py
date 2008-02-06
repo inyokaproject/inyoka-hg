@@ -15,7 +15,7 @@
 import xapian
 from time import mktime
 from inyoka.portal.user import User
-from inyoka.utils.search import search_handler
+from inyoka.utils.search import search_handler, tokenize
 
 
 @search_handler(u'user', u'author')

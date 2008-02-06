@@ -5,7 +5,7 @@
 
     Views for Ikhaya.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007 by Benjamin Wiegand, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import check_login
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.http import templated
+from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.utils.html import escape
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
@@ -67,10 +67,8 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         articles = Article.objects.all()
         link = ()
 
-    if False:
-        # normal users shouldn't see articles that aren't public or whose
-        # pub_date is in the future
-        articles = articles.filter(pub_date__lte=datetime.datetime.now(),
+    if not request.user.is_ikhaya_writer:
+        articles = articles.filter(pub_date__lte=datetime.now(),
                                    public=True)
 
     articles = articles.order_by('-pub_date')
@@ -88,10 +86,10 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 @templated('ikhaya/detail.html', modifier=context_modifier)
 def detail(request, slug):
     """Shows a single article."""
-    # XXX: do not show this article if the user doesn't have
-    # some special ikhaya privileges
     article = Article.objects.get(slug=slug)
-    if article.hidden:
+    if article.hidden or article.pub_date < datetime.now():
+        if not request.user.is_ikhaya_writer:
+            return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für normale Benutzer nicht sichtbar.')
     if request.method == 'POST':
         form = EditCommentForm(request.POST)
