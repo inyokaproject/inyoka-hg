@@ -1,0 +1,50 @@
+{#
+    admin/users_addgroup.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Add an user to some new groups.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'edit', username|e), username|e),
+    (href('admin', 'users', 'groupedit', username|e), 'Gruppen editieren'),
+] %}
+{% set scripts = scripts + ['UserGroupBox.js'] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<form action="" method="post" id="user_addgroup_form">
+  <table>
+    <tr>
+      <th>nicht zugehörige Gruppen</th>
+      <th class="actions">Aktionen</th>
+      <th>zugehörige Gruppen</th>
+    </tr>
+    <tr>
+      <td><select multiple="multiple" name="user_groups_not_joined"></select></td>
+      <td>
+        <img src="{{ href('static', '/img/admin/add_item.png') }}" alt="Gruppe hinzufügen" class="item_add" />
+        <img src="{{ href('static', '/img/admin/remove_item.png') }}" alt="Gruppe entfernen" class="item_remove" />
+      </td>
+      <td><select multiple="multiple" name="user_groups_joined"></select></td>
+    </tr>
+  </table>
+  <p>
+  <input type="submit" value="Änderungen bestätigen" />
+  </p>
+</form>
+
+<script type="text/javascript">
+  var select_form = new GroupBox('#user_addgroup_form', {{ joined_groups|sort|jsonencode }}, {{ not_joined_groups|sort|jsonencode }});
+</script>
+{% endblock %}

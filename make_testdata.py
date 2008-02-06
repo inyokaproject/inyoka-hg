@@ -22,6 +22,7 @@ from inyoka.wiki.models import Page
 
 MARKS = ('.', ';', '!', '?')
 WORDS = LOREM_IPSUM_WORDS.split(' ')
+NAME_WORDS = [w for w in WORDS if not '\n' in w]
 
 groups = []
 users = []
@@ -29,7 +30,7 @@ page_names = []
 forums = []
 
 
-def create_names(count, func=lambda: choice(WORDS)):
+def create_names(count, func=lambda: choice(NAME_WORDS)):
     """Yields a bunch of unique names"""
     used = []
     for _ in xrange(count):

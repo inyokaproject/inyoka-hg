@@ -187,6 +187,9 @@ class User(models.Model):
     forum_welcome = models.TextField('Gelesene Willkommensnachrichten',
                                      blank=True)
 
+    # ikhaya permissions
+    is_ikhaya_writer = models.BooleanField('Ikhaya Autor', default=False)
+
     def save(self):
         """
         Save method that pickles `self.settings` before and cleanup

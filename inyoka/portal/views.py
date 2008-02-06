@@ -48,7 +48,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  Event
 from inyoka.portal.user import User, Group, deactivate_user
-from inyoka.portal.utils import check_login
+from inyoka.portal.utils import check_login, calendar_entries_for_month
 
 
 @templated('errors/404.html')
@@ -848,7 +848,7 @@ def calendar_overview(self):
 
 @templated('portal/open_search.xml', content_type='text/xml; charset=utf-8')
 def open_search(self, app):
-    if app not in ('wiki', 'forum', 'planet', 'ikahaya'):
+    if app not in ('wiki', 'forum', 'planet', 'ikhaya'):
         app='portal'
     return {
         'app': app
