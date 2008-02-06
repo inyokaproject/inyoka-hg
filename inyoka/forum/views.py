@@ -1142,6 +1142,8 @@ def welcome(request, slug, path=None):
     """
     user = request.user
     forum = Forum.objects.get(slug=slug)
+    if not forum.welcome_message:
+        raise PageNotFound()
     goto_url = path or url_for(forum)
     if request.method == 'POST':
         accepted = request.POST.get('accept', False)
