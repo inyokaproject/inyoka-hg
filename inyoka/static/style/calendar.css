@@ -23,11 +23,11 @@ td {
     border-right-width: 1px;
 }
 
-.sunday {
+tr.sunday td {
     background-color: #FFE8E8;
 }
 
-.saturday {
+tr.saturday td{
     background-color: #E0D0D0;
 }
 
