@@ -89,12 +89,17 @@ def populate_context_defaults(context):
     else:
         reported = pms = suggestions = 0
 
+    global_message = cache.get('utils/global_message')
+    if global_message is None:
+        global_message = storage['global_message'] or False
+        cache.set('utils/global_message', global_message)
+
     context.update(
         REQUEST=request,
         CURRENT_URL=request.build_absolute_uri(),
         USER=request and request.user or None,
         MESSAGES=get_flashed_messages(),
-        GLOBAL_MESSAGE=storage['global_message'],
+        GLOBAL_MESSAGE=global_message,
         pm_count=pms,
         report_count=reported,
         suggestion_count=suggestions
