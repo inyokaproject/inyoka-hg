@@ -18,3 +18,17 @@ ul.switcher li:before {
 ul.switcher li:first-child:before {
     content: '';
 }
+
+td { 
+    border-right-width: 1px;
+}
+
+.sunday {
+    background-color: #FFE8E8;
+}
+
+.saturday {
+    background-color: #E0D0D0;
+}
+
+

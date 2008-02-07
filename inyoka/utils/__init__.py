@@ -254,8 +254,8 @@ def format_timedelta(d, now=None, use_since=False):
            u' und '.join(format(a, *b) for a, b in result)
 
 
-def natural_date(value):
-    """Format a value using dateformat but also use today and yesterday."""
+def natural_date(value, prefix=False):
+    """Format a value using dateformat but also use today, tomorrow and yesterday."""
     if isinstance(value, datetime):
         value = date(value.year, value.month, value.day)
     delta = value - date.today()
@@ -263,7 +263,9 @@ def natural_date(value):
         return u'heute'
     elif delta.days == -1:
         return u'gestern'
-    return DateFormat(value).format(settings.DATE_FORMAT)
+    elif delta.days == 1:
+        return u'morgen'
+    return (prefix and 'am ' or '') + DateFormat(value).format(settings.DATE_FORMAT)
 
 
 def format_time(value):
@@ -285,7 +287,7 @@ def format_date(value):
 
 def format_specific_datetime(value, alt=False):
     """
-    Uses German grammar to format a datetime object for a
+    Use German grammar to format a datetime object for a
     specific datetime.
     """
     s_value = date(value.year, value.month, value.day)
@@ -294,11 +296,17 @@ def format_specific_datetime(value, alt=False):
         string = alt and 'heute um ' or 'von heute '
     elif delta.days == -1:
         string = alt and 'gestern um ' or 'von gestern '
+    elif delta.days == 1:
+        string = alt and 'morgen um ' or 'von morgen '
     else:
         string = (alt and 'am %s um ' or 'vom %s um ') % \
             DateFormat(value).format(settings.DATE_FORMAT)
     return string + format_time(value)
 
+def date_time_to_datetime(d, t):
+    """Merge two datetime.date and datetime.time objects into one datetime"""
+    return datetime(d.year, d.month, d.day,
+                    t.hour, t.minute, t.second, t.microsecond)
 
 class deferred(object):
     """

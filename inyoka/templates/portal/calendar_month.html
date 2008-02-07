@@ -9,11 +9,15 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = ['Kalender'] %}
+{% set title_trace = ['%s %d' % (MONTHS[month]|e, year), 'Kalender'] %}
 {% set styles = styles + ['calendar.css'] %}
+{% set navigation_trace =  [
+    (href('portal', 'calendar'), 'Kalender'),
+    (href('portal', 'calendar', year, '%02d' % month), '%s %d' % (MONTHS[month], year)),
+  ] + navigation_trace %}
 {% block appheader %}
-  <h1>Portal</h1>
-  <h2>Kalender</h2>
+  <h1>Kalender</h1>
+  <h2>{{ MONTHS[month]|e }} {{ year }}</h2>
 {% endblock %}
 {% block portal_content %}
 <ul class="switcher">
@@ -30,4 +34,31 @@
   {%- endif %}
   {%- endfor %}
 </ul>
+
+<table>
+  <tr>
+    <th>Tag</th>
+    <th>Veranstaltungen</th>
+  </tr>
+  {% for day, events in days %}
+  <tr
+     {%- if day.weekday() == 6 %} class="sunday"{% endif -%}
+     {%- if day.weekday() == 5 %} class="saturday"{% endif -%}
+     >
+    <td>
+      {{- day.strftime('%a, %d') -}}
+    </td>
+    <td>
+      {%- if events %}
+      <ul>
+        {%- for event in events %}
+        <li><a href="{{ event|url|e }}">{{ event.name }}</a></li>
+        {%- endfor %}
+      </ul>
+    {% endif -%}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
 {% endblock %}

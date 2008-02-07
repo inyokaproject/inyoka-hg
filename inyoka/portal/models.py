@@ -26,7 +26,9 @@ from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import deferred, slugify
+from inyoka.utils import deferred, slugify, format_specific_datetime, \
+                         date_time_to_datetime, natural_date
+from inyoka.utils.html import escape
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
@@ -237,7 +239,7 @@ class Subscription(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True) # the first part (date) may change!!!
+    slug = models.SlugField(unique=True) # this may change !!
     changed = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
@@ -246,10 +248,10 @@ class Event(models.Model):
     author = models.ForeignKey(User)
     location = models.CharField(max_length=40, blank=True)
     location_town = models.CharField(max_length=20, blank=True)
-    location_long = models.FloatField('Koordinaten (Breite)',
-                                      blank=True, null=True)
     location_lat = models.FloatField(u'Koordinaten (Länge)',
                                      blank=True, null=True)
+    location_long = models.FloatField('Koordinaten (Breite)',
+                                      blank=True, null=True)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -268,17 +270,18 @@ class Event(models.Model):
         return render(instructions, context)
 
     def save(self):
-        slug = self.date.strftime('%Y/%m/%d') + slugify(self.name)
         i = 0
         while True:
+            slug = self.date.strftime('%Y/%m/%d/') + slugify(self.name) + \
+                   ('-%d' % i if i else '')
             try:
-                Event.objects.get(slug=slug)
+                event = Event.objects.get(slug=slug)
             except Event.DoesNotExist:
                 break
             else:
+                if event.id == self.id:
+                    break
                 i += 1
-                slug = self.date.strftime('%Y/%m/%d') + slugify(self.name) + \
-                       ('-%d' % i)
         self.slug = slug
         super(self.__class__, self).save()
         cache.delete('ikhaya/event/%s' % self.id)
@@ -289,10 +292,55 @@ class Event(models.Model):
             self.date.strftime('%Y-%m-%d')
         )
 
+    def friendly_title(self, with_date=True, with_html_link=False):
+        if with_date:
+            if self.time == None:
+                s_date = ' ' + natural_date(self.date, prefix=True)
+            else:
+                s_date = ' ' + format_specific_datetime(date_time_to_datetime(
+                                   self.date, self.time), alt=True)
+        else:
+            s_date = ''
+        s_location = self.location_town \
+            and u' in %s' % self.location_town \
+            or ''
+        if with_html_link:
+            return u'<a href="%s">%s</a>%s%s' % (
+                escape(self.get_absolute_url(), True),
+                escape(self.name),
+                escape(s_date),
+                escape(s_location),
+            )
+        else:
+            return self.name + s_date + s_location
+
+    @property
+    def natural_datetime(self):
+        if self.time == None:
+            return ' ' + natural_date(self.date, prefix=True)
+        else:
+            return ' ' + format_specific_datetime(date_time_to_datetime(
+                         self.date, self.time), alt=False)
+
+    @property
+    def natural_coordinates(self):
+        lat = self.location_lat > 0 and u'%g° N' % self.location_lat \
+                                    or u'%g° N' % -self.location_lat
+        long = self.location_long > 0 and u'%g° O' % self.location_long\
+                                      or u'%g° W' % -self.location_long
+        return u'%s, %s' % (lat, long)
+
+    @property
+    def coordinates_link(self):
+        lat = self.location_lat > 0 and '%g_N' % self.location_lat \
+                                    or '%g_S' % -self.location_lat
+        long = self.location_long > 0 and '%g_E' % self.location_long\
+                                      or '%g_W' % -self.location_long
+        return 'http://tools.wikimedia.de/~magnus/geo/geohack.php?language' \
+               '=de&params=%s_%s' % (lat, long)
+
 
 class SearchQueueManager(models.Manager):
-
-
     def append(self, component, doc_id):
         """Append an item to the queue for later indexing."""
         item = self.model()

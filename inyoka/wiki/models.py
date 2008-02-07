@@ -87,7 +87,6 @@ from django.core.cache import cache
 from django.utils.html import escape
 from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
      get_close_matches, get_title, pagename_join
-from inyoka.wiki.parser import nodes
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, url_for
@@ -1262,3 +1261,5 @@ class MetaData(models.Model):
     page = models.ForeignKey(Page)
     key = models.CharField(max_length=30)
     value = models.CharField(max_length=512)
+
+from inyoka.wiki.parser import nodes

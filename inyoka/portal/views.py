@@ -12,7 +12,7 @@
     :license: GNU GPL.
 """
 import md5
-from datetime import datetime
+from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
 
@@ -50,6 +50,10 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, deactivate_user
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 
+MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni',
+          'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
+            'Samstag', 'Sonntag']
 
 @templated('errors/404.html')
 def not_found(request, err_message=None):
@@ -828,23 +832,43 @@ def about_inyoka(request):
                      u'Inyoka</a>' % href('portal', 'inyoka'))
 
 @templated('portal/calendar_month.html')
-def calendar_month(self, year, month):
+def calendar_month(request, year, month):
     year = int(year)
     month = int(month)
-    MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
-    
-    events = Event.objects.filter(date__year=year, date__month=month)\
-                          .order_by('date')
+    days = calendar_entries_for_month(year, month)
+    days = [(date(year, month, day), events) for day, events in days.items()]
 
     return {
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'days': days,
         'year': year,
         'month': month,
+        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
 @templated('portal/calendar_overview.html')
 def calendar_overview(self):
-    pass #TODO
+    events = Event.objects.order_by('date').filter(date__gt=datetime.now())[:10]
+    return {
+        'events': events,
+        'year': datetime.now().year,
+        'month': datetime.now().month,
+        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'WEEKDAYS': dict(enumerate(WEEKDAYS)),
+    }
+
+@templated('portal/calendar_detail.html')
+def calendar_detail(self, slug):
+    try:
+        event = Event.objects.get(slug=slug)
+    except Event.DoesNotExist:
+        raise HttpNotFound
+    return {
+        'event': event,
+        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'WEEKDAYS': dict(enumerate(WEEKDAYS)),
+    }
+
 
 @templated('portal/open_search.xml', content_type='text/xml; charset=utf-8')
 def open_search(self, app):

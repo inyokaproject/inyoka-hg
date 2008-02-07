@@ -151,22 +151,5 @@ def calendar_entries_for_month(year, month):
     events = Event.objects.filter(date__year=year, date__month=month)
     for event in events:
         days[event.date.day].append(event)
-    return events
-
-
-def group_by_day(entries):
-    """Group calendar entries by day."""
-    days = []
-    days_found = set()
-    for entry in entries:
-        key = (entry.date.year, entry.date.month, entry.date.day)
-        if key not in days_found:
-            days.append((key, []))
-            days_found.add(key)
-        days[-1][1].append(entry)
-
-    return [{
-        'date':     date(*key),
-        'articles': entries
-    } for key, entries in days]
+    return days
 
