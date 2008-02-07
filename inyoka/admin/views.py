@@ -484,7 +484,7 @@ def forums_edit(request, id=None):
                     if Forum.objects.filter(slug=data['slug']):
                         form.errors['slug'] = (
                             (u'Bitte einen anderen Slug angeben,'
-                             u'„%s“ ist schon vergeben.'),
+                             u'„%s“ ist schon vergeben.' % data['slug']),
                         )
                     else:
                         f.slug = data['slug']
