@@ -19,6 +19,7 @@ AVATAR_PREFIX = '/path/'
 sys.path.append(WIKI_PATH)
 
 from os import path
+from sqlalchemy import *
 from datetime import datetime
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.portal.user import User
@@ -39,7 +40,6 @@ def convert_wiki():
     new_page = None
     #for name in request.rootpage.getPageList():
     for name in ['Benutzer/Schlaffi']:
-        print name
         # XXX: add filter
         if 'Hardwaredatenbank' in name or 'Spelling' in name or 'Anwendetreffen' in name:
             continue
@@ -238,7 +238,36 @@ def convert_forum():
 
     conn.close()
 
+def convert_ikhaya():
+    from inyoka.ikhaya.models import Article, Category, Comment
+    engine = create_engine('mysql://root@localhost/ubuntu_de_portal')
+    meta = MetaData()
+    meta.bind = engine
+    category_table = Table('ikhaya_categories', meta, autoload=True)
+    article_table = Table('ikhaya_entries', meta, autoload=True)
+    comment_table = Table('ikhaya_comments', meta, autoload=True)
+
+    category_mapping = {}
+
+    for data in category_table.select().execute():
+        category = Category(name=data.name)
+        category.save()
+        category_mapping[data.id] = category
+
+    for data in article_table.select().execute():
+        article = Article(
+            subject=data.subject,
+            pub_date=data.pub_date,
+            intro=data.intro,
+            text=data.text,
+            public=data.public,
+            category=category_mapping[data.category_id]
+        )
+        article.save()
+
 if __name__ == '__main__':
+    print 'Converting ikhaya data'
+    convert_ikhaya()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting forum data'

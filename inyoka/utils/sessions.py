@@ -10,6 +10,7 @@
     :license: GNU GPL.
 """
 import time
+from django.core.cache import cache
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 from inyoka.portal.models import SessionInfo
@@ -51,13 +52,21 @@ def set_session_info(request, action, category=None):
 
 
 def check_for_user_record():
-    """Checks whether the current session count is a new record"""
-    delta = datetime.now() - timedelta(seconds=SESSION_DELTA)
-    record = int(storage.get('session_record', 0))
-    session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
-    if session_count > record:
-        storage['session_record'] = session_count
-        storage['session_record_time'] = int(time.time())
+    """
+    Checks whether the current session count is a new record.
+    This function uses the cache to hit the database rarely.
+    """
+    # check for record all 2 minutes
+    RECORD_CHECK_TIME = 120
+    check = cache.get('session_record_check')
+    if not check or time.time() - RECORD_CHECK_TIME > check:
+        delta = datetime.now() - timedelta(seconds=SESSION_DELTA)
+        record = int(storage.get('session_record', 0))
+        session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
+        if session_count > record:
+            storage['session_record'] = session_count
+            storage['session_record_time'] = int(time.time())
+    cache.set('session_record_check', time.time())
 
 
 def get_user_record():

@@ -457,23 +457,14 @@ def forums(request):
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):
     """
-    Display an interface to let the user create or edit an forum .
-    If `suggestion_id` is given, the new forum is based on a special
-    article suggestion made by a user. After saving it, the suggestion will be
-    deleted automatically.
+    Display an interface to let the user create or edit an forum.
+    If `id` is given, the forum with id `id` will be edited.
     """
+    new_forum = id is None
 
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Forum.objects.all()]
         form.fields['parent'].choices = [(-1,"Kategorie")] + categories
-
-    def _check_forum_slug():
-        try:
-            Forum.objects.get(slug=data['slug'])
-            flash(u'Bitte einen anderen Slug eingeben')
-            return {  'form': form }
-        except Forum.DoesNotExist:
-            f.slug = data['slug']
 
     if request.method == 'POST':
         form = EditForumForm(request.POST)
@@ -490,17 +481,27 @@ def forums_edit(request, id=None):
                 _check_forum_slug()
             else:
                 if f.slug != data['slug']:
-                    _check_forum_slug()
+                    if Forum.objects.filter(slug=data['slug']):
+                        form.errors['slug'] = (
+                            (u'Bitte einen anderen Slug angeben,'
+                             u'„%s“ ist schon vergeben.' % data['slug']),
+                        )
+                    else:
+                        f.slug = data['slug']
+
             f.description = data['description']
             try:
                 if int(data['parent']) != -1:
                     f.parent = Forum.objects.get(id=data['parent'])
-                f.save()
-                flash(u'Das Forum wurde erfolgreich angepasst, bzw angelegt')
             except Forum.DoesNotExist:
-                flash(u'Forum %s existiert nicht' %data['parent'])
-                return {  'form': form }
-            return HttpResponseRedirect(href('admin', 'forum'))
+                form.errors['parent'] = (u'Forum %s existiert nicht' % data['parent'],)
+            f.save()
+            if not form.errors:
+                flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
+                      f.name, new_forum and 'angelegt' or 'editiert'))
+                return HttpResponseRedirect(href('admin', 'forum'))
+            else:
+                flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
 
     else:
         if id is None:
@@ -517,6 +518,8 @@ def forums_edit(request, id=None):
         _add_field_choices()
     return {
         'form': form,
+        'new': new_forum,
+        'forum_name': f.name
     }
 
 
@@ -559,7 +562,6 @@ def edit_user(request, username):
 
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
-        print request.POST
         if form.is_valid():
             data = form.cleaned_data
             #: set the user attributes, avatar and forum privileges
@@ -593,13 +595,11 @@ def edit_user(request, username):
             # group editing
             groups_joined = [groups.get(name=gn) for gn in
                              request.POST.getlist('user_groups_joined')]
-            print "xxxxxxxx %s" % groups_joined
             groups_not_joined = [groups.get(name=gn) for gn in
                                 request.POST.getlist('user_groups_not_joined')]
             user = User.objects.get(username=username)
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
-            #: save the user (XXX: groups seems to not be saved)
             user.save()
 
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)

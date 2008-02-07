@@ -273,7 +273,7 @@ class Event(models.Model):
         i = 0
         while True:
             slug = self.date.strftime('%Y/%m/%d/') + slugify(self.name) + \
-                   ('-%d' % i if i else '')
+                   (i and '-%d' % i or '')
             try:
                 event = Event.objects.get(slug=slug)
             except Event.DoesNotExist:

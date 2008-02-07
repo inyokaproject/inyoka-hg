@@ -582,17 +582,18 @@ def privmsg_new(request, username=None):
         if form.is_valid():
             d = form.cleaned_data
             try:
-                recipients = set(r.strip() for r in \
-                                 d['recipient'].split(';') if r)
-                if request.user.username in recipients:
+                recipient_names = set(r.strip() for r in \
+                                      d['recipient'].split(';') if r)
+                if request.user.username in recipient_names:
                     flash(u'Du kannst dir selber keine Nachrichten schicken.',
                           False)
-                    recipients = []
-                recipients = [User.objects.get(username__exact=r) \
-                              for r in recipients]
+                    recipient_names = []
+                recipients = []
+                for recipient in recipient_names:
+                    recipients.append(User.objects.get(username__exact=recipient))
             except User.DoesNotExist:
                 recipients = None
-                flash('Der Benutzer wurde nicht gefunden', False)
+                flash(u'Der Benutzer „%s“ wurde nicht gefunden' % recipient, False)
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user
@@ -641,7 +642,8 @@ def memberlist(request, page=1):
     `page` represents the current page in the pagination.
     """
     table = Sortable(User.objects.all(), request.GET, 'id')
-    pagination = Pagination(request, table.get_objects(), page, 15)
+    pagination = Pagination(request, table.get_objects(), page, 15,
+        href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {

@@ -296,8 +296,9 @@ class SearchForm(forms.Form):
 
 class PrivateMessageForm(forms.Form):
     """Form for writing a new private message"""
-    recipient = forms.CharField(label=u'Empfänger:')
-    subject = forms.CharField(label=u'Betreff:')
+    recipient = forms.CharField(label=u'Empfänger',
+        help_text="Mehrere Namen mit Semikolon getrennt eingeben.")
+    subject = forms.CharField(label=u'Betreff')
     text = forms.CharField(label=u'Text', widget=forms.Textarea)
 
 

@@ -41,6 +41,55 @@
 
 {% block navigation %}
   {% block admin_navigation %}
+  <h3>Übersicht</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'config') }}">Allgemein</a></li>
+    <li><a href="{{ href('admin', 'users') }}">Benutzerkonfiguration</a></li>
+    <li><a href="{{ href('admin', 'pages') }}">Statische Seiten</a></li>
+    <li><a href="{{ href('admin', 'ikhaya') }}">Ikhaya</a></li>
+    <li><a href="{{ href('admin', 'planet') }}">Planet</a></li>
+    <li><a href="{{ href('admin', 'forum') }}">Forum</a></li>
+    <li><a href="{{ href('admin', 'groups') }}">Gruppenkonfiguration</a></li>
+  </ul>
+  <h3>Planet</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'planet', 'new') }}">Blog eintragen</a></li>
+  </ul>
+  <h3>Forum</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'forum', 'new') }}">Forum erstellen</li>
+  </ul>
+  <h3>Statische Seiten</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'pages', 'new') }}">Seite erstellen</a></li>
+  </ul>
+  <h3>Ikhaya</h3>
+  <ul>
+    <li><a href="{{ href('admin', 'ikhaya', 'articles') }}">Artikel</a></li>
+    <li>
+      <ul>
+        <li><a href="{{ href('admin', 'ikhaya', 'acticles', 'new') }}">Artikel erstellen</a></li>
+      </ul>
+    </li>
+    <li><a href="{{ href('admin', 'ikhaya', 'categories') }}">Kategorien</a></li>
+    <li>
+      <ul>
+        <li><a href="{{ href('admin', 'ikhaya', 'categories', 'new') }}">Kategorie erstellen</a></li>
+      </ul>
+    </li>
+    <li><a href="{{ href('admin', 'ikhaya', 'icons') }}">Icons</a></li>
+    <li>
+      <ul>
+        <li><a href="{{ href('admin', 'ikhaya', 'icons', 'new') }}">Icon erstellen</a></li>
+      </ul>
+    </li>
+    <li><a href="{{ href('admin', 'ikhaya', 'dates') }}">Termine</a></li>
+    <li>
+      <ul>
+        <li><a href="{{ href('admin', 'ikhaya', 'dates', 'new') }}">Termin erstellen</a></li>
+      </ul>
+    </li>
+  </ul>
 
   {% endblock %}
 {% endblock %}
