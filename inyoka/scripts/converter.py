@@ -147,6 +147,11 @@ def convert_forum():
             except (IndexError, ValueError):
                 odd_coordinates.append(row.user_id)
                 co_long = co_lat = None
+        signature = ''
+        if row.user_sig_bbcode_uid:
+            signature = bbcode.parse(row.user_sig.replace(
+                    ':%s]' % row.user_sig_bbcode_uid,']')
+                ).to_markup()
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
@@ -165,14 +170,14 @@ def convert_forum():
             'aim': row.user_aim[:200],
             'yim': row.user_yim[:200],
             'jabber': row.user_jabber[:200],
-            'signature': bbcode.parse(row.user_sig).to_markup(),
+            'signature': signature,
             #TODO: coordinates
             'coordinates_long': co_long,
             'coordinates_lat': co_lat,
             'location': row.user_from[:200],
             #'gpgkey': '',
-            'occupation': bbcode.parse(row.user_occ).to_markup()[:200],
-            'interests': bbcode.parse(row.user_interests).to_markup()[:200],
+            'occupation': row.user_occ[:200],
+            'interests': row.user_interests[:200],
             'website': row.user_website[:200],
             #'_settings' : '',
             #TODO: 'is_manager': 0,
@@ -181,6 +186,10 @@ def convert_forum():
             #'forum_read_status'
             #'forum_welcome'
         }
+        # make Anonymous id 1, luckily Sascha is 2 ;)
+        # CAUTION: take care if mapping -1 to 1 in posts/topics too
+        if row.user_id == -1:
+            data['pk'] = 1
         try:
             User.objects.create(**data)
         except IntegrityError, e:
@@ -194,32 +203,24 @@ def convert_forum():
                 sys.exit(1)
     #print odd_coordinates, mail_error
     print 'Converting forum structue'
+    Forum.objects.all().delete()
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
     s = select([forums_table])
     result = conn.execute(s)
     forum_cat_map = {}
-    def build_dict(row, is_forum=True):
-        if is_forum:
-            data = {
-                'id': row.forum_id,
-                'name': row.forum_name,
-                'description': row.forum_desc,
-                'position': row.forum_order,
-                #TODO
-                #'last_post': ,
-                'post_count': row.forum_posts,
-                'topic_count': row.forum_topics,
-            }
-        else:
-            data = {
-                'name': row.cat_title,
-                'position': row.cat_order,
-            }
-        return data
 
     for row in result:
-        data = build_dict(row)
+        data = {
+            'id': row.forum_id,
+            'name': row.forum_name,
+            'description': row.forum_desc,
+            'position': row.forum_order,
+            #TODO
+            #'last_post': ,
+            'post_count': row.forum_posts,
+            'topic_count': row.forum_topics,
+        }
         f = Forum(**data)
         f.save()
         forum_cat_map.setdefault(row.cat_id, []).append(f)
@@ -227,11 +228,15 @@ def convert_forum():
     s = select([categories_table])
     result = conn.execute(s)
     for row in result:
-        data = build_dict(row, False)
+        data = {
+            'name': row.cat_title,
+            'position': row.cat_order,
+        }
         old_id = row.cat_id
         cat = Forum(**data)
         cat.save()
         new_id = cat.id
+        # assign forums to the correct new category ids...
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
             forum.save()
