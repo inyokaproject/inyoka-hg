@@ -85,6 +85,34 @@ class ForumManager(models.Manager):
         """
         return Forum.objects.filter(parent__isnull=False)
 
+    def get_forum_structure(self):
+        """
+        Fetch the whole forum structure, build up the tree and cache everything.
+        """
+        struct = cache.get('forum/structure')
+        if struct:
+            return struct
+        forums = list(Forum.objects.all())
+        struct = {}
+        for forum in forums:
+            struct[forum.id] = { 'forum': forum }
+        for forum in forums:
+            children = [(c.position, c.id) for c in forums \
+                        if c.parent_id == forum.id]
+            children.sort()
+            children = [c[1] for c in children]
+            struct[forum.id]['children'] = children
+            parents = []
+            parent = forum.parent_id
+            while parent:
+                parents.append(parent)
+                parent = struct.get(parent)
+                parent = parent and parent['forum'].parent_id
+            parents.reverse()
+            struct[forum.id]['parents'] = parents
+        cache.set('forum/structure', struct, 10*60000)
+        return struct
+
 
 class TopicManager(models.Manager):
     """
@@ -563,7 +591,7 @@ class Forum(models.Model):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('forum', self.parent and 'forum' or 'category', self.slug),
+            'show': ('forum', self.parent_id and 'forum' or 'category', self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
             'welcome': ('forum', 'forum', self.slug, 'welcome'),
             'edit': ('admin', 'forum', 'edit', self.id)
@@ -571,7 +599,8 @@ class Forum(models.Model):
 
     @property
     def children(self):
-        return self.forum_set.all()
+        struct = Forum.objects.get_forum_structure()
+        return [struct[c]['forum'] for c in struct[self.id]['children']]
 
     @property
     def topics(self):
@@ -580,13 +609,8 @@ class Forum(models.Model):
     @property
     def parents(self):
         """Return a list of all parent forums up to the root level."""
-        parents = []
-        forum = self
-        while forum.parent is not None:
-            parents.append(forum.parent)
-            forum = forum.parent
-        parents.reverse()
-        return parents
+        struct = Forum.objects.get_forum_structure()
+        return [struct[c]['forum'] for c in struct[self.id]['parents']]
 
     def save(self):
         if not self.slug:
@@ -602,7 +626,7 @@ class Forum(models.Model):
         """
         if user.is_anonymous or self.last_post_id <= user.forum_last_read:
             return True
-        for forum in self.forum_set.all():
+        for forum in self.children:
             if not forum.get_read_status(user):
                 return False
         for topic in self.topic_set.all():
@@ -658,8 +682,8 @@ class Forum(models.Model):
         return '<%s id=%s slug=%s name=%s>' % (
             self.__class__.__name__,
             self.id,
-            self.slug,
-            self.name
+            self.slug.encode('utf-8'),
+            self.name.encode('utf-8')
         )
 
     class Meta:

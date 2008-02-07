@@ -73,5 +73,22 @@ select.permissions option, select.forums option {
 
 select[name="user_groups_joined"],
 select[name="user_groups_not_joined"] {
+  border: none;
   padding: 5px;
+  width: 100%;
+}
+
+table.user_groups {
+  width: 50%;
+}
+
+table.user_groups tr th {
+  font-size: 0.8em;
+  border: 1px dotted #ccc;
+  text-align: center;
+}
+
+table.user_groups tr td {
+  text-align: center;
+  border: 1px solid #ccc;
 }

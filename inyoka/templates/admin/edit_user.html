@@ -32,13 +32,27 @@
     {% else %}
     Der Benutzer {{ user.username|e }} gehört aktuell keinen Gruppen an.
     {% endif %}
-    <h5>Gruppenzugehörigkeiten editieren:</h5>
-    <select multiple="multiple" name="user_groups_not_joined"></select>
-    <img src="{{ href('static', '/img/admin/add_item.png') }}" alt="Gruppen hinzufügen" class="item_add" />
-    <img src="{{ href('static', '/img/admin/remove_item.png') }}" alt="Gruppen entfernen" class="item_remove" />
-    <select multiple="multiple" name="user_groups_joined"></select>
+
   <dl>
   {{ h.render_form(form, 'username', 'is_active', inline=true) }}
+    <dt>Gruppenzugehörigkeiten editieren:</dt>
+    <dd>
+      <table class="user_groups">
+        <tr>
+          <th>nicht zugehörige Gruppen</th>
+          <th class="actions">
+            <img src="{{ href('static', '/img/admin/add_item.png') }}" alt="Gruppen hinzufügen" class="item_add" />
+            <img src="{{ href('static', '/img/admin/remove_item.png') }}" alt="Gruppen entfernen" class="item_remove" />
+          </th>
+          <th>zugehörige Gruppen</th>
+        </tr>
+        <tr>
+          <td><select multiple="multiple" size="5" name="user_groups_not_joined"></select></td>
+          <td></td>
+          <td><select multiple="multiple" size="5" name="user_groups_joined"></select></td>
+        </tr>
+      </table>
+    </dd>
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
     <dt>Ikhaya-Privilegien:</dt>
