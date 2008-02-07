@@ -642,7 +642,8 @@ def memberlist(request, page=1):
     `page` represents the current page in the pagination.
     """
     table = Sortable(User.objects.all(), request.GET, 'id')
-    pagination = Pagination(request, table.get_objects(), page, 15)
+    pagination = Pagination(request, table.get_objects(), page, 15,
+        href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {
