@@ -8,6 +8,7 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
+from copy import copy as ccopy
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.newforms.models import model_to_dict
@@ -188,7 +189,7 @@ def planet_edit(request, blog=None):
 @require_manager
 @templated('admin/ikhaya.html')
 def ikhaya(request):
-    pass
+    return {}
 
 
 @require_manager
@@ -399,6 +400,52 @@ def ikhaya_icon_edit(request, icon=None):
 
 
 @require_manager
+@templated('admin/ikhaya_dates.html')
+def ikhaya_dates(request):
+    sortable = Sortable(Event.objects.all(), request.GET, 'title')
+    return {
+        'table': sortable
+    }
+
+
+@require_manager
+@templated('admin/ikhaya_date_edit.html')
+def ikhaya_date_edit(request, date=None):
+    """
+    Display an interface to let the user create or edit a date.
+    """
+    if date:
+        date = Event.objects.get(id=date)
+    if request.method == 'POST':
+        form = EditDateForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            if not date:
+                date = Event()
+            date.date = data['date']
+            date.title = data['title']
+            date.author_id = request.user.id
+            date.description = data['description']
+            date.save()
+            flash(u'Der Termin wurde geändert.', True)
+            return HttpResponseRedirect(href('admin', 'ikhaya', 'dates'))
+    else:
+        initial = {}
+        if date:
+            initial = {
+                'title': date.title,
+                'description': date.description,
+                'date': date.date
+            }
+        form = EditDateForm(initial=initial)
+
+    return {
+        'form': form,
+        'date': date
+    }
+
+
+@require_manager
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.objects.all(), request.GET, '-name')
@@ -406,7 +453,7 @@ def forums(request):
         'table': sortable
     }
 
-
+@require_manager
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):
     """
@@ -473,16 +520,17 @@ def forums_edit(request, id=None):
     }
 
 
+@require_manager
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
         try:
             user = User.objects.get(username=request.POST.get('user'))
         except User.DoesNotExist:
-            flash(u'Der Benutzer %s existiert nicht.'
+            flash(u'Der Benutzer „%s“ existiert nicht.'
                   % escape(request.POST.get('user')))
         else:
-            return HttpResponseRedirect(href('admin', 'users', user.username))
+            return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
     return {}
 
 
@@ -498,13 +546,24 @@ def edit_user(request, username):
                 if not v in value:
                     setattr(privilege, 'can_' + v, False)
 
-    user = User.objects.get(username=username)
+    #: check if the user exists
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        flash(u'Der Benutzer „%s“ existiert nicht.'
+              % escape(username))
+        return HttpResponseRedirect(href('admin', 'users'))
     form = EditUserForm(model_to_dict(user))
+    groups = Group.objects.select_related(depth=1)
+    groups_joined, groups_not_joined = ([], [])
+
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
+        print request.POST
         if form.is_valid():
             data = form.cleaned_data
-            for key in ('username', 'is_active', 'date_joined',
+            #: set the user attributes, avatar and forum privileges
+            for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey'):
@@ -513,11 +572,11 @@ def edit_user(request, username):
                     user.save_avatar(data['avatar'])
                 if data['new_password']:
                     user.set_password(data['new_password'])
-                #XXX: find a somewhat better method to find all `forum_permission-*` post-args...
+
+                #: forum privileges
                 for key, value in request.POST.iteritems():
                     if key.startswith('forum_privileges-'):
                         forum_slug = key.split('-', 1)[1]
-                        #XXX: remove dublicate code...
                         try:
                             privilege = Privilege.objects.get(forum__slug=forum_slug)
                             privilege.user = user
@@ -530,7 +589,19 @@ def edit_user(request, username):
                             )
                             _set_privileges()
                         privilege.save()
-                user.save()
+
+            # group editing
+            groups_joined = [groups.get(name=gn) for gn in
+                             request.POST.getlist('user_groups_joined')]
+            print "xxxxxxxx %s" % groups_joined
+            groups_not_joined = [groups.get(name=gn) for gn in
+                                request.POST.getlist('user_groups_not_joined')]
+            user = User.objects.get(username=username)
+            user.groups.remove(*groups_not_joined)
+            user.groups.add(*groups_joined)
+            #: save the user (XXX: groups seems to not be saved)
+            user.save()
+
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
@@ -551,15 +622,22 @@ def edit_user(request, username):
         except Privilege.DoesNotExist:
             forum_privileges.append((forum.slug, forum.name, []))
 
+    groups_joined = groups_joined or user.groups.all()
+    groups_not_joined = groups_not_joined or [x for x in groups
+                                              if not x in groups_joined]
+
     return {
         'user': user,
-        'user_groups': user.groups.all(),
         'form': form,
         'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
+        'user_groups': groups_joined,
+        'joined_groups': [g.name for g in groups_joined],
+        'not_joined_groups': [g.name for g in groups_not_joined]
     }
 
 
+@require_manager
 @templated('admin/groups.html')
 def groups(request):
     return {
@@ -567,6 +645,7 @@ def groups(request):
     }
 
 
+@require_manager
 @templated('admin/groups_edit.html')
 def groups_edit(request, id=None):
     new = id is not None
@@ -574,55 +653,8 @@ def groups_edit(request, id=None):
         form = EditGroupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            # XXX: print "xxxxxxxxxx %s" % data
     else:
         form = EditGroupForm()
     return {
         'form': form
-    }
-
-
-@require_manager
-@templated('admin/ikhaya_dates.html')
-def ikhaya_dates(request):
-    sortable = Sortable(Event.objects.all(), request.GET, 'title')
-    return {
-        'table': sortable
-    }
-
-
-@require_manager
-@templated('admin/ikhaya_date_edit.html')
-def ikhaya_date_edit(request, date=None):
-    """
-    Display an interface to let the user create or edit a date.
-    """
-    if date:
-        date = Event.objects.get(id=date)
-    if request.method == 'POST':
-        form = EditDateForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            if not date:
-                date = Event()
-            date.date = data['date']
-            date.title = data['title']
-            date.author_id = request.user.id
-            date.description = data['description']
-            date.save()
-            flash(u'Der Termin wurde geändert.', True)
-            return HttpResponseRedirect(href('admin', 'ikhaya', 'dates'))
-    else:
-        initial = {}
-        if date:
-            initial = {
-                'title': date.title,
-                'description': date.description,
-                'date': date.date
-            }
-        form = EditDateForm(initial=initial)
-
-    return {
-        'form': form,
-        'date': date
     }

@@ -65,3 +65,13 @@ select.permissions, select.forums {
 select.permissions option, select.forums option {
   padding: 0.2em 0.8em;
 }
+
+.item_add,
+.item_remove {
+  cursor: pointer;
+}
+
+select[name="user_groups_joined"],
+select[name="user_groups_not_joined"] {
+  padding: 5px;
+}

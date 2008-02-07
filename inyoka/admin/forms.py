@@ -82,6 +82,9 @@ class EditUserForm(forms.Form):
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
 
+    # ikhaya permission
+    is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
+
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
     icq = forms.CharField(label=u'ICQ', max_length=16, required=False)

@@ -33,6 +33,9 @@ test_data:
 server:
 	@django-admin.py runserver 0.0.0.0:8080
 
+wserver:
+	@(python django-run-debugged.py)
+
 profiled:
 	@(python inyoka/scripts/start_profiled.py)
 
