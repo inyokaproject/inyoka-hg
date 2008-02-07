@@ -618,6 +618,7 @@ class Forum(models.Model):
         self.post_count = self.post_count or 0
         self.topic_count = self.topic_count or 0
         super(Forum, self).save()
+        cache.delete('forum/structure')
 
     def get_read_status(self, user):
         """

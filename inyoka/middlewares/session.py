@@ -92,4 +92,7 @@ class AdvancedSessionMiddleware(object):
                                 max_age=max_age, expires=expires,
                                 domain=settings.SESSION_COOKIE_DOMAIN,
                                 secure=settings.SESSION_COOKIE_SECURE or None)
+        from django.db import connection
+        print 'queries:', len(connection.queries), '\n'.join(q['sql'] for q \
+                                                             in connection.queries)
         return response
