@@ -1,0 +1,35 @@
+{#
+    portal/register_openid.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Generall description about openid.
+
+    :copyright: 2008 by Christoph Hack.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Registrieren'] %}
+{% block appheader %}
+  <h1>Portal</h1>
+  <h2>Registrieren</h2>
+{% endblock %}
+{% block portal_content %}
+  <h3>OpenID verwenden</h3>
+  <form method="POST" action="{{ href('portal', 'register', 'openid') }}">
+    <p>{{ form.openid_url.label_tag() }}: {{ form.openid_url }}
+  </form>
+  <input type="submit" value="Anmelden" name="signin" /></p>
+  {{ form.openid_url.errors }}
+  <h3>Was ist OpenID</h3>
+  <p>OpenID ist ein freier Standard der es dir ermöglicht dich über eine einzige persönliche URL
+  anzumelden. Diese URL kann deine Webseite, dein Blog oder eine Webseite die du verwendest sein.
+  In allen Fällen musst du dich nur einmal bei deinem OpenID Anbieter anmelden und dir nur
+  ein Passwort merken.</p>
+  <h3>OpenID auf ubuntuusers.de</h3>
+  <p>Du kannst dich mit deiner OpenID bei ubuntuusers.de registrieren, oder deine OpenID zu
+  einem bereits existierenden Account hinzufügen. In beiden Fällen musst du dir dann kein
+  extra Passwort für ubuntuusers.de mehr merken, und wenn du dich neu registrierst, kannst
+  du deine Daten von deiner OpenID übernehmen. Das ist der schnellste Weg, dich bei
+  ubuntuusers.de zu registrieren.</p>
+{% endblock %}
