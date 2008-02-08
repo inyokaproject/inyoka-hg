@@ -570,27 +570,27 @@ def edit_user(request, username):
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey'):
                 setattr(user, key, data[key])
-                if data['avatar']:
-                    user.save_avatar(data['avatar'])
-                if data['new_password']:
-                    user.set_password(data['new_password'])
+            if data['avatar']:
+                user.save_avatar(data['avatar'])
+            if data['new_password']:
+                user.set_password(data['new_password'])
 
-                #: forum privileges
-                for key, value in request.POST.iteritems():
-                    if key.startswith('forum_privileges-'):
-                        forum_slug = key.split('-', 1)[1]
-                        try:
-                            privilege = Privilege.objects.get(forum__slug=forum_slug)
-                            privilege.user = user
-                            privilege.forum = Forum.objects.get(slug=forum_slug)
-                            _set_privileges()
-                        except Privilege.DoesNotExist:
-                            privilege = Privilege(
-                                user=user,
-                                forum=Forum.objects.get(slug=forum_slug)
-                            )
-                            _set_privileges()
-                        privilege.save()
+            #: forum privileges
+            for key, value in request.POST.iteritems():
+                if key.startswith('forum_privileges-'):
+                    forum_slug = key.split('-', 1)[1]
+                    try:
+                        privilege = Privilege.objects.get(forum__slug=forum_slug)
+                        privilege.user = user
+                        privilege.forum = Forum.objects.get(slug=forum_slug)
+                        _set_privileges()
+                    except Privilege.DoesNotExist:
+                        privilege = Privilege(
+                            user=user,
+                            forum=Forum.objects.get(slug=forum_slug)
+                        )
+                        _set_privileges()
+                    privilege.save()
 
             # group editing
             groups_joined = [groups.get(name=gn) for gn in
@@ -640,8 +640,15 @@ def edit_user(request, username):
 @require_manager
 @templated('admin/groups.html')
 def groups(request):
+    if request.method == 'POST':
+        try:
+            group = Group.objects.get(name=request.POST.get('group'))
+        except Group.DoesNotExist:
+            flash(u'Die Gruppe „%s“ existiert nicht.', False)
+        return HttpResponseRedirect(href('admin', 'groups'))
+    flash(u'Not implemented yet...')
     return {
-        'groups': Group.objects.all()
+        'groups_exist': bool(Group.objects.count())
     }
 
 
