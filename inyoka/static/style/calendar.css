@@ -1,34 +1,90 @@
+/**
+ * style.calendar
+ * ~~~~~~~~~~~
+ *
+ * The styles for the calendar.
+ *
+ * :copyright: 2008 by Marian Sigler.
+ * :license: GNU GPL.
+ */
 
-.active {
+
+/* common */ 
+ 
+ul.switcher li.active {
     font-weight: bold;
 }
 
 ul.switcher {
     text-align: center;
 }
+
 ul.switcher li {
     list-style: none;
     display: inline;
 }
+
 ul.switcher li:before {
     content: ' | ';
     color: #AAA;
     font-weight: normal;
 }
+
 ul.switcher li:first-child:before {
     content: '';
 }
 
-td { 
-    border-right-width: 1px;
+
+/* overview */
+
+
+
+
+
+/* month view */
+
+table.calendar_month {
+    margin-top: 1em;
 }
 
-tr.sunday td {
-    background-color: #FFE8E8;
+table.calendar_month ul {
+    list-style: none;
+    padding-left: 0;
 }
 
-tr.saturday td{
-    background-color: #E0D0D0;
+table.calendar_month .weekday, table.calendar_month .day {
+    background-color: #F9F9F9;
+    width: 2em;
+    border-right: 1px solid #CCC;
 }
+
+table.calendar_month tr.sunday td {
+    background-color: #FFD6D6;
+}
+
+table.calendar_month tr.saturday td {
+    background-color: #FFEBEB;
+}
+
+table.calendar_month tr.today td {
+    background-color: #FFFFC2;
+}
+
+
+/* detail view */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

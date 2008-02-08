@@ -35,24 +35,28 @@
   {%- endfor %}
 </ul>
 
-<table>
+<table class="calendar_month">
   <tr>
-    <th>Tag</th>
+    <th colspan="2">Tag</th>
     <th>Veranstaltungen</th>
   </tr>
   {% for day, events in days %}
-  <tr
-     {%- if day.weekday() == 6 %} class="sunday"{% endif -%}
-     {%- if day.weekday() == 5 %} class="saturday"{% endif -%}
-     >
-    <td>
-      {{- day.strftime('%a, %d') -}}
+  <tr {#- #FIXME: if it's weekend today there is only the `today` class, but atm it's not used by the css, so *plonk* :) #}
+     {%- if day == today %} class="today"
+     {%- elif day.weekday() == 6 %} class="sunday"
+     {%- elif day.weekday() == 5 %} class="saturday"
+     {%- endif %}>
+    <td class="weekday">
+      {{- day.strftime('%a') -}}
+    </td>
+    <td class="day">
+      {{- day.strftime('%d') -}}
     </td>
     <td>
       {%- if events %}
       <ul>
         {%- for event in events %}
-        <li><a href="{{ event|url|e }}">{{ event.name }}</a></li>
+        <li><a href="{{ event|url|e }}">{{ event.friendly_title(with_date=false, with_html_link=true) }}</a></li>
         {%- endfor %}
       </ul>
     {% endif -%}
