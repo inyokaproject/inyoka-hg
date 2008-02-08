@@ -54,14 +54,24 @@
 
   DateTimeField.prototype = {
     readDateTime: function() {
+      var self = this;
+      var set_vars = function(year, month, day, time) {
+        self.currentYear = year;
+        self.currentMonth = month,
+        self.currentDay = day;
+        self.currentTime = time;
+      };
       var dateTimeRegex = /(\d{4})-(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2}):(\d{2})/
-      dateTimeRegex.exec(this.input.val())
-      var today = new Date();
-      this.currentYear = RegExp.$1 || today.getFullYear();
-      this.currentMonth = RegExp.$2 || today.getMonth() + 1;
-      this.currentDay = RegExp.$3 || today.getDate();
-      this.currentTime = [RegExp.$4 || today.getHours(), RegExp.$5 || today.getMinutes(),
-                          RegExp.$6 || today.getSeconds()].join(':');
+      var input_value = this.input.val();
+      if (input_value == '') {
+        var today = new Date();
+        set_vars(today.getFullYear(), today.getMonth()+1, today.getDate(),
+                 [today.getHours(), today.getMinutes(), today.getSeconds()].join(':'));
+      } else {
+        dateTimeRegex.exec(input_value);
+        set_vars(RegExp.$1, RegExp.$2, RegExp.$3,
+                 [RegExp.$4, RegExp.$5, RegExp.$6].join(':'));
+      }
     },
     writeDateTime: function() {
       this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay + ' ' +
@@ -233,6 +243,7 @@
       this.drawCalendar();
     },
     destroy: function() {
+      this.writeDateTime();
       this.container.remove();
       this.input.show();
     }

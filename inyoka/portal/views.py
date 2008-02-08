@@ -892,6 +892,7 @@ def calendar_month(request, year, month):
         'days': days,
         'year': year,
         'month': month,
+        'today': datetime.now().date(),
         'MONTHS': dict(list(enumerate(MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
