@@ -527,21 +527,20 @@ def forums_edit(request, id=None):
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
+        name = request.POST.get('user')
         try:
-            user = User.objects.get(username=request.POST.get('user'))
+            user = User.objects.get(username=name)
         except User.DoesNotExist:
             flash(u'Der Benutzer „%s“ existiert nicht.'
-                  % escape(request.POST.get('user')))
+                  % escape(name))
         else:
-            return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
+            return HttpResponseRedirect(href('admin', 'users', 'edit', name))
     return {}
 
 
 @require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
-    #TODO: check for expensive SQL-Queries and other performance problems...
-    #      ... this should be cleaned up -- it's damn unreadable for now...
     def _set_privileges():
         for v in value:
             setattr(privilege, 'can_' + v, True)
@@ -600,14 +599,19 @@ def edit_user(request, username):
             user = User.objects.get(username=username)
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
+
+            # save the user object back to the database
             user.save()
 
-            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!' % user.username, True)
+            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+            # redirect to the new username if given
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
 
+    # collect forum privileges
     forum_privileges = []
     forums = Forum.objects.all()
     for forum in forums:
@@ -641,12 +645,16 @@ def edit_user(request, username):
 @templated('admin/groups.html')
 def groups(request):
     if request.method == 'POST':
+        name = request.POST.get('group')
         try:
             group = Group.objects.get(name=request.POST.get('group'))
         except Group.DoesNotExist:
-            flash(u'Die Gruppe „%s“ existiert nicht.', False)
-        return HttpResponseRedirect(href('admin', 'groups'))
-    flash(u'Not implemented yet...')
+            flash(u'Die Gruppe „%s“ existiert nicht.'
+                  % escape(name), False)
+        else:
+            return HttpResponseRedirect(href(
+                'admin', 'groups', 'edit', group.name
+            ))
     return {
         'groups_exist': bool(Group.objects.count())
     }
@@ -654,14 +662,76 @@ def groups(request):
 
 @require_manager
 @templated('admin/groups_edit.html')
-def groups_edit(request, id=None):
-    new = id is not None
+def groups_edit(request, name=None):
+    def _set_privileges():
+        for v in value:
+            setattr(privilege, 'can_' + v, True)
+            for v in PRIVILEGES:
+                if not v in value:
+                    setattr(privilege, 'can_' + v, False)
+
+    new = name is None
+    if new:
+        group = Group()
+    else:
+        try:
+            group = Group.objects.get(name=name)
+        except Group.DoesNotExist:
+            flash(u'Die Gruppe „%s“ existiert nicht.'
+                  % escape(name), False)
+            return HttpResponseRedirect(href('admin', 'groups'))
+
     if request.method == 'POST':
         form = EditGroupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+            group.is_public = data['is_public']
+            group.name = data['name']
+
+            #: forum privileges
+            for key, value in request.POST.iteritems():
+                if key.startswith('forum_privileges-'):
+                    forum_slug = key.split('-', 1)[1]
+                    try:
+                        privilege = Privilege.objects.get(forum__slug=forum_slug)
+                        privilege.group = group
+                        privilege.forum = Forum.objects.get(slug=forum_slug)
+                        _set_privileges()
+                    except Privilege.DoesNotExist:
+                        privilege = Privilege(
+                            group=group,
+                            forum=Forum.objects.get(slug=forum_slug)
+                        )
+                        _set_privileges()
+                    privilege.save()
+
+            group.save()
+            flash(u'Die Gruppe „%s“ wurde erfolgreich %s'
+                  % (escape(group.name), new and 'erstellt' or 'editiert'),
+                  True)
+            return HttpResponseRedirect(href('admin', 'groups'))
     else:
-        form = EditGroupForm()
+        form = EditGroupForm(not new and model_to_dict(group) or None)
+
+    # collect forum privileges
+    forum_privileges = []
+    forums = Forum.objects.all()
+    for forum in forums:
+        try:
+            privilege = Privilege.objects.get(forum=forum, group=group)
+            forum_privileges.append((forum.slug,
+                forum.name,
+                filter(lambda p: getattr(privilege, 'can_' + p, False),
+                        [p[0] for p in PRIVILEGES_DETAILS])
+                )
+            )
+        except Privilege.DoesNotExist:
+            forum_privileges.append((forum.slug, forum.name, []))
+
     return {
-        'form': form
+        'group_forum_privileges': forum_privileges,
+        'forum_privileges': PRIVILEGES_DETAILS,
+        'group_name': '' or not new and group.name,
+        'form': form,
+        'is_new': new,
     }
