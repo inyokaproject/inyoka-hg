@@ -593,7 +593,8 @@ def privmsg_new(request, username=None):
                     recipients.append(User.objects.get(username__exact=recipient))
             except User.DoesNotExist:
                 recipients = None
-                flash(u'Der Benutzer „%s“ wurde nicht gefunden' % recipient, False)
+                flash(u'Der Benutzer „%s“ wurde nicht gefunden'
+                      % escape(recipient), False)
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user

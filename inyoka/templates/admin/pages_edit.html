@@ -10,7 +10,7 @@
 {% extends 'admin/overall.html' %}
 {% if page %}
   {% set navigation_trace = [
-      (page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.name))
+      (page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.title))
     ] %}
 {% else %}
   {% set navigation_trace = [

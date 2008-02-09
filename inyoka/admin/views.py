@@ -234,7 +234,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 article.save()
                 if suggestion_id:
                     Suggestion.objects.delete([suggestion_id])
-                flash('Der Artikel wurde erstellt.', True)
+                flash('Der Artikel „%s“ wurde erstellt.'
+                      % escape(article.subject), True)
             else:
                 changed = False
                 for k in data:
@@ -244,9 +245,11 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 if changed:
                     article.updated = datetime.now()
                     article.save()
-                    flash(u'Der Artikel wurde geändert.', True)
+                    flash(u'Der Artikel „%s“ wurde geändert.'
+                          % escape(article.subject), True)
                 else:
-                    flash(u'Der Artikel wurde nicht verändert')
+                    flash(u'Der Artikel „%s“ wurde nicht verändert'
+                          % escape(article.subject))
             return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
     else:
         initial = {}
@@ -332,13 +335,15 @@ def ikhaya_category_edit(request, category=None):
             if not category:
                 category = Category(**form.cleaned_data)
                 category.save()
-                flash(u'Die Kategorie wurde erstellt', True)
+                flash(u'Die Kategorie „%s“ wurde erstellt'
+                      % escape(category.name), True)
             else:
                 for k in data:
                     if category.__getattribute__(k) != data[k]:
                         category.__setattr__(k, data[k])
                 category.save()
-                flash(u'Die Kategorie wurde geändert.', True)
+                flash(u'Die Kategorie „%s“ wurde geändert.'
+                      % escape(category.name), True)
             return HttpResponseRedirect(href('admin', 'ikhaya', 'categories'))
     else:
         initial = {}
@@ -427,7 +432,8 @@ def ikhaya_date_edit(request, date=None):
             date.author_id = request.user.id
             date.description = data['description']
             date.save()
-            flash(u'Der Termin wurde geändert.', True)
+            flash(u'Der Termin „%s“ wurde geändert.'
+                  % escape(date.title), True)
             return HttpResponseRedirect(href('admin', 'ikhaya', 'dates'))
     else:
         initial = {}
@@ -484,7 +490,8 @@ def forums_edit(request, id=None):
                     if Forum.objects.filter(slug=data['slug']):
                         form.errors['slug'] = (
                             (u'Bitte einen anderen Slug angeben,'
-                             u'„%s“ ist schon vergeben.' % data['slug']),
+                             u'„%s“ ist schon vergeben.'
+                             % escape(data['slug'])),
                         )
                     else:
                         f.slug = data['slug']
@@ -494,11 +501,12 @@ def forums_edit(request, id=None):
                 if int(data['parent']) != -1:
                     f.parent = Forum.objects.get(id=data['parent'])
             except Forum.DoesNotExist:
-                form.errors['parent'] = (u'Forum %s existiert nicht' % data['parent'],)
+                form.errors['parent'] = (u'Forum %s existiert nicht'
+                                         % escape(data['parent']),)
             f.save()
             if not form.errors:
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
-                      f.name, new_forum and 'angelegt' or 'editiert'))
+                      escape(f.name), new_forum and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
             else:
                 flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
