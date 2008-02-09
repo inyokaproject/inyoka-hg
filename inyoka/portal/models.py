@@ -324,14 +324,17 @@ class Event(models.Model):
 
     @property
     def natural_coordinates(self):
-        lat = self.location_lat > 0 and u'%g° N' % self.location_lat \
-                                    or u'%g° N' % -self.location_lat
-        long = self.location_long > 0 and u'%g° O' % self.location_long\
-                                      or u'%g° W' % -self.location_long
-        return u'%s, %s' % (lat, long)
+        if self.location_lat and self.location_long:
+            lat = self.location_lat > 0 and u'%g° N' % self.location_lat \
+                                        or u'%g° S' % -self.location_lat
+            long = self.location_long > 0 and u'%g° O' % self.location_long\
+                                          or u'%g° W' % -self.location_long
+            return u'%s, %s' % (lat, long)
+        else:
+            return u''
 
     @property
-    def coordinates_link(self):
+    def coordinates_url(self):
         lat = self.location_lat > 0 and '%g_N' % self.location_lat \
                                     or '%g_S' % -self.location_lat
         long = self.location_long > 0 and '%g_E' % self.location_long\

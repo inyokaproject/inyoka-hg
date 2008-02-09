@@ -74,7 +74,7 @@ class EditUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     new_password = forms.CharField(label=u'Neues Passwort', max_length=128,
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
-                                   u'Bitte nur angeben, wenn benötigt.'))
+                                   u'Bitte nur angeben, wenn benötigt'))
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
@@ -116,6 +116,7 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
+    is_public = forms.BooleanField(label=u'Öffentliches Profil')
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 
