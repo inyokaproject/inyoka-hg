@@ -152,4 +152,3 @@ def calendar_entries_for_month(year, month):
     for event in events:
         days[event.date.day].append(event)
     return days
-

@@ -655,13 +655,13 @@ def groups(request):
     if request.method == 'POST':
         name = request.POST.get('group')
         try:
-            group = Group.objects.get(name=request.POST.get('group'))
+            group = Group.objects.get(name=name)
         except Group.DoesNotExist:
             flash(u'Die Gruppe „%s“ existiert nicht.'
                   % escape(name), False)
         else:
             return HttpResponseRedirect(href(
-                'admin', 'groups', 'edit', group.name
+                'admin', 'groups', 'edit', name
             ))
     return {
         'groups_exist': bool(Group.objects.count())

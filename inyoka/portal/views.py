@@ -501,7 +501,7 @@ def usercp_deactivate(request):
     """
     This page allows the user to deactivate his account.
     """
-    #TODO: we should additionally send an email with a link etc  
+    #TODO: we should additionally send an email with a link etc
     if request.method == 'POST':
         form = DeactivateUserForm(request.POST)
         if form.is_valid():

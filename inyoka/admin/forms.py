@@ -110,7 +110,7 @@ class EditUserForm(forms.Form):
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
         if gpgkey.startswith('0X'):
-           gpgkey = gpgkey[2:]
+            gpgkey = gpgkey[2:]
         return gpgkey
 
 
