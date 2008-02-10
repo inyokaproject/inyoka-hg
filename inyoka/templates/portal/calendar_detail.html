@@ -1,0 +1,41 @@
+{#
+    portal/calendar_detail.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Show a single event
+
+    :copyright: 2008 by Marian Sigler.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = [event.name|e, 'Kalender'] %}
+{% set styles = styles + ['calendar.css'] %}
+{% set navigation_trace =  [
+    (href('portal', 'calendar'), 'Kalender'),
+    (href('portal', 'calendar', event.date.year, '%02d' % event.date.month), '%s %d' % (MONTHS[event.date.month], event.date.year)),
+    (event|url, event.name|e),
+  ] + navigation_trace %}
+{% block appheader %}
+  <h1>Kalender</h1>
+  <h2>{{ event.name|e }}</h2>
+{% endblock %}
+{% block portal_content %}
+
+<h3>Veranstaltung „{{ event.name|e }}“</h3>
+<table>
+  <tr><th>Zeitpunkt</th><td>{{ event.natural_datetime }}</td></tr>
+  {% if event.location_town %}
+  <tr>
+    <th>Ort</th>
+    <td>
+      {% if event.location != none %}{{ event.location }} in {% endif %}{{ event.location_town }}
+      {% if event.location_lat and event.location_long %}(<a href="{{ event.coordinates_url|e -}}">{{ event.natural_coordinates|e }}</a>){% endif %}
+    </td>
+  </tr>
+  {% endif %}
+  <tr><th colspan="2">Details</th></tr>
+  <tr><td colspan="2">{{ event.rendered_description }}</td></tr>
+</table>
+
+{% endblock %}

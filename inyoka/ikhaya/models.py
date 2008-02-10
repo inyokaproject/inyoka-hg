@@ -110,17 +110,44 @@ class Article(models.Model):
     slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
 
+    def _simplify(self, text, key):
+        """Remove markup of a text that belongs to this Article"""
+        v = cache.get(key)
+        if v:
+            return v
+        if self.is_xhtml:
+            simple = striptags(text)
+        else:
+            simple = parse(text).text
+        cache.set(key, simple)
+        return simple
+
+    def _render(self, text, key):
+        """Render a text that belongs to this Article to HTML"""
+        if self.is_xhtml:
+            return text
+        context = RenderContext(r.request)
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(text).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
+
     @property
     def rendered_text(self):
-        return self._render(self.text)
+        return self._render(self.text, 'ikhaya/article_text/%s' % self.id)
 
     @property
     def rendered_intro(self):
-        return self._render(self.intro)
+        return self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
 
     @property
     def simplified_text(self):
-        return self._simplify(self.text)
+        return self._simplify(self.text, 'ikhaya/simple_text/%s' % self.id)
+
+    @property
+    def simplified_intro(self):
+        return self._simplify(self.intro, 'ikhaya/simple_intro/%s' % self.id)
 
     @property
     def hidden(self):
@@ -131,10 +158,6 @@ class Article(models.Model):
         aren't shown for a normal user.
         """
         return not self.public or self.pub_date > datetime.now()
-
-    @property
-    def simplified_intro(self):
-        return self._simplify(self.intro)
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -148,19 +171,6 @@ class Article(models.Model):
             self.pub_date.strftime('%d.%m.%Y'),
             self.subject
         )
-
-    def _simplify(self, text):
-        """Remove markup of a text that belongs to this Article"""
-        if self.is_xhtml:
-            return striptags(text)
-        return parse(text).text
-
-    def _render(self, text):
-        """Render a text that belongs to this Article to HTML"""
-        if self.is_xhtml:
-            return text
-        node = parse(text)
-        return node.render(r.request, 'html')
 
     def update_search(self):
         """
@@ -239,15 +249,23 @@ class Suggestion(models.Model):
 
     @property
     def rendered_text(self):
-        # XXX: Cache
         context = RenderContext(r.request)
-        return parse(self.text).render(context, 'html')
+        key = 'ikhaya/suggestion_text/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.text).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
 
     @property
     def rendered_intro(self):
-        # XXX: Cache
         context = RenderContext(r.request)
-        return parse(self.intro).render(context, 'html')
+        key = 'ikhaya/suggestion_intro/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.intro).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
 
 
 class Comment(models.Model):

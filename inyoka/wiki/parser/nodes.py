@@ -641,7 +641,7 @@ class Link(Element):
         self.title = title
         self.scheme, self.netloc, self.path, self.params, self.querystring, \
             self.anchor = urlparse(url)
-        
+
 
     @property
     def href(self):
