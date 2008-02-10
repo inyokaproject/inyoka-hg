@@ -98,6 +98,7 @@ class CommonServicesMiddleware(CommonMiddleware):
             powered_by = 'Inyoka'
         response['X-Powered-By'] = powered_by
         response['X-Sucks'] = 'PHP in any version'
+
         return response
 
 
