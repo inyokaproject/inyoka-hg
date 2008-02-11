@@ -1,4 +1,6 @@
 (function() {
+  var mapping = {}
+
   PrivilegeBox = function(container, forums, privileges) {
     var self = this;
     this.container = $(container);
@@ -6,7 +8,8 @@
       .change(function() {
         $('.forum_privileges').hide();
         var id = '#forum_privileges-' + $(this).val();
-        if($(id).length == 1) {
+        console.log(id, $(id), $(id).length);
+        if ($(id).length == 1) {
           $(id).show()
         } else {
           var privileges_select = $('<select multiple="multiple" class="forum_privileges" size="10"></select>')
@@ -15,12 +18,14 @@
           $.each(privileges, function(i, perm) {
             privileges_select.append($('<option></option>').val(perm[0]).text(perm[1]));
           });
+          privileges_select.val(mapping[$(this).val()]);
           self.container.append(privileges_select);
         };
       });
     $.each(forums, function(i, forum) {
-      var [slug, name, perms] = forum;
-      select.append($('<option></option>').val(slug).text(name));
+      var [id, name, perms] = forum;
+      mapping[id] = perms;
+      select.append($('<option></option>').val(id).text(name));
     });
     this.container.html('');
     this.container.append(select);
