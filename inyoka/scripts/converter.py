@@ -21,7 +21,8 @@ AVATAR_PREFIX = '/path/'
 sys.path.append(WIKI_PATH)
 
 from os import path
-from sqlalchemy import *
+from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy.sql import select
 from datetime import datetime
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.portal.user import User
@@ -73,10 +74,7 @@ def convert_wiki():
                     new_page = InyokaPage.objects.create(name, text=text,
                                                          **kwargs)
                 else:
-                    try:
-                        new_page.edit(text=text, deleted=False, **kwargs)
-                    except:
-                        print text
+                    new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
                 att = line.extra
                 att_name = '%s/%s' % (name, att)
@@ -118,27 +116,17 @@ def convert_wiki():
                       note=u'Automatische Konvertierung auf neue Syntax')
 
 
-def convert_forum():
-    from inyoka.forum.models import Forum, Topic
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
+def convert_users():
     from _mysql_exceptions import IntegrityError
     from inyoka.wiki import bbcode
-    from django.db import connection
-
-    django_db_cursor = connection.cursor()
-
-    # Clear the users table
-    django_db_cursor.execute("TRUNCATE TABLE portal_user")
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     conn = engine.connect()
     users_table = Table('%susers' % FORUM_PREFIX, meta, autoload=True)
-    print 'Converting userdata'
     odd_coordinates = []
     mail_error = []
-# TODO: select none.....
+    # TODO: select none.....
     s = select([users_table])
     result = conn.execute(s)
     for row in result:
@@ -198,19 +186,30 @@ def convert_forum():
         if row.user_id == -1:
             data['pk'] = 1
         try:
-            User.objects.create(**data)
+            u = User.objects.create(**data)
         except IntegrityError, e:
             # same email adress, forbidden
             if e.args[1].endswith('key 3'):
                 data['email'] = "(%d)%s" % (row.user_id ,data['email'])
-                User.objects.create(**data)
+                u = User.objects.create(**data)
                 mail_error.append(row.user_id)
             else:
                 print e
                 sys.exit(1)
+        users[u.username] = u
     #print odd_coordinates, mail_error
+
+
+def convert_forum():
+    from inyoka.forum.models import Forum, Topic
+    from sqlalchemy import create_engine, MetaData, Table
+    from sqlalchemy.sql import select
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
     print 'Converting forum structue'
-    django_db_cursor.execute("TRUNCATE TABLE forum_forum")
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
     s = select([forums_table])
@@ -249,7 +248,6 @@ def convert_forum():
             forum.save()
 
     print 'Converting topics'
-    django_db_cursor.execute("TRUNCATE TABLE forum_topic")
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
     s = select([topic_table])
 
@@ -354,7 +352,10 @@ def convert_ikhaya():
         )
         article.save()
 
+
 if __name__ == '__main__':
+    print 'Converting users'
+    convert_users()
     print 'Converting ikhaya data'
     #convert_ikhaya()
     print 'Converting wiki data'

@@ -137,10 +137,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',
     'inyoka.middlewares.session.AdvancedSessionMiddleware',
     'inyoka.middlewares.auth.AuthMiddleware',
+    'inyoka.middlewares.registry.RegistryMiddleware',
     'inyoka.middlewares.services.ServiceMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
     'inyoka.middlewares.common.CommonServicesMiddleware',
-    'inyoka.middlewares.registry.RegistryMiddleware',
     'inyoka.middlewares.highlighter.HighlighterMiddleware',
     'inyoka.middlewares.security.SecurityMiddleware'
 )
