@@ -19,6 +19,11 @@ from django.conf import settings
 from django.utils.dateformat import DateFormat
 from django.utils.tzinfo import LocalTimezone
 
+MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni',
+          'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
+            'Samstag', 'Sonntag']
+
 _strip_re = re.compile(r'<!--.*?-->|<[^>]*>(?s)')
 _slugify_replacement_table = {
     u'\xdf': 'ss',
