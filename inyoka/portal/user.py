@@ -11,6 +11,7 @@
     :license: GNU GPL.
 """
 from sha import sha
+from md5 import md5
 import os
 import cPickle
 import datetime
@@ -41,12 +42,19 @@ def get_hexdigest(salt, raw_password):
     return sha(salt + raw_password).hexdigest()
 
 
-def check_password(raw_password, enc_password):
+def check_password(raw_password, enc_password, convert_user=None):
     """
     Returns a boolean of whether the raw_password was correct. Handles
     encryption formats behind the scenes.
     """
     salt, hsh = enc_password.split('$')
+    # compatibility with old md5 passwords
+    if salt == 'md5':
+        result = hsh == md5(raw_password).hexdigest()
+        if result and convert_user and convert_user.is_authenticated:
+            convert_user.set_password(raw_password)
+            convert_user.save()
+        return result
     return hsh == get_hexdigest(salt, raw_password)
 
 
@@ -114,7 +122,7 @@ class UserManager(models.Manager):
     def authenticate(self, username, password):
         try:
             user = User.objects.get(username=username)
-            if user.check_password(password):
+            if user.check_password(password, auto_convert=True):
                 return user
         except User.DoesNotExist:
             return None
@@ -212,11 +220,12 @@ class User(models.Model):
         hsh = get_hexdigest(salt, raw_password)
         self.password = '%s$%s' % (salt, hsh)
 
-    def check_password(self, raw_password):
+    def check_password(self, raw_password, auto_convert=False):
         """
         Returns a boolean of whether the raw_password was correct.
         """
-        return check_password(raw_password, self.password)
+        return check_password(raw_password, self.password,
+                              convert_user=auto_convert and self or False)
 
     def set_unusable_password(self):
         """Sets a value that will never be a valid hash"""
