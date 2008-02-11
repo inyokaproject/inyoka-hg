@@ -27,6 +27,7 @@
     {{- href('portal', 'datenschutz') }}">der Datenschutzerklärung</a>.
   </p>
   {%- else %}
+  <a href="{{ href('portal', 'register', 'openid') }}" class="openid">OpenID verwenden</a>
   <form action="" method="post">
     <dl>
       {{ h.render_form(form, 'username', 'password', 'confirm_password',

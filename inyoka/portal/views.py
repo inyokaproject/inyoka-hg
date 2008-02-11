@@ -43,7 +43,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
                                 DeactivateUserForm, LostPasswordForm, \
                                 ChangePasswordForm, SubscriptionForm, \
                                 UserCPProfileForm, SetNewPasswordForm, \
-                                NOTIFICATION_CHOICES
+                                NOTIFICATION_CHOICES, OpenIDForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  Event
@@ -131,6 +131,54 @@ def register(request):
         'retry_link':   cookie_error_link
     }
 
+
+# XXX: move to an external util-modul
+from openid import oidutil
+oidutil.log = lambda m: None
+from openid.store.filestore import FileOpenIDStore
+openid_store = FileOpenIDStore('openid')
+
+
+@templated('portal/register_openid.html')
+def register_openid(request):
+    from openid.consumer.consumer import Consumer, SUCCESS, DiscoveryFailure
+    from openid.extensions.sreg import SRegRequest
+    form = OpenIDForm()
+    session = request.session.get('openid_session', {})
+    if request.method == 'POST':
+        form = OpenIDForm(request.POST)
+        if form.is_valid():
+            openid = form.cleaned_data['openid_url']
+            consumer = Consumer(session, openid_store)
+            try:
+                auth = consumer.begin(openid)
+            except DiscoveryFailure:
+                flash('Fehler beim Auffinden des OpenID Anbieters.')
+                return { 'form': form }
+            url = href('portal', 'register', 'openid')
+            auth.addExtension(SRegRequest(required=['nickname', 'email']))
+            authurl = auth.redirectURL(href(), return_to=url, immediate=False)
+            request.session['openid_session'] = session
+            return HttpResponseRedirect(authurl)
+    elif request.GET.get('openid.identity'):
+        url = href('portal', 'register', 'openid')
+        consumer = Consumer(session, openid_store)
+        params = dict((k, v[0]) for k, v in request.GET.iteritems())
+        info = consumer.complete(params, url)
+        if info.status == SUCCESS:
+            cookie_error_link = test_session_cookie(request)
+            flash('OpenID Anmeldung erfolgreich.')
+            form = RegisterForm(initial={
+                'username': params.get('openid.sreg.nickname'),
+                'email': params.get('openid.sreg.email')
+            })
+            return TemplateResponse('portal/register.html', { 'form': form })
+        else:
+            flash('Anmeldung fehlgeschlagen')
+            request.session.pop('openid_session')
+    return {
+        'form': form
+    }
 
 def activate(request, action='', username='', activation_key=''):
     """Activate a user with the activation key send via email."""

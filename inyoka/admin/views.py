@@ -585,16 +585,16 @@ def edit_user(request, username):
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
-                    forum_slug = key.split('-', 1)[1]
+                    forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__slug=forum_slug)
+                        privilege = Privilege.objects.get(forum__id=forum_id)
                         privilege.user = user
-                        privilege.forum = Forum.objects.get(slug=forum_slug)
+                        privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()
                     except Privilege.DoesNotExist:
                         privilege = Privilege(
                             user=user,
-                            forum=Forum.objects.get(slug=forum_slug)
+                            forum=Forum.objects.get(id=forum_id)
                         )
                         _set_privileges()
                     privilege.save()
@@ -625,7 +625,7 @@ def edit_user(request, username):
     for forum in forums:
         try:
             privilege = Privilege.objects.get(forum=forum, user=user)
-            forum_privileges.append((forum.slug,
+            forum_privileges.append((forum.id,
                 forum.name,
                 filter(lambda p: getattr(privilege, 'can_' + p, False),
                         [p[0] for p in PRIVILEGES_DETAILS])

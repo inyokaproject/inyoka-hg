@@ -38,11 +38,11 @@ def convert_wiki():
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    #for name in request.rootpage.getPageList():
-    for name in ['Benutzer/Schlaffi']:
-        # XXX: add filter
-        if 'Hardwaredatenbank' in name or 'Spelling' in name or 'Anwendetreffen' in name:
+    for name in request.rootpage.getPageList():
+    #for name in ['Analog-TV']:
+        if 'Hardwaredatenbank' in name or 'Spelling' in name or 'Anwendertreffen' in name or 'Benutzer/' in name or 'Analog-TV' in name or name == 'Kate':
             continue
+        print name
         page = Page(request, name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -114,6 +114,7 @@ def convert_wiki():
         text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
+
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic
@@ -290,14 +291,48 @@ def convert_forum():
 
     conn.close()
 
+
 def convert_ikhaya():
+    import re
+    from textile import textile
+    from markdown import markdown
+    from xml.sax import saxutils
     from inyoka.ikhaya.models import Article, Category, Comment
+
+    def linebreaks(value):
+        """
+        Converts newlines into <p> and <br />s.
+        Copied of the old portal.
+        """
+        value = re.sub(r'\r\n|\r|\n', '\n', value) # normalize newlines
+        paras = re.split('\n{2,}', value)
+        paras = ['<p>%s</p>' % p.strip().replace('\n', '<br />') for p in paras]
+        return '\n\n'.join(paras)
+
+    def render_article(text, parser):
+        """
+        Copied of the old portal.
+        """
+        if not text.strip():
+            return u''
+        # TODO: Parse images
+        if parser == 'markdown':
+            return markdown(text)
+        if parser == 'textile':
+            return textile(text)
+        if parser == 'autobr':
+            return linebreaks(text)
+        if parser == 'xhtml':
+            return text
+        return saxutils.escape(text)
+
     engine = create_engine('mysql://root@localhost/ubuntu_de_portal')
     meta = MetaData()
     meta.bind = engine
     category_table = Table('ikhaya_categories', meta, autoload=True)
     article_table = Table('ikhaya_entries', meta, autoload=True)
     comment_table = Table('ikhaya_comments', meta, autoload=True)
+    icon_table = Table('ikhaya_icons', meta, autoload=True)
 
     category_mapping = {}
 
@@ -311,7 +346,7 @@ def convert_ikhaya():
             subject=data.subject,
             pub_date=data.pub_date,
             intro=data.intro,
-            text=data.text,
+            text=render_article(data.text),
             public=data.public,
             category=category_mapping[data.category_id]
         )
@@ -319,8 +354,8 @@ def convert_ikhaya():
 
 if __name__ == '__main__':
     print 'Converting ikhaya data'
-    convert_ikhaya()
+    #convert_ikhaya()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting forum data'
-    convert_forum()
+    #convert_forum()

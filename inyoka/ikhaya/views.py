@@ -87,7 +87,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 def detail(request, slug):
     """Shows a single article."""
     article = Article.objects.get(slug=slug)
-    if article.hidden or article.pub_date < datetime.now():
+    if article.hidden or article.pub_date > datetime.now():
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für normale Benutzer nicht sichtbar.')

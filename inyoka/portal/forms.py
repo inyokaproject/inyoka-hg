@@ -150,6 +150,13 @@ class RegisterForm(forms.Form):
             )
 
 
+class OpenIDForm(forms.Form):
+    """
+    A simple form for entering a OpenID.
+    """
+    openid_url = forms.URLField(label='OpenID')
+
+
 class LostPasswordForm(forms.Form):
     """
     Form for the lost password form.
