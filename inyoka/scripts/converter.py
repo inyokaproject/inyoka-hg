@@ -11,9 +11,11 @@
     :license: GNU GPL.
 """
 import sys
+from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://root:@127.0.0.1/ubuntuusers?charset=utf8'
+FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers_old?charset=utf8' % (settings.DATABASE_USER,
+    settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = '/path/'
 sys.path.append(WIKI_PATH)
@@ -163,7 +165,7 @@ def convert_forum():
             'pk': row.user_id,
             'username': row.username[:30],
             'email': row.user_email[:50] or None,
-            'password': '!',
+            'password': 'md5$%s' % row.user_password,
             'is_active': row.user_active,
             'last_login': datetime.fromtimestamp(row.user_lastvisit),
             'date_joined': datetime.fromtimestamp(row.user_regdate),
@@ -356,6 +358,6 @@ if __name__ == '__main__':
     print 'Converting ikhaya data'
     #convert_ikhaya()
     print 'Converting wiki data'
-    convert_wiki()
+    #convert_wiki()
     print 'Converting forum data'
-    #convert_forum()
+    convert_forum()
