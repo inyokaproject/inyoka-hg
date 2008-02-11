@@ -71,7 +71,6 @@ def on_get_calendar_entry(request):
         'MONTHS': dict(list(enumerate(MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
-
     return render_template('portal/_calendar_detail.html', data)
 
 

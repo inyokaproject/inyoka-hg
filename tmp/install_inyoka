@@ -1,3 +1,6 @@
+# this installs all the dependencies needed for inyoka
+# it should work with Ubuntu Gutsy, anything else has not been tested
+
 cd /opt
 sudo su
 aptitude install mercurial subversion python-simplejson mysql-server mysql-client python-openid
