@@ -279,8 +279,8 @@ def convert_forum():
             'sticky': bool(row.topic_type),
             'solved': bool(row.topic_fixed),
             'locked': row.topic_status == 1,
-            'ubuntu_version': ubuntu_version_map[row.topic_version],
-            'ubuntu_distro': ubuntu_distro_map[row.topic_desktop],
+            'ubuntu_version': ubuntu_version_map.get(row.topic_version),
+            'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
             'author_id': row.topic_poster,
             'first_post_id': row.topic_first_post_id,
             'last_post_id': row.topic_last_post_id,
@@ -355,7 +355,7 @@ def convert_ikhaya():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
+    #convert_users()
     print 'Converting ikhaya data'
     #convert_ikhaya()
     print 'Converting wiki data'
