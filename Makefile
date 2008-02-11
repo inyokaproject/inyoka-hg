@@ -4,7 +4,7 @@
 #
 # Shortcuts for various tasks.
 #
-# :copyright: 2007 by Armin Ronacher.
+# :copyright: 2007 by Armin Ronacher, Christopher Grebs.
 # :license: GNU GPL.
 #
 
@@ -49,3 +49,4 @@ clean-files:
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
+	find . -name '*.orig' -exec rm -f {} +
