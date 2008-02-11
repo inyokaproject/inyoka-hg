@@ -549,7 +549,7 @@ def usercp_deactivate(request):
     """
     This page allows the user to deactivate his account.
     """
-    #TODO: we should additionally send an email with a link etc  
+    #TODO: we should additionally send an email with a link etc
     if request.method == 'POST':
         form = DeactivateUserForm(request.POST)
         if form.is_valid():
@@ -641,7 +641,8 @@ def privmsg_new(request, username=None):
                     recipients.append(User.objects.get(username__exact=recipient))
             except User.DoesNotExist:
                 recipients = None
-                flash(u'Der Benutzer „%s“ wurde nicht gefunden' % recipient, False)
+                flash(u'Der Benutzer „%s“ wurde nicht gefunden'
+                      % escape(recipient), False)
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user

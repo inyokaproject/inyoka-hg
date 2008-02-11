@@ -117,13 +117,17 @@ def convert_wiki():
 
 
 def convert_forum():
-    from inyoka.forum.models import Forum
+    from inyoka.forum.models import Forum, Topic
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
     from _mysql_exceptions import IntegrityError
     from inyoka.wiki import bbcode
+    from django.db import connection
+
+    django_db_cursor = connection.cursor()
+
     # Clear the users table
-    User.objects.all().delete()
+    django_db_cursor.execute("TRUNCATE TABLE portal_user")
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
@@ -204,7 +208,7 @@ def convert_forum():
                 sys.exit(1)
     #print odd_coordinates, mail_error
     print 'Converting forum structue'
-    Forum.objects.all().delete()
+    django_db_cursor.execute("TRUNCATE TABLE forum_forum")
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
     s = select([forums_table])
@@ -241,6 +245,49 @@ def convert_forum():
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
             forum.save()
+
+    print 'Converting topics'
+    django_db_cursor.execute("TRUNCATE TABLE forum_topic")
+    topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
+    s = select([topic_table])
+
+    # maybe make it dynamic, but not now ;)
+    ubuntu_version_map = {
+        0: None,
+        1:'4.10', 2:'5.04',
+        3:'5.10', 4:'6.04',
+        7:'6.10', 8:'7.04',
+        10:'7.10', 11:'8.04',
+    }
+    ubuntu_distro_map = {
+        0: None,
+        1: 'ubuntu', 2: 'kubuntu',
+        3: 'xubuntu', 4: 'edubuntu',
+        6: 'kubuntu' # KDE(4) is stille kubuntu ;)
+    }
+
+    result = conn.execute(s)
+
+    for row in result:
+        data = {
+            'pk': row.topic_id,
+            'forum_id': row.forum_id,
+            'title': row.topic_title,
+            'view_count': row.topic_views,
+            'post_count': row.topic_replies + 1,
+            # sticky and announce are sticky in inyoka
+            'sticky': bool(row.topic_type),
+            'solved': bool(row.topic_fixed),
+            'locked': row.topic_status == 1,
+            'ubuntu_version': ubuntu_version_map[row.topic_version],
+            'ubuntu_distro': ubuntu_distro_map[row.topic_desktop],
+            'author_id': row.topic_poster,
+            'first_post_id': row.topic_first_post_id,
+            'last_post_id': row.topic_last_post_id,
+        }
+        # To work around the overwritten objects.create method...
+        t = Topic(**data)
+        t.save()
 
     conn.close()
 

@@ -380,5 +380,3 @@ class SearchQueue(models.Model):
 
     class Meta:
         ordering = ['id']
-
-
