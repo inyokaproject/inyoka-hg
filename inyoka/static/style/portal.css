@@ -100,16 +100,6 @@ table.search_results .score {
     width: 6em;
 }
 
-a.openid {
-    background: url('../img/icons/small/openid.gif') left center no-repeat;
-    padding-left: 20px;
-    float: right;
-}
-
-#id_openid_url {
-    background: url('../img/icons/small/openid.gif') left center no-repeat;
-    padding-left: 20px;
-}
 
 /*** Usermap ******************************************************************/
 div.usermap {
