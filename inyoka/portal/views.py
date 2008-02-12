@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+e -*- coding: utf-8 -*-
 """
     inyoka.portal.views
     ~~~~~~~~~~~~~~~~~~~
@@ -12,6 +12,8 @@
     :license: GNU GPL.
 """
 import md5
+from werkzeug import parse_accept_header
+from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -115,6 +117,27 @@ def register(request):
                 username=data['username'],
                 email=data['email'],
                 password=data['password'])
+
+            # set timezone based on browser language.  This is not the
+            # best way to do that, but good enough for the moment.
+            timezone = 'UTC'
+            language_header = request.META.get('HTTP_ACCEPT_LANGUAGES')
+            if language_header:
+                languages = parse_accept_header(language_header)
+                try:
+                    timezones = country_timezones(languages.best)
+                    if not timezones:
+                        raise LookupError()
+                except LookupError:
+                    pass
+                else:
+                    timezone = timezones[0]
+
+            # utc is default, no need for another update statement
+            if timezone != 'UTC':
+                user.settings['timezone'] = timezone
+                user.save()
+
             flash(u'Der Benutzer „%s“ wurde erfolgreich registriert. '
                   u'Es wurde eine E-Mail an „%s“ gesendet, in der du deinen '
                   u'Account aktivieren kannst.' % (

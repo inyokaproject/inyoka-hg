@@ -32,7 +32,7 @@ class ServiceMiddleware(object):
                 try:
                     call = __import__('inyoka.%s.services' % parts[0], None,
                                       None, ['dispatcher']).dispatcher
-                except (ImportError, AttributeError):
+                except (ImportError, AttributeError), e:
                     pass
                 else:
                     response = call(request, parts[1])

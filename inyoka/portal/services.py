@@ -14,9 +14,9 @@ from urlparse import urlparse
 from django.conf import settings
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
 from inyoka.portal.user import User
-from inyoka.portal.views import MONTHS, WEEKDAYS
 from inyoka.portal.models import Event
-from inyoka.utils import get_random_password, MONTHS, WEEKDAYS
+from inyoka.utils import get_random_password
+from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha
 from inyoka.utils.templating import render_template
@@ -60,6 +60,7 @@ def on_get_captcha(request):
     h.update(captcha.solution)
     request.session['captcha_solution'] = h.digest()
     return captcha.get_response()
+
 
 def on_get_calendar_entry(request):
     if 'url' in request.GET:
