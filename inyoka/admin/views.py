@@ -243,7 +243,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                         article.__setattr__(k, data[k])
                         changed = True
                 if changed:
-                    article.updated = datetime.now()
+                    article.updated = datetime.utcnow()
                     article.save()
                     flash(u'Der Artikel „%s“ wurde geändert.'
                           % escape(article.subject), True)

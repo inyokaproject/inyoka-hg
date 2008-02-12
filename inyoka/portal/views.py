@@ -595,7 +595,7 @@ def privmsg_new(request, username=None):
                 msg.author = request.user
                 msg.subject = d['subject']
                 msg.text = d['text']
-                msg.pub_date = datetime.now()
+                msg.pub_date = datetime.utcnow()
                 msg.send(recipients)
                 # send notification
                 for recipient in recipients:
@@ -840,18 +840,18 @@ def calendar_month(request, year, month):
         'days': days,
         'year': year,
         'month': month,
-        'today': datetime.now().date(),
+        'today': datetime.utcnow().date(),
         'MONTHS': dict(list(enumerate(MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
 @templated('portal/calendar_overview.html')
 def calendar_overview(self):
-    events = Event.objects.order_by('date').filter(date__gt=datetime.now())[:10]
+    events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
     return {
         'events': events,
-        'year': datetime.now().year,
-        'month': datetime.now().month,
+        'year': datetime.utcnow().year,
+        'month': datetime.utcnow().month,
         'MONTHS': dict(list(enumerate(MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }

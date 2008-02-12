@@ -26,8 +26,9 @@ from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import deferred, slugify, format_specific_datetime, \
-                         date_time_to_datetime, natural_date
+from inyoka.utils import deferred, slugify
+from inyoka.utils.dates import format_specific_datetime, \
+     date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic

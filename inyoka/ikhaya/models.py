@@ -32,9 +32,9 @@ class ArticleManager(models.Manager):
         if not self._all:
             q = q.filter(public=self._public)
             if self._public:
-                q = q.filter(pub_date__lt=datetime.now())
+                q = q.filter(pub_date__lt=datetime.utcnow())
             else:
-                q = q.filter(pub_date__qt=datetime.now())
+                q = q.filter(pub_date__qt=datetime.utcnow())
         return q
 
 
@@ -157,7 +157,7 @@ class Article(models.Model):
         Article that are not published or whose pub_date is in the future
         aren't shown for a normal user.
         """
-        return not self.public or self.pub_date > datetime.now()
+        return not self.public or self.pub_date > datetime.utcnow()
 
     def get_absolute_url(self, action='show'):
         return href(*{
@@ -187,7 +187,7 @@ class Article(models.Model):
         if not self.updated or self.updated < self.pub_date:
             self.updated = self.pub_date
         else:
-            self.updated = datetime.now()
+            self.updated = datetime.utcnow()
         if not self.slug:
             if not self.icon:
                 # use the category's icon if available
@@ -294,7 +294,7 @@ class ArticleSearchAuthDecider(object):
     """Decides whetever a user can display a search result or not."""
 
     def __init__(self, user):
-        self.now = datetime.now()
+        self.now = datetime.utcnow()
         self.priv = user.is_ikhaya_writer
 
     def __call__(self, auth):

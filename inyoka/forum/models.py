@@ -123,7 +123,7 @@ class TopicManager(models.Manager):
                False, slug=None, ubuntu_version=None, ubuntu_distro=None,
                sticky=False):
         author = author or r.request.user
-        pub_date = pub_date or datetime.now()
+        pub_date = pub_date or datetime.utcnow()
         topic = Topic(title=title, forum=forum, slug=slug, view_count=0,
                       author=author, ubuntu_distro=ubuntu_distro,
                       ubuntu_version=ubuntu_version, has_poll=has_poll,
@@ -417,7 +417,7 @@ class PollManager(models.Manager):
 
     def create(self, question, options, limit=None, multiple=False,
                topic_id=None):
-        now = datetime.now()
+        now = datetime.utcnow()
         p = Poll(question=question, start_time=now, multiple_votes=multiple,
                  end_time=limit and now + limit or None, topic_id=topic_id)
         p.save()
@@ -730,7 +730,7 @@ class Topic(models.Model):
 
     def reply(self, text, author=None, pub_date=None):
         post = Post(text=text, author=author or r.request.user,
-                    pub_date=pub_date or datetime.now(), topic=self)
+                    pub_date=pub_date or datetime.utcnow(), topic=self)
         post.save()
         self.post_count += 1
         self.last_post = post

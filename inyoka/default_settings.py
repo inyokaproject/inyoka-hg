@@ -32,14 +32,15 @@ DATABASE_OPTIONS = {
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be avilable on all operating systems.
-TIME_ZONE = 'Europe/Vienna'
+# this is only used as fallback if no user timezone etc is set.
+TIME_ZONE = 'UTC'
+DATETIME_FORMAT = 'j. F Y H:i (UTC)'
+DATE_FORMAT = 'j. F Y'
+TIME_FORMAT = 'H:i (UTC)'
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
 LANGUAGE_CODE = 'de-de'
-DATETIME_FORMAT = 'j. F Y H:i'
-DATE_FORMAT = 'j. F Y'
-TIME_FORMAT = 'H:i'
 
 # leave that unchanged, it's unused right now
 SITE_ID = 1

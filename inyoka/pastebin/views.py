@@ -30,7 +30,7 @@ def index(request):
             entry = Entry(title=data['title'] or 'Unbenannt',
                           author=request.user,
                           lang=data['language'], code=data['code'],
-                          pub_date=datetime.now())
+                          pub_date=datetime.utcnow())
             entry.save()
             return HttpResponseRedirect(href('pastebin', entry.id))
     else:
