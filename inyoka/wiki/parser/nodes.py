@@ -1156,7 +1156,7 @@ class Size(Element):
 
     def prepare_html(self):
         style = self.style and self.style + '; ' or ''
-        style += 'font-size: %.2f%%' % self.value
+        style += 'font-size: %.2f%%' % self.size
         yield build_html_tag(u'span',
             id=self.id,
             style=style,
