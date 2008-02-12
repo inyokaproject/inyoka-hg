@@ -22,6 +22,8 @@
     <dd>{{ form.notify }}{{ h.field_errors(form.errors.notify) }}</dd>
     <dt>Benachrichtigen bei</dt>
     <dd>{{ form.notifications }}{{ h.field_errors(form.errors.notifications) }}</dd>
+    <dt>Zeitzone</dt>
+    <dd>{{ form.timezone }}{{ h.field_errors(form.errors.timezone)}}</dd>
     <dt>Oberfläche</dt>
     <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">Avatare ausblenden</label>
         {{ h.field_errors(form.errors.hide_avatar) }}</dd>

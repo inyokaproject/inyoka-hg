@@ -20,6 +20,7 @@ MONTHS = ['Januar', 'Februar', u'MÃ¤rz', 'April', 'Mai', 'Juni',
           'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
             'Samstag', 'Sonntag']
+TIMEZONES = pytz.common_timezones
 
 
 _iso8601_re = re.compile(
@@ -37,7 +38,7 @@ def get_user_timezone():
     """
     user = getattr(r.request, 'user', None)
     try:
-        return pytz.timezone(user.settings.get('timezone'))
+        return pytz.timezone(user.settings.get('timezone', ''))
     except LookupError:
         return pytz.UTC
 
@@ -207,7 +208,7 @@ def format_specific_datetime(value, alt=False, enforce_utc=False):
     if value.tzinfo is not None:
         value = value.astimezone(pytz.UTC)
     s_value = value.replace(tzinfo=None)
-    delta = s_value - date.utcnow()
+    delta = s_value - datetime.utcnow()
     if delta.days == 0:
         string = alt and 'heute um ' or 'von heute '
     elif delta.days == -1:

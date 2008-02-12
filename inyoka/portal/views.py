@@ -21,7 +21,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from inyoka.utils import get_random_password, human_number
-from inyoka.utils.dates import MONTHS, WEEKDAYS
+from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
                                   make_permanent, get_user_record, \
@@ -422,6 +422,7 @@ def usercp_settings(request):
             'notify': settings.get('notify', ['mail']),
             'notifications': settings.get('notifications', [c[0] for c in
                                                     NOTIFICATION_CHOICES]),
+            'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False)
         }

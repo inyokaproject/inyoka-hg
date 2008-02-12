@@ -1,3 +1,4 @@
 ^development_settings\.py$
 \.py[oc]$
 \.DS_Store$
+^inyoka\.xapdb/
