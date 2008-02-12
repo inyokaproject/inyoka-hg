@@ -38,22 +38,44 @@ jinja_env.filters.update(
         lambda use_since=False:
             lambda env, context, value:
                 format_timedelta(value, use_since=use_since),
+    utctimedeltaformat=
+        lambda use_since=False:
+            lambda env, context, value:
+                format_timedelta(value, use_since=use_since,
+                                 enforce_utc=True),
     datetimeformat=
         lambda:
             lambda env, context, value:
                 format_datetime(value),
+    utcdatetimeformat=
+        lambda:
+            lambda env, context, value:
+                format_datetime(value, enforce_utc=True),
     dateformat=
         lambda:
             lambda env, context, value:
                 natural_date(value),
+    utcdateformat=
+        lambda:
+            lambda env, context, value:
+                natural_date(value, enforce_utc=True),
     timeformat=
         lambda:
             lambda env, context, value:
                 format_time(value),
+    utctimeformat=
+        lambda:
+            lambda env, context, value:
+                format_time(value, enforce_utc=True),
     specificdatetimeformat=
         lambda alt=False:
             lambda env, context, value:
                 format_specific_datetime(value, alt),
+    utcspecificdatetimeformat=
+        lambda alt=False:
+            lambda env, context, value:
+                format_specific_datetime(value, alt,
+                                         enforce_utc=True),
     hnumber=
         lambda genus=None:
             lambda env, context, value:

@@ -20,7 +20,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from inyoka.utils import get_random_password, human_number, MONTHS, WEEKDAYS
+from inyoka.utils import get_random_password, human_number
+from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
                                   make_permanent, get_user_record, \
@@ -841,7 +842,7 @@ def calendar_month(request, year, month):
         'year': year,
         'month': month,
         'today': datetime.utcnow().date(),
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
@@ -852,7 +853,7 @@ def calendar_overview(self):
         'events': events,
         'year': datetime.utcnow().year,
         'month': datetime.utcnow().month,
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
@@ -864,7 +865,7 @@ def calendar_detail(self, slug):
         raise HttpNotFound
     return {
         'event': event,
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
