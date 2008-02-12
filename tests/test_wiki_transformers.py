@@ -82,12 +82,12 @@ def test_footnote_support():
         nodes.Footnote([nodes.Text('baz')], id=2),
         nodes.List('unordered', class_='footnotes', children=[
             nodes.ListItem([
-                nodes.Link('#bfn-1', '1', id='fn-1'),
+                nodes.Link('#bfn-1', [nodes.Text('1')], id='fn-1'),
                 nodes.Text(': '),   # this is intended behavior
                 nodes.Text('bar')
             ]),
             nodes.ListItem([
-                nodes.Link('#bfn-2', '2', id='fn-2'),
+                nodes.Link('#bfn-2', [nodes.Text('2')], id='fn-2'),
                 nodes.Text(': '),   # this is intended behavior
                 nodes.Text('baz')
             ])
