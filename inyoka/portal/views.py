@@ -20,7 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from inyoka.utils import get_random_password, human_number
+from inyoka.utils import get_random_password, human_number, MONTHS, WEEKDAYS
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
                                   make_permanent, get_user_record, \
@@ -49,11 +49,6 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  Event
 from inyoka.portal.user import User, Group, deactivate_user
 from inyoka.portal.utils import check_login, calendar_entries_for_month
-
-MONTHS = ['', 'Januar', 'Februar', u'März', 'April', 'Mai', 'Juni',
-          'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
-WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
-            'Samstag', 'Sonntag']
 
 @templated('errors/404.html')
 def not_found(request, err_message=None):

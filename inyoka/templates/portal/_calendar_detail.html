@@ -1,0 +1,25 @@
+{#
+    portal/_calendar_detail.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Show a single event, inline part
+
+    :copyright: 2008 by Marian Sigler.
+    :license: GNU GPL.
+-#}
+
+
+<table>
+  <tr><th>Zeitpunkt</th><td>{{ event.natural_datetime }}</td></tr>
+  {% if event.location_town %}
+  <tr>
+    <th>Ort</th>
+    <td>
+      {% if event.location != none %}{{ event.location }} in {% endif %}{{ event.location_town }}
+      {% if event.location_lat and event.location_long %}(<a href="{{ event.coordinates_url|e -}}">{{ event.natural_coordinates|e }}</a>){% endif %}
+    </td>
+  </tr>
+  {% endif %}
+  <tr><th colspan="2">Details</th></tr>
+  <tr><td colspan="2">{{ event.rendered_description }}</td></tr>
+</table>
