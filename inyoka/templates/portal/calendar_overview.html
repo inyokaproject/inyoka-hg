@@ -33,7 +33,7 @@
 <br />
 
 <h3>die nächsten Termine</h3>
-<ul>
+<ul class="events">
   {% for event in events %}
   <li>{{ event.friendly_title(with_html_link=true) }}</li>
   {%- endfor %}
