@@ -888,7 +888,7 @@ class Topic(models.Model):
             read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
         except:
             read_status = set()
-        if self.last_post.id in read_status:
+        if self.last_post_id in read_status:
             return True
         else:
             return False
@@ -901,7 +901,7 @@ class Topic(models.Model):
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
-        if not self.last_post.id in read_status:
+        if self.last_post_id and not self.last_post_id in read_status:
             read_status.add(self.last_post.id)
             maxid = Post.objects.get_max_id()
             if user.forum_last_read < maxid - settings.FORUM_LIMIT_UNREAD:

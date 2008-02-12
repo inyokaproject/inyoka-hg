@@ -22,10 +22,10 @@ sys.path.append(WIKI_PATH)
 
 from os import path
 from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.sql import select
-from datetime import datetime
+from sqlalchemy.sql import select, func
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.portal.user import User
+from datetime import datetime
 users = {}
 
 
@@ -201,9 +201,11 @@ def convert_users():
 
 
 def convert_forum():
-    from inyoka.forum.models import Forum, Topic
+    from inyoka.forum.models import Forum, Topic, Post
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
+    from inyoka.wiki import bbcode
+    from django.db import connection
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -289,6 +291,33 @@ def convert_forum():
         t = Topic(**data)
         t.save()
 
+    print 'Converting posts'
+    post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
+    post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
+                            autoload=True)
+    s = select([func.max(post_table.c.post_id)])
+    result = conn.execute(s)
+    max_post_id = result.fetchone()[0]
+    block_size = 500
+    range = (0, block_size)
+    while range[1] <= max_post_id:
+        s = select([post_table, post_text_table],
+                   (post_table.c.post_id == post_text_table.c.post_id) & \
+                   (post_table.c.post_id.between(*range)), use_labels=True)
+        result = conn.execute(s)
+        for row in result:
+            text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s]' % \
+                row[post_text_table.c.bbcode_uid], ']')).to_markup()
+            data = {
+                'pk': row[post_table.c.post_id],
+                'topic_id': row[post_table.c.topic_id],
+                'text': text,
+                'author_id': row[post_table.c.poster_id],
+                'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
+            }
+            p = Post(**data)
+            p.save()
+        range = range[1] + 1, range[1] + block_size
     conn.close()
 
 
@@ -355,7 +384,7 @@ def convert_ikhaya():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting ikhaya data'
     #convert_ikhaya()
     print 'Converting wiki data'
