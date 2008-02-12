@@ -70,3 +70,17 @@ table.calendar_month tr.today td {
 
 /* detail view */
 
+
+/* detail view (loaded using ajax from some index page) */
+table.calendar_event_inline {
+    position: relative;
+}
+
+
+
+
+
+
+
+
+

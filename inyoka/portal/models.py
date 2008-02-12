@@ -306,7 +306,7 @@ class Event(models.Model):
             and u' in %s' % self.location_town \
             or ''
         if with_html_link:
-            return u'<a href="%s">%s</a>%s%s' % (
+            return u'<a href="%s" class="event_link">%s</a>%s%s' % (
                 escape(self.get_absolute_url(), True),
                 escape(self.name),
                 escape(s_date),
@@ -321,7 +321,7 @@ class Event(models.Model):
             return ' ' + natural_date(self.date, prefix=True)
         else:
             return ' ' + format_specific_datetime(date_time_to_datetime(
-                         self.date, self.time), alt=False)
+                         self.date, self.time), alt=True)
 
     @property
     def natural_coordinates(self):

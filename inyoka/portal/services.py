@@ -10,7 +10,9 @@
     :license: GNU GPL.
 """
 import md5
+from urlparse import urlparse
 from django.conf import settings
+from django.http import Http404 as PageNotFound, HttpResponseRedirect
 from inyoka.portal.user import User
 from inyoka.portal.views import MONTHS, WEEKDAYS
 from inyoka.portal.models import Event
@@ -60,10 +62,19 @@ def on_get_captcha(request):
     return captcha.get_response()
 
 def on_get_calendar_entry(request):
+    if 'url' in request.GET:
+        url = request.GET['url']
+        slug = urlparse(url)[2][10:]
+        if slug.endswith('/'):
+            slug = slug[:-1]
+    else:
+        try:
+            slug = request.GET['slug']
+        except KeyError:
+            raise HttpNotFound
     try:
-        slug = request.GET['slug']
         event = Event.objects.get(slug=slug)
-    except (KeyError, Event.DoesNotExist):
+    except Event.DoesNotExist:
         raise HttpNotFound
 
     data = {
