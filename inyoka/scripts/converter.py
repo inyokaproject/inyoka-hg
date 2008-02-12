@@ -22,7 +22,7 @@ sys.path.append(WIKI_PATH)
 
 from os import path
 from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.sql import select, func
+from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.portal.user import User
 from datetime import datetime
@@ -248,7 +248,6 @@ def convert_forum():
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
             forum.save()
-
     print 'Converting topics'
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
     s = select([topic_table])
@@ -290,7 +289,6 @@ def convert_forum():
         # To work around the overwritten objects.create method...
         t = Topic(**data)
         t.save()
-
     print 'Converting posts'
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
@@ -318,6 +316,25 @@ def convert_forum():
             p = Post(**data)
             p.save()
         range = range[1] + 1, range[1] + block_size
+    print 'fixing forum references'
+    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
+    dmeta = MetaData()
+    dmeta.bind = dengine
+    dconn = dengine.connect()
+    dtopic = Table('forum_topic', dmeta, autoload=True)
+    dpost = Table('forum_post', dmeta, autoload=True)
+    dforum = Table('forum_forum', dmeta, autoload=True)
+
+    subselect = select([func.max(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
+    dconn.execute(dtopic.update(values={dtopic.c.last_post_id: subselect}))
+    subselect = select([func.max(dtopic.c.last_post_id)],
+                       dtopic.c.forum_id == dforum.c.id)
+    dconn.execute(dforum.update(values={dforum.c.last_post_id: subselect}))
+    dconn.close()
+
     conn.close()
 
 
