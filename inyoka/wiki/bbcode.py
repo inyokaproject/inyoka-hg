@@ -362,7 +362,7 @@ class Parser(object):
     def parse_img(self):
         """parse [img]-tags"""
         t = self.expect_tag('img')
-        src = self.parse_until('/img')
+        src = self.parse_until('/img', raw=True)
         return nodes.Image(src, t.attr or '')
 
     def parse(self):
