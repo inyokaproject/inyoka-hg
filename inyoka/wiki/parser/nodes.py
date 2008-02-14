@@ -649,8 +649,10 @@ class Link(Element):
                            self.querystring, self.anchor))
 
     def generate_markup(self, w):
-        w.markup(u'[%s ' % self.href)
-        Element.generate_markup(self, w)
+        w.markup(u'[%s' % self.href)
+        if self.text != self.href:
+            w.markup(' ')
+            Element.generate_markup(self, w)
         w.markup(u']')
 
     def prepare_html(self):
