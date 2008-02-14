@@ -697,7 +697,6 @@ def groups_edit(request, name=None):
             group.name = data['name']
 
             #: forum privileges
-            print 1
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
