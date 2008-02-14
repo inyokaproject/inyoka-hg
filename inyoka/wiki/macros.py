@@ -32,7 +32,8 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
      ArgumentCollector
 from inyoka.wiki.models import Page, Revision
-from inyoka.utils import human_number, parse_iso8601, \
+from inyoka.utils import human_number
+from inyoka.utils.dates import parse_iso8601, format_datetime, \
      format_datetime, format_time, natural_date
 from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
