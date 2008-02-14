@@ -715,9 +715,9 @@ class NewPages(Macro):
     def build_node(self, context, format):
         now = datetime.utcnow()
         if now.month > self.months:
-            date = datetime.utcnow(now.year, now.month - self.months, 1)
+            date = datetime(now.year, now.month - self.months, 1)
         else:
-            date = datetime.utcnow(now.year - 1, 12 + now.month - self.months, 1)
+            date = datetime(now.year - 1, 12 + now.month - self.months, 1)
         result = nodes.Container()
         last_month = None
         for page, change_date in Page.objects.get_recently_created(date):
