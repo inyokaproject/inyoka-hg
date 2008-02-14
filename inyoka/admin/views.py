@@ -615,7 +615,7 @@ def edit_user(request, username):
                   % escape(user.username), True)
             # redirect to the new username if given
             if user.username != username:
-                return HttpResponseRedirect(href('admin', 'users', user.username))
+                return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
 
@@ -632,7 +632,7 @@ def edit_user(request, username):
                 )
             )
         except Privilege.DoesNotExist:
-            forum_privileges.append((forum.slug, forum.name, []))
+            forum_privileges.append((forum.id, forum.name, []))
 
     groups_joined = groups_joined or user.groups.all()
     groups_not_joined = groups_not_joined or [x for x in groups
@@ -699,16 +699,16 @@ def groups_edit(request, name=None):
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
-                    forum_slug = key.split('-', 1)[1]
+                    forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__slug=forum_slug)
+                        privilege = Privilege.objects.get(forum__id=forum_id)
                         privilege.group = group
-                        privilege.forum = Forum.objects.get(slug=forum_slug)
+                        privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()
                     except Privilege.DoesNotExist:
                         privilege = Privilege(
                             group=group,
-                            forum=Forum.objects.get(slug=forum_slug)
+                            forum=Forum.objects.get(id=forum_id)
                         )
                         _set_privileges()
                     privilege.save()
@@ -727,14 +727,14 @@ def groups_edit(request, name=None):
     for forum in forums:
         try:
             privilege = Privilege.objects.get(forum=forum, group=group)
-            forum_privileges.append((forum.slug,
+            forum_privileges.append((forum.id,
                 forum.name,
                 filter(lambda p: getattr(privilege, 'can_' + p, False),
                         [p[0] for p in PRIVILEGES_DETAILS])
                 )
             )
         except Privilege.DoesNotExist:
-            forum_privileges.append((forum.slug, forum.name, []))
+            forum_privileges.append((forum.id, forum.name, []))
 
     return {
         'group_forum_privileges': forum_privileges,

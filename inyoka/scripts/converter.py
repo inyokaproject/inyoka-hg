@@ -14,7 +14,7 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers_old?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = '/path/'
@@ -283,8 +283,8 @@ def convert_forum():
             'ubuntu_version': ubuntu_version_map.get(row.topic_version),
             'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
             'author_id': row.topic_poster,
-            'first_post_id': row.topic_first_post_id,
-            'last_post_id': row.topic_last_post_id,
+            #'first_post_id': row.topic_first_post_id,
+            #'last_post_id': row.topic_last_post_id,
         }
         # To work around the overwritten objects.create method...
         t = Topic(**data)
@@ -328,8 +328,10 @@ def convert_forum():
     dpost = Table('forum_post', dmeta, autoload=True)
     dforum = Table('forum_forum', dmeta, autoload=True)
 
-    subselect = select([func.max(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
-    dconn.execute(dtopic.update(values={dtopic.c.last_post_id: subselect}))
+    subselect_max = select([func.max(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
+    subselect_min = select([func.min(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
+    dconn.execute(dtopic.update(values={dtopic.c.last_post_id: subselect_max,
+                                        dtopic.c.first_post_id: subselect_min}))
     subselect = select([func.max(dtopic.c.last_post_id)],
                        dtopic.c.forum_id == dforum.c.id)
     dconn.execute(dforum.update(values={dforum.c.last_post_id: subselect}))
@@ -401,7 +403,7 @@ def convert_ikhaya():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
+    #convert_users()
     print 'Converting ikhaya data'
     #convert_ikhaya()
     print 'Converting wiki data'

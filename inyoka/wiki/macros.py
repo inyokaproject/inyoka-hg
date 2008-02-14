@@ -32,7 +32,8 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
      ArgumentCollector
 from inyoka.wiki.models import Page, Revision
-from inyoka.utils import human_number, parse_iso8601, \
+from inyoka.utils import human_number
+from inyoka.utils.dates import parse_iso8601, format_datetime, \
      format_datetime, format_time, natural_date
 from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
@@ -715,9 +716,9 @@ class NewPages(Macro):
     def build_node(self, context, format):
         now = datetime.utcnow()
         if now.month > self.months:
-            date = datetime.utcnow.year, now.month - self.months, 1)
+            date = datetime(now.year, now.month - self.months, 1)
         else:
-            date = datetime.utcnow.year - 1, 12 + now.month - self.months, 1)
+            date = datetime(now.year - 1, 12 + now.month - self.months, 1)
         result = nodes.Container()
         last_month = None
         for page, change_date in Page.objects.get_recently_created(date):
