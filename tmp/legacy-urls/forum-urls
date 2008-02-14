@@ -61,7 +61,7 @@
 ^/profile/$
 ^/profile/\?mode=sendpassword$
 ^/profile/\?mode=email&u=([0-9]+)$
-/profile/\?mode=viewprofile&u=([0-9]+)$
+^/profile/\?mode=viewprofile&u=
 ##### die hier müssen wir nur kurz 'ne weile weiterleiten #####
 ^/login/?$
 ^/logout/?$
@@ -78,7 +78,7 @@
 ^/profile/\?mode=register&agreed=true
 /images/icon_clip.gif/?$
 ^/goto\.php
-^/topic/([0-9]+)/(edit|delete|move|split|lock)/?
+^/topic/([0-9]+)/(edit|delete|move|split|lock|unlock)/?
 \?mosConfig_absolute_path=
 \?phpbb_root_path=
 ^http://forum.ubuntuusers.de/
