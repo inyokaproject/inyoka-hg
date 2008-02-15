@@ -144,16 +144,11 @@ class TopicManager(models.Manager):
 
     def by_forum(self, forum_id):
         """
-        Return a django query object with all threads inside a forum that are
-        not hidden (moderators can see hidden ones).
-        Topics that are sticky are placed at the beginning.
+        Return a django query object with all threads inside a forum.
+        Topics that are sticky are placed at the beginning. The remaining
+        ones are ordered by last_post.
         """
-        topics = Topic.objects.filter(forum__id=forum_id)
-        if False:
-            # XXX: Normal users shouldn't see hidden topics while moderators
-            #      should do.
-            topics = topics.filter(hidden=False)
-        return topics
+        return Topic.objects.filter(forum__id=forum_id)
 
     def move(self, topic, new_forum):
         """
