@@ -14,6 +14,10 @@ div.content {
     border: none;
 }
 
+table.forum a.topic_title , table.forum p.description , table.forum td.post_count {
+	font-size: 0.91em;
+}
+
 table.forum td.icon {
     background-color: #eee;
     border: 1px solid #ccc;
@@ -48,6 +52,7 @@ table.forum td.posts {
 table.forum td.last_post {
     text-align: right;
     width: 200px;
+    font-size: 0.9em;
     padding: 5px 15px 5px 0;
 }
 
