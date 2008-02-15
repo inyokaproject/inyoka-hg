@@ -53,8 +53,7 @@ class EditArticleForm(forms.Form):
     category = forms.ChoiceField(label=u'Kategorie')
     icon = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
-                                   input_formats=DATETIME_INPUT_FORMATS,
-                                   initial=datetime.now())
+                                   input_formats=DATETIME_INPUT_FORMATS)
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
     slug = forms.CharField(label=u'Slug', max_length=100)
 
@@ -122,8 +121,7 @@ class EditGroupForm(forms.Form):
 
 
 class EditDateForm(forms.Form):
-    date = forms.DateTimeField(input_formats=DATETIME_INPUT_FORMATS,
-                               initial=datetime.now())
+    date = forms.DateTimeField(input_formats=DATETIME_INPUT_FORMATS)
     title = forms.CharField()
     description = forms.CharField(widget=forms.Textarea)
 

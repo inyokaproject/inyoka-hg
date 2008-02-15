@@ -68,7 +68,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         link = ()
 
     if not request.user.is_ikhaya_writer:
-        articles = articles.filter(pub_date__lte=datetime.now(),
+        articles = articles.filter(pub_date__lte=datetime.utcnow(),
                                    public=True)
 
     articles = articles.order_by('-pub_date')
@@ -87,7 +87,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 def detail(request, slug):
     """Shows a single article."""
     article = Article.objects.get(slug=slug)
-    if article.hidden or article.pub_date > datetime.now():
+    if article.hidden or article.pub_date > datetime.utcnow():
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für normale Benutzer nicht sichtbar.')
@@ -98,7 +98,7 @@ def detail(request, slug):
             c = Comment(**data)
             c.article = article
             c.author = request.user
-            c.pub_date = datetime.now()
+            c.pub_date = datetime.utcnow()
             c.save()
             flash(u'Der Kommentar „%s“ wurde erstellt.' % escape(c.title))
             return HttpResponseRedirect(url_for(article))
@@ -132,7 +132,7 @@ def suggest(request):
         form = SuggestArticleForm(request.POST)
         if form.is_valid():
             d = form.cleaned_data
-            Suggestion(author=request.user, pub_date=datetime.now(), title=
+            Suggestion(author=request.user, pub_date=datetime.utcnow(), title=
                        d['title'], text=d['text'], intro=d['intro']).save()
             cache.delete('ikhaya/suggestion_count')
             flash(u'Dein Artikelvorschlag wurde versendet, das Ikhaya-Team '

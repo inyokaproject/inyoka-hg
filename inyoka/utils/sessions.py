@@ -46,7 +46,7 @@ def set_session_info(request, action, category=None):
     info.action = action
     info.action_link = request.build_absolute_uri()
     info.category = category
-    info.last_change = datetime.now()
+    info.last_change = datetime.utcnow()
     info.save()
     check_for_user_record()
 
@@ -60,7 +60,7 @@ def check_for_user_record():
     RECORD_CHECK_TIME = 120
     check = cache.get('session_record_check')
     if not check or time.time() - RECORD_CHECK_TIME > check:
-        delta = datetime.now() - timedelta(seconds=SESSION_DELTA)
+        delta = datetime.utcnow() - timedelta(seconds=SESSION_DELTA)
         record = int(storage.get('session_record', 0))
         session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
         if session_count > record:
@@ -78,7 +78,7 @@ def get_user_record():
     record = int(storage.get('session_record', 0))
     timestamp = storage.get('session_record_time')
     if timestamp is None:
-        timestamp = datetime.now()
+        timestamp = datetime.utcnow()
     else:
         timestamp = datetime.fromtimestamp(int(timestamp))
     return record, timestamp
@@ -86,7 +86,7 @@ def get_user_record():
 
 def get_sessions(order_by='-last_change'):
     """Get a simple list of active sessions for the portal index."""
-    delta = datetime.now() - timedelta(seconds=SESSION_DELTA)
+    delta = datetime.utcnow() - timedelta(seconds=SESSION_DELTA)
     sessions = []
     for item in SessionInfo.objects.filter(last_change__gt=delta) \
                                    .order_by(order_by):

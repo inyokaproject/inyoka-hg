@@ -12,6 +12,8 @@
     :license: GNU GPL.
 """
 import md5
+from werkzeug import parse_accept_header
+from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
@@ -20,7 +22,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from inyoka.utils import get_random_password, human_number, MONTHS, WEEKDAYS
+from inyoka.utils import get_random_password, human_number
+from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
                                   make_permanent, get_user_record, \
@@ -114,6 +117,27 @@ def register(request):
                 username=data['username'],
                 email=data['email'],
                 password=data['password'])
+
+            # set timezone based on browser language.  This is not the
+            # best way to do that, but good enough for the moment.
+            timezone = 'UTC'
+            language_header = request.META.get('HTTP_ACCEPT_LANGUAGES')
+            if language_header:
+                languages = parse_accept_header(language_header)
+                try:
+                    timezones = country_timezones(languages.best)
+                    if not timezones:
+                        raise LookupError()
+                except LookupError:
+                    pass
+                else:
+                    timezone = timezones[0]
+
+            # utc is default, no need for another update statement
+            if timezone != 'UTC':
+                user.settings['timezone'] = timezone
+                user.save()
+
             flash(u'Der Benutzer „%s“ wurde erfolgreich registriert. '
                   u'Es wurde eine E-Mail an „%s“ gesendet, in der du deinen '
                   u'Account aktivieren kannst.' % (
@@ -421,6 +445,7 @@ def usercp_settings(request):
             'notify': settings.get('notify', ['mail']),
             'notifications': settings.get('notifications', [c[0] for c in
                                                     NOTIFICATION_CHOICES]),
+            'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False)
         }
@@ -595,7 +620,7 @@ def privmsg_new(request, username=None):
                 msg.author = request.user
                 msg.subject = d['subject']
                 msg.text = d['text']
-                msg.pub_date = datetime.now()
+                msg.pub_date = datetime.utcnow()
                 msg.send(recipients)
                 # send notification
                 for recipient in recipients:
@@ -840,19 +865,19 @@ def calendar_month(request, year, month):
         'days': days,
         'year': year,
         'month': month,
-        'today': datetime.now().date(),
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'today': datetime.utcnow().date(),
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
 @templated('portal/calendar_overview.html')
 def calendar_overview(self):
-    events = Event.objects.order_by('date').filter(date__gt=datetime.now())[:10]
+    events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
     return {
         'events': events,
-        'year': datetime.now().year,
-        'month': datetime.now().month,
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'year': datetime.utcnow().year,
+        'month': datetime.utcnow().month,
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
@@ -864,7 +889,7 @@ def calendar_detail(self, slug):
         raise HttpNotFound
     return {
         'event': event,
-        'MONTHS': dict(list(enumerate(MONTHS))[1:]),
+        'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 

@@ -3,27 +3,33 @@
 # This Script should be run with root previlegs
 
 if [ $(id -u) != "0" ];then
-	echo "This script has to be run as root";
-	exit;
+    echo "This script has to be run as root";
+    exit;
 fi
 
 cd /opt
-aptitude install --assume-yes mercurial subversion python-simplejson mysql-server mysql-client python-openid python-tz python-mysqldb
+
+aptitude install --assume-yes mercurial subversion python-simplejson mysql-server mysql-client python-openid python-tz python-mysqldb python-xapian
+
 svn co http://code.djangoproject.com/svn/django/trunk/ django
 ln -s /opt/django/django /usr/lib/python2.5/site-packages/
 ln -s /opt/django/django/bin/django-admin.py /usr/bin/
+
 hg clone http://dev.pocoo.org/hg/jinja-main jinja
 ln -s /opt/jinja/jinja /usr/lib/python2.5/site-packages/
-aptitude install python-xapian
+
 wget http://html5lib.googlecode.com/files/html5lib-0.10.zip
 unzip html5lib-0.10.zip 
 rm html5lib-0.10.zip
 cd html5lib-0.10/
 python setup.py install
 cd ..
+
 hg clone http://dev.pocoo.org/hg/pygments-main pygments
 ln -s /opt/pygments/pygments /usr/lib/python2.5/site-packages/
 ln -s /opt/pygments/pygmentize /usr/bin/
 ln -s /opt/pygments/docs/pygmentize.1 /usr/share/man/man1/
+
 hg clone http://dev.pocoo.org/hg/werkzeug-main werkzeug
 ln -s /opt/werkzeug/werkzeug /usr/lib/python2.5/site-packages/
+

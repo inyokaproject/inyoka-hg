@@ -26,8 +26,9 @@ from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.middlewares.registry import r
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import deferred, slugify, format_specific_datetime, \
-                         date_time_to_datetime, natural_date
+from inyoka.utils import deferred, slugify
+from inyoka.utils.dates import format_specific_datetime, \
+     date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic
@@ -305,7 +306,7 @@ class Event(models.Model):
             and u' in %s' % self.location_town \
             or ''
         if with_html_link:
-            return u'<a href="%s">%s</a>%s%s' % (
+            return u'<a href="%s" class="event_link">%s</a>%s%s' % (
                 escape(self.get_absolute_url(), True),
                 escape(self.name),
                 escape(s_date),
@@ -320,7 +321,7 @@ class Event(models.Model):
             return ' ' + natural_date(self.date, prefix=True)
         else:
             return ' ' + format_specific_datetime(date_time_to_datetime(
-                         self.date, self.time), alt=False)
+                         self.date, self.time), alt=True)
 
     @property
     def natural_coordinates(self):

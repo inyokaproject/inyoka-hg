@@ -207,7 +207,7 @@ class FootnoteSupport(Transformer):
             container = nodes.List('unordered', class_='footnotes')
             for footnote in footnotes:
                 backlink = nodes.Link('#bfn-%d' % footnote.id,
-                                      unicode(footnote.id),
+                                      [nodes.Text(unicode(footnote.id))],
                                       id='fn-%d' % footnote.id)
                 node = nodes.ListItem([backlink, nodes.Text(': ')] +
                                       footnote.children)

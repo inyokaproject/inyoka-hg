@@ -281,7 +281,7 @@ class SearchSystem(object):
         if date_begin or date_end:
             d1 = date_begin and mktime(date_begin.timetuple()) or 0
             d2 = date_end and mktime(date_end.timetuple()) or \
-                 mktime(datetime.now().timetuple())
+                 mktime(datetime.utcnow().timetuple())
             range = xapian.Query(xapian.Query.OP_VALUE_RANGE, 2,
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))

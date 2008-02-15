@@ -78,7 +78,7 @@ def create_snapshot(folder):
     tpl = jinja_env.get_template('snapshot/docbook_book.xml')
     f = file(path.join(folder, 'snapshot.xml'), 'w+')
     f.write(tpl.render({
-        'today': datetime.now(),
+        'today': datetime.utcnow(),
         'pages': pages
     }))
     f.close()

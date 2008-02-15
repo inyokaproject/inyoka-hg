@@ -13,6 +13,7 @@ from django import newforms as forms
 from django.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils import is_valid_username
+from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
 from inyoka.wiki.parser import validate_signature, SignatureError
@@ -237,6 +238,8 @@ class UserCPSettingsForm(forms.Form):
                                        choices=NOTIFY_BY_CHOICES)
     notifications = forms.MultipleChoiceField(required=False,
                                               choices=NOTIFICATION_CHOICES)
+    timezone = forms.ChoiceField(required=True, choices=zip(TIMEZONES,
+                                                            TIMEZONES))
     hide_avatars = forms.BooleanField()
     hide_signatures = forms.BooleanField()
 

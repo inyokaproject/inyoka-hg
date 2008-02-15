@@ -24,7 +24,7 @@ from xmlrpclib import Fault
 
 
 def log(msg):
-    print >> sys.stderr, '[%s] %s' % (datetime.now(), msg)
+    print >> sys.stderr, '[%s] %s' % (datetime.utcnow(), msg)
 
 
 class ApplicationStop(KeyboardInterrupt):

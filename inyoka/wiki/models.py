@@ -89,16 +89,16 @@ from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
      get_close_matches, get_title, pagename_join
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
+from inyoka.utils import deferred
+from inyoka.utils.dates import format_specific_datetime, format_datetime
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
-from inyoka.utils import format_specific_datetime, format_datetime, deferred
 from inyoka.utils.collections import MultiMap
 from inyoka.middlewares.registry import r
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
-
 
 
 class PageManager(models.Manager):
@@ -523,7 +523,7 @@ class PageManager(models.Manager):
         """
         page = Page(name=name)
         if change_date is None:
-            change_date = datetime.now()
+            change_date = datetime.utcnow()
         if isinstance(text, basestring):
             text, created = Text.objects.get_or_create(value=text)
         if note is None:
@@ -1040,7 +1040,7 @@ class Page(models.Model):
         elif user.is_anonymous:
             user = None
         if change_date is None:
-            change_date = datetime.now()
+            change_date = datetime.utcnow()
         if remote_addr is None:
             remote_addr = '127.0.0.1'
         self.rev = Revision(page=self, text=text, user=user,
@@ -1219,7 +1219,7 @@ class Revision(models.Model):
         note = (note and note + ' ' or '') + ('[%s wiederhergestellt]' %
                                               self.title)
         new_rev = Revision(page=self.page, text=self.text, user=user or
-                           self.user, change_date=datetime.now(),
+                           self.user, change_date=datetime.utcnow(),
                            note=note, deleted=False, remote_addr=
                            remote_addr or '127.0.0.1',
                            attachment=self.attachment)

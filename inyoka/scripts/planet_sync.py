@@ -137,7 +137,7 @@ def sync():
             entry.author_homepage = author_homepage
             entry.save()
             debug('synced entry %r' % guid)
-        blog.last_sync = datetime.now()
+        blog.last_sync = datetime.utcnow()
         blog.save()
 
 

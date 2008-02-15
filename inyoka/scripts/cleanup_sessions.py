@@ -16,8 +16,8 @@ from django.contrib.sessions.models import Session
 
 
 def main():
-    Session.objects.filter(expire_date__lt=datetime.now()).delete()
-    SessionInfo.objects.filter(last_change__lt=datetime.now() -
+    Session.objects.filter(expire_date__lt=datetime.utcnow()).delete()
+    SessionInfo.objects.filter(last_change__lt=datetime.utcnow() -
                                timedelta(seconds=SESSION_DELTA)).delete()
 
 

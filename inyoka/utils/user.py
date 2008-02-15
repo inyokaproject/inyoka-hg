@@ -96,7 +96,7 @@ def authenticate(username, password):
 def login(request, user):
     if user is None:
         user = request.user
-    user.last_login = datetime.datetime.now()
+    user.last_login = datetime.datetime.utcnow()
     user.save()
     request.session[SESSION_KEY] = user.id
     if hasattr(request, 'user'):

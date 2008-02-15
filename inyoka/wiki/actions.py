@@ -329,7 +329,7 @@ def do_edit(request, name):
     try:
         edit_time = datetime(*localtime(int(request.POST['edit_time']))[:7])
     except (KeyError, ValueError):
-        edit_time = datetime.now()
+        edit_time = datetime.utcnow()
     if rev is None:
         latest_rev = page and page.rev or None
     else:

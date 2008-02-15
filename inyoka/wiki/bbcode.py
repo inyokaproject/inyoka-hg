@@ -84,6 +84,9 @@ class Parser(object):
             'b':            self.parse_strong,
             'i':            self.parse_emphasized,
             'u':            self.parse_underline,
+            'url':          self.parse_url,
+            'wiki':         self.parse_wiki,
+            'mod':          self.parse_mod,
             'color':        self.parse_color,
             'font':         self.parse_font,
             'size':         self.parse_size,
@@ -195,6 +198,28 @@ class Parser(object):
         """parse [u]-tags"""
         self.expect_tag('u')
         return nodes.Underline(self.parse_until('/u'))
+
+    def parse_url(self):
+        """parse [url]-tags."""
+        token = self.expect_tag('url')
+        if token.attr:
+            return nodes.Link(token.attr, self.parse_until('/url'))
+        target = self.parse_until('/url', raw=True)
+        return nodes.Link(target, [nodes.Text(target)])
+
+    def parse_wiki(self):
+        """parse [wiki]-tags."""
+        token = self.expect_tag('wiki')
+        if token.attr:
+            return nodes.InternalLink(token.attr, self.parse_until('/wiki'))
+        target = self.parse_until('/wiki', raw=True)
+        return nodes.Link(target, [nodes.Text(target)])
+
+    def parse_mod(self):
+        """parse [mod]-tags."""
+        token = self.expect_tag('mod')
+        children = self.parse_until('/mod')
+        return nodes.Text('XXX load macro here')
 
     def parse_mark(self):
         """
@@ -337,7 +362,7 @@ class Parser(object):
     def parse_img(self):
         """parse [img]-tags"""
         t = self.expect_tag('img')
-        src = self.parse_until('/img')
+        src = self.parse_until('/img', raw=True)
         return nodes.Image(src, t.attr or '')
 
     def parse(self):

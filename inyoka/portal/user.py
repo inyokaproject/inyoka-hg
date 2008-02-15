@@ -72,7 +72,7 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def create_user(self, username, email, password=None):
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         user = self.model(
             None, username,
             email.strip().lower(),
@@ -157,8 +157,8 @@ class User(models.Model):
     email = models.CharField('E-Mail-Adresse', blank=True, unique=True, null=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
-    last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.now)
-    date_joined = models.DateTimeField('Anmeldedatum', default=datetime.datetime.now)
+    last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.utcnow)
+    date_joined = models.DateTimeField('Anmeldedatum', default=datetime.datetime.utcnow)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
@@ -295,7 +295,7 @@ class User(models.Model):
         }[action])
 
     def login(self, request):
-        self.last_login = datetime.datetime.now()
+        self.last_login = datetime.datetime.utcnow()
         self.save()
         request.session['uid'] = self.id
         request.session.pop('_sk', None)
