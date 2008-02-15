@@ -113,6 +113,8 @@ def forum(request, slug, page=1):
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
     topics = Topic.objects.by_forum(f.id)
+    if not have_privilege(request.user, f, 'moderate'):
+        topics = topics.filter(hidden=False)
     pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
