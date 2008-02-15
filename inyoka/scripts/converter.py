@@ -14,8 +14,9 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
+OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = '/path/'
 sys.path.append(WIKI_PATH)
@@ -29,6 +30,20 @@ from datetime import datetime
 users = {}
 
 
+def select_blocks(query, block_size=250):
+    """Execute a query blockwise to prevent lack of ram"""
+    offset = 0
+    while True:
+        print offset
+        query = query.offset(offset).limit(block_size)
+        result = query.execute().fetchall()
+        for i, row in enumerate(result):
+            yield row
+        if i + 1 < block_size:
+            break
+        offset += block_size
+
+
 def convert_wiki():
     from MoinMoin.Page import Page
     from MoinMoin.request import RequestCLI
@@ -36,14 +51,13 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser
     from inyoka.utils.converter import InyokaFormatter
-    # XXX: Ignore some pages like LocalSpellingWords
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
     for name in request.rootpage.getPageList():
     #for name in ['Analog-TV']:
-        if 'Hardwaredatenbank' in name or 'Spelling' in name or 'Anwendertreffen' in name or 'Benutzer/' in name or 'Analog-TV' in name or name == 'Kate':
+        if name == 'Hardwaredatenbank':
             continue
         print name
         page = Page(request, name, formatter=formatter)
@@ -127,9 +141,7 @@ def convert_users():
     odd_coordinates = []
     mail_error = []
     # TODO: select none.....
-    s = select([users_table])
-    result = conn.execute(s)
-    for row in result:
+    for row in select_blocks(users_table.select()):
         avatar = ''
         co_long = co_lat = None
         if row.user_avatar != '':
@@ -205,7 +217,6 @@ def convert_forum():
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
     from inyoka.wiki import bbcode
-    from django.db import connection
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -293,29 +304,21 @@ def convert_forum():
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
-    s = select([func.max(post_table.c.post_id)])
-    result = conn.execute(s)
-    max_post_id = result.fetchone()[0]
-    block_size = 500
-    range = (0, block_size)
-    while range[1] <= max_post_id:
-        s = select([post_table, post_text_table],
-                   (post_table.c.post_id == post_text_table.c.post_id) & \
-                   (post_table.c.post_id.between(*range)), use_labels=True)
-        result = conn.execute(s)
-        for row in result:
-            text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s]' % \
-                row[post_text_table.c.bbcode_uid], ']')).to_markup()
-            data = {
-                'pk': row[post_table.c.post_id],
-                'topic_id': row[post_table.c.topic_id],
-                'text': text,
-                'author_id': row[post_table.c.poster_id],
-                'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
-            }
-            p = Post(**data)
-            p.save()
-        range = range[1] + 1, range[1] + block_size
+    s = select([post_table, post_text_table],
+               (post_table.c.post_id == post_text_table.c.post_id),
+               use_labels=True)
+    for row in select_blocks(s):
+        text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s]' % \
+            row[post_text_table.c.bbcode_uid], ']')).to_markup()
+        data = {
+            'pk': row[post_table.c.post_id],
+            'topic_id': row[post_table.c.topic_id],
+            'text': text,
+            'author_id': row[post_table.c.poster_id],
+            'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
+        }
+        p = Post(**data)
+        p.save()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
@@ -374,7 +377,7 @@ def convert_ikhaya():
             return text
         return saxutils.escape(text)
 
-    engine = create_engine('mysql://root@localhost/ubuntu_de_portal')
+    engine = create_engine(OLD_PORTAL_URI)
     meta = MetaData()
     meta.bind = engine
     category_table = Table('ikhaya_categories', meta, autoload=True)
@@ -382,8 +385,18 @@ def convert_ikhaya():
     comment_table = Table('ikhaya_comments', meta, autoload=True)
     icon_table = Table('ikhaya_icons', meta, autoload=True)
 
-    category_mapping = {}
+    # contains a mapping of old_user_id -> new_user_id
+    user_mapping = {}
+    force = {
+    }
+    for user in select_blocks(user_table.select()):
+        if user.username in force:
+            name = force[user.username]
+        else:
+            name = user.username
+        user_mapping[user.id] = User.objects.get(username=name).id
 
+    category_mapping = {}
     for data in category_table.select().execute():
         category = Category(name=data.name)
         category.save()
@@ -393,12 +406,43 @@ def convert_ikhaya():
         article = Article(
             subject=data.subject,
             pub_date=data.pub_date,
+            author_id=user_mapping[data.user_id],
             intro=data.intro,
             text=render_article(data.text),
             public=data.public,
-            category=category_mapping[data.category_id]
+            category=category_mapping[data.category_id],
         )
         article.save()
+
+
+def convert_pastes():
+    from inyoka.pastebin.models import Entry
+    from pygments.lexers import get_all_lexers
+    engine = create_engine(OLD_PORTAL_URI)
+    meta = MetaData()
+    meta.bind = engine
+    paste_table = Table('paste_pastes', meta, autoload=True)
+    mapping = {
+        'xhtml': 'html',
+        'php': 'html+php',
+        'py': 'python',
+        'pl': 'perl'
+    }
+    anonymous = User.objects.get_anonymous_user()
+    lexers = []
+    for lexer in get_all_lexers():
+        lexers.extend(lexer)
+    for paste in select_blocks(paste_table.select()):
+        lang = mapping.get(paste.language, paste.language)
+        if not lang or lang not in lexers:
+            lang = 'text'
+        Entry(
+            title=u'kein Titel',
+            lang=lang,
+            code=paste.code,
+            pub_date=paste.date,
+            author=anonymous
+        ).save()
 
 
 if __name__ == '__main__':
@@ -406,7 +450,9 @@ if __name__ == '__main__':
     #convert_users()
     print 'Converting ikhaya data'
     #convert_ikhaya()
+    print 'Converting pastes'
+    convert_pastes()
     print 'Converting wiki data'
     #convert_wiki()
     print 'Converting forum data'
-    convert_forum()
+    #convert_forum()
