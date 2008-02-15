@@ -19,14 +19,14 @@ from inyoka.utils.search import search
 PRIVILEGES_DETAILS = [
     ('read', 'kann lesen'),
     ('reply', 'kann antworten'),
-    ('create', 'kann Erstellen'),
-    ('edit', 'kann editieren'),
+    ('create', 'kann erstellen'),
+    ('edit', 'kann bearbeitenen'),
     ('revert', 'kann revidieren'),
     ('delete', 'kann löschen'),
     ('sticky', 'kann anpinnen'),
-    ('vote', 'kann voten'),
+    ('vote', 'kann abstimmen'),
     ('create_poll', 'kann Umfragen erstellen'),
-    ('upload', 'kann Attachments nutzen'),
+    ('upload', u'kann Anhänge nutzen'),
     ('moderate', 'kann moderieren')
 ]
 
