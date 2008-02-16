@@ -22,6 +22,7 @@ AVATAR_PREFIX = '/path/'
 sys.path.append(WIKI_PATH)
 
 from os import path
+from django.db import connection
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
@@ -30,18 +31,23 @@ from datetime import datetime
 users = {}
 
 
-def select_blocks(query, block_size=250):
+def select_blocks(query, block_size=1000):
     """Execute a query blockwise to prevent lack of ram"""
-    offset = 0
+    # get the table
+    table = list(query._table_iterator())[0]
+    # get the tables primary key (a little bit hackish)
+    key_name = list(table.primary_key)[0].name
+    key = table.c[key_name]
+    range = (0, block_size)
     while True:
-        print offset
-        query = query.offset(offset).limit(block_size)
-        result = query.execute().fetchall()
+        print range
+        result = query.where(key.between(*range)).execute()
+        i = 0
         for i, row in enumerate(result):
             yield row
-        if i + 1 < block_size:
+        if i == 0:
             break
-        offset += block_size
+        range = range[1] + 1, range[1] + block_size
 
 
 def convert_wiki():
@@ -431,7 +437,7 @@ def convert_pastes():
     anonymous = User.objects.get_anonymous_user()
     lexers = []
     for lexer in get_all_lexers():
-        lexers.extend(lexer)
+        lexers.extend(lexer[1])
     for paste in select_blocks(paste_table.select()):
         lang = mapping.get(paste.language, paste.language)
         if not lang or lang not in lexers:
@@ -443,6 +449,7 @@ def convert_pastes():
             pub_date=paste.date,
             author=anonymous
         ).save()
+        connection.queries = []
 
 
 if __name__ == '__main__':
