@@ -655,7 +655,6 @@ def new_user(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            print "xxxxxxxxxx %s" % data['authenticate']
             u = User.objects.register_user(
                 username=data['username'],
                 email=data['email'],
@@ -663,10 +662,10 @@ def new_user(request):
                 send_mail=data['authenticate']
             )
             flash(u'Der Bentuzer „%s“ wurde erfolgreich erstellt'
-                  % data['username'], True)
+                  % escape(data['username']), True)
             flash(u'Du kannst nun weitere Details bearbeiten')
             return HttpResponseRedirect(href('admin', 'users', 'edit',
-                                             data['username']))
+                                             escape(data['username'])))
     form = CreateUserForm()
     return {
         'form': form
