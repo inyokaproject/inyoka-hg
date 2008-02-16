@@ -68,12 +68,24 @@ class EditIconForm(forms.Form):
     img = forms.FileField(label=u'Bild')
 
 
+class CreateUserForm(forms.Form):
+    username = forms.CharField(label=u'Benutzername', max_length=30)
+    password = forms.CharField(label=u'Passwort')
+    #XXX: use forms.EmailField after testing, see portal.user.User
+    email = forms.CharField(label=u'E-Mail')
+    authenticate = forms.BooleanField(label=u'Autentifizieren', required=False,
+        help_text=(u'Der Benutzer bekommt eine Bestätigungsmail zugesandt'
+                   u' und wird als inaktiv erstellt.'))
+
+
 class EditUserForm(forms.Form):
     # personal informations
     username = forms.CharField(label=u'Benutzername', max_length=30)
-    new_password = forms.CharField(label=u'Neues Passwort', max_length=128,
+    new_password = forms.CharField(label=u'Neues Passwort',
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
                                    u'Bitte nur angeben, wenn benötigt'))
+    #XXX: use `EmailField` after testing, see portal.user.User
+    email = forms.CharField(label=u'E-Mail')
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 

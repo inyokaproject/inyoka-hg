@@ -23,7 +23,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
                                ConfigurationForm, EditUserForm, EditDateForm, \
-                               EditForumForm, EditGroupForm
+                               EditForumForm, EditGroupForm, CreateUserForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
@@ -575,7 +575,7 @@ def edit_user(request, username):
             for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
-                        'coordinates_lat', 'gpgkey'):
+                        'coordinates_lat', 'gpgkey', 'email'):
                 setattr(user, key, data[key])
             if data['avatar']:
                 user.save_avatar(data['avatar'])
@@ -646,6 +646,30 @@ def edit_user(request, username):
         'user_groups': groups_joined,
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined]
+    }
+
+
+@templated('admin/new_user.html')
+def new_user(request):
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            print "xxxxxxxxxx %s" % data['authenticate']
+            u = User.objects.register_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                send_mail=data['authenticate']
+            )
+            flash(u'Der Bentuzer „%s“ wurde erfolgreich erstellt'
+                  % data['username'], True)
+            flash(u'Du kannst nun weitere Details bearbeiten')
+            return HttpResponseRedirect(href('admin', 'users', 'edit',
+                                             data['username']))
+    form = CreateUserForm()
+    return {
+        'form': form
     }
 
 

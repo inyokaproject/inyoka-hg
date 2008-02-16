@@ -30,10 +30,11 @@
   <input type="submit" value="Auswählen" />
 </form>
 {% endif %}
+{% if groups_exist %}
 <p>
   Oder <a href="{{ href('admin', 'groups', 'new') }}">erstelle eine neue Gruppe</a>.
 </p>
-
+{% endif %}
 <script type="text/javascript">
   /* <![CDATA[ */
   (function () {

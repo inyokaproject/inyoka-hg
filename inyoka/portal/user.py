@@ -100,7 +100,7 @@ class UserManager(models.Manager):
             password
                 The user's password.
             send_mail
-                For debugging purposes. Wheter to send an activation mail or not.
+                Whether to send an activation mail or not.
                 If *False* the user will be saved as active.
         """
         user = self.create_user(username, email, password)
@@ -109,10 +109,8 @@ class UserManager(models.Manager):
             user.is_active = True
         else:
             user.is_active = False
-
-        if send_mail:
             send_activation_mail(user)
-
+        user.save()
         return user
 
     def logout(self, request):
