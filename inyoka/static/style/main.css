@@ -761,7 +761,7 @@ p.badges img:hover {
   border: 1px solid #E8A21A;
   text-align: left;
 }
-form.message { text-align: center; }
+.message form { text-align: center; }
 
 .message input {
   margin: 5px;

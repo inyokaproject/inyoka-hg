@@ -928,15 +928,17 @@ def delete_post(request, post_id):
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
               u'werden.', success=False)
-    elif 'message-yes' in request.POST:
-        post.delete()
-        flash(u'Der Beitrag %s wurde endgültig gelöscht.' % post_id,
-              success=True)
-    elif not 'message-no' in request.POST:
-        flash(u'Soll der Post %s wirklich endgültig und unwiderruflich '
-              u'gelöscht werden?' % post_id, dialog=True,
-              dialog_url=href('forum', 'post', post_id, 'delete'))
-
+    else:
+        if request.method == 'POST':
+            if 'cancel' in request.POST:
+                flash(u'Der Post „%s“ wurde nicht gelöscht'
+                      % escape(post.title))
+            else:
+                post.delete()
+                flash(u'Der Beitrag %s wurde endgültig gelöscht.'
+                      % post_id, success=True)
+        else:
+            flash(render_template('forum/post_delete.html', {'post': post}))
     return HttpResponseRedirect(url_for(post.topic))
 
 
@@ -979,17 +981,17 @@ def delete_topic(request, topic_slug):
     topic = Topic.objects.get(slug=topic_slug)
     if not have_privilege(request.user, topic.forum, 'moderate'):
         return abort_access_denied(request)
-    if 'message-yes' in request.POST:
-        topic.delete()
-        flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
-              success=True)
-        return HttpResponseRedirect(url_for(topic.forum))
-    elif not 'message-no' in request.POST:
-        flash(u'Das Thema „%s“ wirklich löschen? Dabei gehen alle '
-              u'Beiträge unwiderruflich verloren.' % topic.title,
-            dialog=True,
-            dialog_url=href('forum', 'topic', topic_slug, 'delete')
-        )
+
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash(u'Löschen des Themas „%s“ wurde abgebrochen' % topic.title)
+        else:
+            topic.delete()
+            flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
+                  success=True)
+            return HttpResponseRedirect(url_for(topic.forum))
+    else:
+        flash(render_template('forum/delete_topic.html', {'topic': topic}))
     return HttpResponseRedirect(url_for(topic))
 
 

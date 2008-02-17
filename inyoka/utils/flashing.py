@@ -11,50 +11,25 @@
 """
 from inyoka.middlewares.registry import r
 
-DEFAULT_FLASH_BUTTONS = [
-    {'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
-     'value': 'Ja'},
-    {'type': 'submit', 'class': 'message-no', 'name': 'message-no',
-     'value': 'Nein'}
-]
 
-
-def flash(message, success=None, classifier=None, dialog=False,
-          dialog_url=None, dialog_buttons=None, session=None):
+def flash(message, success=None, classifier=None, session=None):
     """
     Flash a message (can contain XHTML).  If ``success`` is True, the flashbar
     will be green, if it's False, it will be red and if it's undefined it will
     be yellow.  If a classifier is given it can be used to unflash all
     messages with that classifier using the `unflash` method.
-
-    It's also possible to flash a simple yes/no dialog through this function.
-    So you don't need to create a new template and a new view for very simple
-    questions e.g "Do you want to delete this object".
-    To use the dialog feature apply ``dialog=True`` and use ``dialog_url``
-    to specify an url to submit the post-form.
-    If you want more then just one yes and one no button use ``dialog_buttons``
-    to specify more buttons. ``buttons`` is a list with dictionaries that
-    represents one button.  E.g:
-        <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
-
-        >>> flash('my_message', False, None, True, None, [{
-            'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
-            'value': 'Yes I\'m sure!'}])
-
-    Each button needs to specify a type, class, name and value.
     """
     if session is None:
         session = getattr(r.request, 'session', None)
         if session is None:
             return False
-    dialog_buttons = dialog_buttons or DEFAULT_FLASH_BUTTONS
     if not 'flmsg' in session:
         session['flmsg'] = [
-            (message, success, classifier, dialog, dialog_url, dialog_buttons)
+            (message, success, classifier)
         ]
     else:
         session['flmsg'].append(
-            (message, success, classifier, dialog, dialog_url, dialog_buttons)
+            (message, success, classifier)
         )
         session.modified = True
     return True
@@ -87,7 +62,7 @@ def get_flashed_messages():
     session = getattr(r.request, 'session', None)
     if session is None:
         return []
-    flash_buffer = [FlashMessage(x[0], x[1], x[3], x[4], x[5]) for x in
+    flash_buffer = [FlashMessage(x[0], x[1]) for x in
                     session.get('flmsg', ())]
     session.pop('flmsg', None)
     r.request.flash_message_buffer = flash_buffer
@@ -95,19 +70,15 @@ def get_flashed_messages():
 
 
 class FlashMessage(object):
-    __slots__ = ('text', 'success', 'dialog', 'dialog_url', 'dialog_buttons')
+    __slots__ = ('text', 'success')
 
-    def __init__(self, text, success=None, dialog=False, dialog_url=None, dialog_buttons=None):
+    def __init__(self, text, success=None):
         self.text = text
         self.success = success
-        self.dialog = dialog
-        self.dialog_url = dialog_url
-        self.dialog_buttons = dialog_buttons
 
     def __repr__(self):
         return '<%s(%s:%s:%s)>' % (
             self.__class__.__name__,
             self.text,
             self.success,
-            self.dialog and 'dialog' or ''
         )

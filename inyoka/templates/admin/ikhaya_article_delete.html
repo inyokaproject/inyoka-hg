@@ -1,0 +1,19 @@
+{#
+    admin/ikhaya_article_delete.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This template is flashed to ensure that the user want to delete the selected article.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+
+<form action="{{ article|url('delete')|e }}" method="post">
+  <p>Möchtest du den Artikel „<a href="{{ article|url('show')|e }}">{{ article.subject }}</a>“ wirklich löschen?</p>
+  <p>
+    <input type="submit" value="Löschen" />
+    <input type="submit" name="unpublish" value="Veröffentlichung aufheben" />
+    <input type="submit" name="cancel" value="Abbrechen" />
+  </p>
+</form>

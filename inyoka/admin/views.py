@@ -16,6 +16,7 @@ from inyoka.utils import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.flashing import flash, DEFAULT_FLASH_BUTTONS
+from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape, cleanup_html
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
@@ -123,14 +124,15 @@ def pages_delete(request, page_key):
         flash(u'Es wurde keine Seite zum löschen ausgewählt.')
     page = StaticPage.objects.get(key=page_key)
     if request.method == 'POST':
-        if 'message-yes' in request.POST:
+        if 'cancel' in request.POST:
+            flash(u'Löschen abgebrochen')
+        else:
             page.delete()
             flash(u'Die Seite „%s“ wurde erfolgreich gelöscht'
                   % escape(page.title))
     else:
-        flash(u'Möchtest du die Seite „%s“ wirklich löschen?'
-              % escape(page.title), dialog=True,
-              dialog_url=href('admin', 'pages', 'delete', page_key))
+        flash(render_template('admin/pages_delete.html', {
+                'page': page}))
     return HttpResponseRedirect(href('admin', 'pages'))
 
 
@@ -287,20 +289,22 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
 def ikhaya_article_delete(request, article):
     article = Article.objects.get(slug=article)
     if request.method == 'POST':
-        if 'message-depublicate' in request.POST:
+        if 'unpublish' in request.POST:
             article.public = False
             article.save()
-            flash(u'Die Veröffentlichung des Artikels „%s“ wurde aufgehoben.'
-                  % escape(article.subject))
-        elif 'message-yes' in request.POST:
+            flash(u'Die Veröffentlichung des Artikels „<a href="%s">%s</a>“'
+                  ' wurde aufgehoben.'
+                  % (escape(url_for(article, 'show')), escape(article.subject)))
+        elif 'cancel' in request.POST:
+            flash(u'Löschen des Artikels „<a href="%s">%s</a>“ wurde abgebrochen'
+                  % (escape(url_for(article, 'show')), escape(article.subject)))
+        else:
             article.delete()
             flash(u'Der Artikel „%s“ wurde erfolgreich gelöscht'
                   % escape(article.subject))
     else:
-        flash(u'Möchtest du den Artikel „%s“ wirklich löschen?'
-              % escape(article.subject), dialog=True,
-              dialog_url=url_for(article, 'delete'),
-              dialog_buttons=IKHAYA_ARTICLE_DELETE_BUTTONS)
+        flash(render_template('admin/ikhaya_article_delete.html',
+              {'article': article}))
     return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
