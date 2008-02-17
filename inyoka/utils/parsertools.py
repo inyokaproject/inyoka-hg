@@ -33,7 +33,7 @@ class Token(tuple):
 
 class TokenStreamIterator(object):
     """
-    The iterator for tokenstreams. Iterate over the stream
+    The iterator for tokenstreams.  Iterate over the stream
     until the eof token is reached.
     """
 
@@ -57,8 +57,8 @@ class TokenStream(object):
     It also provides some functions to expect tokens and similar stuff.
 
     Important note: Do never push more than one token back to the
-                    stream. Although the stream object won't stop you
-                    from doing so, the behavior is undefined. Multiple
+                    stream.  Although the stream object won't stop you
+                    from doing so, the behavior is undefined.  Multiple
                     pushed tokens are only used internally!
     """
 

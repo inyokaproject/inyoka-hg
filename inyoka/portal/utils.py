@@ -29,7 +29,7 @@ def decor(decorator, base):
 def check_login(message=None):
     """
     This function can be used as a decorator to check whether the user is
-    logged in or not. Also it's possible to send the user a message if
+    logged in or not.  Also it's possible to send the user a message if
     he's logged out and needs to login.
     """
     def _wrapper(func):

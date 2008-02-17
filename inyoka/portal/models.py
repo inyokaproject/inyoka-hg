@@ -52,9 +52,9 @@ class SubscriptionManager(models.Manager):
 
 class SessionInfo(models.Model):
     """
-    A special class that holds session information. Not every session
-    automatically has a session info. Basically every user that is
-    active has a session info that is updated every request. The
+    A special class that holds session information.  Not every session
+    automatically has a session info.  Basically every user that is
+    active has a session info that is updated every request.  The
     management functions for this model are in `inyoka.utils.sessions`.
     """
     key = models.CharField(max_length=200, unique=True)
@@ -133,7 +133,7 @@ class PrivateMessage(models.Model):
 class PrivateMessageEntry(models.Model):
     """
     A personal entry for each person who is affected by the private
-    message. This entry can be moved between folders and stores the
+    message.  This entry can be moved between folders and stores the
     read status flag.
     """
     message = models.ForeignKey('PrivateMessage')

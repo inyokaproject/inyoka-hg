@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Because of the same-origin policy we do not serve AJAX services as part
-    of the normal, subdomain bound request dispatching. This middleware
+    of the normal, subdomain bound request dispatching.  This middleware
     dispatches AJAX requests on every subdomain to the modules that provide
     JSON callbacks.
 

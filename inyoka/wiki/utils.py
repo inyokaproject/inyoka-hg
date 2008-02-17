@@ -3,9 +3,9 @@
     inyoka.wiki.utils
     ~~~~~~~~~~~~~~~~~
 
-    Contains various helper functions for the wiki. Most of them are only
+    Contains various helper functions for the wiki.  Most of them are only
     usefor for the the wiki application itself, but there are use cases for
-    some of them outside of the wiki too. Any example for that is the diff
+    some of them outside of the wiki too.  Any example for that is the diff
     renderer which might be useful for the pastebin too.
 
 
@@ -41,8 +41,8 @@ def has_conflicts(text):
 
 def pagename_join(name1, name2):
     """
-    Join a page with another one. This works similar to a normal filesystem
-    path join but with different rules. Here some examples:
+    Join a page with another one.  This works similar to a normal filesystem
+    path join but with different rules.  Here some examples:
 
     >>> pagename_join('Foo', 'Bar')
     'Foo/Bar'
@@ -61,8 +61,8 @@ def pagename_join(name1, name2):
 
 def normalize_pagename(name):
     """
-    Normalize a pagename. Strip unsupported characters. You have to call
-    this function whenever you get a pagename from user input. The models
+    Normalize a pagename.  Strip unsupported characters.  You have to call
+    this function whenever you get a pagename from user input.  The models
     itself never check for normalized names and passing unnormalized page
     names to the models can cause serious breakage.
     """
@@ -76,7 +76,7 @@ def normalize_pagename(name):
 
 def is_external_target(location):
     """
-    Check if a target points to an external URL or an internal page. Returns
+    Check if a target points to an external URL or an internal page.  Returns
     `True` if the target is an external URL.
     """
     return _schema_re.match(location) is not None
@@ -84,8 +84,8 @@ def is_external_target(location):
 
 def get_title(name, full=True):
     """
-    Get the title for a page by name. Per default it just returns the title
-    for the full page, not just the last part. If you just want the part
+    Get the title for a page by name.  Per default it just returns the title
+    for the full page, not just the last part.  If you just want the part
     after the last slash set `full` to `False`.
     """
     name = normalize_pagename(name)
@@ -114,7 +114,7 @@ def get_close_matches(name, matches, n=10, cutoff=0.6):
 
 def debug_repr(obj):
     """
-    A function that does a debug repr for an object. This is used by all the
+    A function that does a debug repr for an object.  This is used by all the
     `nodes`, `macros` and `parsers` so that we get a debuggable ast.
     """
     return '%s.%s(%s)' % (
@@ -127,7 +127,7 @@ def debug_repr(obj):
 
 def simple_match(pattern, string, case_sensitive=False):
     """
-    Match a string against a pattern. Works like `simple_filter`.
+    Match a string against a pattern.  Works like `simple_filter`.
     """
     return re.compile('^%s$%s' % (
         re.escape(pattern).replace('\\*', '.*?'),
@@ -137,8 +137,8 @@ def simple_match(pattern, string, case_sensitive=False):
 
 def simple_filter(pattern, iterable, case_sensitive=True):
     """
-    Filter an iterable against a pattern. The pattern is pretty simple, the
-    only special thing is that "*" is a wildcard. The return value is an
+    Filter an iterable against a pattern.  The pattern is pretty simple, the
+    only special thing is that "*" is a wildcard.  The return value is an
     iterator, not a list.
     """
     return ifilter(re.compile('^%s$%s' % (
@@ -181,7 +181,7 @@ def get_smilies(full=False):
 def generate_udiff(old, new, old_title='', new_title='',
                    context_lines=4):
     """
-    Generate an udiff out of two texts. If titles are given they will be
+    Generate an udiff out of two texts.  If titles are given they will be
     used on the diff.  `context_lines` defaults to 5 and represents the
     number of lines used in an udiff around a changed line.
     """
@@ -197,7 +197,7 @@ def generate_udiff(old, new, old_title='', new_title='',
 
 def prepare_udiff(udiff):
     """
-    Prepare an udiff for the template. The `Diff` model uses this to render
+    Prepare an udiff for the template.  The `Diff` model uses this to render
     an udiff into a HTML table.
     """
     return DiffRenderer(udiff).prepare()
@@ -206,14 +206,14 @@ def prepare_udiff(udiff):
 def get_thumbnail(location, width=None, height=None, force=False):
     """
     This function generates a thumbnail for an uploaded image or external one.
-    It uses the media root to cache those thumbnails. A script should delete
-    thumbnails once a month to get rid of unused thumbnails. The wiki will
+    It uses the media root to cache those thumbnails.  A script should delete
+    thumbnails once a month to get rid of unused thumbnails.  The wiki will
     recreate thumbnails automatically.
 
     The return value is `None` if it cannot generate a thumbnail or the path
-    for the thumbnail. Join it with the media root or media URL to get the
-    internal filename or external url. This method either generates a PNG or
-    JPG thumbnail. It tries both and uses the smaller file.
+    for the thumbnail.  Join it with the media root or media URL to get the
+    internal filename or external url.  This method either generates a PNG or
+    JPG thumbnail.  It tries both and uses the smaller file.
     """
     if not width and not height:
         raise ValueError('neither with nor height given')
@@ -315,11 +315,11 @@ def get_thumbnail(location, width=None, height=None, force=False):
 
 def clean_thumbnail_cache():
     """
-    This should be called by a cron about once a week. It automatically
+    This should be called by a cron about once a week.  It automatically
     deletes external thumbnails (so that they expire over a time) and not
     referenced internal attachments (for example old revisions).
 
-    It returns the list of deleted files *and* directories. Keep in mind
+    It returns the list of deleted files *and* directories.  Keep in mind
     that the return value is more or less useless except for statistics
     because in the meantime something could have recreated a directory or
     even a file.

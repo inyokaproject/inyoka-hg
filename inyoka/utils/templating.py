@@ -130,7 +130,7 @@ def populate_context_defaults(context):
 
 
 def render_template(template_name, context):
-    """Render a template. You might want to set `req` to `None`."""
+    """Render a template.  You might want to set `req` to `None`."""
     tmpl = jinja_env.get_template(template_name)
     populate_context_defaults(context)
     return tmpl.render(context)

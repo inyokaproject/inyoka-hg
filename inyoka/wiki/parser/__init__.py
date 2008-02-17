@@ -4,7 +4,7 @@ r"""
     ~~~~~~~~~~~~~~~~~~
 
     The package implements a rather complex parsers for the inyoka wiki
-    syntax. The parser is roughly divided into five more or less independent
+    syntax.  The parser is roughly divided into five more or less independent
     parts:
 
     - `Lexer` -- tokenizes the markup into tokens, holds in internal stack
@@ -13,16 +13,16 @@ r"""
     - `Parser` -- fetches tokens from the lexer and creates nodes.
       Additionally it calls the transformers after that tree was created.
 
-    - `Node` -- multile nodes make a tree. A tree is renderable into multiple
+    - `Node` -- multile nodes make a tree.  A tree is renderable into multiple
       output formats, however HTML is the only supported at the moment.
 
-    - `Transformer` -- the transformers postprocess the syntax tree. This is
+    - `Transformer` -- the transformers postprocess the syntax tree.  This is
       necessary for typography, smiley insertions, paragraphs etc.
 
-    - `machine` -- the machine is the compiler and renderer. The compiler
+    - `machine` -- the machine is the compiler and renderer.  The compiler
       just takes the flattened stream from the node tree and compiles it into
-      a format the renderer can process. The renderer is then able to
-      generate HTML or whatever from the compiler. If caching is not wanted
+      a format the renderer can process.  The renderer is then able to
+      generate HTML or whatever from the compiler.  If caching is not wanted
       for a specific output format the compilation step can be omitted and the
       renderer fetches the instructions directly from the node tree's prepared
       stream.
@@ -66,31 +66,31 @@ r"""
         u'<p>Hello World!</p>\n<p><em>foo bar spam</em></p>\n'
 
     The compiler ensures that dynamic elements like runtime macros or parsers
-    are called during rendering, not during compiling. This gives us the
+    are called during rendering, not during compiling.  This gives us the
     possibility to cache things in the cached stream.
 
     The code format is either a static string with a header prefix or a
-    pickled list with references to dynamic elements. It may and will most
+    pickled list with references to dynamic elements.  It may and will most
     likely contain binary data, thus it should not be saved in the database.
 
 
     Syntax
     ------
 
-    The syntax we use is derived from the MoinMoin engine's syntax. In fact
+    The syntax we use is derived from the MoinMoin engine's syntax.  In fact
     this parser tries to stay as compatible as possible while fixing some of
     the problem that exist in the moin syntax.
 
     This (from an implementors point of view) most obvious difference is that
     the inyoka parser is not line based although many syntax elements are
-    newline aware. One of the syntax elements that end at a newline are for
-    example list items. If however inline markup (such as bold text) is left
+    newline aware.  One of the syntax elements that end at a newline are for
+    example list items.  If however inline markup (such as bold text) is left
     opened the list item will not close until the bold markup is closed first.
 
     We require that because the lexer does not know anything about block or
-    inline elements. That said it becomes obvious that paragraph handling is
+    inline elements.  That said it becomes obvious that paragraph handling is
     not part of the lexing process but patched into the syntax tree after the
-    parsing process. This allows use to generate more valid HTML because we
+    parsing process.  This allows use to generate more valid HTML because we
     can avoid adding paragraphs to inline elements or macros.
 
     Differences to MoinMoin
@@ -102,30 +102,30 @@ r"""
         that allow arguments have an fixed argument syntax:  a list of
         arguments, whitespace or comma keeps arguments apart and if you
         put single quotes around multiple arguments (escaped with doubling
-        quotes) preserves whitespace. Inside such strings one can even
+        quotes) preserves whitespace.  Inside such strings one can even
         use the macro delimiters. (``[[Macro('[[Foo()]]')]]`` is valid)
-    -   Blockquotes are supported and can contain any kind of markup. The
+    -   Blockquotes are supported and can contain any kind of markup.  The
         syntax is derived from ASCII Mails: ``> quoted text here``.
 
     Additionally all the keyword parameters are translated to German for
-    obvious reasons. Keep in mind that Moin changed the syntax from 1.6
+    obvious reasons.  Keep in mind that Moin changed the syntax from 1.6
     to 1.7 and this parsers is not (yet?) compatible with the latter.
 
 
     Meta Data
     ---------
 
-    The syntax tree has support for metadata. After parsing metadata from the
+    The syntax tree has support for metadata.  After parsing metadata from the
     tree is combined (at least by the wiki system) with other metadata and
-    stored in the database. For example the tree is traversed for any
-    `nodes.MetaData` and `InternalLink` nodes. Not every component in the
+    stored in the database.  For example the tree is traversed for any
+    `nodes.MetaData` and `InternalLink` nodes.  Not every component in the
     inyoka systems makes use of metadata and they can ignore those nodes
-    completely. Their text and rendering representation is empty.
+    completely.  Their text and rendering representation is empty.
 
     However if metadata is used it's important to *walk* the tree, not just
-    look for `nodes.MetaData` at toplevel. It's true that the metadata
+    look for `nodes.MetaData` at toplevel.  It's true that the metadata
     comment syntax is only parsed at top level but there are elements that
-    support nested markup such as quote tags. Also macros and parsers that
+    support nested markup such as quote tags.  Also macros and parsers that
     are expanded at parse time can return `nodes.MetaData` metadata.
 
 
@@ -306,14 +306,14 @@ class SignatureError(ValueError):
 
 class Parser(object):
     """
-    The wiki syntax parser. Never use this class directly, always do this
-    via the public `parse()` function of this module. The behavior of this
+    The wiki syntax parser.  Never use this class directly, always do this
+    via the public `parse()` function of this module.  The behavior of this
     class in multithreaded environments is undefined (might change from
     revision to revision) and the `parse()` function knows how to handle that.
     Either be reusing parsers if safe, locking or reinstanciating.
 
-    This parser should be considered a private class. All of the attributes
-    and methods exists for the internal parsing process. As long as you don't
+    This parser should be considered a private class.  All of the attributes
+    and methods exists for the internal parsing process.  As long as you don't
     extend the parser you should only use the `parse()` function (except of
     parser unittests which can savely user the `Parser` class itself).
     """
@@ -321,9 +321,9 @@ class Parser(object):
     def __init__(self, string, transformers=None):
         """
         In theory you never have to instanciate this parser yourself because
-        the high level `parse()` function encapsulates this. However for the
+        the high level `parse()` function encapsulates this.  However for the
         unittests it's important to be able to disable and enable the
-        `transformers` by hand. If you don't provide any transformers the
+        `transformers` by hand.  If you don't provide any transformers the
         default transformers are used.
         """
         self.string = string
@@ -380,8 +380,8 @@ class Parser(object):
         """
         Call this with a `TokenStream` to dispatch to the correct parser call.
         If the current token on the stream is not handleable it will raise a
-        `KeyError`. However you should not relay on that behavior because the
-        beavior is undefined and may change. It's your reposibility to make
+        `KeyError`.  However you should not relay on that behavior because the
+        beavior is undefined and may change.  It's your reposibility to make
         sure the parser never calls `parse_node` on not existing nodes when
         extending the lexer / parser.
         """
@@ -408,10 +408,10 @@ class Parser(object):
 
     def parse_metadata(self, stream):
         """
-        We do support inline metadata on a syntax level too. A metadata
-        section starts with *one* leading hash until the end of the line. If
+        We do support inline metadata on a syntax level too.  A metadata
+        section starts with *one* leading hash until the end of the line.  If
         the lexer stumbles upon something like that it emits a
-        ``'metadata_begin'`` token this parsing function uses. It's important
+        ``'metadata_begin'`` token this parsing function uses.  It's important
         to know that this can yield metadata at arbitrary positions if quoted
         for example.
 
@@ -426,7 +426,7 @@ class Parser(object):
 
     def parse_headline(self, stream):
         """
-        Parse a headline. Unlike MoinMoin with inline formatting and a
+        Parse a headline.  Unlike MoinMoin with inline formatting and a
         variable length headline closing section.
 
         Returns a `Headline` node.
@@ -466,7 +466,7 @@ class Parser(object):
 
     def parse_escaped_code(self, stream):
         """
-        This parses escaped code formattings. Escaped code formattings work
+        This parses escaped code formattings.  Escaped code formattings work
         like normal code formattings but their delimiter backticks are doubled
         so that one can use single backticks inside.
 
@@ -496,7 +496,7 @@ class Parser(object):
 
     def parse_underline(self, stream):
         """
-        Parses the underline formatting. This should really go away or change
+        Parses the underline formatting.  This should really go away or change
         the meaning to *inserted* text in which situation this makes sense.
 
         Returns a `Underline` node.
@@ -575,9 +575,9 @@ class Parser(object):
 
     def parse_footnote(self, stream):
         """
-        Parses an inline footnote declaration. This doesn't make it a
+        Parses an inline footnote declaration.  This doesn't make it a
         footnote though, for that tasks a `FootnoteSupport` transformer
-        exists. The default rendering is just parenthized small text
+        exists.  The default rendering is just parenthized small text
         at the same position.
 
         Returns a `Footnote` node.
@@ -591,7 +591,7 @@ class Parser(object):
 
     def parse_color(self, stream):
         """
-        Parse a color definition. This exists for backwards compatibility
+        Parse a color definition.  This exists for backwards compatibility
         with phpBB.
 
         Returns a `Color` node.
@@ -611,7 +611,7 @@ class Parser(object):
 
     def parse_size(self, stream):
         """
-        Parse a size tag. This exists for backwards compatibility with phpBB.
+        Parse a size tag.  This exists for backwards compatibility with phpBB.
 
         Returns a `Size` node.
         """
@@ -629,7 +629,7 @@ class Parser(object):
 
     def parse_font(self, stream):
         """
-        Parse a font tag. This exists for backwards compatibility with phpBB.
+        Parse a font tag.  This exists for backwards compatibility with phpBB.
 
         Returns a `Font` node.
         """
@@ -643,8 +643,8 @@ class Parser(object):
 
     def parse_quote(self, stream):
         """
-        Parse a quoted block (blockquote). It does not set the typographic
-        quotes you might have expected. That's part of the `GermanTypography`
+        Parse a quoted block (blockquote).  It does not set the typographic
+        quotes you might have expected.  That's part of the `GermanTypography`
         transformer.
 
         Returns a `Quote` node.
@@ -658,8 +658,8 @@ class Parser(object):
 
     def parse_list(self, stream):
         """
-        This parses a list or a list of lists. Due to the fail silent
-        approach of the syntax this fixes some common errors. For example
+        This parses a list or a list of lists.  Due to the fail silent
+        approach of the syntax this fixes some common errors.  For example
         a list that follows a list with a different type and no paragraph
         inbetween is considered being a different list.
 
@@ -723,7 +723,7 @@ class Parser(object):
 
     def parse_wiki_link(self, stream):
         """
-        Parses an wiki or interwiki link. Depending on the syntax the
+        Parses an wiki or interwiki link.  Depending on the syntax the
         returned link is either an `InternalLink` node or an
         `InternalLink` node.
         """
@@ -767,9 +767,9 @@ class Parser(object):
 
     def parse_newline(self, stream):
         """
-        Parse a simple newline marker. Note that the parser does not process
+        Parse a simple newline marker.  Note that the parser does not process
         paragraphs because it's not safe to guess their positions before the
-        parsing and macro expansion process took place. Have a look at the
+        parsing and macro expansion process took place.  Have a look at the
         `AutomaticParagraphs` transformer for more details.
 
         Returns a `Newline` node.
@@ -788,14 +788,14 @@ class Parser(object):
 
     def parse_macro(self, stream):
         """
-        Parse a macro declaration. It's important to know that macros are
-        expanded already in the parsing process. Depending on the type the
+        Parse a macro declaration.  It's important to know that macros are
+        expanded already in the parsing process.  Depending on the type the
         macros specify the macro is then either inserted into the parse tree
         (default behavior) or marked as deferred and processed after the main
         parsing (or after the transformers).
 
         If a macro is expanded at rendering time a `nodes.Macro` is returned
-        that holds the already instanciated macro. Because the macro *is*
+        that holds the already instanciated macro.  Because the macro *is*
         instanciate, dynamic macros have to ensure that they support pickle.
         """
         from inyoka.wiki.macros import get_macro
@@ -818,7 +818,7 @@ class Parser(object):
 
     def parse_pre_block(self, stream):
         """
-        Parse a pre block or parser block. If a shebang is present the parser
+        Parse a pre block or parser block.  If a shebang is present the parser
         with that name is instanciated and expanded, if it's a dynamic parser
         a `Parser` node will be returned.
 
@@ -860,9 +860,9 @@ class Parser(object):
 
     def parse_table(self, stream):
         """
-        Parse a table. Contrary to moin we have extended support for
+        Parse a table.  Contrary to moin we have extended support for
         attribute sections (``<foo, bar=baz>``) which means that table
-        delimiters are supported inside that section. Also all attributes
+        delimiters are supported inside that section.  Also all attributes
         in such a section are German.
 
         Returns a `Table` node.
@@ -922,7 +922,7 @@ class Parser(object):
 
     def parse_box(self, stream):
         """
-        Parse a box. Pretty much like a table with one cell that renders to
+        Parse a box.  Pretty much like a table with one cell that renders to
         a div or a div with a title and body.
 
         Returns a `Box` node.
@@ -954,7 +954,7 @@ class Parser(object):
 
     def parse_arguments(self, stream, end_token):
         """
-        Helper function for function argument parsing. Pass it a
+        Helper function for function argument parsing.  Pass it a
         `TokenStream` and the delimiter token for the argument section and
         it will extract all position and keyword arguments.
 
@@ -992,7 +992,7 @@ class Parser(object):
 
     def expand_macros(self, tree, stage):
         """
-        Helper function for macro expansion. This is called at the end of
+        Helper function for macro expansion.  This is called at the end of
         the parsing process to insert deferred macros.
         """
         for placeholder, macro in self.deferred_macros[stage]:
@@ -1000,7 +1000,7 @@ class Parser(object):
 
     def parse(self):
         """
-        Starts the parsing process. This sets the dirty flag which means that
+        Starts the parsing process.  This sets the dirty flag which means that
         you have to create a new parser after the parsing.
         """
         if self.is_dirty:

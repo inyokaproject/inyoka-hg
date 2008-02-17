@@ -34,7 +34,7 @@ def flash(message, success=None, classifier=None, dialog=False,
     to specify an url to submit the post-form.
     If you want more then just one yes and one no button use ``dialog_buttons``
     to specify more buttons. ``buttons`` is a list with dictionaries that
-    represents one button. E.g:
+    represents one button.  E.g:
         <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
 
         >>> flash('my_message', False, None, True, None, [{

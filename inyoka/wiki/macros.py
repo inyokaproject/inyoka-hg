@@ -7,14 +7,14 @@
 
     The term macro is derived from the MoinMoin wiki engine which refers to
     macros as small pieces of dynamic snippets that are exanded at rendering
-    time. For inyoka macros are pretty much the same just they are always
-    expanded at parsing time. However, for the sake of dynamics macros can
-    mark themselves as runtime macros. In that case during parsing the macro
+    time.  For inyoka macros are pretty much the same just they are always
+    expanded at parsing time.  However, for the sake of dynamics macros can
+    mark themselves as runtime macros.  In that case during parsing the macro
     is inserted directly into the parsing as as block (or inline, depending on
     the macro settings) node and called once the data is loaded from the
     serialized instructions.
 
-    This leads to the limitation that macros must be pickleable. So if you
+    This leads to the limitation that macros must be pickleable.  So if you
     feel the urge of creating a closure or something similar in your macro
     initializer remember that and move the code into the render method.
 
@@ -41,9 +41,9 @@ from inyoka.utils.pagination import Pagination
 
 def get_macro(name, args, kwargs):
     """
-    Instanciate a new macro or return `None` if it doesn't exist. This is
-    used by the parser when it encounters a `macro_begin` token. Usually
-    there is no need to call this function from outside the parser. There
+    Instanciate a new macro or return `None` if it doesn't exist.  This is
+    used by the parser when it encounters a `macro_begin` token.  Usually
+    there is no need to call this function from outside the parser.  There
     may however be macros that want to extend the functionallity of an
     already existing macro.
     """
@@ -55,8 +55,8 @@ def get_macro(name, args, kwargs):
 
 class Macro(object):
     """
-    Baseclass for macros. All macros should extend from that or implement
-    the same attributes. The preferred way however is subclassing.
+    Baseclass for macros.  All macros should extend from that or implement
+    the same attributes.  The preferred way however is subclassing.
     """
 
     __metaclass__ = ArgumentCollector
@@ -113,7 +113,7 @@ class Macro(object):
 
     def build_node(self, context=None, format=None):
         """
-        If this is a static macro this method has to return a node. If it's
+        If this is a static macro this method has to return a node.  If it's
         a runtime node a context and format parameter is passed.
 
         A static macro has to return a node, runtime macros can either have
@@ -124,12 +124,12 @@ class Macro(object):
 
 class TreeMacro(Macro):
     """
-    Special macro that is processed after the whole tree was created. This
+    Special macro that is processed after the whole tree was created.  This
     is useful for a `TableOfContents` macro that has to look for headline
     tags etc.
 
     If a macro is a tree processor the `build_node` function is passed a
-    tree as only argument. That being said it's impossible to use a tree
+    tree as only argument.  That being said it's impossible to use a tree
     macro as runtime macro.
     """
 
@@ -150,24 +150,24 @@ class TreeMacro(Macro):
     stage = 'initial'
 
     def render(self, context, format):
-        """A tree macro is not a runtime macro. Never static"""
+        """A tree macro is not a runtime macro.  Never static"""
         raise RuntimeError('tree macro is not allowed to be non static')
 
     def build_node(self, tree):
         """
         Works like a normal `build_node` function but it's passed a node that
-        represents the syntax tree. It can be queried using the query
+        represents the syntax tree.  It can be queried using the query
         interface attached to nodes.
 
         The return value must be a node, even if the macro shouldn't output
-        anything. In that situation it's recommended to return just an empty
+        anything.  In that situation it's recommended to return just an empty
         `nodes.Text`.
         """
 
 
 class RecentChanges(Macro):
     """
-    Show a table of the recent changes. This macro does only work for HTML
+    Show a table of the recent changes.  This macro does only work for HTML
     so far, all other formats just get an empty text back.
     """
 
@@ -255,7 +255,7 @@ class RecentChanges(Macro):
 
 class TableOfContents(TreeMacro):
     """
-    Show a table of contents. We do not embedd the TOC in a DIV so far and
+    Show a table of contents.  We do not embedd the TOC in a DIV so far and
     there is also no title on it.
     """
     stage = 'final'
@@ -420,7 +420,7 @@ class RedirectPages(Macro):
 class PageName(Macro):
     """
     Return the name of the current page if the render context
-    knows about that. This is only useful when rendered from
+    knows about that.  This is only useful when rendered from
     a wiki page.
     """
 
@@ -539,7 +539,7 @@ class TagList(Macro):
 
 class Include(Macro):
     """
-    Include a page. This macro works dynamically thus the included headlines
+    Include a page.  This macro works dynamically thus the included headlines
     do not appear in the TOC.
     """
 
@@ -611,11 +611,11 @@ class Template(Macro):
 
 class Picture(Macro):
     """
-    This macro can display external images and attachments as images. It
-    also takes care about thumbnail generation. For any internal (attachment)
+    This macro can display external images and attachments as images.  It
+    also takes care about thumbnail generation.  For any internal (attachment)
     image included that way an ``X-Attach`` metadata is emitted.
 
-    Like for any link only absolute targets are allowed. This might be
+    Like for any link only absolute targets are allowed.  This might be
     surprising behavior if you're used to the MoinMoin syntax but caused
     by the fact that the parser does not know at parse time on which page
     it is operating.

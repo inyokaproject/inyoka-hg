@@ -66,7 +66,7 @@ class Bot(object):
     def send_message(self, jid, message):
         """
         This method is exported from the XMLRPC interface and used to add
-        messages to the queue. XHTML Data is parsed and added to the queue.
+        messages to the queue.  XHTML Data is parsed and added to the queue.
         """
         if isinstance(jid, basestring):
             jid = [jid]
@@ -89,7 +89,7 @@ class Bot(object):
     def from_xhtml(self, jid, xhtml):
         """
         Helper method that creates a message object for this jid and the XHTML
-        data. Returns `None` if it cannot parse the XHTML.
+        data.  Returns `None` if it cannot parse the XHTML.
         """
         try:
             node = xmpp.simplexml.XML2Node(u'<body xmlns="%s">%s</body>' % (

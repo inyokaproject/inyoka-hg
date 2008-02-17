@@ -3,7 +3,7 @@
     inyoka.utils.html
     ~~~~~~~~~~~~~~~~~
 
-    This module implements various HTML/XHTML utility functions. Some parts
+    This module implements various HTML/XHTML utility functions.  Some parts
     of this module require the lxml and html5lib libraries.
 
     **TODO**: switch to lxml.etree for the internal tree representation once

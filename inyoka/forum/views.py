@@ -132,7 +132,7 @@ def viewtopic(request, topic_slug, page=1):
     """
     Shows a topic, the posts are paginated.
     If the topic has a `hidden` flag, the user gets a nice message that the
-    topic is deleted and is redirected to the topic's forum. Moderators can
+    topic is deleted and is redirected to the topic's forum.  Moderators can
     see these topics.
     """
     t = Topic.objects.get(slug=topic_slug)
@@ -221,7 +221,7 @@ def viewtopic(request, topic_slug, page=1):
 def newpost(request, topic_slug=None, quote_id=None):
     """
     If a user requests the page the first time, there is no POST-data and an
-    empty form is displayed. The action of the form is the view itself.
+    empty form is displayed.  The action of the form is the view itself.
     If `quote_id` is an integer, the standard text is set to a quoted version
     of the post with id = `quote_id`.
     If a user submits the form, POST-data is set, and the form is validated.
@@ -345,7 +345,7 @@ def newtopic(request, slug=None, article=None):
     the forum `slug` if `slug` is a string.
     Else a new discussion for the wiki article `article` is created inside a
     special forum that contains wiki discussions only (see the
-    WIKI_DISCUSSION_FORUM setting). It's title is set to the wiki article's
+    WIKI_DISCUSSION_FORUM setting).  It's title is set to the wiki article's
     name.
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
@@ -537,7 +537,7 @@ def edit(request, post_id):
     """
     The user can edit a post's text or add attachments on this page.
     If the post is the first post of a topic, the user also can edit the
-    polls and the options (e.g. sticky) of the topic.
+    polls and the options (e.g.  sticky) of the topic.
     """
     post = Post.objects.get(id=post_id)
     privileges = get_forum_privileges(request.user, post.topic.forum)

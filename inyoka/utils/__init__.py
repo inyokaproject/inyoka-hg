@@ -57,7 +57,7 @@ del _get_inyoka_revision
 
 def interact(offset=0):
     """
-    Start a python debugger in the caller frame. If inyoka is in debug
+    Start a python debugger in the caller frame.  If inyoka is in debug
     mode this function is available globally as ``INTERACT()``.
     """
     import pdb, sys
@@ -151,7 +151,7 @@ def human_number(number, genus=None):
 
 class deferred(object):
     """
-    Deferred properties. Calculated once and then it replaces the
+    Deferred properties.  Calculated once and then it replaces the
     property object.
     """
 

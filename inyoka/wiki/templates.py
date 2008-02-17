@@ -3,7 +3,7 @@ r"""
     inyoka.wiki.templates
     ~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements the templating language for the Wiki. It's a
+    This module implements the templating language for the Wiki.  It's a
     very simple language with some syntax elements taken from both Python
     and PHP.
 
@@ -397,7 +397,7 @@ class Parser(object):
 
 class TemplateSyntaxError(Exception):
     """
-    Helper for the parser. Translates into a node in the parsing process.
+    Helper for the parser.  Translates into a node in the parsing process.
     """
 
     def __init__(self, message):

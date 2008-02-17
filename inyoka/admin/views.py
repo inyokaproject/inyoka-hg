@@ -210,7 +210,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     """
     Display an interface to let the user create or edit an article.
     If `suggestion_id` is given, the new ikhaya article is based on a special
-    article suggestion made by a user. After saving it, the suggestion will be
+    article suggestion made by a user.  After saving it, the suggestion will be
     deleted automatically.
     """
     def _add_field_choices():

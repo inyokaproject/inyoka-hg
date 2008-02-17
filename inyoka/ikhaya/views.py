@@ -125,7 +125,7 @@ def archive(request):
 @templated('ikhaya/suggest.html', modifier=context_modifier)
 def suggest(request):
     """
-    A Page to suggest a new ikhaya article. It just sends an email to the
+    A Page to suggest a new ikhaya article.  It just sends an email to the
     ikhaya administrators.
     """
     if request.method == 'POST':

@@ -3,13 +3,13 @@
     inyoka.wiki.parsers
     ~~~~~~~~~~~~~~~~~~~
 
-    Parsers can process contents inside parser blocks. Unlike macros the
-    possibilities of parsers regarding tree processing are very limited. They
+    Parsers can process contents inside parser blocks.  Unlike macros the
+    possibilities of parsers regarding tree processing are very limited.  They
     can only return subtrees (which are inserted at the parser block position)
     or render data dynamically on page rendering.
 
     This means that they are also unable to both render data dynamically *and*
-    emit metadata. This functionallity is reserverd for macros.
+    emit metadata.  This functionallity is reserverd for macros.
 
     Beside that all features of macros also affect parsers just that they are
     passed the wrapper `data` which they can process.
@@ -33,7 +33,7 @@ def get_parser(name, args, kwargs, data):
 
 class Parser(object):
     """
-    baseclass for parsers. Concrete parsers should either subclass this or
+    baseclass for parsers.  Concrete parsers should either subclass this or
     implement the same attributes and methods.
     """
 
@@ -80,7 +80,7 @@ class Parser(object):
 
     def build_node(self, context=None, format=None):
         """
-        If this is a static parser this method has to return a node. if it's
+        If this is a static parser this method has to return a node.  if it's
         a runtime parser a context and format parameter is passed.
         """
 

@@ -4,21 +4,21 @@
     ~~~~~~~~~~~~~~~~~~~
 
     Beside the metadata the wiki has a storage concept which is a bit simpler
-    in terms of implementation. Basically a wiki storage is a preformatted
-    block in a special wiki page that is know at compile time. That block is
+    in terms of implementation.  Basically a wiki storage is a preformatted
+    block in a special wiki page that is know at compile time.  That block is
     then processed by a storage class and converted into a list of tuples or
     a dict, or something different, depending what the class wants to have.
 
     This is used for similies, interwiki links, access control and much more.
     If a page is a storage container is determined by the special 'X-Behave'
-    metadata header. There can be multiple pages with the same behave header,
+    metadata header.  There can be multiple pages with the same behave header,
     the contents of those pages are combined afterwards.
 
     The following behave headers are known so far:
 
     ``X-Behave: Smiley-Map``
         this page must contain a pre block that binds smiley codes to their
-        image location. If the link is relative it's assumed to be a link to
+        image location.  If the link is relative it's assumed to be a link to
         an attachment, otherwise a full url.
 
     ``X-Behave: Interwiki-Map``
@@ -120,7 +120,7 @@ class BaseStorage(object):
     def extract_data(self, text):
         """
         This is passed the text of the first preformatted node on a page where
-        the behavior header matched. The returned object is probably post-
+        the behavior header matched.  The returned object is probably post-
         processed by `combine_data` to comine multiple results.
         """
 
@@ -202,7 +202,7 @@ class InterwikiMap(DictStorage):
 
 class AccessControlList(BaseStorage):
     """
-    This storage holds the access control lists for the whole wiki. The rules
+    This storage holds the access control lists for the whole wiki.  The rules
     are similar to the basic expansion rules we also use for the `PageList`
     macro but they are always case sensitive.
     """

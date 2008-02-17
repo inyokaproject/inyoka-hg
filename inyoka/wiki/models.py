@@ -3,21 +3,21 @@
     inyoka.wiki.models
     ~~~~~~~~~~~~~~~~~~
 
-    This module implements the database models for the wiki. It's important
+    This module implements the database models for the wiki.  It's important
     to know that this doesn't automatically mean that an operation hits the
-    database. In fact most operations will happen either on the caching
-    system or the python layer. Operations that hit the database are all
+    database.  In fact most operations will happen either on the caching
+    system or the python layer.  Operations that hit the database are all
     native django query methods (which are left untouched) and those that
     are documented to do so.
 
     This module implements far more models that are acutually in use in the
-    `actions`. This is because the `Page` model and the `PageManager` also
+    `actions`.  This is because the `Page` model and the `PageManager` also
     manage other models such as `Revision`, `Text` and of course also the
     special `Attachment` model which in fact never leaves the module except
     for read only access.
 
     For details about manipulating and querying objects check out the
-    `PageManager` documentation as well as the `Page` documentation. If you
+    `PageManager` documentation as well as the `Page` documentation.  If you
     just want infos about the models as such that are passed to the template
     context see `Page`, `Attachment`, `Revision`, `Text` and `Diff`.
 
@@ -26,32 +26,32 @@
     =========
 
     Meta data keys starting with an capital X, followed by an dash are used
-    internally. Some of them have a special meaning, others are ignored by
+    internally.  Some of them have a special meaning, others are ignored by
     the software until they get a meaning by code updates.
 
     The following keys are currently in use:
 
     ``X-Link``
-        For every internal link in the page an ``X-Link`` is emitted. This is
+        For every internal link in the page an ``X-Link`` is emitted.  This is
         used by the wiki system to look up backlinks, invalidate caches,
-        find missing pages or orphans etc. Links that leave the parser are
+        find missing pages or orphans etc.  Links that leave the parser are
         considered "implicitly relative" which means that they are always
-        joined with the current page name. If a parser wants to avoid that
+        joined with the current page name.  If a parser wants to avoid that
         it must prefix it with an slash before emitting it.
 
     ``X-Attach``
         Works like ``X-Link`` but this is emitted if a page is included with
-        a macro that displays a page inline. Examples are the `Picture` or
-        the `Include` macro. This is also considered being an "implicit
+        a macro that displays a page inline.  Examples are the `Picture` or
+        the `Include` macro.  This is also considered being an "implicit
         relative" reference thus if something just accepts an absolute link
         this must prefix it with an slash.
 
     ``X-Redirect``
-        Marks this page as redirect to another page. This should be an
+        Marks this page as redirect to another page.  This should be an
         absolute link to an existing page.
 
     ``X-Behave``
-        Gives the page a behavior. This is used by the `storage` system and
+        Gives the page a behavior.  This is used by the `storage` system and
         documented as part of that module.
 
     ``X-Cache-Time``
@@ -59,18 +59,18 @@
 
     ``X-Owner``
         Every user or group (prefixed with an ``'@'``) defined this way is
-        added to the special ACL ``@Owner`` group. This is for example used
+        added to the special ACL ``@Owner`` group.  This is for example used
         for user wiki pages that should only give moderators, administrators
         and the owner of the page access.
 
     Every internal key is only modifyable by people with the ``PRIV_MANAGE``
-    privilege. Some keys like `X-Link` and `X-Attach` that are defined also
+    privilege.  Some keys like `X-Link` and `X-Attach` that are defined also
     by the wiki parser itself are marked as `LENIENT_METADATA_KEYS` which
     gives users without the `PRIV_MANAGE` privlege to edit them.
 
     Apart of those users without this privilege will see the metadata in their
     editor but if they try to send changed metadata back to the database the
-    wiki will avoid that. The models itself do not test for changed metadata
+    wiki will avoid that.  The models itself do not test for changed metadata
     that is part of the `acl` system.
 
 
@@ -116,9 +116,9 @@ class PageManager(models.Manager):
 
     def get_head(self, name, offset=0):
         """
-        Return the revision ID for head or with an offset. The offset
+        Return the revision ID for head or with an offset.  The offset
         can be an negative or positive number, but despite that always
-        the absolute number is used. This is useful if you want the non
+        the absolute number is used.  This is useful if you want the non
         head revision, say to compare head with head - 1 you can call
         ``Page.objects.get_head("Page_Name", -1)``.
         """
@@ -137,8 +137,8 @@ class PageManager(models.Manager):
 
     def get_tagcloud(self, max=100):
         """
-        Get a tagcloud. Note that this is one of the few operations that
-        also returns attachments, not only pages. A tag cloud is represented
+        Get a tagcloud.  Note that this is one of the few operations that
+        also returns attachments, not only pages.  A tag cloud is represented
         as ordinary list of dicts with the following keys:
 
         ``'name'``
@@ -148,8 +148,8 @@ class PageManager(models.Manager):
             Number of pages flagged with this tag.
 
         ``'size'``:
-            The relative size of this page in percent. One page means a size
-            of 100%. The number is calculated using the natural logarithm.
+            The relative size of this page in percent.  One page means a size
+            of 100%.  The number is calculated using the natural logarithm.
             In theory there is no upper limit for the tag size but it won't
             grow unnecessary high with a sane page count (< 1000000 pages)
         """
@@ -172,8 +172,8 @@ class PageManager(models.Manager):
 
     def compare(self, name, old_rev, new_rev=None):
         """
-        Compare two revisions of a page. If the new revision is not given,
-        the most recent one is taken. The return value of this operation
+        Compare two revisions of a page.  If the new revision is not given,
+        the most recent one is taken.  The return value of this operation
         is a `Diff` instance.
         """
         if new_rev is not None:
@@ -184,7 +184,7 @@ class PageManager(models.Manager):
 
     def _get_object_list(self, nocache):
         """
-        Get a list of all objects that are pages or attachments. The return
+        Get a list of all objects that are pages or attachments.  The return
         value is a list of ``(name, deleted, latest_rev, is_page)`` tuples
         where `is_page` is False if that object is an attachment.
         """
@@ -213,8 +213,8 @@ class PageManager(models.Manager):
     def get_page_list(self, existing_only=True, nocache=False):
         """
         Get a list of unicode strings with the page names that have a
-        head that exists. Normally the results are cached, pass it
-        `nocache` if you want to force the database query. Normally this
+        head that exists.  Normally the results are cached, pass it
+        `nocache` if you want to force the database query.  Normally this
         is not necessary because whenever a page is deleted or created the
         pagelist cache is invalidated.
         """
@@ -224,7 +224,7 @@ class PageManager(models.Manager):
     def get_attachment_list(self, parent=None, existing_only=True,
                             nocache=False):
         """
-        Works like `get_page_list` but just lists attachments. If parent is
+        Works like `get_page_list` but just lists attachments.  If parent is
         given only pages blow that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
@@ -236,8 +236,8 @@ class PageManager(models.Manager):
 
     def get_page_count(self, existing_only=True, nocache=False):
         """
-        Get the number of pages. Per default just pages with an non
-        deleted head will be returned. This in fact just counts the
+        Get the number of pages.  Per default just pages with an non
+        deleted head will be returned.  This in fact just counts the
         results returned by `get_page_list` because we hit the cache most
         of the time anyway.
         """
@@ -286,8 +286,8 @@ class PageManager(models.Manager):
 
     def get_orphans(self):
         """
-        Return a list of orphaned pages. The return value will be a list
-        of unicode strings, not the actual page object. This ignores
+        Return a list of orphaned pages.  The return value will be a list
+        of unicode strings, not the actual page object.  This ignores
         attachments!
         """
         ignore = set([settings.WIKI_MAIN_PAGE])
@@ -338,19 +338,19 @@ class PageManager(models.Manager):
     def get_similar(self, name, n=10):
         """
         Pass it a name and it will give you a list of page names with a
-        similar name. This also checks for similar attachments.
+        similar name.  This also checks for similar attachments.
         """
         return [x[1] for x in get_close_matches(name, [x[0] for x in
                 self._get_object_list(False) if not x[1]], n)]
 
     def get_by_name(self, name, nocache=False, raise_on_deleted=False):
         """
-        Return a page with the most recent revision. This should be used
+        Return a page with the most recent revision.  This should be used
         from the view functions if no revision is defined because it sends
         just one query to get all data.
 
         The most recent version is additionally stored in the cache so that
-        we don't hit the database for that. Because some caching backends
+        we don't hit the database for that.  Because some caching backends
         share cached objects you should not modify it unless you bypass
         the caching backend by passing `nocache` = True.
         """
@@ -380,7 +380,7 @@ class PageManager(models.Manager):
     def get_by_name_and_rev(self, name, rev, raise_on_deleted=False):
         """
         Works like `get_by_name` but selects a specific revision of a page,
-        not the most recent one. If `rev` is `None`, `get_by_name` is called.
+        not the most recent one.  If `rev` is `None`, `get_by_name` is called.
         """
         if rev is None:
             return self.get_by_name(name, True, raise_on_deleted)
@@ -419,7 +419,7 @@ class PageManager(models.Manager):
     def attachment_for_page(self, page_name):
         """
         Get the internal filename of the attachment attached to the page
-        provided. If the page does not exist or it doesn't have an attachment
+        provided.  If the page does not exist or it doesn't have an attachment
         defined the return value will be `None`.
         """
         cursor = connection.cursor()
@@ -467,36 +467,36 @@ class PageManager(models.Manager):
                note=None, attachment=None, attachment_filename=None,
                deleted=False, remote_addr=None):
         """
-        Create a new wiki page. Always use this method to create pages,
+        Create a new wiki page.  Always use this method to create pages,
         never the `Page` constructor which doesn't create the revision and
         text objects.
 
         :Parameters:
 
             name
-                This must be a *normaliezd* version of the page name. The
+                This must be a *normaliezd* version of the page name.  The
                 default action dispatcher (`ikhaya.wiki.views.show_page`)
                 automatically normalizes incoming page names so this is no
-                issue from the web layer. However shell scripts, converters,
+                issue from the web layer.  However shell scripts, converters,
                 crons etc have to normalize this parameter themselves.
 
             text
-                Either a text object or a text that represents the text. If
+                Either a text object or a text that represents the text.  If
                 it's a string inyoka calculates a hash of it and tries to find
                 a text with the same value in the database.
 
             user
                 If this paramter is `None` the inoyka system user will be the
-                author of the created revision. Otherwise it can either be a
+                author of the created revision.  Otherwise it can either be a
                 User or an AnoymousUser object from the auth contrib module.
 
             change_date
-                If this is not provided the current date is used. Otherwise
+                If this is not provided the current date is used.  Otherwise
                 it should be an UTC timestamp in form of a `datetime.datetime`
                 object.
 
             note
-                The change note for the revision. If not given it will be
+                The change note for the revision.  If not given it will be
                 ``'Created'`` or something like that.
 
             attachment
@@ -504,7 +504,7 @@ class PageManager(models.Manager):
 
             attachmene
                 if an attachment filename is given the page will act as an
-                attachment. The `attachment` must be a bytestring in current
+                attachment.  The `attachment` must be a bytestring in current
                 django versions, for performance reasons latter versions
                 probably will support a file descriptor here.
 
@@ -515,9 +515,9 @@ class PageManager(models.Manager):
                 something reasonable.
 
             remote_addr
-                The remote address of the user that created this page. If not
+                The remote address of the user that created this page.  If not
                 given it will be ``'127.0.0.1'`` but never the remote addr of
-                the active request object. This decision was made so that no
+                the active request object.  This decision was made so that no
                 confusion comes up when creating page objects in the context
                 of a request that are not affiliated with the user.
         """
@@ -552,8 +552,8 @@ class PageManager(models.Manager):
 class TextManager(models.Manager):
     """
     Helper manager for the text table so that we can get texts by the
-    hash of an object. You should always use the `get_or_create`
-    function to get or create a text. Available as `Text.objects`.
+    hash of an object.  You should always use the `get_or_create`
+    function to get or create a text.  Available as `Text.objects`.
     """
 
     def get_or_create(self, value):
@@ -571,7 +571,7 @@ class TextManager(models.Manager):
 
 class Diff(object):
     """
-    This class represents the results of a page comparison. You can get
+    This class represents the results of a page comparison.  You can get
     useful instances of this class by using the ``compare_*`` functions on
     the `PageManager`.
 
@@ -591,14 +591,14 @@ class Diff(object):
             The udiff of the diff as string.
 
         template_diff
-            The diff in parsed form for the template. This is mainly used by
+            The diff in parsed form for the template.  This is mainly used by
             the ``'wiki/_diff.html'`` template which is automatically rendered
             if one calls the `render()` method on the instance.
     """
 
     def __init__(self, page, old, new):
         """
-        This constructor exists maily for internal usage. It's not supported
+        This constructor exists maily for internal usage.  It's not supported
         to create `Diff` object yourself.
         """
         self.page = page
@@ -617,7 +617,7 @@ class Diff(object):
 
     def render(self):
         """
-        Render the diff using the ``wiki/_diff.html`` template. Have a look
+        Render the diff using the ``wiki/_diff.html`` template.  Have a look
         at the class' docstring for more detail.
         """
         return render_template('wiki/_diff.html', {'diff': self})
@@ -635,7 +635,7 @@ class Diff(object):
 
 class Text(models.Model):
     """
-    The text for a revision. Keep in mind that text objects are shared among
+    The text for a revision.  Keep in mind that text objects are shared among
     revisions so *never ever* edit a text object after it was created.
 
     Because of that some methods require an explicit page object being passed
@@ -731,7 +731,7 @@ class Text(models.Model):
 class Page(models.Model):
     """
     This represents one wiki page and optionally also a bound revision.
-    `Page` instances exist both bound and unbound. We refer to a bound page
+    `Page` instances exist both bound and unbound.  We refer to a bound page
     when a revision was attached to the page *and* the query documents that.
 
     Some queries might add a revision to the page object for reasons of
@@ -744,7 +744,7 @@ class Page(models.Model):
     :IVariables:
 
         name
-            The normalized name of the page. This is guaranteed to be unique.
+            The normalized name of the page.  This is guaranteed to be unique.
 
         topic
             A foreign key to the topic that belongs to this wiki page.
@@ -764,8 +764,8 @@ class Page(models.Model):
     @property
     def title(self):
         """
-        The title of the page. This is automatically generated from the page
-        name and cannot be changed. However future versions might support
+        The title of the page.  This is automatically generated from the page
+        name and cannot be changed.  However future versions might support
         giving pages different titles by using the metadata system.
         """
         return get_title(self.name)
@@ -773,8 +773,8 @@ class Page(models.Model):
     @property
     def short_title(self):
         """
-        Like `title` but just the short version of it. Thus it returns the
-        outermost part (after the last slash). This is primarly used in the
+        Like `title` but just the short version of it.  Thus it returns the
+        outermost part (after the last slash).  This is primarly used in the
         `do_show` action.
         """
         return get_title(self.name, full=False)
@@ -805,7 +805,7 @@ class Page(models.Model):
     @deferred
     def links(self):
         """
-        Internal wiki links on this page. Because there could be links to
+        Internal wiki links on this page.  Because there could be links to
         non existing pages the list returned contains just the link targets
         in normalized format, not the page objects as such.
         """
@@ -823,7 +823,7 @@ class Page(models.Model):
     @deferred
     def metadata(self):
         """
-        Get the metadata from this page as `MultiMap`. It's not possible to
+        Get the metadata from this page as `MultiMap`.  It's not possible to
         change metadata from the model because it's an aggregated value from
         multiple sources (explicit metadata, backlinks, macros etc.)
         """
@@ -845,9 +845,9 @@ class Page(models.Model):
 
     def update_meta(self):
         """
-        Update page metadata. Crosslinks and the search index. This method
+        Update page metadata.  Crosslinks and the search index.  This method
         always operates on the most recent revision, never on the revision
-        attached to the page. If there is no revision in the database yet
+        attached to the page.  If there is no revision in the database yet
         this method fails silently.
 
         Thus the page create method has to call this after the revision was
@@ -916,7 +916,7 @@ class Page(models.Model):
     def save(self):
         """
         This not only saves the page but also a revision that is
-        bound to the page object. If you don't want to save the
+        bound to the page object.  If you don't want to save the
         revision set it to `None` before calling `save()`.
         """
         if self.id is None:
@@ -944,8 +944,8 @@ class Page(models.Model):
 
     def delete(self):
         """
-        This deletes the page. In fact it does not delete the page but add a
-        "deleted" revision. You should never use this method directly, always
+        This deletes the page.  In fact it does not delete the page but add a
+        "deleted" revision.  You should never use this method directly, always
         use `edit()` with `delete` set to `True` to get user data into the
         revision log.
 
@@ -970,23 +970,23 @@ class Page(models.Model):
         :Parameters:
 
             text
-                Either a text object or a text that represents the text. If
+                Either a text object or a text that represents the text.  If
                 it's a string inyoka calculates a hash of it and tries to find
-                a text with the same value in the database. If no text is
+                a text with the same value in the database.  If no text is
                 provided the text from the last revision is used.
 
             user
                 If this paramter is `None` the inoyka system user will be the
-                author of the created revision. Otherwise it can either be a
+                author of the created revision.  Otherwise it can either be a
                 User or an AnoymousUser object from the auth contrib module.
 
             change_date
-                If this is not provided the current date is used. Otherwise
+                If this is not provided the current date is used.  Otherwise
                 it should be an UTC timestamp in form of a `datetime.datetime`
                 object.
 
             note
-                The change note for the revision. If not given it will be
+                The change note for the revision.  If not given it will be
                 empty.
 
             attachment
@@ -994,9 +994,9 @@ class Page(models.Model):
 
             attachmene
                 if an attachment filename is given the page will act as an
-                attachment. The `attachment` must be a bytestring in current
+                attachment.  The `attachment` must be a bytestring in current
                 django versions, for performance reasons latter versions
-                probably will support a file descriptor here. If no
+                probably will support a file descriptor here.  If no
                 attachment filename is given the page will either continue to
                 be a page or attachment depending on the last revision.
 
@@ -1007,9 +1007,9 @@ class Page(models.Model):
                 something reasonable.
 
             remote_addr
-                The remote address of the user that created this page. If not
+                The remote address of the user that created this page.  If not
                 given it will be ``'127.0.0.1'`` but never the remote addr of
-                the active request object. This decision was made so that no
+                the active request object.  This decision was made so that no
                 confusion comes up when creating page objects in the context
                 of a request that are not affiliated with the user.
         """
@@ -1097,9 +1097,9 @@ class Attachment(models.Model):
     @property
     def contents(self):
         """
-        The raw contents of the file. This is usually unsafe because
+        The raw contents of the file.  This is usually unsafe because
         it can cause the memory limit to be reached if the file is too
-        big. However this limitation currently affects the whole django
+        big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
         """
         f = self.open()
@@ -1112,7 +1112,7 @@ class Attachment(models.Model):
     def html_representation(self):
         """
         This method returns a `HTML` representation of the attachment for the
-        `show_action` page. If this method does not know about an internal
+        `show_action` page.  If this method does not know about an internal
         representation for the object the return value will be an download
         link to the raw attachment.
         """
@@ -1127,7 +1127,7 @@ class Attachment(models.Model):
 
     def open(self, mode='rb'):
         """
-        Open the file as file descriptor. Don't forget to close this file
+        Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
         return file(self.get_file_filename(), mode)
@@ -1138,7 +1138,7 @@ class Attachment(models.Model):
 
 class Revision(models.Model):
     """
-    Represents a single page revision. A revision object is always bound to
+    Represents a single page revision.  A revision object is always bound to
     a page which is available with the `page` attribute.
 
     Most of the time `Revision` objects appear as a part of a `Page` object
@@ -1148,19 +1148,19 @@ class Revision(models.Model):
     :IVariables:
 
         page
-            The page this object is operating on. In the templates however
+            The page this object is operating on.  In the templates however
             you will never have to access this attribute because all revisions
             sent to the template are either part of a bound `Page` or provide
             an extra object for the page itself.
 
         text
-            a `Text` object. In templates you usually don't have to cope with
+            a `Text` object.  In templates you usually don't have to cope with
             this attribute because it just contains the raw data and not the
-            rendered one. For the rendered data have a look at
+            rendered one.  For the rendered data have a look at
             `rendered_text`.
 
         user
-            The user that created this revision. If an anoymous user created
+            The user that created this revision.  If an anoymous user created
             the revision this will be `None`.
 
         change_date
@@ -1173,13 +1173,13 @@ class Revision(models.Model):
             If the revision is marked as deleted this is `True`.
 
         remote_addr
-            The remote address for the user. In templates this is a useful
+            The remote address for the user.  In templates this is a useful
             attribute if you need a replacement for the `user` when no user is
             present.
 
         attachment
             If the page itself holds an attachment this will point to an
-            `Attachment` object. Otherwise this attribute is `None` and must
+            `Attachment` object.  Otherwise this attribute is `None` and must
             be ignored.
     """
     page = models.ForeignKey(Page, related_name='revisions')
@@ -1195,7 +1195,7 @@ class Revision(models.Model):
     @property
     def title(self):
         """
-        The page title plus the revision date. This is equivalent to
+        The page title plus the revision date.  This is equivalent to
         `Page.full_title`.
         """
         return u'%s (Revision %s)' % (
@@ -1206,7 +1206,7 @@ class Revision(models.Model):
     @property
     def rendered_text(self):
         """
-        The rendered version of the `text` attribute. This is equivalent
+        The rendered version of the `text` attribute.  This is equivalent
         to calling ``text.render(page=page)``.
         """
         return self.text.render(page=self.page.name)
@@ -1252,7 +1252,7 @@ class Revision(models.Model):
 class MetaData(models.Model):
     """
     Every page (just pages not revisions) can have an unlimited number
-    of metadata associated with. Metadata is useful to add invisible
+    of metadata associated with.  Metadata is useful to add invisible
     information to pages such as tags, acls etc.
 
     This should be considered being a private class because it is wrapped

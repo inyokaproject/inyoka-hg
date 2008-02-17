@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~~
 
     This module implements an extensible search interface for all components
-    of the inyoka system. For the concrete implementations have a look at the
+    of the inyoka system.  For the concrete implementations have a look at the
     `inyoka.app.search` modules, where app is the name of the application.
 
     :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
@@ -256,7 +256,7 @@ class SearchSystem(object):
     def register_prefix_handler(self, prefixes, handler):
         """
         Register a prefix handler which can be used to search for
-        spezific terms in the database. Instead of a simple prefix->value
+        spezific terms in the database.  Instead of a simple prefix->value
         map, we use own handlers which can do additional transformations
         and database lookups, but they must all return a xapian.Query
         object (or None in case of failure).

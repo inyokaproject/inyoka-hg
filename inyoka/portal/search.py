@@ -5,7 +5,7 @@
 
     Since the portal doesn't create and store searchable documents by its
     own this module only profides some general costumazions which are
-    available trough the whole portal. For the concrete implementations
+    available trough the whole portal.  For the concrete implementations
     have a look at the `inyoka.app.search` modules, where app is the
     name of the application.
 

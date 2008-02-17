@@ -3,7 +3,7 @@
     inyoka.utils.captcha
     ~~~~~~~~~~~~~~~~~~~~
 
-    A module that produces image and audio captchas. Uses some code of
+    A module that produces image and audio captchas.  Uses some code of
     PyCAPTCHA by Micah Dowty.
 
 
@@ -224,7 +224,7 @@ class DarkBackground(Picture):
 
 class NoiseBackground(Layer):
     """
-    Add some noise as background. You can combine this with another
+    Add some noise as background.  You can combine this with another
     background layer.
     """
     bg = 'transparent'
@@ -248,7 +248,7 @@ class NoiseBackground(Layer):
 
 class GridBackground(Layer):
     """
-    Add a grid as background. You can combine this with another
+    Add a grid as background.  You can combine this with another
     background layer.
     """
     bg = 'transparent'
@@ -278,7 +278,7 @@ class GridBackground(Layer):
 
 class SolidColor(Layer):
     """
-    A solid color background. Very weak on its own, but good
+    A solid color background.  Very weak on its own, but good
     to combine with other backgrounds.
     """
 
@@ -330,7 +330,7 @@ class WigglyBlocks(Layer):
 
 class WarpBase(Layer):
     """
-    Abstract base class for image warping. Subclasses define a
+    Abstract base class for image warping.  Subclasses define a
     function that maps points in the output image to points in the input image.
     This warping engine runs a grid of points through this transform and uses
     PIL's mesh transform to warp the image.

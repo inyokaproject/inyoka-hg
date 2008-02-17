@@ -3,7 +3,7 @@
     inyoka.wiki.parser.machine
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    This implements the ast compiler and evaluator. Most of the functionality
+    This implements the ast compiler and evaluator.  Most of the functionality
     here is available on the nodes itself because they mix those classes in,
     the renderer for compiled instructions is importable from the normal
     parser package.
@@ -21,7 +21,7 @@ _whitespace_re = re.compile('\s+')
 
 class NodeCompiler(object):
     """
-    MixIn class for node instruction compiling. Most nodes mix this class in
+    MixIn class for node instruction compiling.  Most nodes mix this class in
     and obtain the `compile` method because of that.
     """
 
@@ -53,9 +53,9 @@ class NodeRenderer(object):
     """
     MixedIn on all nodes so that you can render a node without compiling.
 
-    Nodes as such do not know how to render their own structure. That's up
+    Nodes as such do not know how to render their own structure.  That's up
     to the `Renderer` which uses the instructions from either a node passed
-    or a compiled instruction set. However this class is implemented by all
+    or a compiled instruction set.  However this class is implemented by all
     non basic nodes and allows to `stream` and `render` the generated markup
     without having to instanciate a `Renderer`.
     """
@@ -77,7 +77,7 @@ class NodeRenderer(object):
 
 class NodeQueryInterface(object):
     """
-    Adds a `query` property to nodes implementing this interface. The query
+    Adds a `query` property to nodes implementing this interface.  The query
     attribute returns a new `Query` object for the node that implements the
     query interface.
     """
@@ -89,7 +89,7 @@ class NodeQueryInterface(object):
 
 class Query(object):
     """
-    Helper class to traverse a tree of nodes. Useful for tree processor
+    Helper class to traverse a tree of nodes.  Useful for tree processor
     macros that collect data from the final tree.
     """
 
@@ -140,14 +140,14 @@ class Query(object):
 
 class RenderContext(object):
     """
-    Holds information for the rendering systems. This can be used by macros
+    Holds information for the rendering systems.  This can be used by macros
     to get a reference to the current context object, the wiki page that
     triggered the rendering or if the rendering should happen in simplified
     mode (disables dynamic macros).
 
     Per definition a render context must be recreated before a rendering but
-    shared among subrenderings. For example if you include a page you have
-    to pass the render context object around. The reason for this is that
+    shared among subrenderings.  For example if you include a page you have
+    to pass the render context object around.  The reason for this is that
     only that allows you to track circular page inclusions.
     """
 
@@ -161,8 +161,8 @@ class RenderContext(object):
 
 class Renderer(object):
     """
-    This class can render nodes and compiled structures. One can pass it a
-    node or a compiler instruction set (compiled by a `NodeCompiler`). In
+    This class can render nodes and compiled structures.  One can pass it a
+    node or a compiler instruction set (compiled by a `NodeCompiler`).  In
     the first case the render method expects a `format` argument, in the
     latter the format argument should be ommited or must match the format of
     the compiled instruction set.
@@ -188,9 +188,9 @@ class Renderer(object):
     def stream(self, context, format=None):
         """
         Creates a generator that yields the results of the instructions
-        attached to the renderer. If the renderer was constructed from
+        attached to the renderer.  If the renderer was constructed from
         an instruction set you should not provide format so that it can
-        use the format of the instruction set. If you do provide it the
+        use the format of the instruction set.  If you do provide it the
         two format definitions must match.
 
         If a node is attached to the renderer it will be prepared on the
@@ -226,8 +226,8 @@ class Renderer(object):
 
 class MarkupWriter(object):
     """
-    Helper function to generate Markup. It's used to generate wiki markup
-    from nodes. Note that not all nodes have markup associated. In fact
+    Helper function to generate Markup.  It's used to generate wiki markup
+    from nodes.  Note that not all nodes have markup associated.  In fact
     so far only the nodes also used in the `bbcode` parser have a markup
     generation method for the converter.
     """

@@ -3,8 +3,8 @@
     inyoka.wiki.parser.lexer
     ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Tokenizes our wiki markup. The lexer is implemented as some sort of
-    scanner with an internal stack. Inspired by pygments.
+    Tokenizes our wiki markup.  The lexer is implemented as some sort of
+    scanner with an internal stack.  Inspired by pygments.
 
 
     :copyright: Copyright 2007 by Armin Ronacher
@@ -52,8 +52,8 @@ def switch(state):
 
 class ruleset(tuple):
     """
-    Rulesets keep some rules. If at the end of parsing a ruleset is left
-    on the stack a `name_end` token is emitted without a value. If you don't
+    Rulesets keep some rules.  If at the end of parsing a ruleset is left
+    on the stack a `name_end` token is emitted without a value.  If you don't
     want this behavior use the `helperset`.
     """
     __slots__ = ()
@@ -339,7 +339,7 @@ class Lexer(object):
 
     def tokenize_block(self, string, _escape_hint=None):
         """
-        This tokenizes a block. It's used by the normal tokenize function to
+        This tokenizes a block.  It's used by the normal tokenize function to
         lex quotes and normal markup isolated, so that breakage in one block
         does not affect outer areas.
         """

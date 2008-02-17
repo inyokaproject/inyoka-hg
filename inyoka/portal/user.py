@@ -44,7 +44,7 @@ def get_hexdigest(salt, raw_password):
 
 def check_password(raw_password, enc_password, convert_user=None):
     """
-    Returns a boolean of whether the raw_password was correct. Handles
+    Returns a boolean of whether the raw_password was correct.  Handles
     encryption formats behind the scenes.
     """
     salt, hsh = enc_password.split('$')
@@ -133,7 +133,7 @@ class UserManager(models.Manager):
 
     def get_system_user(self):
         """
-        This returns the system user that is controlled by inyoka itself. It
+        This returns the system user that is controlled by inyoka itself.  It
         is the sender for welcome notices, it updates the antispam list and
         is the owner for log entries in the wiki triggered by inyoka itself.
         """

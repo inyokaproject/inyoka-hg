@@ -5,7 +5,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Update the whole search index by reindexing all tuples from all
-    Models providing a ``update_search`` method. Normally you must not
+    Models providing a ``update_search`` method.  Normally you must not
     call this script, but it could be useful for fixing troubles
     with broken search indexes.
 
@@ -24,8 +24,8 @@ from inyoka.utils.search import search
 
 def update(limit=None):
     """
-    Update the next items from the queue. You should call this
-    function regularly (e.g. as cron).
+    Update the next items from the queue.  You should call this
+    function regularly (e.g.  as cron).
     """
     last_id = 0
     for id, component, doc_id in SearchQueue.objects.next():
