@@ -28,7 +28,6 @@ jinja_env = Environment(loader=FileSystemLoader(
 ))
 jinja_env.globals.update(
     INYOKA_REVISION=INYOKA_REVISION,
-    #XXX: just allow some vars?
     SETTINGS=settings,
     href=href,
     h={}
@@ -97,17 +96,19 @@ def populate_context_defaults(context):
             pms = PrivateMessageEntry.objects.filter(user__id=request.user.id,
                                                   read=False).count()
             cache.set(key, pms)
-        # XXX: permission check
-        key = 'forum/reported_topic_count'
-        reported = cache.get(key)
-        if reported is None:
-            reported = Topic.objects.filter(reported__isnull=False).count()
-            cache.set(key, reported)
-        key = 'ikhaya/suggestion_count'
-        suggestions = cache.get(key)
-        if suggestions is None:
-            suggestions = Suggestion.objects.all().count()
-            cache.set(key, suggestions)
+        if not request.user.is_manager:
+            reported = suggestions = 0
+        else:
+            key = 'forum/reported_topic_count'
+            reported = cache.get(key)
+            if reported is None:
+                reported = Topic.objects.filter(reported__isnull=False).count()
+                cache.set(key, reported)
+            key = 'ikhaya/suggestion_count'
+            suggestions = cache.get(key)
+            if suggestions is None:
+                suggestions = Suggestion.objects.all().count()
+                cache.set(key, suggestions)
     else:
         reported = pms = suggestions = 0
 

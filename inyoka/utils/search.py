@@ -207,8 +207,6 @@ class SearchResult(object):
         return ' '.join(term for term in self.terms)
 
 
-
-
 class SearchSystem(object):
     """
     The central object that is used by applications to register their
@@ -383,7 +381,6 @@ class AuthMatchDecider(xapian.MatchDecider):
         if auth and decider is not None:
             return decider(loads(auth))
         else:
-            # XXX:print "ignoring", doc.get_value(0), self.deciders
             pass
         return True
 

@@ -180,8 +180,6 @@ class User(models.Model):
     website = models.URLField('Webseite', blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
 
-    #XXX: permissions
-
     # the user can access the admin panel
     is_manager = models.BooleanField('Teammitglied (kann ins Admin-Panel)',
                                      default=False)

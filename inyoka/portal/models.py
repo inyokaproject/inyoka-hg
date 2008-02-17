@@ -34,6 +34,8 @@ from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
 
+
+
 class SubscriptionManager(models.Manager):
     """
     Manager class for the `Subscription` model.
@@ -193,8 +195,9 @@ class StaticPage(models.Model):
           unique=True, help_text=u'Wird für die URL verwendet.'\
                                  u' Kann nicht verändert werden.')
     title = models.CharField(u'Titel', max_length=200)
-    content = models.TextField(u'Inhalt', help_text=u'Muss valides XHTML sein.'
-                                          u' Überschriften ab h3 abwärts.')
+    content = models.TextField(u'Inhalt',
+        help_text=(u'Muss valides XHTML sein. Überschriften ab h3 abwärts.')
+    )
 
     class Meta:
         verbose_name = 'statische Seite'
