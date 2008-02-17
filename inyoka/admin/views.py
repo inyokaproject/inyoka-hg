@@ -15,7 +15,7 @@ from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
-from inyoka.utils.flashing import flash, DEFAULT_FLASH_BUTTONS
+from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape, cleanup_html
 from inyoka.utils.sortable import Sortable
@@ -34,14 +34,6 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum, Privilege
 
 
-IKHAYA_ARTICLE_DELETE_BUTTONS = [
-    {'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
-     'value': 'Löschen'},
-    {'type': 'submit', 'class': 'message-depublicate',
-     'name': 'message-depublicate', 'value': 'Veröffentlichung aufheben'},
-    {'type': 'submit', 'class': 'message-no', 'name': 'message-no',
-     'value': 'Abbrechen'}
-]
 
 
 @require_manager
