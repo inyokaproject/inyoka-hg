@@ -137,4 +137,26 @@ $(document).ready(function() {
       submitted = true;
     });
   })();
+
+  // add links to the "package" macro
+  $('.package-list').each(function(i, elm) {
+    var [apt, aptitude] = $('.bash', elm);
+    $(aptitude).hide();
+    $($('p', elm)[0]).append(
+      $('<a href="#">apt-get</a>').click(function() {
+        $(this).parent().children().css('font-weight', '');
+        $(this).css('font-weight', 'bold');
+        $(apt).show();
+        $(aptitude).hide();
+      }).click(), ' ',
+      $('<a href="#">aptitude</a>').click(function() {
+        $(this).parent().children().css('font-weight', '');
+        $(this).css('font-weight', 'bold');
+        $(aptitude).show();
+        $(apt).hide();
+      }), ' ',
+      $('<a>apturl</a>').attr('href', 'apt://' + $(apt).text().split(' ')
+                                                       .slice(3).join(' '))
+    )
+  });
 });

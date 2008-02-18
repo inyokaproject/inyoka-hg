@@ -875,13 +875,15 @@ def join_array(array, delimiter):
 
 
 BINARY_FUNCTIONS = {
-    'contain':      lambda a, b: b in a,
-    'contains':     lambda a, b: b in a,
-    'has_key':      lambda a, b: a.has_key(b),
-    'startswith':   lambda a, b: unicode(a).startswith(b),
-    'endswith':     lambda a, b: unicode(a).endswith(b),
-    'matches':      lambda a, b: simple_match(b, unicode(a)),
-    'join_with':    join_array
+    'contain':       lambda a, b: b in a,
+    'contains':      lambda a, b: b in a,
+    'has_key':       lambda a, b: a.has_key(b),
+    'startswith':    lambda a, b: unicode(a).startswith(b),
+    'endswith':      lambda a, b: unicode(a).endswith(b),
+    'matches':       lambda a, b: simple_match(b, unicode(a)),
+    'matches_regex': lambda a, b: re.match(unicode(b), unicode(a)) \
+                                  is not None,
+    'join_with':     join_array
 }
 
 CONVERTER = {

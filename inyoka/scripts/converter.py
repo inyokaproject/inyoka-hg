@@ -85,20 +85,16 @@ def convert_wiki():
 
             if line.action in ('SAVE', 'SAVENEW', 'SAVE/REVERT'):
                 try:
-                    try:
-                        f = file(page.get_rev(rev=int(line.rev))[0])
-                        text = f.read().decode('utf-8')
-                        f.close()
-                    except IOError:
-                        new_page.edit(deleted=True, **kwargs)
-                    if int(rev_id) == 1:
-                        new_page = InyokaPage.objects.create(name, text=text,
-                                                             **kwargs)
-                    else:
-                        new_page.edit(text=text, deleted=False, **kwargs)
-                except Exception, e:
-                    print '!' * 100
-                    print e
+                    f = file(page.get_rev(rev=int(line.rev))[0])
+                    text = f.read().decode('utf-8')
+                    f.close()
+                except IOError:
+                    new_page.edit(deleted=True, **kwargs)
+                if int(rev_id) == 1:
+                    new_page = InyokaPage.objects.create(name, text=text,
+                                                         **kwargs)
+                else:
+                    new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
                 att = line.extra
                 att_name = '%s/%s' % (name, att)

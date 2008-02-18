@@ -11,27 +11,54 @@
 """
 from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
-
+from inyoka.scripts.create_templates import templates
 
 class InyokaFormatter(FormatterBase):
     list_depth = 0
 
     def macro(self, macro_obj, name, args):
-        # TODO: Not yet handled are Anmerkung
-        if name == 'Anchor':
+        # TODO: Not yet handled are Anmerkung, RandomMirror, RedirectCheck, Tasten
+        if name in ['Anchor', 'Diskussion']:
             # The new parser does create human readable anchor names so we
             # don't need this
             return u''
-        if name in ('Archiviert', 'Ausbaufaehig'):
-            name = 'Wiki/Vorlagen/%s' % name.replace('ae', u'ä')
-            if args:
-                return u'[[Vorlage(%s, %s)]]' % (name, args)
-            else:
-                return u'[[Vorlage(%s)]]' % name
 
-        # the syntax of this macro didn't change
+        replacements = {
+            'TableOfContents': 'Inhaltsverzeichnis',
+            'PageCount': 'Seitenzahl',
+            'LikePages': u'ÄhnlicheSeiten'
+        }
+
+        if name in replacements:
+            name = replacements[name]
+
+        elif name == 'Tag':
+            return u'# X-Tags: ' + args
+
+        elif name in templates.keys() or name == 'Ausbaufaehig':
+            if name == 'Pakete', 'Getestet', 'InArbeit':
+                args = [a.strip() for a in args.split(',')]
+            else:
+                args = args and [args] or []
+            args = ['Wiki/Vorlagen/%s' % name.replace('ae', u'ä')] + args
+            name = 'Vorlage'
+
+        elif name == 'Bild':
+            args = [a.strip() for a in args.split(',')]
+            if len(args) > 2 and args[2] in ('links', 'rechts', 'zentriert'):
+                args[2] = {
+                    'links': 'left',
+                    'rechts': 'right',
+                    'zentriert': 'center'
+                }[args[2]]
+
+        elif name == 'Pakete':
+            args = [a.strip() for a in args.split(',')]
+
         if args:
-            return u'[[%s(%s)]]' % (name, args)
+            return u'[[%s(%s)]]' % (name, ', '.join(
+                ' ' in a and ("'%s'" % a) or a for a in args
+            ))
         else:
             return u'[[%s]]' % name
 

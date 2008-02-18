@@ -1,0 +1,42 @@
+/**
+ * syle.wiki
+ * ~~~~~~~~~
+ *
+ * This is the style for the wiki marup.
+ * 
+ * :copyright: 2007 by Benjamin Wiegand.
+ * :license: GNU GPL.
+ */
+
+div.box {
+  clear: both;
+  margin: 0.5em 1em;
+  border: 1px solid #bbb;
+}
+
+div.box h3 {
+  margin: 0;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: white;
+  background-color: #bbb;
+  padding: 0 1em;
+}
+
+div.box div.contents {
+  padding: 0.5em 1em;
+}
+
+div.bash {
+  color: white;
+  font-family: monospace;
+  background-color: #454545;
+  border: 1px solid #666;
+  clear: both;
+  margin: 0.3em 1em;
+}
+
+div.bash p {
+  margin: 0;
+  padding: 0 0.3em;
+}

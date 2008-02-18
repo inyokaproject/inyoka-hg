@@ -1339,13 +1339,13 @@ class Box(Element):
         yield build_html_tag(u'div',
             id=self.id,
             style=u' '.join(style),
-            classes=('box', self.class_)
+            classes=(self.class_,)
         )
         if self.title is not None:
             yield build_html_tag(u'h3', class_=self.class_)
             yield escape(self.title)
             yield u'</h3>'
-        yield build_html_tag(u'div', classes=(u'contents', self.class_))
+        yield build_html_tag(u'div', classes=(u'contents',))
         for item in Element.prepare_html(self):
             yield item
         yield u'</div></div>'
