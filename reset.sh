@@ -31,3 +31,6 @@ mkdir ./inyoka/media/planet/icons
 mkdir ./inyoka/media/wiki
 mkdir ./inyoka/media/wiki/attachments
 echo "Created media directories"
+
+python inyoka/scripts/create_templates.py
+echo "Created wiki templates"

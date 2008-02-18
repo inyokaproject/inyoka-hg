@@ -62,8 +62,7 @@ def convert_wiki():
     request.formatter = formatter
     new_page = None
     for name in request.rootpage.getPageList():
-    #for name in ['Analog-TV']:
-        if name == 'Hardwaredatenbank':
+        if 'Hardwaredatenbank' in name or 'Spelling' in name:
             continue
         print name
         page = Page(request, name, formatter=formatter)
@@ -73,7 +72,8 @@ def convert_wiki():
             kwargs = {
                 'note': line.comment,
                 'change_date': datetime.fromtimestamp(version2timestamp(
-                                                     line.ed_time_usecs))
+                                                     line.ed_time_usecs)),
+                'update_meta': False
             }
             data = line.getEditorData(request)
             if data[1] in users:
@@ -85,16 +85,20 @@ def convert_wiki():
 
             if line.action in ('SAVE', 'SAVENEW', 'SAVE/REVERT'):
                 try:
-                    f = file(page.get_rev(rev=int(line.rev))[0])
-                    text = f.read().decode('utf-8')
-                    f.close()
-                except IOError:
-                    new_page.edit(deleted=True, **kwargs)
-                if int(rev_id) == 1:
-                    new_page = InyokaPage.objects.create(name, text=text,
-                                                         **kwargs)
-                else:
-                    new_page.edit(text=text, deleted=False, **kwargs)
+                    try:
+                        f = file(page.get_rev(rev=int(line.rev))[0])
+                        text = f.read().decode('utf-8')
+                        f.close()
+                    except IOError:
+                        new_page.edit(deleted=True, **kwargs)
+                    if int(rev_id) == 1:
+                        new_page = InyokaPage.objects.create(name, text=text,
+                                                             **kwargs)
+                    else:
+                        new_page.edit(text=text, deleted=False, **kwargs)
+                except Exception, e:
+                    print '!' * 100
+                    print e
             elif line.action == 'ATTNEW':
                 att = line.extra
                 att_name = '%s/%s' % (name, att)
@@ -466,12 +470,12 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
-    print 'Converting ikhaya data'
-    convert_ikhaya()
-    print 'Converting pastes'
-    #convert_pastes()
-    print 'Converting wiki data'
-    #convert_wiki()
+    #convert_users()
     print 'Converting forum data'
     #convert_forum()
+    print 'Converting wiki data'
+    convert_wiki()
+    print 'Converting ikhaya data'
+    #convert_ikhaya()
+    print 'Converting pastes'
+    #convert_pastes()

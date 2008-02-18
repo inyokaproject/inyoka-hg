@@ -16,8 +16,21 @@ from MoinMoin.formatter.base import FormatterBase
 class InyokaFormatter(FormatterBase):
     list_depth = 0
 
-    # don't execute dynamic stuff
     def macro(self, macro_obj, name, args):
+        # TODO: Not yet handled are Anmerkung
+        if name == 'Anchor':
+            # The new parser does create human readable anchor names so we
+            # don't need this
+            return u''
+        print name, name in ('Archiviert',)
+        if name in ('Archiviert', 'Ausbaufaehig'):
+            name = 'Wiki/Vorlagen/%s' % name.replace('ae', u'ä')
+            if args:
+                return u'[[Vorlage(%s, %s)]]' % (name, args)
+            else:
+                return u'[[Vorlage(%s)]]' % name
+
+        # the syntax of this macro didn't change
         if args:
             return u'[[%s(%s)]]' % (name, args)
         else:
