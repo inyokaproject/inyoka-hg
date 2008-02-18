@@ -3,22 +3,22 @@
     inyoka.wiki.acl
     ~~~~~~~~~~~~~~~
 
-    This module handles security levels for the wiki. The system uses the
-    wiki storage to store the patterns. Whenever the data is loaded from the
+    This module handles security levels for the wiki.  The system uses the
+    wiki storage to store the patterns.  Whenever the data is loaded from the
     wiki pages that hold access control information the `storage` module
     splits the data already into easy processable data.
 
     This is an important detail because the ACL module knows nothing about the
-    names of the privileges on the frontend. Internally the names of the
+    names of the privileges on the frontend.  Internally the names of the
     privileges are mapped to integer flags.
 
     All previlege functions consume either the privilege flags or the internal
-    short name of the privilege. The shortnames are specified in the
+    short name of the privilege.  The shortnames are specified in the
     `privilege_map` dict and different from the user interface which uses
     translated versions of the variables.
 
     Because metadata is part of a page the views have to check if the metadata
-    changed in a way the user is not allowed to change it. This module
+    changed in a way the user is not allowed to change it.  This module
     provides a function called `test_changes_allowed` that checks for that.
 
 
@@ -74,7 +74,7 @@ privilege_map = {
 
 class PrivilegeTest(object):
     """
-    An instance of this class is passed to all the action templates. Attribute
+    An instance of this class is passed to all the action templates.  Attribute
     access can then be used to check if the current user has a privilege the
     current page.
     """
@@ -94,7 +94,7 @@ class PrivilegeTest(object):
 
 class GroupContainer(object):
     """
-    This class fetches the groups for an user in a lazy way. This is used by
+    This class fetches the groups for an user in a lazy way.  This is used by
     the `get_privilege_flags` to not load groups if they are not used for a
     specific query.
 
@@ -168,7 +168,7 @@ class MultiPrivilegeTest(object):
 def get_privilege_flags(user, page_name, groups=None):
     """
     Return an integer with the privilege flags for a user for the given
-    page name. Like any other page name depending function the page name
+    page name.  Like any other page name depending function the page name
     must be in a normalized state.
 
     :param groups: used internally by the `MultiPrivilegeTest`
@@ -209,7 +209,7 @@ def get_privileges(user, page_name, groups=None):
 
 def has_privilege(user, page_name, privilege, groups=None):
     """
-    Check if a user has a special privilege on a page. If you want to check
+    Check if a user has a special privilege on a page.  If you want to check
     for multiple privileges (for example if you want to display what a user
     can do or not do) you should use `get_privileges` which is faster for
     multiple checks and also returns it automatically as a dict.
@@ -247,7 +247,7 @@ def require_privilege(privilege):
 def test_changes_allowed(user, page_name, old_text, new_text):
     """
     This method returns `True` if the user is allowed to change the text of
-    a page from `old_text` to `new_text`. At the moment this just checks for
+    a page from `old_text` to `new_text`.  At the moment this just checks for
     changed metadata, in the future however it makes sense to also check for
     banned words here.
     """

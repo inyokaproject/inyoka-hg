@@ -15,7 +15,8 @@ from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
-from inyoka.utils.flashing import flash, DEFAULT_FLASH_BUTTONS
+from inyoka.utils.flashing import flash
+from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape, cleanup_html
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
@@ -23,7 +24,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
                                ConfigurationForm, EditUserForm, EditDateForm, \
-                               EditForumForm, EditGroupForm
+                               EditForumForm, EditGroupForm, CreateUserForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
@@ -33,14 +34,6 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum, Privilege
 
 
-IKHAYA_ARTICLE_DELETE_BUTTONS = [
-    {'type': 'submit', 'class': 'message-yes', 'name': 'message-yes',
-     'value': 'Löschen'},
-    {'type': 'submit', 'class': 'message-depublicate',
-     'name': 'message-depublicate', 'value': 'Veröffentlichung aufheben'},
-    {'type': 'submit', 'class': 'message-no', 'name': 'message-no',
-     'value': 'Abbrechen'}
-]
 
 
 @require_manager
@@ -123,14 +116,15 @@ def pages_delete(request, page_key):
         flash(u'Es wurde keine Seite zum löschen ausgewählt.')
     page = StaticPage.objects.get(key=page_key)
     if request.method == 'POST':
-        if 'message-yes' in request.POST:
+        if 'cancel' in request.POST:
+            flash(u'Löschen abgebrochen')
+        else:
             page.delete()
             flash(u'Die Seite „%s“ wurde erfolgreich gelöscht'
                   % escape(page.title))
     else:
-        flash(u'Möchtest du die Seite „%s“ wirklich löschen?'
-              % escape(page.title), dialog=True,
-              dialog_url=href('admin', 'pages', 'delete', page_key))
+        flash(render_template('admin/pages_delete.html', {
+                'page': page}))
     return HttpResponseRedirect(href('admin', 'pages'))
 
 
@@ -210,7 +204,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     """
     Display an interface to let the user create or edit an article.
     If `suggestion_id` is given, the new ikhaya article is based on a special
-    article suggestion made by a user. After saving it, the suggestion will be
+    article suggestion made by a user.  After saving it, the suggestion will be
     deleted automatically.
     """
     def _add_field_choices():
@@ -287,20 +281,22 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
 def ikhaya_article_delete(request, article):
     article = Article.objects.get(slug=article)
     if request.method == 'POST':
-        if 'message-depublicate' in request.POST:
+        if 'unpublish' in request.POST:
             article.public = False
             article.save()
-            flash(u'Die Veröffentlichung des Artikels „%s“ wurde aufgehoben.'
-                  % escape(article.subject))
-        elif 'message-yes' in request.POST:
+            flash(u'Die Veröffentlichung des Artikels „<a href="%s">%s</a>“'
+                  ' wurde aufgehoben.'
+                  % (escape(url_for(article, 'show')), escape(article.subject)))
+        elif 'cancel' in request.POST:
+            flash(u'Löschen des Artikels „<a href="%s">%s</a>“ wurde abgebrochen'
+                  % (escape(url_for(article, 'show')), escape(article.subject)))
+        else:
             article.delete()
             flash(u'Der Artikel „%s“ wurde erfolgreich gelöscht'
                   % escape(article.subject))
     else:
-        flash(u'Möchtest du den Artikel „%s“ wirklich löschen?'
-              % escape(article.subject), dialog=True,
-              dialog_url=url_for(article, 'delete'),
-              dialog_buttons=IKHAYA_ARTICLE_DELETE_BUTTONS)
+        flash(render_template('admin/ikhaya_article_delete.html',
+              {'article': article}))
     return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
@@ -575,7 +571,7 @@ def edit_user(request, username):
             for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
-                        'coordinates_lat', 'gpgkey'):
+                        'coordinates_lat', 'gpgkey', 'email'):
                 setattr(user, key, data[key])
             if data['avatar']:
                 user.save_avatar(data['avatar'])
@@ -646,6 +642,29 @@ def edit_user(request, username):
         'user_groups': groups_joined,
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined]
+    }
+
+
+@templated('admin/new_user.html')
+def new_user(request):
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            u = User.objects.register_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password'],
+                send_mail=data['authenticate']
+            )
+            flash(u'Der Bentuzer „%s“ wurde erfolgreich erstellt'
+                  % escape(data['username']), True)
+            flash(u'Du kannst nun weitere Details bearbeiten')
+            return HttpResponseRedirect(href('admin', 'users', 'edit',
+                                             escape(data['username'])))
+    form = CreateUserForm()
+    return {
+        'form': form
     }
 
 

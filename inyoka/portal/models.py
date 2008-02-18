@@ -34,6 +34,8 @@ from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
 
+
+
 class SubscriptionManager(models.Manager):
     """
     Manager class for the `Subscription` model.
@@ -50,9 +52,9 @@ class SubscriptionManager(models.Manager):
 
 class SessionInfo(models.Model):
     """
-    A special class that holds session information. Not every session
-    automatically has a session info. Basically every user that is
-    active has a session info that is updated every request. The
+    A special class that holds session information.  Not every session
+    automatically has a session info.  Basically every user that is
+    active has a session info that is updated every request.  The
     management functions for this model are in `inyoka.utils.sessions`.
     """
     key = models.CharField(max_length=200, unique=True)
@@ -131,7 +133,7 @@ class PrivateMessage(models.Model):
 class PrivateMessageEntry(models.Model):
     """
     A personal entry for each person who is affected by the private
-    message. This entry can be moved between folders and stores the
+    message.  This entry can be moved between folders and stores the
     read status flag.
     """
     message = models.ForeignKey('PrivateMessage')
@@ -193,8 +195,9 @@ class StaticPage(models.Model):
           unique=True, help_text=u'Wird für die URL verwendet.'\
                                  u' Kann nicht verändert werden.')
     title = models.CharField(u'Titel', max_length=200)
-    content = models.TextField(u'Inhalt', help_text=u'Muss valides XHTML sein.'
-                                          u' Überschriften ab h3 abwärts.')
+    content = models.TextField(u'Inhalt',
+        help_text=(u'Muss valides XHTML sein. Überschriften ab h3 abwärts.')
+    )
 
     class Meta:
         verbose_name = 'statische Seite'

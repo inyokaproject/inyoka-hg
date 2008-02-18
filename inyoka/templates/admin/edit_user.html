@@ -34,7 +34,7 @@
     {% endif %}
 
   <dl>
-  {{ h.render_form(form, 'username', 'is_active', inline=true) }}
+  {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', inline=true) }}
     <dt>Gruppenzugehörigkeiten editieren:</dt>
     <dd>
       <table class="user_groups">
@@ -61,7 +61,7 @@
   <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
   </dl>
   <h4>Persönliche Details von {{ user.username|e }}</h4>
-  {{ h.render_form(form, 'new_password', 'website', 'interests', 'location') }}
+  {{ h.render_form(form, 'website', 'interests', 'location') }}
   <h4>Benachrichtigungs-Einstellungen</h4>
   {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
   <h4>Sonstige Einstellungen</h4>

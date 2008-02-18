@@ -3,7 +3,7 @@
     inyoka.utils.pagination
     ~~~~~~~~~~~~~~~~~~~~~~~
 
-    This file helps creating a pagination. It's able to generate the HTML
+    This file helps creating a pagination.  It's able to generate the HTML
     source and to select the right database entries.
 
     Usage::

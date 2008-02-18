@@ -4,7 +4,7 @@
     ~~~~~~~~~~~~~~~~~~
 
     This mdoule implements an ubunutuusers-phpBB compatible BBCode-Parser
-    that generates `nodes`. Because of a completely different implementation
+    that generates `nodes`.  Because of a completely different implementation
     this parser does not use the `parsertools`.
 
     To get a tree of `nodes` from a bbcode text use this snippet:
@@ -223,8 +223,8 @@ class Parser(object):
 
     def parse_mark(self):
         """
-        Parse [mark]-tags. Because we no longer have the concept of marked
-        text this just renders into a strong node. As a matter of fact it is
+        Parse [mark]-tags.  Because we no longer have the concept of marked
+        text this just renders into a strong node.  As a matter of fact it is
         part of the normal parsing process and thus unhandled inside
         preformatted blocks.
         """
@@ -285,10 +285,10 @@ class Parser(object):
         Parse [list]-tags.
 
         Due to the fact that phpBB has a badly implemented parser we have to
-        cope with some invalid markup here. The definition of a list is not
+        cope with some invalid markup here.  The definition of a list is not
         clear in phpBB and the markup allows some crazy things like using
         lists as pseudo indents because <ul>'s automatically indent due to a
-        left margin. We do not support invalid HTML markup (lists *must*
+        left margin.  We do not support invalid HTML markup (lists *must*
         have list items as children) so we add support for those pseudo items
         by making them a list item.
         """

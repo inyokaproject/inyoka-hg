@@ -14,7 +14,7 @@ from inyoka.wiki.utils import has_conflicts
 
 class PageEditForm(forms.Form):
     """
-    Used in the `do_edit` action for both new and existing pages. The
+    Used in the `do_edit` action for both new and existing pages.  The
     following fields are available:
 
     `text`
@@ -37,18 +37,18 @@ class PageEditForm(forms.Form):
 
 class AddAttachmentForm(forms.Form):
     """
-    Allows the user to upload new attachments. It's used in the `do_attach`
+    Allows the user to upload new attachments.  It's used in the `do_attach`
     action and provides the following fields:
 
     `attachment`
         A file field for the uploaded file.
 
     `filename`
-        The target filename. If this is left blank the original filename
+        The target filename.  If this is left blank the original filename
         is used for the server too.
 
     `override`
-        A checkbox for the override flag. If this is true a filename with
+        A checkbox for the override flag.  If this is true a filename with
         the same name is overridden (A new revision is created)
 
     `text`
@@ -67,7 +67,7 @@ class AddAttachmentForm(forms.Form):
 
 class EditAttachmentForm(forms.Form):
     """
-    A formular for editing existing Attachments. For a more detailed
+    A formular for editing existing Attachments.  For a more detailed
     description, have a look at the AddAttachmentForm.
     """
     attachment = forms.FileField(required=False)

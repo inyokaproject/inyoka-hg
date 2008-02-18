@@ -3,7 +3,7 @@
     inyoka.utils.urls
     ~~~~~~~~~~~~~~~~~
 
-    This module implements unicode aware unicode functions. It also allows
+    This module implements unicode aware unicode functions.  It also allows
     to build urls for different subdomains using the `href` function.
 
 

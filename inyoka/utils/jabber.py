@@ -3,7 +3,7 @@
     inyoka.utils.jabber
     ~~~~~~~~~~~~~~~~~~~
 
-    Helper functions to communicate with the bot. The communication uses
+    Helper functions to communicate with the bot.  The communication uses
     basic XMLRPC.
 
     :copyright: Copyright 2007 by Armin Ronacher.
@@ -20,7 +20,7 @@ _proxy = None
 def send(jid, message, xhtml=True):
     """
     Send a message to a jid.  `message` must be a valid XHTML document as
-    unicode string. If it's not parseable XHTML an `ValueError` is raised.
+    unicode string.  If it's not parseable XHTML an `ValueError` is raised.
 
     If a raw, non xhtml message is wanted you can set `xhtml` to `False`.
 

@@ -132,7 +132,7 @@ def viewtopic(request, topic_slug, page=1):
     """
     Shows a topic, the posts are paginated.
     If the topic has a `hidden` flag, the user gets a nice message that the
-    topic is deleted and is redirected to the topic's forum. Moderators can
+    topic is deleted and is redirected to the topic's forum.  Moderators can
     see these topics.
     """
     t = Topic.objects.get(slug=topic_slug)
@@ -221,7 +221,7 @@ def viewtopic(request, topic_slug, page=1):
 def newpost(request, topic_slug=None, quote_id=None):
     """
     If a user requests the page the first time, there is no POST-data and an
-    empty form is displayed. The action of the form is the view itself.
+    empty form is displayed.  The action of the form is the view itself.
     If `quote_id` is an integer, the standard text is set to a quoted version
     of the post with id = `quote_id`.
     If a user submits the form, POST-data is set, and the form is validated.
@@ -345,7 +345,7 @@ def newtopic(request, slug=None, article=None):
     the forum `slug` if `slug` is a string.
     Else a new discussion for the wiki article `article` is created inside a
     special forum that contains wiki discussions only (see the
-    WIKI_DISCUSSION_FORUM setting). It's title is set to the wiki article's
+    WIKI_DISCUSSION_FORUM setting).  It's title is set to the wiki article's
     name.
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
@@ -537,7 +537,7 @@ def edit(request, post_id):
     """
     The user can edit a post's text or add attachments on this page.
     If the post is the first post of a topic, the user also can edit the
-    polls and the options (e.g. sticky) of the topic.
+    polls and the options (e.g.  sticky) of the topic.
     """
     post = Post.objects.get(id=post_id)
     privileges = get_forum_privileges(request.user, post.topic.forum)
@@ -928,15 +928,17 @@ def delete_post(request, post_id):
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
               u'werden.', success=False)
-    elif 'message-yes' in request.POST:
-        post.delete()
-        flash(u'Der Beitrag %s wurde endgültig gelöscht.' % post_id,
-              success=True)
-    elif not 'message-no' in request.POST:
-        flash(u'Soll der Post %s wirklich endgültig und unwiderruflich '
-              u'gelöscht werden?' % post_id, dialog=True,
-              dialog_url=href('forum', 'post', post_id, 'delete'))
-
+    else:
+        if request.method == 'POST':
+            if 'cancel' in request.POST:
+                flash(u'Der Post „%s“ wurde nicht gelöscht'
+                      % escape(post.title))
+            else:
+                post.delete()
+                flash(u'Der Beitrag %s wurde endgültig gelöscht.'
+                      % post_id, success=True)
+        else:
+            flash(render_template('forum/post_delete.html', {'post': post}))
     return HttpResponseRedirect(url_for(post.topic))
 
 
@@ -979,17 +981,17 @@ def delete_topic(request, topic_slug):
     topic = Topic.objects.get(slug=topic_slug)
     if not have_privilege(request.user, topic.forum, 'moderate'):
         return abort_access_denied(request)
-    if 'message-yes' in request.POST:
-        topic.delete()
-        flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
-              success=True)
-        return HttpResponseRedirect(url_for(topic.forum))
-    elif not 'message-no' in request.POST:
-        flash(u'Das Thema „%s“ wirklich löschen? Dabei gehen alle '
-              u'Beiträge unwiderruflich verloren.' % topic.title,
-            dialog=True,
-            dialog_url=href('forum', 'topic', topic_slug, 'delete')
-        )
+
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash(u'Löschen des Themas „%s“ wurde abgebrochen' % topic.title)
+        else:
+            topic.delete()
+            flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
+                  success=True)
+            return HttpResponseRedirect(url_for(topic.forum))
+    else:
+        flash(render_template('forum/delete_topic.html', {'topic': topic}))
     return HttpResponseRedirect(url_for(topic))
 
 

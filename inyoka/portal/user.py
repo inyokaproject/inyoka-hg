@@ -44,7 +44,7 @@ def get_hexdigest(salt, raw_password):
 
 def check_password(raw_password, enc_password, convert_user=None):
     """
-    Returns a boolean of whether the raw_password was correct. Handles
+    Returns a boolean of whether the raw_password was correct.  Handles
     encryption formats behind the scenes.
     """
     salt, hsh = enc_password.split('$')
@@ -100,7 +100,7 @@ class UserManager(models.Manager):
             password
                 The user's password.
             send_mail
-                For debugging purposes. Wheter to send an activation mail or not.
+                Whether to send an activation mail or not.
                 If *False* the user will be saved as active.
         """
         user = self.create_user(username, email, password)
@@ -109,10 +109,8 @@ class UserManager(models.Manager):
             user.is_active = True
         else:
             user.is_active = False
-
-        if send_mail:
             send_activation_mail(user)
-
+        user.save()
         return user
 
     def logout(self, request):
@@ -135,7 +133,7 @@ class UserManager(models.Manager):
 
     def get_system_user(self):
         """
-        This returns the system user that is controlled by inyoka itself. It
+        This returns the system user that is controlled by inyoka itself.  It
         is the sender for welcome notices, it updates the antispam list and
         is the owner for log entries in the wiki triggered by inyoka itself.
         """
@@ -181,8 +179,6 @@ class User(models.Model):
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
-
-    #XXX: permissions
 
     # the user can access the admin panel
     is_manager = models.BooleanField('Teammitglied (kann ins Admin-Panel)',

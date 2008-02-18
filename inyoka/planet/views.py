@@ -63,7 +63,7 @@ def index(request, page=1):
 @templated('planet/suggest.html', modifier=context_modifier)
 def suggest(request):
     """
-    A Page to suggest a new blog. It just sends an email to the planet
+    A Page to suggest a new blog.  It just sends an email to the planet
     administrators.
     """
     if 'abort' in request.POST:

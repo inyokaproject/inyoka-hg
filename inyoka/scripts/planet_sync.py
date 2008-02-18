@@ -5,7 +5,7 @@
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The ``sync`` function should be called periodically to check for new
-    articles. It checks whether the last syncronization of a blog is more
+    articles.  It checks whether the last syncronization of a blog is more
     than ``PLANET_SYNC_TIME`` ago and updates them.
 
     It'd be ideal if ``sync`` was called every 30 minutes.
@@ -41,7 +41,7 @@ def debug(msg):
 
 def sync():
     """
-    Performs a synchronization. Articles that are already syncronized aren't
+    Performs a synchronization.  Articles that are already syncronized aren't
     touched anymore.
     """
     debug('debugging enabled')

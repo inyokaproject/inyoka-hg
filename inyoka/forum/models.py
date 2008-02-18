@@ -145,7 +145,7 @@ class TopicManager(models.Manager):
     def by_forum(self, forum_id):
         """
         Return a django query object with all threads inside a forum.
-        Topics that are sticky are placed at the beginning. The remaining
+        Topics that are sticky are placed at the beginning.  The remaining
         ones are ordered by last_post.
         """
         return Topic.objects.filter(forum__id=forum_id)
@@ -456,7 +456,7 @@ class PollManager(models.Manager):
             options
                 The list of ids of the poll options the user votes for
             polls
-                A list of the polls containing `polls`. The user will not be
+                A list of the polls containing `polls`.  The user will not be
                 able to vote in these polls anymore.
         """
         cur = connection.cursor()
@@ -563,10 +563,10 @@ class Forum(models.Model):
     """
     This is a forum that may contain subforums or threads.
     If parent is None this forum is a root forum, else it's a subforum.
-    Position is an integer that's used to sort the forums. The lower position
+    Position is an integer that's used to sort the forums.  The lower position
     is, the higher the forum is displayed.
     if `offtopic` is True, this forum isn't displayed in the normal forum
-    index but in the talk index. This property is automatically set when
+    index but in the talk index.  This property is automatically set when
     creating a new forum inside an offtopic one.
     """
     objects = ForumManager()
@@ -1033,7 +1033,7 @@ class Attachment(models.Model):
     `name`
         The name of the attachment.
     `post`
-        The post the attachment belongs to. It may be NULL if the attachment
+        The post the attachment belongs to.  It may be NULL if the attachment
         belongs to a post that is not yet created.
     """
     objects = AttachmentManager()
@@ -1060,9 +1060,9 @@ class Attachment(models.Model):
     @property
     def contents(self):
         """
-        The raw contents of the file. This is usually unsafe because
+        The raw contents of the file.  This is usually unsafe because
         it can cause the memory limit to be reached if the file is too
-        big. However this limitation currently affects the whole django
+        big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
         """
         f = self.open()
@@ -1075,7 +1075,7 @@ class Attachment(models.Model):
     def html_representation(self):
         """
         This method returns a `HTML` representation of the attachment for the
-        `show_action` page. If this method does not know about an internal
+        `show_action` page.  If this method does not know about an internal
         representation for the object the return value will be an download
         link to the raw attachment.
         """
@@ -1090,7 +1090,7 @@ class Attachment(models.Model):
 
     def open(self, mode='rb'):
         """
-        Open the file as file descriptor. Don't forget to close this file
+        Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
         return file(self.get_file_filename(), mode)
@@ -1139,8 +1139,8 @@ class Privilege(models.Model):
 class WelcomeMessage(models.Model):
     """
     This class can be used, to attach additional Welcome-Messages to
-    a category or forum. That might be usefull for greeting the users or
-    explaining extra rules. The message will be displayed only once for
+    a category or forum.  That might be usefull for greeting the users or
+    explaining extra rules.  The message will be displayed only once for
     each user.
     """
     title = models.CharField(max_length=120)

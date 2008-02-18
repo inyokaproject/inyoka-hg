@@ -3,7 +3,7 @@ r"""
     inyoka.wiki.templates
     ~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements the templating language for the Wiki. It's a
+    This module implements the templating language for the Wiki.  It's a
     very simple language with some syntax elements taken from both Python
     and PHP.
 
@@ -347,8 +347,12 @@ class Parser(object):
         elif self.stream.test('raw'):
             item = Value(self.stream.current.value)
             self.stream.next()
+        elif self.stream.test('number'):
+            item = Value(float(self.stream.current.value))
+            self.stream.next()
         else:
-            return node
+            raise TemplateSyntaxError(u'Variable, Zahl oder Attribut '
+                                      u'erwartet.')
         return GetItem(node, item)
 
     def subparse(self, test, drop_needle=True):
@@ -397,7 +401,7 @@ class Parser(object):
 
 class TemplateSyntaxError(Exception):
     """
-    Helper for the parser. Translates into a node in the parsing process.
+    Helper for the parser.  Translates into a node in the parsing process.
     """
 
     def __init__(self, message):

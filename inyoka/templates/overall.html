@@ -126,20 +126,9 @@
       {%- endif %}
 
       {%- for message in MESSAGES %}
-      {%- if message.dialog %}
-      <form class="message" action="{% if message.dialog_url != none %}{{ message.dialog_url }}{% else %}{{ CURRENT_URL }}{% endif %}" method="post">
-        <p>{{ message.text }}</p>
-        <p>
-          {% for button in message.dialog_buttons %}
-          <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
-          {% endfor %}
-        </p>
-      </form>
-      {%- else %}
       <div class="message{% if message.success == true %} success{% elif message.success == false %} fail{% endif %}">
         {{ message.text }}
       </div>
-      {%- endif %}
       {%- endfor %}
 
       <div class="page_content">

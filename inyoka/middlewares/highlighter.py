@@ -8,21 +8,21 @@
 
     Keep in mind that this middleware does not stem the searchwords thus the
     number of highlighed words can (and will) be different from the number of
-    matches in the original document. To improve that this highilghter
+    matches in the original document.  To improve that this highilghter
     accepts some more word characters after the match to complete the
-    highlighted word. So ``'complet'`` highlighlights both ``'completion'``
+    highlighted word.  So ``'complet'`` highlighlights both ``'completion'``
     and ``'complete'`` but not ``'autocomplete'``.
 
     This middleware does not highlight within ``script``, ``textarea``,
-    ``style``, and ``head``. The ``head`` section is excluded because it's
+    ``style``, and ``head``.  The ``head`` section is excluded because it's
     invisible for one and contains pseudo displayed elements like ``title``
     that could cause unexpected results when highlighted.
 
-    This uses the `flashing` capabilities of inyoka. Keep in mind that this
+    This uses the `flashing` capabilities of inyoka.  Keep in mind that this
     sort of highlighting is quite expensive compared to a normal request.
     Maybe we can find a better solution in the future that doesn't split
-    and ressamble the text. This also evaluates dynamic requests into a
-    plain string. Thus if you have a request that uses streaming it will
+    and ressamble the text.  This also evaluates dynamic requests into a
+    plain string.  Thus if you have a request that uses streaming it will
     be buffered and then processed.
 
 
@@ -51,15 +51,15 @@ def _handle_match(match):
 
 class HighlighterMiddleware(object):
     """
-    Highlight searchwords. And flash a message that allows to disable the
+    Highlight searchwords.  And flash a message that allows to disable the
     highlighting again.
     """
 
     def process_request(self, request):
         """
         During request processing we check either if there is a "highlight"
-        parameter in the query string. If not we check the referrer for a
-        "q" or "query" parameter. If any of the parameters have a proper
+        parameter in the query string.  If not we check the referrer for a
+        "q" or "query" parameter.  If any of the parameters have a proper
         value it's whitespace splitted and the search words are saved on
         the request object.
         """

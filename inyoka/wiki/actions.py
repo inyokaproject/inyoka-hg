@@ -3,16 +3,16 @@
     inyoka.wiki.actions
     ~~~~~~~~~~~~~~~~~~~
 
-    This module contains all the actions for the wiki. Actions are bound
-    to a page and change the default display for a page. Per default the
+    This module contains all the actions for the wiki.  Actions are bound
+    to a page and change the default display for a page.  Per default the
     action is 'show' and displays the most recent revision or the revision
-    provided in the URL. Other actions are 'edit', 'delete', 'info',
+    provided in the URL.  Other actions are 'edit', 'delete', 'info',
     'diff' etc.
 
     All actions are passed normalized page names because the view function
-    that dispatches action ensures that. If however actions are called from
+    that dispatches action ensures that.  If however actions are called from
     a source that deals with user submitted data all page names *must* be
-    normalized. The database models do not do this on their own!
+    normalized.  The database models do not do this on their own!
 
 
     :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack,
@@ -48,7 +48,7 @@ def context_modifier(request, context):
     """
     If a key called ``'page'`` that points to a page object is part of the
     context this modifier will hook a `PrivilegeTest` for the current user
-    and that page into the request (called ``can``). Then the templates
+    and that page into the request (called ``can``).  Then the templates
     can test for privileges this way::
 
         {% if can.read %}...{% endif %}
@@ -65,11 +65,11 @@ def context_modifier(request, context):
 @templated('wiki/action_show.html', modifier=context_modifier)
 def do_show(request, name):
     """
-    Show a given revision or the most recent one. This action requires the
-    read privilege. If a page does not exist yet and no revision was provided
+    Show a given revision or the most recent one.  This action requires the
+    read privilege.  If a page does not exist yet and no revision was provided
     in the URL it will call `do_missing_page` and return that output.
 
-    Otherwise the page from the database is loaded and displayer. Because it
+    Otherwise the page from the database is loaded and displayer.  Because it
     does not catch not found exceptions the `views.show_page` function that
     dispatches the actions automatically renders a missing resource.
 
@@ -78,8 +78,8 @@ def do_show(request, name):
 
     **Context**
         ``page``
-            the bound `Page` object that should be shown. Because it's bound
-            the `rev` attribute points to the requested revision. Note that
+            the bound `Page` object that should be shown.  Because it's bound
+            the `rev` attribute points to the requested revision.  Note that
             deleted pages must not be handled in the template because the view
             automatically dispatches to `do_missing_page` if a revision is
             maked as deleted.
@@ -115,9 +115,9 @@ def do_show(request, name):
 @require_privilege('read')
 def do_metaexport(request, name):
     """
-    Export metadata as raw text. This exists mainly for debugging reasons but
+    Export metadata as raw text.  This exists mainly for debugging reasons but
     it could make sense for external scripts too that want to get a quick list
-    of backlinks etc. Like the `do_show` action this requires read access to
+    of backlinks etc.  Like the `do_show` action this requires read access to
     the page.
     """
     page = Page.objects.get_by_name(name)
@@ -145,7 +145,7 @@ def do_missing_page(request, name, _page=None):
             The title of that page.
 
         ``similar``
-            List of pages with a similar name. The list contains some dicts
+            List of pages with a similar name.  The list contains some dicts
             with ``name`` and ``title`` items.
 
         ``backlinks``
@@ -280,8 +280,8 @@ def do_rename(request, name):
 @templated('wiki/action_edit.html', modifier=context_modifier)
 def do_edit(request, name):
     """
-    Edit or create a wiki page. If the page is an attachment this displays a
-    form to update the attachment next to the description box. If it's a
+    Edit or create a wiki page.  If the page is an attachment this displays a
+    form to update the attachment next to the description box.  If it's a
     normal page or no page yet this just displays a text box for the page
     text and an input field for the change note.
 
@@ -293,7 +293,7 @@ def do_edit(request, name):
             The name of the page that is edited.
 
         ``page``
-            The `Page` object of the page that is edited. This only exists
+            The `Page` object of the page that is edited.  This only exists
             if a page is edited, not if a page is created.
 
         ``form``
@@ -465,10 +465,10 @@ def do_log(request, name):
     **Context**
         ``page``
             The `Page` object this template action renders the revision
-            log of. It's unbound thus the `rev` attribute is `None`.
+            log of.  It's unbound thus the `rev` attribute is `None`.
 
         ``revisions``
-            The list of revisions ordered by date. The newest revision
+            The list of revisions ordered by date.  The newest revision
             first.
     """
     try:
@@ -575,7 +575,7 @@ def do_export(request, name):
     ``HTML``        yes     yes     The wiki markup converted to HTML4.
     ``Docbook``     yes     yes     The wiki markup converted to docbook.
     ``AST``         yes     no      The wiki markup as internal abstract
-                                    syntax tree. Useful for debugging.
+                                    syntax tree.  Useful for debugging.
     =============== ======= ==================================================
 
 
@@ -637,7 +637,7 @@ def do_attach(request, name):
 
         ``attachments``
             A list of `Page` objects that are attachments and below this
-            page. They all have a proper attachment attributes which is
+            page.  They all have a proper attachment attributes which is
             an `Attachment`.
 
         ``form``
