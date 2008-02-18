@@ -22,7 +22,6 @@ class InyokaFormatter(FormatterBase):
             # The new parser does create human readable anchor names so we
             # don't need this
             return u''
-        print name, name in ('Archiviert',)
         if name in ('Archiviert', 'Ausbaufaehig'):
             name = 'Wiki/Vorlagen/%s' % name.replace('ae', u'ä')
             if args:
