@@ -347,8 +347,12 @@ class Parser(object):
         elif self.stream.test('raw'):
             item = Value(self.stream.current.value)
             self.stream.next()
+        elif self.stream.test('number'):
+            item = Value(float(self.stream.current.value))
+            self.stream.next()
         else:
-            return node
+            raise TemplateSyntaxError(u'Variable, Zahl oder Attribut '
+                                      u'erwartet.')
         return GetItem(node, item)
 
     def subparse(self, test, drop_needle=True):
