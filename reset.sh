@@ -1,7 +1,10 @@
 #!/bin/bash
 DBNAME=$(python -c 'from django.conf import settings; print settings.DATABASE_NAME')
-django-admin.py dbshell <<EOF
+DBUSER=$(python -c 'from django.conf import settings; print settings.DATABASE_USER')
+mysql -u$DBUSER <<EOF
 	drop database ${DBNAME};
+EOF
+mysql -u$DBUSER <<EOF
 	create database ${DBNAME};
 EOF
 django-admin.py syncdb --noinput

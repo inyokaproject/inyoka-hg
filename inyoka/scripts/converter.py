@@ -306,6 +306,7 @@ def convert_forum():
         # To work around the overwritten objects.create method...
         t = Topic(**data)
         t.save()
+        connection.queries = []
     print 'Converting posts'
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
@@ -325,6 +326,7 @@ def convert_forum():
         }
         p = Post(**data)
         p.save()
+        connection.queries = []
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
@@ -376,7 +378,7 @@ def convert_ikhaya():
         if parser == 'markdown':
             return markdown(text)
         if parser == 'textile':
-            return textile(text)
+            return textile(text.encode('utf-8')).decode('utf-8')
         if parser == 'autobr':
             return linebreaks(text)
         if parser == 'xhtml':
@@ -389,18 +391,25 @@ def convert_ikhaya():
     category_table = Table('ikhaya_categories', meta, autoload=True)
     article_table = Table('ikhaya_entries', meta, autoload=True)
     comment_table = Table('ikhaya_comments', meta, autoload=True)
-    icon_table = Table('ikhaya_icons', meta, autoload=True)
+    icon_table = Table('static_images', meta, autoload=True)
+    user_table = Table('auth_users', meta, autoload=True)
 
     # contains a mapping of old_user_id -> new_user_id
     user_mapping = {}
     force = {
+        'tux123': 'tux21b',
+
     }
     for user in select_blocks(user_table.select()):
         if user.username in force:
             name = force[user.username]
         else:
             name = user.username
-        user_mapping[user.id] = User.objects.get(username=name).id
+        try:
+            user_mapping[user.id] = User.objects.get(username=name).id
+        except User.DoesNotExist:
+            print u'Not able to find user', name, u'using anonymous instead'
+            user_mapping[user.id] = 1
 
     category_mapping = {}
     for data in category_table.select().execute():
@@ -412,13 +421,15 @@ def convert_ikhaya():
         article = Article(
             subject=data.subject,
             pub_date=data.pub_date,
-            author_id=user_mapping[data.user_id],
-            intro=data.intro,
-            text=render_article(data.text),
+            author_id=user_mapping[data.author_id],
+            intro=render_article(data.intro, data.parser),
+            text=render_article(data.text, data.parser),
             public=data.public,
             category=category_mapping[data.category_id],
+            is_xhtml=1
         )
         article.save()
+        connection.queries = []
 
 
 def convert_pastes():
@@ -447,18 +458,19 @@ def convert_pastes():
             lang=lang,
             code=paste.code,
             pub_date=paste.date,
-            author=anonymous
+            author=anonymous,
+            id=paste.id
         ).save()
         connection.queries = []
 
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    convert_pastes()
+    #convert_pastes()
     print 'Converting wiki data'
     #convert_wiki()
     print 'Converting forum data'
