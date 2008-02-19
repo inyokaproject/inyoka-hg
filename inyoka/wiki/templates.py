@@ -168,7 +168,7 @@ class Parser(object):
                 else_block = self.subparse(lambda:
                                            self.stream.test('raw', 'endif'),
                                            drop_needle=False)
-            elif self.stream.test('raw', 'elif'):
+            elif self.stream.test('raw', 'elseif'):
                 self.stream.next()
                 expr = self.parse_expression()
                 if not self.stream.test('tag_end'):
@@ -179,9 +179,8 @@ class Parser(object):
                              self.stream.test('raw', ('endif', 'elseif')),
                              drop_needle=False)))
                 continue
-            else:
-                self.stream.next()
             break
+        self.stream.next()
         if not self.stream.test('tag_end'):
             raise TemplateSyntaxError(u'„endif“ erlaubt keine Argumente.')
         self.stream.next()
@@ -210,7 +209,7 @@ class Parser(object):
         while self.stream.test('raw', functions):
             func = BINARY_FUNCTIONS[self.stream.current.value]
             self.stream.next()
-            left = BinaryFunction(left, self.parse_test(), func)
+            left = BinaryFunction(left, self.parse_convert(), func)
         return left
 
     def parse_convert(self):
