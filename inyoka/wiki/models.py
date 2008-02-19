@@ -91,7 +91,7 @@ from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils import deferred
 from inyoka.utils.dates import format_specific_datetime, format_datetime
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
@@ -465,7 +465,7 @@ class PageManager(models.Manager):
 
     def create(self, name, text, user=None, change_date=None,
                note=None, attachment=None, attachment_filename=None,
-               deleted=False, remote_addr=None):
+               deleted=False, remote_addr=None, update_meta=True):
         """
         Create a new wiki page.  Always use this method to create pages,
         never the `Page` constructor which doesn't create the revision and
@@ -520,6 +520,10 @@ class PageManager(models.Manager):
                 the active request object.  This decision was made so that no
                 confusion comes up when creating page objects in the context
                 of a request that are not affiliated with the user.
+            update_meta
+                This is a boolean that defines whether metadata should be
+                updated or not. It's useful to disable this for converter
+                scripts.
         """
         page = Page(name=name)
         if change_date is None:
@@ -545,7 +549,8 @@ class PageManager(models.Manager):
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
         page.rev.save()
-        page.update_meta()
+        if update_meta:
+            page.update_meta()
         return page
 
 
@@ -913,7 +918,7 @@ class Page(models.Model):
             self.rev.text.prune()
         deferred.clear(self)
 
-    def save(self):
+    def save(self, update_meta=True):
         """
         This not only saves the page but also a revision that is
         bound to the page object.  If you don't want to save the
@@ -938,7 +943,8 @@ class Page(models.Model):
 
         if self.rev is not None:
             self.rev.save()
-        self.update_meta()
+        if update_meta:
+            self.update_meta()
 
         deferred.clear(self)
 
@@ -962,7 +968,7 @@ class Page(models.Model):
 
     def edit(self, text=None, user=None, change_date=None,
              note=u'', attachment=None, attachment_filename=None,
-             deleted=None, remote_addr=None):
+             deleted=None, remote_addr=None, update_meta=True):
         """
         This saves outstanding changes and creates a new revision which is
         then attached to the `rev` attribute.
@@ -1012,6 +1018,10 @@ class Page(models.Model):
                 the active request object.  This decision was made so that no
                 confusion comes up when creating page objects in the context
                 of a request that are not affiliated with the user.
+            update_meta
+                This is a boolean that defines whether metadata should be
+                updated or not. It's useful to disable this for converter
+                scripts.
         """
         try:
             rev = self.revisions.latest()
@@ -1047,7 +1057,7 @@ class Page(models.Model):
                             change_date=change_date, note=note,
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
-        self.save()
+        self.save(update_meta=update_meta)
         if (deleted and rev and not rev.deleted) or \
            (not deleted and rev and rev.deleted):
             cache.delete('wiki/object_list')

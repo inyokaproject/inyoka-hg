@@ -1,7 +1,10 @@
 #!/bin/bash
 DBNAME=$(python -c 'from django.conf import settings; print settings.DATABASE_NAME')
-django-admin.py dbshell <<EOF
+DBUSER=$(python -c 'from django.conf import settings; print settings.DATABASE_USER')
+mysql -u$DBUSER <<EOF
 	drop database ${DBNAME};
+EOF
+mysql -u$DBUSER <<EOF
 	create database ${DBNAME};
 EOF
 django-admin.py syncdb --noinput
@@ -21,6 +24,8 @@ python -c 'import xapian; from django.conf import settings; xapian.WritableDatab
 # create the media folders
 rm -Rf ./inyoka/media
 mkdir ./inyoka/media
+mkdir ./inyoka/media/portal
+mkdir ./inyoka/media/portal/avatars
 mkdir ./inyoka/media/forum
 mkdir ./inyoka/media/forum/attachments
 mkdir ./inyoka/media/planet
@@ -28,3 +33,6 @@ mkdir ./inyoka/media/planet/icons
 mkdir ./inyoka/media/wiki
 mkdir ./inyoka/media/wiki/attachments
 echo "Created media directories"
+
+python inyoka/scripts/create_templates.py
+echo "Created wiki templates"
