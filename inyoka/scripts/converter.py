@@ -519,17 +519,17 @@ def convert_pastes():
 
 
 if __name__ == '__main__':
+    print 'Converting wiki data'
+    convert_wiki()
+    print 'Converting ikhaya data'
+    convert_ikhaya()
+    print 'Converting pastes'
+    convert_pastes()
     print 'Converting users'
     convert_users()
     print 'Converting groups'
     convert_groups()
     print 'Converting forum data'
     convert_forum()
-    print 'Converting wiki data'
-    convert_wiki()
-    print 'Converting ikhaya data'
-    convert_ikhaya()
     print 'Converting attachments'
     convert_attachments()
-    print 'Converting pastes'
-    convert_pastes()
