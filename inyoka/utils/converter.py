@@ -21,6 +21,7 @@ class InyokaFormatter(FormatterBase):
         if name in ['Anchor', 'Diskussion']:
             # The new parser does create human readable anchor names so we
             # don't need this
+            # TODO: Do something for discussoin
             return u''
 
         replacements = {
@@ -36,7 +37,7 @@ class InyokaFormatter(FormatterBase):
             return u'# X-Tags: ' + args
 
         elif name in templates.keys() or name == 'Ausbaufaehig':
-            if name == 'Pakete', 'Getestet', 'InArbeit':
+            if name in ('Pakete', 'Getestet', 'InArbeit'):
                 args = [a.strip() for a in args.split(',')]
             else:
                 args = args and [args] or []

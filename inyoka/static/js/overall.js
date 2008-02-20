@@ -4,7 +4,7 @@
  *
  * Some general scripts for the whole portal (requires jQuery).
  *
- * :copyright: 2007 by Christoph Hack, Armin Ronacher.
+ * :copyright: 2007 by Christoph Hack, Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
 
@@ -143,13 +143,13 @@ $(document).ready(function() {
     var [apt, aptitude] = $('.bash', elm);
     $(aptitude).hide();
     $($('p', elm)[0]).append(
-      $('<a href="#">apt-get</a>').click(function() {
+      $('<a>apt-get</a>').click(function() {
         $(this).parent().children().css('font-weight', '');
         $(this).css('font-weight', 'bold');
         $(apt).show();
         $(aptitude).hide();
       }).click(), ' ',
-      $('<a href="#">aptitude</a>').click(function() {
+      $('<a>aptitude</a>').click(function() {
         $(this).parent().children().css('font-weight', '');
         $(this).css('font-weight', 'bold');
         $(aptitude).show();

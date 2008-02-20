@@ -24,23 +24,28 @@ Anleitung wird vom Wiki-Team weder auf Richtigkeit überprüft
 noch anderweitig gepflegt. Zusätzlich wurde der Artikel für
 weitere Änderungen gesperrt.%s
 |}}""" % note,
-    u'Ausbaufähig': u"""{{|<title="Ausbaufähige Anleitung">
+    u'Ausbaufähig': u"""{{|<title="Ausbaufähige Anleitung"
+                            class="box improvable">
 Dieser Anleitung fehlen noch einige Informationen. Wenn Du etwas
 verbessern kannst, dann editiere den Beitrag, um die Qualität
 des Wikis noch weiter zu verbessern.%s
 |}}""" % note,
-    u'Fehlerhaft': u"""{{|<title="Fehlerhafte Anleitung">
+    u'Fehlerhaft': u"""{{|<title="Fehlerhafte Anleitung"
+                           class="box fixme">
 Diese Anleitung ist fehlerhaft. Wenn du weißt, wie du sie
 ausbessern kannst, nimm dir bitte die Zeit und bessere sie aus.%s
 |}}""" % note,
-    u'Fortgeschritten': u"""{{|<title="Artikel für fortgeschrittene \
-Anwender">
+    u'Fortgeschritten': u"""{{|<title="Artikel für fortgeschrittene Anwender"
+                                class="box advanced">
 Dieser Artikel erfordert mehr Erfahrung im Umgang mit
 Linux und ist daher nur für fortgeschrittene Benutzer
 gedacht.
 |}}""",
-    u'Getestet': u"""{{|<title="Dieser Artikel wurde für die folgenden \
-Ubuntu-Versionen getestet:">
+    u'Getestet': u"""{{|<title="Dieser Artikel wurde für die folgenden
+Ubuntu-Versionen getestet:" class="box tested_for">
+<@ if $arguments contain 'general' @>
+Dieser Artikel ist größtenteils für alle Ubuntu-Versionen gültig.
+<@ else @>
 <@ if $arguments contain 'dapper' @>
   * [:Ubuntu_Dapper_Drake:Ubuntu Dapper Drake 6.06]
 <@ endif @><@ if $arguments contain 'edgy' @>
@@ -50,8 +55,10 @@ Ubuntu-Versionen getestet:">
 <@ endif @><@ if $arguments contain 'gutsy' @>
   * [:Ubuntu_Gutsy_Gibbon:Ubuntu Gutsy Gibbon 7.10]
 <@ endif @>
+<@ endif @>
 |}}""",
-    u'Verlassen': u"""{{|<title="Verlassene Anleitung">
+    u'Verlassen': u"""{{|<title="Verlassene Anleitung"
+                          class="box left">
 Dieser Artikel wurde von seinem Ersteller verlassen und wird
 nicht mehr weiter von ihm gepflegt. Wenn Du den Artikel
 fertigstellen oder erweitern kannst, dann bessere ihn bitte aus.%s

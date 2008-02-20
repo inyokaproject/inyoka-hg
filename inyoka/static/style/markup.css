@@ -2,30 +2,11 @@
  * syle.wiki
  * ~~~~~~~~~
  *
- * This is the style for the wiki marup.
+ * This is the stylesheet for the wiki marup.
  * 
  * :copyright: 2007 by Benjamin Wiegand.
  * :license: GNU GPL.
  */
-
-div.box {
-  clear: both;
-  margin: 0.5em 1em;
-  border: 1px solid #bbb;
-}
-
-div.box h3 {
-  margin: 0;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: white;
-  background-color: #bbb;
-  padding: 0 1em;
-}
-
-div.box div.contents {
-  padding: 0.5em 1em;
-}
 
 div.bash {
   color: white;
@@ -40,3 +21,65 @@ div.bash p {
   margin: 0;
   padding: 0 0.3em;
 }
+
+/* Boxes of page templates */
+
+div.box {
+  clear: both;
+  margin: 0.5em 1em;
+  border: 1px solid #bbb;
+}
+
+.box div.contents {
+  padding: 0.5em 1em;
+}
+
+div.box h3 {
+  margin: 0;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: white;
+  background-color: #bbb;
+  padding: 0 1em;
+}
+
+div.improvable {
+  border: 1px solid #73A76F;
+}
+
+div.improvable h3 {
+  background-color: #73A76F;
+}
+
+div.fixme {
+  border: 1px solid #D40000;
+}
+
+div.fixme h3 {
+  background-color: #D40000;
+}
+
+div.advanced {
+  border: 1px solid #708090;
+}
+
+div.advanced h3 {
+  background-color: #708090;
+}
+
+div.tested_for {
+  border: 1px solid #4A9596;
+}
+
+div.tested_for h3 {
+  background-color: #4A9596;
+}
+
+div.left {
+  border: 1px solid #3E6E58;
+}
+
+div.left h3 {
+  background-color: #3E6E58;
+}
+

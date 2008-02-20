@@ -57,11 +57,13 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser
     from inyoka.utils.converter import InyokaFormatter
+    from _mysql_exceptions import IntegrityError
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    for name in request.rootpage.getPageList():
+    #for name in request.rootpage.getPageList():
+    for name in ['64bit-Architektur']:
         if 'Hardwaredatenbank' in name or 'Spelling' in name:
             continue
         print name
@@ -91,8 +93,14 @@ def convert_wiki():
                 except IOError:
                     new_page.edit(deleted=True, **kwargs)
                 if int(rev_id) == 1:
-                    new_page = InyokaPage.objects.create(name, text=text,
-                                                         **kwargs)
+                    try:
+                        new_page = InyokaPage.objects.create(name, text=text,
+                                                             **kwargs)
+                    except IntegrityError, e:
+                        # TODO
+                        name = u'DuplicatePages/%s' % name
+                        new_page = InyokaPage.objects.create(name, text=text,
+                                                             **kwargs)
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
@@ -132,6 +140,7 @@ def convert_wiki():
         formatter.setPage(page)
         parser = Parser(text, request)
         text = request.redirectedOutput(parser.format, formatter)
+        print text
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
 
