@@ -3,7 +3,7 @@
     inyoka.utils.services
     ~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements a simple dispatcher for services. Applications
+    This module implements a simple dispatcher for services.  Applications
     can still write their own but for 99% of the time this should work.
 
 

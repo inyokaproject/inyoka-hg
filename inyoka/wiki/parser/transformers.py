@@ -3,7 +3,7 @@
     inyoka.wiki.parser.transformers
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    This module holds ast transformers we use. Transformers can assume that
+    This module holds ast transformers we use.  Transformers can assume that
     they always operate on complete trees, thus the outermost node is always
     a container node.
 
@@ -46,8 +46,8 @@ class Transformer(object):
 
     def transform(self, tree):
         """
-        This is passed a tree that should be processed. A class can modify
-        a tree in place, the return value has to be the tree then. Otherwise
+        This is passed a tree that should be processed.  A class can modify
+        a tree in place, the return value has to be the tree then.  Otherwise
         it's safe to return a new tree.
         """
         return tree
@@ -125,7 +125,7 @@ class AutomaticParagraphs(Transformer):
 
 class GermanTypography(Transformer):
     """
-    This class enables German typography for a tree. Basically simple inch
+    This class enables German typography for a tree.  Basically simple inch
     signs and other quotes are replaced with typographically correct quotes.
     """
 
@@ -193,7 +193,7 @@ class SmileyInjector(Transformer):
 class FootnoteSupport(Transformer):
     """
     Looks for footnote nodes, gives them an unique id and moves the
-    text to the bottom into a list. Without this translator footnotes
+    text to the bottom into a list.  Without this translator footnotes
     are just <small>ed and don't have an id.
     """
 
@@ -219,9 +219,9 @@ class FootnoteSupport(Transformer):
 class HeadlineProcessor(Transformer):
     """
     This transformer looks at all headlines and makes sure that every ID is
-    unique. If one id clashes with another headline ID a numeric suffix is
-    added. What this transformer does not do is resolving clashes with
-    footnotes or other references. At least not by now because such clashes
+    unique.  If one id clashes with another headline ID a numeric suffix is
+    added.  What this transformer does not do is resolving clashes with
+    footnotes or other references.  At least not by now because such clashes
     are very unlikely.
     """
 
@@ -242,8 +242,8 @@ class HeadlineProcessor(Transformer):
 
 class AutomaticStructure(Transformer):
     """
-    This transformer adds additional structure information. Each headline
-    adds either a new section or subsection depending on its level. This is
+    This transformer adds additional structure information.  Each headline
+    adds either a new section or subsection depending on its level.  This is
     required for docbook, but might be useful for HTML too, if you want to
     indent paragraphs depending on their level.
     """

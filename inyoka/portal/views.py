@@ -53,6 +53,8 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, deactivate_user
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 
+
+
 @templated('errors/404.html')
 def not_found(request, err_message=None):
     return {
@@ -727,8 +729,6 @@ def usermap(request):
 
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
-    #_dbg = open('/tmp/dbg', 'w')
-    #def dbg(t): _dbg.write('%s\n\n' % t)
     r = {'app': app}
 
     if app == 'forum':
@@ -817,8 +817,6 @@ def feedselector(request, app=None):
 
     r['forums'] = Forum.objects.all()
     r['ikhaya_categories'] = Category.objects.all()
-    #dbg(`r`)
-    #_dbg.close()
     return r
 
 
@@ -854,6 +852,7 @@ def about_inyoka(request):
     set_session_info(request, u'informiert sich über <a href="%s">'
                      u'Inyoka</a>' % href('portal', 'inyoka'))
 
+
 @templated('portal/calendar_month.html')
 def calendar_month(request, year, month):
     year = int(year)
@@ -870,6 +869,7 @@ def calendar_month(request, year, month):
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
 
+
 @templated('portal/calendar_overview.html')
 def calendar_overview(self):
     events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
@@ -880,6 +880,7 @@ def calendar_overview(self):
         'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
         'WEEKDAYS': dict(enumerate(WEEKDAYS)),
     }
+
 
 @templated('portal/calendar_detail.html')
 def calendar_detail(self, slug):

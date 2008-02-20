@@ -3,8 +3,8 @@
     inyoka.middlewares.registry
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements a per request registry. This allows use to use the
-    special `r` variable in the base module. It also imports all applications
+    This module implements a per request registry.  This allows use to use the
+    special `r` variable in the base module.  It also imports all applications
     so that boostrapping code is executed.
 
     :copyright: Copyright 2007 by Armin Ronacher

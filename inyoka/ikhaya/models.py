@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import random
+import xapian
 from datetime import datetime
 from django.db import models, connection
 from django.core.cache import cache
@@ -230,8 +231,10 @@ class Article(models.Model):
         """
         Deletes the xapian document
         """
-        Document(self.xapian_docid).delete()
+        id = self.id
         super(Article, self).delete()
+        # update search
+        IkhayaSearchAdapter.queue(id)
 
     class Meta:
         verbose_name = 'Artikel'

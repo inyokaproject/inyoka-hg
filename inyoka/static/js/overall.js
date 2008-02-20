@@ -4,7 +4,7 @@
  *
  * Some general scripts for the whole portal (requires jQuery).
  *
- * :copyright: 2007 by Christoph Hack, Armin Ronacher.
+ * :copyright: 2007 by Christoph Hack, Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
 
@@ -137,4 +137,26 @@ $(document).ready(function() {
       submitted = true;
     });
   })();
+
+  // add links to the "package" macro
+  $('.package-list').each(function(i, elm) {
+    var [apt, aptitude] = $('.bash', elm);
+    $(aptitude).hide();
+    $($('p', elm)[0]).append(
+      $('<a>apt-get</a>').click(function() {
+        $(this).parent().children().css('font-weight', '');
+        $(this).css('font-weight', 'bold');
+        $(apt).show();
+        $(aptitude).hide();
+      }).click(), ' ',
+      $('<a>aptitude</a>').click(function() {
+        $(this).parent().children().css('font-weight', '');
+        $(this).css('font-weight', 'bold');
+        $(aptitude).show();
+        $(apt).hide();
+      }), ' ',
+      $('<a>apturl</a>').attr('href', 'apt://' + $(apt).text().split(' ')
+                                                       .slice(3).join(' '))
+    )
+  });
 });

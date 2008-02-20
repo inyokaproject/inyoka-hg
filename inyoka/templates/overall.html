@@ -9,7 +9,6 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 #}
-{%- include 'macros.html' -%}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
@@ -18,7 +17,7 @@
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- set styles = ['main.css'] + styles -%}
+    {%- set styles = ['main.css', 'markup.css'] + styles -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}
@@ -126,20 +125,9 @@
       {%- endif %}
 
       {%- for message in MESSAGES %}
-      {%- if message.dialog %}
-      <form class="message" action="{% if message.dialog_url != none %}{{ message.dialog_url }}{% else %}{{ CURRENT_URL }}{% endif %}" method="post">
-        <p>{{ message.text }}</p>
-        <p>
-          {% for button in message.dialog_buttons %}
-          <input type="{{ button.type }}" class="{{ button.class }}" name="{{ button.name }}" value="{{ button.value }}" />
-          {% endfor %}
-        </p>
-      </form>
-      {%- else %}
       <div class="message{% if message.success == true %} success{% elif message.success == false %} fail{% endif %}">
         {{ message.text }}
       </div>
-      {%- endif %}
       {%- endfor %}
 
       <div class="page_content">

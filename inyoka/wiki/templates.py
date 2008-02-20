@@ -3,7 +3,7 @@ r"""
     inyoka.wiki.templates
     ~~~~~~~~~~~~~~~~~~~~~
 
-    This module implements the templating language for the Wiki. It's a
+    This module implements the templating language for the Wiki.  It's a
     very simple language with some syntax elements taken from both Python
     and PHP.
 
@@ -165,10 +165,10 @@ class Parser(object):
                                               u'wolltest du einen „elseif“ '
                                               u'Block verwenden.')
                 self.stream.next()
-                else_block = self.subparse(lambda:
+                else_body = self.subparse(lambda:
                                            self.stream.test('raw', 'endif'),
                                            drop_needle=False)
-            elif self.stream.test('raw', 'elif'):
+            elif self.stream.test('raw', 'elseif'):
                 self.stream.next()
                 expr = self.parse_expression()
                 if not self.stream.test('tag_end'):
@@ -179,9 +179,8 @@ class Parser(object):
                              self.stream.test('raw', ('endif', 'elseif')),
                              drop_needle=False)))
                 continue
-            else:
-                self.stream.next()
             break
+        self.stream.next()
         if not self.stream.test('tag_end'):
             raise TemplateSyntaxError(u'„endif“ erlaubt keine Argumente.')
         self.stream.next()
@@ -210,7 +209,7 @@ class Parser(object):
         while self.stream.test('raw', functions):
             func = BINARY_FUNCTIONS[self.stream.current.value]
             self.stream.next()
-            left = BinaryFunction(left, self.parse_test(), func)
+            left = BinaryFunction(left, self.parse_convert(), func)
         return left
 
     def parse_convert(self):
@@ -347,8 +346,12 @@ class Parser(object):
         elif self.stream.test('raw'):
             item = Value(self.stream.current.value)
             self.stream.next()
+        elif self.stream.test('number'):
+            item = Value(float(self.stream.current.value))
+            self.stream.next()
         else:
-            return node
+            raise TemplateSyntaxError(u'Variable, Zahl oder Attribut '
+                                      u'erwartet.')
         return GetItem(node, item)
 
     def subparse(self, test, drop_needle=True):
@@ -397,7 +400,7 @@ class Parser(object):
 
 class TemplateSyntaxError(Exception):
     """
-    Helper for the parser. Translates into a node in the parsing process.
+    Helper for the parser.  Translates into a node in the parsing process.
     """
 
     def __init__(self, message):
@@ -871,13 +874,15 @@ def join_array(array, delimiter):
 
 
 BINARY_FUNCTIONS = {
-    'contain':      lambda a, b: b in a,
-    'contains':     lambda a, b: b in a,
-    'has_key':      lambda a, b: a.has_key(b),
-    'startswith':   lambda a, b: unicode(a).startswith(b),
-    'endswith':     lambda a, b: unicode(a).endswith(b),
-    'matches':      lambda a, b: simple_match(b, unicode(a)),
-    'join_with':    join_array
+    'contain':       lambda a, b: b in a,
+    'contains':      lambda a, b: b in a,
+    'has_key':       lambda a, b: a.has_key(b),
+    'startswith':    lambda a, b: unicode(a).startswith(b),
+    'endswith':      lambda a, b: unicode(a).endswith(b),
+    'matches':       lambda a, b: simple_match(b, unicode(a)),
+    'matches_regex': lambda a, b: re.match(unicode(b), unicode(a)) \
+                                  is not None,
+    'join_with':     join_array
 }
 
 CONVERTER = {

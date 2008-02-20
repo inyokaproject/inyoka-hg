@@ -62,9 +62,7 @@
         if (this.selected) {
           this.selected = false;
           $(this).appendTo(to);
-            //XXX: why is the option moved to the `to` opject?
-            //options[i] = null;
-          }
+        }
       });
     },
   }

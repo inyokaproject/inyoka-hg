@@ -22,7 +22,7 @@ DISTRO_CHOICES = [('', 'Distribution auswählen')] + list(
 
 class NewPostForm(forms.Form):
     """
-    Allows the user to create a new post. It provides the following fields:
+    Allows the user to create a new post.  It provides the following fields:
     `text`
         The text for the post.
     `att_ids`
@@ -122,16 +122,16 @@ class SplitTopicForm(forms.Form):
 
 class AddAttachmentForm(forms.Form):
     """
-    Allows the user to upload new attachments. It provides the following fields:
+    Allows the user to upload new attachments.  It provides the following fields:
     `attachment`
         A file field for the uploaded file.
 
     `filename`
-        The target filename. If this is left blank the original filename
+        The target filename.  If this is left blank the original filename
         is used for the server too.
 
     `override`
-        A checkbox for the override flag. If this is true a filename with
+        A checkbox for the override flag.  If this is true a filename with
         the same name is overridden (A new revision is created)
 
     `description`

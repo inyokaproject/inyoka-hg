@@ -6,11 +6,11 @@
     The nodes for the parse tree of the parser.
 
     Nodes also provide the formatting methods to generate HTML, docbook or
-    whatever. If you want to add new formatting methods don't forget to
-    register it in the dispatching functions. Also in the other modules
+    whatever.  If you want to add new formatting methods don't forget to
+    register it in the dispatching functions.  Also in the other modules
     and especially in macro and parser baseclasses.
 
-    All nodes except of the base nodes have to have a `__dict__`. This is
+    All nodes except of the base nodes have to have a `__dict__`.  This is
     enforced because dict-less objects cannot be replaced in place which is
     a required by the `DeferredNode`.
 
@@ -129,7 +129,7 @@ def from_html(obj):
 
 class BaseNode(object):
     """
-    internal Baseclass for all nodes. Usually you inherit from `Node`
+    internal Baseclass for all nodes.  Usually you inherit from `Node`
     that implements the renderer and compiler interface but sometimes
     it can be useful to have a plain node.
     """
@@ -199,22 +199,22 @@ class DeferredNode(BaseNode):
 
 class Node(BaseNode, NodeRenderer, NodeCompiler, NodeQueryInterface):
     """
-    The public baseclass for all nodes. It implements the `NodeRenderer`
+    The public baseclass for all nodes.  It implements the `NodeRenderer`
     and `NodeCompiler` and sets some basic attributes every node must have.
     """
 
     def generate_markup(self, w):
         """
-        Generate markup from the node again. The ``w`` argument is an
+        Generate markup from the node again.  The ``w`` argument is an
         instance of the `MarkupWriter`.
         """
 
     def prepare(self, format):
         """
-        Public interface to the rendering functions. This is only a
+        Public interface to the rendering functions.  This is only a
         dispatcher on the basenode, the preparation methods always
         *have* to call themselves with their internal name for
-        performance reasons. The `prepare()` method itself is only
+        performance reasons.  The `prepare()` method itself is only
         used by the renderer and node compiler.
         """
         return {
@@ -224,7 +224,7 @@ class Node(BaseNode, NodeRenderer, NodeCompiler, NodeQueryInterface):
 
     def prepare_html(self):
         """
-        The AST itself never survives the parsing process. At the end
+        The AST itself never survives the parsing process.  At the end
         of parsing `prepare_html` (or `prepare_docbook` if one wants to
         implement that) is called and the iterator returned is converted
         into an active cacheable object (pickled if it contains dynamic
@@ -284,7 +284,7 @@ class HTML(Node):
 
 class MetaData(Node):
     """
-    Holds invisible metadata. Never rendered.
+    Holds invisible metadata.  Never rendered.
     """
 
     is_block_tag = True
@@ -297,7 +297,7 @@ class MetaData(Node):
 
 class Newline(Node):
     """
-    A newline in a paragraph. Never use multiple of those.
+    A newline in a paragraph.  Never use multiple of those.
     """
 
     text = u'\n'
@@ -329,7 +329,7 @@ class Ruler(Node):
 
 class ConflictMarker(Node):
     """
-    Represents a conflict marker in the markup. The type argument must
+    Represents a conflict marker in the markup.  The type argument must
     be one of `left`, `middle`, or `right`.
     """
 
@@ -410,9 +410,9 @@ class Parser(object):
 
 class Image(Node):
     """
-    Holds a reference to an image. Because images are quite problematic for
+    Holds a reference to an image.  Because images are quite problematic for
     alternative output formats it's supported to replace it with the alt tag
-    on rendering. So far images targets are always absolute urls, however
+    on rendering.  So far images targets are always absolute urls, however
     in the future a pseudourl "attachment:" could be added so that a docbook
     formatter could bundle images and refer to them.
     """
@@ -714,7 +714,7 @@ class Section(Element):
 
 class Paragraph(Element):
     """
-    A paragraph. Everything is in there :-)
+    A paragraph.  Everything is in there :-)
     (except of block level stuff)
     """
     is_block_tag = True
@@ -763,7 +763,7 @@ class Error(Element):
 
 class Footnote(Element):
     """
-    This represents a footnote. A transformer moves the actual
+    This represents a footnote.  A transformer moves the actual
     text down to the bottom and sets an automatically incremented id.
     If that transformer is not activated a <small> section is rendered.
     """
@@ -884,7 +884,7 @@ class Headline(Element):
 
 class Strong(Element):
     """
-    Holds children that are emphasized strongly. For HTML this will
+    Holds children that are emphasized strongly.  For HTML this will
     return a <strong> tag which is usually bold.
     """
 
@@ -911,7 +911,7 @@ class Strong(Element):
 
 class Emphasized(Element):
     """
-    Like `Strong`, but with slightly less importance. Usually rendered
+    Like `Strong`, but with slightly less importance.  Usually rendered
     with an italic font face.
     """
 
@@ -938,8 +938,8 @@ class Emphasized(Element):
 
 class Code(Element):
     """
-    This represents code. Usually formatted in a monospaced font that
-    preserves whitespace. Additionally this node is maked raw so children
+    This represents code.  Usually formatted in a monospaced font that
+    preserves whitespace.  Additionally this node is maked raw so children
     are not touched by the altering translators.
     """
     is_raw = True
@@ -967,8 +967,8 @@ class Code(Element):
 class Underline(Element):
     """
     This element exists for backwards compatibility to MoinMoin and should
-    not be used. It generates a span tag with an "underline" class for
-    HTML and could generate something similar for docbook or others. It's
+    not be used.  It generates a span tag with an "underline" class for
+    HTML and could generate something similar for docbook or others.  It's
     also allowed to not render this element in a special way.
     """
 
@@ -1111,7 +1111,7 @@ class Sup(Element):
 
 class Color(Element):
     """
-    Gives the embedded text a color. Like `Underline` it just exists because
+    Gives the embedded text a color.  Like `Underline` it just exists because
     of backwards compatibility (this time to phpBB).
     """
 
@@ -1142,8 +1142,8 @@ class Color(Element):
 
 class Size(Element):
     """
-    Gives the embedded text a size. Like `Underline` it just exists because
-    of backwards compatibility. Requires the font size in percent.
+    Gives the embedded text a size.  Like `Underline` it just exists because
+    of backwards compatibility.  Requires the font size in percent.
     """
 
     def __init__(self, size, children=None, id=None, style=None,
@@ -1171,7 +1171,7 @@ class Size(Element):
 
 class Font(Element):
     """
-    Gives the embedded text a font face. Like `Underline` it just exists
+    Gives the embedded text a font face.  Like `Underline` it just exists
     because of backwards compatibility.
     """
 
@@ -1248,7 +1248,7 @@ class DefinitionTerm(Element):
 
 class List(Element):
     """
-    Sourrounds list items so that they appear as list. Make sure that the
+    Sourrounds list items so that they appear as list.  Make sure that the
     children are list items.
     """
     is_block_tag = True
@@ -1288,7 +1288,7 @@ class List(Element):
 
 class ListItem(Element):
     """
-    Marks the children as list item. Use in conjunction with list.
+    Marks the children as list item.  Use in conjunction with list.
     """
     is_block_tag = True
     allows_paragraphs = True
@@ -1314,7 +1314,7 @@ class ListItem(Element):
 
 class Box(Element):
     """
-    A dialog like object. Usually renders to a layer with one headline and
+    A dialog like object.  Usually renders to a layer with one headline and
     a second layer for the contents.
     """
     is_block_tag = True
@@ -1339,13 +1339,13 @@ class Box(Element):
         yield build_html_tag(u'div',
             id=self.id,
             style=u' '.join(style),
-            classes=('box', self.class_)
+            classes=(self.class_,)
         )
         if self.title is not None:
             yield build_html_tag(u'h3', class_=self.class_)
             yield escape(self.title)
             yield u'</h3>'
-        yield build_html_tag(u'div', classes=(u'contents', self.class_))
+        yield build_html_tag(u'div', classes=(u'contents',))
         for item in Element.prepare_html(self):
             yield item
         yield u'</div></div>'
@@ -1353,7 +1353,7 @@ class Box(Element):
 
 class Layer(Element):
     """
-    Like a box but without headline and an nested content section. Translates
+    Like a box but without headline and an nested content section.  Translates
     into a plain old HTML div or something comparable.
     """
     is_block_tag = True
@@ -1369,7 +1369,7 @@ class Layer(Element):
 
 class Table(Element):
     """
-    A simple table. This can only contain table rows.
+    A simple table.  This can only contain table rows.
     """
     is_block_tag = True
 
@@ -1399,7 +1399,7 @@ class Table(Element):
 
 class TableRow(Element):
     """
-    A row in a table. Only contained in a table and the only children
+    A row in a table.  Only contained in a table and the only children
     nodes supported are table cells and headers.
     """
     is_block_tag = True

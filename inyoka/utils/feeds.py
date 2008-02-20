@@ -45,26 +45,26 @@ class FeedBuilder(object):
 
         :Parameters:
           title
-            the title of the feed. Required.
+            the title of the feed.  Required.
           title_type
-            the type attribute for the title element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the title element.  One of html, text,
+            xhtml.  Default is text.
           url
             the url for the feed.
           id
-            a globally unique id for the feed. Must be an URI. If not present
+            a globally unique id for the feed.  Must be an URI.  If not present
             the URL is used, but one of both is required.
           updated
-            the time the feed was modified the last time. Must be a
-            `datetime.datetime` object. If not present the latest entry's
+            the time the feed was modified the last time.  Must be a
+            `datetime.datetime` object.  If not present the latest entry's
             `updated` is used.
           feed_url
-            the url to the feed. Should be the URL that was requested.
+            the url to the feed.  Should be the URL that was requested.
           author
-            the author of the feed. Must be either a string (the name) or a
-            dict with name (required) and uri or email (both optional). Can be
+            the author of the feed.  Must be either a string (the name) or a
+            dict with name (required) and uri or email (both optional).  Can be
             a list of (may be mixed, too) strings and dicts, too, if there are
-            multiple authors. Required if not every entry has an author
+            multiple authors.  Required if not every entry has an author
             element.
           icon
             an icon for the feed.
@@ -73,18 +73,18 @@ class FeedBuilder(object):
           rights
             copyright information for the feed.
           rights_type
-            the type attribute for the rights element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the rights element.  One of html, text,
+            xhtml.  Default is text.
           subtitle
             a short description of the feed.
           subtitle_type
-            the type attribute for the subtitle element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the subtitle element.  One of html, text,
+            xhtml.  Default is text.
           links
-            additional links. Must be a list of dictionaries with href
+            additional links.  Must be a list of dictionaries with href
             (required)  and rel, type, hreflang, title, length (all optional)
           entries
-            a list with the entries for the feed. Entries can also be added
+            a list with the entries for the feed.  Entries can also be added
             later with add().
 
         For more information on the elements see
@@ -207,44 +207,44 @@ class FeedEntry(object):
 
         :Parameters:
           title
-            the title of the entry. Required.
+            the title of the entry.  Required.
           title_type
-            the type attribute for the title element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the title element.  One of html, text,
+            xhtml.  Default is text.
           content
             the content of the entry.
           content_type
-            the type attribute for the content element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the content element.  One of html, text,
+            xhtml.  Default is text.
           summary
             a summary of the entry's content.
           summary_type
-            a type attribute for the summary element. One of html, text,
-            xhtml. Default is text.
+            a type attribute for the summary element.  One of html, text,
+            xhtml.  Default is text.
           url
             the url for the entry.
           id
-            a globally unique id for the entry. Must be an URI. If not present
+            a globally unique id for the entry.  Must be an URI.  If not present
             the URL is used, but one of both is required.
           updated
-            the time the entry was modified the last time. Must be a
-            `datetime.datetime` object. Required.
+            the time the entry was modified the last time.  Must be a
+            `datetime.datetime` object.  Required.
           author
-            the author of the entry. Must be either a string (the name) or a
-            dict with name (required) and uri or email (both optional). Can
+            the author of the entry.  Must be either a string (the name) or a
+            dict with name (required) and uri or email (both optional).  Can
             be a list of (may be mixed, too) strings and dicts, too, if there
-            are multiple authors. Required if there is no author for the
+            are multiple authors.  Required if there is no author for the
             feed.
           published
-            the time the entry was initially published. Must be a
+            the time the entry was initially published.  Must be a
             datetime.datetime object.
           rights
             copyright information for the entry.
           rights_type
-            the type attribute for the rights element. One of html, text,
-            xhtml. Default is text.
+            the type attribute for the rights element.  One of html, text,
+            xhtml.  Default is text.
           links
-            additional links. Must be a list of dictionaries with href
+            additional links.  Must be a list of dictionaries with href
             (required) and rel, type, hreflang, title, length (all optional)
 
         For more information on the elements see

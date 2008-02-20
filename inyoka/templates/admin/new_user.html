@@ -1,0 +1,42 @@
+{#
+    admin/new_user.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    Create a new user.
+
+    :copyright: 2008 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+
+{% set navigation_trace = [
+    (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'new'), 'Benutzer erstellen')
+] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<form action="" method="post" id="user_edit_form">
+  <h3>Neuen Benutzer erstellen</h3>
+  <dl>
+    {{ h.render_form(form, 'username', 'password', 'email', inline=true) }}
+    <dt>Autentifizieren:</dt>
+    <dd>
+      <input type="checkbox" name="authenticate" id="id_authenticate" />
+      <span class="note">{{ form.fields['authenticate'].help_text|e }}</span>
+    </dd>
+  </dl>
+  <br />
+  <p class="note">
+    Weitere Einstellungen sind verfügbar, nachdem der Benutzer gespeichert wurde.
+  </p>
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+{% endblock %}

@@ -3,9 +3,9 @@
     inyoka.wiki.views
     ~~~~~~~~~~~~~~~~~
 
-    The views for the wiki. Unlike the other applications the wiki doesn't
-    really use the views but `actions`. This is the case because we only
-    have one kind of page which is a wiki page. Non existing pages render
+    The views for the wiki.  Unlike the other applications the wiki doesn't
+    really use the views but `actions`.  This is the case because we only
+    have one kind of page which is a wiki page.  Non existing pages render
     a replacement message to create one, so not much to dispatch.
 
     Some internal functions such as the image serving are implemented as
@@ -58,7 +58,7 @@ def show_page(request, name):
 def missing_resource(request):
     """
     Called if the templated decorator catches a `ObjectDoesNotExist`
-    exception on the wiki. This does not affect missing pages
+    exception on the wiki.  This does not affect missing pages
     because the show view checks for that.
 
     **Template**
@@ -68,14 +68,14 @@ def missing_resource(request):
         none
 
     Not having a context doesn't mean that a template cannot render
-    something. The default context objects also exists for this one.
+    something.  The default context objects also exists for this one.
     """
 
 
 def get_image_resource(request):
     """
-    Deliver the attachment or external URL as image. This is used by the
-    `Picture` macro mainly. The idea is that we can still check privileges
+    Deliver the attachment or external URL as image.  This is used by the
+    `Picture` macro mainly.  The idea is that we can still check privileges
     and that the image URL does not change if a new revision is uploaded.
     """
     try:
