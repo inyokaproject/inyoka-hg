@@ -24,6 +24,8 @@ python -c 'import xapian; from django.conf import settings; xapian.WritableDatab
 # create the media folders
 rm -Rf ./inyoka/media
 mkdir ./inyoka/media
+mkdir ./inyoka/media/portal
+mkdir ./inyoka/media/portal/avatars
 mkdir ./inyoka/media/forum
 mkdir ./inyoka/media/forum/attachments
 mkdir ./inyoka/media/planet
