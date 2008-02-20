@@ -165,7 +165,7 @@ class Parser(object):
                                               u'wolltest du einen „elseif“ '
                                               u'Block verwenden.')
                 self.stream.next()
-                else_block = self.subparse(lambda:
+                else_body = self.subparse(lambda:
                                            self.stream.test('raw', 'endif'),
                                            drop_needle=False)
             elif self.stream.test('raw', 'elseif'):
