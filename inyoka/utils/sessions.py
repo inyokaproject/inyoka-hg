@@ -11,9 +11,10 @@
 """
 import sys
 from time import time
-from django.core.cache import cache
 from datetime import datetime, timedelta
+from django.core.cache import cache
 from django.http import HttpResponseRedirect
+from django.newforms import ValidationError
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
@@ -64,13 +65,15 @@ class SurgeProtectionMixin(object):
         Du kannst Daten nicht so schnell hintereinander absenden.  Bitte
         warte noch einige Zeit bis du das Forumlar erneut absendest.
     '''
+    source_protection_identifier = None
 
     def clean(self):
-        storage = r.request.session.setdefault('_sp', {})
-        blocked = storage.get(identifier, 0) >= time()
-        storage[identifier] = time() + self.source_protection_timeout
-        if blocked:
+        identifier = self.source_protection_identifier or \
+                     self.__class__.__module__.split('.')[1]
+        storage = r.request.session.setdefault('sp', {})
+        if storage.get(identifier, 0) >= time():
             raise ValidationError(self.source_protection_message)
+        storage[identifier] = time() + self.source_protection_timeout
         return super(SurgeProtectionMixin, self).clean()
 
 
