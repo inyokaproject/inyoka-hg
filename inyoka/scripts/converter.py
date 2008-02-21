@@ -19,6 +19,7 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = '/path/'
+PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
 from os import path
@@ -195,6 +196,7 @@ def convert_users():
             'date_joined': datetime.fromtimestamp(row.user_regdate),
             #'new_password_key': None,
             'post_count': row.user_posts,
+            # TODO: assure correct location
             'avatar': avatar[:100],
             'icq': row.user_icq[:16],
             'msn': row.user_msnm[:200],
@@ -202,7 +204,6 @@ def convert_users():
             'yim': row.user_yim[:200],
             'jabber': row.user_jabber[:200],
             'signature': signature,
-            #TODO: coordinates
             'coordinates_long': co_long,
             'coordinates_lat': co_lat,
             'location': row.user_from[:200],
@@ -210,8 +211,6 @@ def convert_users():
             'occupation': row.user_occ[:200],
             'interests': row.user_interests[:200],
             'website': row.user_website[:200],
-            #'_settings' : '',
-            #TODO: 'is_manager': 0,
             #TODO:
             #'forum_last_read'
             #'forum_read_status'
@@ -369,6 +368,52 @@ def convert_forum():
 
     conn.close()
 
+def convert_groups():
+    from sqlalchemy import create_engine, MetaData, Table
+    from sqlalchemy.sql import select
+    from inyoka.portal.user import Group
+    from django.db import connection
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    group_table = Table('%sgroups' % FORUM_PREFIX, meta, autoload=True)
+
+    sel = select([group_table], group_table.c.group_description != "Personal User")
+    for group in conn.execute(sel):
+        Group.objects.create(**{
+                'pk': group.group_id,
+                'name': group.group_name,
+                'is_public': True
+            })
+
+    relation_table = Table('%suser_group' % FORUM_PREFIX, meta, autoload=True)
+
+    subselect = select([group_table.c.group_id], group_table.c.group_description != "Personal User")
+    sel_relation = select([relation_table], relation_table.c.group_id.in_(subselect))
+
+    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
+    dmeta = MetaData()
+    dmeta.bind = dengine
+    dconn = dengine.connect()
+    django_user_group_rel = Table('portal_user_groups', dmeta, autoload=True)
+
+    for erg in conn.execute(sel_relation):
+        ins = django_user_group_rel.insert(values={'user_id': erg.user_id, 'group_id': erg.group_id})
+        dconn.execute(ins)
+
+    dconn.close()
+    conn.close()
+
+
+
+def convert_attachments():
+    pass
 
 def convert_ikhaya():
     import re
@@ -484,13 +529,17 @@ def convert_pastes():
 
 
 if __name__ == '__main__':
-    print 'Converting users'
-    #convert_users()
-    print 'Converting forum data'
-    #convert_forum()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
+    print 'Converting users'
+    convert_users()
+    print 'Converting groups'
+    convert_groups()
+    print 'Converting forum data'
+    convert_forum()
+    print 'Converting attachments'
+    convert_attachments()
