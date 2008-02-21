@@ -833,6 +833,7 @@ class Parser(object):
             stream.next()
             args, kwargs = self.parse_arguments(stream, 'parser_end')
             stream.next()
+            print stream.current
         else:
             name = 'text'
 

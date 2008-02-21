@@ -428,7 +428,7 @@ class Lexer(object):
                 add_text(char)
                 pos += 1
 
-        # if there is a bogus escaped push a bang
+        # if there is a bogus escaped push a backslash
         if escaped:
             add_text('\\')
 

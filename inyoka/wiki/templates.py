@@ -66,7 +66,7 @@ class Lexer(object):
             rule(r'\d(\.\d*)?', 'number'),
             rule(r"('([^'\\]*(?:\\.[^'\\]*)*)'|"
                  r'"([^"\\]*(?:\\.[^"\\]*)*)")(?s)', 'string'),
-            rule(r'(<=?|>=?|[!=]?=)|[()&.*%/+-]', 'operator'),
+            rule(r'(<=?|>=?|=>|[!=]?=)|[()\[\]&.,*%/+-]', 'operator'),
             rule(r'\$[^\W\d][^\W]*', 'variable')
         )
     }
@@ -320,11 +320,37 @@ class Parser(object):
             node = Var(value[1:])
         elif token_type == 'string':
             node = Value(unescape_string(value[1:-1]))
-        elif token_type == 'operator' and value == '(':
-            node = self.parse_expr()
-            if not self.stream.test('operator', ')'):
-                raise TemplateSyntaxError(u'Klammerausdruck wurde '
-                                          u'nicht geschlossen.')
+        elif token_type == 'operator':
+            if value == '(':
+                node = self.parse_expr()
+                if not self.stream.test('operator', ')'):
+                    raise TemplateSyntaxError(u'Klammerausdruck wurde '
+                                              u'nicht geschlossen.')
+            elif value == '[':
+                items = {}
+                next_numeric = 0
+                while self.stream.current.value != ']':
+                    if items:
+                        if not self.stream.test('operator', ','):
+                            raise TemplateSyntaxError(u'fehlender Beistrich '
+                                                      u'zwischen Array '
+                                                      u'Einträgen.')
+                        self.stream.next()
+                    value = self.parse_expr()
+                    if self.stream.test('operator', '=>'):
+                        self.stream.next()
+                        key = value
+                        value = self.parse_expr()
+                        # that's ridiculous but PHP behavior and we should
+                        # stick to that as it's very beginner friendly.
+                        as_int = int(value)
+                        if as_int > next_numeric and as_int == float(value):
+                            next_numeric = as_int + 1
+                    else:
+                        key = Value(next_numeric)
+                        next_numeric += 1
+                    items[key] = value
+                node = Value(items)
             self.stream.next()
         else:
             node = Value(value)
@@ -626,6 +652,13 @@ class Value(Expr):
         elif isinstance(self.value, dict):
             return u', '.join(u'%s: %s' % x for x in self.value.iteritems())
         return unicode(self.value)
+
+    def __hash__(self):
+        if isinstance(self.value, (list, tuple)):
+            return hash(tuple(self.value))
+        elif isinstance(self.value, dict):
+            return hash(tuple(self.value.items()))
+        return hash(unicode(self))
 
     def __eq__(self, other):
         if isinstance(self.value, (list, tuple, dict)):
