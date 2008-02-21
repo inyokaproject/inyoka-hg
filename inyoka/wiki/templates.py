@@ -882,7 +882,8 @@ BINARY_FUNCTIONS = {
     'matches':       lambda a, b: simple_match(b, unicode(a)),
     'matches_regex': lambda a, b: re.match(unicode(b), unicode(a)) \
                                   is not None,
-    'join_with':     join_array
+    'join_with':     join_array,
+    'split_by':      lambda a, b: unicode(a).split(unicode(b))
 }
 
 CONVERTER = {

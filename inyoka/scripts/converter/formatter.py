@@ -12,6 +12,10 @@
 from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.create_templates import templates
+from inyoka.wiki.utils import normalize_pagename
+
+PAGE_TEMPLATE_NAME = 'Wiki/Vorlagen/%s'
+
 
 class InyokaFormatter(FormatterBase):
     list_depth = 0
@@ -41,7 +45,7 @@ class InyokaFormatter(FormatterBase):
                 args = [a.strip() for a in args.split(',')]
             else:
                 args = args and [args] or []
-            args = ['Wiki/Vorlagen/%s' % name.replace('ae', u'ä')] + args
+            args = [PAGE_TEMPLATE_NAME % name.replace('ae', u'ä')] + args
             name = 'Vorlage'
 
         elif name == 'Bild':
@@ -56,6 +60,10 @@ class InyokaFormatter(FormatterBase):
         elif name == 'Pakete':
             args = [a.strip() for a in args.split(',')]
 
+        elif name == 'Include':
+            args = [a.strip() for a in args.split(',')]
+            name = 'Vorlage'
+
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
                 ' ' in a and ("'%s'" % a) or a for a in args
@@ -64,13 +72,22 @@ class InyokaFormatter(FormatterBase):
             return u'[[%s]]' % name
 
     def processor(self, processor_name, lines, is_parser=0):
-        result = [self.preformatted(1)]
-        for line in lines:
-            result.append(line + u'\n')
-        result.append(self.preformatted(0))
-        return ''.join(result)
+        # remove the #!name thing
+        lines.pop(0)
+
+        if processor_name == 'Text':
+            result = [self.preformatted(1)]
+            for line in lines:
+                result.append(line + u'\n')
+            result.append(self.preformatted(0))
+            return u''.join(result)
+
+        # most processors are page tempaltes in inyoka
+        return u'[[Vorlage(%s, \'%s\')]]' % (PAGE_TEMPLATE_NAME % processor_name,
+                                        u'\n'.join(lines))
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
+        pagename = normalize_pagename(pagename)
         if on:
             return u'[:%s:' % (pagename)
         return u']'

@@ -129,8 +129,13 @@ code {
 pre {
   background-color: #eee;
   font-family: monospace;
-  border: dotted 1px #888;
-  padding: 0.4em;
+  border: 1px solid #aaa;
+  padding: 0 0.4em;
+  margin: 0.5em 1em;
+}
+
+ol, ul {
+  line-height: 1.3em;
 }
 
 /*** Table Style **************************************************************/

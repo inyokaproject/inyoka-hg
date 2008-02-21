@@ -93,6 +93,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ endif @> """,
     u'Befehl': u"""{{|<class="bash"><@ $arguments @>
 |}}""",
+    u'Tasten': u"""""",
     u'Warnung': simple_box(u'Achtung!', 'warning'),
     u'Hinweis': simple_box(u'Hinweis:', 'notice'),
     u'Experten': simple_box(u'Experten-Info:', 'experts'),
@@ -105,6 +106,8 @@ def create():
         Page.objects.create(u'Wiki/Vorlagen/%s' % name,
                             u'# X-Preprocess: Page-Template\n%s' % content,
                             note=u'Vorlage automatisch erstellt')
+
+    # attach key images to Tasten macro
 
 
 if __name__ == '__main__':
