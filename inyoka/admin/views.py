@@ -455,6 +455,7 @@ def forums(request):
         'table': sortable
     }
 
+
 @require_manager
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):

@@ -18,16 +18,11 @@
 <form enctype="multipart/form-data" class="usercp_form" method="post" action="">
   <h3>Benutzereinstellungen</h3>
   <dl>
-    <dt>Benachrichtigung über</dt>
-    <dd>{{ form.notify }}{{ h.field_errors(form.errors.notify) }}</dd>
-    <dt>Benachrichtigen bei</dt>
-    <dd>{{ form.notifications }}{{ h.field_errors(form.errors.notifications) }}</dd>
-    <dt>Zeitzone</dt>
-    <dd>{{ form.timezone }}{{ h.field_errors(form.errors.timezone)}}</dd>
+    {{ h.render_form(form, 'notify', 'notifications', 'timezone', inline=true) }}
     <dt>Oberfläche</dt>
-    <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">Avatare ausblenden</label>
+    <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">{{ form.hide_avatars.label }}</label>
         {{ h.field_errors(form.errors.hide_avatar) }}</dd>
-    <dd>{{ form.hide_signatures }} <label for="id_hide_signatures">Signaturen ausblenden</label>
+    <dd>{{ form.hide_signatures }} <label for="id_hide_signatures">{{ form.hide_signatures.label }}</label>
         {{ h.field_errors(form.errors.hide_signatures) }}</dd>
   </dl>
   <p>
