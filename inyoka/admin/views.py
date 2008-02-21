@@ -455,6 +455,7 @@ def forums(request):
         'table': sortable
     }
 
+
 @require_manager
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):
@@ -762,3 +763,17 @@ def groups_edit(request, name=None):
         'form': form,
         'is_new': new,
     }
+
+@templated('admin/events.html')
+def events(request, show_all=False):
+    if show_all:
+        objects = Event.objects.filter(date__gt=date.today())
+    else:
+        objects = Event.objects.all()
+    sortable = Sortable(objects, request.GET, '-date')
+    return {
+        'table': sortable,
+        'events': sortable.get_objects(),
+    }
+
+    

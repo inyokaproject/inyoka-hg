@@ -27,7 +27,7 @@ NOTIFY_BY_CHOICES = (
 
 NOTIFICATION_CHOICES = (
     ('topic_move', 'Verschieben eines eigenen Themas'),
-    ('pm_new', 'Neuer privaten Nachricht')
+    ('pm_new', 'Neuer privater Nachricht')
 )
 
 SEARCH_AREA_CHOICES = (
@@ -68,11 +68,11 @@ class RegisterForm(forms.Form):
     # allow @localhost urls for easier testing
     email = forms.CharField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
-        u'deines vergessen haben solltest. ubuntuusers.de <a href="%s">'
+        u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
         u'garantiert</a>, dass sie nicht weitergegeben wird.' % href('portal',
                                                                'datenschutz'))
-    password = forms.CharField(label='Passwort', widget=
-        forms.PasswordInput(render_value=False))
+    password = forms.CharField(label='Passwort',
+        widget=forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Passwortbestätigung',
         widget=forms.PasswordInput(render_value=False))
     captcha = CaptchaField(label='CAPTCHA')
@@ -234,14 +234,16 @@ class UserCPSettingsForm(forms.Form):
     Form used for the user control panel -- settings
     dialog.
     """
-    notify = forms.MultipleChoiceField(required=False,
-                                       choices=NOTIFY_BY_CHOICES)
-    notifications = forms.MultipleChoiceField(required=False,
-                                              choices=NOTIFICATION_CHOICES)
-    timezone = forms.ChoiceField(required=True, choices=zip(TIMEZONES,
-                                                            TIMEZONES))
-    hide_avatars = forms.BooleanField()
-    hide_signatures = forms.BooleanField()
+    notify = forms.MultipleChoiceField(
+        label='Benachrichtigen bei', required=False,
+        choices=NOTIFY_BY_CHOICES)
+    notifications = forms.MultipleChoiceField(
+        label=u'Benachrichtigen über', required=False,
+        choices=NOTIFICATION_CHOICES)
+    timezone = forms.ChoiceField(label='Zeitzone', required=True,
+        choices=zip(TIMEZONES, TIMEZONES))
+    hide_avatars = forms.BooleanField(label='Avatare ausblenden')
+    hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
 
 
 class UserCPProfileForm(forms.Form):

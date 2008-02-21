@@ -19,6 +19,7 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = '/path/'
+PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
 from os import path
@@ -56,18 +57,28 @@ def convert_wiki():
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser
-    from inyoka.utils.converter import InyokaFormatter
+    from inyoka.scripts.converter.formatter import InyokaFormatter
+    from inyoka.wiki.utils import normalize_pagename
+    from _mysql_exceptions import IntegrityError
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    for name in request.rootpage.getPageList():
-        if 'Hardwaredatenbank' in name or 'Spelling' in name:
-            continue
-        print name
-        page = Page(request, name, formatter=formatter)
+    import cPickle
+    f = file('pagelist', 'r')
+    l = cPickle.load(f)
+    f.close()
+    #for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(request.rootpage.getPageList()):
+    for i, moin_name in enumerate(['Wiki/Includes']):
+        #if 'Hardwaredatenbank' in name or 'Spelling' in name:
+        #    continue
+        name = normalize_pagename(moin_name)
+        print i, ':', name
+        page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
+            connection.queries = []
             rev_id = line.rev
             kwargs = {
                 'note': line.comment,
@@ -85,20 +96,22 @@ def convert_wiki():
 
             if line.action in ('SAVE', 'SAVENEW', 'SAVE/REVERT'):
                 try:
+                    f = file(page.get_rev(rev=int(line.rev))[0])
+                    text = f.read().decode('utf-8')
+                    f.close()
+                except IOError:
+                    new_page.edit(deleted=True, **kwargs)
+                if int(rev_id) == 1:
                     try:
-                        f = file(page.get_rev(rev=int(line.rev))[0])
-                        text = f.read().decode('utf-8')
-                        f.close()
-                    except IOError:
-                        new_page.edit(deleted=True, **kwargs)
-                    if int(rev_id) == 1:
                         new_page = InyokaPage.objects.create(name, text=text,
                                                              **kwargs)
-                    else:
-                        new_page.edit(text=text, deleted=False, **kwargs)
-                except Exception, e:
-                    print '!' * 100
-                    print e
+                    except IntegrityError, e:
+                        # TODO
+                        name = u'DuplicatePages/%s' % name
+                        new_page = InyokaPage.objects.create(name, text=text,
+                                                             **kwargs)
+                else:
+                    new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
                 att = line.extra
                 att_name = '%s/%s' % (name, att)
@@ -129,6 +142,8 @@ def convert_wiki():
                 except InyokaPage.DoesNotExist:
                     continue
                 att_page.edit(deleted=True, **kwargs)
+            elif line.action == 'ATTDRW':
+                pass
             else:
                 raise NotImplementedError(line.action)
 
@@ -181,6 +196,7 @@ def convert_users():
             'date_joined': datetime.fromtimestamp(row.user_regdate),
             #'new_password_key': None,
             'post_count': row.user_posts,
+            # TODO: assure correct location
             'avatar': avatar[:100],
             'icq': row.user_icq[:16],
             'msn': row.user_msnm[:200],
@@ -188,7 +204,6 @@ def convert_users():
             'yim': row.user_yim[:200],
             'jabber': row.user_jabber[:200],
             'signature': signature,
-            #TODO: coordinates
             'coordinates_long': co_long,
             'coordinates_lat': co_lat,
             'location': row.user_from[:200],
@@ -196,8 +211,6 @@ def convert_users():
             'occupation': row.user_occ[:200],
             'interests': row.user_interests[:200],
             'website': row.user_website[:200],
-            #'_settings' : '',
-            #TODO: 'is_manager': 0,
             #TODO:
             #'forum_last_read'
             #'forum_read_status'
@@ -219,6 +232,7 @@ def convert_users():
                 print e
                 sys.exit(1)
         users[u.username] = u
+        connection.queries = []
     #print odd_coordinates, mail_error
 
 
@@ -354,6 +368,52 @@ def convert_forum():
 
     conn.close()
 
+def convert_groups():
+    from sqlalchemy import create_engine, MetaData, Table
+    from sqlalchemy.sql import select
+    from inyoka.portal.user import Group
+    from django.db import connection
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    group_table = Table('%sgroups' % FORUM_PREFIX, meta, autoload=True)
+
+    sel = select([group_table], group_table.c.group_description != "Personal User")
+    for group in conn.execute(sel):
+        Group.objects.create(**{
+                'pk': group.group_id,
+                'name': group.group_name,
+                'is_public': True
+            })
+
+    relation_table = Table('%suser_group' % FORUM_PREFIX, meta, autoload=True)
+
+    subselect = select([group_table.c.group_id], group_table.c.group_description != "Personal User")
+    sel_relation = select([relation_table], relation_table.c.group_id.in_(subselect))
+
+    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
+    dmeta = MetaData()
+    dmeta.bind = dengine
+    dconn = dengine.connect()
+    django_user_group_rel = Table('portal_user_groups', dmeta, autoload=True)
+
+    for erg in conn.execute(sel_relation):
+        ins = django_user_group_rel.insert(values={'user_id': erg.user_id, 'group_id': erg.group_id})
+        dconn.execute(ins)
+
+    dconn.close()
+    conn.close()
+
+
+
+def convert_attachments():
+    pass
 
 def convert_ikhaya():
     import re
@@ -469,13 +529,17 @@ def convert_pastes():
 
 
 if __name__ == '__main__':
-    print 'Converting users'
-    #convert_users()
-    print 'Converting forum data'
-    #convert_forum()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
+    print 'Converting users'
+    convert_users()
+    print 'Converting groups'
+    convert_groups()
+    print 'Converting forum data'
+    convert_forum()
+    print 'Converting attachments'
+    convert_attachments()

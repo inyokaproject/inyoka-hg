@@ -947,6 +947,7 @@ class Parser(object):
                 box.class_ = u' '.join(args)
             box.style = attrs.get('style')
             box.title = attrs.get('title')
+            box.class_ = attrs.get('class')
 
         while stream.current.type != 'box_end':
             box.children.append(self.parse_node(stream))
