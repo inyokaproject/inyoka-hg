@@ -9,7 +9,8 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import time
+import sys
+from time import time
 from django.core.cache import cache
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
@@ -17,6 +18,7 @@ from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
+from inyoka.middlewares.registry import r
 
 
 SESSION_DELTA = 300
@@ -51,6 +53,27 @@ def set_session_info(request, action, category=None):
     check_for_user_record()
 
 
+class SurgeProtectionMixin(object):
+    """
+    Mixin for forms to override the `clean()` method to perform an additional
+    surge protection.  Give this method a higher MRO than the form baseclass!
+    """
+
+    source_protection_timeout = 30
+    source_protection_message = '''
+        Du kannst Daten nicht so schnell hintereinander absenden.  Bitte
+        warte noch einige Zeit bis du das Forumlar erneut absendest.
+    '''
+
+    def clean(self):
+        storage = r.request.session.setdefault('_sp', {})
+        blocked = storage.get(identifier, 0) >= time()
+        storage[identifier] = time() + self.source_protection_timeout
+        if blocked:
+            raise ValidationError(self.source_protection_message)
+        return super(SurgeProtectionMixin, self).clean()
+
+
 def check_for_user_record():
     """
     Checks whether the current session count is a new record.
@@ -59,14 +82,14 @@ def check_for_user_record():
     # check for record all 2 minutes
     RECORD_CHECK_TIME = 120
     check = cache.get('session_record_check')
-    if not check or time.time() - RECORD_CHECK_TIME > check:
+    if not check or time() - RECORD_CHECK_TIME > check:
         delta = datetime.utcnow() - timedelta(seconds=SESSION_DELTA)
         record = int(storage.get('session_record', 0))
         session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
         if session_count > record:
             storage['session_record'] = session_count
-            storage['session_record_time'] = int(time.time())
-    cache.set('session_record_check', time.time())
+            storage['session_record_time'] = int(time())
+    cache.set('session_record_check', time())
 
 
 def get_user_record():
