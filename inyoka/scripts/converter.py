@@ -57,19 +57,27 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser
     from inyoka.utils.converter import InyokaFormatter
+    from inyoka.wiki.utils import normalize_pagename
     from _mysql_exceptions import IntegrityError
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    #for name in request.rootpage.getPageList():
-    for name in ['64bit-Architektur']:
-        if 'Hardwaredatenbank' in name or 'Spelling' in name:
-            continue
-        print name
-        page = Page(request, name, formatter=formatter)
+    import cPickle
+    f = file('pagelist', 'r')
+    l = cPickle.load(f)
+    f.close()
+    #for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(request.rootpage.getPageList()):
+    for i, moin_name in enumerate(['Wiki/Includes']):
+        #if 'Hardwaredatenbank' in name or 'Spelling' in name:
+        #    continue
+        name = normalize_pagename(moin_name)
+        print i, ':', name
+        page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
+            connection.queries = []
             rev_id = line.rev
             kwargs = {
                 'note': line.comment,
@@ -133,6 +141,8 @@ def convert_wiki():
                 except InyokaPage.DoesNotExist:
                     continue
                 att_page.edit(deleted=True, **kwargs)
+            elif line.action == 'ATTDRW':
+                pass
             else:
                 raise NotImplementedError(line.action)
 
@@ -140,7 +150,6 @@ def convert_wiki():
         formatter.setPage(page)
         parser = Parser(text, request)
         text = request.redirectedOutput(parser.format, formatter)
-        print text
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
 
@@ -224,6 +233,7 @@ def convert_users():
                 print e
                 sys.exit(1)
         users[u.username] = u
+        connection.queries = []
     #print odd_coordinates, mail_error
 
 

@@ -8,6 +8,14 @@
  * :license: GNU GPL.
  */
 
+a.missing {
+  color: #999;
+}
+
+.image-right {
+  float: right;
+}
+
 div.bash {
   color: white;
   font-family: monospace;
@@ -30,7 +38,7 @@ div.box {
   border: 1px solid #bbb;
 }
 
-.box div.contents {
+div.box div.contents {
   padding: 0.5em 1em;
 }
 
@@ -81,5 +89,29 @@ div.left {
 
 div.left h3 {
   background-color: #3E6E58;
+}
+
+div.warning {
+  border: 1px solid #d40000;
+}
+
+div.warning h3 {
+  background-color: #d40000;
+}
+
+div.experts {
+  border: 1px solid #666;
+}
+
+div.experts h3 {
+  background-color: #666;
+}
+
+div.knowledge {
+  border: 1px solid #d7b97b;
+}
+
+div.knowledge h3 {
+  background-color: #d7b97b;
 }
 

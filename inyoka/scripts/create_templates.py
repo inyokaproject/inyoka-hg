@@ -11,10 +11,18 @@
 """
 from inyoka.wiki.models import Page
 
+
 note = """<@ if $arguments.0 @>
 ----
 '''Anmerkung:''' <@ $arguments.0 @>
 <@ endif @>"""
+
+
+def simple_box(name, class_):
+    return u"""{{|<title="%s" class="box %s">
+<@ $arguments @>
+|}}""" % (name, class_)
+
 
 templates = {
     u'Archiviert': u"""{{|<title="Archivierte Anleitung">
@@ -65,10 +73,8 @@ fertigstellen oder erweitern kannst, dann bessere ihn bitte aus.%s
 |}}""" % note,
     u'Pakete': u"""{{|<class="package-list">
 Paketliste zum Kopieren:
-{{|<class="bash">sudo apt-get install <@ $arguments join_with " " @>
-|}}
-{{|<class="bash">sudo aptitude install <@ $arguments join_with " " @>
-|}}
+[[Vorlage(Wiki/Vorlagen/Befehl, 'sudo apt-get install <@ $arguments join_with " " @>')]]
+[[Vorlage(Wiki/Vorlagen/Befehl, 'sudo aptitude install <@ $arguments join_with " " @>')]]
 |}}""",
     u'InArbeit': u"""<@ if $arguments.0 as stripped == "" or $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
 Dieser Artikel wird momentan
@@ -84,7 +90,14 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 '''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!
 <@ else @>
 '''Parameterfehler''': Ungültiges Datum
-<@ endif @> """
+<@ endif @> """,
+    u'Befehl': u"""{{|<class="bash"><@ $arguments @>
+|}}""",
+    u'Warnung': simple_box(u'Achtung!', 'warning'),
+    u'Hinweis': simple_box(u'Hinweis:', 'notice'),
+    u'Experten': simple_box(u'Experten-Info:', 'experts'),
+    u'Wissen': simple_box(u'Diese Anleitung setzt die Kenntnis folgender '
+                          u'Seiten voraus:', 'knowledge'),
 }
 
 def create():
