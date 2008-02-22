@@ -777,5 +777,3 @@ def events(request, show_all=False):
         'table': sortable,
         'events': sortable.get_objects(),
     }
-
-    
