@@ -951,6 +951,9 @@ class Post(models.Model):
         self.rendered_text = self.render_text()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
+        for page in range(1, 5):
+            cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
+            cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
         self.update_search()
 
     def update_search(self):

@@ -40,7 +40,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import Session, SATopic, SAForum
+from inyoka.forum.database import Session, SATopic, SAForum, topic_table
 from sqlalchemy.orm import eagerload
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -118,7 +118,8 @@ def forum(request, slug, page=1):
     data = cache.get(key)
     if not data:
         topics = SATopic.query.options(eagerload('author'), eagerload('last_post'),
-            eagerload('last_post.author')).filter_by(forum_id=f.id)
+            eagerload('last_post.author')).filter_by(forum_id=f.id) \
+            .order_by(topic_table.c.last_post_id.desc())
         if privs['moderate']:
             topics = topics.filter_by(hidden=False)
         subforums = SAForum.query.options(eagerload('last_post'),
@@ -314,6 +315,10 @@ def newpost(request, topic_slug=None, quote_id=None):
                 post = t.reply(text=data['text'], author=request.user)
                 Attachment.objects.update_post_ids(att_ids, post.id)
                 t.save()
+                # update cache
+                for page in range(1, 5):
+                    cache.remove('forum/topics/%d/%d' % (t.forum_id, page))
+                    cache.remove('forum/topics/%dm/%d' % (t.forum_id, page))
                 # send notifications
                 for s in Subscription.objects.filter(topic=t):
                     text = render_template('mails/new_post.txt', {
