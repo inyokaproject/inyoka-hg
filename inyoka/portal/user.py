@@ -36,8 +36,8 @@ _ANONYMOUS_USER = None
 class UserBanned(Exception):
     """
     Simple exception that is raised while
-    logging in so we can give the user a better
-    exception
+    log-in to give the user a somewhat detailed
+    exception.
     """
 
 
@@ -126,6 +126,15 @@ class UserManager(models.Manager):
         request.user = self.get_anonymous_user()
 
     def authenticate(self, username, password):
+        """
+        Authenticate a user with `username` and `password`.
+
+        :Raises:
+            User.DoesNotExist
+                If the user with `username` does not exist
+            UserBanned
+                If the found user was banned by an admin.
+        """
         user = User.objects.get(username=username)
 
         if user.banned is not None:

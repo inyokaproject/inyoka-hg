@@ -599,8 +599,6 @@ def edit_user(request, username):
                         _set_privileges()
                     privilege.save()
 
-
-
             # group editing
             groups_joined = [groups.get(name=gn) for gn in
                              request.POST.getlist('user_groups_joined')]
