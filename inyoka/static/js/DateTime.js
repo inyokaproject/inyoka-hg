@@ -37,9 +37,10 @@
     return days;
   }
 
-  DateTimeField = function(editor) {
+  DateTimeField = function(editor, only_date) {
     var self = this;
     this.input = $(editor).hide();
+    this.only_date = only_date || false;
     this.readDateTime();
     this.calendarMonth = this.currentMonth;
     this.calendarYear = this.currentYear;
@@ -49,6 +50,10 @@
     this.timetable = $('<td></td>').appendTo(row);
     this.drawCalendar();
     this.drawTimetable();
+    if (only_date) {
+      this.timetable.hide();
+      this.currentTime = '00:00:00';
+    }
     this.input.parent().append(this.container);
   }
 

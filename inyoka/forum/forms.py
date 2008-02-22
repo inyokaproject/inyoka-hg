@@ -11,16 +11,14 @@
 from django import newforms as forms
 from inyoka.utils.forms import MultiField
 from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS
-
-VERSION_CHOICES = [('', 'Version auswählen')] + list(
-    UBUNTU_VERSIONS.iteritems()
-)
-DISTRO_CHOICES = [('', 'Distribution auswählen')] + list(
-    UBUNTU_DISTROS.iteritems()
-)
+from inyoka.utils.sessions import SurgeProtectionMixin
 
 
-class NewPostForm(forms.Form):
+VERSION_CHOICES = [('', 'Version auswählen')] + UBUNTU_VERSIONS.items()
+DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS.items()
+
+
+class NewPostForm(SurgeProtectionMixin, forms.Form):
     """
     Allows the user to create a new post.  It provides the following fields:
     `text`
@@ -44,7 +42,7 @@ class EditPostForm(forms.Form):
     sticky = forms.BooleanField(required=False)
 
 
-class NewTopicForm(forms.Form):
+class NewTopicForm(SurgeProtectionMixin, forms.Form):
     """
     Allows the user to create a new topic.
     It provides the following fields:

@@ -87,6 +87,7 @@ class EditUserForm(forms.Form):
     #XXX: use `EmailField` after testing, see portal.user.User
     email = forms.CharField(label=u'E-Mail')
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
+    banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
     #groups = forms.MultipleChoiceField(label=u'Gruppen', choices=[], required=False)

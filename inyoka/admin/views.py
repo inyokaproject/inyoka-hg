@@ -579,6 +579,9 @@ def edit_user(request, username):
             if data['new_password']:
                 user.set_password(data['new_password'])
 
+            if data['banned'] != user.banned:
+                user.banned = data['banned']
+
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
@@ -601,7 +604,6 @@ def edit_user(request, username):
                              request.POST.getlist('user_groups_joined')]
             groups_not_joined = [groups.get(name=gn) for gn in
                                 request.POST.getlist('user_groups_not_joined')]
-            user = User.objects.get(username=username)
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
 
@@ -775,5 +777,3 @@ def events(request, show_all=False):
         'table': sortable,
         'events': sortable.get_objects(),
     }
-
-    

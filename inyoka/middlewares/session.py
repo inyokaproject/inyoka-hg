@@ -78,16 +78,16 @@ class AdvancedSessionMiddleware(object):
 
         # expire the surge protection information if there is one.
         # this keeps the cookie small
-        surge_protection = request.session.get('_sp')
+        surge_protection = request.session.get('sp')
         if surge_protection is not None:
             now = time()
             surge_protection = dict((key, timeout) for key, timeout in
                                     surge_protection.iteritems()
                                     if timeout > now)
             if surge_protection:
-                request.session['_sp'] = surge_protection
+                request.session['sp'] = surge_protection
             else:
-                del request.session['_sp']
+                del request.session['sp']
 
         # we can remove the session key if the user is logged in
         if '_sk' in request.session and 'uid' in request.session:
