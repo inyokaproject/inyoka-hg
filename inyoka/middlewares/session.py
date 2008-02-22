@@ -76,6 +76,19 @@ class AdvancedSessionMiddleware(object):
         except AttributeError:
             return response
 
+        # expire the surge protection information if there is one.
+        # this keeps the cookie small
+        surge_protection = request.session.get('sp')
+        if surge_protection is not None:
+            now = time()
+            surge_protection = dict((key, timeout) for key, timeout in
+                                    surge_protection.iteritems()
+                                    if timeout > now)
+            if surge_protection:
+                request.session['sp'] = surge_protection
+            else:
+                del request.session['sp']
+
         # we can remove the session key if the user is logged in
         if '_sk' in request.session and 'uid' in request.session:
             del request.session['_sk']
@@ -92,4 +105,5 @@ class AdvancedSessionMiddleware(object):
                                 max_age=max_age, expires=expires,
                                 domain=settings.SESSION_COOKIE_DOMAIN,
                                 secure=settings.SESSION_COOKIE_SECURE or None)
+
         return response

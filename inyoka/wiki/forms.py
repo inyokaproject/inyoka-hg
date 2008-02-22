@@ -10,9 +10,10 @@
 """
 from django import newforms as forms
 from inyoka.wiki.utils import has_conflicts
+from inyoka.utils.sessions import SurgeProtectionMixin
 
 
-class PageEditForm(forms.Form):
+class PageEditForm(SurgeProtectionMixin, forms.Form):
     """
     Used in the `do_edit` action for both new and existing pages.  The
     following fields are available:
