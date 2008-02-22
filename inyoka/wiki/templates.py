@@ -170,7 +170,7 @@ class Parser(object):
                                            drop_needle=False)
             elif self.stream.test('raw', 'elseif'):
                 self.stream.next()
-                expr = self.parse_expression()
+                expr = self.parse_expr()
                 if not self.stream.test('tag_end'):
                     raise TemplateSyntaxError(u'Bedingungen erlauben nur '
                                               u'einen Ausdruck pro Block.')

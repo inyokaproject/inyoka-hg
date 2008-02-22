@@ -30,6 +30,9 @@ reset:
 test_data:
 	@(sh make_test_data.sh)
 
+convert:
+	@(python inyoka/scripts/converter/converter.py)
+
 server:
 	@django-admin.py runserver 0.0.0.0:8080
 

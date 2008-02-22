@@ -57,7 +57,7 @@ def convert_wiki():
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser
-    from inyoka.scripts.converter.formatter import InyokaFormatter
+    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter
     from inyoka.wiki.utils import normalize_pagename
     from _mysql_exceptions import IntegrityError
     request = RequestCLI()
@@ -68,13 +68,13 @@ def convert_wiki():
     f = file('pagelist', 'r')
     l = cPickle.load(f)
     f.close()
-    #for i, moin_name in enumerate(l):
+    for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Includes']):
+    #for i, moin_name in enumerate(['Wiki/Syntax/Tabellen']):
         #if 'Hardwaredatenbank' in name or 'Spelling' in name:
         #    continue
         name = normalize_pagename(moin_name)
-        print i, ':', name
+        #print i, ':', name
         page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -529,14 +529,14 @@ def convert_pastes():
 
 
 if __name__ == '__main__':
+    print 'Converting users'
+    #convert_users()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'
     convert_ikhaya()
     print 'Converting pastes'
     convert_pastes()
-    print 'Converting users'
-    convert_users()
     print 'Converting groups'
     convert_groups()
     print 'Converting forum data'
