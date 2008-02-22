@@ -105,5 +105,4 @@ class AdvancedSessionMiddleware(object):
                                 max_age=max_age, expires=expires,
                                 domain=settings.SESSION_COOKIE_DOMAIN,
                                 secure=settings.SESSION_COOKIE_SECURE or None)
-
         return response

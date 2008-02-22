@@ -43,7 +43,7 @@
       <th class="last_post">Letzte Antwort</th>
     </tr>
     {%- for topic in topics %}
-      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+    <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
           {{ topic_icon(topic) }}
         </td>
@@ -63,7 +63,7 @@
         <td class="post_count">
           {{ topic.post_count }} / {{ topic.view_count }}
         </td>
-        <td class="last_post">{% if forum.last_post %}
+        <td class="last_post">{% if forum.last_post_id %}
           <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
           von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
@@ -74,6 +74,7 @@
         <td colspan="5">
           Es existieren noch keine Themen. <a href="{{ forum|url('newtopic') }}">Erstelle</a> doch das Erste!</td>
       </tr>
+    #}
     {% endfor %}
     </tbody>
   </table>

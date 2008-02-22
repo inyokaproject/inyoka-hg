@@ -40,7 +40,8 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
                                MoveTopicForm, ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-
+from inyoka.forum.database import Session, SATopic, SAForum
+from sqlalchemy.orm import eagerload
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -105,26 +106,38 @@ def forum(request, slug, page=1):
     Return a single forum to show a topic list.
     """
     f = Forum.objects.get(slug=slug)
-    if f.parent is None:
+    if f.parent_id is None:
         return HttpResponseRedirect(href('forum'))
-    if not have_privilege(request.user, f, 'read'):
+    privs = get_forum_privileges(request.user, f)
+    if not privs['read']:
         return abort_access_denied(request)
     fmsg = f.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    topics = Topic.objects.by_forum(f.id)
-    if not have_privilege(request.user, f, 'moderate'):
-        topics = topics.filter(hidden=False)
-    pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
+    key = 'forum/topics/%d%s/%d' % (f.id, privs['moderate'] and 'm' or '', page)
+    data = cache.get(key)
+    if not data:
+        topics = SATopic.query.options(eagerload('author'), eagerload('last_post'),
+            eagerload('last_post.author')).filter_by(forum_id=f.id)
+        if privs['moderate']:
+            topics = topics.filter_by(hidden=False)
+        subforums = SAForum.query.options(eagerload('last_post'),
+                eagerload('last_post.author')).filter_by(parent_id=f.id).all()
+        pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
+        data = {
+            'forum':        f,
+            'subforums':    subforums,
+            'topics':       list(pagination.get_objects()),
+            'pagination':   pagination.generate()
+        }
+        Session.remove()
+        if page <= 4:
+            cache.set(key, data)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
-    return {
-        'forum':        f,
-        'subforums':    filter_invisible(request.user, f.children),
-        'topics':       list(pagination.get_objects()),
-        'pagination':   pagination.generate()
-    }
+    data['subforums'] = filter_invisible(request.user, data['subforums'])
+    return data
 
 
 @templated('forum/topic.html')

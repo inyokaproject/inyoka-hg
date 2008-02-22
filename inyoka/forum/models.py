@@ -559,6 +559,7 @@ class PollManager(models.Manager):
                                                                         100))
 
 
+
 class Forum(models.Model):
     """
     This is a forum that may contain subforums or threads.
@@ -1154,3 +1155,4 @@ class WelcomeMessage(models.Model):
     def render_text(self, request=None, format='html'):
         context = RenderContext(request or r.request, simplified=True)
         return parse(self.text).render(context, format)
+
