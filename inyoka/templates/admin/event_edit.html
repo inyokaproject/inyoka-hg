@@ -1,0 +1,59 @@
+{#
+    templates.admin.date_edit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Template for editing or creating an calendar entry.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+
+{% if not date %}
+  {% set navigation_trace = [
+      (href('admin', 'ikhaya', 'dates', 'new'), 'Termin erstellen')
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (date|url('edit'), 'Termin „%s“ bearbeiten'|format(date.title|e))
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'ikhaya'), 'Ikhaya'),
+    (href('admin', 'ikhaya', 'dates'), 'Termine')
+  ] + navigation_trace %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" enctype="multipart/form-data">
+  {%- if form.errors %}
+  <ul>{{ form.errors }}</ul>
+  {%- endif %}
+  <dt><label for="id_name">Name:</label></dt>
+  <dd>{{ form.name }}</dd>
+  <dt>Zeitpunkt:</dt>
+  <dd><label for="id_date">Datum:</label> {{ form.date }}</dd>
+  <dd><label for="id_time">Uhrzeit:</label> {{ form.time }}</dd>
+  <dt><label for="id_description">Details:</label></dt>
+  <dd>{{ form.description }}</dd>
+  <dt>Ort:</dt>
+  <dd><label for="id_location_town">Stadt:</label> {{ form.location_town }}</dd>
+  <dd><label for="id_location">Veranstaltungsort:</label> {{ form.location }}</dd>
+
+  <dt>Koordinaten:</dt>
+  <dd><label for="id_location_long">Breite:</label> {{ form.location_long }}</dd>
+  <dd><label for="id_location_lat">Länge:</label> {{ form.location_lat }}</dd>
+
+  <p><input type="submit" value="Speichern" /></p>
+</form>
+
+<script type="text/javascript">
+  /* <![CDATA[ */
+  var date = new DateTimeField('input[@name="date"]');
+  var text = new WikiEditor('textarea[@name="description"]');
+  /* ]]> */
+</script>
+{% endblock %}
