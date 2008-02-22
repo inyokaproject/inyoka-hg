@@ -24,17 +24,17 @@
 
 {% block admin_content %}
 <form action="" method="post" id="user_edit_form">
-  <h3>Einstellungen von {{ user.username|e }}</h3>
-  <h4>Forum-Einstellungen</h4>
+  <h3>Forum-Einstellungen</h3>
   <p>
     {% if user_groups %}
-    Der Benutzer {{ user.username|e }} gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+    Der Benutzer „{{ user.username|e }}“ gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
     {% else %}
     Der Benutzer {{ user.username|e }} gehört aktuell keinen Gruppen an.
     {% endif %}
 
   <dl>
-  {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', inline=true) }}
+  {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', 'banned', inline=true) }}
+  <span class="note_link bann_user_event">Benutzer sperren</span>
     <dt>Gruppenzugehörigkeiten editieren:</dt>
     <dd>
       <table class="user_groups">
@@ -60,11 +60,11 @@
   {{ h.render_form(form, 'date_joined', inline=true) }}
   <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
   </dl>
-  <h4>Persönliche Details von {{ user.username|e }}</h4>
+  <h3>Persönliche Details von {{ user.username|e }}</h3>
   {{ h.render_form(form, 'website', 'interests', 'location') }}
-  <h4>Benachrichtigungs-Einstellungen</h4>
+  <h3>Benachrichtigungs-Einstellungen</h3>
   {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
-  <h4>Sonstige Einstellungen</h4>
+  <h3>Sonstige Einstellungen</h3>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>
     <input type="submit" value="Speichern" />
@@ -73,7 +73,6 @@
 <script type="text/javascript">
   /* <![CDATA[ */
   var signature = new WikiEditor('textarea[@name="signature"]');
-  var date_joined = null;
   var forum_rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
     {{ forum_privileges|jsonencode }});
   var select_form = new GroupBox('#user_edit_box',
@@ -81,17 +80,43 @@
     {{ not_joined_groups|sort|jsonencode }}
   );
 
-  var dj_ui_switcher = $('.date_joined_ui_switcher');
-  dj_ui_switcher.click(function() {
-    if (date_joined instanceof DateTimeField) {
-      date_joined.destroy();
-      date_joined = null;
-      dj_ui_switcher.text('grafischen Editor aktivieren');
-    } else {
-      date_joined = new DateTimeField('input[@name="date_joined"]');
-      dj_ui_switcher.text('grafischen Editor deaktivieren');
-    }
-  })
+  var banned = $('input[@name="banned"]');
+  var bann_user_event = $('.bann_user_event');
+
+  if (banned.val()) {
+    bann_user_event.text('Sperrung aufheben');
+    banned = new DateTimeField('input[@name="banned"]', true);
+  } else {
+    banned.hide()
+  }
+
+  bann_user_event
+    .click(function() {
+      if (banned instanceof DateTimeField) {
+        banned.destroy();
+        banned = $('input[@name="banned"]')
+          .val('')
+          .hide();
+        bann_user_event.text('Benutzer sperren')
+      } else {
+        banned = new DateTimeField('input[@name="banned"]', true);
+        bann_user_event.text('Sperrung aufheben');
+      }
+    });
+
+
+  var date_joined = null;
+  var dj_ui_switcher = $('.date_joined_ui_switcher')
+    .click(function() {
+      if (date_joined instanceof DateTimeField) {
+        date_joined.destroy();
+        date_joined = null;
+        dj_ui_switcher.text('grafischen Editor aktivieren');
+      } else {
+        date_joined = new DateTimeField('input[@name="date_joined"]');
+        dj_ui_switcher.text('grafischen Editor deaktivieren');
+      }
+    });
   /* ]]> */
 </script>
 {% endblock %}

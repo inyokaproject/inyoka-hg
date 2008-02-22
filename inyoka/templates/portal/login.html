@@ -18,10 +18,18 @@
 {% block portal_content %}
   <h3>Login</h3>
   {%- if failed %}
-  {%- if not inactive %}
+  {%- if not inactive and not banned %}
   <div class="message fail">
     Du konntest nicht eingeloggt werden, da das Passwort für den Benutzer
     „{{ username|e }}“ falsch war oder der Benutzer nicht existiert.
+  </div>
+  {%- elif banned %}
+  <div class="message fail">
+    Du konntest nicht eingeloggt werden, da der Benutzer „{{ username|e }}“
+    derzeit gebannt ist.<br />
+    Du wurdest darüber weitgehend informiert.
+    Solltest du dem nicht zustimmen oder ein Irrtum vorliegen so schreibe
+    bitte eine Nachtricht an ... {# XXX: E-Mail #}
   </div>
   {%- else %}
   <div class="message fail">

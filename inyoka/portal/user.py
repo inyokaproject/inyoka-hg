@@ -6,15 +6,15 @@
     Our own user model used for implementing our own
     permission system and our own administration center.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christopher Grebs,
-                                  Benjamin Wiegand, Christoph Hack.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs,
+                                       Benjamin Wiegand, Christoph Hack.
     :license: GNU GPL.
 """
+from datetime import datetime
 from sha import sha
 from md5 import md5
 import os
 import cPickle
-import datetime
 from os import path
 from PIL import Image
 from StringIO import StringIO
@@ -31,6 +31,14 @@ from inyoka.middlewares.registry import r
 
 UNUSABLE_PASSWORD = '!'
 _ANONYMOUS_USER = None
+
+
+class UserBanned(Exception):
+    """
+    Simple exception that is raised while
+    logging in so we can give the user a better
+    exception
+    """
 
 
 def get_hexdigest(salt, raw_password):
@@ -72,7 +80,7 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def create_user(self, username, email, password=None):
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         user = self.model(
             None, username,
             email.strip().lower(),
@@ -118,12 +126,15 @@ class UserManager(models.Manager):
         request.user = self.get_anonymous_user()
 
     def authenticate(self, username, password):
-        try:
-            user = User.objects.get(username=username)
-            if user.check_password(password, auto_convert=True):
-                return user
-        except User.DoesNotExist:
-            return None
+        user = User.objects.get(username=username)
+
+        if user.banned is not None:
+            if not (user.banned.utctimetuple()[:3] ==
+                    datetime.utcnow().utctimetuple()[:3]):
+                raise UserBanned()
+
+        if user.check_password(password, auto_convert=True):
+            return user
 
     def get_anonymous_user(self):
         global _ANONYMOUS_USER
@@ -155,16 +166,18 @@ class User(models.Model):
     email = models.CharField('E-Mail-Adresse', blank=True, unique=True, null=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
-    last_login = models.DateTimeField('Letzter Login', default=datetime.datetime.utcnow)
-    date_joined = models.DateTimeField('Anmeldedatum', default=datetime.datetime.utcnow)
+    last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)
+    date_joined = models.DateTimeField('Anmeldedatum', default=datetime.utcnow)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
+    banned = models.DateTimeField('Gesperrt', null=True)
+
     # profile attributes
     post_count = models.IntegerField(u'Beiträge', default=0)
     avatar = models.ImageField('Avatar', upload_to='portal/avatars',
-                                blank=True, null=True)
+                               blank=True, null=True)
     jabber = models.CharField('Jabber', max_length=200, blank=True)
     icq = models.CharField('ICQ', max_length=16, blank=True)
     msn = models.CharField('MSN', max_length=200, blank=True)
@@ -208,6 +221,7 @@ class User(models.Model):
 
     is_anonymous = property(lambda x: x.id == 1)
     is_authenticated = property(lambda x: not x.is_anonymous)
+    is_banned = property(lambda x: x.banned is not None)
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
@@ -291,7 +305,7 @@ class User(models.Model):
         }[action])
 
     def login(self, request):
-        self.last_login = datetime.datetime.utcnow()
+        self.last_login = datetime.utcnow()
         self.save()
         request.session['uid'] = self.id
         request.session.pop('_sk', None)
