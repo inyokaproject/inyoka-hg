@@ -161,5 +161,8 @@ INSTALLED_APPS = (
     'inyoka.admin',
 )
 
+# some terms to exclude by default to maintain readability
+SEARCH_DEFAULT_EXCLUDE = ('Cstammtisch',)
+
 # export only uppercase keys
 __all__ = list(x for x in locals() if x.isupper())
