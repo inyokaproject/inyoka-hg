@@ -50,6 +50,7 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^groups/$', 'groups'),
     (r'^groups/edit/(?P<name>.*)/$', 'groups_edit'),
     (r'^groups/new/$', 'groups_edit'),
+    (r'^styles/$', 'styles'),
 
 )
 

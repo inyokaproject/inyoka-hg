@@ -68,9 +68,9 @@ def convert_wiki():
     f = file('pagelist', 'r')
     l = cPickle.load(f)
     f.close()
-    for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Wiki/Syntax/Tabellen']):
+    for i, moin_name in enumerate(['Programme starten']):
         #if 'Hardwaredatenbank' in name or 'Spelling' in name:
         #    continue
         name = normalize_pagename(moin_name)

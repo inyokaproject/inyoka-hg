@@ -73,7 +73,7 @@ class Storage(models.Model):
     Use the `storage` object for accessing it (it behaves like a dict).
     """
     key = models.CharField(u'Schlüssel', max_length=200)
-    value = models.CharField(u'Wert', max_length=200)
+    value = models.TextField(u'Wert')
 
     def __unicode__(self):
         return self.key

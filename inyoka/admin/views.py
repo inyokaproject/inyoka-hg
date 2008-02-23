@@ -24,7 +24,8 @@ from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
                                ConfigurationForm, EditUserForm, EditDateForm, \
-                               EditForumForm, EditGroupForm, CreateUserForm
+                               EditForumForm, EditGroupForm, CreateUserForm, \
+                               EditStyleForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
@@ -648,6 +649,7 @@ def edit_user(request, username):
     }
 
 
+@require_manager
 @templated('admin/new_user.html')
 def new_user(request):
     if request.method == 'POST':
@@ -766,6 +768,8 @@ def groups_edit(request, name=None):
         'is_new': new,
     }
 
+
+@require_manager
 @templated('admin/events.html')
 def events(request, show_all=False):
     if show_all:
@@ -776,4 +780,20 @@ def events(request, show_all=False):
     return {
         'table': sortable,
         'events': sortable.get_objects(),
+    }
+
+
+@require_manager
+@templated('admin/styles.html')
+def styles(request):
+    key = 'markup_styles'
+    if request.method == 'POST':
+        form = EditStyleForm(request.POST)
+        if form.is_valid():
+            storage[key] = form.data['styles']
+            flash(u'Das Stylesheet wurde erfolgreich gespeichert', True)
+    else:
+        form = EditStyleForm(initial={'styles': storage.get(key, u'')})
+    return {
+        'form': form
     }
