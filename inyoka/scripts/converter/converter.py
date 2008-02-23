@@ -14,7 +14,7 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
@@ -182,7 +182,7 @@ def convert_users():
         signature = ''
         if row.user_sig_bbcode_uid:
             signature = bbcode.parse(row.user_sig.replace(
-                    ':%s]' % row.user_sig_bbcode_uid,']')
+                    ':%s' % row.user_sig_bbcode_uid,'')
                 ).to_markup()
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
@@ -333,8 +333,8 @@ def convert_forum():
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     for row in select_blocks(s):
-        text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s]' % \
-            row[post_text_table.c.bbcode_uid], ']')).to_markup()
+        text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
+            row[post_text_table.c.bbcode_uid], '')).to_markup()
         data = {
             'pk': row[post_table.c.post_id],
             'topic_id': row[post_table.c.topic_id],
