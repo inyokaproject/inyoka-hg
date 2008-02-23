@@ -14,14 +14,14 @@ table.admin_control td {
   width: 25%;
 }
 
-table.admin_control td a {
+table.admin_control td :link, table.admin_control td :visited {
   text-decoration: none;
   color: #888;
   display: block;
   padding: 10px;
 }
 
-table.admin_control td:hover a {
+table.admin_control td:hover :link, table.admin_control td:hover :visited {
   color: #444;
 }
 
