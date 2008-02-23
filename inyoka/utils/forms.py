@@ -20,18 +20,28 @@ from inyoka.middlewares.registry import r
 
 DATETIME_INPUT_FORMATS = (
     '%d.%m.%Y %H:%M', # default output format
-    '%Y-%m-%d %H:%M:%S',
-    '%Y-%m-%d %H:%M',
     '%d.%m.%Y %H:%M:%S',
-    '%d.%m.%Y %H:%M',
-    '%d.%m.%y %H:%M:%S',
     '%d.%m.%y %H:%M',
-    '%Y-%m-%d, %H:%M:%S',
+    '%d.%m.%y %H:%M:%S',
+    '%Y-%m-%d %H:%M',
+    '%Y-%m-%d %H:%M:%S',
     '%Y-%m-%d, %H:%M',
-    '%d.%m.%Y, %H:%M:%S',
+    '%Y-%m-%d, %H:%M:%S',
     '%d.%m.%Y, %H:%M',
-    '%d.%m.%y, %H:%M:%S',
+    '%d.%m.%Y, %H:%M:%S',
     '%d.%m.%y, %H:%M',
+    '%d.%m.%y, %H:%M:%S',
+)
+
+DATE_INPUT_FORMATS = (
+    '%d.%m.%Y', # default output format
+    '%d.%m.%y',
+    '%Y-%m-%d',
+)
+
+TIME_INPUT_FORMATS = (
+    '%H:%M:%S',
+    '%H:%M',
 )
 
 
