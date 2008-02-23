@@ -14,7 +14,7 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntuusers?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
@@ -530,7 +530,7 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'
