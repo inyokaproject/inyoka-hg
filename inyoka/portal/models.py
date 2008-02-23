@@ -248,9 +248,9 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
     time = models.TimeField(blank=True, null=True) # None -> whole day
-    description = models.TextField()
+    description = models.TextField(blank=True)
     author = models.ForeignKey(User)
-    location = models.CharField(max_length=40, blank=True)
+    location = models.CharField(max_length=50, blank=True)
     location_town = models.CharField(max_length=20, blank=True)
     location_lat = models.FloatField(u'Koordinaten (Länge)',
                                      blank=True, null=True)
@@ -260,9 +260,9 @@ class Event(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('portal', 'calendar', self.slug),
-            'edit': ('admin', 'event', 'edit', self.id),
-            'delete': ('admin', 'event', 'delete', self.id),
-            'new': ('admin', 'event', 'new'),
+            'edit': ('admin', 'events', 'edit', self.id),
+            'delete': ('admin', 'events', 'delete', self.id),
+            'new': ('admin', 'events', 'new'),
         }[action])
 
     @property

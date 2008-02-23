@@ -50,7 +50,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  PrivateMessageEntry, PRIVMSG_FOLDERS, \
                                  Event
-from inyoka.portal.user import User, Group, deactivate_user
+from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 
 
@@ -274,13 +274,22 @@ def login(request):
     # enforce an existing session
     cookie_error_link = test_session_cookie(request)
 
-    failed = inactive = False
+    failed = inactive = banned = False
     if request.method == 'POST' and cookie_error_link is None:
         form = LoginForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            user = User.objects.authenticate(username=data['username'],
-                                             password=data['password'])
+            try:
+                user = User.objects.authenticate(
+                    username=data['username'],
+                    password=data['password'])
+            except User.DoesNotExist:
+                failed = True
+                user = None
+            except UserBanned:
+                failed = banned = True
+                user = None
+
             if user is not None:
                 if user.is_active:
                     if data['permanent']:
@@ -290,9 +299,6 @@ def login(request):
                     user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
-
-            # username doesn't match password or user isn't activate
-            failed = True
     else:
         form = LoginForm()
 
@@ -300,6 +306,7 @@ def login(request):
         'form':         form,
         'failed':       failed,
         'inactive':     inactive,
+        'banned':       banned,
         'cookie_error': cookie_error_link is not None,
         'retry_link':   cookie_error_link
     }
@@ -338,7 +345,8 @@ def search(request):
             d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=d['date_begin'], date_end=d['date_end'],
-            component=area
+            component=area,
+            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
         )
         if len(results.results ) > 0:
             return TemplateResponse('portal/search_results.html', {

@@ -84,6 +84,7 @@
       <dd>
         {{ form.att_ids }}
         {{ form.polls }}
+        {{ h.field_errors(form.errors.__all__) }}
         <input type="submit" value="Absenden" name="send" />
         <input type="submit" value="Vorschau" name="preview" />
       </dd>

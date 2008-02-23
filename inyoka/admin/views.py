@@ -9,8 +9,9 @@
     :license: GNU GPL.
 """
 from copy import copy as ccopy
-from datetime import datetime
-from django.http import HttpResponse, HttpResponseRedirect
+from datetime import datetime, date
+from django.http import HttpResponse, HttpResponseRedirect, \
+                        Http404 as PageNotFound
 from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
@@ -23,7 +24,7 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditUserForm, EditDateForm, \
+                               ConfigurationForm, EditUserForm, EditEventForm,\
                                EditForumForm, EditGroupForm, CreateUserForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
@@ -579,6 +580,9 @@ def edit_user(request, username):
             if data['new_password']:
                 user.set_password(data['new_password'])
 
+            if data['banned'] != user.banned:
+                user.banned = data['banned']
+
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
@@ -601,7 +605,6 @@ def edit_user(request, username):
                              request.POST.getlist('user_groups_joined')]
             groups_not_joined = [groups.get(name=gn) for gn in
                                 request.POST.getlist('user_groups_not_joined')]
-            user = User.objects.get(username=username)
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
 
@@ -767,13 +770,85 @@ def groups_edit(request, name=None):
 @templated('admin/events.html')
 def events(request, show_all=False):
     if show_all:
-        objects = Event.objects.filter(date__gt=date.today())
-    else:
         objects = Event.objects.all()
+    else:
+        objects = Event.objects.filter(date__gt=date.today())
     sortable = Sortable(objects, request.GET, '-date')
     return {
         'table': sortable,
         'events': sortable.get_objects(),
+        'show_all': show_all,
     }
 
-    
+
+@templated('admin/event_edit.html')
+def event_edit(request, id=None):
+    if request.method == 'POST':
+        form = EditEventForm(request.POST)
+        if form.is_valid():
+            if id is not None:
+                try:
+                    event = Event.objects.get(id=id)
+                except Event.DoesNotExist:
+                    raise PageNotFound
+                mode = 'edit'
+            else:
+                event = Event()
+                mode = 'new'
+            data = form.cleaned_data
+            event.name = data['name']
+            event.date = data['date']
+            event.time = data['time']
+            event.description = data['description']
+            event.author = request.user
+            event.location = data['location']
+            event.location_town = data['location_town']
+            if data['location_lat'] and data['location_long']:
+                event.location_lat = data['location_lat']
+                event.location_long = data['location_long']
+            event.save()
+            flash('Die Veranstaltung wurde gespeichert.', True)
+            return HttpResponseRedirect(event.get_absolute_url())
+    else:
+        if id is not None:
+            try:
+                event = Event.objects.get(id=id)
+            except Event.DoesNotExist:
+                raise PageNotFound
+            form = EditEventForm({
+                'name': event.name,
+                'date': event.date,
+                'time': event.time,
+                'description': event.description,
+                'location_town': event.location_town,
+                'location': event.location,
+                'location_lat': event.location_lat,
+                'location_long': event.location_long,
+            });
+            mode = 'edit'
+        else:
+            form = EditEventForm()
+            event = None
+            mode = 'new'
+    return {
+        'form': form,
+        'mode': mode,
+        'event': event,
+    }
+
+@templated('admin/event_delete.html')
+def event_delete(request, id):
+    try:
+        event = Event.objects.get(id=id)
+    except Event.DoesNotExist:
+        raise PageNotFound
+    if request.method == 'POST':
+        if request.POST['confirm']:
+            event.delete()
+            flash(u'Die Veranstaltung „%s“ wurde gelöscht.'
+                  % escape(event.name), True)
+        return HttpResponseRedirect(href('admin', 'events'))
+    else:
+        return {'event': event}
+
+

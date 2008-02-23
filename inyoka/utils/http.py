@@ -11,7 +11,6 @@
 """
 from django.http import HttpResponse, Http404 as PageNotFound
 from django.core.exceptions import ObjectDoesNotExist
-from inyoka.utils.templating import render_template
 
 
 def templated(template_name, status=None, modifier=None,
@@ -89,3 +88,7 @@ class DirectResponse(Exception):
         Exception.__init__(self, response)
         self.message = 'direct response %r' % response
         self.response = response
+
+
+# circular import
+from inyoka.utils.templating import render_template

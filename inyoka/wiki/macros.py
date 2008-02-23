@@ -734,6 +734,17 @@ class NewPages(Macro):
         return result
 
 
+class Newline(Macro):
+    """
+    This macro just forces a new line.
+    """
+
+    is_static = True
+
+    def build_node(self):
+        return nodes.Newline()
+
+
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -753,7 +764,8 @@ ALL_MACROS = {
     u'Vorlage':             Template,
     u'Bild':                Picture,
     u'Datum':               Date,
-    u'NeueSeiten':          NewPages
+    u'NeueSeiten':          NewPages,
+    u'BR':                  Newline,
 }
 
 

@@ -1,0 +1,55 @@
+{#
+    admin/events.html
+    ~~~~~~~~~~~~~~~~
+
+    This is the overview of the events.
+
+    :copyright: 2008 by Marian Sigler.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'events'), 'Veranstaltungen'),
+  ] %}
+{% if show_all %}{% set navigation_trace = navigation_trace + [(href('admin', 'events', 'all'), 'alle anzeigen')] %}{% endif %}
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Portal</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>Veranstaltungen</h3>
+<table class="events">
+  <thead>
+  <tr>
+    <th class="name">{{ table.get_html('name', 'Name') }}</th>
+    <th class="date">{{ table.get_html('date', 'Zeitpunkt') }}</th>
+    <th class="actions">Aktionen</th>
+  </tr>
+  </thead>
+  <tbody>
+  {%- for event in events %}
+  <tr>
+    <td class="name"><a href="{{ event|url }}">{{ event.name|e }}</a></td>
+    <td class="date">{{ event.date|e }}</td>
+    <td class="actions">
+      <a href="{{ event|url('edit') }}">Bearbeiten</a>
+      <a href="{{ event|url('delete') }}">Löschen</a>
+    </td>
+  </tr>
+  {%- else %}
+  <tr>
+    <td colspan="3">Es wurden noch keine Veranstaltungen eingetragen, <a href="{{ href('admin', 'events', 'new') }}">erstelle</a> jetzt die erste!</td>
+  </tr>
+  {%- endfor %}
+  </tbody>
+</table>
+<p class="linklist">
+<a href="{{ href('admin', 'events', 'new') }}">Neue Veranstaltung eintragen</a> |
+{%- if show_all %}
+<a href="{{ href('admin', 'events') }}">Nur zukünftige Veranstaltungen anzeigen</a>
+{%- else %}
+<a href="{{ href('admin', 'events', 'all') }}">Auch vergangene Veranstaltungen anzeigen</a>
+{%- endif %}
+</p>
+{% endblock %}

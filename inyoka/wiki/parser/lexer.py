@@ -87,9 +87,14 @@ class rule(object):
 
 class Lexer(object):
     rules = {
-        '*': ruleset(
+        'everything': ruleset(
             include('block'),
-            include('inline')
+            include('inline'),
+            include('links')
+        ),
+        'inline_with_links': ruleset(
+            include('inline'),
+            include('links')
         ),
         'block': ruleset(
             rule('^##.*?(\n|$)(?m)', None),
@@ -126,8 +131,10 @@ class Lexer(object):
             rule(r'\[size\s*=\s*(.*?)\s*\]', bygroups('font_size'),
                  enter='size'),
             rule(r'\[font\s*=\s*(.*?)\s*\]', bygroups('font_face'),
-                 enter='font'),
-            rule(r'\[\s*([^:]+?)?\s*:(?!//)\s*((?:::|[^:])*)\s*:\s*',
+                 enter='font')
+        ),
+        'links': ruleset(
+            rule(r'\[\s*([^:\]]+?)?\s*:(?!//)\s*((?:::|[^:])*)\s*:\s*',
                  astuple('link_target'), enter='wiki_link'),
             rule(r'(\[)(\S+)(\])', bygroups('external_link_begin',
                  'link_target', 'external_link_end')),
@@ -146,24 +153,24 @@ class Lexer(object):
         'conflict': ruleset(
             rule(r'^={40}\s*$(?m)', 'conflict_switch'),
             rule(r'^>{40}\s*$(?m)', leave=1),
-            include('*')
+            include('everything')
         ),
         # In difference to moin we allow arbitrary markup in headlines.
         'headline': ruleset(
             rule(r'\s*=+\s*$(?m)', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'definition': ruleset(
             rule(r'(\n|$)(?m)', leave=1),
-            include('*')
+            include('inline_with_links')
         ),
         'strong': ruleset(
             rule("'''", leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'emphasized': ruleset(
             rule("''", leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'escaped_code': ruleset(
             rule('``', leave=1),
@@ -173,47 +180,47 @@ class Lexer(object):
         ),
         'underline': ruleset(
             rule('__', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'stroke': ruleset(
             rule('\)--', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'small': ruleset(
             rule('-~', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'big': ruleset(
             rule(r'\+~', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'sub': ruleset(
             rule(r',,', leave=1),
-            include('inline'),
+            include('inline_with_links')
         ),
         'sup': ruleset(
             rule(r'\^\^', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'footnote': ruleset(
             rule(r'\)\)', leave=1),
-            include('*')
+            include('everything')
         ),
         'list_item': ruleset(
             rule(r'(\n|$)(?m)', leave=1),
-            include('*')
+            include('everything')
         ),
         'color': ruleset(
             rule(r'\[/color\]', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'size': ruleset(
             rule(r'\[/size\]', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         'font': ruleset(
             rule(r'\[/font\]', leave=1),
-            include('inline')
+            include('inline_with_links')
         ),
         # links
         'wiki_link': ruleset(
@@ -250,7 +257,7 @@ class Lexer(object):
         'table_contents': ruleset(
             rule(r'\|\|\s*?(\n|$)(?m)', leave=1),
             rule(r'\|\|', 'table_col_switch', switch='table_row'),
-            include('*')
+            include('everything')
         ),
         # a box, works like a single table cell but generates a div
         'box': ruleset(
@@ -263,7 +270,7 @@ class Lexer(object):
         ),
         'box_contents': ruleset(
             rule(r'^\|\}\}\s*$(?m)', leave=1),
-            include('*')
+            include('everything')
         ),
         # the macro base is that part where the lexer waits for an upcoming
         # argument list start parenthesis. It will skip whitespace but fall
@@ -346,7 +353,7 @@ class Lexer(object):
         escaped = False
         pos = 0
         end = len(string)
-        stack = [(None, '*')]
+        stack = [(None, 'everything')]
         rule_cache = {}
         text_buffer = []
         add_text = text_buffer.append

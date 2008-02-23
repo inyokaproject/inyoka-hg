@@ -16,6 +16,10 @@ a.missing {
   float: right;
 }
 
+.image-left {
+  float: left;
+}
+
 div.bash {
   color: white;
   font-family: monospace;
