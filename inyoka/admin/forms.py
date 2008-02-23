@@ -11,7 +11,8 @@
 from datetime import datetime
 from django import newforms as forms
 from inyoka.middlewares.registry import r
-from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS
+from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
+                               DATE_INPUT_FORMATS, TIME_INPUT_FORMATS
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 
 
@@ -133,15 +134,28 @@ class EditGroupForm(forms.Form):
                                                  required=False)
 
 
-class EditDateForm(forms.Form):
-    date = forms.DateTimeField(input_formats=DATETIME_INPUT_FORMATS)
-    title = forms.CharField()
-    description = forms.CharField(widget=forms.Textarea)
-
-
 class EditForumForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=100)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), label=u'Beschreibung', required=False)
     parent = forms.ChoiceField(label=u'Elternforum', required=False)
     position = forms.IntegerField(label=u'Position', initial=0)
+
+
+class EditEventForm(forms.Form):
+    name = forms.CharField(label=u'Name', max_length=50)
+    date = forms.DateField(label=u'Datum', input_formats=DATE_INPUT_FORMATS)
+    time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
+                           required=False)
+    description = forms.CharField(label=u'Details', required=False,
+                                  widget=forms.Textarea(attrs={'rows': 3}))
+    location_town = forms.CharField(label=u'Ort', max_length=20, required=False)
+    location = forms.CharField(label=u'Veranstaltungsort', max_length=50,
+                               required=False)
+    location_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+                                      required=False,
+                                      min_value=-180, max_value=180)
+    location_long = forms.DecimalField(label=u'Koordinaten (Breite)',
+                                      required=False,
+                                      min_value=-90, max_value=90)
+

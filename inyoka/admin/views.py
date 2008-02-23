@@ -10,7 +10,8 @@
 """
 from copy import copy as ccopy
 from datetime import datetime
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, \
+                        Http404 as PageNotFound
 from django.newforms.models import model_to_dict
 from inyoka.utils import slugify
 from inyoka.utils.http import templated
@@ -23,7 +24,7 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditUserForm, EditDateForm, \
+                               ConfigurationForm, EditUserForm, EditEventForm,\
                                EditForumForm, EditGroupForm, CreateUserForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
@@ -777,3 +778,32 @@ def events(request, show_all=False):
         'table': sortable,
         'events': sortable.get_objects(),
     }
+
+
+@templated('admin/event_edit.html')
+def event_edit(request, id=None):
+    if request.method == 'POST':
+        form = EditEventForm(request.POST)
+        if form.is_valid():
+            flash('Form war OK, aber das Speichern ist noch nicht eingebaut :-P')
+            return HttpResponseRedirect(href())
+    else:
+        if id is not None:
+            try:
+                event = Event.objects.get(id=id)
+            except Event.DoesNotExist:
+                raise PageNotFound
+            form = EditEventForm({
+                'name': event.name,
+                'date': event.date,
+                'time': event.time,
+                'description': event.description,
+                'location_town': event.location_town,
+                'location': event.location,
+                'location_lat': event.location_lat,
+                'location_long': event.location_long,
+            });
+        else:
+            form = EditEventForm()
+    return {'form': form}
+    
