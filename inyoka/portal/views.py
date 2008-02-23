@@ -345,7 +345,8 @@ def search(request):
             d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=d['date_begin'], date_end=d['date_end'],
-            component=area
+            component=area,
+            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
         )
         if len(results.results ) > 0:
             return TemplateResponse('portal/search_results.html', {
