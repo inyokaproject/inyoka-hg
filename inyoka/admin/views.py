@@ -785,8 +785,27 @@ def event_edit(request, id=None):
     if request.method == 'POST':
         form = EditEventForm(request.POST)
         if form.is_valid():
-            flash('Form war OK, aber das Speichern ist noch nicht eingebaut :-P')
-            return HttpResponseRedirect(href())
+            if id is not None:
+                try:
+                    event = Event.objects.get(id=id)
+                except Event.DoesNotExist:
+                    raise PageNotFound
+            else:
+                event = Event()
+            data = form.cleaned_data
+            event.name = data['name']
+            event.date = data['date']
+            event.time = data['time']
+            event.description = data['description']
+            event.author = request.user
+            event.location = data['location']
+            event.location_town = data['location_town']
+            if data['location_lat'] and data['location_long']:
+                event.location_lat = data['location_lat']
+                event.location_long = data['location_long']
+            event.save()
+            flash('Die Veranstaltung wurde gespeichert.', True)
+            return HttpResponseRedirect(event.get_absolute_url())
     else:
         if id is not None:
             try:
@@ -806,4 +825,19 @@ def event_edit(request, id=None):
         else:
             form = EditEventForm()
     return {'form': form}
-    
+
+    @templated('admin/event_delete.html')
+    def event_delete(request, id):
+        try:
+            event = Event.objects.get(id=id)
+        except Event.DoesNotExist:
+            raise PageNotFound
+        if request.method == 'POST':
+            if request.POST['confirm']:
+                flash(`dir(event)`)
+                # delete it
+            return HttpResponseRedirect(href('admin', 'events'))
+        else:
+            return {'event': event}
+
+

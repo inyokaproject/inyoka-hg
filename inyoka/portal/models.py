@@ -260,9 +260,9 @@ class Event(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('portal', 'calendar', self.slug),
-            'edit': ('admin', 'event', 'edit', self.id),
-            'delete': ('admin', 'event', 'delete', self.id),
-            'new': ('admin', 'event', 'new'),
+            'edit': ('admin', 'events', 'edit', self.id),
+            'delete': ('admin', 'events', 'delete', self.id),
+            'new': ('admin', 'events', 'new'),
         }[action])
 
     @property
