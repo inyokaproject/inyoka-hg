@@ -88,10 +88,6 @@ table.forum td.last_post {
     float: right;
 }
 
-.linklist {
-    color: #cccccc;
-}
-
 .status_solved {
     background-repeat: no-repeat;
     background-image: url('../img/forum_solved.png');
