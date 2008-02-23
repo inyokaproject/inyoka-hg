@@ -9,6 +9,7 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
+import os
 from inyoka.wiki.models import Page
 
 
@@ -93,7 +94,44 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ endif @> """,
     u'Befehl': u"""{{|<class="bash"><@ $arguments @>
 |}}""",
-    u'Tasten': u"""""",
+    u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
+<@ if ['hash','#'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/hash.png)]]
+<@ elseif ['^'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/zirklumflex.png)]]
+<@ elseif ['.'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fullstop.png)]]
+<@ elseif ['<'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/lt.png)]]
+<@ elseif ['plus'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/plus.png)]]
+<@ elseif [','] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/comma.png)]]
+<@ elseif ['alt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/alt.png)]]
+<@ elseif ['fn'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fn.png)]]
+<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/home.png)]]
+<@ elseif ['ende','end'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/end.png)]]
+<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/enter.png)]]
+<@ elseif ['','space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/space.png)]]
+<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/up.png)]]
+<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/backspace.png)]]
+<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/down.png)]]
+<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/left.png)]]
+<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/right.png)]]
+<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgup.png)]]
+<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgdown.png)]]
+<@ elseif ['strg','ctrl'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ctrl.png)]]
+<@ elseif ['alt gr','altgr'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/altgr.png)]]
+<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/shift.png)]]
+<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/caps.png)]]
+<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/del.png)]]
+<@ elseif ['win','windows'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/win.png)]]
+<@ elseif ['tab','tabulator'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tab.png)]]
+<@ elseif ['esc','escape'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/esc.png)]]
+<@ elseif ['druck','print'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/print.png)]]
+<@ elseif ['minus','-'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/dash.png)]]
+<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/apple.png)]]
+<@ elseif ['einfg','ins'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ins.png)]]
+<@ elseif ['ß','s'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/sz.png)]]
+<@ elseif ['`',"'"] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tick.png)]]
+<@ elseif $key matches_regex "^[a-zA-Z0-9]{1}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
+<@ endif @>
+<@ endfor @>""",
     u'Warnung': simple_box(u'Achtung!', 'warning'),
     u'Hinweis': simple_box(u'Hinweis:', 'notice'),
     u'Experten': simple_box(u'Experten-Info:', 'experts'),
@@ -101,14 +139,21 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
                           u'Seiten voraus:', 'knowledge'),
 }
 
-def create():
+def create_page_templates():
     for name, content in templates.iteritems():
         Page.objects.create(u'Wiki/Vorlagen/%s' % name,
                             u'# X-Preprocess: Page-Template\n%s' % content,
                             note=u'Vorlage automatisch erstellt')
 
     # attach key images to Tasten macro
-
+    pth = os.path.join(os.path.dirname(__file__), 'keys')
+    for name in os.listdir(pth):
+        f = file(os.path.join(pth, name))
+        name = name.replace('key-', '')
+        Page.objects.create(u'Wiki/Vorlagen/Tasten/%s' % name,
+                    u'', note=u'Vorlage automatisch erstellt',
+                    attachment=f.read(), attachment_filename=name)
+        f.close()
 
 if __name__ == '__main__':
-    create()
+    create_page_templates()

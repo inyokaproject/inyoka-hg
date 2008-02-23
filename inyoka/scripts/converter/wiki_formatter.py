@@ -11,16 +11,19 @@
 """
 from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
-from inyoka.scripts.create_templates import templates
+from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
 PAGE_TEMPLATE_NAME = 'Wiki/Vorlagen/%s'
 
-
+macros = []
 class InyokaFormatter(FormatterBase):
     list_depth = 0
 
     def macro(self, macro_obj, name, args):
+        if name not in macros:
+            macros.append(name)
+            print name
         # TODO: Not yet handled are Anmerkung, RandomMirror, RedirectCheck, Tasten
         if name in ['Anchor', 'Diskussion']:
             # The new parser does create human readable anchor names so we
@@ -29,15 +32,18 @@ class InyokaFormatter(FormatterBase):
             return u''
 
         replacements = {
-            'TableOfContents': 'Inhaltsverzeichnis',
-            'PageCount': 'Seitenzahl',
-            'LikePages': u'ÄhnlicheSeiten'
+            'TableOfContents': u'Inhaltsverzeichnis',
+            'PageCount':       u'Seitenzahl',
+            'LikePages':       u'ÄhnlicheSeiten',
+            'RecentChanges':   u'LetzteÄnderungen',
+            'OrphanedPages':   u'VerwaisteSeiten',
+            'WantedPages':     u'FehlendeSeiten',
         }
 
         if name in replacements:
             name = replacements[name]
 
-        elif name == 'Tag':
+        elif name == 'Tags':
             return u'# X-Tags: ' + args
 
         elif name in templates.keys() or name == 'Ausbaufaehig':
@@ -56,6 +62,11 @@ class InyokaFormatter(FormatterBase):
                     'rechts': 'right',
                     'zentriert': 'center'
                 }[args[2]]
+                if not args[1]:
+                    args.pop(1)
+                    args[1] = u'align=%s' % args[1]
+                    if len(args) > 2 and args[2]:
+                        args[2] = u"alt='%s'" % args[2]
 
         elif name == 'Pakete':
             args = [a.strip() for a in args.split(',')]
@@ -63,6 +74,42 @@ class InyokaFormatter(FormatterBase):
         elif name == 'Include':
             args = [a.strip() for a in args.split(',')]
             name = 'Vorlage'
+
+        elif name == 'ImageLink':
+            args = [a.strip() for a in args.split(',')]
+            img = args[0]
+            link = args[1]
+            height = u''
+            width = u''
+
+            if '/' not in img:
+                img = './' + img
+
+            for arg in args[1:]:
+                if args.startswith('alt='):
+                    img += ",alt='%s'" % arg[4:]
+                elif arg.startswith('width='):
+                    width = args[6:]
+                elif arg.startswith('height='):
+                    height = args[7:]
+
+            if width or height:
+                img += u',%sx%s' % (width, height)
+
+            img = u'[[Bild(%s)]]' % img
+
+            if '://' in link:
+                return u'[%s %s]' % (link, img)
+            else:
+                return u'[:%s:%s]' % (link, img)
+
+        elif name == 'PageList':
+            name = 'Seitenliste'
+            args = args.strip()
+            if args.startswith('regex:'):
+                args = [u'pattern=%s' % args[6:]
+            else:
+                args = []
 
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
@@ -166,10 +213,12 @@ class InyokaFormatter(FormatterBase):
     def table_row(self, on, attrs=None, **kw):
         if on:
             return u'\n'
-        return u''
+        return u'||'
 
     def table_cell(self, on, attrs=None, **kw):
-        return u'||'
+        if on:
+            return u'||'
+        return u''
 
     def linebreak(self, preformatted=1):
         if preformatted:
