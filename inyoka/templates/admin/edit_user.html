@@ -26,15 +26,18 @@
 <form action="" method="post" id="user_edit_form">
   <h3>Forum-Einstellungen</h3>
   <p>
-    {% if user_groups %}
+    {%- if user_groups %}
     Der Benutzer „{{ user.username|e }}“ gehört den folgenden Gruppen an: {% for group in user_groups|sort %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-    {% else %}
+    {%- else %}
     Der Benutzer {{ user.username|e }} gehört aktuell keinen Gruppen an.
-    {% endif %}
+    {%- endif %}
+  </p>
 
   <dl>
-  {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', 'banned', inline=true) }}
-  <span class="note_link bann_user_event">Benutzer sperren</span>
+    {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', 'banned', inline=true) }}
+    <dd class="note_link bann_user_event">
+      Benutzer sperren
+    </dd>
     <dt>Gruppenzugehörigkeiten editieren:</dt>
     <dd>
       <table class="user_groups">
@@ -58,7 +61,7 @@
     <dt>Ikhaya-Privilegien:</dt>
     <dd>{{ form.is_ikhaya_writer }} {{ form.is_ikhaya_writer.label }}</dd>
   {{ h.render_form(form, 'date_joined', inline=true) }}
-  <span class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</span>
+    <dd class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</dd>
   </dl>
   <h3>Persönliche Details von {{ user.username|e }}</h3>
   {{ h.render_form(form, 'website', 'interests', 'location') }}

@@ -24,8 +24,9 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
                                EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditUserForm, EditEventForm,\
-                               EditForumForm, EditGroupForm, CreateUserForm
+                               ConfigurationForm, EditUserForm, EditEventForm, \
+                               EditForumForm, EditGroupForm, CreateUserForm, \
+                               EditStyleForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
@@ -467,32 +468,33 @@ def forums_edit(request, id=None):
     new_forum = id is None
 
     def _add_field_choices():
-        categories = [(c.id, c.name) for c in Forum.objects.all()]
-        form.fields['parent'].choices = [(-1,"Kategorie")] + categories
+        query = Forum.objects.all()
+        if id:
+            query = query.exclude(id=id)
+        categories = [(c.id, c.name) for c in query]
+        form.fields['parent'].choices = [(-1, "-")] + categories
+
+    if id is None:
+        f = Forum()
+    else:
+        f = Forum.objects.get(id=id)
 
     if request.method == 'POST':
         form = EditForumForm(request.POST)
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            if id is None:
-                f = Forum()
-            else:
-                f = Forum.objects.get(id=id)
             f.name = data['name']
             f.position = data['position']
-            if id is None:
-                _check_forum_slug()
-            else:
-                if f.slug != data['slug']:
-                    if Forum.objects.filter(slug=data['slug']):
-                        form.errors['slug'] = (
-                            (u'Bitte einen anderen Slug angeben,'
-                             u'„%s“ ist schon vergeben.'
-                             % escape(data['slug'])),
-                        )
-                    else:
-                        f.slug = data['slug']
+            if f.slug != data['slug']:
+                if Forum.objects.filter(slug=data['slug']):
+                    form.errors['slug'] = (
+                        (u'Bitte einen anderen Slug angeben,'
+                         u'„%s“ ist schon vergeben.'
+                         % escape(data['slug'])),
+                    )
+                else:
+                    f.slug = data['slug']
 
             f.description = data['description']
             try:
@@ -513,7 +515,6 @@ def forums_edit(request, id=None):
         if id is None:
             form = EditForumForm()
         else:
-            f = Forum.objects.get(id=id)
             form = EditForumForm({
                 'name': f.name,
                 'slug': f.slug,
@@ -649,6 +650,7 @@ def edit_user(request, username):
     }
 
 
+@require_manager
 @templated('admin/new_user.html')
 def new_user(request):
     if request.method == 'POST':
@@ -767,6 +769,8 @@ def groups_edit(request, name=None):
         'is_new': new,
     }
 
+
+@require_manager
 @templated('admin/events.html')
 def events(request, show_all=False):
     if show_all:
@@ -781,6 +785,7 @@ def events(request, show_all=False):
     }
 
 
+@require_manager
 @templated('admin/event_edit.html')
 def event_edit(request, id=None):
     if request.method == 'POST':
@@ -836,6 +841,8 @@ def event_edit(request, id=None):
         'event': event,
     }
 
+
+@require_manager
 @templated('admin/event_delete.html')
 def event_delete(request, id):
     try:
@@ -850,5 +857,21 @@ def event_delete(request, id):
         return HttpResponseRedirect(href('admin', 'events'))
     else:
         return {'event': event}
+
+
+@require_manager
+@templated('admin/styles.html')
+def styles(request):
+    key = 'markup_styles'
+    if request.method == 'POST':
+        form = EditStyleForm(request.POST)
+        if form.is_valid():
+            storage[key] = form.data['styles']
+            flash(u'Das Stylesheet wurde erfolgreich gespeichert', True)
+    else:
+        form = EditStyleForm(initial={'styles': storage.get(key, u'')})
+    return {
+        'form': form
+    }
 
 

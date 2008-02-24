@@ -107,7 +107,7 @@ class InyokaFormatter(FormatterBase):
             name = 'Seitenliste'
             args = args.strip()
             if args.startswith('regex:'):
-                args = [u'pattern=%s' % args[6:]
+                args = [u'pattern=%s' % args[6:]]
             else:
                 args = []
 

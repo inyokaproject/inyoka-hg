@@ -17,10 +17,11 @@
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- set styles = ['main.css', 'markup.css'] + styles -%}
+    {%- set styles = ['main.css'] + styles -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}
+    <link rel="stylesheet" type="text/css" href="{{ href('portal', 'markup.css') }}" />
     <!--[if IE 6]><link rel="stylesheet" type="text/css" href="{{ href('static', 'style', 'ie.css') }}" /><![endif]-->
     {%- for title, url in feeds %}
     <link rel="alternate" href="{{ url|e }}" title="{{ title|e }}" type="application/atom+xml" />

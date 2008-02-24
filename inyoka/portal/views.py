@@ -52,7 +52,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
                                  Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
-
+from inyoka.utils.storage import storage
 
 
 @templated('errors/404.html')
@@ -83,6 +83,14 @@ def index(request):
         'record_time':      record_time
     }
 
+
+def markup_styles(request):
+    """
+    This function returns a CSS file that's used for formatting wiki markup.
+    It's content is editable in the admin panel.
+    """
+    resp = HttpResponse(storage['markup_styles'], mimetype='text/css')
+    return resp
 
 
 @templated('portal/whoisonline.html')
