@@ -1,10 +1,10 @@
 {#
-    templates.admin.date_edit
+    templates.admin.event_edit
     ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Template for editing or creating an calendar entry.
+    Template for editing or creating an event.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2008 by Marian Sigler.
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
@@ -13,16 +13,17 @@
 
 {% if not date %}
   {% set navigation_trace = [
-      (href('admin', 'ikhaya', 'dates', 'new'), 'Termin erstellen')
+      (href('admin', 'ikhaya', 'dates', 'new'), 'Veranstaltung eintragen')
     ] %}
 {% else %}
   {% set navigation_trace = [
-      (date|url('edit'), 'Termin „%s“ bearbeiten'|format(date.title|e))
+      (date|url('edit'), 'Veranstaltung „%s“ bearbeiten'|format(date.title|e))
     ] %}
 {% endif %}
+
 {% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
-    (href('admin', 'ikhaya', 'dates'), 'Termine')
+    (href('admin', 'events'), 'Veranstaltungen'),
   ] + navigation_trace %}
 
 {% block admin_content %}
@@ -52,8 +53,8 @@
 
 <script type="text/javascript">
   /* <![CDATA[ */
-  var date = new DateTimeField('input[@name="date"]');
-  var text = new WikiEditor('textarea[@name="description"]');
+//  var date = new DateTimeField('#id_date');
+  var text = new WikiEditor('#id_description');
   /* ]]> */
 </script>
 {% endblock %}

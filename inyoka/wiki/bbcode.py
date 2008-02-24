@@ -76,6 +76,7 @@ class Parser(object):
     def __init__(self, text, transformers=None):
         self.tokens = []
         self.pos = 0
+        text = text.replace('\r\n', '\n')
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS
         self.transformers = transformers

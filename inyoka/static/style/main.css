@@ -31,7 +31,7 @@ div.body {
   padding: 10px 0 20px 0;
 }
 
-a, :visited {
+:link, :visited {
   color: #956205;
   text-decoration: underline;
   cursor: pointer;
@@ -54,6 +54,16 @@ input[type="submit"], input[type="button"], input[type="reset"] {
 input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
   border: 1px #aaa inset;
   background-color: #f2f2f2!important;
+}
+
+input[type="submit"] {
+  border-color: #333;
+  font-weight: bold;
+}
+
+input.cancel[type="submit"] {
+  border-color: #777;
+  font-weight: normal;
 }
 
 input.disabled, input.disabled:active {
@@ -273,6 +283,10 @@ table.syntaxtable td.linenos {
   font-weight: bold;
   text-align: right;
   border-right: 1px solid #DDDDDD;
+}
+
+.linklist {
+    color: #cccccc;
 }
 
 /*** Header / Tabbar **********************************************************/

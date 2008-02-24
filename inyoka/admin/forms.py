@@ -148,7 +148,7 @@ class EditEventForm(forms.Form):
     time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
                            required=False)
     description = forms.CharField(label=u'Details', required=False,
-                                  widget=forms.Textarea(attrs={'rows': 3}))
+                                  widget=forms.Textarea(attrs={'rows': 6}))
     location_town = forms.CharField(label=u'Ort', max_length=20, required=False)
     location = forms.CharField(label=u'Veranstaltungsort', max_length=50,
                                required=False)
