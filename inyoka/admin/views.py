@@ -483,18 +483,15 @@ def forums_edit(request, id=None):
             data = form.cleaned_data
             f.name = data['name']
             f.position = data['position']
-            if id is None:
-                _check_forum_slug()
-            else:
-                if f.slug != data['slug']:
-                    if Forum.objects.filter(slug=data['slug']):
-                        form.errors['slug'] = (
-                            (u'Bitte einen anderen Slug angeben,'
-                             u'„%s“ ist schon vergeben.'
-                             % escape(data['slug'])),
-                        )
-                    else:
-                        f.slug = data['slug']
+            if f.slug != data['slug']:
+                if Forum.objects.filter(slug=data['slug']):
+                    form.errors['slug'] = (
+                        (u'Bitte einen anderen Slug angeben,'
+                         u'„%s“ ist schon vergeben.'
+                         % escape(data['slug'])),
+                    )
+                else:
+                    f.slug = data['slug']
 
             f.description = data['description']
             try:
