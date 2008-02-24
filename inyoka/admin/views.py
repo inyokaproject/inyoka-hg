@@ -468,8 +468,11 @@ def forums_edit(request, id=None):
     new_forum = id is None
 
     def _add_field_choices():
-        categories = [(c.id, c.name) for c in Forum.objects.all()]
-        form.fields['parent'].choices = [(-1,"Kategorie")] + categories
+        query = Forum.objects.all()
+        if id:
+            query = query.exclude(id=id)
+        categories = [(c.id, c.name) for c in query]
+        form.fields['parent'].choices = [(-1, "-")] + categories
 
     if id is None:
         f = Forum()
