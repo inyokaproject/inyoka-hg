@@ -117,12 +117,12 @@ def forum(request, slug, page=1):
     fmsg = f.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    key = 'forum/topics/%d%s/%d' % (f.id, privs['moderate'] and 'm' or '', page)
+    key = 'forum/topics/%d%s/%d' % (f.id, privs['moderate'] and 'm' or '', int(page))
     data = cache.get(key)
     if not data:
         topics = SATopic.query.options(eagerload('author'), eagerload('last_post'),
             eagerload('last_post.author')).filter_by(forum_id=f.id) \
-            .order_by(topic_table.c.last_post_id.desc())
+            .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
         if privs['moderate']:
             topics = topics.filter_by(hidden=False)
         subforums = SAForum.query.options(eagerload('last_post'),
