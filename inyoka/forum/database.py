@@ -20,7 +20,7 @@ from inyoka.forum.models import Forum, Topic, Post
 
 
 metadata = MetaData()
-engine = create_engine('%s://%s:%s@%s/%s?charset=utf8' % (
+engine = create_engine('%s://%s:%s@%s/%s' % (
     settings.DATABASE_ENGINE, settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST, settings.DATABASE_NAME))
 metadata.bind = engine
