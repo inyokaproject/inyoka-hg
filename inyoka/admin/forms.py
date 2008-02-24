@@ -21,7 +21,7 @@ class ConfigurationForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3}), required=False,
         help_text = u'Diese Nachricht wird auf allen Seiten über dem Inhalt '
                     u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer. '
-                    u'HTML ist hier erlaubt.')
+                    u'Muss valides XHTML sein.')
 
 
 class EditStaticPageForm(forms.Form):
