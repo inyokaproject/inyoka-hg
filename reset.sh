@@ -31,6 +31,7 @@ mkdir ./inyoka/media/wiki
 mkdir ./inyoka/media/wiki/attachments
 echo "Created media directories"
 
-# XXX: why are we converting data in the reset script?
-#python inyoka/scripts/converter/create_templates.py
-#echo "Created wiki templates"
+# question: why are we converting data in the reset script?
+# answer: it's not converting data but creating fundamentals
+python inyoka/scripts/converter/create_templates.py
+echo "Created wiki templates"
