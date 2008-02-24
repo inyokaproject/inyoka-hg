@@ -90,7 +90,6 @@ def markup_styles(request):
     It's content is editable in the admin panel.
     """
     resp = HttpResponse(storage['markup_styles'], mimetype='text/css')
-    resp['Last-Mofidied'] = 'Sat, 26 Jan 2008 04:06:58 GMT'
     return resp
 
 

@@ -64,17 +64,15 @@ def convert_wiki():
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    import cPickle
-    f = file('pagelist', 'r')
-    l = cPickle.load(f)
-    f.close()
+    #import cPickle
+    #f = file('pagelist', 'r')
+    #l = cPickle.load(f)
+    #f.close()
     #for i, moin_name in enumerate(l):
-    #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Programme starten']):
-        #if 'Hardwaredatenbank' in name or 'Spelling' in name:
-        #    continue
+    for i, moin_name in enumerate(request.rootpage.getPageList()):
+    #for i, moin_name in enumerate(['Programme starten']):
         name = normalize_pagename(moin_name)
-        #print i, ':', name
+        print i, ':', name
         page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -372,7 +370,6 @@ def convert_groups():
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
     from inyoka.portal.user import Group
-    from django.db import connection
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -420,7 +417,7 @@ def convert_ikhaya():
     from textile import textile
     from markdown import markdown
     from xml.sax import saxutils
-    from inyoka.ikhaya.models import Article, Category, Comment
+    from inyoka.ikhaya.models import Article, Category
 
     def linebreaks(value):
         """
@@ -530,7 +527,7 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'

@@ -164,7 +164,7 @@ def create_markup_stylesheet():
  * ~~~~~~~~~
  *
  * This is the stylesheet for the wiki markup.
- * 
+ *
  * :copyright: 2007 by Benjamin Wiegand.
  * :license: GNU GPL.
  */
