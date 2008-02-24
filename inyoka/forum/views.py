@@ -79,7 +79,10 @@ def index(request, category=None):
     """
     categories = Forum.objects.get_categories(depth=1)
     if category:
-        categories = categories.filter(slug=slugify(category))
+        categories = [categories.get(slug=slugify(category))]
+        fmsg = categories[0].find_welcome(request.user)
+        if fmsg is not None:
+            return welcome(request, fmsg.slug, request.path)
         set_session_info(request, (u'sieht sich die Forenübersicht der '
                                    u'Kategorie „%s“ an'
                                    % categories[0].name),
