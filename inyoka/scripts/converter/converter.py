@@ -23,7 +23,7 @@ PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
 from os import path
-from django.db import connection
+from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
@@ -244,6 +244,7 @@ def convert_forum():
     meta = MetaData()
     meta.bind = engine
     conn = engine.connect()
+
     print 'Converting forum structue'
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
@@ -281,6 +282,7 @@ def convert_forum():
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
             forum.save()
+
     print 'Converting topics'
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
     s = select([topic_table])
@@ -302,7 +304,12 @@ def convert_forum():
 
     result = conn.execute(s)
 
+    i = 0
     for row in result:
+        if i == 0:
+            transaction.enter_transaction_management()
+            transaction.managed(True)
+
         data = {
             'pk': row.topic_id,
             'forum_id': row.forum_id,
@@ -323,14 +330,26 @@ def convert_forum():
         t = Topic(**data)
         t.save()
         connection.queries = []
+        if i == 500:
+            transaction.commit()
+            i = 0
+        else:
+            i += 1
+
+
     print 'Converting posts'
+    f = open("dump-missing-topics", "w")
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
     s = select([post_table, post_text_table],
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
+    i = 0
     for row in select_blocks(s):
+        if i == 0:
+            transaction.enter_transaction_management()
+            transaction.managed(True)
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
         data = {
@@ -341,8 +360,19 @@ def convert_forum():
             'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
         }
         p = Post(**data)
-        p.save()
+        try:
+            p.save()
+        except Topic.DoesNotExist:
+            f.write("%s %s %s\n" % (data['pk'],data['topic_id'],data['pub_date']))
+            f.flush()
+            pass
         connection.queries = []
+        if i == 500:
+            transaction.commit()
+            i = 0
+        else:
+            i += 1
+    f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
