@@ -566,9 +566,6 @@ class Forum(models.Model):
     If parent is None this forum is a root forum, else it's a subforum.
     Position is an integer that's used to sort the forums.  The lower position
     is, the higher the forum is displayed.
-    if `offtopic` is True, this forum isn't displayed in the normal forum
-    index but in the talk index.  This property is automatically set when
-    creating a new forum inside an offtopic one.
     """
     objects = ForumManager()
     name = models.CharField('Name', max_length=100)
@@ -580,7 +577,6 @@ class Forum(models.Model):
     last_post = models.ForeignKey('Post', null=True, blank=True)
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
-    offtopic = models.BooleanField(default=False)
 
     welcome_message = models.ForeignKey('WelcomeMessage', null=True,
                                         blank=True)
