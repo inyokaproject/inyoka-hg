@@ -25,9 +25,9 @@
       {{ forum.post_count }}
     </td>
     <td class="last_post">
-    {%- if forum.last_post -%}
+    {%- if forum.last_post_id -%}
     <a href="{{ forum.last_post|url }}">{{ forum.last_post.pub_date|datetimeformat }}</a><br />
-    von <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author }}</a>
+    von <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author|e }}</a>
     {%- else %}---
     {%- endif %}</td>
   </tr>

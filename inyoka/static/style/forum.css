@@ -88,10 +88,6 @@ table.forum td.last_post {
     float: right;
 }
 
-.linklist {
-    color: #cccccc;
-}
-
 .status_solved {
     background-repeat: no-repeat;
     background-image: url('../img/forum_solved.png');
@@ -170,4 +166,11 @@ table.forum a.collapse {
 
 table.forum a.collapsed {
     background-image: url('../img/icons/small/expand.png');
+}
+
+.signature p { 
+    border-top: 1px solid #AAA;
+    padding-top: .2em;
+    color: #666;
+    font-size: .85em;
 }

@@ -269,13 +269,17 @@ class SearchSystem(object):
         return QueryParser(self.prefix_handlers).parse(query)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
-              date_end=None, collapse=True, component=None):
+              date_end=None, collapse=True, component=None, exclude=[]):
         """Search for something."""
         enq = xapian.Enquire(self.get_connection())
         qry = self.parse_query(query)
         if component:
             qry = xapian.Query(xapian.Query.OP_FILTER, qry,
                                xapian.Query('P%s' % component.lower()))
+        if exclude:
+            # XXX: negative filters seems to be not possible in xapian
+            qry = xapian.Query(xapian.Query.OP_AND_NOT, qry,
+                               xapian.Query(xapian.Query.OP_OR, exclude))
         if date_begin or date_end:
             d1 = date_begin and mktime(date_begin.timetuple()) or 0
             d2 = date_end and mktime(date_end.timetuple()) or \

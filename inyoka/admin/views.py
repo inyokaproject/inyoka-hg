@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 from copy import copy as ccopy
-from datetime import datetime
+from datetime import datetime, date
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
 from django.newforms.models import model_to_dict
@@ -471,15 +471,16 @@ def forums_edit(request, id=None):
         categories = [(c.id, c.name) for c in Forum.objects.all()]
         form.fields['parent'].choices = [(-1,"Kategorie")] + categories
 
+    if id is None:
+        f = Forum()
+    else:
+        f = Forum.objects.get(id=id)
+
     if request.method == 'POST':
         form = EditForumForm(request.POST)
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            if id is None:
-                f = Forum()
-            else:
-                f = Forum.objects.get(id=id)
             f.name = data['name']
             f.position = data['position']
             if id is None:
@@ -514,7 +515,6 @@ def forums_edit(request, id=None):
         if id is None:
             form = EditForumForm()
         else:
-            f = Forum.objects.get(id=id)
             form = EditForumForm({
                 'name': f.name,
                 'slug': f.slug,
@@ -774,13 +774,14 @@ def groups_edit(request, name=None):
 @templated('admin/events.html')
 def events(request, show_all=False):
     if show_all:
-        objects = Event.objects.filter(date__gt=date.today())
-    else:
         objects = Event.objects.all()
+    else:
+        objects = Event.objects.filter(date__gt=date.today())
     sortable = Sortable(objects, request.GET, '-date')
     return {
         'table': sortable,
         'events': sortable.get_objects(),
+        'show_all': show_all,
     }
 
 
@@ -790,8 +791,29 @@ def event_edit(request, id=None):
     if request.method == 'POST':
         form = EditEventForm(request.POST)
         if form.is_valid():
-            flash('Form war OK, aber das Speichern ist noch nicht eingebaut :-P')
-            return HttpResponseRedirect(href())
+            if id is not None:
+                try:
+                    event = Event.objects.get(id=id)
+                except Event.DoesNotExist:
+                    raise PageNotFound
+                mode = 'edit'
+            else:
+                event = Event()
+                mode = 'new'
+            data = form.cleaned_data
+            event.name = data['name']
+            event.date = data['date']
+            event.time = data['time']
+            event.description = data['description']
+            event.author = request.user
+            event.location = data['location']
+            event.location_town = data['location_town']
+            if data['location_lat'] and data['location_long']:
+                event.location_lat = data['location_lat']
+                event.location_long = data['location_long']
+            event.save()
+            flash('Die Veranstaltung wurde gespeichert.', True)
+            return HttpResponseRedirect(event.get_absolute_url())
     else:
         if id is not None:
             try:
@@ -808,9 +830,34 @@ def event_edit(request, id=None):
                 'location_lat': event.location_lat,
                 'location_long': event.location_long,
             });
+            mode = 'edit'
         else:
             form = EditEventForm()
-    return {'form': form}
+            event = None
+            mode = 'new'
+    return {
+        'form': form,
+        'mode': mode,
+        'event': event,
+    }
+
+
+@require_manager
+@templated('admin/event_delete.html')
+def event_delete(request, id):
+    try:
+        event = Event.objects.get(id=id)
+    except Event.DoesNotExist:
+        raise PageNotFound
+    if request.method == 'POST':
+        if request.POST['confirm']:
+            event.delete()
+            flash(u'Die Veranstaltung „%s“ wurde gelöscht.'
+                  % escape(event.name), True)
+        return HttpResponseRedirect(href('admin', 'events'))
+    else:
+        return {'event': event}
+
 
 @require_manager
 @templated('admin/styles.html')

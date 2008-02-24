@@ -1,10 +1,7 @@
 #!/bin/bash
 DBNAME=$(python -c 'from django.conf import settings; print settings.DATABASE_NAME')
-DBUSER=$(python -c 'from django.conf import settings; print settings.DATABASE_USER')
-mysql -u$DBUSER <<EOF
+django-admin.py dbshell <<EOF
 	drop database ${DBNAME};
-EOF
-mysql -u$DBUSER <<EOF
 	create database ${DBNAME};
 EOF
 django-admin.py syncdb --noinput
@@ -34,5 +31,6 @@ mkdir ./inyoka/media/wiki
 mkdir ./inyoka/media/wiki/attachments
 echo "Created media directories"
 
-python inyoka/scripts/converter/create_templates.py
-echo "Created wiki templates"
+# XXX: why are we converting data in the reset script?
+#python inyoka/scripts/converter/create_templates.py
+#echo "Created wiki templates"

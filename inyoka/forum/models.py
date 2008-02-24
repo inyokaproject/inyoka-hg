@@ -559,15 +559,13 @@ class PollManager(models.Manager):
                                                                         100))
 
 
+
 class Forum(models.Model):
     """
     This is a forum that may contain subforums or threads.
     If parent is None this forum is a root forum, else it's a subforum.
     Position is an integer that's used to sort the forums.  The lower position
     is, the higher the forum is displayed.
-    if `offtopic` is True, this forum isn't displayed in the normal forum
-    index but in the talk index.  This property is automatically set when
-    creating a new forum inside an offtopic one.
     """
     objects = ForumManager()
     name = models.CharField('Name', max_length=100)
@@ -579,7 +577,6 @@ class Forum(models.Model):
     last_post = models.ForeignKey('Post', null=True, blank=True)
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
-    offtopic = models.BooleanField(default=False)
 
     welcome_message = models.ForeignKey('WelcomeMessage', null=True,
                                         blank=True)
@@ -950,6 +947,9 @@ class Post(models.Model):
         self.rendered_text = self.render_text()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
+        for page in range(1, 5):
+            cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
+            cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
         self.update_search()
 
     def update_search(self):
@@ -1154,3 +1154,4 @@ class WelcomeMessage(models.Model):
     def render_text(self, request=None, format='html'):
         context = RenderContext(request or r.request, simplified=True)
         return parse(self.text).render(context, format)
+

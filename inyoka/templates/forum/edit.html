@@ -52,6 +52,7 @@
       <dd>{{ form.text }}{{ h.field_errors(form.errors.text) }}</dd>
       {# when enter is pressed the first submit button is used #}
       {# XXX: I'm sure that a better sollution exists for this #}
+      {# then put it here :) #}
       <dd style="display: none"><input type="submit" value="Absenden" name="send" /></dd>
       {%- if isnewtopic or isfirstpost %}
       <dt class="collapse">Umfragen:</dt>
@@ -85,7 +86,7 @@
         {{ form.att_ids }}
         {{ form.polls }}
         {{ h.field_errors(form.errors.__all__) }}
-        <input type="submit" value="Absenden" name="send" />
+        <input type="submit" value="Speichern" name="send" />
         <input type="submit" value="Vorschau" name="preview" />
       </dd>
     </dl>

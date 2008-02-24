@@ -11,6 +11,7 @@
 {% set navigation_trace = [
     (href('admin', 'events'), 'Veranstaltungen'),
   ] %}
+{% if show_all %}{% set navigation_trace = navigation_trace + [(href('admin', 'events', 'all'), 'alle anzeigen')] %}{% endif %}
 {% block appheader %}
 <h1>Administration</h1>
 <h2>Portal</h2>
@@ -43,5 +44,12 @@
   {%- endfor %}
   </tbody>
 </table>
-<a href="{{ href('admin', 'events', 'new') }}">Neue Veranstaltung eintragen</a>
+<p class="linklist">
+<a href="{{ href('admin', 'events', 'new') }}">Neue Veranstaltung eintragen</a> |
+{%- if show_all %}
+<a href="{{ href('admin', 'events') }}">Nur zukünftige Veranstaltungen anzeigen</a>
+{%- else %}
+<a href="{{ href('admin', 'events', 'all') }}">Auch vergangene Veranstaltungen anzeigen</a>
+{%- endif %}
+</p>
 {% endblock %}
