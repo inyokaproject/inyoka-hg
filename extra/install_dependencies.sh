@@ -33,3 +33,5 @@ ln -s /opt/pygments/docs/pygmentize.1 /usr/share/man/man1/
 hg clone http://dev.pocoo.org/hg/werkzeug-main werkzeug
 ln -s /opt/werkzeug/werkzeug /usr/lib/python2.5/site-packages/
 
+svn checkout http://svn.sqlalchemy.org/sqlalchemy/trunk sqlalchemy
+ln -s /opt/sqlalchemy/lib/sqlalchemy /usr/lib/python2.5/site-packages/

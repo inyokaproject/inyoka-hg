@@ -235,10 +235,10 @@ class UserCPSettingsForm(forms.Form):
     dialog.
     """
     notify = forms.MultipleChoiceField(
-        label='Benachrichtigen bei', required=False,
+        label='Benachrichtigen per', required=False,
         choices=NOTIFY_BY_CHOICES)
     notifications = forms.MultipleChoiceField(
-        label=u'Benachrichtigen über', required=False,
+        label=u'Benachrichtigen bei', required=False,
         choices=NOTIFICATION_CHOICES)
     timezone = forms.ChoiceField(label='Zeitzone', required=True,
         choices=zip(TIMEZONES, TIMEZONES))

@@ -134,8 +134,9 @@ Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ to
           {{ post.rendered_text }}
           {{ h.render_attachments(attachments) }}
           {%- if post.author.signature and not USER.settings['hide_signatures'] %}
-            <hr />
+            <span class="signature">
             {{ post.author.rendered_signature }}
+            </span>
           {%- endif %}
         </td>
       </tr>
