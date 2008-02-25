@@ -41,6 +41,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
 from inyoka.forum.database import Session, SATopic, SAForum, topic_table
+from inyoka.forum.legacyurls import test_legacy_url
 from sqlalchemy.orm import eagerload
 
 
@@ -51,24 +52,9 @@ def not_found(request, err_message=None):
     """
     This is called if no URL matches or a view returned a `PageNotFound`.
     """
-    # check if an old forum url matches
-    m = _legacy_forum_re.match(request.path)
-    if m:
-        forum_id, offset = m.groups()
-        try:
-            forum = Forum.objects.get(id=forum_id)
-        except Forum.DoesNotExist:
-            pass
-        else:
-            if offset is None:
-                page = 1
-            else:
-                page = (offset / POSTS_PER_PAGE) + 1
-            if page <= 1:
-                url = href('forum', 'forum', forum.slug)
-            else:
-                url = href('forum', 'forum', forum.slug, page)
-            return HttpResponseRedirect(url)
+    response = test_legacy_url(request)
+    if response is not None:
+        return response
     return global_not_found(request, err_message)
 
 
