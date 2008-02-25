@@ -1101,7 +1101,7 @@ class Attachment(models.Model):
 
 class Poll(models.Model):
     objects = PollManager()
-    question = models.CharField(max_length=100)
+    question = models.CharField(max_length=250)
     topic = models.ForeignKey(Topic, blank=True, null=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
@@ -1110,7 +1110,7 @@ class Poll(models.Model):
 
 class PollOption(models.Model):
     poll = models.ForeignKey(Poll)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=250)
     votes = models.IntegerField(default=0)
 
 

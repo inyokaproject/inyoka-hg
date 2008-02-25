@@ -18,7 +18,7 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
-AVATAR_PREFIX = '/path/'
+AVATAR_PREFIX = 'portal/avatars'
 PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
@@ -163,7 +163,6 @@ def convert_users():
     users_table = Table('%susers' % FORUM_PREFIX, meta, autoload=True)
     odd_coordinates = []
     mail_error = []
-    # TODO: select none.....
     for row in select_blocks(users_table.select()):
         avatar = ''
         co_long = co_lat = None
@@ -299,17 +298,16 @@ def convert_forum():
         0: None,
         1: 'ubuntu', 2: 'kubuntu',
         3: 'xubuntu', 4: 'edubuntu',
-        6: 'kubuntu' # KDE(4) is stille kubuntu ;)
+        6: 'kubuntu' # KDE(4) is still kubuntu ;)
     }
 
     result = conn.execute(s)
 
     i = 0
+    transaction.enter_transaction_management()
+    transaction.managed(True)
     for row in result:
-        if i == 0:
-            transaction.enter_transaction_management()
-            transaction.managed(True)
-
+        
         data = {
             'pk': row.topic_id,
             'forum_id': row.forum_id,
@@ -346,10 +344,9 @@ def convert_forum():
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
+    transaction.enter_transaction_management()
+    transaction.managed(True)
     for row in select_blocks(s):
-        if i == 0:
-            transaction.enter_transaction_management()
-            transaction.managed(True)
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
         data = {
@@ -396,6 +393,10 @@ def convert_forum():
 
     conn.close()
 
+    # Fix anon user:
+    connection.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
+    connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
+
 def convert_groups():
     from sqlalchemy import create_engine, MetaData, Table
     from sqlalchemy.sql import select
@@ -437,7 +438,90 @@ def convert_groups():
     dconn.close()
     conn.close()
 
+def convert_polls():
+    from sqlalchemy import create_engine, MetaData, Table
+    from sqlalchemy.sql import select
+    from inyoka.forum.models import Poll, PollOption, Voter, Topic
 
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    poll_table = Table('%svote_desc' % FORUM_PREFIX, meta, autoload=True)
+    poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta, autoload=True)
+    voter_table = Table('%svote_voters' % FORUM_PREFIX, meta, autoload=True)
+
+    topics_with_poll = []
+
+    # Only < 10000 Polls, one transaction...
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    for row in select_blocks(poll_table.select()):
+        data = {
+            'pk': row.vote_id,
+            'question': row.vote_text,
+            'start_time': datetime.fromtimestamp(row.vote_start),
+            'topic_id': row.topic_id,
+        }
+        if row.vote_length == 0:
+            data['end_time'] = None
+        else:
+            data['end_time'] = datetime.fromtimestamp(row.vote_start + row.vote_length)
+        poll = Poll(**data)
+        try:
+            poll.save()
+        except Topic.DoesNotExist:
+            poll.topic_id = None
+            poll.save()
+        topics_with_poll.append(row.topic_id)
+    transaction.commit()
+
+    # Only < 10000 Options, one transaction...
+    # Can't use select_blocks, no primary key :/
+    for row in conn.execute(poll_opt_table.select()):
+        data = {
+            'poll_id': row.vote_id,
+            'name': row.vote_option_text,
+            'votes': row.vote_result
+        }
+        PollOption.objects.create(**data)
+        connection.queries = []
+    transaction.commit()
+
+    i = 0
+    for row in conn.execute(voter_table.select()):
+        data = {
+            'voter_id': row.vote_user_id,
+            'poll_id': row.vote_id,
+        }
+        try:
+            Voter.objects.create(**data)
+        # Some votes are missing polls...
+        except:
+            pass
+        connection.queries = []
+        if i == 1000:
+            transaction.commit()
+            i = 0
+        else:
+            i += 1
+
+    # Fixing Topic.has_poll
+    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
+    dmeta = MetaData()
+    dmeta.bind = dengine
+    dconn = dengine.connect()
+
+    topic_table = Table('forum_topic', dmeta, autoload=True)
+    dconn.execute(topic_table.update(topic_table.c.id.in_(topics_with_poll)),
+            has_poll=True)
+
+    # Fix anon user:
+    connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
 def convert_attachments():
     pass
@@ -568,5 +652,7 @@ if __name__ == '__main__':
     convert_groups()
     print 'Converting forum data'
     convert_forum()
+    print 'Converting polls'
+    convert_polls()
     print 'Converting attachments'
     convert_attachments()
