@@ -31,7 +31,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.models import Page as WikiPage
-from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
                                 Post, get_ubuntu_version, Poll, WelcomeMessage
@@ -279,7 +279,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         attachments = list(Attachment.objects.filter(id__in=att_ids,
                                                      post_null=True))
         if 'attach' in request.POST:
-            if 'upload' not in privileges:
+            if not privileges['upload']:
                 return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
@@ -299,7 +299,7 @@ def newpost(request, topic_slug=None, quote_id=None):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
-            if 'upload' not in privileges or 'delete' not in privileges:
+            if not (privileges['upload'] and privileges['delete']):
                 return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att_ids.remove(id)
@@ -311,9 +311,8 @@ def newpost(request, topic_slug=None, quote_id=None):
         elif form.is_valid():
             data = form.cleaned_data
             if 'preview' in request.POST:
-                instructions = parse(data['text']).compile('html')
-                context = RenderContext(request)
-                preview = render(instructions, context)
+                ctx = RenderContext(request)
+                preview = parse(data['text']).render(ctx, 'html')
             else:
                 post = t.reply(text=data['text'], author=request.user)
                 Attachment.objects.update_post_ids(att_ids, post.id)
@@ -353,7 +352,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         'form':        form,
         'attach_form': attach_form,
         'attachments': list(attachments),
-        'can_attach':  'upload' in privileges,
+        'can_attach':  privileges['upload'],
         'isnewpost' :  True,
         'preview':     preview
     }
@@ -398,7 +397,7 @@ def newtopic(request, slug=None, article=None):
         return HttpResponseRedirect(href('forum'))
 
     privileges = get_forum_privileges(request.user, f)
-    if 'create' not in privileges:
+    if not privileges['create']:
         return abort_access_denied(request)
 
     attach_form = AddAttachmentForm()
@@ -421,7 +420,7 @@ def newtopic(request, slug=None, article=None):
         options = request.POST.getlist('options')
 
         if 'attach' in request.POST:
-            if 'upload' not in privileges:
+            if not privileges['upload']:
                 return abort_access_denied(request)
             # the user uploaded a new attachment
             attach_form = AddAttachmentForm(request.POST, request.FILES)
@@ -441,7 +440,7 @@ def newtopic(request, slug=None, article=None):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
-            if 'upload' not in privileges or 'delete' not in privileges:
+            if not (privileges['upload'] and privileges['delete']):
                 return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att_ids.remove(id)
@@ -452,7 +451,7 @@ def newtopic(request, slug=None, article=None):
 
         elif 'add_poll' in request.POST:
             # the user added a new poll
-            if 'create_poll' not in privileges:
+            if not privileges['create_poll']:
                 return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             if poll_form.is_valid():
@@ -468,13 +467,13 @@ def newtopic(request, slug=None, article=None):
                 options = ['', '']
 
         elif 'add_option' in request.POST:
-            if 'create_poll' not in privileges:
+            if not privileges['create_poll']:
                 return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             options.append('')
 
         elif 'delete_poll' in request.POST:
-            if 'create_poll' not in privileges or not 'delete' in privileges:
+            if not (privileges['create_poll'] and privileges['delete']):
                 return abort_access_denied(request)
             # the user deleted a poll
             poll_id = int(request.POST['delete_poll'])
@@ -489,9 +488,8 @@ def newtopic(request, slug=None, article=None):
             data = form.cleaned_data
             if 'preview' in request.POST:
                 # just show the user a preview
-                instructions = parse(data['text']).compile('html')
-                context = RenderContext(request)
-                preview = render(instructions, context)
+                ctx = RenderContext(request)
+                preview = parse(data['text']).render(ctx, 'html')
             else:
                 # write the topic into the database
                 topic = Topic.objects.create(f, data['title'], data['text'],
@@ -520,7 +518,6 @@ def newtopic(request, slug=None, article=None):
                             u' Seite „%s“ wurde eröffnet')
                             % article.title, text)
 
-
                 return HttpResponseRedirect(topic.get_absolute_url())
 
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
@@ -543,7 +540,7 @@ def newtopic(request, slug=None, article=None):
         'forum':       f,
         'attach_form': attach_form,
         'attachments': list(attachments),
-        'can_attach':  'upload' in privileges,
+        'can_attach':  privileges['upload'],
         'poll_form':   poll_form,
         'polls':       polls,
         'options':     options,
@@ -562,7 +559,7 @@ def edit(request, post_id):
     """
     post = Post.objects.get(id=post_id)
     privileges = get_forum_privileges(request.user, post.topic.forum)
-    if 'edit' not in privileges:
+    if not privileges['edit']:
         return abort_access_denied(request)
     is_first_post = post.topic.first_post_id == post.id
     attach_form = AddAttachmentForm()
@@ -574,7 +571,7 @@ def edit(request, post_id):
     if request.method == 'POST':
         form = EditPostForm(request.POST)
         if 'attach' in request.POST:
-            if 'upload' not in privileges:
+            if not privileges['upload']:
                 return abort_access_denied(request)
             attach_form = AddAttachmentForm(request.POST, request.FILES)
             if attach_form.is_valid():
@@ -600,7 +597,7 @@ def edit(request, post_id):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
-            if 'upload' not in privileges or 'delete' not in privileges:
+            if not (privileges['upload'] and privileges['delete']:
                 return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att = filter(lambda a: a.id == id, attachments)[0]
@@ -609,7 +606,7 @@ def edit(request, post_id):
             flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
 
         elif is_first_post and 'add_poll' in request.POST:
-            if 'create_poll' not in privileges:
+            if not privileges['create_poll']:
                 return abort_access_denied(request)
             # the user added a new poll
             poll_form = AddPollForm(request.POST)
@@ -629,13 +626,13 @@ def edit(request, post_id):
                 options = ['', '']
 
         elif is_first_post and 'add_option' in request.POST:
-            if 'create_poll' not in privileges:
+            if not privileges['create_poll']:
                 return abort_access_denied(request)
             poll_form = AddPollForm(request.POST)
             options.append('')
 
         elif is_first_post and 'delete_poll' in request.POST:
-            if 'create_poll' not in privileges or not 'delete' in privileges:
+            if not (privileges['create_poll'] and privileges['delete']):
                 return abort_access_denied(request)
             # the user deleted a poll
             poll_id = int(request.POST['delete_poll'])
