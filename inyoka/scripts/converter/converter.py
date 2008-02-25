@@ -19,7 +19,6 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
-PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
 from os import path
@@ -232,6 +231,11 @@ def convert_users():
         connection.queries = []
     #print odd_coordinates, mail_error
 
+    # ban users ;) Really q&d
+    ban_table = Table('%sbanlist' % FORUM_PREFIX, meta, autoload=True)
+    for ban in conn.execute(ban_table.select(ban_table.c.ban_userid != 0)):
+        cursor = connection.cursor()
+        cursor.execute("UPDATE portal_user SET is_active=0 WHERE id=%i" % ban[1])
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic, Post
@@ -523,8 +527,39 @@ def convert_polls():
     # Fix anon user:
     connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
-def convert_attachments():
-    pass
+def convert_privileges():
+    from sqlalchemy import create_engine, MetaData, Table
+    from sqlalchemy.sql import select
+    from inyoka.forum.models import Privilege
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+
+    auth_table = Table('%sauth_access' % FORUM_PREFIX, meta, autoload=True)
+    for row in conn.execute(auth_table.select()):
+        data = {
+            'group_id': row.group_id,
+            'forum_id': row.forum_id,
+            'can_read': bool(row.auth_read),
+            'can_reply': bool(row.auth_reply),
+            'can_create': bool(row.auth_post),
+            'can_edit': bool(row.auth_edit),
+            'can_revert': bool(row.auth_mod),
+            'can_delete': bool(row.auth_delete),
+            'can_sticky': bool(row.auth_sticky) or bool(row.auth_announce),
+            'can_vote': bool(row.auth_vote),
+            'can_create_poll': bool(row.auth_pollcreate),
+            'can_upload': bool(row.auth_attachments),
+            'can_moderate': bool(row.auth_mod)
+        }
+        Privilege.objects.create(**data)
+    transaction.commit()
+
 
 def convert_ikhaya():
     import re
@@ -641,18 +676,18 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
+    #convert_users()
     print 'Converting wiki data'
-    convert_wiki()
+    #convert_wiki()
     print 'Converting ikhaya data'
-    convert_ikhaya()
+    #convert_ikhaya()
     print 'Converting pastes'
-    convert_pastes()
+    #convert_pastes()
     print 'Converting groups'
-    convert_groups()
+    #convert_groups()
+    print 'Converting privileges'
+    convert_privileges()
     print 'Converting forum data'
-    convert_forum()
+    #convert_forum()
     print 'Converting polls'
-    convert_polls()
-    print 'Converting attachments'
-    convert_attachments()
+    #convert_polls()

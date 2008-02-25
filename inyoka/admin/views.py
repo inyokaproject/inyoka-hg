@@ -589,7 +589,8 @@ def edit_user(request, username):
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__id=forum_id)
+                        privilege = Privilege.objects.get(forum__id=forum_id,
+                            group__isnull=True, user=user)
                         privilege.user = user
                         privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()
@@ -726,7 +727,8 @@ def groups_edit(request, name=None):
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__id=forum_id)
+                        privilege = Privilege.objects.get(forum__id=forum_id,
+                            user__isnull=True, group=group)
                         privilege.group = group
                         privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()
