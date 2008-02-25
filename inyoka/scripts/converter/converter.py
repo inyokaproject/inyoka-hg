@@ -18,7 +18,7 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
-AVATAR_PREFIX = '/path/'
+AVATAR_PREFIX = 'portal/avatars'
 PHPBB_ATTACHMENT_PATH = '/path/to/attachment/folder'
 sys.path.append(WIKI_PATH)
 
@@ -163,7 +163,6 @@ def convert_users():
     users_table = Table('%susers' % FORUM_PREFIX, meta, autoload=True)
     odd_coordinates = []
     mail_error = []
-    # TODO: select none.....
     for row in select_blocks(users_table.select()):
         avatar = ''
         co_long = co_lat = None
@@ -308,7 +307,7 @@ def convert_forum():
     transaction.enter_transaction_management()
     transaction.managed(True)
     for row in result:
-
+        
         data = {
             'pk': row.topic_id,
             'forum_id': row.forum_id,
@@ -393,6 +392,10 @@ def convert_forum():
     dconn.close()
 
     conn.close()
+
+    # Fix anon user:
+    connection.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
+    connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
 
 def convert_groups():
     from sqlalchemy import create_engine, MetaData, Table
@@ -517,6 +520,8 @@ def convert_polls():
     dconn.execute(topic_table.update(topic_table.c.id.in_(topics_with_poll)),
             has_poll=True)
 
+    # Fix anon user:
+    connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
 def convert_attachments():
     pass
