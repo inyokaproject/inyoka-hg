@@ -449,6 +449,8 @@ def convert_polls():
     poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta, autoload=True)
     voter_table = Table('%svote_voters' % FORUM_PREFIX, meta, autoload=True)
 
+    topics_with_poll = []
+
     # Only < 10000 Polls, one transaction...
     transaction.enter_transaction_management()
     transaction.managed(True)
@@ -469,6 +471,7 @@ def convert_polls():
         except Topic.DoesNotExist:
             poll.topic_id = None
             poll.save()
+        topics_with_poll.append(row.topic_id)
     transaction.commit()
 
     # Only < 10000 Options, one transaction...
@@ -501,6 +504,18 @@ def convert_polls():
         else:
             i += 1
 
+    # Fixing Topic.has_poll
+    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
+        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
+    dmeta = MetaData()
+    dmeta.bind = dengine
+    dconn = dengine.connect()
+
+    topic_table = Table('forum_topic', dmeta, autoload=True)
+    dconn.execute(topic_table.update(topic_table.c.id.in_(topics_with_poll)),
+            has_poll=True)
 
 
 def convert_attachments():
