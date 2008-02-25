@@ -43,6 +43,7 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
 from inyoka.forum.database import Session, SATopic, SAForum, topic_table
 from sqlalchemy.orm import eagerload
 
+
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
 
@@ -597,7 +598,7 @@ def edit(request, post_id):
                           % att_name)
 
         elif 'delete_attachment' in request.POST:
-            if not (privileges['upload'] and privileges['delete']:
+            if not (privileges['upload'] and privileges['delete']):
                 return abort_access_denied(request)
             id = int(request.POST['delete_attachment'])
             att = filter(lambda a: a.id == id, attachments)[0]
