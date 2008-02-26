@@ -43,7 +43,8 @@ UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
     'xubuntu': 'Xubuntu',
-    'edubuntu': 'Edubuntu'
+    'edubuntu': 'Edubuntu',
+    'server': 'Server',
 }
 REGEX = '(.+)Ubuntu\/%s \(%s\)(.+)'
 VERSION_REGEXES = [
