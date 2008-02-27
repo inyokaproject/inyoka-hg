@@ -239,8 +239,6 @@ def convert_users():
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic, Post
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
     from inyoka.wiki import bbcode
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
@@ -402,8 +400,6 @@ def convert_forum():
     connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
 
 def convert_groups():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
     from inyoka.portal.user import Group
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
@@ -443,8 +439,6 @@ def convert_groups():
     conn.close()
 
 def convert_polls():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
     from inyoka.forum.models import Poll, PollOption, Voter, Topic
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
@@ -528,9 +522,7 @@ def convert_polls():
     connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
 def convert_privileges():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
-    from inyoka.forum.models import Privilege
+    from inyoka.forum.models import Privilege, Group
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -557,10 +549,31 @@ def convert_privileges():
             'can_upload': bool(row.auth_attachments),
             'can_moderate': bool(row.auth_mod)
         }
+        try:
+            Group.objects.get(pk=row.group_id)
+        except: continue
         Privilege.objects.create(**data)
     transaction.commit()
 
+def convert_subscriptions():
+    from inyoka.portal.models import Subscription
 
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    subscription_table = Table('%stopics_watch' % FORUM_PREFIX, meta, autoload=True)
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    for row in conn.execute(subscription_table.select()):
+        try:
+            Subscription.objects.create(user_id=row.user_id, topic_id=row.topic_id)
+        # Ignore missing topics...
+        except:
+            pass
+    transaction.commit()
 def convert_ikhaya():
     import re
     from textile import textile
@@ -676,18 +689,20 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
-    #convert_wiki()
+    convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
     print 'Converting groups'
-    #convert_groups()
+    convert_groups()
+    print 'Converting forum data'
+    convert_forum()
+    print 'Converting subscriptions'
+    convert_subscriptions()
     print 'Converting privileges'
     convert_privileges()
-    print 'Converting forum data'
-    #convert_forum()
     print 'Converting polls'
-    #convert_polls()
+    convert_polls()
