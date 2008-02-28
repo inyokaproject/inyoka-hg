@@ -19,6 +19,7 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
+OLD_ATTACHMENTS = '/tmp/'
 sys.path.append(WIKI_PATH)
 
 from os import path
@@ -35,6 +36,7 @@ def select_blocks(query, block_size=1000):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
     table = list(query._table_iterator())[0]
+    print table
     # get the tables primary key (a little bit hackish)
     key_name = list(table.primary_key)[0].name
     key = table.c[key_name]
@@ -567,6 +569,8 @@ def convert_subscriptions():
 
     transaction.enter_transaction_management()
     transaction.managed(True)
+    # According to http://www.phpbbdoctor.com/doc_columns.php?id=22 
+    # we need to add both notify_status = 1|0 to out watch_list.
     for row in conn.execute(subscription_table.select()):
         try:
             Subscription.objects.create(user_id=row.user_id, topic_id=row.topic_id)
@@ -574,6 +578,45 @@ def convert_subscriptions():
         except:
             pass
     transaction.commit()
+
+def convert_attchments():
+    from inyoka.forum.models import Attachment, Post
+    from sqlalchemy.sql import and_
+
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    attachment_desc_table = Table('%sattachments_desc' % FORUM_PREFIX, meta, autoload=True)
+    attachment_table = Table('%sattachments' % FORUM_PREFIX, meta, autoload=True)
+
+    sel = select([attachment_desc_table, attachment_table.c.post_id], \
+          and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
+          attachment_table.c.post_id != 0))
+
+    path = OLD_ATTACHMENTS.rstrip('/') + '/'
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    for row in select_blocks(sel):
+        data = {
+            'pk': row.attach_id,
+            'name': row.real_filename,
+            'comment': row.comment,
+            'post_id': row.post_id,
+        }
+        att = Attachment(**data)
+        file_ = open(path + row.physical_filename,'rb')
+        att.save_file_file(row.real_filename, file_.read())
+        file_.close()
+        try:
+            att.save()
+        except Post.DoesNotExist:
+            pass
+    transaction.commit()
+
 def convert_ikhaya():
     import re
     from textile import textile
@@ -689,20 +732,22 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
+    #convert_users()
     print 'Converting wiki data'
-    convert_wiki()
+    #convert_wiki()
     print 'Converting ikhaya data'
-    convert_ikhaya()
+    #convert_ikhaya()
     print 'Converting pastes'
-    convert_pastes()
+    #convert_pastes()
     print 'Converting groups'
-    convert_groups()
+    #convert_groups()
     print 'Converting forum data'
-    convert_forum()
+    #convert_forum()
     print 'Converting subscriptions'
-    convert_subscriptions()
+    #convert_subscriptions()
     print 'Converting privileges'
-    convert_privileges()
+    #convert_privileges()
     print 'Converting polls'
-    convert_polls()
+    #convert_polls()
+    print 'Converting attchments'
+    convert_attchments()

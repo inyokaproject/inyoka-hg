@@ -1032,6 +1032,8 @@ class Attachment(models.Model):
         The path to the attachment itself.
     `name`
         The name of the attachment.
+    `comment`
+        The comment of the attachment.
     `post`
         The post the attachment belongs to.  It may be NULL if the attachment
         belongs to a post that is not yet created.
@@ -1039,6 +1041,7 @@ class Attachment(models.Model):
     objects = AttachmentManager()
     file = models.FileField(upload_to='forum/attachments/%S/%W')
     name = models.CharField(max_length=255)
+    comment = models.TextField()
     post = models.ForeignKey(Post, null=True)
 
     @property
