@@ -957,6 +957,7 @@ class Post(models.Model):
                     rev.store_date = datetime.now()
                     rev.post = self
                     rev.text = old.text
+                    rev.save()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
         for page in range(1, 5):
@@ -1044,6 +1045,15 @@ class PostRevision(models.Model):
     post = models.ForeignKey(Post, verbose_name='zugehöriges Posting')
     text = models.TextField('Text')
     store_date = models.DateTimeField('Datum der Löschung')
+    
+    def __repr__(self):
+        return '<%s post=%d (%s), stored=%s>' % (
+            self.__class__.__name__,
+            self.post.id,
+            self.post.topic.title,
+            self.store_date.strftime('%Y-%m-%d %H:%M')
+        )
+
 
 
 class Attachment(models.Model):
