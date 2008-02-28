@@ -579,7 +579,7 @@ def convert_subscriptions():
             pass
     transaction.commit()
 
-def convert_attchments():
+def convert_attachments():
     from inyoka.forum.models import Attachment, Post
     from sqlalchemy.sql import and_
 
@@ -732,22 +732,22 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
-    #convert_wiki()
+    convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
     print 'Converting groups'
-    #convert_groups()
+    convert_groups()
     print 'Converting forum data'
-    #convert_forum()
+    convert_forum()
     print 'Converting subscriptions'
-    #convert_subscriptions()
+    convert_subscriptions()
     print 'Converting privileges'
-    #convert_privileges()
+    convert_privileges()
     print 'Converting polls'
-    #convert_polls()
-    print 'Converting attchments'
-    convert_attchments()
+    convert_polls()
+    print 'Converting attachments'
+    convert_attachments()
