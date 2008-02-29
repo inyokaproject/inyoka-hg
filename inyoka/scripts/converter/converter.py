@@ -14,12 +14,12 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
-#FORUM_URI = 'mysql://%s:%s@%s/phpbb?charset=utf8' % (settings.DATABASE_USER,
+#FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/phpbb?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
-FORUM_PREFIX = 'ubuntu_'
-#FORUM_PREFIX = 'phpbb_'
+#FORUM_PREFIX = 'ubuntu_'
+FORUM_PREFIX = 'phpbb_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 sys.path.append(WIKI_PATH)
@@ -648,9 +648,9 @@ def convert_privmsgs():
     msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
     while True:
         msg = conn.execute(msg_table.select(msg_table.c.done==False).limit(1)).fetchone()
-        ids = [msg.privmsgs_id]
         if msg is None:
             break
+        ids = [msg.privmsgs_id]
         msg_text = conn.execute(msg_text_table.select(msg_text_table.c.privmsgs_text_id == msg.privmsgs_id)).fetchone()
 
         # msg_text missing?
