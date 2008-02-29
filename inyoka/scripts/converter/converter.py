@@ -851,14 +851,14 @@ MODE_MAPPING = {
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:
-        mode = sys.argv[1]
-        if mode in MODE_MAPPING:
-            print 'Converting only %s' % mode
-            MODE_MAPPING[mode]()
+        for mode in sys.argv[1:]:
+            if mode in MODE_MAPPING:
+                print 'Converting %s' % mode
+                MODE_MAPPING[mode]()
+            else:
+                print 'Please choose or more of: %s' % ', '.join(MODE_MAPPING)
+                sys.exit(1)
             sys.exit(0)
-        else:
-            print 'Please choose one of: %s' % ', '.join(MODE_MAPPING)
-            sys.exit(1)
     print 'Converting users'
     convert_users()
     print 'Converting wiki data'
