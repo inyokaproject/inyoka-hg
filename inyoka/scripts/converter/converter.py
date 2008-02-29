@@ -338,7 +338,7 @@ def convert_forum():
             i = 0
         else:
             i += 1
-    transaction.commit()
+
 
     print 'Converting posts'
     f = open("dump-missing-topics", "w")
@@ -374,7 +374,6 @@ def convert_forum():
             i = 0
         else:
             i += 1
-    transaction.commit()
     f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
@@ -630,9 +629,8 @@ def convert_privmsgs():
     msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
     msg_text_table = Table('%sprivmsgs_text' % FORUM_PREFIX, meta, autoload=True)
 
-    sel = msg_table.select().group_by(msg_table.c.privmsgs_date,
-                                      msg_table.c.privmsgs_from_userid).order_by(
-                                    msg_table.c.privmsgs_date.asc())
+    sel = msg_table.select().order_by( msg_table.c.privmsgs_date.asc(),
+                                      msg_table.c.privmsgs_from_userid)
 
     transaction.enter_transaction_management()
     transaction.managed(True)
@@ -641,7 +639,6 @@ def convert_privmsgs():
     last_msg = None
     i = 0
     for row in select_blocks(sel):
-        print row
         # Create new message, if date/from_user differ from last row.
         if (row.privmsgs_from_userid != from_user and
             row.privmsgs_date != date):
@@ -677,12 +674,16 @@ def convert_privmsgs():
         # If the message is read/unread put it into inbox and set read flag.
         # The user is the recipient.
         if row.privmsgs_type in (0,5):
-            data['read'] = bool(row.privmsgs_type)
+            data['read'] = not bool(row.privmsgs_type)
             data['folder'] = 1
             data['user_id'] = row.privmsgs_to_userid
         # If the message is sent/in_outbox put it into sent (0).
         # The user is the sender.
         elif row.privmsgs_type in (1,2):
+            # Copy it into the user's Inbox
+            if row.privmsgs_type == 1:
+                PrivateMessageEntry.objects.create(read=False, folder=1, 
+                        user_id=row.privmsgs_to_userid, message_id=last_msg)
             data['folder'] = 0
             data['user_id'] = row.privmsgs_from_userid
         # If the message is saved put it into archive
