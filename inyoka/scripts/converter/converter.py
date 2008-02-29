@@ -27,6 +27,7 @@ from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
+from inyoka.wiki import bbcode
 from inyoka.portal.user import User
 from datetime import datetime
 users = {}
@@ -36,7 +37,6 @@ def select_blocks(query, block_size=1000):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
     table = list(query._table_iterator())[0]
-    print table
     # get the tables primary key (a little bit hackish)
     key_name = list(table.primary_key)[0].name
     key = table.c[key_name]
@@ -241,7 +241,6 @@ def convert_users():
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic, Post
-    from inyoka.wiki import bbcode
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -617,6 +616,90 @@ def convert_attachments():
             pass
     transaction.commit()
 
+def convert_privmsgs():
+    from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
+    msg_text_table = Table('%sprivmsgs_text' % FORUM_PREFIX, meta, autoload=True)
+
+    sel = msg_table.select().group_by(msg_table.c.privmsgs_date,
+                                      msg_table.c.privmsgs_from_userid).order_by(
+                                    msg_table.c.privmsgs_date.asc())
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    from_user = None
+    date = None
+    last_msg = None
+    i = 0
+    for row in select_blocks(sel):
+        # Create new message, if date/from_user differ from last row.
+        if (row.privmsgs_from_userid != from_user and
+            row.privmsgs_date != date):
+            date = row.privmsgs_date
+            from_user = row.privmsgs_from_userid
+            s = select([msg_text_table], msg_text_table.c.privmsgs_text_id == row.privmsgs_id)
+            result = conn.execute(s).fetchone()
+            # Workaround for no result?!
+            if result is None:
+                last_msg = None
+                continue
+            text = bbcode.parse(result.privmsgs_text.replace(':%s' % \
+                        result.privmsgs_bbcode_uid, '')).to_markup()
+            data = {
+                'author_id': row.privmsgs_from_userid,
+                'subject': row.privmsgs_subject,
+                'pub_date': datetime.fromtimestamp(row.privmsgs_date),
+                'text': text
+            }
+            try:
+                pm = PrivateMessage.objects.create(**data)
+            except:
+                pass
+            last_msg = pm.id
+        if last_msg is None:
+            continue
+        # Create the Message entry:
+        data = {
+            'message_id': last_msg,
+            'read': True,
+        }
+        # If the message is read/unread put it into inbox and set read flag.
+        # The user is the recipient.
+        if row.privmsgs_type in (0,5):
+            data['read'] = bool(row.privmsgs_type)
+            data['folder'] = 1
+            data['user_id'] = row.privmsgs_to_userid
+        # If the message is sent/in_outbox put it into sent (0).
+        # The user is the sender.
+        elif row.privmsgs_type in (1,2):
+            data['folder'] = 0
+            data['user_id'] = row.privmsgs_from_userid
+        # If the message is saved put it into archive
+        # The user depends on the type.
+        else:
+            data['folder'] = 3
+            if row.privmsgs_type == 3:
+                data['user_id'] = row.privmsgs_to_userid
+            else:
+                data['user_id'] = row.privmsgs_from_userid
+
+        try:
+            PrivateMessageEntry.objects.create(**data)
+        except:
+            pass
+
+        if i == 500:
+            transaction.commit()
+            i = 0
+        else:
+            i += 1
+
 def convert_ikhaya():
     import re
     from textile import textile
@@ -751,3 +834,5 @@ if __name__ == '__main__':
     convert_polls()
     print 'Converting attachments'
     convert_attachments()
+    print 'Converting private messages'
+    convert_privmsgs()

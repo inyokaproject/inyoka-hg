@@ -97,7 +97,7 @@ class PrivateMessage(models.Model):
     """
     #objects = PrivateMessageManager()
     author = models.ForeignKey(User)
-    subject = models.CharField(u'Titel', max_length=200)
+    subject = models.CharField(u'Titel', max_length=255)
     pub_date = models.DateTimeField(u'Datum')
     text = models.TextField(u'Text')
 
