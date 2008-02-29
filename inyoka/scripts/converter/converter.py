@@ -841,7 +841,32 @@ def convert_pastes():
         connection.queries = []
 
 
+
+MODE_MAPPING = {
+        'users': convert_users,
+        'wiki': convert_wiki,
+        'ikhaya': convert_ikhaya,
+        'pastes': convert_pastes,
+        'groups': convert_groups,
+        'forum': convert_forum,
+        'subscriptions': convert_subscriptions,
+        'privileges': convert_privileges,
+        'polls': convert_polls,
+        'attachments': convert_attachments,
+        'privmsgs': convert_privmsgs,
+}
+
 if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+        if mode in MODE_MAPPING:
+            print 'Converting only %s' % mode
+            MODE_MAPPING[mode]()
+            sys.exit(0)
+        else:
+            print 'Please choose one of: %s' % ', '.join(MODE_MAPPING)
+            sys.exit(1)
     print 'Converting users'
     convert_users()
     print 'Converting wiki data'
