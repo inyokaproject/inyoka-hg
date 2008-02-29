@@ -15,11 +15,9 @@ from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
 FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
-#FORUM_URI = 'mysql://%s:%s@%s/phpbb?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
-#FORUM_PREFIX = 'phpbb_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 sys.path.append(WIKI_PATH)
@@ -620,108 +618,102 @@ def convert_attachments():
 
 def convert_privmsgs():
     from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
+    from sqlalchemy.sql import and_
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     conn = engine.connect()
+    try:
+        conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
+    except:
+        conn.execute("UPDATE `%sprivmsgs` SET `done` = 0 WHERE 1;" % FORUM_PREFIX)
 
-    msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
     msg_text_table = Table('%sprivmsgs_text' % FORUM_PREFIX, meta, autoload=True)
-
-    sel = msg_table.select().order_by( msg_table.c.privmsgs_date.asc(),
-                                      msg_table.c.privmsgs_from_userid)
 
     transaction.enter_transaction_management()
     transaction.managed(True)
-    from_user = None
-    date = None
-    last_msg = None
-    last_row = None
-    msg_count = 1
-    first_time = True
     i = 0
-    for row in select_blocks(sel):
-        last_row = row
-        # Create new message, if date/from_user differ from last row.
-        if not (row.privmsgs_from_userid == from_user and
-            row.privmsgs_date == date):
-            date = row.privmsgs_date
-            from_user = row.privmsgs_from_userid
-            s = select([msg_text_table], msg_text_table.c.privmsgs_text_id == row.privmsgs_id)
-            result = conn.execute(s).fetchone()
-            # Workaround for no result?!
-            if result is None:
-                last_msg = None
-                continue
-            text = bbcode.parse(result.privmsgs_text.replace(':%s' % \
-                        result.privmsgs_bbcode_uid, '')).to_markup()
-            data = {
-                'author_id': row.privmsgs_from_userid,
-                'subject': row.privmsgs_subject,
-                'pub_date': datetime.fromtimestamp(row.privmsgs_date),
-                'text': text
-            }
-            try:
-                pm = PrivateMessage.objects.create(**data)
-            except:
-                pass
-            if msg_count == 1:
-                if first_time:
-                    last_msg = pm.id
-                if last_row.privmsgs_type in (0,5,3):
-                    user_id = last_row.privmsgs_from_userid
-                else:
-                    user_id = last_row.privmsgs_to_userid
-                PrivateMessageEntry.objects.create(user_id=user_id, message_id=
-                    last_msg, folder=None, read=True)
-            else: msg_count = 1
-            last_msg = pm.id
+    FOLDER_MAPPING = {
+    0: 1,
+    1: 0,
+    2: 0,
+    3: 3,
+    4: 3,
+    5: 1,
+    }
 
-        first_time = False
+    msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
+    while True:
+        msg = conn.execute(msg_table.select(msg_table.c.done==False).limit(1)).fetchone()
+        if msg is None:
+            break
+        ids = [msg.privmsgs_id]
+        msg_text = conn.execute(msg_text_table.select(
+                    msg_text_table.c.privmsgs_text_id == msg.privmsgs_id)
+                   ).fetchone()
 
-        if (row.privmsgs_from_userid == from_user and
-                        row.privmsgs_date == date):
-            msg_count += 1
-
-        if last_msg is None:
+        # msg_text missing?
+        if msg_text is None:
+            print "msg_text missing for %s" % msg.privmsgs_id
+            conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)),
+                         done=True)
             continue
-        # Create the Message entry:
-        data = {
-            'message_id': last_msg,
-            'read': True,
-        }
-        # If the message is read/unread put it into inbox and set read flag.
-        # The user is the recipient.
-        if row.privmsgs_type in (0,5):
-            data['read'] = not bool(row.privmsgs_type)
-            data['folder'] = 1
-            data['user_id'] = row.privmsgs_to_userid
-        # If the message is sent/in_outbox put it into sent (0).
-        # The user is the sender.
-        elif row.privmsgs_type in (1,2):
-            # Copy it into the user's Inbox
-            if row.privmsgs_type == 1:
-                PrivateMessageEntry.objects.create(read=False, folder=1, 
-                        user_id=row.privmsgs_to_userid, message_id=last_msg)
-                msg_count += 1
-            data['folder'] = 0
-            data['user_id'] = row.privmsgs_from_userid
-        # If the message is saved put it into archive
-        # The user depends on the type.
-        else:
-            data['folder'] = 3
-            if row.privmsgs_type == 3:
-                data['user_id'] = row.privmsgs_to_userid
-            else:
-                data['user_id'] = row.privmsgs_from_userid
 
-        try:
-            PrivateMessageEntry.objects.create(**data)
-        except:
-            pass
+        other_msg = conn.execute(msg_table.select(and_(
+                                msg_table.c.privmsgs_from_userid ==
+                                msg.privmsgs_from_userid,
+                                msg_table.c.privmsgs_date == msg.privmsgs_date,
+                                msg_table.c.privmsgs_id != msg.privmsgs_id)
+                    ).limit(1)).fetchone()
+
+        m = PrivateMessage()
+        m.author_id = msg.privmsgs_from_userid;
+        m.subject = msg.privmsgs_subject
+        m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
+        m.text = bbcode.parse(msg_text.privmsgs_text.replace(':%s' % \
+            msg_text.privmsgs_bbcode_uid, '')).to_markup()
+        m.save()
+
+        # If the status is sent, the first user is the sender.
+        if msg.privmsgs_type in (1, 2, 4):
+            user = msg.privmsgs_from_userid
+            second_user = msg.privmsgs_to_userid
+        # Else the Recipient is the user for the first message.
+        # This only happens if the sender deletes his message.
+        else:
+            user = msg.privmsgs_to_userid
+            second_user = msg.privmsgs_from_userid
+
+        m1 = PrivateMessageEntry()
+        m1.message = m
+        m1.user_id = user
+        m1.read = msg.privmsgs_type != 5
+        m1.folder = FOLDER_MAPPING[msg.privmsgs_type]
+        m1.save()
+
+        m2 = PrivateMessageEntry()
+        m2.message = m
+        m2.user_id = second_user
+        if other_msg is None: # Then the message is deleted
+            m2.read = True
+            m2.folder = None
+            # Except if the type is 1 (for 'Postausgang'), where no copy exists;
+            # We put one in the users inbox, and mark it unread
+            if msg.privmsgs_type == 1:
+                m2.read = False
+                m2.folder = 1
+        else:
+            m2.read = other_msg.privmsgs_type != 5
+            m2.folder = FOLDER_MAPPING[other_msg.privmsgs_type]
+            ids.append(other_msg.privmsgs_id)
+
+        m2.save()
+
+        conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
 
         if i == 500:
+            print msg.privmsgs_id
             transaction.commit()
             i = 0
         else:
