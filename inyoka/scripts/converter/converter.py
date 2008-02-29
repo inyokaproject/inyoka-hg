@@ -14,10 +14,12 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
+#FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/phpbb?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
-FORUM_PREFIX = 'ubuntu_'
+#FORUM_PREFIX = 'ubuntu_'
+FORUM_PREFIX = 'phpbb_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 sys.path.append(WIKI_PATH)
@@ -336,7 +338,7 @@ def convert_forum():
             i = 0
         else:
             i += 1
-
+    transaction.commit()
 
     print 'Converting posts'
     f = open("dump-missing-topics", "w")
@@ -372,6 +374,7 @@ def convert_forum():
             i = 0
         else:
             i += 1
+    transaction.commit()
     f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
@@ -638,6 +641,7 @@ def convert_privmsgs():
     last_msg = None
     i = 0
     for row in select_blocks(sel):
+        print row
         # Create new message, if date/from_user differ from last row.
         if (row.privmsgs_from_userid != from_user and
             row.privmsgs_date != date):
@@ -662,6 +666,7 @@ def convert_privmsgs():
             except:
                 pass
             last_msg = pm.id
+
         if last_msg is None:
             continue
         # Create the Message entry:
@@ -699,6 +704,7 @@ def convert_privmsgs():
             i = 0
         else:
             i += 1
+    transaction.commit()
 
 def convert_ikhaya():
     import re
@@ -815,24 +821,24 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    convert_users()
+    #convert_users()
     print 'Converting wiki data'
-    convert_wiki()
+    #convert_wiki()
     print 'Converting ikhaya data'
-    convert_ikhaya()
+    #convert_ikhaya()
     print 'Converting pastes'
-    convert_pastes()
+    #convert_pastes()
     print 'Converting groups'
-    convert_groups()
+    #convert_groups()
     print 'Converting forum data'
-    convert_forum()
+    #convert_forum()
     print 'Converting subscriptions'
-    convert_subscriptions()
+    #convert_subscriptions()
     print 'Converting privileges'
-    convert_privileges()
+    #convert_privileges()
     print 'Converting polls'
-    convert_polls()
+    #convert_polls()
     print 'Converting attachments'
-    convert_attachments()
+    #convert_attachments()
     print 'Converting private messages'
     convert_privmsgs()
