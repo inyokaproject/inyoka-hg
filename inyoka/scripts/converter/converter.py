@@ -14,12 +14,10 @@ import sys
 from django.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
-#FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
-FORUM_URI = 'mysql://%s:%s@%s/phpbb?charset=utf8' % (settings.DATABASE_USER,
+FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
     settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
-#FORUM_PREFIX = 'ubuntu_'
-FORUM_PREFIX = 'phpbb_'
+FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 sys.path.append(WIKI_PATH)
@@ -644,23 +642,30 @@ def convert_privmsgs():
     4: 3,
     5: 1,
     }
-    
+
     msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
     while True:
         msg = conn.execute(msg_table.select(msg_table.c.done==False).limit(1)).fetchone()
         if msg is None:
             break
         ids = [msg.privmsgs_id]
-        msg_text = conn.execute(msg_text_table.select(msg_text_table.c.privmsgs_text_id == msg.privmsgs_id)).fetchone()
+        msg_text = conn.execute(msg_text_table.select(
+                    msg_text_table.c.privmsgs_text_id == msg.privmsgs_id)
+                   ).fetchone()
 
         # msg_text missing?
         if msg_text is None:
             print "msg_text missing for %s" % msg.privmsgs_id
-            conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
+            conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)),
+                         done=True)
             continue
 
-        other_msg = conn.execute(msg_table.select(and_(msg_table.c.privmsgs_from_userid == msg.privmsgs_from_userid, 
-                                msg_table.c.privmsgs_date == msg.privmsgs_date, msg_table.c.privmsgs_id != msg.privmsgs_id)).limit(1)).fetchone()
+        other_msg = conn.execute(msg_table.select(and_(
+                                msg_table.c.privmsgs_from_userid ==
+                                msg.privmsgs_from_userid,
+                                msg_table.c.privmsgs_date == msg.privmsgs_date,
+                                msg_table.c.privmsgs_id != msg.privmsgs_id)
+                    ).limit(1)).fetchone()
 
         m = PrivateMessage()
         m.author_id = msg.privmsgs_from_userid;
@@ -670,7 +675,6 @@ def convert_privmsgs():
             msg_text.privmsgs_bbcode_uid, '')).to_markup()
         m.save()
 
-        
         # If the status is sent, the first user is the sender.
         if msg.privmsgs_type in (1, 2, 4):
             user = msg.privmsgs_from_userid
@@ -694,11 +698,11 @@ def convert_privmsgs():
         if other_msg is None: # Then the message is deleted
             m2.read = True
             m2.folder = None
-        # Except if the type is 1 (for 'Postausgang'), where no copy exists;
-        # We put one in the users inbox, and mark it unread
-        elif other_msg is None and msg.privmsgs_type == 1:
-            m2.read = False
-            m2.folder = 1
+            # Except if the type is 1 (for 'Postausgang'), where no copy exists;
+            # We put one in the users inbox, and mark it unread
+            if msg.privmsgs_type == 1:
+                m2.read = False
+                m2.folder = 1
         else:
             m2.read = other_msg.privmsgs_type != 5
             m2.folder = FOLDER_MAPPING[other_msg.privmsgs_type]
@@ -831,24 +835,24 @@ def convert_pastes():
 
 if __name__ == '__main__':
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
-    #convert_wiki()
+    convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
     print 'Converting groups'
-    #convert_groups()
+    convert_groups()
     print 'Converting forum data'
-    #convert_forum()
+    convert_forum()
     print 'Converting subscriptions'
-    #convert_subscriptions()
+    convert_subscriptions()
     print 'Converting privileges'
-    #convert_privileges()
+    convert_privileges()
     print 'Converting polls'
-    #convert_polls()
+    convert_polls()
     print 'Converting attachments'
-    #convert_attachments()
+    convert_attachments()
     print 'Converting private messages'
     convert_privmsgs()
