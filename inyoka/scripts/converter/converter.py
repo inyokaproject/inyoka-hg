@@ -675,6 +675,7 @@ def convert_privmsgs():
                     user_id = last_row.privmsgs_to_userid
                 PrivateMessageEntry.objects.create(user_id=user_id, message_id=
                     last_msg, folder=None, read=True)
+            else: msg_count = 1
             last_msg = pm.id
 
         first_time = False
