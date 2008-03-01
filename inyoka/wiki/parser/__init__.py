@@ -805,8 +805,8 @@ class Parser(object):
         stream.next()
         macro = get_macro(name, args, kwargs)
         if macro is None:
-            return nodes.error_box('Fehlendes Macro',
-                                   u'Das Macro „%s“ konnte nicht '
+            return nodes.error_box('Fehlendes Makro',
+                                   u'Das Makro „%s“ konnte nicht '
                                    u'gefunden werden.' % name)
         elif macro.is_tree_processor:
             placeholder = nodes.DeferredNode(macro)
