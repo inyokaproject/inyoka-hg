@@ -292,7 +292,7 @@
     /* on newline continue the current list or keep the indentation */
     if (evt.keyCode == 13) {
       var match = this.getCurrentLine()
-                      .match(/^(\s*(?:\*|-|[01aAiI]\.)?\s*)(.*?)$/);
+                      .match(/^(\s*(?:\*|- |[01aAiI]\.)?\s*)(.*?)$/);
       if (match[1].length) {
         evt.preventDefault();
         /* continue indention / list */
