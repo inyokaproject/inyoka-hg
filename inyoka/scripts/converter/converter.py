@@ -20,6 +20,7 @@ OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
+from inyoka.scripts.converter_config import *
 sys.path.append(WIKI_PATH)
 
 from os import path
