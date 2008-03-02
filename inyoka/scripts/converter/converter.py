@@ -878,7 +878,6 @@ if __name__ == '__main__':
                 print 'Please choose or more of: %s' % ', '.join(MODE_MAPPING)
                 sys.exit(1)
             sys.exit(0)
-    asdasd
     print 'Converting users'
     convert_users()
     print 'Converting wiki data'
