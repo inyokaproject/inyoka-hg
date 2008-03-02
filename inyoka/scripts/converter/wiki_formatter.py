@@ -9,6 +9,7 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
+import re
 from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
@@ -24,10 +25,8 @@ class InyokaFormatter(FormatterBase):
         if name not in macros:
             macros.append(name)
             print name
-        # TODO: Not yet handled are Anmerkung, RandomMirror, RedirectCheck, Tasten
-        if name in ['Anchor', 'Diskussion']:
-            # The new parser does create human readable anchor names so we
-            # don't need this
+        # TODO: Not yet handled are RandomMirror, RedirectCheck, Tasten
+        if name in ['Diskussion']:
             # TODO: Do something for discussoin
             return u''
 
@@ -38,10 +37,14 @@ class InyokaFormatter(FormatterBase):
             'RecentChanges':   u'LetzteÄnderungen',
             'OrphanedPages':   u'VerwaisteSeiten',
             'WantedPages':     u'FehlendeSeiten',
+            'Anchor':          u'Anker'
         }
 
         if name in replacements:
             name = replacements[name]
+
+        elif name == 'Anmerkung':
+            return u'((%s))' % u''.join(args)
 
         elif name == 'Tags':
             return u'# X-Tags: ' + args
@@ -86,7 +89,7 @@ class InyokaFormatter(FormatterBase):
                 img = './' + img
 
             for arg in args[1:]:
-                if args.startswith('alt='):
+                if arg.startswith('alt='):
                     img += ",alt='%s'" % arg[4:]
                 elif arg.startswith('width='):
                     width = args[6:]
@@ -130,8 +133,22 @@ class InyokaFormatter(FormatterBase):
             return u''.join(result)
 
         # most processors are page tempaltes in inyoka
-        return u'[[Vorlage(%s, \'%s\')]]' % (PAGE_TEMPLATE_NAME % processor_name,
-                                        u'\n'.join(lines))
+        if processor_name != 'Wissen':
+            return u'[[Vorlage(%s, \'%s\')]]' % (
+                PAGE_TEMPLATE_NAME % processor_name, u'\n'.join(lines)
+            )
+        else:
+            links = []
+            for line in lines:
+                for match in re.findall('\[([^\]]+)\]', line):
+                    try:
+                        int(match)
+                    except ValueError:
+                        links.append(u"'[%s]'" % match)
+            return u'[[Vorlage(%s, %s)]]' % (
+                PAGE_TEMPLATE_NAME % processor_name,
+                u', '.join(links)
+            )
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
         pagename = normalize_pagename(pagename)

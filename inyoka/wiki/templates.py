@@ -642,6 +642,9 @@ class Value(Expr):
                     'value':    value
                 })
 
+    def __len__(self):
+        return len(self.value)
+
     def __getitem__(self, key):
         if isinstance(self.value, (tuple, list, dict)):
             try:
