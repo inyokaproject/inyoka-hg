@@ -19,6 +19,8 @@ FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
 OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
+OLD_ATTACHMENTS = '/tmp/'
+from inyoka.scripts.converter_config import *
 sys.path.append(WIKI_PATH)
 
 from os import path
@@ -26,6 +28,7 @@ from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
+from inyoka.wiki import bbcode
 from inyoka.portal.user import User
 from datetime import datetime
 users = {}
@@ -239,9 +242,6 @@ def convert_users():
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic, Post
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
-    from inyoka.wiki import bbcode
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -402,8 +402,6 @@ def convert_forum():
     connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
 
 def convert_groups():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
     from inyoka.portal.user import Group
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
@@ -443,8 +441,6 @@ def convert_groups():
     conn.close()
 
 def convert_polls():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
     from inyoka.forum.models import Poll, PollOption, Voter, Topic
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
@@ -528,9 +524,7 @@ def convert_polls():
     connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
 def convert_privileges():
-    from sqlalchemy import create_engine, MetaData, Table
-    from sqlalchemy.sql import select
-    from inyoka.forum.models import Privilege
+    from inyoka.forum.models import Privilege, Group
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -557,9 +551,175 @@ def convert_privileges():
             'can_upload': bool(row.auth_attachments),
             'can_moderate': bool(row.auth_mod)
         }
+        try:
+            Group.objects.get(pk=row.group_id)
+        except: continue
         Privilege.objects.create(**data)
     transaction.commit()
 
+def convert_subscriptions():
+    from inyoka.portal.models import Subscription
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    subscription_table = Table('%stopics_watch' % FORUM_PREFIX, meta, autoload=True)
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    # According to http://www.phpbbdoctor.com/doc_columns.php?id=22 
+    # we need to add both notify_status = 1|0 to out watch_list.
+    for row in conn.execute(subscription_table.select()):
+        try:
+            Subscription.objects.create(user_id=row.user_id, topic_id=row.topic_id)
+        # Ignore missing topics...
+        except:
+            pass
+    transaction.commit()
+
+def convert_attachments():
+    from inyoka.forum.models import Attachment, Post
+    from sqlalchemy.sql import and_
+
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+
+    attachment_desc_table = Table('%sattachments_desc' % FORUM_PREFIX, meta, autoload=True)
+    attachment_table = Table('%sattachments' % FORUM_PREFIX, meta, autoload=True)
+
+    sel = select([attachment_desc_table, attachment_table.c.post_id], \
+          and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
+          attachment_table.c.post_id != 0))
+
+    path = OLD_ATTACHMENTS.rstrip('/') + '/'
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    for row in select_blocks(sel):
+        data = {
+            'pk': row.attach_id,
+            'name': row.real_filename,
+            'comment': row.comment,
+            'post_id': row.post_id,
+        }
+        att = Attachment(**data)
+        file_ = open(path + row.physical_filename,'rb')
+        att.save_file_file(row.real_filename, file_.read())
+        file_.close()
+        try:
+            att.save()
+        except Post.DoesNotExist:
+            pass
+    transaction.commit()
+
+def convert_privmsgs():
+    from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
+    from sqlalchemy.sql import and_
+
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+    try:
+        conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
+    except:
+        conn.execute("UPDATE `%sprivmsgs` SET `done` = 0 WHERE 1;" % FORUM_PREFIX)
+
+    msg_text_table = Table('%sprivmsgs_text' % FORUM_PREFIX, meta, autoload=True)
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    i = 0
+    FOLDER_MAPPING = {
+    0: 1,
+    1: 0,
+    2: 0,
+    3: 3,
+    4: 3,
+    5: 1,
+    }
+
+    msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
+    while True:
+        msg = conn.execute(msg_table.select(msg_table.c.done==False).limit(1)).fetchone()
+        if msg is None:
+            break
+        ids = [msg.privmsgs_id]
+        msg_text = conn.execute(msg_text_table.select(
+                    msg_text_table.c.privmsgs_text_id == msg.privmsgs_id)
+                   ).fetchone()
+
+        # msg_text missing?
+        if msg_text is None:
+            print "msg_text missing for %s" % msg.privmsgs_id
+            conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)),
+                         done=True)
+            continue
+
+        other_msg = conn.execute(msg_table.select(and_(
+                                msg_table.c.privmsgs_from_userid ==
+                                msg.privmsgs_from_userid,
+                                msg_table.c.privmsgs_date == msg.privmsgs_date,
+                                msg_table.c.privmsgs_id != msg.privmsgs_id)
+                    ).limit(1)).fetchone()
+
+        m = PrivateMessage()
+        m.author_id = msg.privmsgs_from_userid;
+        m.subject = msg.privmsgs_subject
+        m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
+        m.text = bbcode.parse(msg_text.privmsgs_text.replace(':%s' % \
+            msg_text.privmsgs_bbcode_uid, '')).to_markup()
+        m.save()
+
+        # If the status is sent, the first user is the sender.
+        if msg.privmsgs_type in (1, 2, 4):
+            user = msg.privmsgs_from_userid
+            second_user = msg.privmsgs_to_userid
+        # Else the Recipient is the user for the first message.
+        # This only happens if the sender deletes his message.
+        else:
+            user = msg.privmsgs_to_userid
+            second_user = msg.privmsgs_from_userid
+
+        m1 = PrivateMessageEntry()
+        m1.message = m
+        m1.user_id = user
+        m1.read = msg.privmsgs_type != 5
+        m1.folder = FOLDER_MAPPING[msg.privmsgs_type]
+        m1.save()
+
+        m2 = PrivateMessageEntry()
+        m2.message = m
+        m2.user_id = second_user
+        if other_msg is None: # Then the message is deleted
+            m2.read = True
+            m2.folder = None
+            # Except if the type is 1 (for 'Postausgang'), where no copy exists;
+            # We put one in the users inbox, and mark it unread
+            if msg.privmsgs_type == 1:
+                m2.read = False
+                m2.folder = 1
+        else:
+            m2.read = other_msg.privmsgs_type != 5
+            m2.folder = FOLDER_MAPPING[other_msg.privmsgs_type]
+            ids.append(other_msg.privmsgs_id)
+
+        m2.save()
+
+        conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
+
+        if i == 500:
+            print msg.privmsgs_id
+            transaction.commit()
+            i = 0
+        else:
+            i += 1
+    transaction.commit()
 
 def convert_ikhaya():
     import re
@@ -674,20 +834,51 @@ def convert_pastes():
         connection.queries = []
 
 
+
+MODE_MAPPING = {
+        'users': convert_users,
+        'wiki': convert_wiki,
+        'ikhaya': convert_ikhaya,
+        'pastes': convert_pastes,
+        'groups': convert_groups,
+        'forum': convert_forum,
+        'subscriptions': convert_subscriptions,
+        'privileges': convert_privileges,
+        'polls': convert_polls,
+        'attachments': convert_attachments,
+        'privmsgs': convert_privmsgs,
+}
+
 if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1:
+        for mode in sys.argv[1:]:
+            if mode in MODE_MAPPING:
+                print 'Converting %s' % mode
+                MODE_MAPPING[mode]()
+            else:
+                print 'Please choose or more of: %s' % ', '.join(MODE_MAPPING)
+                sys.exit(1)
+            sys.exit(0)
     print 'Converting users'
-    #convert_users()
+    convert_users()
     print 'Converting wiki data'
-    #convert_wiki()
+    convert_wiki()
     print 'Converting ikhaya data'
-    #convert_ikhaya()
+    convert_ikhaya()
     print 'Converting pastes'
-    #convert_pastes()
+    convert_pastes()
     print 'Converting groups'
-    #convert_groups()
+    convert_groups()
+    print 'Converting forum data'
+    convert_forum()
+    print 'Converting subscriptions'
+    convert_subscriptions()
     print 'Converting privileges'
     convert_privileges()
-    print 'Converting forum data'
-    #convert_forum()
     print 'Converting polls'
-    #convert_polls()
+    convert_polls()
+    print 'Converting attachments'
+    convert_attachments()
+    print 'Converting private messages'
+    convert_privmsgs()

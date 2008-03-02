@@ -94,7 +94,7 @@
   var insert = function(format, def) {
     return function(evt) {
       return this.insertTag(format, (typeof def == 'undefined')
-                            ? 'Formattierter Text' : def);
+                            ? 'Formatierter Text' : def);
     };
   }
 
@@ -220,15 +220,15 @@
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
     }, ['wiki']),
-    dropdown('macro', 'Macro', [
+    dropdown('macro', 'Makro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
         item('[[TagListe(%s)]]', 'Tag-Liste'),
         item('[[Anhänge(%s)]]', 'Anhänge'),
         item('[[Seitenzahl(%s)]]', 'Seitenzahl'),
         item('[[Inhaltsverzeichnis(%s)]]', 'Inhaltsverzeichnis'),
-        item('[[Einbinden(%s)]]', 'Seite Einbinden'),
+        item('[[Einbinden(%s)]]', 'Seite einbinden'),
         item('[[Seitenliste(%s)]]', 'Seitenliste'),
-        item('[[Seitenname(%s)]]', 'aktueller Seitenname'),
+        item('[[Seitenname(%s)]]', 'Aktueller Seitenname'),
         item('[[Weiterleitungen(%s)]]', 'Weiterleitungen'),
         item('[[ÄhnlicheSeiten(%s)]]', 'Ähnliche Seiten'),
         item('[[TagWolke(%s)]]', 'Tag-Wolke'),
@@ -292,7 +292,7 @@
     /* on newline continue the current list or keep the indentation */
     if (evt.keyCode == 13) {
       var match = this.getCurrentLine()
-                      .match(/^(\s*(?:\*|-|[01aAiI]\.)?\s*)(.*?)$/);
+                      .match(/^(\s*(?:\*|- |[01aAiI]\.)?\s*)(.*?)$/);
       if (match[1].length) {
         evt.preventDefault();
         /* continue indention / list */

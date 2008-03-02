@@ -2,3 +2,4 @@
 \.py[oc]$
 \.DS_Store$
 ^inyoka\.xapdb/
+inyoka/scripts/converter/converter_config.py
