@@ -745,6 +745,23 @@ class Newline(Macro):
         return nodes.Newline()
 
 
+class Anchor(Macro):
+    """
+    This macro creates an anchor accessible by url.
+    """
+
+    is_static = True
+    arguments = (
+        ('id', unicode, None),
+    )
+
+    def __init__(self, id):
+        self.id = id
+
+    def build_node(self):
+        return nodes.Span(id=self.id)
+
+
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -766,6 +783,7 @@ ALL_MACROS = {
     u'Datum':               Date,
     u'NeueSeiten':          NewPages,
     u'BR':                  Newline,
+    u'Anker':               Anchor
 }
 
 

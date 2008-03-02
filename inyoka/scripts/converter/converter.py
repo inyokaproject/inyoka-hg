@@ -42,6 +42,7 @@ def select_blocks(query, block_size=1000):
     key_name = list(table.primary_key)[0].name
     key = table.c[key_name]
     range = (0, block_size)
+    failed = 0
     while True:
         print range
         result = query.where(key.between(*range)).execute()
@@ -49,7 +50,11 @@ def select_blocks(query, block_size=1000):
         for i, row in enumerate(result):
             yield row
         if i == 0:
-            break
+            failed += 1
+            if failed == 5:
+                break
+        else:
+            failed = 0
         range = range[1] + 1, range[1] + block_size
 
 
@@ -66,15 +71,24 @@ def convert_wiki():
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    #import cPickle
-    #f = file('pagelist', 'r')
-    #l = cPickle.load(f)
-    #f.close()
-    #for i, moin_name in enumerate(l):
-    for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Programme starten']):
+    us = User.objects.all()
+    for u in us:
+        users[u.username] = u
+    del us
+    import cPickle
+    f = file('pagelist', 'r')
+    l = cPickle.load(f)
+    f.close()
+    #start = False
+    for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(request.rootpage.getPageList()):
+    #for i, moin_name in enumerate(['Opera/Installation']):
         name = normalize_pagename(moin_name)
         print i, ':', name
+        #if not start and name != 'Firefox/Installation':
+        #    continue
+        #else:
+        #    start = True
         page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -224,7 +238,7 @@ def convert_users():
         except IntegrityError, e:
             # same email adress, forbidden
             if e.args[1].endswith('key 3'):
-                data['email'] = "(%d)%s" % (row.user_id ,data['email'])
+                data['email'] = "(%d)%s" % (row.user_id, data['email'])
                 u = User.objects.create(**data)
                 mail_error.append(row.user_id)
             else:
@@ -440,6 +454,7 @@ def convert_groups():
     dconn.close()
     conn.close()
 
+
 def convert_polls():
     from inyoka.forum.models import Poll, PollOption, Voter, Topic
 
@@ -523,6 +538,7 @@ def convert_polls():
     # Fix anon user:
     connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
 
+
 def convert_privileges():
     from inyoka.forum.models import Privilege, Group
 
@@ -557,6 +573,7 @@ def convert_privileges():
         Privilege.objects.create(**data)
     transaction.commit()
 
+
 def convert_subscriptions():
     from inyoka.portal.models import Subscription
 
@@ -578,6 +595,7 @@ def convert_subscriptions():
         except:
             pass
     transaction.commit()
+
 
 def convert_attachments():
     from inyoka.forum.models import Attachment, Post
@@ -617,6 +635,7 @@ def convert_attachments():
             pass
     transaction.commit()
 
+
 def convert_privmsgs():
     from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
     from sqlalchemy.sql import and_
@@ -636,12 +655,12 @@ def convert_privmsgs():
     transaction.managed(True)
     i = 0
     FOLDER_MAPPING = {
-    0: 1,
-    1: 0,
-    2: 0,
-    3: 3,
-    4: 3,
-    5: 1,
+        0: 1,
+        1: 0,
+        2: 0,
+        3: 3,
+        4: 3,
+        5: 1,
     }
 
     msg_table = Table('%sprivmsgs' % FORUM_PREFIX, meta, autoload=True)
@@ -768,7 +787,6 @@ def convert_ikhaya():
     user_mapping = {}
     force = {
         'tux123': 'tux21b',
-
     }
     for user in select_blocks(user_table.select()):
         if user.username in force:
@@ -860,6 +878,7 @@ if __name__ == '__main__':
                 print 'Please choose or more of: %s' % ', '.join(MODE_MAPPING)
                 sys.exit(1)
             sys.exit(0)
+    asdasd
     print 'Converting users'
     convert_users()
     print 'Converting wiki data'

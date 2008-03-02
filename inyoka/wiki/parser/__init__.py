@@ -365,7 +365,8 @@ class Parser(object):
             'macro_begin':          self.parse_macro,
             'pre_begin':            self.parse_pre_block,
             'table_row_begin':      self.parse_table,
-            'box_begin':            self.parse_box
+            'box_begin':            self.parse_box,
+            'sourcelink':           self.parse_source_link
         }
 
         #: runtime information
@@ -1017,3 +1018,9 @@ class Parser(object):
             result = transformer.transform(result)
         self.expand_macros(result, 'final')
         return result
+
+    def parse_source_link(self, stream):
+        """
+        """
+        sourcenumber = stream.expect('sourcelink').value[1:-1]
+        return nodes.SourceLink(id=sourcenumber)
