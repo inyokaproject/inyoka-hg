@@ -55,6 +55,7 @@ from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
 
 
+
 @templated('errors/404.html')
 def not_found(request, err_message=None):
     return {

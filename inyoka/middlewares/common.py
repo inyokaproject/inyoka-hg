@@ -40,14 +40,6 @@ for name, item in [('static', settings.STATIC_ROOT),
     module.require_trailing_slash = False
 
 
-# hook in debug call function
-if settings.DEBUG:
-    from inyoka.utils import interact
-    import __builtin__
-    __builtin__.INTERACT = interact
-    del __builtin__, interact
-
-
 class CommonServicesMiddleware(CommonMiddleware):
 
     def process_request(self, request):
