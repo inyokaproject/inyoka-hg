@@ -16,7 +16,6 @@ from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
 from django.utils.html import escape
-from django.core.cache import cache
 from django.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -24,20 +23,21 @@ from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
+from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 from inyoka.portal.user import User, Group
 
 
 POSTS_PER_PAGE = 10
 UBUNTU_VERSIONS = {
-    '4.10': 'Warty Warthog',
-    '5.04': 'Hoary Hedgehog',
-    '5.10': 'Breezy Badger',
-    '6.06': 'Dapper Drake',
-    '6.10': 'Edgy Eft',
-    '7.04': 'Feisty Fawn',
-    '7.10': 'Gutsy Gibbon',
-    '8.04': 'Hardy Heron'
+    '4.10': '4.10 (Warty Warthog)',
+    '5.04': '5.04 (Hoary Hedgehog)',
+    '5.10': '5.10 (Breezy Badger)',
+    '6.06': '6.06 (Dapper Drake)',
+    '6.10': '6.10 (Edgy Eft)',
+    '7.04': '7.04 (Feisty Fawn)',
+    '7.10': '7.10 (Gutsy Gibbon)',
+    '8.04': '8.04 (Hardy Heron)'
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
@@ -1190,4 +1190,3 @@ class WelcomeMessage(models.Model):
     def render_text(self, request=None, format='html'):
         context = RenderContext(request or r.request, simplified=True)
         return parse(self.text).render(context, format)
-

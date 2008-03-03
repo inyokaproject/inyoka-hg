@@ -12,11 +12,11 @@ import random
 import xapian
 from datetime import datetime
 from django.db import models, connection
-from django.core.cache import cache
 from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils import slugify, striptags
 from inyoka.utils.urls import href, url_for
+from inyoka.utils.cache import cache
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.middlewares.registry import r
 

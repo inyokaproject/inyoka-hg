@@ -16,7 +16,8 @@ BASE_PATH = dirname(__file__)
 # debugger is off per default
 DEBUG = TEMPLATE_DEBUG = False
 
-# per default there are no managers and admins
+# per default there are no managers and admins.  I guess that's
+# unused :)
 MANAGERS = ADMINS = ()
 
 # set the database settings in the actual settings file
@@ -27,6 +28,11 @@ DATABASE_ENGINE = 'mysql'
 DATABASE_OPTIONS = {
     'init_command': "set storage_engine=INNODB"
 }
+
+# if we are in debug mode we issue tickets into a trac
+TRAC_URL = 'http://trac.ubuntuusers.de/'
+TRAC_USERNAME = 'ubuntu_de'
+TRAC_PASSWORD = 'G3h31m!'
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -123,15 +129,9 @@ WIKI_DISCUSSION_FORUM = 'diskussionen'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 
-# Our Cache System. Set this to memcached or locmen or something
-# more useful in the production environment
-CACHE_BACKEND = 'locmem:///'
-
-# We only load templates from the template folder
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source'
-)
+# if memcache servers are defined the caching system is initialized
+# with the werkzeug memcache layer, otherwise the null cache.
+MEMCACHE_SERVERS = []
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',

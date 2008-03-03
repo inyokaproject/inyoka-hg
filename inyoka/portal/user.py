@@ -10,22 +10,22 @@
                                        Benjamin Wiegand, Christoph Hack.
     :license: GNU GPL.
 """
+import os
+import cPickle
 from datetime import datetime
 from sha import sha
 from md5 import md5
-import os
-import cPickle
 from os import path
 from PIL import Image
 from StringIO import StringIO
 from django.db import models
 from django.conf import settings
 from django.utils.encoding import smart_str
-from django.core.cache import cache
 from django.core import validators
 from inyoka.utils import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
+from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 
 

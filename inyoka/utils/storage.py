@@ -9,8 +9,8 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from django.core.cache import cache
 from inyoka.portal.models import Storage
+from inyoka.utils.cache import cache
 
 
 class CachedStorage(object):

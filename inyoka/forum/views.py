@@ -13,7 +13,6 @@ from urllib import unquote
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
-from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, check_login, \
@@ -29,6 +28,7 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
+from inyoka.utils.cache import cache
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext

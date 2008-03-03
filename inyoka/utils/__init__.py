@@ -55,19 +55,6 @@ INYOKA_REVISION = _get_inyoka_revision()
 del _get_inyoka_revision
 
 
-def interact(offset=0):
-    """
-    Start a python debugger in the caller frame.  If inyoka is in debug
-    mode this function is available globally as ``INTERACT()``.
-    """
-    import pdb, sys
-    frm = sys._getframe(offset + 1)
-    p = pdb.Pdb()
-    p.prompt = '>>> '
-    p.reset()
-    p.interaction(frm, None)
-
-
 def increment_string(s):
     """Increment a number in a string or add a number."""
     m = _str_num_re.search(s)
