@@ -19,7 +19,6 @@ from StringIO import StringIO
 from django.db import models, connection
 from django.conf import settings
 from django.utils.encoding import smart_str
-from django.core.cache import cache
 from django.core import validators
 from django.db.models.manager import EmptyManager
 from inyoka.utils.urls import href
@@ -30,6 +29,7 @@ from inyoka.utils import deferred, slugify
 from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
+from inyoka.utils.cache import cache
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page

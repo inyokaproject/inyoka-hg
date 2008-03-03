@@ -123,15 +123,9 @@ WIKI_DISCUSSION_FORUM = 'diskussionen'
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 
-# Our Cache System. Set this to memcached or locmen or something
-# more useful in the production environment
-CACHE_BACKEND = 'locmem:///'
-
-# We only load templates from the template folder
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source'
-)
+# if memcache servers are defined the caching system is initialized
+# with the werkzeug memcache layer, otherwise the null cache.
+MEMCACHE_SERVERS = []
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.gzip.GZipMiddleware',

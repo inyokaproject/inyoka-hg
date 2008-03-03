@@ -12,7 +12,6 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse, \
                         Http404 as PageNotFound
 from django.core.mail import send_mail
-from django.core.cache import cache
 from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.user import Group
@@ -23,6 +22,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.cache import cache
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
 from inyoka.planet.utils import group_by_day
