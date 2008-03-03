@@ -12,13 +12,13 @@
 import sys
 from time import time
 from datetime import datetime, timedelta
-from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.newforms import ValidationError
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
+from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 
 

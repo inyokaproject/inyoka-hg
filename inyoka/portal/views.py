@@ -19,7 +19,6 @@ from django.newforms.models import model_to_dict
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from inyoka.utils import get_random_password, human_number
@@ -36,6 +35,7 @@ from inyoka.utils.sortable import Sortable
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
+from inyoka.utils.cache import cache
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
                                 send_new_user_password
 from inyoka.wiki.models import Page as WikiPage

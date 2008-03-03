@@ -11,12 +11,12 @@
 import os
 from jinja import Environment, FileSystemLoader
 from django.conf import settings
-from django.core.cache import cache
 from inyoka.utils.dates import format_timedelta, natural_date, \
      format_datetime, format_specific_datetime, format_time
 from inyoka.utils import INYOKA_REVISION, human_number
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.flashing import get_flashed_messages
+from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 
 

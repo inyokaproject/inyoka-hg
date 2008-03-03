@@ -9,9 +9,10 @@
     :copyright: Copyright 2008 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from inyoka.utils.storage import storage, Storage
-from django.core.cache import cache
 import time
+from inyoka.utils.storage import storage, Storage
+from inyoka.utils.cache import cache
+
 
 def test_set():
     def _compare(key, value):

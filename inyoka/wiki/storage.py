@@ -41,9 +41,9 @@
 """
 import re
 from urlparse import urljoin
-from django.core.cache import cache
 from django.conf import settings
 from django.db import connection
+from inyoka.utils.cache import cache
 
 
 _block_re = re.compile(r'^\{\{\{(?:\n?#.*?$)?(.*?)^\}\}\}(?sm)')

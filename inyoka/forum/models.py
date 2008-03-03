@@ -16,7 +16,6 @@ from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
 from django.utils.html import escape
-from django.core.cache import cache
 from django.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -24,6 +23,7 @@ from inyoka.utils import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
+from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 from inyoka.portal.user import User, Group
 
