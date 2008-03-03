@@ -30,14 +30,14 @@ from inyoka.portal.user import User, Group
 
 POSTS_PER_PAGE = 10
 UBUNTU_VERSIONS = {
-    '4.10': 'Warty Warthog',
-    '5.04': 'Hoary Hedgehog',
-    '5.10': 'Breezy Badger',
-    '6.06': 'Dapper Drake',
-    '6.10': 'Edgy Eft',
-    '7.04': 'Feisty Fawn',
-    '7.10': 'Gutsy Gibbon',
-    '8.04': 'Hardy Heron'
+    '4.10': '4.10 (Warty Warthog)',
+    '5.04': '5.04 (Hoary Hedgehog)',
+    '5.10': '5.10 (Breezy Badger)',
+    '6.06': '6.06 (Dapper Drake)',
+    '6.10': '6.10 (Edgy Eft)',
+    '7.04': '7.04 (Feisty Fawn)',
+    '7.10': '7.10 (Gutsy Gibbon)',
+    '8.04': '8.04 (Hardy Heron)'
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',

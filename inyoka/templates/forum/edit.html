@@ -84,14 +84,14 @@
       <dt>Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
-      <dd>
-        {{ form.att_ids }}
-        {{ form.polls }}
-        {{ h.field_errors(form.errors.__all__) }}
-        <input type="submit" value="Speichern" name="send" />
-        <input type="submit" value="Vorschau" name="preview" />
-      </dd>
     </dl>
+    <p>
+      {{ form.att_ids }}
+      {{ form.polls }}
+      {{ h.field_errors(form.errors.__all__) }}
+      <input type="submit" value="Speichern" name="send" />
+      <input type="submit" value="Vorschau" name="preview" />
+    </p>
     {%- if preview %}
     <h2>Vorschau</h2>
     <div class="preview">{{ preview }}</div>
