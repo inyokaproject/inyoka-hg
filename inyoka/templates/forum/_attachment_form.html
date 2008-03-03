@@ -15,8 +15,7 @@
     :license GNU GPL
     
 #}
-{% if can_attach %}
-{% if attachments %}
+{%- if attachments %}
 <ul>
   {%- for att in attachments %}
   <li>
@@ -25,7 +24,7 @@
   </li>
   {%- endfor %}
 </ul>
-{% endif %}
+{%- endif %}
 <p><label for="id_attachment">Dateianhang:</label>
   {{ form.attachment }}{{ h.field_errors(form.errors.attachment) }}</p>
 <p><label for="id_filename">Umbenennen auf:</label>
@@ -35,4 +34,3 @@
 <p>{{ form.override }} <label for="id_override">Bestehenden Anhang
   gleichen Namens überschreiben</label></p>
 <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
-{% endif %}

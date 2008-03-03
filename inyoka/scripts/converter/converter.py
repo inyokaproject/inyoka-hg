@@ -71,18 +71,18 @@ def convert_wiki():
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    #us = User.objects.all()
-    #for u in us:
-    #    users[u.username] = u
-    #del us
+    us = User.objects.all()
+    for u in us:
+        users[u.username] = u
+    del us
     import cPickle
     f = file('pagelist', 'r')
     l = cPickle.load(f)
     f.close()
     #start = False
-    #for i, moin_name in enumerate(l):
+    for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Firefox/Installation']):
+    #for i, moin_name in enumerate(['Firefox/Installation']):
         name = normalize_pagename(moin_name)
         print i, ':', name
         #if not start and name != 'Firefox/Installation':
