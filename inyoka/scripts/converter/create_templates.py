@@ -93,7 +93,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
 '''Parameterfehler''': Ungültiges Datum
 <@ endif @> """,
-    u'Befehl': u"""{{|<class="bash"><@ $arguments @>
+    u'Befehl': u"""{{|<class="bash"><@ $arguments split_by('\n') join_with('[[BR]]') @>
 |}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>

@@ -82,10 +82,10 @@ def convert_wiki():
     #start = False
     for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Opera/Installation']):
+    #for i, moin_name in enumerate(['Firefox/Installation']):
         name = normalize_pagename(moin_name)
         print i, ':', name
-        #if not start and name != 'Firefox/Installation':
+        #if not start and name != 'Wiki/Sandkasten/margin':
         #    continue
         #else:
         #    start = True

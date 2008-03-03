@@ -16,8 +16,10 @@ from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
 PAGE_TEMPLATE_NAME = 'Wiki/Vorlagen/%s'
-
 macros = []
+addslashes = lambda x: x.replace('"', '\\"')
+
+
 class InyokaFormatter(FormatterBase):
     list_depth = 0
 
@@ -37,7 +39,6 @@ class InyokaFormatter(FormatterBase):
             'RecentChanges':   u'LetzteÄnderungen',
             'OrphanedPages':   u'VerwaisteSeiten',
             'WantedPages':     u'FehlendeSeiten',
-            'Anchor':          u'Anker'
         }
 
         if name in replacements:
@@ -71,8 +72,12 @@ class InyokaFormatter(FormatterBase):
                     if len(args) > 2 and args[2]:
                         args[2] = u"alt='%s'" % args[2]
 
-        elif name == 'Pakete':
+        elif name in 'Pakete':
             args = [a.strip() for a in args.split(',')]
+
+        elif name == 'Anchor':
+            args = [a.strip() for a in args.split(',')]
+            name = 'Anker'
 
         elif name == 'Include':
             args = [a.strip() for a in args.split(',')]
@@ -116,7 +121,9 @@ class InyokaFormatter(FormatterBase):
 
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
-                ' ' in a and ("'%s'" % a) or a for a in args
+                re.findall('[\'" ]', a)
+                    and ('"%s"' % addslashes(a)) or a
+                for a in args
             ))
         else:
             return u'[[%s]]' % name
@@ -132,12 +139,7 @@ class InyokaFormatter(FormatterBase):
             result.append(self.preformatted(0))
             return u''.join(result)
 
-        # most processors are page tempaltes in inyoka
-        if processor_name != 'Wissen':
-            return u'[[Vorlage(%s, \'%s\')]]' % (
-                PAGE_TEMPLATE_NAME % processor_name, u'\n'.join(lines)
-            )
-        else:
+        if processor_name == 'Wissen':
             links = []
             for line in lines:
                 for match in re.findall('\[([^\]]+)\]', line):
@@ -148,6 +150,12 @@ class InyokaFormatter(FormatterBase):
             return u'[[Vorlage(%s, %s)]]' % (
                 PAGE_TEMPLATE_NAME % processor_name,
                 u', '.join(links)
+            )
+        else:
+            # most processors are page templates in inyoka
+            return u'[[Vorlage(%s, "%s")]]' % (
+                PAGE_TEMPLATE_NAME % processor_name,
+                addslashes(u'\n'.join(lines))
             )
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
