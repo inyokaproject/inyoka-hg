@@ -30,20 +30,21 @@ from inyoka.portal.user import User, Group
 
 POSTS_PER_PAGE = 10
 UBUNTU_VERSIONS = {
-    '4.10': 'Warty Warthog',
-    '5.04': 'Hoary Hedgehog',
-    '5.10': 'Breezy Badger',
-    '6.06': 'Dapper Drake',
-    '6.10': 'Edgy Eft',
-    '7.04': 'Feisty Fawn',
-    '7.10': 'Gutsy Gibbon',
-    '8.04': 'Hardy Heron'
+    '4.10': '4.10 (Warty Warthog)',
+    '5.04': '5.04 (Hoary Hedgehog)',
+    '5.10': '5.10 (Breezy Badger)',
+    '6.06': '6.06 (Dapper Drake)',
+    '6.10': '6.10 (Edgy Eft)',
+    '7.04': '7.04 (Feisty Fawn)',
+    '7.10': '7.10 (Gutsy Gibbon)',
+    '8.04': '8.04 (Hardy Heron)'
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
     'xubuntu': 'Xubuntu',
-    'edubuntu': 'Edubuntu'
+    'edubuntu': 'Edubuntu',
+    'server': 'Server',
 }
 REGEX = '(.+)Ubuntu\/%s \(%s\)(.+)'
 VERSION_REGEXES = [
@@ -945,11 +946,24 @@ class Post(models.Model):
 
     def save(self):
         self.rendered_text = self.render_text()
+        if self.id is not None:
+            try:
+                old = Post.objects.get(id=self.id)
+            except Post.DoesNotExist:
+                pass
+            else:
+                if self.text != old.text:
+                    rev = PostRevision()
+                    rev.store_date = datetime.now()
+                    rev.post = self
+                    rev.text = old.text
+                    rev.save()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
         for page in range(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
             cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
+
         self.update_search()
 
     def update_search(self):
@@ -1023,6 +1037,25 @@ class Post(models.Model):
         get_latest_by = 'id'
 
 
+class PostRevision(models.Model):
+    """
+    This saves old revisions of posts. It can be used to restore posts if
+    something odd was done to them.
+    """
+    post = models.ForeignKey(Post, verbose_name='zugehöriges Posting')
+    text = models.TextField('Text')
+    store_date = models.DateTimeField('Datum der Löschung')
+    
+    def __repr__(self):
+        return '<%s post=%d (%s), stored=%s>' % (
+            self.__class__.__name__,
+            self.post.id,
+            self.post.topic.title,
+            self.store_date.strftime('%Y-%m-%d %H:%M')
+        )
+
+
+
 class Attachment(models.Model):
     """
     Posts can have uploaded data associated, this table holds the  mapping
@@ -1032,6 +1065,8 @@ class Attachment(models.Model):
         The path to the attachment itself.
     `name`
         The name of the attachment.
+    `comment`
+        The comment of the attachment.
     `post`
         The post the attachment belongs to.  It may be NULL if the attachment
         belongs to a post that is not yet created.
@@ -1039,6 +1074,7 @@ class Attachment(models.Model):
     objects = AttachmentManager()
     file = models.FileField(upload_to='forum/attachments/%S/%W')
     name = models.CharField(max_length=255)
+    comment = models.TextField()
     post = models.ForeignKey(Post, null=True)
 
     @property
@@ -1101,7 +1137,7 @@ class Attachment(models.Model):
 
 class Poll(models.Model):
     objects = PollManager()
-    question = models.CharField(max_length=100)
+    question = models.CharField(max_length=250)
     topic = models.ForeignKey(Topic, blank=True, null=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
@@ -1110,7 +1146,7 @@ class Poll(models.Model):
 
 class PollOption(models.Model):
     poll = models.ForeignKey(Poll)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=250)
     votes = models.IntegerField(default=0)
 
 

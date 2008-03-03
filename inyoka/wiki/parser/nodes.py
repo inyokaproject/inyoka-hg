@@ -936,6 +936,20 @@ class Emphasized(Element):
         yield u'</emphasis>'
 
 
+class SourceLink(Element):
+
+    allowed_in_signatures = False
+
+    def generate_markup(self, w):
+        w.markup(u"[%s]" % self.id)
+
+    def prepare_html(self):
+        yield u'<sup><a href="#source-%s">[%s]</a></sup>' % (self.id, self.id)
+
+    def prepare_docbook(self):
+        yield u'[%s]' % self.id
+
+
 class Code(Element):
     """
     This represents code.  Usually formatted in a monospaced font that

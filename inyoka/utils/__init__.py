@@ -50,7 +50,7 @@ def _get_inyoka_revision():
             if len(p) == 2 and p[0].lower().strip() == 'changeset':
                 hg_node = p[1].strip()
                 break
-    return hg_node
+    return hg_node.split(':')[0]
 INYOKA_REVISION = _get_inyoka_revision()
 del _get_inyoka_revision
 

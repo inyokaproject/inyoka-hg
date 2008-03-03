@@ -39,7 +39,7 @@ def get_user_timezone():
     user = getattr(r.request, 'user', None)
     try:
         return pytz.timezone(user.settings.get('timezone', ''))
-    except (AttributeError, LookupError):
+    except:
         return pytz.UTC
 
 

@@ -60,7 +60,7 @@ class SurgeProtectionMixin(object):
     surge protection.  Give this method a higher MRO than the form baseclass!
     """
 
-    source_protection_timeout = 30
+    source_protection_timeout = 15
     source_protection_message = '''
         Du kannst Daten nicht so schnell hintereinander absenden.  Bitte
         warte noch einige Zeit bis du das Forumlar erneut absendest.

@@ -468,8 +468,11 @@ def forums_edit(request, id=None):
     new_forum = id is None
 
     def _add_field_choices():
-        categories = [(c.id, c.name) for c in Forum.objects.all()]
-        form.fields['parent'].choices = [(-1,"Kategorie")] + categories
+        query = Forum.objects.all()
+        if id:
+            query = query.exclude(id=id)
+        categories = [(c.id, c.name) for c in query]
+        form.fields['parent'].choices = [(-1, "-")] + categories
 
     if id is None:
         f = Forum()
@@ -586,7 +589,8 @@ def edit_user(request, username):
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__id=forum_id)
+                        privilege = Privilege.objects.get(forum__id=forum_id,
+                            group__isnull=True, user=user)
                         privilege.user = user
                         privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()
@@ -723,7 +727,8 @@ def groups_edit(request, name=None):
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     try:
-                        privilege = Privilege.objects.get(forum__id=forum_id)
+                        privilege = Privilege.objects.get(forum__id=forum_id,
+                            user__isnull=True, group=group)
                         privilege.group = group
                         privilege.forum = Forum.objects.get(id=forum_id)
                         _set_privileges()

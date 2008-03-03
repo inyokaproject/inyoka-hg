@@ -365,7 +365,8 @@ class Parser(object):
             'macro_begin':          self.parse_macro,
             'pre_begin':            self.parse_pre_block,
             'table_row_begin':      self.parse_table,
-            'box_begin':            self.parse_box
+            'box_begin':            self.parse_box,
+            'sourcelink':           self.parse_source_link
         }
 
         #: runtime information
@@ -805,8 +806,8 @@ class Parser(object):
         stream.next()
         macro = get_macro(name, args, kwargs)
         if macro is None:
-            return nodes.error_box('Fehlendes Macro',
-                                   u'Das Macro „%s“ konnte nicht '
+            return nodes.error_box('Fehlendes Makro',
+                                   u'Das Makro „%s“ konnte nicht '
                                    u'gefunden werden.' % name)
         elif macro.is_tree_processor:
             placeholder = nodes.DeferredNode(macro)
@@ -833,7 +834,6 @@ class Parser(object):
             stream.next()
             args, kwargs = self.parse_arguments(stream, 'parser_end')
             stream.next()
-            print stream.current
         else:
             name = 'text'
 
@@ -1018,3 +1018,9 @@ class Parser(object):
             result = transformer.transform(result)
         self.expand_macros(result, 'final')
         return result
+
+    def parse_source_link(self, stream):
+        """
+        """
+        sourcenumber = stream.expect('sourcelink').value[1:-1]
+        return nodes.SourceLink(id=sourcenumber)

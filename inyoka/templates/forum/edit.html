@@ -76,20 +76,22 @@
       {%- endfor %}
       <dd><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
       {%- endif %}
+      {%- if can_attach %}
       <dt class="collapse">Dateianhänge:</dt>
       <dd>{{ h.attachment_form(attach_form, attachments) }}</dd>
+      {%- endif %}
       {%- if isnewtopic or isfirstpost %}
       <dt>Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
-      <dd>
-        {{ form.att_ids }}
-        {{ form.polls }}
-        {{ h.field_errors(form.errors.__all__) }}
-        <input type="submit" value="Speichern" name="send" />
-        <input type="submit" value="Vorschau" name="preview" />
-      </dd>
     </dl>
+    <p>
+      {{ form.att_ids }}
+      {{ form.polls }}
+      {{ h.field_errors(form.errors.__all__) }}
+      <input type="submit" value="Speichern" name="send" />
+      <input type="submit" value="Vorschau" name="preview" />
+    </p>
     {%- if preview %}
     <h2>Vorschau</h2>
     <div class="preview">{{ preview }}</div>

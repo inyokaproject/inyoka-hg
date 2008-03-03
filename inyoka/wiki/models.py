@@ -101,6 +101,10 @@ from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
 
+# maximum number of bytes for metadata.  everything above is truncated
+MAX_METADATA = 2 << 15
+
+
 class PageManager(models.Manager):
     """
     Because our table definitions are rather complex due to shared text,
@@ -906,7 +910,7 @@ class Page(models.Model):
         cur.close()
 
         for key, value in new_metadata:
-            MetaData(page=self, key=key, value=value).save()
+            MetaData(page=self, key=key, value=value[:MAX_METADATA]).save()
 
         # searchindex
         search.queue('w', self.id)

@@ -653,17 +653,19 @@ def privmsg_new(request, username=None):
                                    u' von %s' % (request.user.username), text)
     else:
         data = {}
-        if request.GET.get('reply_to'):
+        if request.GET.get('reply_to') and \
+           request.GET['reply_to'].isnumeric():
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,
                     message=int(request.GET.get('reply_to')))
                 msg = entry.message
-                data['subject'] = msg.subject.startswith(u'Re: ') and \
+                data['subject'] = msg.subject.lower().startswith(u're: ') and \
                                   msg.subject or u'Re: %s' % msg.subject
                 data['recipient'] = msg.author.username
                 data['text'] = u'%s schrieb:\n%s' % (
                     msg.author.username,
                     '\n'.join('> %s' % l for l in msg.text.splitlines()))
+                form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist, ValueError):
                 pass
         if username:

@@ -558,8 +558,19 @@ class For(Node):
 
     def stream_markup(self, context):
         context.push()
-        for child in self.seq.evaluate(context):
+        seq = self.seq.evaluate(context)
+        length = len(seq)
+        for idx, child in enumerate(seq):
             context[self.var] = child
+            context['loop'] = Value({
+                'index0':       idx,
+                'index':        idx + 1,
+                'revindex0':    length - idx - 1,
+                'revindex':     length - idx,
+                'length':       length,
+                'first':        idx == 0,
+                'last':         idx == length - 1
+            })
             for item in self.body.stream_markup(context):
                 yield item
         context.pop()
@@ -630,6 +641,11 @@ class Value(Expr):
                     'key':      key,
                     'value':    value
                 })
+
+    def __len__(self):
+        if self.value:
+            return len(self.value)
+        return 0
 
     def __getitem__(self, key):
         if isinstance(self.value, (tuple, list, dict)):

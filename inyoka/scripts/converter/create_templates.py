@@ -93,7 +93,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
 '''Parameterfehler''': Ungültiges Datum
 <@ endif @> """,
-    u'Befehl': u"""{{|<class="bash"><@ $arguments @>
+    u'Befehl': u"""{{|<class="bash"><@ $arguments split_by('\n') join_with('[[BR]]') @>
 |}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>
@@ -134,11 +134,14 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
 <@ endif @>
 <@ endfor @>""",
+    u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
+<@ for $arg in $arguments @>
+ * [[Anker(source-<@ $loop.index @>)]]<@ $loop.index @>: <@ $arg @>
+<@ endfor @>
+|}}""",
     u'Warnung': simple_box(u'Achtung!', 'warning'),
     u'Hinweis': simple_box(u'Hinweis:', 'notice'),
     u'Experten': simple_box(u'Experten-Info:', 'experts'),
-    u'Wissen': simple_box(u'Diese Anleitung setzt die Kenntnis folgender '
-                          u'Seiten voraus:', 'knowledge'),
 }
 
 def create_page_templates():
