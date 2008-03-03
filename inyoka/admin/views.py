@@ -870,5 +870,3 @@ def styles(request):
     return {
         'form': form
     }
-
-

@@ -1154,4 +1154,3 @@ class WelcomeMessage(models.Model):
     def render_text(self, request=None, format='html'):
         context = RenderContext(request or r.request, simplified=True)
         return parse(self.text).render(context, format)
-
