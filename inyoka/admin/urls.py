@@ -56,4 +56,3 @@ urlpatterns = patterns('inyoka.admin.views',
 )
 
 handler404 = 'inyoka.portal.views.not_found'
-handler500 = 'inyoka.portal.views.internal_server_error'

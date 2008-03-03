@@ -16,7 +16,8 @@ BASE_PATH = dirname(__file__)
 # debugger is off per default
 DEBUG = TEMPLATE_DEBUG = False
 
-# per default there are no managers and admins
+# per default there are no managers and admins.  I guess that's
+# unused :)
 MANAGERS = ADMINS = ()
 
 # set the database settings in the actual settings file
@@ -27,6 +28,11 @@ DATABASE_ENGINE = 'mysql'
 DATABASE_OPTIONS = {
     'init_command': "set storage_engine=INNODB"
 }
+
+# if we are in debug mode we issue tickets into a trac
+TRAC_URL = 'http://trac.ubuntuusers.de/'
+TRAC_USERNAME = 'ubuntu_de'
+TRAC_PASSWORD = 'G3h31m!'
 
 
 # Local time zone for this installation. Choices can be found here:

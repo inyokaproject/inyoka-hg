@@ -62,11 +62,6 @@ def not_found(request, err_message=None):
     }
 
 
-@templated('errors/500.html')
-def internal_server_error(request):
-    pass
-
-
 @templated('portal/index.html')
 def index(request):
     """
