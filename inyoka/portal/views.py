@@ -435,7 +435,6 @@ def usercp_profile(request):
             ((k, v) for k, v in request.user.settings.iteritems()
              if k.startswith('show_'))
         ))
-        print "xxxxxxxxxx %s" % values
         settings = request.user.settings
         form = UserCPProfileForm(values)
     return {
