@@ -15,7 +15,6 @@ from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
-PAGE_TEMPLATE_NAME = 'Wiki/Vorlagen/%s'
 macros = []
 addslashes = lambda x: x.replace('"', '\\"')
 
@@ -39,10 +38,14 @@ class InyokaFormatter(FormatterBase):
             'RecentChanges':   u'LetzteÄnderungen',
             'OrphanedPages':   u'VerwaisteSeiten',
             'WantedPages':     u'FehlendeSeiten',
+            'user':            u'Benutzer',
+            'Anchor':          u'Anker',
+            'Include':         u'Vorlage',
         }
 
         if name in replacements:
             name = replacements[name]
+            args = [a.strip() for a in args.split(',')]
 
         elif name == 'Anmerkung':
             return u'((%s))' % u''.join(args)
@@ -55,7 +58,7 @@ class InyokaFormatter(FormatterBase):
                 args = [a.strip() for a in args.split(',')]
             else:
                 args = args and [args] or []
-            args = [PAGE_TEMPLATE_NAME % name.replace('ae', u'ä')] + args
+            args = [name.replace('ae', u'ä')] + args
             name = 'Vorlage'
 
         elif name == 'Bild':
@@ -71,17 +74,6 @@ class InyokaFormatter(FormatterBase):
                     args[1] = u'align=%s' % args[1]
                     if len(args) > 2 and args[2]:
                         args[2] = u"alt='%s'" % args[2]
-
-        elif name in 'Pakete':
-            args = [a.strip() for a in args.split(',')]
-
-        elif name == 'Anchor':
-            args = [a.strip() for a in args.split(',')]
-            name = 'Anker'
-
-        elif name == 'Include':
-            args = [a.strip() for a in args.split(',')]
-            name = 'Vorlage'
 
         elif name == 'ImageLink':
             args = [a.strip() for a in args.split(',')]
@@ -119,6 +111,9 @@ class InyokaFormatter(FormatterBase):
             else:
                 args = []
 
+        if name in ['Inhaltsverzeichnis', 'Seitenzahl']:
+            args = []
+
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
                 re.findall('[\'" ]', a)
@@ -147,15 +142,12 @@ class InyokaFormatter(FormatterBase):
                         int(match)
                     except ValueError:
                         links.append(u"'[%s]'" % match)
-            return u'[[Vorlage(%s, %s)]]' % (
-                PAGE_TEMPLATE_NAME % processor_name,
-                u', '.join(links)
-            )
+            return u'[[Vorlage(%s, %s)]]' % (processor_name,
+                                             u', '.join(links))
         else:
             # most processors are page templates in inyoka
-            return u'[[Vorlage(%s, "%s")]]' % (
-                PAGE_TEMPLATE_NAME % processor_name,
-                addslashes(u'\n'.join(lines))
+            return u'[[Vorlage(%s, "%s")]]' % (processor_name,
+                                               addslashes(u'\n'.join(lines))
             )
 
     def pagelink(self, on, pagename=u'', page=None, **kw):

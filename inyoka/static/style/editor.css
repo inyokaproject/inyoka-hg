@@ -8,10 +8,6 @@
  * :license: GNU GPL.
  */
 
-div.editor textarea {
-    height: 250px;
-}
-
 ul.toolbar {
     margin: 0.5em 0 0.2em 0;
     padding: 0px;

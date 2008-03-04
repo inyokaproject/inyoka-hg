@@ -21,7 +21,7 @@
   {% if user.settings['show_'+item] %}
   <td>{{ user[item]|e or '-' }}</td>
   {% else %}
-  <td class="hidden"> </td>
+  <td class="hidden">{% if REQUEST.user.is_manager %}{{ user[item]|e or '-' }}{% endif %}</td>
   {% endif %}
 {% endmacro %}
 
