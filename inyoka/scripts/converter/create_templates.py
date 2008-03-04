@@ -93,7 +93,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
 '''Parameterfehler''': Ungültiges Datum
 <@ endif @> """,
-    u'Befehl': u"""{{|<class="bash"><@ $arguments split_by('\n') join_with('[[BR]]') @>
+    u'Befehl': u"""{{|<class="bash"><@ $arguments as array_of_lines join_with('[[BR]]') @>
 |}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>
@@ -146,8 +146,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 
 def create_page_templates():
     for name, content in templates.iteritems():
-        Page.objects.create(u'Wiki/Vorlagen/%s' % name,
-                            u'# X-Preprocess: Page-Template\n%s' % content,
+        Page.objects.create(u'Wiki/Vorlagen/%s' % name, content,
                             note=u'Vorlage automatisch erstellt')
 
     # attach key images to Tasten macro

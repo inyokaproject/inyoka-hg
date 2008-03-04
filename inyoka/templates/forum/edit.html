@@ -111,7 +111,7 @@
 
       $('form input[@name="preview"]').click(function() {
         preview.hide();
-        $.get('/?__service__=wiki.render_preview', {
+        $.post('/?__service__=wiki.render_preview', {
           text: editor.val()
         }, function(data) {
           output.html(data);

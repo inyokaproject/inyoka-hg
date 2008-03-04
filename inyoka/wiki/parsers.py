@@ -20,6 +20,7 @@
 """
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr
+from inyoka.wiki.models import Page
 from inyoka.utils.highlight import highlight_code
 
 
@@ -140,10 +141,56 @@ class CSVParser(Parser):
         return result
 
 
+class TemplateParser(Parser):
+    """
+    Works exactly like the template macro just with the difference that
+    the body of the parser is passed as first argument.
+
+    As such the following two pieces of code do the very same::
+
+        [[Vorlage(Foo, "
+            Hello World
+        ")]]
+
+        {{{
+        #!Vorlage Foo
+        Hello World
+        }}}
+    """
+
+    has_argument_parser = True
+    is_static = True
+
+    def __init__(self, data, args, kwargs):
+        if not args:
+            self.template = None
+            return
+        items = kwargs.items()
+        for idx, arg in enumerate(args[1:] + (data,)):
+            items.append(('arguments.%d' % idx, arg))
+        self.template = args[0]
+        self.context = items
+
+    def build_node(self):
+        if self.template is None:
+            return nodes.error_box(u'Parameterfehler', 'Das erste Argument '
+                                   u'muss der Name des Templates sein.')
+        try:
+            page = Page.objects.get_by_name(self.template)
+        except Page.DoesNotExist:
+            return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
+                                   u'Template existiert nicht.')
+        return nodes.Container([
+            page.rev.text.parse(self.context),
+            nodes.MetaData('X-Attach', (self.template,))
+        ])
+
+
 #: list of all parsers this wiki can handle
 ALL_PARSERS = {
     'code':     PygmentsParser,
-    'csv':      CSVParser
+    'csv':      CSVParser,
+    'vorlage':  TemplateParser
 }
 
 #: reverse mapping of the parsers
