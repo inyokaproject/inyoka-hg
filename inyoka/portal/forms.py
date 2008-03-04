@@ -255,6 +255,12 @@ class UserCPProfileForm(forms.Form):
     msn = forms.CharField(label='MSN Messenger', required=False)
     aim = forms.CharField(label='AIM', required=False)
     yim = forms.CharField(label='Yahoo Instant Messenger', required=False)
+    show_email = forms.BooleanField(required=False)
+    show_jabber = forms.BooleanField(required=False)
+    show_icq = forms.BooleanField(required=False)
+    show_msn = forms.BooleanField(required=False)
+    show_aim = forms.BooleanField(required=False)
+    show_yim = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
     coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',

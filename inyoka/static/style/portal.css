@@ -134,6 +134,10 @@ table.userinfo td {
   border: 1px dotted #ccc;
 }
 
+table.userinfo td.hidden {
+  background-color: #f1e8dd;
+}
+
 /* User Control Panel *******************************************************/
 
 table.usercp_control {
