@@ -101,6 +101,7 @@ table.forum td.last_post {
 }
 
 .action {
+    
     background-repeat: no-repeat;
     padding-left: 20px;
 }
@@ -174,3 +175,5 @@ table.forum a.collapsed {
     color: #666;
     font-size: .85em;
 }
+
+
