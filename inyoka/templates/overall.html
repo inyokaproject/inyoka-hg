@@ -38,7 +38,9 @@
       var
         $STATIC_URL = {{ href('static')|jsonencode }},
         $MEDIA_URL = {{ href('media')|jsonencode }},
-        $BASE_DOMAIN_NAME = {{ SETTINGS.BASE_DOMAIN_NAME|jsonencode }};
+        $BASE_DOMAIN_NAME = {{ SETTINGS.BASE_DOMAIN_NAME|jsonencode }},
+        $CURRENT_USER = {{ USER.username|jsonencode if USER.is_authenticated else 'null' }},
+        $IS_LOGGED_IN = {{ USER.is_authenticated|jsonencode }};
     /*]]>*/
     </script>
     {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
@@ -53,9 +55,8 @@
 
       <ul class="tabbar">
         {%- for app in ('portal', 'forum', 'wiki', 'ikhaya', 'planet') %}
-        <li class="{{ app }}{% if app == active_app %} active{% endif %}">
-          <a href="{{ href(app) }}">{{ app|capitalize }}</a>
-        </li>
+        <li class="{{ app }}{% if app == active_app %} active{% endif
+          %}"><a href="{{ href(app) }}">{{ app|capitalize }}</a></li>
         {%- endfor %}
       </ul>{# .tabbar #}
     </div>{# .header #}
@@ -83,11 +84,11 @@
           <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
           <li><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></li>
           <li>
-            {%- if pm_count %}
+            {%- if pm_count -%}
             <strong><a href="{{ href('portal', 'privmsg')}}">Private Nachrichten ({{ pm_count }})</a></strong>
-            {%- else %}
+            {%- else -%}
             <a href="{{ href('portal', 'privmsg') }}">Private Nachrichten</a>
-            {%- endif %}
+            {%- endif -%}
           </li>
           {%- else %}
           <li><a href="{{ href('portal', 'login', next=CURRENT_URL) }}">Login</a></li>
@@ -173,8 +174,7 @@
         </li>
         <li class="license">
           <img src="{{ href('static', 'img/copyleft.png') }}" alt="Copyleft" />
-          2004 – 2008 ubuntuusers.de • Einige Rechte vorbehalten
-          <br />
+          2004 – 2008 ubuntuusers.de • Einige Rechte vorbehalten<br />
           <a href="{{ href('portal', 'lizenz') }}">Lizenz</a> •
           <a href="{{ href('portal', 'kontakt') }}">Kontakt</a> •
           <a href="{{ href('portal', 'datenschutz') }}">Datenschutz</a> •
