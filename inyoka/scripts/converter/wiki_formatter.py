@@ -38,10 +38,14 @@ class InyokaFormatter(FormatterBase):
             'RecentChanges':   u'LetzteÄnderungen',
             'OrphanedPages':   u'VerwaisteSeiten',
             'WantedPages':     u'FehlendeSeiten',
+            'user':            u'Benutzer',
+            'Anchor':          u'Anker',
+            'Include':         u'Vorlage',
         }
 
         if name in replacements:
             name = replacements[name]
+            args = [a.strip() for a in args.split(',')]
 
         elif name == 'Anmerkung':
             return u'((%s))' % u''.join(args)
@@ -70,17 +74,6 @@ class InyokaFormatter(FormatterBase):
                     args[1] = u'align=%s' % args[1]
                     if len(args) > 2 and args[2]:
                         args[2] = u"alt='%s'" % args[2]
-
-        elif name in 'Pakete':
-            args = [a.strip() for a in args.split(',')]
-
-        elif name == 'Anchor':
-            args = [a.strip() for a in args.split(',')]
-            name = 'Anker'
-
-        elif name == 'Include':
-            args = [a.strip() for a in args.split(',')]
-            name = 'Vorlage'
 
         elif name == 'ImageLink':
             args = [a.strip() for a in args.split(',')]
