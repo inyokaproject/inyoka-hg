@@ -126,6 +126,12 @@ GOOGLE_MAPS_APIKEY = ''
 # The forum that should contain the wiki discussions
 WIKI_DISCUSSION_FORUM = 'diskussionen'
 
+# the page below we have our templates.  The template the
+# user specifies in the macro or in the parser is then
+# joined with this page name according to our weird joining
+# rules
+WIKI_TEMPLATE_BASE = 'Wiki/Vorlagen'
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 

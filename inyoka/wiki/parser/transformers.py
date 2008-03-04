@@ -139,9 +139,13 @@ class GermanTypography(Transformer):
                    replacement + \
                    all[match.end(1) - offset:]
 
-        for node in tree.query.text_nodes():
-            for regexp, replacement in _german_typography_rules:
-                node.text = regexp.sub(handle_match, node.text)
+        if tree.is_container and not tree.is_raw:
+            for node in tree.children:
+                if node.is_text_node:
+                    for regexp, replacement in _german_typography_rules:
+                        node.text = regexp.sub(handle_match, node.text)
+                elif node.is_container:
+                    self.transform(node)
         return tree
 
 

@@ -26,6 +26,7 @@
     :license: GNU GPL.
 """
 from datetime import datetime, date
+from django.conf import settings
 from inyoka.utils.urls import href, urlencode
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
@@ -591,7 +592,7 @@ class Template(Macro):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):
             items.append(('arguments.%d' % idx, arg))
-        self.template = args[0]
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
         self.context = items
 
     def build_node(self):

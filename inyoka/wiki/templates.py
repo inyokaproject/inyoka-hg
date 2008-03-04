@@ -923,41 +923,42 @@ def join_array(array, delimiter):
 
 
 BINARY_FUNCTIONS = {
-    'contain':       lambda a, b: b in a,
-    'contains':      lambda a, b: b in a,
-    'has_key':       lambda a, b: a.has_key(b),
-    'startswith':    lambda a, b: unicode(a).startswith(b),
-    'endswith':      lambda a, b: unicode(a).endswith(b),
-    'matches':       lambda a, b: simple_match(b, unicode(a)),
-    'matches_regex': lambda a, b: re.match(unicode(b), unicode(a)) \
-                                  is not None,
-    'join_with':     join_array,
-    'split_by':      lambda a, b: unicode(a).split(unicode(b))
+    'contain':          lambda a, b: b in a,
+    'contains':         lambda a, b: b in a,
+    'has_key':          lambda a, b: a.has_key(b),
+    'starts_with':      lambda a, b: unicode(a).startswith(b),
+    'ends_with':        lambda a, b: unicode(a).endswith(b),
+    'matches':          lambda a, b: simple_match(b, unicode(a)),
+    'matches_regex':    lambda a, b: re.match(unicode(b), unicode(a)) \
+                                     is not None,
+    'join_with':        join_array,
+    'split_by':         lambda a, b: unicode(a).split(unicode(b))
 }
 
 CONVERTER = {
-    'string':       lambda x: unicode(x),
-    'number':       lambda x: float(x),
-    'uppercase':    lambda x: unicode(x).upper(),
-    'lowercase':    lambda x: unicode(x).lower(),
-    'title':        lambda x: unicode(x).title(),
-    'stripped':     lambda x: unicode(x).strip(),
-    'rounded':      lambda x: math.round(float(x)),
-    'quoted':       lambda x: u"%s" % unicode(x) .
-                              replace('\\', '\\\\') .
-                              replace('"', '\\"'),
-    'escaped':      lambda x: escape(unicode(x))
+    'string':           lambda x: unicode(x),
+    'number':           lambda x: float(x),
+    'uppercase':        lambda x: unicode(x).upper(),
+    'lowercase':        lambda x: unicode(x).lower(),
+    'title':            lambda x: unicode(x).title(),
+    'stripped':         lambda x: unicode(x).strip(),
+    'rounded':          lambda x: math.round(float(x)),
+    'quoted':           lambda x: u"%s" % unicode(x) .
+                                  replace('\\', '\\\\') .
+                                  replace('"', '\\"'),
+    'escaped':          lambda x: escape(unicode(x)),
+    'array_of_lines':   lambda x: unicode(x).splitlines()
 }
 
 TESTS = {
-    'even':         lambda x: int(x) % 2 == 0,
-    'odd':          lambda x: int(x) % 2 != 0,
-    'uppercase':    lambda x: unicode(x).isupper(),
-    'lowercase':    lambda x: unicode(x).islower(),
-    'string':       lambda x: x.is_string,
-    'number':       lambda x: x.is_number,
-    'array':        lambda x: x.is_array,
-    'object':       lambda x: x.is_object,
-    'defined':      lambda x: x.value is not None,
-    'undefined':    lambda x: x.value is None
+    'even':             lambda x: int(x) % 2 == 0,
+    'odd':              lambda x: int(x) % 2 != 0,
+    'uppercase':        lambda x: unicode(x).isupper(),
+    'lowercase':        lambda x: unicode(x).islower(),
+    'string':           lambda x: x.is_string,
+    'number':           lambda x: x.is_number,
+    'array':            lambda x: x.is_array,
+    'object':           lambda x: x.is_object,
+    'defined':          lambda x: x.value is not None,
+    'undefined':        lambda x: x.value is None
 }
