@@ -1045,7 +1045,7 @@ class PostRevision(models.Model):
     post = models.ForeignKey(Post, verbose_name='zugehöriges Posting')
     text = models.TextField('Text')
     store_date = models.DateTimeField('Datum der Löschung')
-    
+
     def __repr__(self):
         return '<%s post=%d (%s), stored=%s>' % (
             self.__class__.__name__,

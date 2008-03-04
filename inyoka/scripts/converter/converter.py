@@ -183,7 +183,7 @@ def convert_users():
         avatar = ''
         co_long = co_lat = None
         if row.user_avatar != '':
-            avatar = "%s/%s" % (AVATAR_PREFIX.rstrip('/'),row.user_avatar)
+            avatar = "%s/%s" % (AVATAR_PREFIX.rstrip('/'), row.user_avatar)
         if row.user_coordinates != '':
             co = row.user_coordinates.split(',')
             try:
@@ -325,7 +325,7 @@ def convert_forum():
     transaction.enter_transaction_management()
     transaction.managed(True)
     for row in result:
-        
+
         data = {
             'pk': row.topic_id,
             'forum_id': row.forum_id,
@@ -586,7 +586,7 @@ def convert_subscriptions():
 
     transaction.enter_transaction_management()
     transaction.managed(True)
-    # According to http://www.phpbbdoctor.com/doc_columns.php?id=22 
+    # According to http://www.phpbbdoctor.com/doc_columns.php?id=22
     # we need to add both notify_status = 1|0 to out watch_list.
     for row in conn.execute(subscription_table.select()):
         try:

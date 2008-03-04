@@ -290,13 +290,8 @@ class User(models.Model):
         if avatar.size > settings.AVATAR_SIZE:
             avatar = avatar.resize(settings.AVATAR_SIZE)
         actual_path = self.get_avatar_filename()
-        ext = path.splitext(img.filename)[1][1:]
-        fn = 'portal/avatars/avatar_user%d.%s' % (self.id, ext)
-        if not actual_path:
-            pth = path.join(settings.MEDIA_ROOT, fn)
-        else:
-            pth = actual_path
-        ext = path.splitext(img.filename)[1]
+        fn = 'portal/avatars/avatar_user%d.png' % (self.id)
+        pth = path.join(settings.MEDIA_ROOT, fn)
         avatar.save(pth, "PNG")
         self.avatar = fn
 
