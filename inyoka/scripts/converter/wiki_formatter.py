@@ -111,6 +111,9 @@ class InyokaFormatter(FormatterBase):
             else:
                 args = []
 
+        if name in ['Inhaltsverzeichnis', 'Seitenzahl']:
+            args = []
+
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
                 re.findall('[\'" ]', a)

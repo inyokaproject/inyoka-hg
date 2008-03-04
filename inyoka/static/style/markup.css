@@ -134,3 +134,11 @@ div.knowledge {
 div.knowledge h3 {
   background-color: #d7b97b;
 }
+
+.toc {
+  float: right;
+}
+
+code {
+  background-color: #fff;
+}
