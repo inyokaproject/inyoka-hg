@@ -8,7 +8,6 @@
       .change(function() {
         $('.forum_privileges').hide();
         var id = '#forum_privileges-' + $(this).val();
-        console.log(id, $(id), $(id).length);
         if ($(id).length == 1) {
           $(id).show()
         } else {
