@@ -10,11 +10,24 @@
 """
 
 
+def _unpickle_multimap(d):
+    """
+    Helper that creates a multipmap after pickling.  We need this
+    because the default pickle system for dicts requires a mutable
+    interface which `MultiMap` is not.  Do not make this a closure
+    as this object must be pickleable itself.
+    """
+    m = dict.__new__(MultiMap)
+    dict.__init__(m, d)
+    return m
+
+
 class MultiMap(dict):
     """
     A special structure used to represent metadata and other
     data that has multiple values for one key.
     """
+    __slots__ = ()
 
     def __init__(self, sequence):
         for key, value in sequence:
@@ -38,6 +51,9 @@ class MultiMap(dict):
             return self[key][0]
         except IndexError:
             return default
+
+    def __reduce__(self):
+        return (_unpickle_multimap, (dict(self),))
 
     def __repr__(self):
         tmp = []
