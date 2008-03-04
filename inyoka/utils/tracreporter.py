@@ -84,15 +84,75 @@ class TracHandler(Handler):
     app doesn't lock up on error reporting.
     """
 
-    def __init__(self, trac_url=None, username='anonymous', password=None,
+    def __init__(self):
+        Handler.__init__(self)
+        self.trac = Trac()
+
+    def emit(self, record):
+        Thread(target=self.submit, args=(record,)).start()
+
+    def analyseForTicket(self, record):
+        for level, priority in self.priorities:
+            if level >= record.levelno:
+                break
+        else:
+            priority = ''
+        summary = record.levelname + ':'
+        description = description_formatter.format(record)
+        exception_message = get_exception_message(record.exc_info)
+        if exception_message:
+            summary += ' ' + exception_message
+            description += '\n\n=== Traceback ===\n\n{{{\n%s\n}}}' % \
+                           record.exc_text
+        else:
+            words = (record.getMessage()).split()
+            words.reverse()
+            while words and len(summary) < 140:
+                summary += ' ' + words.pop()
+            if words:
+                summary += '...'
+
+        return {
+            'keyword':      keyword,
+            'summary':      summary,
+            'description':  description,
+            'priority':     priority
+        }
+
+    def analyseForComment(self, record):
+        return {
+            'comment':      comment_formatter.format(record)
+        }
+
+    def submit(self, record):
+        keyword = 'tb_' + get_record_hash(record)
+        try:
+            record_ticket = self.trac.get_ticket_id(keyword)
+            if record_ticket is None:
+                details = self.analyseForTicket(record)
+                self.trac.submit_new_ticket(keyword, **details)
+            else:
+                details = self.analyseForComment(record)
+                self.submit_comment(record_ticket, **details)
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
+
+class Trac(object):
+    """
+    Provides a simple interface to the trac specified in the configuration.
+    """
+
+    def __init__(self, trac_url=None, username=None, password=None,
                  priorities=DEFAULT_PRIORITIES, auth_handler=None,
                  ticket_type='defect', charset='utf-8'):
-        Handler.__init__(self)
         trac_url = trac_url or settings.TRAC_URL
         if not trac_url.endswith('/'):
             trac_url += '/'
         self.trac_url = trac_url
-        self.username = settings.TRAC_USERNAME
+        self.username = username or settings.TRAC_USERNAME
         self.priorities = priorities.items()
         self.priorities.sort()
         self.trac_charset = charset
@@ -101,13 +161,10 @@ class TracHandler(Handler):
         if auth_handler is None:
             mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, self.trac_url, self.username,
-                             settings.TRAC_PASSWORD or '')
+                             password or settings.TRAC_PASSWORD or '')
             auth_handler = urllib2.HTTPBasicAuthHandler(mgr)
         self.opener = urllib2.build_opener(auth_handler)
         self.opener.addheaders = [('User-Agent', USER_AGENT)]
-
-    def emit(self, record):
-        Thread(target=self.submit, args=(record,)).start()
 
     def get_trac_cookie(self):
         if self._cookie is not None:
@@ -141,20 +198,7 @@ class TracHandler(Handler):
                                                 for n, m in cookie.items()]))
         return self.opener.open(request)
 
-    def submit(self, record):
-        try:
-            record_ticket = self.get_ticket_id(record)
-            if record_ticket is None:
-                self.submit_new_ticket(record)
-            else:
-                self.submit_comment(record_ticket, record)
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except:
-            self.handleError(record)
-
-    def get_ticket_id(self, record):
-        keyword = 'tb_' + get_record_hash(record)
+    def get_ticket_id(self, keyword):
         for line in csv.reader(self.open_trac('query', {
                 'keywords': '~' + keyword,
                 'order_by': 'id',
@@ -164,40 +208,21 @@ class TracHandler(Handler):
             if line and line[0].isdigit():
                 return int(line[0])
 
-    def submit_new_ticket(self, record):
-        keyword = 'tb_' + get_record_hash(record)
-        for level, priority in self.priorities:
-            if level >= record.levelno:
-                break
-        else:
-            priority = ''
-
-        summary = record.levelname + ':'
-        description = description_formatter.format(record)
-        exception_message = get_exception_message(record.exc_info)
-        if exception_message:
-            summary += ' ' + exception_message
-            description += '\n\n=== Traceback ===\n\n{{{\n%s\n}}}' % \
-                           record.exc_text
-        else:
-            words = (record.getMessage()).split()
-            words.reverse()
-            while words and len(summary) < 140:
-                summary += ' ' + words.pop()
-            if words:
-                summary += '...'
-
+    def submit_new_ticket(self, keywords='', summary='', description='',
+                          priority='major', ticket_type=None):
+        if not isinstance(keywords, basestring):
+            keywords = ' '.join(keywords)
         self.open_trac('newticket', {
             'field_summary':        summary,
             'field_description':    description,
-            'field_keywords':       keyword,
+            'field_keywords':       keywords,
             'field_priority':       priority,
-            'field_type':           self.ticket_type,
+            'field_type':           ticket_type or self.ticket_type,
             'field_status':         'new',
             'author':               self.username
         })
 
-    def submit_comment(self, ticket_id, record):
+    def submit_comment(self, ticket_id, comment=''):
         resource = 'ticket/%d' % ticket_id
         fd = self.open_trac(resource, method='GET')
         ts_input = None
