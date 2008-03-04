@@ -29,4 +29,3 @@ urlpatterns = patterns('inyoka.ikhaya.views',
 
 
 handler404 = 'inyoka.ikhaya.views.not_found'
-handler500 = 'inyoka.portal.views.internal_server_error'

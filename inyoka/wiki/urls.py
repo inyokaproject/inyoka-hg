@@ -19,5 +19,4 @@ urlpatterns = patterns('inyoka.wiki.views',
 
 
 handler404 = 'inyoka.wiki.views.missing_resource'
-handler500 = 'inyoka.portal.views.internal_server_error'
 require_trailing_slash = False

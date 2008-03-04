@@ -23,7 +23,8 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from inyoka.utils import import_string, INYOKA_REVISION
-from inyoka.utils.http import DirectResponse
+from inyoka.utils.http import DirectResponse, TemplateResponse
+from inyoka.utils.logger import logger
 
 
 # Set up virtual url modules for static and media
@@ -78,6 +79,9 @@ class CommonServicesMiddleware(CommonMiddleware):
     def process_exception(self, request, exception):
         if isinstance(exception, DirectResponse):
             return exception.response
+        if not settings.DEBUG:
+            logger.exception('Exception during request at %r' % request.path)
+            return TemplateResponse('errors/500.html', {}, 500)
 
     def process_response(self, request, response):
         """
