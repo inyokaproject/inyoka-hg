@@ -41,6 +41,12 @@ div.body {
   border: none;
 }
 
+a.userlink {
+  background-image: url(../img/user.png);
+  background-repeat: no-repeat;
+  padding-left: 16px;
+}
+
 input {
   border: 1px solid #AAA;
   padding: 1px 3px;

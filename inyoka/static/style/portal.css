@@ -13,6 +13,11 @@ h3 {
     color: #444;
 }
 
+a.userlink {
+  background-image: url(../img/user.png);
+  background-repeat: no-repeat;
+}
+
 .content p {
     margin-left: 0.4em;
 }
@@ -54,7 +59,6 @@ img.cat {
 .article p {
   color: #333;
 }
-
 
 .search_sidebar {
   float: right;
