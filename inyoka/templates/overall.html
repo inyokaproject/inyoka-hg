@@ -17,7 +17,7 @@
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- set styles = ['main.css'] + styles -%}
+    {%- set styles = ['main.css', 'markup.css'] + styles -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}

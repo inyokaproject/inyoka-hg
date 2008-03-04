@@ -175,6 +175,10 @@ a.missing {
   color: #999;
 }
 
+span.underline {
+  text-decoration: underline;
+}
+
 .image-right {
   float: right;
 }

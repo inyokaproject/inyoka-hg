@@ -21,7 +21,7 @@ if settings.DEBUG:
     logging_handler.setLevel(logging.ERROR)
 else:
     logging_handler = logging.StreamHandler()
-    logging_handler.setFormatter(Formatter(
+    logging_handler.setFormatter(logging.Formatter(
         '[%(asctime)s] %(levelname)s:%(name)s: %(message)s'
     ))
     logging_handler.setLevel(logging.DEBUG)
