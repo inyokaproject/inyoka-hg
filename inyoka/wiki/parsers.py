@@ -18,8 +18,10 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from django.conf import settings
 from inyoka.wiki.parser import nodes
-from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr
+from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr, \
+     pagename_join
 from inyoka.wiki.models import Page
 from inyoka.utils.highlight import highlight_code
 
@@ -168,7 +170,7 @@ class TemplateParser(Parser):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:] + (data,)):
             items.append(('arguments.%d' % idx, arg))
-        self.template = args[0]
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
         self.context = items
 
     def build_node(self):
