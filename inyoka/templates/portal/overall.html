@@ -43,21 +43,21 @@
     <li><a href="{% if USER.is_authenticated %}{{ href('pastebin') }}{% else %}{{ href('pastebin', 'browse') }}{% endif %}">No Paste Service</a></li>
     <li><a href="{{ href('portal', 'whoisonline') }}">Wer ist online?</a></li>
   </ul>
-  <h3 class="navi_forum">{{ feed_button(href('portal', 'feeds', _anchor='forum')) }}<a href="{{ href('forum') }}">Forum</a></h3>
+  <h3 class="navi_forum">{{ feed_button(href('portal', 'feeds', 'forum')) }}<a href="{{ href('forum') }}">Forum</a></h3>
   <ul>
     <li><a href="{{ href('wiki', 'Verwaltung', 'Moderatoren-Team', 'Forenregeln') }}">Forenregeln</a></li>
     <li><a href="{{ href('wiki', 'Verwaltung', 'Moderatoren-Team', 'Richtig_Fragen') }}">Richtig Fragen</a></li>
   </ul>
-  <h3 class="navi_wiki">{{ feed_button(href('portal', 'feeds', _anchor='wiki')) }}<a href="{{ href('wiki') }}">Wiki</a></h3>
+  <h3 class="navi_wiki">{{ feed_button(href('portal', 'feeds', 'wiki')) }}<a href="{{ href('wiki') }}">Wiki</a></h3>
   <ul>
     <li><a href="{{ href('wiki', 'Galerie') }}">Galerie</a></li>
     <li><a href="{{ href('wiki', 'Links') }}">Links</a></li>
   </ul>
-  <h3 class="navi_ikhaya">{{ feed_button(href('portal', 'feeds', _anchor='ikhaya')) }}<a href="{{ href('ikhaya') }}">Ikhaya</a></h3>
+  <h3 class="navi_ikhaya">{{ feed_button(href('portal', 'feeds', 'ikhaya')) }}<a href="{{ href('ikhaya') }}">Ikhaya</a></h3>
   <ul>
     <li><a href="{{ href('ikhaya', 'suggest') }}">Artikel vorschlagen</a></li>
   </ul>
-  <h3 class="navi_planet">{{ feed_button(href('portal', 'feeds', _anchor='planet')) }}<a href="{{ href('planet') }}">Planet</a></h3>
+  <h3 class="navi_planet">{{ feed_button(href('portal', 'feeds', 'planet')) }}<a href="{{ href('planet') }}">Planet</a></h3>
   <ul>
     <li><a href="{{ href('planet', 'suggest') }}">Blog vorschlagen</a></li>
   </ul>

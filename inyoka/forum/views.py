@@ -29,6 +29,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import format_datetime
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
@@ -1044,7 +1045,10 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                                     u'xhtml">%s</div>' % summary
                 kwargs['summary_type'] = 'xhtml'
             feed.add(
-                title='%s - %s' % (post.author.username, post.pub_date),
+                title='%s (%s)' % (
+                    post.author.username,
+                    format_datetime(post.pub_date)
+                ),
                 url=url_for(post),
                 author=post.author,
                 published=post.pub_date,

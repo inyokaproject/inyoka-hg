@@ -185,4 +185,14 @@ table.forum a.collapsed {
     font-size: .85em;
 }
 
+.postinfo {
+    font-size: 0.9em; /* that's why margin and padding are that ugly */
+    background-color: #F4F4F4; 
+    margin: -0.333333em -0.666666em;
+    padding: 0.333333em 0.666666em;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+
+}
+
 
