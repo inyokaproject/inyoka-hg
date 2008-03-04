@@ -15,7 +15,6 @@ from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
-PAGE_TEMPLATE_NAME = 'Wiki/Vorlagen/%s'
 macros = []
 addslashes = lambda x: x.replace('"', '\\"')
 
@@ -55,7 +54,7 @@ class InyokaFormatter(FormatterBase):
                 args = [a.strip() for a in args.split(',')]
             else:
                 args = args and [args] or []
-            args = [PAGE_TEMPLATE_NAME % name.replace('ae', u'ä')] + args
+            args = [name.replace('ae', u'ä')] + args
             name = 'Vorlage'
 
         elif name == 'Bild':
@@ -147,15 +146,12 @@ class InyokaFormatter(FormatterBase):
                         int(match)
                     except ValueError:
                         links.append(u"'[%s]'" % match)
-            return u'[[Vorlage(%s, %s)]]' % (
-                PAGE_TEMPLATE_NAME % processor_name,
-                u', '.join(links)
-            )
+            return u'[[Vorlage(%s, %s)]]' % (processor_name,
+                                             u', '.join(links))
         else:
             # most processors are page templates in inyoka
-            return u'[[Vorlage(%s, "%s")]]' % (
-                PAGE_TEMPLATE_NAME % processor_name,
-                addslashes(u'\n'.join(lines))
+            return u'[[Vorlage(%s, "%s")]]' % (processor_name,
+                                               addslashes(u'\n'.join(lines))
             )
 
     def pagelink(self, on, pagename=u'', page=None, **kw):

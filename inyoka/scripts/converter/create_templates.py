@@ -146,8 +146,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 
 def create_page_templates():
     for name, content in templates.iteritems():
-        Page.objects.create(u'Wiki/Vorlagen/%s' % name,
-                            u'# X-Preprocess: Page-Template\n%s' % content,
+        Page.objects.create(u'Wiki/Vorlagen/%s' % name, content,
                             note=u'Vorlage automatisch erstellt')
 
     # attach key images to Tasten macro
