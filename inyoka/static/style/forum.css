@@ -14,7 +14,8 @@ div.content {
     border: none;
 }
 
-table.forum a.topic_title , table.forum p.description , table.forum td.post_count {
+table.forum a.topic_title, table.forum p.description,
+table.forum td.posts, table.forum td.post_count {
 	font-size: 0.91em;
 }
 
@@ -43,10 +44,18 @@ table.forum tr.entry p.subforums {
     padding: 4px 0 3px 5px;
 }
 
-table.forum td.posts {
+table.forum th.post_count {
+    text-align: center;
+}
+
+table.forum td.posts, table.forum td.post_count {
     text-align: center;
     color: #888;
     width: 140px;
+}
+
+table.forum th.last_post {
+    text-align: right;
 }
 
 table.forum td.last_post {
