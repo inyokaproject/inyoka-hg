@@ -25,4 +25,4 @@ else:
         '[%(asctime)s] %(levelname)s:%(name)s: %(message)s'
     ))
     logging_handler.setLevel(logging.DEBUG)
-logger.setHandler(logging_handler)
+logger.addHandler(logging_handler)

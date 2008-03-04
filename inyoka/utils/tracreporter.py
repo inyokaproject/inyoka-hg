@@ -84,11 +84,11 @@ class TracHandler(Handler):
     app doesn't lock up on error reporting.
     """
 
-    def __init__(self, trac_url, username='anonymous', password=None,
+    def __init__(self, trac_url=None, username='anonymous', password=None,
                  priorities=DEFAULT_PRIORITIES, auth_handler=None,
                  ticket_type='defect', charset='utf-8'):
         Handler.__init__(self)
-        trac_url = settings.TRAC_URL
+        trac_url = trac_url or settings.TRAC_URL
         if not trac_url.endswith('/'):
             trac_url += '/'
         self.trac_url = trac_url
