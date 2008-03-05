@@ -14,6 +14,7 @@ from time import time
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 from django.newforms import ValidationError
+from django.db import transaction
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
@@ -25,6 +26,7 @@ from inyoka.utils.local import current_request
 SESSION_DELTA = 300
 
 
+@transaction.commit_on_success
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -50,7 +52,16 @@ def set_session_info(request, action, category=None):
     info.action_link = request.build_absolute_uri()
     info.category = category
     info.last_change = datetime.utcnow()
-    info.save()
+
+    # try to save, but fall back silently.  Under some rare conditions
+    # we could encounter a problem here and because the information is
+    # worthless anyways we don't care if it breaks.
+    try:
+        info.save()
+    except:
+        pass
+
+    # XXX: move into standalone process!
     check_for_user_record()
 
 
