@@ -163,7 +163,6 @@ class SmileyInjector(Transformer):
         else:
             from inyoka.wiki.storage import storage
             smilies = dict(storage.smilies)
-        print smilies
         if not smilies:
             return tree
         smiley_re = re.compile(r'(?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u)' %
