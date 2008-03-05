@@ -230,7 +230,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 article.save()
                 if suggestion_id:
                     Suggestion.objects.delete([suggestion_id])
-                flash('Der Artikel „%s“ wurde erstellt.'
+                flash(u'Der Artikel „%s“ wurde erstellt.'
                       % escape(article.subject), True)
             else:
                 changed = False

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    inyoka.scripts.planet_sync
+    inyoka.scripts.user_record
     ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This file checks for a new user record.
