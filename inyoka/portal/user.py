@@ -19,9 +19,8 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from django.db import models
-from django.conf import settings
-from django.utils.encoding import smart_str
 from django.core import validators
+from inyoka.conf import settings
 from inyoka.utils.decorators import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
@@ -46,7 +45,8 @@ def get_hexdigest(salt, raw_password):
     Returns a string of the hexdigest of the given plaintext password and salt
     using the sha1 algorithm.
     """
-    raw_password, salt = smart_str(raw_password), smart_str(salt)
+    if isinstance(raw_password, unicode):
+        raw_password = raw_password.encode('utf-8')
     return sha(salt + raw_password).hexdigest()
 
 

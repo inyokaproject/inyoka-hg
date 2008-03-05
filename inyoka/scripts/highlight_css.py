@@ -16,8 +16,8 @@
 """
 from os.path import join
 from pygments.formatters import HtmlFormatter
+from inyoka.conf import settings
 from inyoka.utils.highlight import HumanStyle
-from django.conf import settings
 
 
 def generate_highlight_css(elm='.syntax'):

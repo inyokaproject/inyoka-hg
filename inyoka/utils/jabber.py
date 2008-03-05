@@ -11,7 +11,7 @@
 """
 import socket
 from xmlrpclib import ServerProxy, Fault
-from django.conf import settings
+from inyoka.conf import settings
 
 
 _proxy = None

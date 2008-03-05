@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.http import HttpResponse
-from django.utils.html import escape
+from inyoka.utils.html import escape
 
 
 # XXX: this module is in a slightly modified version part of

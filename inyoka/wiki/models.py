@@ -82,8 +82,7 @@ from math import log
 from datetime import datetime
 from mimetypes import guess_type
 from django.db import models, connection
-from django.conf import settings
-from django.utils.html import escape
+from inyoka.conf import settings
 from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
      get_close_matches, get_title, pagename_join
 from inyoka.wiki import parser, templates
@@ -97,6 +96,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.collections import MultiMap
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
+from inyoka.utils.html import escape
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 

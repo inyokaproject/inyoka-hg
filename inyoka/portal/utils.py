@@ -14,7 +14,7 @@ import string
 import calendar
 from md5 import new as md5
 from django.http import HttpResponseRedirect
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.flashing import flash

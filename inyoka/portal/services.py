@@ -11,11 +11,12 @@
 """
 import md5
 from urlparse import urlparse
-from django.conf import settings
-from django.http import Http404 as PageNotFound, HttpResponseRedirect
+from django.http import HttpResponseRedirect
+from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password
+from inyoka.utils.http import PageNotFound
 from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha

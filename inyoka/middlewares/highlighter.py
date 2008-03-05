@@ -30,7 +30,7 @@
     :license: GNU GPL.
 """
 from inyoka.utils.html import escape
-from inyoka.utils.urls import urldecode
+from inyoka.utils.urls import url_decode
 from inyoka.utils.flashing import flash, unflash
 import re
 
@@ -78,7 +78,7 @@ class HighlighterMiddleware(object):
                 url, query = referrer.split('?', 1)
                 if not _referrer_re.match(url):
                     return
-                args = urldecode(query)
+                args = url_decode(query)
                 search_words = args.get('q') or args.get('query')
                 if request.GET:
                     plain_url += '?' + request.GET.urlencode()

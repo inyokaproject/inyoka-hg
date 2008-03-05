@@ -10,7 +10,7 @@
 """
 import md5
 from django import newforms as forms
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.portal.utils import is_valid_username
 from inyoka.utils.dates import TIMEZONES

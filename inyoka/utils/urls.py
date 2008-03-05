@@ -11,43 +11,10 @@
     :license: GNU GPL.
 """
 import cgi
-import urllib
 from urlparse import urlparse
-from django.conf import settings
-from werkzeug import import_string
-
-
-def quote(s):
-    if isinstance(s, unicode):
-        s = s.encode('utf-8')
-    else:
-        s = str(s)
-    return urllib.quote(s)
-
-
-def quote_plus(s):
-    if isinstance(s, unicode):
-        s = s.encode('utf-8')
-    else:
-        s = str(s)
-    return urllib.quote_plus(s)
-
-
-def urlencode(d):
-    buf = []
-    for key, value in d.iteritems():
-        if value is None:
-            continue
-        buf.append('%s=%s' % (quote_plus(key), quote_plus(value)))
-    return '&'.join(buf)
-
-
-def urldecode(url, charset='utf-8'):
-    result = {}
-    for key, values in cgi.parse_qs(url).iteritems():
-        result[key.decode(charset, 'ignore')] = \
-            values[0].decode(charset, 'ignore')
-    return result
+from inyoka.conf import settings
+from werkzeug import import_string, url_encode, url_decode, url_quote, \
+     url_quote_plus, url_fix
 
 
 def href(_module='portal', *parts, **query):
@@ -56,15 +23,15 @@ def href(_module='portal', *parts, **query):
     module = import_string('inyoka.%s.urls' % _module)
     subdomain = settings.SUBDOMAIN_REVERSE_MAP[_module]
     append_slash = getattr(module, 'require_trailing_slash', True)
-    path = '/'.join(quote(x) for x in parts if x is not None)
+    path = '/'.join(url_quote(x) for x in parts if x is not None)
 
     return 'http://%s%s/%s%s%s%s' % (
         subdomain and subdomain + '.' or '',
         settings.BASE_DOMAIN_NAME,
         path,
         append_slash and path and not path.endswith('/') and '/' or '',
-        query and '?' + urlencode(query) or '',
-        anchor and '#' + quote_plus(anchor) or ''
+        query and '?' + url_encode(query) or '',
+        anchor and '#' + url_quote_plus(anchor) or ''
     )
 
 

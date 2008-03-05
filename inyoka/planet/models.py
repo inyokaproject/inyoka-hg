@@ -12,8 +12,8 @@ import os
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from django.conf import settings
 from django.db import models
+from inyoka.conf import settings
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter

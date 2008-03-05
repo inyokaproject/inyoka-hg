@@ -18,7 +18,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr, \
      pagename_join

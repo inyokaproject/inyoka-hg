@@ -24,7 +24,7 @@
     :license: GNU GPL.
 """
 import math
-from django.http import Http404 as PageNotFound
+from inyoka.utils.http import PageNotFound
 
 
 class Pagination(object):
