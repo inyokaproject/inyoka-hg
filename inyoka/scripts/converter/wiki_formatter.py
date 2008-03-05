@@ -41,6 +41,7 @@ class InyokaFormatter(FormatterBase):
             'user':            u'Benutzer',
             'Anchor':          u'Anker',
             'Include':         u'Vorlage',
+            'NewPage':         u'NeueSeite',
         }
 
         if name in replacements:

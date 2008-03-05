@@ -184,7 +184,13 @@ class SmileyMap(DictStorage):
 
     def extract_data(self, text):
         for key, value in DictStorage.extract_data(self, text):
-            yield key, urljoin(settings.STATIC_URL, value.encode('utf-8'))
+            value = value.encode('utf-8')
+            try:
+                url = Revision.objects.filter(page__name=value).latest() \
+                                      .attachment.get_absolute_url()
+            except (Revision.DoesNotExist, AttributeError):
+                continue
+            yield key, url
 
     def combine_data(self, objects):
         result = []
@@ -263,3 +269,7 @@ storage = StorageManager(
     interwiki=InterwikiMap,
     acl=AccessControlList
 )
+
+
+# circular imports
+from inyoka.wiki.models import Revision

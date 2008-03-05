@@ -198,7 +198,7 @@ def create_smilies():
     text = u'''# X-Behave: Smiley-Map
 {{{
 %s
-}}}''' % u'\n'.join(u'%s = %s' % (key, img)
+}}}''' % u'\n'.join(u'%s = %s' % (key, 'Wiki/Smilies/%s' % img)
                     for key, img in smiley_map.iteritems())
     Page.objects.create(u'Wiki/Smilies', text,
                         note=u'Smilies automatisch erstellt')
