@@ -21,7 +21,6 @@
 """
 from time import localtime
 from datetime import datetime
-from django.utils.html import escape
 from django.http import HttpResponseRedirect, Http404 as PageNotFound, \
      HttpResponse
 from inyoka.utils.urls import href, url_for
@@ -34,6 +33,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.html import escape
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
