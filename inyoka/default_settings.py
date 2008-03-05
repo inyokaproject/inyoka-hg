@@ -13,8 +13,11 @@ from os.path import dirname, join
 # the base path of the application
 BASE_PATH = dirname(__file__)
 
-# debugger is off per default
-DEBUG = TEMPLATE_DEBUG = False
+# debug mode is off by default
+DEBUG = False
+
+# so is the code execution debugger.  never enable on production
+ENABLE_DEBUGGER = False
 
 # per default there are no managers and admins.  I guess that's
 # unused :)
@@ -61,15 +64,9 @@ SUBDOMAIN_MAP = {
     'ikhaya':   'inyoka.ikhaya.urls',
     'wiki':     'inyoka.wiki.urls',
     'paste':    'inyoka.pastebin.urls',
-    'static':   'inyoka.static.urls',
-    'media':    'inyoka.media.urls',
     'forum':    'inyoka.forum.urls',
     'admin':    'inyoka.admin.urls',
 }
-
-# The automatically generated reverse map
-SUBDOMAIN_REVERSE_MAP = dict((v.split('.')[1], k) for k, v in
-                             SUBDOMAIN_MAP.iteritems())
 
 # this url conf is used for contrib stuff like the auth system
 ROOT_URLCONF = 'inyoka.portal.urls'

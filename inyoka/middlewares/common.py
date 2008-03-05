@@ -15,8 +15,6 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import sys
-import new
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from werkzeug import import_string
@@ -108,19 +106,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         self._local_manager.cleanup()
 
         return response
-
-
-# Set up virtual url modules for static and media
-for name, item in [('static', settings.STATIC_ROOT),
-                   ('media', settings.MEDIA_ROOT)]:
-    sys.modules['inyoka.%s.urls' % name] = module = new.module(name)
-    __import__('inyoka.%s' % name, None, None, ['urls']).urls = module
-    module.urlpatterns = patterns('',
-        (r'(?P<path>.*)$', 'django.views.static.serve', {
-           'document_root': item
-        })
-    )
-    module.require_trailing_slash = False
 
 
 # import all application modules so that we get bootstrapping

@@ -35,10 +35,10 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-                                Post, get_ubuntu_version, Poll, WelcomeMessage
+     Post, get_ubuntu_version, Poll, WelcomeMessage
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
-                               AddAttachmentForm, EditPostForm, AddPollForm, \
-                               MoveTopicForm, ReportTopicForm, ReportListForm
+     AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
+     ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
 from inyoka.forum.database import Session, SATopic, SAForum, topic_table

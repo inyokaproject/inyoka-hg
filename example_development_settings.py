@@ -6,7 +6,7 @@ DATABASE_USER = 'root'
 XAPIAN_DATABASE = '/path/to/our_inyoka.xapdb'
 
 # debug settings
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = ENABLE_DEBUGGER = True
 
 # url settings
 BASE_DOMAIN_NAME = 'ubuntuusers.local:8080'

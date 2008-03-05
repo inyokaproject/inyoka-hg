@@ -34,16 +34,13 @@ convert:
 	@(python inyoka/scripts/converter/converter.py)
 
 server:
-	@django-admin.py runserver 0.0.0.0:8080
-
-wserver:
-	@(python django-run-debugged.py)
+	@(python manage-inyoka.py runserver)
 
 profiled:
-	@(python inyoka/scripts/start_profiled.py)
+	@(python manage-inyoka.py profiled)
 
 shell:
-	@django-admin.py shell
+	@(python manage-inyoka.py shell)
 
 mysql:
 	@mysql -uroot ubuntuusers

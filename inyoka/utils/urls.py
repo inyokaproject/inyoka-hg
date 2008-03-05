@@ -17,12 +17,24 @@ from werkzeug import import_string, url_encode, url_decode, url_quote, \
      url_quote_plus, url_fix
 
 
+# extended at runtime with module introspection information
+_append_slash_map = {'static': False, 'media': False}
+_url_reverse_map = dict((v.split('.')[1], k) for k, v in
+                        settings.SUBDOMAIN_MAP.iteritems())
+_url_reverse_map['static'] = 'static'
+_url_reverse_map['media'] = 'media'
+
+
 def href(_module='portal', *parts, **query):
     """Generates an internal URL for different subdomains."""
     anchor = query.pop('_anchor', None)
-    module = import_string('inyoka.%s.urls' % _module)
-    subdomain = settings.SUBDOMAIN_REVERSE_MAP[_module]
-    append_slash = getattr(module, 'require_trailing_slash', True)
+    if _module not in _append_slash_map:
+        module = import_string('inyoka.%s.urls' % _module)
+        append_slash = getattr(module, 'require_trailing_slash', True)
+        _append_slash_map[_module] = append_slash
+    else:
+        append_slash = _append_slash_map[_module]
+    subdomain = _url_reverse_map[_module]
     path = '/'.join(url_quote(x) for x in parts if x is not None)
 
     return 'http://%s%s/%s%s%s%s' % (
@@ -45,7 +57,7 @@ def url_for(obj, action=None):
     else:
         raise TypeError('type %r has no url' % obj.__class__)
     if not url.startswith('http://'):
-        subdomain = settings.SUBDOMAIN_REVERSE_MAP['portal']
+        subdomain = _url_reverse_map['portal']
         url = 'http://%s%s%s' % (
             subdomain and subdomain + '.' or '',
             settings.BASE_DOMAIN_NAME,

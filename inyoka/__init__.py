@@ -113,14 +113,10 @@
 
 
 def _bootstrap():
-    """Get the inyoka version and setup fake modules"""
+    """Get the inyoka version and store it."""
     global INYOKA_REVISION
-    import os, inyoka, new, sys
+    import os, inyoka
     from subprocess import Popen, PIPE
-
-    # boostrap fake modules
-    sys.modules['inyoka.static'] = static = new.module('inyoka.static')
-    sys.modules['inyoka.media'] = media = new.module('inyoka.media')
 
     # get inyoka revision
     hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
