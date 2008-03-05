@@ -9,12 +9,12 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect, HttpResponse
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import check_login
 from inyoka.utils.urls import href, url_for
-from inyoka.utils.http import templated, AccessDeniedResponse
+from inyoka.utils.http import templated, AccessDeniedResponse, \
+     PageNotFound
 from inyoka.utils.html import escape
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
@@ -163,11 +163,11 @@ def feed(request, category_slug=None, mode='short', count=25):
     """
 
     if not mode in ('full', 'short', 'title'):
-        raise Http404
+        raise PageNotFound()
 
     count = int(count)
     if count not in (5, 10, 15, 20, 25, 50, 75, 100):
-        raise Http404
+        raise PageNotFound()
 
     key = 'ikhaya/feeds/%s/%s/%s' % (category_slug, mode, count)
     content = cache.get(key)

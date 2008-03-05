@@ -36,8 +36,6 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum, Privilege
 
 
-
-
 @require_manager
 @templated('admin/index.html')
 def index(request):
@@ -55,7 +53,7 @@ def config(request):
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
-        form = ConfigurationForm(initial=storage.get_dict('global_message'))
+        form = ConfigurationForm(initial=storage.get_many(['global_message']))
     return {
         'form': form
     }
