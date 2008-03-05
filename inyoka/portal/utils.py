@@ -13,12 +13,11 @@ import random
 import string
 import calendar
 from md5 import new as md5
-from django.http import HttpResponseRedirect
 from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.flashing import flash
-from inyoka.utils.http import AccessDeniedResponse
+from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.templating import render_template
 

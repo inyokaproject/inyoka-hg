@@ -9,7 +9,9 @@
     :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
-from django.http import HttpResponse, Http404 as PageNotFound
+from django.http import HttpResponse, HttpResponseRedirect, \
+     HttpResponsePermanentRedirect, HttpResponseForbidden, \
+     Http404 as PageNotFound
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.utils.decorators import patch_wrapper
 

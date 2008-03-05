@@ -16,14 +16,13 @@ from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
-from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 
 from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
-     PageNotFound, does_not_exist_is_404
+     PageNotFound, does_not_exist_is_404, HttpResponseRedirect
 from inyoka.utils.sessions import get_sessions, set_session_info, \
      make_permanent, get_user_record, test_session_cookie
 from inyoka.utils.urls import href, url_for, is_safe_domain

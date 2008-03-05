@@ -16,11 +16,10 @@
     :license: GNU GPL.
 """
 from urlparse import urljoin
-from django.http import HttpResponseRedirect
 from inyoka.conf import settings
 from inyoka.utils.urls import href, is_safe_domain, url_for
 from inyoka.utils.html import escape
-from inyoka.utils.http import PageNotFound
+from inyoka.utils.http import PageNotFound, HttpResponseRedirect
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.wiki.models import Page

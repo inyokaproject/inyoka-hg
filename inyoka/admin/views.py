@@ -10,8 +10,6 @@
 """
 from copy import copy as ccopy
 from datetime import datetime, date
-from django.http import HttpResponse, HttpResponseRedirect, \
-                        Http404 as PageNotFound
 from django.newforms.models import model_to_dict
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
@@ -19,14 +17,15 @@ from inyoka.utils.urls import url_for, href
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape, cleanup_html
+from inyoka.utils.http import HttpResponse, HttpResponseRedirect, \
+     PageNotFound
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
-                               EditBlogForm, EditCategoryForm, EditIconForm, \
-                               ConfigurationForm, EditUserForm, EditEventForm, \
-                               EditForumForm, EditGroupForm, CreateUserForm, \
-                               EditStyleForm
+     EditBlogForm, EditCategoryForm, EditIconForm, ConfigurationForm, \
+     EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
+     CreateUserForm, EditStyleForm
 from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager

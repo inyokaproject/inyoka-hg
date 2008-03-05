@@ -9,7 +9,6 @@
     :license: GNU GPL.
 """
 import re
-from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.text import truncate_html_words
 from werkzeug import url_unquote
 from sqlalchemy.orm import eagerload
@@ -22,7 +21,8 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, AccessDeniedResponse, \
-                              PageNotFound, does_not_exist_is_404
+     PageNotFound, HttpResponse, HttpResponseRedirect, \
+     does_not_exist_is_404
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template

@@ -26,10 +26,9 @@
     :license: GNU GPL.
 """
 from inyoka.portal.user import User
-from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
-from inyoka.utils.http import AccessDeniedResponse
+from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
 from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
 from inyoka.wiki.models import Page

@@ -9,12 +9,11 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from django.http import HttpResponseRedirect, HttpResponse
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import check_login
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, AccessDeniedResponse, \
-     PageNotFound
+     HttpResponseRedirect, HttpResponse, PageNotFound
 from inyoka.utils.html import escape
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash

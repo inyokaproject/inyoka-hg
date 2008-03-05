@@ -13,10 +13,10 @@
 import random
 import colorsys
 import math
-from django.http import HttpResponse
 from os import listdir
 from os.path import abspath, join, dirname, pardir
 from PIL import ImageFont, ImageDraw, Image, ImageChops, ImageColor
+from inyoka.utils.http import HttpResponse
 
 
 resource_path = abspath(join(dirname(__file__), pardir, 'res'))

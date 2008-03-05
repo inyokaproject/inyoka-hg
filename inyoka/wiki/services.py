@@ -15,7 +15,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from django.http import HttpResponse
+from inyoka.utils.http import HttpResponse
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.wiki.utils import get_smilies
 from inyoka.wiki.parser import parse, RenderContext

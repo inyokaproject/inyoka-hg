@@ -17,15 +17,15 @@
 """
 import sys
 import new
-from django.http import HttpResponsePermanentRedirect, \
-     HttpResponseForbidden
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
+from werkzeug import import_string
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
-from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
+from inyoka.utils.http import PageNotFound, DirectResponse, \
+     TemplateResponse, HttpResponsePermanentRedirect, \
+     HttpResponseForbidden
 from inyoka.utils.logger import logger
-from werkzeug import import_string
 
 
 core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)

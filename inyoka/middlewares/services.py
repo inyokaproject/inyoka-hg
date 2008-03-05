@@ -15,8 +15,8 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from django.http import HttpResponse
 from simplejson import dumps
+from inyoka.utils.http import HttpResponse
 
 
 JSON_CONTENTTYPE = 'application/json'

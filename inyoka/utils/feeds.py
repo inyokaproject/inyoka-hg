@@ -8,8 +8,8 @@
     :copyright: 2007 by Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django.http import HttpResponse
 from inyoka.utils.html import escape
+from inyoka.utils.http import HttpResponse
 
 
 # XXX: this module is in a slightly modified version part of
