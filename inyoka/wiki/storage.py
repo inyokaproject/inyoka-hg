@@ -40,7 +40,9 @@
     :license: GNU GPL.
 """
 import re
+from urlparse import urljoin
 from django.db import connection
+from django.conf import settings
 from inyoka.utils.cache import cache
 
 
@@ -181,14 +183,24 @@ class SmileyMap(DictStorage):
     multi_key = True
 
     def extract_data(self, text):
-        for key, value in DictStorage.extract_data(self, text):
-            value = value.encode('utf-8')
-            try:
-                url = Revision.objects.filter(page__name=value).latest() \
-                                      .attachment.get_absolute_url()
-            except (Revision.DoesNotExist, AttributeError):
-                continue
-            yield key, url
+        data = list(DictStorage.extract_data(self, text))
+        mapping = dict((d[1], d[0]) for d in data)
+        cur = connection.cursor()
+        # XXX: is someone able to do this without a subquery?
+        cur.execute('''
+            select a.file, p.name
+              from wiki_attachment a, wiki_revision r, wiki_page p
+              where a.id = r.attachment_id and
+                    r.page_id = p.id and r.id in (
+                select max(r.id)
+                  from wiki_page p, wiki_revision r
+                  where p.id = r.page_id and
+                        p.name in (%s)
+                  group by page_id
+              )
+         ''' % ', '.join(('%s',) * len(data)), tuple(d[1] for d in data))
+        for fname, page_name in cur.fetchall():
+            yield mapping[page_name], urljoin(settings.MEDIA_URL, fname)
 
     def combine_data(self, objects):
         result = []
@@ -267,7 +279,3 @@ storage = StorageManager(
     interwiki=InterwikiMap,
     acl=AccessControlList
 )
-
-
-# circular imports
-from inyoka.wiki.models import Revision
