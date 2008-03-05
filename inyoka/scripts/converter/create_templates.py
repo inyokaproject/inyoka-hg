@@ -161,139 +161,57 @@ def create_page_templates():
 
 
 def create_markup_stylesheet():
-    storage['markup_styles'] = u"""/**
- * syle.wiki
- * ~~~~~~~~~
- *
- * This is the stylesheet for the wiki markup.
- *
- * :copyright: 2007 by Benjamin Wiegand.
- * :license: GNU GPL.
- */
+    storage['markup_styles'] = u""""""
 
-a.missing {
-  color: #999;
-}
 
-span.underline {
-  text-decoration: underline;
-}
-
-.image-right {
-  float: right;
-}
-
-.image-left {
-  float: left;
-}
-
-.image-center {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-div.bash {
-  color: white;
-  font-family: monospace;
-  background-color: #454545;
-  border: 1px solid #666;
-  clear: both;
-  margin: 0.3em 1em;
-}
-
-div.bash p {
-  margin: 0;
-  padding: 0 0.3em;
-}
-
-/* Boxes of page templates */
-
-div.box {
-  clear: both;
-  margin: 0.5em 1em;
-  border: 1px solid #bbb;
-}
-
-div.box div.contents {
-  padding: 0.5em 1em;
-}
-
-div.box h3 {
-  margin: 0;
-  font-size: 0.9em;
-  font-weight: bold;
-  color: white;
-  background-color: #bbb;
-  padding: 0 1em;
-}
-
-div.improvable {
-  border: 1px solid #73A76F;
-}
-
-div.improvable h3 {
-  background-color: #73A76F;
-}
-
-div.fixme {
-  border: 1px solid #D40000;
-}
-
-div.fixme h3 {
-  background-color: #D40000;
-}
-
-div.advanced {
-  border: 1px solid #708090;
-}
-
-div.advanced h3 {
-  background-color: #708090;
-}
-
-div.tested_for {
-  border: 1px solid #4A9596;
-}
-
-div.tested_for h3 {
-  background-color: #4A9596;
-}
-
-div.left {
-  border: 1px solid #3E6E58;
-}
-
-div.left h3 {
-  background-color: #3E6E58;
-}
-
-div.warning {
-  border: 1px solid #d40000;
-}
-
-div.warning h3 {
-  background-color: #d40000;
-}
-
-div.experts {
-  border: 1px solid #666;
-}
-
-div.experts h3 {
-  background-color: #666;
-}
-
-div.knowledge {
-  border: 1px solid #d7b97b;
-}
-
-div.knowledge h3 {
-  background-color: #d7b97b;
-}
-"""
+def create_smilies():
+    smiley_map = {
+        ':D':  'biggrin.png',
+        ':)':  'happy.png',
+        ':(':  'sad.png',
+        ':o':  'surprised.png',
+        '8-o': 'eek.png',
+        ':?':  'confused.png',
+        '8(':  'cool.png',
+        ':lol:': 'lol.png',
+        ':x': 'angry.png',
+        ':P': 'razz.png',
+        ':-$': 'redface.gif',
+        ';-(': 'cry.png',
+        ']:-(': 'evil.png',
+        ']:-)': 'twisted.png',
+        ':roll': 'rolleyes.gif',
+        ';)': 'wink.png',
+        ':|': 'neutral.png',
+        ':->': 'smile.png',
+        'O:-)': 'angel.png',
+        ':[]': 'grin.png',
+        u'§)': 'canny.png',
+        ':-x': 'kiss.png',
+        '8-}': 'monkey.png',
+        ':!:': 'exclaim.png',
+        ':?:': 'question.png',
+        ':idea:': 'idea.png',
+        ':arrow:': 'arrow.png',
+        '<3': 'favorite.png',
+    }
+    text = u'''# X-Behave: Smiley-Map
+{{{
+%s
+}}}''' % u'\n'.join(u'%s = %s' % (key, img)
+                    for key, img in smiley_map.iteritems())
+    Page.objects.create(u'Wiki/Smilies', text,
+                        note=u'Smilies automatisch erstellt')
+    pth = os.path.join(os.path.dirname(__file__), 'smilies')
+    for key, img in smiley_map.iteritems():
+        f = file(os.path.join(pth, img))
+        Page.objects.create(u'Wiki/Smilies/%s' % img,
+                    u'', note=u'Smiley automatisch erstellt',
+                    attachment=f.read(), attachment_filename=img)
+        f.close()
 
 
 if __name__ == '__main__':
     create_page_templates()
     create_markup_stylesheet()
+    create_smilies()
