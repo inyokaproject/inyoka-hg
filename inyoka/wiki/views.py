@@ -18,7 +18,8 @@
 from urlparse import urljoin
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404 as PageNotFound
-from inyoka.utils.urls import href, is_safe_domain
+from inyoka.utils.urls import href, is_safe_domain, url_for
+from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.wiki.models import Page
@@ -57,23 +58,30 @@ def show_page(request, name):
 
 def redirect_new_page(request):
     """Helper for the `NewPage` macro."""
-    template = request.POST.get('template')
-    base = request.POST.get('base', '')
-    page = request.POST.get('page', '')
+    template = request.GET.get('template')
+    base = request.GET.get('base', '')
+    page = request.GET.get('page', '')
+    options = {'action': 'edit'}
+    backref = request.META.get('HTTP_REFERER')
+    if not backref or not is_safe_domain(backref):
+        backref = href('wiki', settings.WIKI_MAIN_PAGE)
+
     if not page:
-        backref = request.META.get('HTTP_REFERER')
-        if not backref or not is_safe_domain(backref):
-            backref = href('wiki', settings.WIKI_MAIN_PAGE)
         flash('Konnte Seite nicht erstellen, kein Seitenname angegeben '
               'wurde.', success=False)
         return HttpResponseRedirect(backref)
-    options = {'action': 'edit'}
     if base:
         page = pagename_join(base, page)
-    if template:
-        options['template'] = pagename_join(settings.WIKI_TEMPLATE_BASE,
-                                            template)
-    return HttpResponseRedirect(href('wiki', page, **options))
+    try:
+        page = Page.objects.get(name=page)
+    except Page.DoesNotExist:
+        if template:
+            options['template'] = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                                template)
+        return HttpResponseRedirect(href('wiki', page, **options))
+    flash(u'Eine Seite mit dem Namen „<a href="%s">%s</a>“existiert '
+          u'bereits.' % (url_for(page), escape(page.name)), success=False)
+    return HttpResponseRedirect(backref)
 
 
 @templated('wiki/missing_resource.html', status=404)

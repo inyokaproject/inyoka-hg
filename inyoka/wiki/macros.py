@@ -450,7 +450,7 @@ class NewPage(Macro):
         self.text = text
 
     def build_node(self):
-        return nodes.html_partial('wiki/_new_page_macro.html',
+        return nodes.html_partial('wiki/_new_page_macro.html', True,
             text=self.text,
             base=self.base,
             template=self.template
