@@ -12,17 +12,19 @@
 from time import time
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
+from django.db import transaction
 from django.newforms import ValidationError
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 SESSION_DELTA = 300
 
 
+@transaction.commit_on_success
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -48,7 +50,12 @@ def set_session_info(request, action, category=None):
     info.action_link = request.build_absolute_uri()
     info.category = category
     info.last_change = datetime.utcnow()
-    info.save()
+
+    # if there is an exception ignore it
+    try:
+        info.save()
+    except:
+        pass
 
 
 class SurgeProtectionMixin(object):

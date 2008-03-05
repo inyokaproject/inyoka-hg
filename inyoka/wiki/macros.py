@@ -431,6 +431,26 @@ class PageName(Macro):
         return nodes.Text('Unbekannte Seite')
 
 
+class NewPage(Macro)
+    """
+    Show a small form to create a new page below a page or in
+    top level and with a given template.
+    """
+
+    is_static = True
+    arguments = (
+        ('base', unicode, ''),
+        ('template', unicode,'')
+    )
+
+    def __init__(self, base, template):
+        self.base = base
+        self.template = template
+
+    def build_node(self, context, format):
+        pass
+
+
 class SimilarPages(Macro):
     """
     Show a list of pages similar to the page name given or the

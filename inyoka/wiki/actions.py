@@ -323,15 +323,19 @@ def do_edit(request, name):
     if page is not None:
         form.initial = {'text': page.rev.text.value}
 
-    # if there is a template, load initial text from the template
+    # if there a template is in use, load initial text from the template
     template = request.GET.get('template')
-    if not request.method == 'POST' and template:
+    if not request.method == 'POST' and template and \
+       has_privilege(request.user, template, 'read'):
         try:
             template = Page.objects.get_by_name(template)
         except Page.DoesNotExist:
             pass
         else:
             form.initial['text'] = template.rev.text.value
+            flash(u'Die Vorlage “<a href="%s">%s</a>” wurde geladen und '
+                  u'wird als Basis für die neue Seite verwendet.' %
+                  (url_for(template), escape(template.name)))
 
     # check for edits by other users.  If we have such an edit we try
     # to merge and set the edit time to the time of the last merge or
