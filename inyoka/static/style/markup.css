@@ -1,6 +1,6 @@
 /**
- * syle.wiki
- * ~~~~~~~~~
+ * style.markup
+ * ~~~~~~~~~~~~
  *
  * This is the stylesheet for the wiki markup.
  *
@@ -20,6 +20,10 @@ a.userlink {
 
 span.underline {
   text-decoration: underline;
+}
+
+.image-left, .image-right, .image-center {
+  margin: 1em;
 }
 
 .image-right {
@@ -137,8 +141,13 @@ div.knowledge h3 {
 
 .toc {
   float: right;
+  margin: 0 0 .5em .5em;
+  padding: .5em .5em .5em 2em;
+  border: 1px solid #d7b97b;
+  -moz-border-radius: 5px;
 }
 
 code {
   background-color: #fff;
 }
+
