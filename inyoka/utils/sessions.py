@@ -9,7 +9,6 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import sys
 from time import time
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
@@ -18,7 +17,6 @@ from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
-from inyoka.utils.cache import cache
 from inyoka.middlewares.registry import r
 
 
@@ -51,7 +49,6 @@ def set_session_info(request, action, category=None):
     info.category = category
     info.last_change = datetime.utcnow()
     info.save()
-    check_for_user_record()
 
 
 class SurgeProtectionMixin(object):
@@ -77,31 +74,13 @@ class SurgeProtectionMixin(object):
         return super(SurgeProtectionMixin, self).clean()
 
 
-def check_for_user_record():
-    """
-    Checks whether the current session count is a new record.
-    This function uses the cache to hit the database rarely.
-    """
-    # check for record all 2 minutes
-    RECORD_CHECK_TIME = 120
-    check = cache.get('session_record_check')
-    if not check or time() - RECORD_CHECK_TIME > check:
-        delta = datetime.utcnow() - timedelta(seconds=SESSION_DELTA)
-        record = int(storage.get('session_record', 0))
-        session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
-        if session_count > record:
-            storage['session_record'] = session_count
-            storage['session_record_time'] = int(time())
-    cache.set('session_record_check', time())
-
-
 def get_user_record():
     """
     Get a tuple for the user record in the format ``(number, timestamp)``
     where number is an integer with the number of online users and
     timestamp a datetime object.
     """
-    record = int(storage.get('session_record', 0))
+    record = int(storage.get('session_record', 1))
     timestamp = storage.get('session_record_time')
     if timestamp is None:
         timestamp = datetime.utcnow()
