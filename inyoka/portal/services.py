@@ -11,8 +11,8 @@
 """
 import md5
 from urlparse import urlparse
-from django.conf import settings
 from django.http import Http404 as PageNotFound, HttpResponseRedirect
+from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password

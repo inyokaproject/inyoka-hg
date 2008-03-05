@@ -11,7 +11,7 @@
 """
 from datetime import datetime, timedelta
 import time
-from django.conf import settings
+from inyoka.conf import settings
 
 
 def get_expired_users():

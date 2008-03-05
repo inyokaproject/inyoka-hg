@@ -8,16 +8,15 @@
     :copyright: 2007 by Benjamin Wiegand, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponse, \
-                        Http404 as PageNotFound
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.mail import send_mail
 from django.utils.text import truncate_html_words
+from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.user import Group
 from inyoka.utils.urls import href
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated
+from inyoka.utils.http import PageNotFound, templated
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template

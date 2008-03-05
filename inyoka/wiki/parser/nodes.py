@@ -18,14 +18,14 @@
     :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
     :license: GNU GPL.
 """
-from django.conf import settings
-from cgi import escape
 from urlparse import urlparse, urlunparse
+from inyoka.conf import settings
 from inyoka.utils.text import slugify
-from inyoka.utils.html import build_html_tag, striptags
+from inyoka.utils.html import build_html_tag, striptags, escape
 from inyoka.utils.urls import href
 from inyoka.utils.templating import render_template
-from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr
+from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
+     resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
 
@@ -612,23 +612,17 @@ class InterWikiLink(Element):
         w.markup(u']')
 
     def prepare_html(self):
-        from inyoka.wiki.storage import storage
-        from urllib import quote
-        rule = storage.interwiki.get(self.wiki)
-        if rule is None:
+        target = resolve_interwiki_link(self.wiki, self.page)
+        if target is None:
             for item in Element.prepare_html(self):
                 yield item
             return
-        page = quote(self.page.encode('utf-8'))
-        if '$PAGE' not in self.page:
-            link = rule + page
-        else:
-            link = rule.replace('$PAGE', page)
         yield build_html_tag(u'a',
-            href=link,
+            href=target,
             id=self.id,
             style=self.style,
-            classes=(u'interwiki', self.class_)
+            classes=(u'interwiki', u'interwiki-' + self.wiki,
+                     self.class_)
         )
         for item in Element.prepare_html(self):
             yield item

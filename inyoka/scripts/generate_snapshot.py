@@ -14,7 +14,7 @@ import re
 import shutil
 from os import path
 from datetime import datetime
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
 from inyoka.wiki.parser import parse

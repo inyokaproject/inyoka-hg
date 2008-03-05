@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import py
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka import default_settings
 
 test_settings = {}

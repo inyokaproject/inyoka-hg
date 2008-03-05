@@ -13,9 +13,10 @@ import csv
 import re
 import traceback
 from Cookie import SimpleCookie
-from urllib import urlencode
 from threading import Thread
-from django.conf import settings
+from inyoka.conf import settings
+from inyoka.utils.urls import url_encode
+
 try:
     from hashlib import md5
 except ImportError:
@@ -187,7 +188,7 @@ class Trac(object):
             form_token = cookie['trac_form_token']
             if form_token and form_token.value:
                 data['__FORM_TOKEN'] = form_token.value
-        data = urlencode(data)
+        data = url_encode(data)
         url = self.trac_url + resource
         if method == 'GET':
             if data:

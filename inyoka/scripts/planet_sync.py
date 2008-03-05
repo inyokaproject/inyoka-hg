@@ -18,9 +18,9 @@ import re
 import sys
 import feedparser
 from time import time
-from django.conf import settings
-from inyoka.utils.html import escape, cleanup_html
 from datetime import datetime
+from inyoka.conf import settings
+from inyoka.utils.html import escape, cleanup_html
 from inyoka.planet.models import Blog, Entry
 
 

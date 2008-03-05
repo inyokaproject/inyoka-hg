@@ -14,7 +14,7 @@ from sqlalchemy import Table, Column, String, Text, Integer, \
         ForeignKey, DateTime, UniqueConstraint, Boolean, create_engine, \
         MetaData
 from sqlalchemy.orm import relation, backref, scoped_session, create_session
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.portal.models import User
 from inyoka.forum.models import Forum, Topic, Post
 

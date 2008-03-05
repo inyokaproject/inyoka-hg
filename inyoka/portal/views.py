@@ -16,17 +16,16 @@ from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
-from django.http import Http404 as PageNotFound, HttpResponseRedirect
-
+from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
-from django.shortcuts import get_object_or_404
+
+from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
-from inyoka.utils.http import templated, TemplateResponse, HttpResponse
+from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
+     PageNotFound, does_not_exist_is_404
 from inyoka.utils.sessions import get_sessions, set_session_info, \
-                                  make_permanent, get_user_record, \
-                                  test_session_cookie
+     make_permanent, get_user_record, test_session_cookie
 from inyoka.utils.urls import href, url_for, is_safe_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
@@ -42,18 +41,14 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
-                                UserCPSettingsForm, PrivateMessageForm, \
-                                DeactivateUserForm, LostPasswordForm, \
-                                ChangePasswordForm, SubscriptionForm, \
-                                UserCPProfileForm, SetNewPasswordForm, \
-                                NOTIFICATION_CHOICES
+     UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
+     LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
+     UserCPProfileForm, SetNewPasswordForm, NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
-                                 PrivateMessageEntry, PRIVMSG_FOLDERS, \
-                                 Event
+     PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
-
 
 
 @templated('errors/404.html')
@@ -200,9 +195,10 @@ def activate(request, action='', username='', activation_key=''):
             return HttpResponseRedirect(href('portal'))
 
 
+@does_not_exist_is_404
 def resend_activation_mail(request, username):
     """Resend the activation mail if the user is not already activated."""
-    user = get_object_or_404(User, username=username)
+    user = User.objects.get(username=username)
     if user.is_active:
         flash(u'Das Benutzerkonto von „%s“ ist schon aktiviert worden!' %
               escape(user.username), False)

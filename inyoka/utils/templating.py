@@ -10,8 +10,8 @@
 """
 import os
 from jinja import Environment, FileSystemLoader
-from django.conf import settings
 from inyoka import INYOKA_REVISION
+from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
      format_datetime, format_specific_datetime, format_time
 from inyoka.utils.text import human_number

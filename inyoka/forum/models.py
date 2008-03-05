@@ -16,7 +16,7 @@ from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
 from django.utils.html import escape
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify

@@ -26,8 +26,8 @@
     :license: GNU GPL.
 """
 from datetime import datetime, date
-from django.conf import settings
-from inyoka.utils.urls import href, urlencode
+from inyoka.conf import settings
+from inyoka.utils.urls import href, url_encode
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
@@ -202,7 +202,7 @@ class RecentChanges(Macro):
                 parameters['page'] = str(page_num)
             rv = href('wiki', context.wiki_page)
             if parameters:
-                rv += '?' + parameters.urlencode()
+                rv += '?' + parameters.url_encode()
             return rv
         pagination = Pagination(context.request, Revision.objects.
                                 select_related(depth=1), page_num,
@@ -520,7 +520,7 @@ class TagCloud(Macro):
             else:
                 title = '%s Seiten' % human_number(tag['count'], 'feminine')
             container.children.extend((
-                nodes.Link('?' + urlencode({
+                nodes.Link('?' + url_encode({
                         'tag':  tag['name']
                     }), [nodes.Text(tag['name'])],
                     title=title,
@@ -555,7 +555,7 @@ class TagList(Macro):
                 result.children.append(item)
         else:
             for tag in Page.objects.get_tagcloud():
-                link = nodes.Link('?' + urlencode({
+                link = nodes.Link('?' + url_encode({
                         'tag':  tag['name']
                     }), [nodes.Text(tag['name'])],
                     style='font-size: %s%%' % tag['size']

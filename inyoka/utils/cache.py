@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 from werkzeug.contrib.cache import NullCache, MemcachedCache, SimpleCache
-from django.conf import settings
+from inyoka.conf import settings
 
 
 cache = (type('UnconfiguredCache', (object,), {}))()

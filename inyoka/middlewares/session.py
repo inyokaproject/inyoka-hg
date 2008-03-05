@@ -22,9 +22,9 @@ except ImportError:
     from md5 import md5
 from time import time
 from random import random
-from django.conf import settings
-from django.utils.http import cookie_date
+from werkzeug import cookie_date
 from werkzeug.contrib.securecookie import SecureCookie
+from inyoka.conf import settings
 
 
 class Session(SecureCookie):

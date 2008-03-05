@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 import logging
-from django.conf import settings
+from inyoka.conf import settings
 
 
 logger = logging.getLogger('inyoka')

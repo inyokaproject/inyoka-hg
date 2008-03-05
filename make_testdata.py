@@ -13,7 +13,7 @@ import time
 from random import randint, choice
 from datetime import datetime
 from jinja.constants import LOREM_IPSUM_WORDS
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum, Topic, Privilege
 from inyoka.forum.acl import PRIVILEGES

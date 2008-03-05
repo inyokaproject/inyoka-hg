@@ -15,7 +15,7 @@
 import re
 import hmac
 import pickle
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.utils.http import TemplateResponse
 
 

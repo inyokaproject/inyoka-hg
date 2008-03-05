@@ -24,8 +24,11 @@ from cStringIO import StringIO
 from tempfile import TemporaryFile
 from sha import new as sha1
 from itertools import ifilter
-from cgi import escape
-from django.conf import settings
+from werkzeug.utils import url_quote
+from inyoka.conf import settings
+from inyoka.wiki.storage import storage
+from inyoka.utils.urls import href
+from inyoka.utils.html import escape
 
 
 _path_crop = re.compile(r'^(..?/)+')
@@ -165,7 +168,6 @@ def get_smilies(full=False):
     Per default for multiple codes only the first one is returend, if you want
     all codes set the full parameter to `True`.
     """
-    from inyoka.wiki.storage import storage
     if full:
         return storage.smilies[:]
     result = []
@@ -176,6 +178,24 @@ def get_smilies(full=False):
         result.append((code, img))
         images_yielded.add(img)
     return result
+
+
+def resolve_interwiki_link(wiki, page):
+    """
+    Resolve an interwiki link.  If no such wiki exists the return value
+    will be `None`.
+    """
+    if wiki == 'user':
+        return href('portal', 'users', page)
+    rule = storage.interwiki.get(wiki)
+    if rule is None:
+        return
+    quoted_page = url_quote(page)
+    if '$PAGE' not in page:
+        link = rule + page
+    else:
+        link = rule.replace('$PAGE', page)
+    return link
 
 
 def generate_udiff(old, new, old_title='', new_title='',

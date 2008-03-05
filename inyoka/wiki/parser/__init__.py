@@ -134,7 +134,7 @@ r"""
 """
 import re
 import unicodedata
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext

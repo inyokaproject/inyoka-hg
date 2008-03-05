@@ -14,7 +14,7 @@ import datetime
 from md5 import md5
 from sha import sha
 import random, string
-from django.conf import settings
+from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 

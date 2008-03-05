@@ -12,7 +12,7 @@
 """
 import re
 import sys
-from django.conf import settings
+from inyoka.conf import settings
 
 WIKI_PATH = '/srv/www/de/wiki'
 FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,

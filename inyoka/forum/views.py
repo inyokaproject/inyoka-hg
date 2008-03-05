@@ -9,11 +9,11 @@
     :license: GNU GPL.
 """
 import re
-from urllib import unquote
-from django.conf import settings
-from django.http import HttpResponse, HttpResponseRedirect, \
-                        Http404 as PageNotFound
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.text import truncate_html_words
+from werkzeug import url_unquote
+from sqlalchemy.orm import eagerload
+from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, check_login, \
                                 abort_access_denied
@@ -22,7 +22,7 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, AccessDeniedResponse, \
-                              does_not_exist_is_404
+                              PageNotFound, does_not_exist_is_404
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -43,7 +43,6 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
 from inyoka.forum.database import Session, SATopic, SAForum, topic_table
 from inyoka.forum.legacyurls import test_legacy_url
-from sqlalchemy.orm import eagerload
 
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -246,7 +245,8 @@ def newpost(request, topic_slug=None, quote_id=None):
     # check for multi quote
     if request.COOKIES.get('multi_quote'):
         quotes += Post.objects.filter(topic__id=t.id, id__in=[
-            int(i) for i in unquote(request.COOKIES['multi_quote']).split(',')
+            int(i.strip()) for i in
+            url_unquote(request.COOKIES['multi_quote']).split(',')
         ])
 
     privileges = get_forum_privileges(request.user, t.forum)

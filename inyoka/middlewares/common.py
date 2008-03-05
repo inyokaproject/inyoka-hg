@@ -19,10 +19,10 @@ import sys
 import new
 from django.http import HttpResponsePermanentRedirect, \
      HttpResponseForbidden
-from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from inyoka import INYOKA_REVISION
+from inyoka.conf import settings
 from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
 from inyoka.utils.logger import logger
 from werkzeug import import_string

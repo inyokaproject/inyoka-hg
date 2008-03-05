@@ -10,9 +10,9 @@
     :license: GNU GPL.
 """
 import md5
-from django.conf import settings
 from django import newforms as forms
 from django.newforms.widgets import Input
+from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
