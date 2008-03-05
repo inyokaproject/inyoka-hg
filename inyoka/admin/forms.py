@@ -53,9 +53,14 @@ class EditArticleForm(forms.Form):
     category = forms.ChoiceField(label=u'Kategorie')
     icon = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
-                                   input_formats=DATETIME_INPUT_FORMATS)
+        input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
+        u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
+        u'angezeigt.')
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
-    slug = forms.CharField(label=u'Slug', max_length=100)
+    slug = forms.CharField(label=u'Slug', max_length=100, required=False,
+        help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
+                  u'Feld frei, um ihn automatisch generieren zu lassen '
+                  u'(empfohlen).')
 
 
 class EditCategoryForm(forms.Form):

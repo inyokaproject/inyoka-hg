@@ -17,7 +17,7 @@
 {% set styles = ['forum.css'] %}
 
 {% block ikhaya_content %}
-<h2>Artikelvorschläge</h2>
+<h3>Artikelvorschläge</h3>
 <p>
   Hier siehst du alle {{ suggestion_count }} Artikelvorschläge, die noch nicht bearbeitet wurden.
 </p>
@@ -42,7 +42,7 @@
           <div class="postinfo">
             <span class="postactions">
               <a href="?delete={{ suggestion.id }}">Löschen</a>
-              <a href="{{ href('ikhaya', 'add', suggestion.id) }}">Artikel erstellen</a>
+              <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a>
             </span>
             Verfasst: {{ suggestion.pub_date.strftime('%d.%m.%Y %H:%M') }}
           </div>
