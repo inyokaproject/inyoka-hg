@@ -25,7 +25,7 @@ from inyoka.utils.local import current_request
 jinja_env = Environment(loader=FileSystemLoader(
     os.path.join(os.path.dirname(__file__), os.pardir, 'templates'),
     use_memcache=not settings.DEBUG,
-    memcache_size=100
+    memcache_size=200
 ))
 jinja_env.globals.update(
     INYOKA_REVISION=INYOKA_REVISION,
