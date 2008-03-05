@@ -431,7 +431,7 @@ class PageName(Macro):
         return nodes.Text('Unbekannte Seite')
 
 
-class NewPage(Macro)
+class NewPage(Macro):
     """
     Show a small form to create a new page below a page or in
     top level and with a given template.
@@ -440,15 +440,21 @@ class NewPage(Macro)
     is_static = True
     arguments = (
         ('base', unicode, ''),
-        ('template', unicode,'')
+        ('template', unicode,''),
+        ('text', unicode, '')
     )
 
-    def __init__(self, base, template):
+    def __init__(self, base, template, text):
         self.base = base
         self.template = template
+        self.text = text
 
-    def build_node(self, context, format):
-        pass
+    def build_node(self):
+        return nodes.html_partial('wiki/_new_page_macro.html',
+            text=self.text,
+            base=self.base,
+            template=self.template
+        )
 
 
 class SimilarPages(Macro):
@@ -824,7 +830,8 @@ ALL_MACROS = {
     u'NeueSeiten':          NewPages,
     u'BR':                  Newline,
     u'Anker':               Anchor,
-    u'Benutzer':            User
+    u'Benutzer':            User,
+    u'NeueSeite':           NewPage
 }
 
 

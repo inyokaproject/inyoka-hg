@@ -27,7 +27,7 @@ from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \
                                   make_permanent, get_user_record, \
                                   test_session_cookie
-from inyoka.utils.urls import href, url_for, is_save_domain
+from inyoka.utils.urls import href, url_for, is_safe_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
@@ -164,7 +164,7 @@ def register(request):
 
 def activate(request, action='', username='', activation_key=''):
     """Activate a user with the activation key send via email."""
-    redirect = is_save_domain(request.GET.get('next', ''))
+    redirect = is_safe_domain(request.GET.get('next', ''))
     if not redirect:
         redirect = href('portal', 'login', username=username)
     try:
@@ -269,7 +269,7 @@ def set_new_password(request, username, new_password_key):
 @templated('portal/login.html')
 def login(request):
     """Login dialog that supports permanent logins"""
-    redirect = is_save_domain(request.GET.get('next', '')) and \
+    redirect = is_safe_domain(request.GET.get('next', '')) and \
                  request.GET['next'] or href('portal')
     if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet!', False)

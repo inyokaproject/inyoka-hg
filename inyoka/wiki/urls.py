@@ -14,6 +14,7 @@ from django.conf.urls.defaults import patterns
 urlpatterns = patterns('inyoka.wiki.views',
     (r'^$', 'index'),
     (r'^_image$', 'get_image_resource'),
+    (r'^_newpage$', 'redirect_new_page'),
     (r'^(.+?)$', 'show_page')
 )
 

@@ -11,7 +11,7 @@
 from urlparse import urlparse
 from django.db import models
 from inyoka.portal.user import User
-from inyoka.utils.urls import href, is_save_domain
+from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.decorators import deferred
 from inyoka.utils.highlight import highlight_code
 
@@ -35,7 +35,7 @@ class Entry(models.Model):
         return [x for x in self.referrer.splitlines() if x]
 
     def add_referrer(self, referrer):
-        if is_save_domain(referrer):
+        if is_safe_domain(referrer):
             # take sure that the referrer isn't a pastebin url
             netloc = urlparse(referrer)[1]
             if ('.' + netloc).endswith(('.' + urlparse(href('pastebin'))[1])):

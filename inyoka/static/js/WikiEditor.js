@@ -268,8 +268,8 @@
     this.username = $CURRENT_USER || 'Anonymous';
     this.smilies = null;
 
+    this.textarea = $(editor);
     /* XXX: disabled for the time being as it causes too much trouble
-    this.textarea = $(editor)
       .keypress(function(evt) {
         self.onKeyDown(evt);
       });*/

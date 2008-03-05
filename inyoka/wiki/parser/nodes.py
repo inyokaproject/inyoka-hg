@@ -24,6 +24,7 @@ from urlparse import urlparse, urlunparse
 from inyoka.utils.text import slugify
 from inyoka.utils.html import build_html_tag, striptags
 from inyoka.utils.urls import href
+from inyoka.utils.templating import render_template
 from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
@@ -35,6 +36,15 @@ def error_box(title, message):
         Strong([Text(title)]),
         Paragraph([Text(message)])
     ])
+
+
+def html_partial(template_name, block_level=False, **context):
+    """
+    Return a `HTMLOnly` node with the rendered template and an empty
+    fallback for non HTML output.
+    """
+    rv = render_template(template_name, context)
+    return HTMLOnly(rv, Node(), block_level=block_level)
 
 
 def from_html(obj):
@@ -280,6 +290,20 @@ class HTML(Node):
 
     def prepare_html(self):
         yield self.html
+
+
+class HTMLOnly(HTML):
+    """
+    Like `HTML` but with a fallback for non HTML formats.
+    """
+
+    def __init__(self, html, fallback, block_level=True):
+        HTML.__init__(self, html, block_level)
+        self.fallback = fallback
+
+    def prepare_docbook(self):
+        for item in self.fallback.prepare_docbook():
+            yield item
 
 
 class MetaData(Node):

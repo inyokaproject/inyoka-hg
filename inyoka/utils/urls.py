@@ -87,7 +87,7 @@ def url_for(obj, action=None):
     return url
 
 
-def is_save_domain(url):
+def is_safe_domain(url):
     """Check whether `url` points to the same host as inyoka"""
     scheme, netloc = urlparse(url)[:2]
     if scheme not in ('http', 'https', 'ftp'):

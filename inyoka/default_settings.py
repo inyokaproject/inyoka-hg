@@ -97,9 +97,6 @@ XAPIAN_DATABASE = ''
 # imagemagick path. leave empty for auto detection
 IMAGEMAGICK_PATH = ''
 
-# wiki settings
-WIKI_MAIN_PAGE = 'Startseite'
-
 # forum settings
 FORUM_LIMIT_UNREAD = 10000
 
@@ -122,6 +119,9 @@ AVATAR_SIZE = (80, 100)
 
 # key for google maps
 GOOGLE_MAPS_APIKEY = ''
+
+# wiki settings
+WIKI_MAIN_PAGE = 'Startseite'
 
 # The forum that should contain the wiki discussions
 WIKI_DISCUSSION_FORUM = 'diskussionen'

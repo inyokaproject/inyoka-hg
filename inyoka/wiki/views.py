@@ -18,12 +18,13 @@
 from urlparse import urljoin
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404 as PageNotFound
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, is_safe_domain
+from inyoka.utils.flashing import flash
 from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.wiki.models import Page
 from inyoka.wiki.actions import PAGE_ACTIONS
 from inyoka.wiki.utils import normalize_pagename, get_thumbnail, \
-     is_external_target
+     is_external_target, pagename_join
 from inyoka.wiki.acl import has_privilege
 
 
@@ -52,6 +53,27 @@ def show_page(request, name):
     if action and action not in PAGE_ACTIONS:
         return missing_resource(request)
     return PAGE_ACTIONS[action or 'show'](request, normalized_name)
+
+
+def redirect_new_page(request):
+    """Helper for the `NewPage` macro."""
+    template = request.POST.get('template')
+    base = request.POST.get('base', '')
+    page = request.POST.get('page', '')
+    if not page:
+        backref = request.META.get('HTTP_REFERER')
+        if not backref or not is_safe_domain(backref):
+            backref = href('wiki', settings.WIKI_MAIN_PAGE)
+        flash('Konnte Seite nicht erstellen, kein Seitenname angegeben '
+              'wurde.', success=False)
+        return HttpResponseRedirect(backref)
+    options = {'action': 'edit'}
+    if base:
+        page = pagename_join(base, page)
+    if template:
+        options['template'] = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                            template)
+    return HttpResponseRedirect(href('wiki', page, **options))
 
 
 @templated('wiki/missing_resource.html', status=404)
