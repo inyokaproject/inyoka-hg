@@ -265,12 +265,8 @@
   WikiEditor = function(editor, profile) {
     var self = this, t;
     this.profile = profile || 'small';
-    this.username = null;
+    this.username = $CURRENT_USER || 'Anonymous';
     this.smilies = null;
-    $.getJSON('/?__service__=portal.get_current_user', function(user) {
-      if (!user.is_anonymous)
-        self.username = user.username;
-    });
 
     this.textarea = $(editor)
       .keypress(function(evt) {

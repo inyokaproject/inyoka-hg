@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-    inyoka.scripts.converter
-    ~~~~~~~~~~~~~~~~~~~~~~~~
+    inyoka.scripts.converter.wiki_formatter
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This file contains a MoinMoin formatter that can be used to convert
     MoinMoin syntax to inyoka syntax.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Armin Ronacher.
     :license: GNU GPL.
 """
 import re
@@ -146,9 +146,9 @@ class InyokaFormatter(FormatterBase):
                                              u', '.join(links))
         else:
             # most processors are page templates in inyoka
-            return u'[[Vorlage(%s, "%s")]]' % (processor_name,
-                                               addslashes(u'\n'.join(lines))
-            )
+            # but you can embed them via macros and parsers.
+            return u'{{{\n#!vorlage %s\n%s\n}}}' % (proesssor_name,
+                                                    u'\n'.join(lines))
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
         pagename = normalize_pagename(pagename)
@@ -158,7 +158,7 @@ class InyokaFormatter(FormatterBase):
 
     def interwikilink(self, on, interwiki, pagename, **kw):
         if on:
-            return u'[:%s:%s:' % (interwiki, pagename)
+            return u'[%s:%s:' % (interwiki, pagename)
         return u']'
 
     def url(self, on, url=None, **kw):
@@ -254,7 +254,7 @@ class InyokaFormatter(FormatterBase):
         # TODO: Implement something like [attachment:asd.tar.gz:asd] that
         #       links directly to the attachment and not on the attachment
         #       wiki page
-        return u'[:%s/%s:%s]' % (self.page.page_name, url, text)
+        return u'[attachment:%s/%s:%s]' % (self.page.page_name, url, text)
 
     def attachment_image(self, url, **kw):
         # TODO

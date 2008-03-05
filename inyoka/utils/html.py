@@ -13,6 +13,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from __future__ import division
 import re
 from htmlentitydefs import name2codepoint
 from cgi import escape
@@ -21,7 +22,7 @@ from html5lib import HTMLParser, treewalkers, treebuilders
 from html5lib.serializer import XHTMLSerializer, HTMLSerializer
 from html5lib.filters.optionaltags import Filter as OptionalTagsFilter
 from html5lib.filters import sanitizer
-from inyoka.utils import increment_string
+from inyoka.utils.text import increment_string
 
 
 #: set of tags that don't want child elements.
@@ -29,6 +30,7 @@ EMPTY_TAGS = set(['br', 'img', 'area', 'hr', 'param', 'meta', 'link', 'base',
                   'input', 'embed', 'col', 'frame', 'spacer'])
 
 _entity_re = re.compile(r'&([^;]+);')
+_strip_re = re.compile(r'<!--.*?-->|<[^>]*>(?s)')
 
 
 #: a dict of html entities to codepoints. This includes the problematic
@@ -60,6 +62,18 @@ def build_html_tag(tag, class_=None, classes=None, **attrs):
     return _build_html_tag(tag, attrs)[0]
 
 
+def color_fade(c1, c2, percent):
+    """Fades two html colors"""
+    new_color = []
+    for i in xrange(3):
+        part1 = int(c1[i * 2:i * 2 + 2], 16)
+        part2 = int(c2[i * 2:i * 2 + 2], 16)
+        diff = part1 - part2
+        new = int(part2 + diff * percent / 100)
+        new_color.append(hex(new)[2:])
+    return ''.join(new_color)
+
+
 def replace_entities(string):
     """
     Replace HTML entities in a string:
@@ -83,6 +97,11 @@ def replace_entities(string):
                 return u''
         return u''
     return _entity_re.sub(handle_match, string)
+
+
+def striptags(string):
+    """Remove HTML tags from a string."""
+    return replace_entities(u' '.join(_strip_re.sub('', string).split()))
 
 
 def parse_html(string, fragment=True):

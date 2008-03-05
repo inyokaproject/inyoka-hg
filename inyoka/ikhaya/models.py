@@ -14,11 +14,12 @@ from datetime import datetime
 from django.db import models, connection
 from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
-from inyoka.utils import slugify, striptags
+from inyoka.utils.text import slugify
+from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.cache import cache
 from inyoka.utils.search import search, SearchAdapter
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 class ArticleManager(models.Manager):
@@ -127,7 +128,7 @@ class Article(models.Model):
         """Render a text that belongs to this Article to HTML"""
         if self.is_xhtml:
             return text
-        context = RenderContext(r.request)
+        context = RenderContext(current_request)
         instructions = cache.get(key)
         if instructions is None:
             instructions = parse(text).compile('html')
@@ -252,7 +253,7 @@ class Suggestion(models.Model):
 
     @property
     def rendered_text(self):
-        context = RenderContext(r.request)
+        context = RenderContext(current_request)
         key = 'ikhaya/suggestion_text/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:
@@ -262,7 +263,7 @@ class Suggestion(models.Model):
 
     @property
     def rendered_intro(self):
-        context = RenderContext(r.request)
+        context = RenderContext(current_request)
         key = 'ikhaya/suggestion_intro/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:
@@ -284,7 +285,7 @@ class Comment(models.Model):
 
     @property
     def rendered_text(self):
-        context = RenderContext(r.request)
+        context = RenderContext(current_request)
         key = 'ikhaya/comment/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:

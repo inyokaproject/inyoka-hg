@@ -22,25 +22,37 @@ from django.http import HttpResponsePermanentRedirect, \
 from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
-from inyoka.utils import import_string, INYOKA_REVISION
-from inyoka.utils.http import DirectResponse, TemplateResponse
+from inyoka import INYOKA_REVISION
+from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
 from inyoka.utils.logger import logger
+from werkzeug import import_string
 
 
-# Set up virtual url modules for static and media
-for name, item in [('static', settings.STATIC_ROOT),
-                   ('media', settings.MEDIA_ROOT)]:
-    sys.modules['inyoka.%s.urls' % name] = module = new.module(name)
-    __import__('inyoka.%s' % name, None, None, ['urls']).urls = module
-    module.urlpatterns = patterns('',
-        (r'(?P<path>.*)$', 'django.views.static.serve', {
-           'document_root': item
-        })
-    )
-    module.require_trailing_slash = False
+core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)
+try:
+    core_exceptions += (GeneratorExit,)
+except NameError:
+    pass
+
+
+class ExceptionInterceptionMiddleware(object):
+    """Hook in as last middleware to bypass django error system."""
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, DirectResponse):
+            return exception.response
+        if not settings.DEBUG and not isinstance(exception, core_exceptions):
+            logger.exception('Exception during request at %r' % request.path)
+            return TemplateResponse('errors/500.html', {}, 500)
 
 
 class CommonServicesMiddleware(CommonMiddleware):
+    """Hook in as first middleware for common tasks."""
+
+    def __init__(self):
+        from inyoka.utils.local import local, local_manager
+        self._local = local
+        self._local_manager = local_manager
 
     def process_request(self, request):
         # check for disallowed user agents
@@ -48,6 +60,9 @@ class CommonServicesMiddleware(CommonMiddleware):
             for user_agent_regex in settings.DISALLOWED_USER_AGENTS:
                 if user_agent_regex.search(request.META['HTTP_USER_AGENT']):
                     return HttpResponseForbidden('<h1>Forbidden</h1>')
+
+        # populate the request
+        self._local.request = request
 
         # dispatch requests to subdomains
         host = request.get_host()
@@ -76,16 +91,10 @@ class CommonServicesMiddleware(CommonMiddleware):
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
 
-    def process_exception(self, request, exception):
-        if isinstance(exception, DirectResponse):
-            return exception.response
-        if not settings.DEBUG:
-            logger.exception('Exception during request at %r' % request.path)
-            return TemplateResponse('errors/500.html', {}, 500)
-
     def process_response(self, request, response):
         """
-        Hook our X-Powered header in. (and an easteregg header).
+        Hook our X-Powered header in (and an easteregg header).  And clean up
+        the werkzeug local.
         """
         response = CommonMiddleware.process_response(self, request, response)
         if INYOKA_REVISION:
@@ -95,7 +104,23 @@ class CommonServicesMiddleware(CommonMiddleware):
         response['X-Powered-By'] = powered_by
         response['X-Sucks'] = 'PHP in any version'
 
+        # clean up after the local manager
+        self._local_manager.cleanup()
+
         return response
+
+
+# Set up virtual url modules for static and media
+for name, item in [('static', settings.STATIC_ROOT),
+                   ('media', settings.MEDIA_ROOT)]:
+    sys.modules['inyoka.%s.urls' % name] = module = new.module(name)
+    __import__('inyoka.%s' % name, None, None, ['urls']).urls = module
+    module.urlpatterns = patterns('',
+        (r'(?P<path>.*)$', 'django.views.static.serve', {
+           'document_root': item
+        })
+    )
+    module.require_trailing_slash = False
 
 
 # import all application modules so that we get bootstrapping

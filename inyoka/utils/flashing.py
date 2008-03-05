@@ -9,7 +9,7 @@
                 and Christopher Grebs.
     :license: GNU GPL.
 """
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 def flash(message, success=None, classifier=None, session=None):
@@ -20,7 +20,7 @@ def flash(message, success=None, classifier=None, session=None):
     messages with that classifier using the `unflash` method.
     """
     if session is None:
-        session = getattr(r.request, 'session', None)
+        session = getattr(current_request, 'session', None)
         if session is None:
             return False
     if not 'flmsg' in session:
@@ -37,7 +37,7 @@ def flash(message, success=None, classifier=None, session=None):
 
 def unflash(classifier):
     """Unflash all messages with a given classifier"""
-    session = getattr(r.request, 'session', None)
+    session = getattr(current_request, 'session', None)
     if session is None:
         return
     session['flmsg'] = [item for item in session.get(
@@ -49,23 +49,24 @@ def unflash(classifier):
 
 def clear():
     """Clear the whole flash buffer."""
-    session = getattr(r.request, 'session', None)
+    session = getattr(current_request, 'session', None)
     if session is not None:
         session.pop('flmsg', None)
 
 
 def get_flashed_messages():
     """Get all flashed messages for this user."""
-    flash_buffer = getattr(r.request, 'flash_message_buffer', None)
+    request = current_request._get_current_object()
+    flash_buffer = getattr(request, 'flash_message_buffer', None)
     if flash_buffer is not None:
         return flash_buffer
-    session = getattr(r.request, 'session', None)
+    session = getattr(request, 'session', None)
     if session is None:
         return []
     flash_buffer = [FlashMessage(x[0], x[1]) for x in
                     session.get('flmsg', ())]
     session.pop('flmsg', None)
-    r.request.flash_message_buffer = flash_buffer
+    request.flash_message_buffer = flash_buffer
     return flash_buffer
 
 

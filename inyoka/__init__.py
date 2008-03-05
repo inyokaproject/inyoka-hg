@@ -110,8 +110,34 @@
                 Benjamin Wiegand, Maximilian Trescher.
     :license: GNU GPL.
 """
-import new
-import sys
-sys.modules['inyoka.static'] = static = new.module('inyoka.static')
-sys.modules['inyoka.media'] = media = new.module('inyoka.media')
-del new, sys
+
+
+def _bootstrap():
+    """Get the inyoka version and setup fake modules"""
+    global INYOKA_REVISION
+    import os, inyoka, new, sys
+    from subprocess import Popen, PIPE
+
+    # boostrap fake modules
+    sys.modules['inyoka.static'] = static = new.module('inyoka.static')
+    sys.modules['inyoka.media'] = media = new.module('inyoka.media')
+
+    # get inyoka revision
+    hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
+               cwd=os.path.dirname(inyoka.__file__))
+    hg.stdin.close()
+    hg.stderr.close()
+    rv = hg.stdout.read()
+    hg.stdout.close()
+    hg.wait()
+    hg_node = None
+    if hg.wait() == 0:
+        for line in rv.splitlines():
+            p = line.split(':', 1)
+            if len(p) == 2 and p[0].lower().strip() == 'changeset':
+                hg_node = p[1].strip().split(':')[0]
+                break
+    INYOKA_REVISION = hg_node
+
+_bootstrap()
+del _bootstrap

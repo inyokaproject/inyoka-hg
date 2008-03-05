@@ -13,10 +13,10 @@ import md5
 from django.conf import settings
 from django import newforms as forms
 from django.newforms.widgets import Input
-import django.db.models.base
 from inyoka.portal.user import User
 from inyoka.utils.urls import href
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
+
 
 DATETIME_INPUT_FORMATS = (
     '%d.%m.%Y %H:%M', # default output format
@@ -103,7 +103,7 @@ class CaptchaField(forms.Field):
     widget = CaptchaWidget
 
     def clean(self, value):
-        solution = r.request.session.get('captcha_solution')
+        solution = current_request.session.get('captcha_solution')
         h = md5.new(settings.SECRET_KEY)
         h.update(value)
         if h.digest() == solution:

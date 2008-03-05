@@ -12,6 +12,11 @@ from django.http import HttpResponse
 from django.utils.html import escape
 
 
+# XXX: this module is in a slightly modified version part of
+# werkzeug.contrib.atom.  We should consider replacing it as
+# soon as the werkzeug switch is done
+
+
 def _make_text_block(name, content, content_type=None):
     if content_type == 'xhtml':
         return u'<%s type="xhtml">%s</%s>\n' % (

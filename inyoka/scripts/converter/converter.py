@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    inyoka.scripts.converter
-    ~~~~~~~~~~~~~~~~~~~~~~~~
+    inyoka.scripts.converter.converter
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This script converts all data of the old wiki, forum and portal to the new
     inyoka structure.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand and Florian Apolloner.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Florian Apolloner.
     :license: GNU GPL.
 """
+import re
 import sys
 from django.conf import settings
 
@@ -43,8 +44,7 @@ def select_blocks(query, block_size=1000):
     key = table.c[key_name]
     range = (0, block_size)
     failed = 0
-    while True:
-        print range
+    while 1:
         result = query.where(key.between(*range)).execute()
         i = 0
         for i, row in enumerate(result):
@@ -63,7 +63,17 @@ def convert_wiki():
     from MoinMoin.request import RequestCLI
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
-    from MoinMoin.parser.wiki import Parser
+    from MoinMoin.parser.wiki import Parser as NormalParser
+
+    # Hack to disable camel case
+    class Parser(NormalParser):
+        def __init__(self, raw, request, **kw):
+            self.formatting_rules = re.sub(r"\(\?P<word>.*\n", "",
+                                           self.formatting_rules)
+            self.formatting_rules = re.sub(r"\(\?P<interwiki>.*\n", "",
+                                           self.formatting_rules)
+            NormalParser.__init__(self, raw, request, **kw)
+
     from inyoka.scripts.converter.wiki_formatter import InyokaFormatter
     from inyoka.wiki.utils import normalize_pagename
     from _mysql_exceptions import IntegrityError

@@ -11,13 +11,14 @@
 import os
 from jinja import Environment, FileSystemLoader
 from django.conf import settings
+from inyoka import INYOKA_REVISION
 from inyoka.utils.dates import format_timedelta, natural_date, \
      format_datetime, format_specific_datetime, format_time
-from inyoka.utils import INYOKA_REVISION, human_number
+from inyoka.utils.text import human_number
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.flashing import get_flashed_messages
 from inyoka.utils.cache import cache
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 # we could use the MemcachedFileSystemLoader too
@@ -88,7 +89,7 @@ jinja_env.filters.update(
 
 def populate_context_defaults(context):
     """Fill in context defaults."""
-    request = r.request
+    request = current_request._get_current_object()
     if request.user.is_authenticated:
         key = 'portal/pm_count/%s' % request.user.id
         pms = cache.get(key)

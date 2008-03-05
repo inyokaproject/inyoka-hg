@@ -12,7 +12,7 @@ from urlparse import urlparse
 from django.db import models
 from inyoka.portal.user import User
 from inyoka.utils.urls import href, is_save_domain
-from inyoka.utils import deferred
+from inyoka.utils.decorators import deferred
 from inyoka.utils.highlight import highlight_code
 
 

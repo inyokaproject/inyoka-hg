@@ -21,11 +21,11 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 from django.core import validators
 from django.db.models.manager import EmptyManager
+from inyoka.utils.decorators import deferred
+from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
-from inyoka.middlewares.registry import r
-from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import deferred, slugify
+from inyoka.utils.local import current_request
 from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
@@ -33,7 +33,7 @@ from inyoka.utils.cache import cache
 from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
-
+from inyoka.wiki.parser import parse, render, RenderContext
 
 
 class SubscriptionManager(models.Manager):
@@ -127,7 +127,7 @@ class PrivateMessage(models.Model):
 
     @property
     def rendered_text(self):
-        return parse(self.text).render(r.request, 'html')
+        return parse(self.text).render(current_request, 'html')
 
 
 class PrivateMessageEntry(models.Model):
@@ -267,7 +267,7 @@ class Event(models.Model):
 
     @property
     def rendered_description(self):
-        context = RenderContext(r.request)
+        context = RenderContext(current_request)
         key = 'ikhaya/date/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:

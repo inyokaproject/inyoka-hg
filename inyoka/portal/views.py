@@ -21,7 +21,7 @@ from django.http import Http404 as PageNotFound, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from inyoka.utils import get_random_password, human_number
+from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse
 from inyoka.utils.sessions import get_sessions, set_session_info, \

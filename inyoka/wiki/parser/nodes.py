@@ -21,8 +21,8 @@
 from django.conf import settings
 from cgi import escape
 from urlparse import urlparse, urlunparse
-from inyoka.utils import striptags, slugify
-from inyoka.utils.html import build_html_tag
+from inyoka.utils.text import slugify
+from inyoka.utils.html import build_html_tag, striptags
 from inyoka.utils.urls import href
 from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \

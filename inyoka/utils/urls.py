@@ -14,7 +14,7 @@ import cgi
 import urllib
 from urlparse import urlparse
 from django.conf import settings
-from inyoka.utils import import_string
+from werkzeug import import_string
 
 
 def quote(s):
