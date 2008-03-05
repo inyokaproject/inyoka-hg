@@ -49,7 +49,9 @@ class EditArticleForm(forms.Form):
                             label=u'Einleitung')
     text = forms.CharField(widget=forms.Textarea(attrs={'rows': 15}),
                            label=u'Text')
-    author = UserField(label=u'Autor', initial='')
+    author = UserField(label=u'Autor', initial='',
+        help_text=u'Wenn du dieses Feld leer lässt, wirst du automatisch '
+                  u'als Autor eingetragen.')
     category = forms.ChoiceField(label=u'Kategorie')
     icon = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
