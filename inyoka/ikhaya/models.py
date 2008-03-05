@@ -14,7 +14,8 @@ from datetime import datetime
 from django.db import models, connection
 from inyoka.portal.user import User
 from inyoka.wiki.parser import render, parse, RenderContext
-from inyoka.utils import slugify, striptags
+from inyoka.utils.text import slugify
+from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.cache import cache
 from inyoka.utils.search import search, SearchAdapter

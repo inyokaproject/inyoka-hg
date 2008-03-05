@@ -14,5 +14,8 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
-from inyoka.middlewares.common import local
+from werkzeug import Local, LocalManager
+
+local = Local()
+local_manager = LocalManager(local)
 current_request = local('request')

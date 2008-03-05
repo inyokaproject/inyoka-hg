@@ -13,7 +13,7 @@ from datetime import datetime, date
 from django.http import HttpResponse, HttpResponseRedirect, \
                         Http404 as PageNotFound
 from django.newforms.models import model_to_dict
-from inyoka.utils import slugify
+from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.flashing import flash

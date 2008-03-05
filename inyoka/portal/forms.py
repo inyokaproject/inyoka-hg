@@ -12,7 +12,7 @@ import md5
 from django import newforms as forms
 from django.conf import settings
 from inyoka.portal.user import User
-from inyoka.utils import is_valid_username
+from inyoka.portal.utils import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField

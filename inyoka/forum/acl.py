@@ -12,7 +12,7 @@ from itertools import izip
 from django.db import connection
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum
-from inyoka.portal.utils import decor
+from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.search import search
 
 

@@ -8,22 +8,27 @@
     :copyright: 2008 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
 """
+import re
+import random
+import string
+import calendar
 from md5 import new as md5
-import random, string, calendar
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import AccessDeniedResponse
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.templating import render_template
 
 
-def decor(decorator, base):
-    decorator.__name__ = base.__name__
-    decorator.__module__ = base.__module__
-    decorator.__doc__ = base.__doc__
-    return decorator
+_username_re = re.compile(r'[\w0-9_]{1,30}(?u)')
+
+
+def is_valid_username(name):
+    """Check if the username entered is a valid one."""
+    return _username_re.search(name) is not None
 
 
 def check_login(message=None):
@@ -41,7 +46,7 @@ def check_login(message=None):
                 flash(message)
             args = {'next': 'http://%s%s' % (req.get_host(), req.path)}
             return HttpResponseRedirect(href('portal', 'login', **args))
-        return decor(decorator, func)
+        return patch_wrapper(decorator, func)
     return _wrapper
 
 
@@ -51,7 +56,7 @@ def require_manager(f):
         if request.user.is_manager:
             return f(request, *args, **kwargs)
         return abort_access_denied(request)
-    return simple_check_login(decor(decorator, f))
+    return simple_check_login(patch_wrapper(decorator, f))
 
 
 def simple_check_login(f):
@@ -67,7 +72,7 @@ def simple_check_login(f):
             return f(*args, **kwargs)
         args = {'next': 'http://%s%s' % (req.get_host(), req.path)}
         return HttpResponseRedirect(href('portal', 'login', **args))
-    return decor(decorator, f)
+    return patch_wrapper(decorator, f)
 
 
 def abort_access_denied(request):

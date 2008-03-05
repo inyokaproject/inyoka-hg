@@ -28,6 +28,7 @@
 from inyoka.portal.user import User
 from django.http import HttpResponseRedirect
 from inyoka.utils.urls import href
+from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.http import AccessDeniedResponse
 from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
@@ -237,10 +238,7 @@ def require_privilege(privilege):
                 ))
                 return HttpResponseRedirect(url)
             return AccessDeniedResponse()
-        oncall.__name__ = f.__name__
-        oncall.__module__ = f.__module__
-        oncall.__doc__ = f.__doc__
-        return oncall
+        return patch_wrapper(oncall, f)
     return decorate
 
 

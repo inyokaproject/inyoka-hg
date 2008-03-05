@@ -19,7 +19,7 @@ from django.utils.html import escape
 from django.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils import slugify
+from inyoka.utils.text import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search

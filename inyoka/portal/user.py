@@ -22,7 +22,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.encoding import smart_str
 from django.core import validators
-from inyoka.utils import deferred
+from inyoka.utils.decorators import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.cache import cache

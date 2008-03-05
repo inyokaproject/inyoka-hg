@@ -17,7 +17,7 @@ from django.utils.text import truncate_html_words
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, check_login, \
                                 abort_access_denied
-from inyoka.utils import slugify
+from inyoka.utils.text import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info

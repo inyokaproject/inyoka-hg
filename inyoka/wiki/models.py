@@ -88,7 +88,7 @@ from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
      get_close_matches, get_title, pagename_join
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
-from inyoka.utils import deferred
+from inyoka.utils.decorators import deferred
 from inyoka.utils.dates import format_specific_datetime, format_datetime
 from inyoka.utils.urls import href
 from inyoka.utils.search import search

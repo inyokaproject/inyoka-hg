@@ -11,6 +11,7 @@
 """
 from django.http import HttpResponse, Http404 as PageNotFound
 from django.core.exceptions import ObjectDoesNotExist
+from inyoka.utils.decorators import patch_wrapper
 
 
 def templated(template_name, status=None, modifier=None,
@@ -43,10 +44,7 @@ def templated(template_name, status=None, modifier=None,
                 modifier(request, rv)
             return TemplateResponse(template_name, rv, status=status,
                                     content_type=content_type)
-        proxy.__name__ = f.__name__
-        proxy.__module__ = f.__module__
-        proxy.__doc__ = f.__doc__
-        return proxy
+        return patch_wrapper(proxy, f)
     return decorator
 
 
@@ -57,10 +55,7 @@ def does_not_exist_is_404(f):
             return f(*args, **kwargs)
         except ObjectDoesNotExist:
             raise PageNotFound()
-    proxy.__name__ = f.__name__
-    proxy.__module__ = f.__module__
-    proxy.__doc__ = f.__doc__
-    return proxy
+    return patch_wrapper(proxy, f)
 
 
 class TemplateResponse(HttpResponse):

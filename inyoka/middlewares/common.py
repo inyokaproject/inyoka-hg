@@ -22,13 +22,37 @@ from django.http import HttpResponsePermanentRedirect, \
 from django.conf import settings
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
-from inyoka.utils import import_string, INYOKA_REVISION
+from inyoka import INYOKA_REVISION
 from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
 from inyoka.utils.logger import logger
-from werkzeug.local import Local, LocalManager
+from werkzeug import import_string
+
+
+core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)
+try:
+    core_exceptions += (GeneratorExit,)
+except NameError:
+    pass
+
+
+class ExceptionInterceptionMiddleware(object):
+    """Hook in as last middleware to bypass django error system."""
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, DirectResponse):
+            return exception.response
+        if not settings.DEBUG and not isinstance(exception, core_exceptions):
+            logger.exception('Exception during request at %r' % request.path)
+            return TemplateResponse('errors/500.html', {}, 500)
 
 
 class CommonServicesMiddleware(CommonMiddleware):
+    """Hook in as first middleware for common tasks."""
+
+    def __init__(self):
+        from inyoka.utils.local import local, local_manager
+        self._local = local
+        self._local_manager = local_manager
 
     def process_request(self, request):
         # check for disallowed user agents
@@ -38,7 +62,7 @@ class CommonServicesMiddleware(CommonMiddleware):
                     return HttpResponseForbidden('<h1>Forbidden</h1>')
 
         # populate the request
-        local._request = request
+        self._local.request = request
 
         # dispatch requests to subdomains
         host = request.get_host()
@@ -67,14 +91,6 @@ class CommonServicesMiddleware(CommonMiddleware):
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
 
-    def process_exception(self, request, exception):
-        if isinstance(exception, DirectResponse):
-            return exception.response
-        if not settings.DEBUG and not \
-           isinstance(exception, (PageNotFound, DirectResponse)):
-            logger.exception('Exception during request at %r' % request.path)
-            return TemplateResponse('errors/500.html', {}, 500)
-
     def process_response(self, request, response):
         """
         Hook our X-Powered header in (and an easteregg header).  And clean up
@@ -89,7 +105,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         response['X-Sucks'] = 'PHP in any version'
 
         # clean up after the local manager
-        _local_manager.cleanup()
+        self._local_manager.cleanup()
 
         return response
 
@@ -105,11 +121,6 @@ for name, item in [('static', settings.STATIC_ROOT),
         })
     )
     module.require_trailing_slash = False
-
-
-# set up our local system for the request registry
-local = Local()
-_local_manager = LocalManager(_local)
 
 
 # import all application modules so that we get bootstrapping

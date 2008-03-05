@@ -21,7 +21,8 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 from django.core import validators
 from django.db.models.manager import EmptyManager
-from inyoka.utils import deferred, slugify
+from inyoka.utils.decorators import deferred
+from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.local import current_request
