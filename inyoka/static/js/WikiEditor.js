@@ -268,10 +268,11 @@
     this.username = $CURRENT_USER || 'Anonymous';
     this.smilies = null;
 
+    /* XXX: disabled for the time being as it causes too much trouble
     this.textarea = $(editor)
       .keypress(function(evt) {
         self.onKeyDown(evt);
-      });
+      });*/
 
     /* create toolbar based on button layout */
     t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());

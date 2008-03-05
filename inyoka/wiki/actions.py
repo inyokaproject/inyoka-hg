@@ -312,6 +312,7 @@ def do_edit(request, name):
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
 
+    # attachments have a custom editor
     if page and page.rev.attachment:
         return do_attach_edit(request, page.name)
 
@@ -321,6 +322,16 @@ def do_edit(request, name):
     form = PageEditForm()
     if page is not None:
         form.initial = {'text': page.rev.text.value}
+
+    # if there is a template, load initial text from the template
+    template = request.GET.get('template')
+    if not request.method == 'POST' and template:
+        try:
+            template = Page.objects.get_by_name(template)
+        except Page.DoesNotExist:
+            pass
+        else:
+            form.initial['text'] = template.rev.text.value
 
     # check for edits by other users.  If we have such an edit we try
     # to merge and set the edit time to the time of the last merge or
