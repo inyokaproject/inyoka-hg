@@ -55,7 +55,7 @@ def config(request):
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
-        form = ConfigurationForm(initial=storage.get_many(['global_message']))
+        form = ConfigurationForm(initial=storage.get_dict('global_message'))
     return {
         'form': form
     }

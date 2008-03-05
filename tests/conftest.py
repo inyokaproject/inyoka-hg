@@ -39,8 +39,13 @@ settings.configure(**test_settings)
 
 from django.test.utils import create_test_db, destroy_test_db
 from inyoka.utils.search import search
+from inyoka.utils.cache import set_test_cache
 from inyoka.portal.user import User
 from shutil import rmtree
+
+
+# enable the test environment
+set_test_cache()
 
 
 class Directory(py.test.collect.Directory):

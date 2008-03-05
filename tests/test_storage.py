@@ -24,7 +24,7 @@ def test_set():
     storage.set('test', 'boo', 1)
     _compare('test', 'boo')
     time.sleep(3)
-    assert None == cache.get('storage/test')
+    assert cache.get('storage/test') is None
     storage['foo'] = 'bar'
     storage['boo'] = 'far'
     assert storage.get_many(['foo', 'boo', 'nonexisting']) == {

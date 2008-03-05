@@ -11,6 +11,7 @@
 """
 import re
 import random
+import unicodedata
 
 
 _str_num_re = re.compile(r'(?:[^\d]*(\d+)[^\d]*)+')

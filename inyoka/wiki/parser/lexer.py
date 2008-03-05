@@ -86,6 +86,19 @@ class rule(object):
 
 
 class Lexer(object):
+    # what the lexer understands as url.  This list is far from complete
+    # but this is intention.  These are the most often used URLs and the
+    # smaller the list, the less the clashes with the interwiki names.
+    # and yes: this list includes nonstandard urls too because they are
+    # in use (like git or irc)
+    _url_pattern = (
+        # urls with netloc
+        r'(?:(?:https?|ftps?|file|ssh|mms|svn(?:\+ssh)?|git|dict|nntp|irc|'
+        r'rsync|smb)://|'
+        # urls without netloc
+        r'(?:mailto|telnet|s?news|sips?|skype):)'
+    )
+
     rules = {
         'everything': ruleset(
             include('block'),
@@ -131,17 +144,17 @@ class Lexer(object):
             rule(r'\[size\s*=\s*(.*?)\s*\]', bygroups('font_size'),
                  enter='size'),
             rule(r'\[font\s*=\s*(.*?)\s*\]', bygroups('font_face'),
-                 enter='font'),
-            rule(r'\[(\d+)\]', 'sourcelink')
+                 enter='font')
         ),
         'links': ruleset(
-            rule(r'\[\s*([^:\]]+?)?\s*:(?!//)\s*((?:::|[^:])*)\s*:\s*',
-                 astuple('link_target'), enter='wiki_link'),
-            rule(r'(\[)(\S+)(\])', bygroups('external_link_begin',
-                 'link_target', 'external_link_end')),
-            rule(r'\[(.*?)\s+', bygroups('link_target'),
+            rule(r'\[\s*(\d+)\s*\]', 'sourcelink'),
+            rule(r'(\[\s*)((?:%s|\?)\S+)(\s*\])' % _url_pattern, bygroups(
+                 'external_link_begin', 'link_target', 'external_link_end')),
+            rule(r'\[((?:%s|\?).*?)\s+' % _url_pattern, bygroups('link_target'),
                  enter='external_link'),
-            rule(r'(ftp|https?)://[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?',
+            rule(r'\[\s*([^:\]]+?)?\s*:\s*((?:::|[^:])*)\s*:\s*',
+                 astuple('link_target'), enter='wiki_link'),
+            rule(_url_pattern + '[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?',
                  'free_link')
         ),
         'metadata': ruleset(
