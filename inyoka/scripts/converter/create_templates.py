@@ -10,6 +10,7 @@
     :license: GNU GPL.
 """
 import os
+from inyoka.forum.models import Forum
 from inyoka.wiki.models import Page
 from inyoka.utils.storage import storage
 
@@ -195,13 +196,7 @@ def create_smilies():
         ':arrow:': 'arrow.png',
         '<3': 'favorite.png',
     }
-    text = u'''# X-Behave: Smiley-Map
-{{{
-%s
-}}}''' % u'\n'.join(u'%s = %s' % (key, 'Wiki/Smilies/%s' % img)
-                    for key, img in smiley_map.iteritems())
-    Page.objects.create(u'Wiki/Smilies', text,
-                        note=u'Smilies automatisch erstellt')
+
     pth = os.path.join(os.path.dirname(__file__), 'smilies')
     for key, img in smiley_map.iteritems():
         f = file(os.path.join(pth, img))
@@ -209,6 +204,33 @@ def create_smilies():
                     u'', note=u'Smiley automatisch erstellt',
                     attachment=f.read(), attachment_filename=img)
         f.close()
+
+    # create flags
+    pth = os.path.join(os.path.dirname(__file__), 'flags')
+    flags = {}
+    for name in os.listdir(pth):
+        f = file(os.path.join(pth, name))
+        name = name.replace('flag-', '')
+        Page.objects.create(u'Wiki/Flaggen/%s' % name,
+                    u'', note=u'Flagge automatisch erstellt',
+                    attachment=f.read(), attachment_filename=name)
+        f.close()
+        flags[name.split('.')[0]] = u'Wiki/Flaggen/%s' % name
+
+    smiley_text = u'''# X-Behave: Smiley-Map
+{{{
+%s
+}}}''' % u'\n'.join(u'%s = %s' % (key, 'Wiki/Smilies/%s' % img)
+                    for key, img in smiley_map.iteritems())
+    flag_text = u'''# X-Behave: Smiley-Map
+{{{
+%s
+}}}''' % u'\n'.join(u'{%s} = %s' % (flag, img)
+                    for flag, img in flags.iteritems())
+    Page.objects.create(u'Wiki/Smilies', smiley_text,
+                        note=u'Smilies automatisch erstellt')
+    Page.objects.create(u'Wiki/Flaggen', flag_text,
+                        note=u'Flaggen automatisch erstellt')
 
 
 if __name__ == '__main__':
