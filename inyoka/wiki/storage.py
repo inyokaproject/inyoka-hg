@@ -40,9 +40,7 @@
     :license: GNU GPL.
 """
 import re
-from urlparse import urljoin
 from django.db import connection
-from inyoka.conf import settings
 from inyoka.utils.cache import cache
 
 
