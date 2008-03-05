@@ -9,24 +9,20 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import sys
 from time import time
 from datetime import datetime, timedelta
 from django.http import HttpResponseRedirect
 from django.newforms import ValidationError
-from django.db import transaction
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
-from inyoka.utils.cache import cache
-from inyoka.utils.local import current_request
+from inyoka.middlewares.registry import r
 
 
 SESSION_DELTA = 300
 
 
-@transaction.commit_on_success
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -52,17 +48,7 @@ def set_session_info(request, action, category=None):
     info.action_link = request.build_absolute_uri()
     info.category = category
     info.last_change = datetime.utcnow()
-
-    # try to save, but fall back silently.  Under some rare conditions
-    # we could encounter a problem here and because the information is
-    # worthless anyways we don't care if it breaks.
-    try:
-        info.save()
-    except:
-        pass
-
-    # XXX: move into standalone process!
-    check_for_user_record()
+    info.save()
 
 
 class SurgeProtectionMixin(object):
@@ -81,29 +67,11 @@ class SurgeProtectionMixin(object):
     def clean(self):
         identifier = self.source_protection_identifier or \
                      self.__class__.__module__.split('.')[1]
-        storage = current_request.session.setdefault('sp', {})
+        storage = r.request.session.setdefault('sp', {})
         if storage.get(identifier, 0) >= time():
             raise ValidationError(self.source_protection_message)
         storage[identifier] = time() + self.source_protection_timeout
         return super(SurgeProtectionMixin, self).clean()
-
-
-def check_for_user_record():
-    """
-    Checks whether the current session count is a new record.
-    This function uses the cache to hit the database rarely.
-    """
-    # check for record all 2 minutes
-    RECORD_CHECK_TIME = 120
-    check = cache.get('session_record_check')
-    if not check or time() - RECORD_CHECK_TIME > check:
-        delta = datetime.utcnow() - timedelta(seconds=SESSION_DELTA)
-        record = int(storage.get('session_record', 0))
-        session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
-        if session_count > record:
-            storage['session_record'] = session_count
-            storage['session_record_time'] = int(time())
-    cache.set('session_record_check', time())
 
 
 def get_user_record():
@@ -112,7 +80,7 @@ def get_user_record():
     where number is an integer with the number of online users and
     timestamp a datetime object.
     """
-    record = int(storage.get('session_record', 0))
+    record = int(storage.get('session_record', 1))
     timestamp = storage.get('session_record_time')
     if timestamp is None:
         timestamp = datetime.utcnow()
