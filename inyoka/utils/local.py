@@ -11,6 +11,9 @@
     `current_request`
         A proxy to the current active request object.
 
+    The purpose of this module is to allow functions to access request data
+    in the context of a request without explicitly passing the request object.
+
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
