@@ -9,9 +9,9 @@
 -#}
 
 
-<form action="/_newpage" method="post"><span>
+<form action="/_newpage" method="get" class="new-page-macro"><div>
   <input type="hidden" name="template" value="{{ template|e(1) }}" />
   <input type="hidden" name="base" value="{{ base|e(1) }}" />
   <input type="text" name="page" value="{{ text|e(1) }}" />
   <input type="submit" value="Seite erstellen" />
-</span></form>
+</div></form>
