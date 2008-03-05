@@ -378,10 +378,6 @@ def profile(request, username):
         user = User.objects.get(username=username)
         wikipage = WikiPage.objects.get_by_name('Benutzer/%s' % username)
         content = wikipage.rev.rendered_text
-    except User.DoesNotExist:
-        flash(u'Der Benutzer „%s“ existiert nicht' % (
-            escape(username)), False)
-        return HttpResponseRedirect(href('portal', 'users'))
     except WikiPage.DoesNotExist:
         content = u''
     set_session_info(request, u'schaut sich das Benutzerprofil von '
