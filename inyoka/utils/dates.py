@@ -13,10 +13,10 @@ import pytz
 from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
 from django.conf import settings
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
-MONTHS = ['Januar', 'Februar', u'MÃ¤rz', 'April', 'Mai', 'Juni',
+MONTHS = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni',
           'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
             'Samstag', 'Sonntag']
@@ -36,7 +36,7 @@ def get_user_timezone():
     Return the timezone of the current user or UTC if there is no user
     available (eg: no web request).
     """
-    user = getattr(r.request, 'user', None)
+    user = getattr(current_request, 'user', None)
     try:
         return pytz.timezone(user.settings.get('timezone', ''))
     except:

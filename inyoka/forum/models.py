@@ -24,7 +24,7 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
 
 
@@ -123,7 +123,7 @@ class TopicManager(models.Manager):
     def create(self, forum, title, text, author=None, pub_date=None, has_poll=
                False, slug=None, ubuntu_version=None, ubuntu_distro=None,
                sticky=False):
-        author = author or r.request.user
+        author = author or current_request.user
         pub_date = pub_date or datetime.utcnow()
         topic = Topic(title=title, forum=forum, slug=slug, view_count=0,
                       author=author, ubuntu_distro=ubuntu_distro,
@@ -722,7 +722,7 @@ class Topic(models.Model):
     has_poll = models.BooleanField(default=False)
 
     def reply(self, text, author=None, pub_date=None):
-        post = Post(text=text, author=author or r.request.user,
+        post = Post(text=text, author=author or current_request.user,
                     pub_date=pub_date or datetime.utcnow(), topic=self)
         post.save()
         self.post_count += 1
@@ -934,7 +934,9 @@ class Post(models.Model):
     hidden = models.BooleanField(u'Verborgen', default=False)
 
     def render_text(self, request=None, format='html', nocache=False):
-        context = RenderContext(request or r.request, simplified=True)
+        if request is None:
+            request = current_request._get_current_object()
+        context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
             return parse(self.text).render(context, format)
         key = 'forum/post/%s' % self.id
@@ -1188,5 +1190,7 @@ class WelcomeMessage(models.Model):
         super(WelcomeMessage, self).save()
 
     def render_text(self, request=None, format='html'):
-        context = RenderContext(request or r.request, simplified=True)
+        if request is None:
+            request = request._get_current_object()
+        context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, format)

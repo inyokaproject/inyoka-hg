@@ -10,7 +10,6 @@
 """
 from datetime import datetime
 from django import newforms as forms
-from inyoka.middlewares.registry import r
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS
 from inyoka.forum.acl import PRIVILEGES_DETAILS
@@ -50,7 +49,7 @@ class EditArticleForm(forms.Form):
                             label=u'Einleitung')
     text = forms.CharField(widget=forms.Textarea(attrs={'rows': 15}),
                            label=u'Text')
-    author = UserField(label=u'Autor', initial=(r.request and r.request.user.username or ''))
+    author = UserField(label=u'Autor', initial='')
     category = forms.ChoiceField(label=u'Kategorie')
     icon = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',

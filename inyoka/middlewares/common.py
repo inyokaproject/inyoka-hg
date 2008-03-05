@@ -25,19 +25,7 @@ from django.middleware.common import CommonMiddleware
 from inyoka.utils import import_string, INYOKA_REVISION
 from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
 from inyoka.utils.logger import logger
-
-
-# Set up virtual url modules for static and media
-for name, item in [('static', settings.STATIC_ROOT),
-                   ('media', settings.MEDIA_ROOT)]:
-    sys.modules['inyoka.%s.urls' % name] = module = new.module(name)
-    __import__('inyoka.%s' % name, None, None, ['urls']).urls = module
-    module.urlpatterns = patterns('',
-        (r'(?P<path>.*)$', 'django.views.static.serve', {
-           'document_root': item
-        })
-    )
-    module.require_trailing_slash = False
+from werkzeug.local import Local, LocalManager
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -48,6 +36,9 @@ class CommonServicesMiddleware(CommonMiddleware):
             for user_agent_regex in settings.DISALLOWED_USER_AGENTS:
                 if user_agent_regex.search(request.META['HTTP_USER_AGENT']):
                     return HttpResponseForbidden('<h1>Forbidden</h1>')
+
+        # populate the request
+        local._request = request
 
         # dispatch requests to subdomains
         host = request.get_host()
@@ -86,7 +77,8 @@ class CommonServicesMiddleware(CommonMiddleware):
 
     def process_response(self, request, response):
         """
-        Hook our X-Powered header in. (and an easteregg header).
+        Hook our X-Powered header in (and an easteregg header).  And clean up
+        the werkzeug local.
         """
         response = CommonMiddleware.process_response(self, request, response)
         if INYOKA_REVISION:
@@ -96,7 +88,28 @@ class CommonServicesMiddleware(CommonMiddleware):
         response['X-Powered-By'] = powered_by
         response['X-Sucks'] = 'PHP in any version'
 
+        # clean up after the local manager
+        _local_manager.cleanup()
+
         return response
+
+
+# Set up virtual url modules for static and media
+for name, item in [('static', settings.STATIC_ROOT),
+                   ('media', settings.MEDIA_ROOT)]:
+    sys.modules['inyoka.%s.urls' % name] = module = new.module(name)
+    __import__('inyoka.%s' % name, None, None, ['urls']).urls = module
+    module.urlpatterns = patterns('',
+        (r'(?P<path>.*)$', 'django.views.static.serve', {
+           'document_root': item
+        })
+    )
+    module.require_trailing_slash = False
+
+
+# set up our local system for the request registry
+local = Local()
+_local_manager = LocalManager(_local)
 
 
 # import all application modules so that we get bootstrapping

@@ -19,7 +19,7 @@ from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage
 from inyoka.utils.http import DirectResponse
 from inyoka.utils.cache import cache
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 SESSION_DELTA = 300
@@ -70,7 +70,7 @@ class SurgeProtectionMixin(object):
     def clean(self):
         identifier = self.source_protection_identifier or \
                      self.__class__.__module__.split('.')[1]
-        storage = r.request.session.setdefault('sp', {})
+        storage = current_request.session.setdefault('sp', {})
         if storage.get(identifier, 0) >= time():
             raise ValidationError(self.source_protection_message)
         storage[identifier] = time() + self.source_protection_timeout

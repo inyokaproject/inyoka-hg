@@ -17,7 +17,7 @@ from inyoka.utils import INYOKA_REVISION, human_number
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.flashing import get_flashed_messages
 from inyoka.utils.cache import cache
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 
 
 # we could use the MemcachedFileSystemLoader too
@@ -88,7 +88,7 @@ jinja_env.filters.update(
 
 def populate_context_defaults(context):
     """Fill in context defaults."""
-    request = r.request
+    request = current_request._get_current_object()
     if request.user.is_authenticated:
         key = 'portal/pm_count/%s' % request.user.id
         pms = cache.get(key)

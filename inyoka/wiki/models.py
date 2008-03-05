@@ -96,7 +96,7 @@ from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
 from inyoka.utils.collections import MultiMap
 from inyoka.utils.cache import cache
-from inyoka.middlewares.registry import r
+from inyoka.utils.local import current_request
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
@@ -716,7 +716,9 @@ class Text(models.Model):
         If no request is given the current request is used.
         """
         if context is None:
-            context = parser.RenderContext(request or r.request, page)
+            if request is None:
+                request = current_request._get_current_object()
+            context = parser.RenderContext(request, page)
         if template_context is not None or nocache or self.id is None or \
            format not in self.cached_formats:
             return self.parse(template_context).render(context, format)
