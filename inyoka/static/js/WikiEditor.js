@@ -242,18 +242,11 @@
         evt.target.selectedIndex = 0;
     }, ['wiki']),
     button('shrink', 'Verkleinern', function(evt) {
-      if (this.textarea[0].rows >= 6)
-        this.textarea[0].rows -= 3;
-      else
-        this.textarea[0].rows = 3;
-      this.textarea[0].focus();
+      var height = this.textarea.height() - 50;
+      this.textarea.height((height >= 100) ? height : 100).focus();
     }),
     button('enlarge', 'Vergrößern', function(evt) {
-      if (isNaN(this.textarea[0].rows) || this.textarea[0].rows < .5)
-        this.textarea[0].rows = 6;
-      else
-        this.textarea[0].rows += 3;
-      this.textarea[0].focus();
+      this.textarea.height(this.textarea.height() + 50).focus();
     })
   ]};
 
