@@ -22,16 +22,23 @@
 {% endfor %}
 {% set navigation_trace = navigation_trace + [(forum|url, forum.name)] %}
 
-{% block forum_navigation %}
-  <ul class="table_tabs">
-    <li><a href="{{ forum|url('newtopic') }}">Neues Thema</a></li>
-  </ul>
-{% endblock %}
-
 {% block forum_content %}
   <table class="forum">
     <thead>
       <tr><th colspan="4" class="category">{{ forum.name|e }}</th></tr>
+      <tr>
+        <td colspan="4">
+          {%- if forum.description %}
+          <p class="description">{{ forum.description|e }}</p>
+          {%- endif %}
+          <p class="pagination">
+            Gehe zu Seite {{ pagination }}
+          </p>
+          <p class="actions">
+            <a href="{{ forum|url('newtopic') }}">Neues Thema</a>
+          </p>
+        </td>
+      </tr>
     </thead>
     <tbody>
     {%- for subforum in subforums %}
@@ -77,12 +84,8 @@
     {% endfor %}
     </tbody>
   </table>
-  <ul class="navi_tabbar_bottom">
-    <li><a href="{{ forum|url('newtopic') }}">Neues Thema</a></li>
-  </ul>
   
   <div class="pagination">
-    <a href="{{ forum|url('newtopic') }}" class="newtopic-link">Neues Thema</a>
     Gehe zu Seite {{ pagination }}
   </div>
 {% endblock %}

@@ -556,8 +556,8 @@ class PollManager(models.Manager):
                 if count == 0:
                     option['percent'] = 0
                 else:
-                    option['percent'] = int(round(option['votes'] / count *
-                                                                        100))
+                    option['percent'] = int(round(option['votes'] /
+                                                  count * 100))
 
 
 
@@ -578,7 +578,6 @@ class Forum(models.Model):
     last_post = models.ForeignKey('Post', null=True, blank=True)
     post_count = models.IntegerField(blank=True)
     topic_count = models.IntegerField(blank=True, default=0)
-
     welcome_message = models.ForeignKey('WelcomeMessage', null=True,
                                         blank=True)
 

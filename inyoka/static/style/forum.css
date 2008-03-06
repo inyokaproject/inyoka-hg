@@ -76,16 +76,21 @@ table.forum td.last_post {
 }
 
 .topic_box {
-    border: 1px solid #cccccc;
+    background: #f8f8f8;
+    border: 1px solid #ccc;
     margin-bottom: 1em;
     padding: 0px;
 }
 
 .topic_box h2 {
+    font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
     text-align: center;
-    background-image: url('../img/caption.png');
-    background-repeat: x-repeat;
-    margin: 0px;
+    font-weight: bold;
+    background: #f5f1e6 url('../img/table-header.png') repeat-x;
+    margin: 0;
+    font-size: 1em;
+    padding: 0.6em 0 0.4em 0;
+    border-bottom: 1px solid #ccc;
 }
 
 .topic_box_content{
@@ -195,4 +200,17 @@ table.forum a.collapsed {
 
 }
 
+table.forum thead td p.actions,
+table.forum thead td p.pagination {
+    margin: 0;
+    padding: 0.3em 0 0.5em 0;
+    font-size: 0.85em;
+}
 
+table.forum thead td p.pagination {
+    float: right;
+}
+
+table.forum thead td p.description {
+    color: #666;
+}
