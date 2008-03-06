@@ -14,14 +14,7 @@ $(function () {
   $('dt.collapse').each(function() {
     $(this).nextWhile('dd').hide().addClass('collapse_enabled');
     $(this).click(function() {
-      var children = $(this).nextWhile('dd'), lastChanged = 0;
-      $(this).toggleClass('collapsed');
-      (function next() {
-        $(children[lastChanged]).slideToggle(30, function() {
-          if (++lastChanged < children.length)
-            next();
-        });
-      })();
+      $(this).toggleClass('collapsed').nextWhile('dd').toggle();
     }).addClass('collapse_enabled collapsed');
   });
   
