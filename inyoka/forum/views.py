@@ -213,6 +213,7 @@ def viewtopic(request, topic_slug, page=1):
         'topic':        t,
         'forum':        t.forum,
         'posts':        list(pagination.get_objects()),
+        'privileges':   privileges,
         'is_subscribed':subscribed,
         'pagination':   pagination.generate(),
         'polls':        polls,
@@ -532,7 +533,7 @@ def newtopic(request, slug=None, article=None):
         'poll_form':   poll_form,
         'polls':       polls,
         'options':     options,
-        'isnewtopic' : True,
+        'isnewtopic':  True,
         'article':     article,
         'preview':     preview
     }

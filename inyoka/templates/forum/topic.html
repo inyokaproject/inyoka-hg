@@ -25,39 +25,20 @@
   (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/25'))
 ] %}
 
-{% macro moderation_actions %}
-  <span class="linklist">
-    <a href="{{ topic|url('split') }}" class="action action_split">Aufteilen</a> | 
-    <a href="{{ topic|url('move') }}" class="action action_move">Verschieben</a> | 
-    {%- if topic.locked %}
-    <a href="{{ topic|url('unlock') }}" class="action action_unlock">Entsperren</a> | 
-    {%- else %}
-    <a href="{{ topic|url('lock') }}" class="action action_lock">Sperren</a> |
-    {%- endif %}
-    {%- if topic.hidden %}
-    <a href="{{ topic|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
-    <a href="{{ topic|url('delete') }}" class="action action_delete">Löschen</a>
-    {%- else %}
-    <a href="{{ topic|url('hide') }}" class="action action_hide">Verbergen</a> 
-    {%- endif %}
-  </span>
-  <br />
-{% endmacro %}
-
 {% macro topic_actions %}
   <span class="linklist">
-    <a href="{{ topic|url('reply') }}" class="action action_reply" >Neue Antwort erstellen</a> |
+    <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
     {%- if is_subscribed %}
-    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">Bei neuen Beiträgen nicht mehr benachrichtigen</a> |
+    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">de-abonieren</a> |
     {%- else %}
-    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen benachrichtigen</a> |
+    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonieren</a> |
     {%- endif %}
     {%- if topic.solved %}
-    <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">Thema als ungelöst markieren</a> |
+    <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a> |
     {%- else %}
-    <a href="{{ topic|url('solve') }}" class="action action_solve">Thema als gelöst markieren</a> |
+    <a href="{{ topic|url('solve') }}" class="action action_solve">als gelöst markieren</a> |
     {%- endif %}
-    <a href="{{ topic|url('report') }}" class="action action_report">Thema melden</a>
+    <a href="{{ topic|url('report') }}" class="action action_report">melden</a>
   </span>
 {% endmacro %}
 
@@ -73,7 +54,6 @@
       <span class="linklist">|</span>
       <strong>Ubuntu-Version:</strong>
         {{ topic.get_ubuntu_version() }}<br />
-        {{ moderation_actions() }}
         {{ topic_actions() }}
       </div>
     </div>
@@ -119,17 +99,19 @@
         <td class="post">
           <div class="postinfo">
             <div class="linklist floatright">
-              <a href="{{ post|url('edit') }}" class="action action_edit">Bearbeiten</a> |
-              <a href="{{ post|url('quote') }}" class="action action_quote">direktes Zitat</a> |
-              <a href="#" style="display: none" class="action action_mark_quote" id="quote{{ post.id }}">Zitat</a> |
-              {%- if post.hidden %}
-              <a href="{{ post|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
-              <a href="{{ post|url('delete') }}" class="action action_delete">Endgültig löschen</a>
-              {%- else %}
-              <a href="{{ post|url('hide') }}" class="action action_hide">Verbergen</a>
+              <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
+              <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a> |
+              <a href="#" style="display: none" class="action action_mark_quote" id="quote{{ post.id }}">Zitat</a> [XXX: Usability WTF]
+              {%- if privileges.moderate %}|
+                {%- if post.hidden %}
+                <a href="{{ post|url('restore') }}" class="action action_restore">wiederherstellen</a> |
+                <a href="{{ post|url('delete') }}" class="action action_delete">endgültig löschen</a>
+                {%- else %}
+                <a href="{{ post|url('hide') }}" class="action action_hide">verbergen</a>
+                {%- endif %}
               {%- endif %}
             </div>
-            <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="return false">
+            <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false">
               <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
             </a>
             Verfasst: {{ post.pub_date.strftime('%d.%m.%Y, %H:%M') }}
@@ -150,7 +132,23 @@
   <div class="topic_box">
     <div class="topic_box_content">
       <div class="pagination">Gehe zu Seite {{ pagination }}</div>
-      {{ moderation_actions() }}
+      {% if privileges.moderate %}
+      <span class="linklist">
+        <a href="{{ topic|url('split') }}" class="action action_split">aufteilen</a> | 
+        <a href="{{ topic|url('move') }}" class="action action_move">verschieben</a> | 
+        {%- if topic.locked %}
+        <a href="{{ topic|url('unlock') }}" class="action action_unlock">entsperren</a> | 
+        {%- else %}
+        <a href="{{ topic|url('lock') }}" class="action action_lock">sperren</a> |
+        {%- endif %}
+        {%- if topic.hidden %}
+        <a href="{{ topic|url('restore') }}" class="action action_restore">wiederherstellen</a> |
+        <a href="{{ topic|url('delete') }}" class="action action_delete">löschen</a>
+        {%- else %}
+        <a href="{{ topic|url('hide') }}" class="action action_hide">verbergen</a> 
+        {%- endif %}
+      </span><br />
+      {% endif %}
       {{ topic_actions() }}
     </div>
   </div>
