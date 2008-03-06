@@ -202,7 +202,7 @@ class PostManager(models.Manager):
         if row is not None:
             post_count, slug = row
             page = post_count // POSTS_PER_PAGE + 1
-            return (slug, page, str(post_id))
+            return (slug, page, post_id)
 
     def split(self, posts, forum_id=None, title=None, topic_slug=None):
         """
@@ -980,14 +980,9 @@ class Post(models.Model):
         search.queue('f', self.id)
 
     def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('forum', 'post', self.id),
-            'edit': ('forum', 'post', self.id, 'edit'),
-            'quote': ('forum', 'post', self.id, 'quote'),
-            'restore': ('forum', 'post', self.id, 'restore'),
-            'delete': ('forum', 'post', self.id, 'delete'),
-            'hide': ('forum', 'post', self.id, 'hide')
-        }[action])
+        if action == 'show':
+            return href('forum', 'post', self.id)
+        return href('forum', 'post', self.id, action)
 
     def deregister(self):
         """

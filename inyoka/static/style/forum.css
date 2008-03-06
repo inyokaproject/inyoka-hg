@@ -296,6 +296,10 @@ form.post_editor dd.text {
     margin: 10px 0 10px 0;
 }
 
+form.post_editor dd.text textarea {
+    height: 250px;
+}
+
 form.post_editor dt.collapse_enabled {
     cursor: pointer;
     padding-left: 20px;

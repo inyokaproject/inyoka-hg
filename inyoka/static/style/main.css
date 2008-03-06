@@ -256,8 +256,19 @@ table tfoot td {
   float: right;
 }
 
-ul.errors li, .error {
+.error {
   color: #920000;
+}
+
+ul.errors {
+  margin: 5px 0 5px 0;
+  padding: 2px 2px 2px 26px!important;
+  border: 1px solid #900;
+  background: #A80000 url(../img/smallerror.png) no-repeat 4px 5px;
+}
+
+ul.errors li {
+  color: white;
 }
 
 span.highlight {

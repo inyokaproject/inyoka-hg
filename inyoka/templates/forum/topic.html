@@ -89,7 +89,7 @@
     {%- for post in posts %}
       {# XXX: Does this create a sql query each time inside loop? A: yes it does #}
       {%- set attachments = post.attachment_set.all() %}      
-      <tr id="post{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
+      <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}

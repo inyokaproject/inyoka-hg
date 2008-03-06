@@ -71,12 +71,16 @@ class SurgeProtectionMixin(object):
     source_protection_identifier = None
 
     def clean(self):
-        identifier = self.source_protection_identifier or \
-                     self.__class__.__module__.split('.')[1]
-        storage = current_request.session.setdefault('sp', {})
-        if storage.get(identifier, 0) >= time():
-            raise ValidationError(self.source_protection_message)
-        storage[identifier] = time() + self.source_protection_timeout
+        # only perform surge protection tests if the form is valid up
+        # to that point.  This is important because otherwise form
+        # errors would trigger the surge protection!
+        if self.is_valid:
+            identifier = self.source_protection_identifier or \
+                         self.__class__.__module__.split('.')[1]
+            storage = current_request.session.setdefault('sp', {})
+            if storage.get(identifier, 0) >= time():
+                raise ValidationError(self.source_protection_message)
+            storage[identifier] = time() + self.source_protection_timeout
         return super(SurgeProtectionMixin, self).clean()
 
 
