@@ -251,7 +251,7 @@ class UserCPSettingsForm(forms.Form):
 class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
-    email = forms.EmailField(label='E-Mail', required=False)
+    email = forms.EmailField(label='E-Mail', required=True)
     jabber = forms.CharField(label='Jabber', required=False)
     icq = forms.CharField(label='ICQ', required=False)
     msn = forms.CharField(label='MSN Messenger', required=False)
