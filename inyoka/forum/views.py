@@ -308,8 +308,8 @@ def newpost(request, topic_slug=None, quote_id=None):
                 t.save()
                 # update cache
                 for page in range(1, 5):
-                    cache.remove('forum/topics/%d/%d' % (t.forum_id, page))
-                    cache.remove('forum/topics/%dm/%d' % (t.forum_id, page))
+                    cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
+                    cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
                 # send notifications
                 for s in Subscription.objects.filter(topic=t):
                     text = render_template('mails/new_post.txt', {

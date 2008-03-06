@@ -91,9 +91,14 @@
       {%- set attachments = post.attachment_set.all() %}      
       <tr id="post{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
-          <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
+          <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
-          <img src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
+          <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
+          {%- endif %}
+          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
+          <p>Beiträge: {{ post.author.post_count }}</p>
+          {%- if post.author.location %}
+          <p>Wohnort: {{ post.author.location|e }}</p>
           {%- endif %}
         </td>
         <td class="post">

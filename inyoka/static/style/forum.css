@@ -210,6 +210,34 @@ table.forum a.collapsed {
 
 table td.post {
     padding: 10px;
+    vertical-align: top;
+}
+
+table td.author {
+    width: 140px;
+}
+
+table td.author p {
+    margin: 2px 0 2px 0;
+    font-size: 0.8em;
+    text-align: left;
+}
+
+table td.author p.username {
+    margin: 3px 0 10px 0;
+    font-size: 1.1em;
+}
+
+table td.author p.username a {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+table td.author img.avatar {
+    margin: 10px 0 0 0;
+    border: 1px solid #ccc;
+    background-color: white;
 }
 
 table.forum thead td p.actions,
@@ -239,4 +267,11 @@ form.poll ul {
     list-style: none;
     margin: 1em 0 1em 0;
     padding: 0;
+}
+
+div.forum_offset_pagination {
+    margin: 0;
+    font-size: 0.85em;
+    border: 1px solid #ccc;
+    padding: 10px;
 }
