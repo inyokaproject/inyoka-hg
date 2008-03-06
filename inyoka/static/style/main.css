@@ -145,7 +145,21 @@ pre {
 }
 
 ol, ul {
-  line-height: 1.3em;
+  margin: 0.5em 0 0.5em 0;
+  padding: 0 0 0 2em;
+  line-height: 1.5em;
+}
+
+ol ul, ol ol, ul ol, ol ul {
+  margin: 0;
+}
+
+li p {
+  margin: 0!important;
+}
+
+li p + p {
+  margin-top: 0.5em!important;
 }
 
 /*** Table Style **************************************************************/
@@ -323,6 +337,7 @@ table.syntaxtable td.linenos {
 
 .tabbar {
   position: absolute;
+  margin: 0;
   top: 0px;
   right: 10px;
 }
@@ -372,9 +387,6 @@ table.syntaxtable td.linenos {
 .content_sidebar, .content_tabbar {
   border: solid 1px #ccc;
   background-color: #fff;
-  background-image: url('../img/contentbg.png');
-  background-repeat: no-repeat;
-  background-position: top right;
   padding: 15px 20px;
 }
 
@@ -479,11 +491,14 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 
 .navi_tabbar {
   font-size: 0.85em;
+  margin-bottom: -1px;
 }
 
 .navi_tabbar ul {
   float: right;
   list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 .navi_tabbar ul li {
@@ -494,24 +509,23 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 
 .navi_tabbar ul li a {
   display: block;
-  border: 1px solid  #ccc;
-  padding: 0.2em 0.4em;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  padding: 3px 6px 2px 6px;
   text-decoration: none;
 }
 
 .navi_tabbar ul li a.active {
   font-weight: bold;
-  background-image: url(../img/contentbg.png);
-  background-position: top right;
-  background-color: #f2f2f2;
+  background: white;
   border-color: #999;
-  border-bottom: solid 1px #fff;
-  padding: 0.2em 0.7em;
+  padding-bottom: 3px;
 }
 
 .navi_tabbar ul li a:hover {
-  color: #664400;
-  background-image: url(../img/contentbg.png); 
+  color: #222;
+  background: #f8f8f8;
 }
 
 /*** Appheader / Global Navigation / Pathbar **********************************/
