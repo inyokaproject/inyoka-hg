@@ -50,9 +50,6 @@ TIME_ZONE = 'UTC'
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
 LANGUAGE_CODE = 'de-de'
 
-# leave that unchanged, it's unused right now
-SITE_ID = 1
-
 # the base url (without subdomain)
 BASE_DOMAIN_NAME = 'ubuntuusers.de'
 SESSION_COOKIE_DOMAIN = '.%s' % BASE_DOMAIN_NAME.split(':')[0]
@@ -153,8 +150,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.contenttypes',
-    'django.contrib.sites',
     'inyoka.portal',
     'inyoka.wiki',
     'inyoka.forum',

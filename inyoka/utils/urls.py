@@ -48,22 +48,16 @@ def href(_module='portal', *parts, **query):
 
 
 def url_for(obj, action=None):
-    """Get the URL for an object."""
+    """
+    Get the URL for an object.  As we are not using django contrib stuff
+    any more this method is not useful any more but no it isn't because
+    django does ugly things with `get_absolute_url` so we have to do that.
+    """
     if hasattr(obj, 'get_absolute_url'):
-        if action:
-            url = obj.get_absolute_url(action=action)
-        else:
-            url = obj.get_absolute_url()
-    else:
-        raise TypeError('type %r has no url' % obj.__class__)
-    if not url.startswith('http://'):
-        subdomain = _url_reverse_map['portal']
-        url = 'http://%s%s%s' % (
-            subdomain and subdomain + '.' or '',
-            settings.BASE_DOMAIN_NAME,
-            url
-        )
-    return url
+        if action is not None:
+            return obj.get_absolute_url(action)
+        return obj.get_absolute_url()
+    raise TypeError('type %r has no url' % obj.__class__)
 
 
 def is_safe_domain(url):
