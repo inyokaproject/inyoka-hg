@@ -79,7 +79,6 @@ table.forum td.last_post {
     background: #f8f8f8;
     border: 1px solid #ccc;
     margin-bottom: 1em;
-    padding: 0px;
 }
 
 .topic_box h2 {
@@ -94,8 +93,9 @@ table.forum td.last_post {
 }
 
 .topic_box_content{
-    padding: 5px;
+    padding: 5px 10px 5px 10px;
     line-height: 150%;
+    font-size: 0.85em;
 }
 
 .pagination {
@@ -191,13 +191,12 @@ table.forum a.collapsed {
 }
 
 .postinfo {
-    font-size: 0.9em; /* that's why margin and padding are that ugly */
-    background-color: #F4F4F4; 
-    margin: -0.333333em -0.666666em;
-    padding: 0.333333em 0.666666em;
+    font-size: 0.8em; /* that's why margin and padding are odd numbers */
+    background: #F4F4F4 url(../img/table-header-alternative.png); 
+    margin: -0.375em -0.75em;
+    padding: 0.375em 0.75em;
     border-top: 1px solid #CCC;
     border-bottom: 1px solid #CCC;
-
 }
 
 table.forum thead td p.actions,

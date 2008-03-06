@@ -26,57 +26,59 @@
 ] %}
 
 {% macro moderation_actions %}
-    <span class="linklist">
-        <a href="{{ topic|url('split') }}" class="action action_split">Aufteilen</a> | 
-        <a href="{{ topic|url('move') }}" class="action action_move">Verschieben</a> | 
-        {%- if topic.locked %}
-        <a href="{{ topic|url('unlock') }}" class="action action_unlock">Entsperren</a> | 
-        {%- else %}
-        <a href="{{ topic|url('lock') }}" class="action action_lock">Sperren</a> |
-        {%- endif %}
-        {%- if topic.hidden %}
-        <a href="{{ topic|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
-        <a href="{{ topic|url('delete') }}" class="action action_delete">Löschen</a>
-        {%- else %}
-        <a href="{{ topic|url('hide') }}" class="action action_hide">Verbergen</a> 
-        {%- endif %}
-    </span>
-    <br />
+  <span class="linklist">
+    <a href="{{ topic|url('split') }}" class="action action_split">Aufteilen</a> | 
+    <a href="{{ topic|url('move') }}" class="action action_move">Verschieben</a> | 
+    {%- if topic.locked %}
+    <a href="{{ topic|url('unlock') }}" class="action action_unlock">Entsperren</a> | 
+    {%- else %}
+    <a href="{{ topic|url('lock') }}" class="action action_lock">Sperren</a> |
+    {%- endif %}
+    {%- if topic.hidden %}
+    <a href="{{ topic|url('restore') }}" class="action action_restore">Wiederherstellen</a> |
+    <a href="{{ topic|url('delete') }}" class="action action_delete">Löschen</a>
+    {%- else %}
+    <a href="{{ topic|url('hide') }}" class="action action_hide">Verbergen</a> 
+    {%- endif %}
+  </span>
+  <br />
 {% endmacro %}
 
 {% macro topic_actions %}
-    <span class="linklist">
-        <a href="{{ topic|url('reply') }}" class="action action_reply" >Neue Antwort erstellen</a> |
-        {%- if is_subscribed %}
-        <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">Bei neuen Beiträgen nicht mehr benachrichtigen</a> |
-        {%- else %}
-        <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen benachrichtigen</a> |
-        {%- endif %}
-        {%- if topic.solved %}
-        <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">Thema als ungelöst markieren</a> |
-        {%- else %}
-        <a href="{{ topic|url('solve') }}" class="action action_solve">Thema als gelöst markieren</a> |
-        {%- endif %}
-        <a href="{{ topic|url('report') }}" class="action action_report">Thema melden</a>
-    </span>
+  <span class="linklist">
+    <a href="{{ topic|url('reply') }}" class="action action_reply" >Neue Antwort erstellen</a> |
+    {%- if is_subscribed %}
+    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">Bei neuen Beiträgen nicht mehr benachrichtigen</a> |
+    {%- else %}
+    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">Bei neuen Beiträgen benachrichtigen</a> |
+    {%- endif %}
+    {%- if topic.solved %}
+    <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">Thema als ungelöst markieren</a> |
+    {%- else %}
+    <a href="{{ topic|url('solve') }}" class="action action_solve">Thema als gelöst markieren</a> |
+    {%- endif %}
+    <a href="{{ topic|url('report') }}" class="action action_report">Thema melden</a>
+  </span>
 {% endmacro %}
 
 {% block forum_content %}
 
-<div class="topic_box " >
-<h2>{{ topic.title|e }}</h2>
-<div class="topic_box_content">
-<div class="pagination">Gehe zu Seite {{ pagination }}</div>
+  <div class="topic_box">
+    <h2>{{ topic.title|e }}</h2>
+    <div class="topic_box_content">
+      <div class="pagination">Gehe zu Seite {{ pagination }}</div>
+      <strong>Status:</strong> <span class="status_{{
+        topic.solved and 'solved' or 'unsolved' }}">{{
+        topic.solved and 'gelöst' or 'ungelöst' }}</span>
+      <span class="linklist">|</span>
+      <strong>Ubuntu-Version:</strong>
+        {{ topic.get_ubuntu_version() }}<br />
+        {{ moderation_actions() }}
+        {{ topic_actions() }}
+      </div>
+    </div>
 
-Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ topic.solved and 'gelöst' or 'ungelöst' }}</span>
-    <span class="linklist">|</span>
-    Ubuntu-Version: {{ topic.get_ubuntu_version() }} <br />
-    {{ moderation_actions() }}
-    {{ topic_actions() }}
-</div>
-</div>
-
-{%- if polls %}
+  {%- if polls %}
   <form action="" method="post">
     {%- for pid, poll in polls.iteritems() %}
     <strong>{{ poll.question|e }}</strong>
@@ -101,10 +103,11 @@ Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ to
     {%- endfor %}
   </form>
   {%- endif %}
+
   <table class="topic">
    <tbody>
     {%- for post in posts %}
-      {# XXX: Does this create a sql query each time inside loop? #}
+      {# XXX: Does this create a sql query each time inside loop? A: yes it does #}
       {%- set attachments = post.attachment_set.all() %}      
       <tr id="post{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
@@ -144,12 +147,12 @@ Status: <span class="status_{{ topic.solved and 'solved' or 'unsolved' }}">{{ to
     </tbody>
   </table>
   
-<div class="topic_box " >
-<div class="topic_box_content">
-<div class="pagination">Gehe zu Seite {{ pagination }}</div>
-    {{ moderation_actions() }}
-    {{ topic_actions() }}
-</div>
-</div>
+  <div class="topic_box">
+    <div class="topic_box_content">
+      <div class="pagination">Gehe zu Seite {{ pagination }}</div>
+      {{ moderation_actions() }}
+      {{ topic_actions() }}
+    </div>
+  </div>
 
 {% endblock %}
