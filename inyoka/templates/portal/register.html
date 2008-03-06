@@ -46,7 +46,7 @@
     <script type="text/javascript">
       /*<![CDATA[*/
       (function() {
-        var captcha_url = $('img.captcha').attr('src');
+        var captcha_url = $('img.captcha').attr('src').split('&')[0];
         $('input[@name="renew_captcha"]')
           .click(function() {
             var uid = Math.random().toString().substring(2, 10);

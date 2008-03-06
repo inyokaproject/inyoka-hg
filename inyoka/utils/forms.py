@@ -9,7 +9,9 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
+import sys
 import md5
+from random import randrange
 from django import newforms as forms
 from django.newforms.widgets import Input
 from inyoka.conf import settings
@@ -95,8 +97,9 @@ class CaptchaWidget(Input):
         return (u'<img src="%s" class="captcha" alt="Captcha" /><br />'
                 u'Bitte gib den Code des obigen Bildes hier ein: <br />%s '
                 u'<input type="submit" name="renew_captcha" value="Neuen Code'
-                u' erzeugen" />') % (href('portal', __service__=
-                                   'portal.get_captcha'), input)
+                u' erzeugen" />') % (
+            href('portal', __service__='portal.get_captcha',
+                 rnd=randrange(1, sys.maxint)), input)
 
 
 class CaptchaField(forms.Field):
