@@ -20,6 +20,7 @@ from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha
 from inyoka.utils.templating import render_template
+from inyoka.utils.xmlrpc import xmlrpc
 
 
 def on_get_current_user(request):
@@ -92,4 +93,5 @@ dispatcher = SimpleDispatcher(
     get_random_password=on_get_random_password,
     get_captcha=on_get_captcha,
     get_calendar_entry=on_get_calendar_entry,
+    xmlrpc=xmlrpc
 )
