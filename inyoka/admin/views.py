@@ -222,8 +222,9 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             data = form.cleaned_data
             data['category_id'] = data.pop('category')
             data['icon_id'] = data.pop('icon')
+            data['author'] = data['author'] or request.user
             if not article:
-                article = Article(**form.cleaned_data)
+                article = Article(**data)
                 article.save()
                 if suggestion_id:
                     Suggestion.objects.delete([suggestion_id])
