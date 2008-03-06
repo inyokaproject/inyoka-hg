@@ -300,6 +300,8 @@ def login(request):
                     user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
+            else:
+                failed = True
     else:
         form = LoginForm()
 

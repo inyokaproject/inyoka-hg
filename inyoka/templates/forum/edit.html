@@ -32,7 +32,7 @@
 {% set styles = ['editor.css'] %}
 
 {% block forum_content %}
-  <form action="" method="post" enctype="multipart/form-data" class="new_topic">
+  <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <h2>{{ title_trace[0] }}</h2>
     <dl>
       {%- if isnewtopic %}
@@ -48,8 +48,8 @@
       <dd><input type="hidden" name="title" value="{{ article.name }}" /></dd>
       {%- endif %}
       {%- endif %}
-      <dt>Text:</dt>
-      <dd>{{ form.text }}{{ h.field_errors(form.errors.text) }}</dd>
+      <dt class="text">Text:</dt>
+      <dd class="text">{{ form.text }}{{ h.field_errors(form.errors.text) }}</dd>
       {# when enter is pressed the first submit button is used #}
       {# XXX: I'm sure that a better sollution exists for this #}
       {# then put it here :) #}
@@ -81,7 +81,7 @@
       <dd>{{ h.attachment_form(attach_form, attachments) }}</dd>
       {%- endif %}
       {%- if isnewtopic or isfirstpost %}
-      <dt>Optionen:</dt>
+      <dt class="collapse">Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
     </dl>
@@ -91,10 +91,13 @@
       {{ h.field_errors(form.errors.__all__) }}
       <input type="submit" value="Speichern" name="send" />
       <input type="submit" value="Vorschau" name="preview" />
+      <input type="submit" value="Abbrechen" name="cancel" />
     </p>
     {%- if preview %}
-    <h2>Vorschau</h2>
-    <div class="preview">{{ preview }}</div>
+    <div class="preview_wrapper">
+      <h2 class="title">Vorschau</h2>
+      <div class="preview">{{ preview }}</div>
+    </div>
     {%- endif %}
   </form>
   <script type="text/javascript">
@@ -103,10 +106,10 @@
     (function() {
       var
         editor = $('textarea[@name="text"]'),
-        output = $('<div class="preview"></div>')
-      var preview = $('<div></div>')
+        output = $('<div class="preview" />')
+      var preview = $('<div class="preview_wrapper" />')
         .hide()
-        .append('<h2>Vorschau</h2>')
+        .append('<h2 class="title">Vorschau</h2>')
         .append(output);
 
       $('form input[@name="preview"]').click(function() {

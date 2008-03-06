@@ -118,7 +118,6 @@ table.forum td.last_post {
 }
 
 .action {
-    
     background-repeat: no-repeat;
     padding-left: 20px;
 }
@@ -275,4 +274,66 @@ div.forum_offset_pagination {
     font-size: 0.85em;
     border: 1px solid #ccc;
     padding: 10px;
+}
+
+form.post_editor {
+    display: block;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px 10px 10px 70px;
+    background: white url(../img/editoremblem.png) no-repeat 10px 10px;
+}
+
+form.post_editor h2 {
+    margin: 10px 0 10px 0;
+}
+
+form.post_editor dt.text {
+    display: none;
+}
+
+form.post_editor dd.text {
+    margin: 10px 0 10px 0;
+}
+
+form.post_editor dd.text textarea {
+    height: 250px;
+}
+
+form.post_editor dt.collapse_enabled {
+    cursor: pointer;
+    padding-left: 20px;
+    background: #eee url(../img/expanded.png) no-repeat 4px center;
+    border: 1px solid #ccc;
+}
+
+form.post_editor dt.collapse_enabled:hover {
+    background-color: #f2f2f2;
+}
+
+form.post_editor dt.collapsed {
+    background: white url(../img/collapsed.png) no-repeat 0 center;
+    border: 1px solid white;
+}
+
+form.post_editor dd.collapse_enabled {
+    margin: 0;
+    padding: 5px 10px 10px 10px;
+}
+
+div.preview_wrapper {
+    border: 1px solid #ccc;
+    margin-top: 10px;
+    padding: 10px 10px 0 10px;
+}
+
+div.preview_wrapper h2.title {
+    margin: -10px -10px 10px -10px;
+    font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
+    text-align: center;
+    font-weight: bold;
+    background: #f5f1e6 url('../img/table-header.png') repeat-x;
+    font-size: 1em;
+    padding: 0.6em 0 0.4em 0;
+    border-bottom: 1px solid #ccc;
 }

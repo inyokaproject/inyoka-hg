@@ -256,8 +256,20 @@ table tfoot td {
   float: right;
 }
 
-ul.errors li, .error {
+.error {
   color: #920000;
+}
+
+ul.errors, div.errors {
+  margin: 5px 0 5px 0;
+  padding: 2px 2px 2px 26px!important;
+  border: 1px solid #900;
+  background: #A80000 url(../img/smallerror.png) no-repeat 4px 5px;
+  color: white;
+}
+
+ul.errors li {
+  color: white;
 }
 
 span.highlight {
@@ -795,7 +807,6 @@ p.badges img:hover {
   border: 1px solid #E8A21A;
   text-align: left;
 }
-.message form { text-align: center; }
 
 .message input {
   margin: 5px;

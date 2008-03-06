@@ -263,6 +263,10 @@ def newpost(request, topic_slug=None, quote_id=None):
     attach_form = AddAttachmentForm()
 
     if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash('Antworten wurde abgebrochen.')
+            return HttpResponseRedirect(t.get_absolute_url())
+
         form = NewPostForm(request.POST)
         att_ids = [int(id) for id in request.POST['att_ids'].split(',') if id]
         # check for post = None to be sure that the user can't "hijack"
@@ -299,32 +303,32 @@ def newpost(request, topic_slug=None, quote_id=None):
             attachments.remove(att)
             flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
 
+        elif 'preview' in request.POST:
+            ctx = RenderContext(request)
+            preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+
         elif form.is_valid():
             data = form.cleaned_data
-            if 'preview' in request.POST:
-                ctx = RenderContext(request)
-                preview = parse(data['text']).render(ctx, 'html')
-            else:
-                post = t.reply(text=data['text'], author=request.user)
-                Attachment.objects.update_post_ids(att_ids, post.id)
-                t.save()
-                # update cache
-                for page in range(1, 5):
-                    cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
-                    cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
-                # send notifications
-                for s in Subscription.objects.filter(topic=t):
-                    text = render_template('mails/new_post.txt', {
-                        'username': s.user.username,
-                        'post':     post,
-                        'topic':    t
-                    })
-                    send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
-                                      % t.title, text)
-                resp = HttpResponseRedirect(t.get_absolute_url())
-                # delete multi quote data
-                resp.delete_cookie('multi_quote')
-                return resp
+            post = t.reply(text=data['text'], author=request.user)
+            Attachment.objects.update_post_ids(att_ids, post.id)
+            t.save()
+            # update cache
+            for page in range(1, 5):
+                cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
+                cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
+            # send notifications
+            for s in Subscription.objects.filter(topic=t):
+                text = render_template('mails/new_post.txt', {
+                    'username': s.user.username,
+                    'post':     post,
+                    'topic':    t
+                })
+                send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
+                                  % t.title, text)
+            resp = HttpResponseRedirect(post.get_absolute_url())
+            # delete multi quote data
+            resp.delete_cookie('multi_quote')
+            return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
     else:
         if quotes:
@@ -373,7 +377,7 @@ def newtopic(request, slug=None, article=None):
                                                     (escape(article.name)))
     else:
         f = Forum.objects.get(slug=slug)
-        if request.method != 'POST':
+        if 0:# this is sooo annoying. request.method != 'POST':
             flash(u'<ul><li>Kennst du unsere <a href="%s">Verhaltensregeln</a'
                   u'>?</li><li>Kann das <a href="%s">Wiki</a> dir weiterhelfe'
                   u'n?</li><li>Hast du die <a href="%s">Suche</a> schon benut'
@@ -410,7 +414,11 @@ def newtopic(request, slug=None, article=None):
         polls = list(Poll.objects.filter(id__in=poll_ids, topic__isnull=True))
         options = request.POST.getlist('options')
 
-        if 'attach' in request.POST:
+        if 'cancel' in request.POST:
+            flash('Das Erstellen eines neuen Themas wurde abgebrochen.')
+            return HttpResponseRedirect(f.get_absolute_url())
+
+        elif 'attach' in request.POST:
             if not privileges['upload']:
                 return abort_access_denied(request)
             # the user uploaded a new attachment
@@ -475,41 +483,41 @@ def newtopic(request, slug=None, article=None):
             flash(u'Die Umfrage „%s“ wurde gelöscht' % escape(poll.question),
                   success=True)
 
+        if 'preview' in request.POST:
+            # just show the user a preview
+            ctx = RenderContext(request)
+            preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+
         elif form.is_valid():
             data = form.cleaned_data
-            if 'preview' in request.POST:
-                # just show the user a preview
-                ctx = RenderContext(request)
-                preview = parse(data['text']).render(ctx, 'html')
-            else:
-                # write the topic into the database
-                topic = Topic.objects.create(f, data['title'], data['text'],
-                            author=request.user, has_poll=bool(poll_ids),
-                            ubuntu_distro=data['ubuntu_distro'],
-                            ubuntu_version=data['ubuntu_version'],
-                            sticky=data['sticky'])
-                # bind all uploaded attachments to the new post
-                Attachment.objects.update_post_ids(att_ids,
-                                                   topic.first_post_id)
-                # bind all new polls to the new topic
-                Poll.objects.update_topic_ids(poll_ids, topic.id)
+            # write the topic into the database
+            topic = Topic.objects.create(f, data['title'], data['text'],
+                        author=request.user, has_poll=bool(poll_ids),
+                        ubuntu_distro=data['ubuntu_distro'],
+                        ubuntu_version=data['ubuntu_version'],
+                        sticky=data['sticky'])
+            # bind all uploaded attachments to the new post
+            Attachment.objects.update_post_ids(att_ids,
+                                               topic.first_post_id)
+            # bind all new polls to the new topic
+            Poll.objects.update_topic_ids(poll_ids, topic.id)
 
-                if article:
-                    # the topic is a wiki discussion, bind it to the wiki
-                    # article and send notifications.
-                    article.topic = topic
-                    article.save()
+            if article:
+                # the topic is a wiki discussion, bind it to the wiki
+                # article and send notifications.
+                article.topic = topic
+                article.save()
 
-                    for s in Subscription.objects.filter(wiki_page=article):
-                        text = render_template('mails/new_page_discussion.txt', {
-                            'username': s.user.username,
-                            'page':     article
-                        })
-                        send_notification(s.user, (u'Neue Diskussion für die'
-                            u' Seite „%s“ wurde eröffnet')
-                            % article.title, text)
+                for s in Subscription.objects.filter(wiki_page=article):
+                    text = render_template('mails/new_page_discussion.txt', {
+                        'username': s.user.username,
+                        'page':     article
+                    })
+                    send_notification(s.user, (u'Neue Diskussion für die'
+                        u' Seite „%s“ wurde eröffnet')
+                        % article.title, text)
 
-                return HttpResponseRedirect(topic.get_absolute_url())
+            return HttpResponseRedirect(topic.get_absolute_url())
 
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
         form.data['polls'] = ','.join([unicode(id) for id in poll_ids])
@@ -790,14 +798,14 @@ def reportlist(request):
 
 def post(request, post_id):
     """Redirect to the "real" post url" (see `PostManager.url_for_post`)"""
-    rv = Post.objects.get_post_topic(post_id)
+    rv = Post.objects.get_post_topic(int(post_id))
     if rv is None:
         raise PageNotFound()
-    slug, page, anchor = rv
+    slug, page, post_id = rv
     url = href('forum', 'topic', slug, *(page != 1 and (page,) or ()))
     if request.GET:
         url += '?' + request.GET.urlencode()
-    url += '#' + anchor
+    url += '#post-%d' % post_id
     return HttpResponseRedirect(url)
 
 
