@@ -14,8 +14,11 @@ from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS
 from inyoka.utils.sessions import SurgeProtectionMixin
 
 
+sorter = lambda x,y: cmp(x[0], y[0])
 VERSION_CHOICES = [('', 'Version auswählen')] + UBUNTU_VERSIONS.items()
+VERSION_CHOICES.sort(sorter)
 DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS.items()
+DISTRO_CHOICES.sort(sorter)
 
 
 class NewPostForm(SurgeProtectionMixin, forms.Form):

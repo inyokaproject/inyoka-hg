@@ -150,6 +150,10 @@ ol, ul {
   line-height: 1.5em;
 }
 
+form ul {
+  list-style: none;
+}
+
 ol ul, ol ol, ul ol, ol ul {
   margin: 0;
 }
