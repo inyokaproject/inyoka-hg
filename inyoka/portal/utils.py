@@ -8,7 +8,6 @@
     :copyright: 2008 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
 """
-import re
 import random
 import string
 import calendar
@@ -20,14 +19,6 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.templating import render_template
-
-
-_username_re = re.compile(r'[\w0-9_]{1,30}(?u)')
-
-
-def is_valid_username(name):
-    """Check if the username entered is a valid one."""
-    return _username_re.search(name) is not None
 
 
 def check_login(message=None):

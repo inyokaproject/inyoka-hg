@@ -134,8 +134,8 @@
       {%- for post in posts %}
       <tr>
         <td class="author">
-            <a href="{{ post.author|url }}">{{ post.author|e }}</a><br />
-            {{ post.pub_date|datetimeformat }}
+          <p class="username"><a href="{{ post.author|url }}">{{ post.author|e }}</a></p>
+          <p>geschrieben am:<br />{{ post.pub_date|datetimeformat }}</p>
         </td>
         <td class="post">{{ post.rendered_text }}</td>
       </tr>
