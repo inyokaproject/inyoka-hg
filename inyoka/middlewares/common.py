@@ -24,6 +24,7 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
      TemplateResponse, HttpResponsePermanentRedirect, \
      HttpResponseForbidden
 from inyoka.utils.logger import logger
+from inyoka.utils.urls import get_resolver
 
 
 core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)
@@ -62,17 +63,13 @@ class CommonServicesMiddleware(CommonMiddleware):
         # populate the request
         self._local.request = request
 
-        # dispatch requests to subdomains
-        host = request.get_host()
-        request.subdomain = None
-        if host.endswith(settings.BASE_DOMAIN_NAME):
-            subdomain = host[:-len(settings.BASE_DOMAIN_NAME)].rstrip('.')
-            if subdomain in settings.SUBDOMAIN_MAP:
-                request.subdomain = subdomain
-                request.urlconf = settings.SUBDOMAIN_MAP[subdomain]
+        # dispatch requests to subdomains or redirect to the portal if
+        # it's a request to a unknown subdomain
+        request.subdomain, urlconf = get_resolver(request.get_host())
+        if urlconf:
+            request.urlconf = urlconf
 
-        # redirect to the portal because unknown subdomain
-        if request.subdomain is None:
+        else:
             main_url = 'http://%s/' % settings.BASE_DOMAIN_NAME
             return HttpResponsePermanentRedirect(main_url)
 

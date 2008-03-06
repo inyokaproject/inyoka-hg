@@ -253,6 +253,7 @@ table.forum thead td p.pagination {
 
 table.forum thead td p.description {
     color: #666;
+    font-size: 0.85em;
 }
 
 form.poll {

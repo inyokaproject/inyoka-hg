@@ -89,7 +89,7 @@ def detail(request, slug):
     if article.hidden or article.pub_date > datetime.utcnow():
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
-        flash(u'Dieser Artikel ist für normale Benutzer nicht sichtbar.')
+        flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
     if request.method == 'POST':
         form = EditCommentForm(request.POST)
         if form.is_valid():
