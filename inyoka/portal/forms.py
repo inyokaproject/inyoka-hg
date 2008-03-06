@@ -236,10 +236,12 @@ class UserCPSettingsForm(forms.Form):
     """
     notify = forms.MultipleChoiceField(
         label='Benachrichtigen per', required=False,
-        choices=NOTIFY_BY_CHOICES)
+        choices=NOTIFY_BY_CHOICES,
+        widget=forms.CheckboxSelectMultiple)
     notifications = forms.MultipleChoiceField(
         label=u'Benachrichtigen bei', required=False,
-        choices=NOTIFICATION_CHOICES)
+        choices=NOTIFICATION_CHOICES,
+        widget=forms.CheckboxSelectMultiple)
     timezone = forms.ChoiceField(label='Zeitzone', required=True,
         choices=zip(TIMEZONES, TIMEZONES))
     hide_avatars = forms.BooleanField(label='Avatare ausblenden')
