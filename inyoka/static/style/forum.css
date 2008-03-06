@@ -16,7 +16,7 @@ div.content {
 
 table.forum a.topic_title, table.forum p.description,
 table.forum td.posts, table.forum td.post_count {
-	font-size: 0.91em;
+	font-size: 0.9em;
 }
 
 table.forum td.icon {
@@ -94,7 +94,7 @@ table.forum td.last_post {
 
 .topic_box_content{
     padding: 5px 10px 5px 10px;
-    line-height: 150%;
+    line-height: 170%;
     font-size: 0.85em;
 }
 
@@ -183,20 +183,30 @@ table.forum a.collapsed {
     background-image: url('../img/icons/small/expand.png');
 }
 
-.signature p { 
+.signature { 
+    margin: 20px 0 -5px 0;
+    padding: 5px 0 0 0;
     border-top: 1px solid #AAA;
-    padding-top: .2em;
     color: #666;
     font-size: .85em;
+    line-height: 140%;
+}
+
+.signature p {
+    padding: 0 0 5px 0;
+    margin: 0;
 }
 
 .postinfo {
-    font-size: 0.8em; /* that's why margin and padding are odd numbers */
+    font-size: 0.8em;
     background: #F4F4F4 url(../img/table-header-alternative.png); 
-    margin: -0.375em -0.75em;
-    padding: 0.375em 0.75em;
-    border-top: 1px solid #CCC;
+    margin: -10px -10px 10px -10px;
+    padding: 6px 10px;
     border-bottom: 1px solid #CCC;
+}
+
+table td.post {
+    padding: 10px;
 }
 
 table.forum thead td p.actions,
