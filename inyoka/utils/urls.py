@@ -89,9 +89,8 @@ def get_server_name(url):
     return urlparse(url)[1].decode(charset, 'utf-8', 'ignore')
 
 
-def get_resolver(server_name):
+def get_resolver(host):
     """Get the subdomain and resolver for that server name or (None, None)."""
-    server_name = server_name.split(':')[0]
     if host.endswith(settings.BASE_DOMAIN_NAME):
         subdomain = host[:-len(settings.BASE_DOMAIN_NAME)].rstrip('.')
         if subdomain in settings.SUBDOMAIN_MAP:
