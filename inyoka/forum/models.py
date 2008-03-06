@@ -935,7 +935,13 @@ class Post(models.Model):
 
     def render_text(self, request=None, format='html', nocache=False):
         if request is None:
-            request = current_request._get_current_object()
+            # we have to do that becaus render_text is called during
+            # save() which might be triggered outside of a HTTP request
+            # eg: converter
+            try:
+                request = current_request._get_current_object()
+            except RuntimeError:
+                request = None
         context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
             return parse(self.text).render(context, format)

@@ -79,8 +79,10 @@ def markup_styles(request):
     This function returns a CSS file that's used for formatting wiki markup.
     It's content is editable in the admin panel.
     """
-    resp = HttpResponse(storage['markup_styles'], mimetype='text/css')
-    return resp
+    from django.utils.cache import patch_response_headers
+    response = HttpResponse(storage['markup_styles'], mimetype='text/css')
+    patch_response_headers(response, 60 * 15)
+    return response
 
 
 @templated('portal/whoisonline.html')
