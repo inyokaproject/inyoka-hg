@@ -55,16 +55,19 @@
           {{ topic_icon(topic) }}
         </td>
         <td class="topic">
-          {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
-          <a href="{{ topic|url }}" class="topic_title"> 
-            {{- topic.title|e -}}
-          </a>
-          {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-          {%- if topic.hidden %} [Verborgen] {% endif %}
-          {%- if topic.reported %} [Gemeldet] {% endif %}
-          {%- if topic.paginated %} {{topic.get_pagination() }} {% endif -%}
+          <p class="topic_title">
+            {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
+            {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
+            {%- if topic.hidden %} [Verborgen] {% endif -%}
+            {%- if topic.reported %} [Gemeldet] {% endif -%}
+            <a href="{{ topic|url }}">{{- topic.title|e -}}</a>
+          </p>
           <p class="description">
             von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
+            &nbsp; &nbsp;
+            {%- if topic.paginated %}[
+              Gehe zu Seite {{topic.get_pagination() }}
+            ]{% endif -%}
           </p>
         </td>
         <td class="post_count">

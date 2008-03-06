@@ -14,9 +14,12 @@ div.content {
     border: none;
 }
 
-table.forum a.topic_title, table.forum p.description,
-table.forum td.posts, table.forum td.post_count {
+table.forum td.topic, table.forum td.posts, table.forum td.post_count {
 	font-size: 0.9em;
+}
+
+table.forum td.topic p {
+    margin: 0;    
 }
 
 table.forum td.icon {
