@@ -30,7 +30,10 @@
     {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
     {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim'] %}
     <dt><label for="{{ form[item].auto_id }}">{{ form[item].label }}</label></dt>
-    <dd>{{ form[item] }} <span class="note">{{ form['show_' + item] }} <label for="id_show_{{ item }}">anzeigen</label></span></dd>
+    <dd>{{ form[item] }}
+    {%- if item in ['email', 'jabber'] %} <span class="note">{{ form['show_' + item] }} <label for="id_show_{{ item }}">im Profil anzeigen</label></span>
+    {%- endif -%}
+    </dd>
     {%- if form.errors[item] %}<dd>{{ form.errors[item] }}</dd>{% endif %}
     {% endfor %}
   </dl>

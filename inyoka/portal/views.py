@@ -417,8 +417,7 @@ def usercp_profile(request):
                 request.user.delete_avatar()
             if data['avatar']:
                 request.user.save_avatar(data['avatar'])
-            for key in ('show_icq', 'show_msn', 'show_aim', 'show_yim',
-                        'show_email', 'show_jabber'):
+            for key in ('show_email', 'show_jabber'):
                 request.user.settings[key] = data[key]
             request.user.save()
             flash(u'Deine Profilinformationen wurden erfolgreich '
