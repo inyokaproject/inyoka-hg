@@ -476,16 +476,10 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .navi_sidebar ul {
-  list-style-type: none;
+  list-style: url(../img/bullet.gif);
   color: #222;
-  margin-bottom: 0.7em;
-}
-
-.navi_sidebar ul li {
-  background-image: url('../img/bullet.gif');
-  background-repeat: no-repeat;
-  background-position: center left;
-  padding-left: 9px;
+  margin: 0 0 0 1.3em;
+  padding: 0;
 }
 
 .navi_sidebar ul a {

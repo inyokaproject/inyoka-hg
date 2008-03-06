@@ -96,8 +96,10 @@ def forum(request, slug, page=1):
     Return a single forum to show a topic list.
     """
     f = Forum.objects.get(slug=slug)
+    # if the forum is a category we raise PageNotFound.  categories have
+    # their own url at /category.
     if f.parent_id is None:
-        return HttpResponseRedirect(href('forum'))
+        raise PageNotFound()
     privs = get_forum_privileges(request.user, f)
     if not privs['read']:
         return abort_access_denied(request)
