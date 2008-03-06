@@ -59,7 +59,7 @@
     </div>
 
   {%- if polls %}
-  <form action="" method="post">
+  <form action="" method="post" class="poll">
     {%- for pid, poll in polls.iteritems() %}
     <strong>{{ poll.question|e }}</strong>
     <ul>
@@ -72,7 +72,7 @@
         {%- endif %}
         <label{% if not poll.participated %} for="poll_{{ oid }}"{% endif %}>
           {{ option.name|e }}: {{ option.percent }}%
-          ({{ option.votes }} Stimmen)
+          ({{ option.votes }} Stimme{% if option.votes != 1 %}n{% endif %})
         </label>
       </li>
       {%- endfor %}
@@ -132,6 +132,7 @@
   <div class="topic_box">
     <div class="topic_box_content">
       <div class="pagination">Gehe zu Seite {{ pagination }}</div>
+      {{ topic_actions() }}<br />
       {% if privileges.moderate %}
       <span class="linklist">
         <a href="{{ topic|url('split') }}" class="action action_split">aufteilen</a> | 
@@ -147,9 +148,8 @@
         {%- else %}
         <a href="{{ topic|url('hide') }}" class="action action_hide">verbergen</a> 
         {%- endif %}
-      </span><br />
+      </span>
       {% endif %}
-      {{ topic_actions() }}
     </div>
   </div>
 

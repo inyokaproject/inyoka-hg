@@ -78,7 +78,7 @@ table.forum td.last_post {
 .topic_box {
     background: #f8f8f8;
     border: 1px solid #ccc;
-    margin-bottom: 1em;
+    margin-bottom: 10px;
 }
 
 .topic_box h2 {
@@ -222,4 +222,18 @@ table.forum thead td p.pagination {
 
 table.forum thead td p.description {
     color: #666;
+}
+
+form.poll {
+    display: block;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px 10px 10px 70px;
+    background: white url(../img/poll.png) no-repeat 10px 10px;
+}
+
+form.poll ul {
+    list-style: none;
+    margin: 1em 0 1em 0;
+    padding: 0;
 }
