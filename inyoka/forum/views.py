@@ -96,8 +96,10 @@ def forum(request, slug, page=1):
     Return a single forum to show a topic list.
     """
     f = Forum.objects.get(slug=slug)
+    # if the forum is a category we raise PageNotFound.  categories have
+    # their own url at /category.
     if f.parent_id is None:
-        return HttpResponseRedirect(href('forum'))
+        raise PageNotFound()
     privs = get_forum_privileges(request.user, f)
     if not privs['read']:
         return abort_access_denied(request)
@@ -308,8 +310,8 @@ def newpost(request, topic_slug=None, quote_id=None):
                 t.save()
                 # update cache
                 for page in range(1, 5):
-                    cache.remove('forum/topics/%d/%d' % (t.forum_id, page))
-                    cache.remove('forum/topics/%dm/%d' % (t.forum_id, page))
+                    cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
+                    cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
                 # send notifications
                 for s in Subscription.objects.filter(topic=t):
                     text = render_template('mails/new_post.txt', {
