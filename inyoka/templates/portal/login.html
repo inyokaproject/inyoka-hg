@@ -73,7 +73,10 @@
 
   </form>
   <script type="text/javascript">
-    $(function() { $('#id_username').focus(); });
+    if ( $('#id_username')[0].value )
+        $('#id_password').focus();
+    else 
+        $('#id_username').focus();
   </script>
   {%- endif %}
 {% endblock %}

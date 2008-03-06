@@ -303,7 +303,10 @@ def login(request):
             else:
                 failed = True
     else:
-        form = LoginForm()
+        if 'username' in request.GET:
+            form = LoginForm(initial={'username':request.GET['username']})
+        else:
+            form = LoginForm()
 
     d = {
         'form':         form,
