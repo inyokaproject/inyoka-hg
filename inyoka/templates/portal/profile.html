@@ -18,11 +18,13 @@
 {% endblock %}
 
 {% macro show_item(item) %}
-  {% if user.settings['show_'+item] %}
-  <td>{{ user[item]|e or '-' }}</td>
-  {% else %}
-  <td class="hidden">{% if REQUEST.user.is_manager %}{{ user[item]|e or '-' }}{% endif %}</td>
-  {% endif %}
+  {%- if user[item] and user.settings['show_'+item] -%}
+  <td>{{ user[item]|e }}</td>
+  {%- elif user[item] and REQUEST.user.is_manager -%}
+  <td class="hidden">{{ user[item]|e }}</td>
+  {%- else -%}
+  <td>–</td>
+  {%- endif -%}
 {% endmacro %}
 
 {% block portal_content %}  
@@ -34,7 +36,7 @@
       <td rowspan="5"><img class="userinfo_avatar" src="{{ user.avatar_url }}" alt="Avatar von „{{ user.username|e }}“" /></td>
     </tr>
     <tr>
-      <th>E-Mail Adresse</th>
+      <th>E-Mail-Adresse</th>
       {{ show_item('email') }}
     </tr>
     <tr>
@@ -43,7 +45,7 @@
         {%- if user.website -%}
           <a href="{{ user.website|e(True) }}">{{ user.website|e }}</a>
         {%- else -%}
-          -
+          –
         {%- endif -%}
       </td>
     </tr>
@@ -57,7 +59,7 @@
     </tr>
     <tr>
       <th>GPG-Schlüssel</th>
-      <td>{% if user.gpgkey %}0x{{ user.gpgkey }}{% endif %}</td>
+      <td>{% if user.gpgkey %}0x{{ user.gpgkey }}{% else %}–{% endif %}</td>
     </tr>
     <tr>
       <th>Wohnort</th>
@@ -65,9 +67,9 @@
       <th>Interessen</th>
     </tr>
     <tr>
-      <td>{{ user.location|e or '-' }}</td>
-      <td>{{ user.occupation|e or '-' }}</td>
-      <td>{{ user.interests|e or '-' }}</td>
+      <td>{{ user.location|e or '–' }}</td>
+      <td>{{ user.occupation|e or '–' }}</td>
+      <td>{{ user.interests|e or '–' }}</td>
     </tr>
     <tr>
       <th>MSN Messenger</th>
@@ -75,9 +77,9 @@
       <th>AIM-Adresse</th>
     </tr>
     <tr>
-      {{ show_item('msn') }}
-      {{ show_item('icq') }}
-      {{ show_item('aim') }}
+      <td>{{ user.msn|e or '–' }}</td>
+      <td>{{ user.icq|e or '–' }}</td>
+      <td>{{ user.aim|e or '–' }}</td>
     </tr>
     <tr>
       <th>Yahoo Messenger</th>
@@ -85,7 +87,7 @@
       <th>Kontakt</th>
     </tr>
     <tr>
-      {{ show_item('yim') }}
+      <td>{{ user.yim|e or '–' }}</td>
       {{ show_item('jabber') }}
       <td>
         <a href="{{ user|url('privmsg') }}">Private Nachricht</a>
