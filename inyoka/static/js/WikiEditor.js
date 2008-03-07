@@ -150,13 +150,8 @@
            'http://www.example.org/'), ['wiki', 'forum', 'small']),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
-      if (selection.length) {
-        var lines = [];
-        $.each(selection.split(/\r?\n/), function() {
-          lines.push('>' + (this.charAt(0) != '>' ? ' ' : '') + this);
-        });
-        this.setSelection(lines.join('\n') + '\n');
-      }
+      if (selection.length)
+        this.setSelection(this.quoteText(selection));
     }, ['wiki', 'forum']),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum']),
@@ -262,6 +257,7 @@
     this.smilies = null;
 
     this.textarea = $(editor);
+    this.textarea[0].inyokaWikiEditor = this;
     /* XXX: disabled for the time being as it causes too much trouble
       .keypress(function(evt) {
         self.onKeyDown(evt);
@@ -376,7 +372,7 @@
       t.value = s1 + text + s2;
       t.focus();
       if (reselect) {
-        t.selectionStart = start + before.length;
+        t.selectionStart = start;
         t.selectionEnd = start + text.length;
       }
       else
@@ -437,6 +433,19 @@
       t.selectionStart = t.selectionEnd = start + text.length;
     }
     // XXX: IE-Version
+  };
+
+  /**
+   * Quote a given text.
+   */
+  WikiEditor.prototype.quoteText = function(text) {
+    if (!text)
+      return '';
+    var lines = [];
+    $.each(text.split(/\r\n|\r|\n/), function() {
+      lines.push('>' + (this.charAt(0) != '>' ? ' ' : '') + this);
+    });
+    return lines.join('\n') + '\n';
   };
 
 })();
