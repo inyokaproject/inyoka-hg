@@ -407,7 +407,7 @@ def quote_text(text, author=None):
     If the optional argument `author` is given, a written-by info is
     prepended.
     """
-    by = author and (u"'''%s''' schrieb:\n" % author.username) or u''
+    by = author and (u"[user:%s:] schrieb:\n" % author.username) or u''
     return by + u'\n'.join(
         '>' + (not line.startswith('>') and ' ' or '') + line
         for line in text.split('\n')

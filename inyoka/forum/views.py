@@ -316,8 +316,6 @@ def newpost(request, topic_slug=None, quote_id=None):
                 send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
                                   % t.title, text)
             resp = HttpResponseRedirect(post.get_absolute_url())
-            # delete multi quote data
-            resp.delete_cookie('multi_quote')
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
     else:
