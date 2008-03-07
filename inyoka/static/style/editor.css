@@ -94,6 +94,7 @@ ul.toolbar li ul.smileybox li {
 ul.toolbar li ul.smileybox li {
     height: 24px;
     background-color: #eee;
+    float: left;
 }
 
 ul.toolbar li ul.colorbox li:hover {
@@ -103,4 +104,9 @@ ul.toolbar li ul.colorbox li:hover {
 
 ul.toolbar li ul.smileybox li:hover {
     background-color: #fff;
+}
+
+ul.toolbar li ul.smileybox {
+    width: 190px;
+    background-color: #eee;
 }
