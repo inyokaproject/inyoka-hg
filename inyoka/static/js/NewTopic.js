@@ -18,6 +18,7 @@ $(function() {
             var editor = $('#id_text')[0].inyokaWikiEditor;
             editor.setSelection("'''" + post.author + "''' schrieb:\n" +
                                 editor.quoteText(post.text));
+            editor.focus();
           }
         });
         return false;
