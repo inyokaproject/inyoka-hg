@@ -132,12 +132,19 @@
     </thead>
     <tbody>
       {%- for post in posts %}
-      <tr>
+      <tr id="post-{{ post.id }}">
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author|e }}</a></p>
-          <p>geschrieben am:<br />{{ post.pub_date|datetimeformat }}</p>
+          <p>Beiträge: {{ post.author.post_count }}</p>
+          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
         </td>
-        <td class="post">{{ post.rendered_text }}</td>
+        <td class="post">
+          <div class="postinfo">
+            <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
+            Verfasst: {{ post.pub_date.strftime('%d.%m.%Y, %H:%M') }}
+          </div>
+          {{ post.rendered_text }}
+        </td>
       </tr>
       {%- endfor %}
     </tbody>
