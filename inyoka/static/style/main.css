@@ -799,7 +799,7 @@ p.badges img:hover {
 /*** Message Boxes ************************************************************/
 
 .message {
-  margin: 1.0em 20px;
+  margin: 10px 20px;
   padding: 0.2em 1.5em;
   background-color: #F9EAAF;
   background-repeat: no-repeat;

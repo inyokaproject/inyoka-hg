@@ -903,7 +903,8 @@ def hide_post(request, post_id):
     else:
         post.hidden = True
         post.save()
-        flash(u'Der Beitrag %s wurde unsichtbar gemacht.' % post_id,
+        flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
+              u'gemacht.' % (url_for(post), escape(post.author.username)),
               success=True)
     return HttpResponseRedirect(url_for(post.topic))
 
@@ -918,7 +919,8 @@ def restore_post(request, post_id):
         return abort_access_denied(request)
     post.hidden = False
     post.save()
-    flash(u'Der Beitrag %s wurde wieder sichtbar gemacht.' % post_id,
+    flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde wieder sichtbar '
+          u'gemacht.' % (url_for(post), escape(post.author.username)),
           success=True)
     return HttpResponseRedirect(url_for(post.topic))
 
@@ -938,12 +940,12 @@ def delete_post(request, post_id):
     else:
         if request.method == 'POST':
             if 'cancel' in request.POST:
-                flash(u'Der Post „%s“ wurde nicht gelöscht'
-                      % escape(post.title))
+                flash(u'Das löschen wurde abgebrochen.')
             else:
                 post.delete()
-                flash(u'Der Beitrag %s wurde endgültig gelöscht.'
-                      % post_id, success=True)
+                flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde gelöscht.'
+                      % (url_for(post), escape(post.author.username)),
+                      success=True)
         else:
             flash(render_template('forum/post_delete.html', {'post': post}))
     return HttpResponseRedirect(url_for(post.topic))
