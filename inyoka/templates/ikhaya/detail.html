@@ -39,7 +39,7 @@
     {%- for comment in comments %}
     <li class="comment" id="comment_{{ loop.index }}">
       <strong>„{{ comment.title|e }}“</strong> —
-      <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> von {{ comment.pub_date|specificdatetimeformat(true) }} —
+      von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }} —
       <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
       {{ comment.rendered_text }}
     </li>
