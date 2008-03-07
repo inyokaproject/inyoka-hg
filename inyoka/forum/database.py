@@ -11,12 +11,12 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \
-        ForeignKey, DateTime, UniqueConstraint, Boolean, create_engine, \
-        MetaData
+    ForeignKey, DateTime, UniqueConstraint, Boolean, create_engine, \
+    MetaData, select
 from sqlalchemy.orm import relation, backref, scoped_session, create_session
 from inyoka.conf import settings
 from inyoka.portal.models import User
-from inyoka.forum.models import Forum, Topic, Post
+from inyoka.forum.models import Forum, Topic, Post, Attachment
 
 
 metadata = MetaData()
@@ -36,6 +36,7 @@ forum_table = Table('forum_forum', metadata, autoload=True)
 topic_table = Table('forum_topic', metadata, autoload=True)
 post_table = Table('forum_post', metadata, autoload=True)
 user_table = Table('portal_user', metadata, autoload=True)
+attachment_table = Table('forum_attachment', metadata, autoload=True)
 
 
 class SAUser(User):
@@ -50,10 +51,13 @@ class SATopic(Topic):
 class SAPost(Post):
     __metaclass__ = type
     pass
-
+class SAAtachment(Attachment):
+    __metaclass__ = type
+    pass
 
 # set up the mappers for sqlalchemy
 session.mapper(SAUser, user_table)
+session.mapper(SAAtachment, attachment_table)
 session.mapper(SAForum, forum_table, properties={
     'last_post': relation(SAPost,
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
@@ -73,5 +77,6 @@ session.mapper(SATopic, topic_table, properties={
 session.mapper(SAPost, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id==user_table.c.id,
-        foreign_keys=[post_table.c.author_id])
+        foreign_keys=[post_table.c.author_id]),
+    'attachments': relation(SAAtachment, backref=backref('post')),
 })

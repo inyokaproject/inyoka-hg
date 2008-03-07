@@ -13,6 +13,10 @@ h3 {
     color: #444;
 }
 
+form.usercp_form ul {
+  list-style: none;
+}
+
 .content p {
     margin-left: 0.4em;
 }

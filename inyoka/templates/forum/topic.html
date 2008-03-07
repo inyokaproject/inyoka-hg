@@ -88,7 +88,7 @@
     {%- for post in posts %}
       {%- if not post.hidden or privileges.moderate %}
       {# XXX: Does this create a sql query each time inside loop? A: yes it does #}
-      {%- set attachments = post.attachment_set.all() %}      
+      {%- set attachments = post.attachments %}      
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>

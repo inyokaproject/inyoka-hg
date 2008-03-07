@@ -41,7 +41,8 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import SATopic, SAForum, topic_table
+from inyoka.forum.database import SATopic, SAForum, SAPost, post_table, \
+                                  topic_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 
@@ -154,7 +155,9 @@ def viewtopic(request, topic_slug, page=1):
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
     t.touch()
-    posts = t.post_set.all().exclude(text='')
+
+    posts = SAPost.query.options(eagerload('attachments')). \
+        select_whereclause(post_table.c.text!='')
 
     if t.has_poll:
         polls = Poll.objects.get_polls(t.id)
@@ -262,7 +265,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.
         attachments = list(Attachment.objects.filter(id__in=att_ids,
-                                                     post_null=True))
+                                                     post__isnull=True))
         if 'attach' in request.POST:
             if not privileges['upload']:
                 return abort_access_denied(request)
