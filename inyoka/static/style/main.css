@@ -260,7 +260,7 @@ table tfoot td {
   color: #920000;
 }
 
-ul.errors, div.errors {
+ul.errorlist, ul.errors, div.errors {
   margin: 5px 0 5px 0;
   padding: 2px 2px 2px 26px!important;
   border: 1px solid #900;
@@ -268,7 +268,7 @@ ul.errors, div.errors {
   color: white;
 }
 
-ul.errors li {
+ul.errors li, ul.errorlist {
   color: white;
 }
 
