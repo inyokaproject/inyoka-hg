@@ -41,7 +41,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import Session, SATopic, SAForum, topic_table
+from inyoka.forum.database import SATopic, SAForum, topic_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 
@@ -123,7 +123,6 @@ def forum(request, slug, page=1):
             'topics':       list(pagination.get_objects()),
             'pagination':   pagination.generate()
         }
-        Session.remove()
         if page <= 4:
             cache.set(key, data)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
@@ -235,22 +234,13 @@ def newpost(request, topic_slug=None, quote_id=None):
     If validation fails, the form is displayed again with added error
     messages, else the post is saved and the user is forwarded to topic-view.
     """
-    preview = None
+    preview = quote = None
 
     if quote_id:
-        p = Post.objects.get(id=quote_id)
-        t = p.topic
-        quotes = [p]
+        quote = Post.objects.get(id=quote_id)
+        t = quote.topic
     else:
-        quotes = []
         t = Topic.objects.get(slug=topic_slug)
-
-    # check for multi quote
-    if request.COOKIES.get('multi_quote'):
-        quotes += Post.objects.filter(topic__id=t.id, id__in=[
-            int(i.strip()) for i in
-            url_unquote(request.COOKIES['multi_quote']).split(',')
-        ])
 
     privileges = get_forum_privileges(request.user, t.forum)
     if t.locked and not privileges['moderate']:
@@ -331,8 +321,8 @@ def newpost(request, topic_slug=None, quote_id=None):
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
     else:
-        if quotes:
-            text = '\n\n'.join(quote_text(p.text, p.author) for p in quotes)
+        if quote:
+            text = quote_text(quote.text, quote.author)
             form = NewPostForm(initial={'text': text})
         else:
             form = NewPostForm()

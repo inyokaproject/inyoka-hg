@@ -22,11 +22,16 @@ from inyoka.forum.models import Forum, Topic, Post
 metadata = MetaData()
 engine = create_engine('%s://%s:%s@%s/%s' % (
     settings.DATABASE_ENGINE, settings.DATABASE_USER,
-    settings.DATABASE_PASSWORD, settings.DATABASE_HOST, settings.DATABASE_NAME))
+    settings.DATABASE_PASSWORD, settings.DATABASE_HOST, settings.DATABASE_NAME),
+    pool_recycle=300, convert_unicode=True)
 metadata.bind = engine
 
-Session = scoped_session(lambda: create_session(engine,
+session = scoped_session(lambda: create_session(engine,
     transactional=True))
+from django.dispatch import dispatcher
+from django.core.signals import request_finished
+dispatcher.connect(session.remove, request_finished)
+
 forum_table = Table('forum_forum', metadata, autoload=True)
 topic_table = Table('forum_topic', metadata, autoload=True)
 post_table = Table('forum_post', metadata, autoload=True)
@@ -48,13 +53,13 @@ class SAPost(Post):
 
 
 # set up the mappers for sqlalchemy
-Session.mapper(SAUser, user_table)
-Session.mapper(SAForum, forum_table, properties={
+session.mapper(SAUser, user_table)
+session.mapper(SAForum, forum_table, properties={
     'last_post': relation(SAPost,
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
         foreign_keys=[forum_table.c.last_post_id])
 })
-Session.mapper(SATopic, topic_table, properties={
+session.mapper(SATopic, topic_table, properties={
     'forum': relation(SAForum,
         primaryjoin=topic_table.c.forum_id==forum_table.c.id,
         foreign_keys=[topic_table.c.forum_id]),
@@ -65,7 +70,7 @@ Session.mapper(SATopic, topic_table, properties={
         primaryjoin=topic_table.c.last_post_id==post_table.c.id,
         foreign_keys=[topic_table.c.last_post_id])
 })
-Session.mapper(SAPost, post_table, properties={
+session.mapper(SAPost, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id==user_table.c.id,
         foreign_keys=[post_table.c.author_id])

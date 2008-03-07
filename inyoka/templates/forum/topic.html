@@ -13,7 +13,6 @@
 {% extends 'forum/page.html' %}
 
 {% set title_trace = [topic.title|e] %}
-{% set scripts =  ['jQuery.Cookie.js', 'newtopic.js'] %}
 {% set navigation_trace =  [
     (forum|url, forum.name),
     (topic|url, topic.title)
@@ -105,9 +104,8 @@
           <div class="postinfo">
             <div class="linklist floatright">
               <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
-              <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a> |
-              <a href="#" style="display: none" class="action action_mark_quote" id="quote{{ post.id }}">Zitat</a> [XXX: Usability WTF]
-              {%- if privileges.moderate %}|
+              <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
+              {%- if privileges.moderate %} |
                 {%- if post.hidden %}
                 <a href="{{ post|url('restore') }}" class="action action_restore">wiederherstellen</a> |
                 <a href="{{ post|url('delete') }}" class="action action_delete">endgültig löschen</a>
