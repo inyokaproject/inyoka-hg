@@ -14,11 +14,14 @@
         ...                         per_page,
                                     optional_link)
         >>> # the database entries on this page
-        >>> objects = pagination.get_objects()
+        >>> objects = pagination.objects
         >>> # the generated HTML code for the pagination
         >>> html = pagination.generate()
 
     If the page is out of range, it throws a PageNotFound exception.
+
+    Caveat: paginations with link functions generated in a closure are
+    not pickleable.
 
     :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
@@ -31,35 +34,42 @@ from inyoka.utils.html import escape
 class Pagination(object):
 
     def __init__(self, request, query, page, per_page=10, link=None):
-        self.query = query
         self.page = int(page)
         self.per_page = per_page
-        self.parameters = request.GET
+
+        idx = (self.page - 1) * self.per_page
+        result = query[idx:idx + self.per_page]
+        if not result and self.page != 1:
+            raise PageNotFound()
+        self.objects = list(result)
+
+        if hasattr(query, 'count'):
+            self.total = query.count()
+        else:
+            self.total = len(query)
 
         if link is None:
             link_base = request.path
-        elif not isinstance(link, basestring):
-            self.link_func = link
-            return
+        elif isinstance(link, basestring):
+            self.parameters = {}
+            self.link_base = link
         else:
             link_base = link or request.path
+            self.parameters = request.GET
+            def link_func(page, parameters):
+                if page == 1:
+                    rv = link_base
+                else:
+                    rv = '%s%d/' % (link_base, page)
+                if parameters:
+                    rv += '?' + parameters.urlencode()
+                return rv
+            self.generate_link = link_func
 
-        def link_func(page, parameters):
-            if page == 1:
-                rv = link_base
-            else:
-                rv = '%s%d/' % (link_base, page)
-            if parameters:
-                rv += '?' + parameters.urlencode()
-            return rv
-        self.link_func = link_func
-
-    def get_objects(self):
-        idx = (self.page - 1) * self.per_page
-        result = self.query[idx:idx + self.per_page]
-        if not result and self.page != 1:
-            raise PageNotFound()
-        return result
+    def generate_link(self, page, parameters):
+        if page == 1:
+            return self.link_base
+        return '%s%d/' % (self.link_base, page)
 
     def generate(self, position=None, threshold=2, show_next_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
@@ -68,11 +78,7 @@ class Pagination(object):
         was_ellipsis = False
         result = []
         add = result.append
-        if isinstance(self.query, list):
-            total = len(self.query)
-        else:
-            total = self.query.count() - 1
-        pages = total // self.per_page + 1
+        pages = self.total // self.per_page + 1
         params = self.parameters.copy()
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
@@ -80,7 +86,7 @@ class Pagination(object):
                 if result and result[-1] != ellipsis:
                     add(u'<span class="comma">, </span>')
                 was_space = False
-                link = self.link_func(num, params)
+                link = self.generate_link(num, params)
                 if num == self.page:
                     template = active
                 else:
@@ -95,7 +101,7 @@ class Pagination(object):
 
         if show_next_link:
             if self.page < pages:
-                link = escape(self.link_func(self.page + 1, params))
+                link = escape(self.generate_link(self.page + 1, params))
                 tmpl = u'<a href="%s" class="next"> Weiter » </a>'
                 add(tmpl % escape(link))
             else:

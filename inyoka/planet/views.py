@@ -54,7 +54,7 @@ def index(request, page=1):
     set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
                      href('planet'), 'Planet')
     return {
-        'days':         group_by_day(pagination.get_objects()),
+        'days':         group_by_day(pagination.objects),
         'pagination':   pagination
     }
 

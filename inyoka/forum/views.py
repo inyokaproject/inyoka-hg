@@ -121,7 +121,7 @@ def forum(request, slug, page=1):
         data = {
             'forum':        f,
             'subforums':    subforums,
-            'topics':       list(pagination.get_objects()),
+            'topics':       pagination.objects,
             'pagination':   pagination
         }
         if page <= 4:
@@ -218,7 +218,7 @@ def viewtopic(request, topic_slug, page=1):
     return {
         'topic':        t,
         'forum':        t.forum,
-        'posts':        pagination.get_objects(),
+        'posts':        pagination.objects,
         'privileges':   privileges,
         'is_subscribed':subscribed,
         'pagination':   pagination,
@@ -1148,7 +1148,7 @@ def newposts(request, page=1):
     pagination = Pagination(request, posts, page, 20,
         href('forum', 'newposts'))
     return {
-        'posts': pagination.get_objects(),
+        'posts': pagination.objects,
         'pagination': pagination
     }
 

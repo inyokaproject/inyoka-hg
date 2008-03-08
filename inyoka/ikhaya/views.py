@@ -76,7 +76,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
     pagination = Pagination(request, articles, page, 15, link)
 
     return {
-        'articles':      list(pagination.get_objects()),
+        'articles':      pagination.objects,
         'pagination':    pagination,
         'category':      category
     }

@@ -208,7 +208,7 @@ class RecentChanges(Macro):
                                 select_related(depth=1), page_num,
                                 self.per_page, link_func)
 
-        for revision in pagination.get_objects():
+        for revision in pagination.objects:
             d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
