@@ -14,7 +14,7 @@ from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
@@ -320,3 +320,16 @@ class DeactivateUserForm(forms.Form):
 class SubscriptionForm(forms.Form):
     #: this is a list of integers of the subscriptions that should get deleted
     delete = forms.MultipleChoiceField()
+
+
+class UserErrorReportForm(forms.Form):
+    title = forms.CharField(label='kurze Beschreibung', max_length=50,
+                            widget=forms.TextInput(attrs={'size':50}))
+    text = forms.CharField(label=u'ausführliche Beschreibung',
+                           widget=forms.Textarea(attrs={'rows': 3}))
+    url = forms.URLField(widget=forms.HiddenInput)
+
+    def clean_url(self):
+        if not is_safe_domain(self.cleaned_data['url']):
+            raise forms.ValidationError(u'Ungültige URL')
+        return self.cleaned_data['url']

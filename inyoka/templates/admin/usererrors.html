@@ -1,0 +1,43 @@
+{#
+    admin/errors.html
+    ~~~~~~~~~~~~~~~
+
+    This is the overview of the reported errors.
+
+    :copyright: 2008 by Marian Sigler, Christopher Grebs.
+    :license: GNU GPL.
+#}
+{% extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'bugs'), 'Bugs'),
+    (href('admin', 'bugs/usererrors'), 'Fehlermeldungen von Usern'),
+  ] %}
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Portal</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>User-Fehlermeldungen</h3>
+<table>
+  {% if errors %}
+  {%- for error in errors %}
+  <tr>
+    <th style="font-weight: normal">
+      <strong>{{ error.title|e }}</strong>
+      berichtet {{ error.date|specificdatetimeformat(true) }}
+      {% if error.reporter %}von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <p><strong>URL:</strong> <a href="{{ error.url|e }}">{{ error.url|e }}</a></p>
+      <p>{{ error.text }}</p>
+    <td>
+  </tr>
+  {%- endfor %}
+  {% else %}
+  <strong>Es sind derzeit keine Fehlermeldungen vorhanden. <img src="{{ href('static', 'img/icons/smiley.png') }}" /></strong>
+  {% endif %}
+</table>
+{% endblock %}

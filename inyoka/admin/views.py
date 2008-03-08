@@ -26,7 +26,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditIconForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm
-from inyoka.portal.models import StaticPage, Event
+from inyoka.portal.models import StaticPage, Event, UserErrorReport
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
@@ -872,4 +872,13 @@ def styles(request):
         form = EditStyleForm(initial={'styles': storage.get(key, u'')})
     return {
         'form': form
+    }
+
+
+@require_manager
+@templated('admin/usererrors.html')
+def usererrors(request):
+    errors = UserErrorReport.objects.order_by('-date')
+    return {
+        'errors': errors,
     }

@@ -16,6 +16,7 @@ from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
+from django import newforms as forms
 from django.core.exceptions import ObjectDoesNotExist
 
 from inyoka.conf import settings
@@ -42,9 +43,10 @@ from inyoka.forum.models import Forum
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
-     UserCPProfileForm, SetNewPasswordForm, NOTIFICATION_CHOICES
+     UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
+     NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
-     PrivateMessageEntry, PRIVMSG_FOLDERS, Event
+     PrivateMessageEntry, PRIVMSG_FOLDERS, Event, UserErrorReport
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
@@ -656,6 +658,7 @@ def privmsg_new(request, username=None):
                         send_notification(recipient, u'Neue private Nachricht'
                                    u' von %s' % (request.user.username), text)
                 flash(u'Die persönliche Nachricht wurde erfolgreich versendet.')
+                return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
         if request.GET.get('reply_to') and \
@@ -925,3 +928,40 @@ def open_search(self, app):
     return {
         'app': app
     }
+
+
+@templated('portal/user_error_report.html')
+def user_error_report(request):
+    if request.method == 'POST':
+        form = UserErrorReportForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            uer = UserErrorReport()
+            uer.title = data['title']
+            uer.text = data['text']
+            uer.url = data['url']
+            uer.date = datetime.utcnow()
+            uer.reporter = request.user
+            uer.save()
+            print '***', `UserErrorReport.objects.get(pk=uer.pk).reporter`
+            flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
+                  u'Wir werden uns so schnell wie möglich darum kümmern.',
+                  True)
+            return HttpResponseRedirect(data['url'])
+    else:
+        if 'url' in request.GET:
+            form = UserErrorReportForm(initial={'url':request.GET['url']})
+        else:
+            form = UserErrorReportForm()
+
+    if 'url' in request.GET:
+        show_url_field = False
+    else:
+        show_url_field = True
+        form.fields['url'].widget = forms.TextInput(attrs={'size':50})
+
+    return {
+        'form': form,
+        'show_url_field': show_url_field,
+    }
+
