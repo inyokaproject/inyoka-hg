@@ -95,7 +95,7 @@ class ForumManager(models.Manager):
         struct = cache.get('forum/structure')
         if struct:
             return struct
-        forums = list(Forum.objects.all())
+        forums = Forum.objects.select_related()
         struct = {}
         for forum in forums:
             struct[forum.id] = { 'forum': forum }
