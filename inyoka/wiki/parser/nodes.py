@@ -564,7 +564,10 @@ class InternalLink(Element):
         self.anchor = anchor
 
     def generate_markup(self, w):
-        w.markup(u'[:%s:' % self.page)
+        target = self.page
+        if self.anchor:
+            target += '#' + self.anchor
+        w.markup(u'[:%s:' % target.replace(':', '::'))
         Element.generate_markup(self, w)
         w.markup(u']')
 
@@ -611,7 +614,10 @@ class InterWikiLink(Element):
         self.anchor = anchor
 
     def generate_markup(self, w):
-        w.markup(u'[%s:%s:' % (self.wiki, self.page.replace(':', '::')))
+        target = self.page
+        if self.anchor:
+            target += '#' + anchor
+        w.markup(u'[%s:%s:' % (self.wiki, target.replace(':', '::')))
         Element.generate_markup(self, w)
         w.markup(u']')
 
