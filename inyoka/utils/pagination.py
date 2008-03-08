@@ -67,6 +67,7 @@ class Pagination(object):
         ellipsis = u'<span class="ellipsis"> … </span>'
         was_ellipsis = False
         result = []
+        add = result.append
         if isinstance(self.query, list):
             total = len(self.query)
         else:
@@ -77,28 +78,28 @@ class Pagination(object):
             if num <= threshold or num > pages - threshold or\
                abs(self.page - num) < math.ceil(threshold / 2.0):
                 if result and result[-1] != ellipsis:
-                    result.append(u'<span class="comma">, </span>')
+                    add(u'<span class="comma">, </span>')
                 was_space = False
                 link = self.link_func(num, params)
                 if num == self.page:
                     template = active
                 else:
                     template = normal
-                result.append(template % {
+                add(template % {
                     'href':     escape(link),
                     'page':     num,
                 })
             elif not was_ellipsis:
                 was_ellipsis = True
-                result.append(ellipsis)
+                add(ellipsis)
 
         if show_next_link:
             if self.page < pages:
                 link = escape(self.link_func(self.page + 1, params))
                 tmpl = u'<a href="%s" class="next"> Weiter » </a>'
-                result.append(tmpl % escape(link))
+                add(tmpl % escape(link))
             else:
-                result.append(u'<span class="disabled next"> Weiter » </span>')
+                add(u'<span class="disabled next"> Weiter » </span>')
 
         class_ = 'pagination'
         if position:
