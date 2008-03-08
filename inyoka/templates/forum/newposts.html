@@ -31,16 +31,18 @@
           {{ topic_icon(post.topic) }}
         </td>
         <td class="topic">
-          {%- if post.topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
-          <a href="{{ post.topic|url }}" class="topic_title"> 
-            {{- post.topic.title|e -}}
-          </a>
-          {%- if post.topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-          {%- if post.topic.hidden %} [Verborgen] {% endif %}
-          {%- if post.topic.reported %} [Gemeldet] {% endif %}
-          {%- if post.topic.paginated %} {{post.topic.get_pagination() }} {% endif -%}
+          <p class="topic_title">
+            {%- if post.topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
+            {%- if post.topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
+            {%- if post.topic.hidden %} [Verborgen] {% endif %}
+            {%- if post.topic.reported %} [Gemeldet] {% endif %}
+            <a href="{{ post.topic|url }}">{{ post.topic.title|e }}</a>
+          </p>
           <p class="description">
             von <a href="{{ post.topic.author|url }}">{{ post.topic.author.username|e }}</a>
+            {%- if post.topic.paginated %} &#160; &#160; [
+              Gehe zu Seite {{post.topic.get_pagination() }}
+            ]{% endif -%}
           </p>
         </td>
         <td class="post_count">{{ post.topic.post_count }}</td>
@@ -59,7 +61,8 @@
     {% endfor %}
     </tbody>
   </table>
-  <div class="pagination">
-    Gehe zu Seite {{ pagination }}
+  <div class="pagination left_pagination">
+    {{ pagination }}
+    <div style="clear: both"></div>
   </div>
 {% endblock %}

@@ -9,7 +9,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import random
-import xapian
 from datetime import datetime
 from django.db import models, connection
 from inyoka.portal.user import User

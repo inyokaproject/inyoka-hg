@@ -40,7 +40,5 @@
     </tr>
     {%- endfor %}
   </table>
-  <div class="pagination">
-    Seite: {{ pagination }}
-  </div>
+  {{ pagination.generate() }}
 {% endblock %}

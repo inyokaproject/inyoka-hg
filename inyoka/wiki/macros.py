@@ -208,7 +208,7 @@ class RecentChanges(Macro):
                                 select_related(depth=1), page_num,
                                 self.per_page, link_func)
 
-        for revision in pagination.get_objects():
+        for revision in pagination.objects:
             d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
@@ -248,7 +248,8 @@ class RecentChanges(Macro):
         if format == 'html':
             return '<div class="recent_changes">%s%s</div>' % (
                 table.render(context, format),
-                '<div class="pagination">%s</div>' % pagination.generate()
+                '<div class="pagination">%s<div style="clear: both">'
+                '<div></div>' % pagination.generate()
             )
 
         return table
@@ -789,25 +790,6 @@ class Anchor(Macro):
         return nodes.Span(id=self.id)
 
 
-class User(Macro):
-    """
-    This macro creates a link to a user.
-    """
-
-    is_static = True
-    arguments = (
-        ('username', unicode, None),
-    )
-
-    def __init__(self, username):
-        self.username = username
-
-    def build_node(self):
-        return nodes.Link(href('portal', 'users', self.username),
-                          class_='userlink',
-                          children=[nodes.Text(self.username)])
-
-
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -830,7 +812,6 @@ ALL_MACROS = {
     u'NeueSeiten':          NewPages,
     u'BR':                  Newline,
     u'Anker':               Anchor,
-    u'Benutzer':            User,
     u'NeueSeite':           NewPage
 }
 

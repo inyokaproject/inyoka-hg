@@ -121,8 +121,8 @@ def forum(request, slug, page=1):
         data = {
             'forum':        f,
             'subforums':    subforums,
-            'topics':       list(pagination.get_objects()),
-            'pagination':   pagination.generate()
+            'topics':       pagination.objects,
+            'pagination':   pagination
         }
         if page <= 4:
             cache.set(key, data)
@@ -156,8 +156,10 @@ def viewtopic(request, topic_slug, page=1):
         return welcome(request, fmsg.slug, request.path)
     t.touch()
 
-    posts = SAPost.query.options(eagerload('attachments')). \
-        select_whereclause(post_table.c.text!='')
+    posts = SAPost.query.options(eagerload('attachments')).filter(
+        (SAPost.topic_id == t.id) &
+        (SAPost.text != '')
+    )
 
     if t.has_poll:
         polls = Poll.objects.get_polls(t.id)
@@ -216,10 +218,10 @@ def viewtopic(request, topic_slug, page=1):
     return {
         'topic':        t,
         'forum':        t.forum,
-        'posts':        list(pagination.get_objects()),
+        'posts':        pagination.objects,
         'privileges':   privileges,
         'is_subscribed':subscribed,
-        'pagination':   pagination.generate(),
+        'pagination':   pagination,
         'polls':        polls,
         'can_vote':     polls and (False in [p['participated'] for p in
                                              polls.values()]) or False
@@ -1146,8 +1148,8 @@ def newposts(request, page=1):
     pagination = Pagination(request, posts, page, 20,
         href('forum', 'newposts'))
     return {
-        'posts': pagination.get_objects(),
-        'pagination': pagination.generate()
+        'posts': pagination.objects,
+        'pagination': pagination
     }
 
 

@@ -31,9 +31,7 @@
           {%- if forum.description %}
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
-          <p class="pagination">
-            Gehe zu Seite {{ pagination }}
-          </p>
+          {{ pagination.generate('right') }}
           <p class="actions">
             <a href="{{ forum|url('newtopic') }}">Neues Thema</a>
           </p>
@@ -64,9 +62,8 @@
           </p>
           <p class="description">
             von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
-            &nbsp; &nbsp;
-            {%- if topic.paginated %}[
-              Gehe zu Seite {{topic.get_pagination() }}
+            {%- if topic.paginated %} &#160; &#160; [
+              Gehe zu Seite {{ topic.get_pagination() }}
             ]{% endif -%}
           </p>
         </td>
@@ -88,6 +85,6 @@
     </tbody>
   </table>
   <div class="forum_offset_pagination">
-    Gehe zu Seite: {{ pagination }}
+    {{ pagination.generate() }}
   </div>
 {% endblock %}
