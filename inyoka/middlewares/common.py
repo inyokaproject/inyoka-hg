@@ -107,12 +107,12 @@ class CommonServicesMiddleware(CommonMiddleware):
                     if not s:
                         continue
                     if first:
-                        print >> sys.stderr, s
+                        print >> sys.stderr, q['time'] + ':', s
                         first = False
                     else:
                         print >> sys.stderr, ' '*6, s
                 print >> sys.stderr
-            print >> sys.stderr "-----------------------------------------\n"
+            print >> sys.stderr, "-----------------------------------------\n"
 
         return response
 
