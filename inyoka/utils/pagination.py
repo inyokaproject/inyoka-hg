@@ -71,9 +71,10 @@ class Pagination(object):
         add = result.append
         pages = self.total // self.per_page + 1
         params = self.parameters.copy()
+        half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
-               abs(self.page - num) < math.ceil(threshold / 2.0):
+               abs(self.page - num) < half_threshold:
                 if result and result[-1] != ellipsis:
                     add(u'<span class="comma">, </span>')
                 was_space = False
