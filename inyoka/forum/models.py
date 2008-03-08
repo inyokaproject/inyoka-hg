@@ -15,6 +15,7 @@ import cPickle
 from django.db import models, connection
 from mimetypes import guess_type
 from datetime import datetime
+from sqlalchemy.orm import eagerload
 from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -26,6 +27,7 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
+
 
 
 POSTS_PER_PAGE = 10
@@ -74,12 +76,11 @@ class ForumManager(models.Manager):
         If depth is an integer, it also fetches the categories' subforums
         recursively until depth.
         """
-
-        o = Forum.objects
         if depth:
-            o = o.select_related(depth=depth)
-
-        return o.filter(parent__isnull=True)
+            return SAForum.query.options(eagerload('parent')). \
+                filter(forum_table.c.parent_id==None)
+        else:
+            return SAForum.query.filter(forum_table.c.parent==None)
 
     def get_forums(self):
         """
@@ -94,7 +95,7 @@ class ForumManager(models.Manager):
         struct = cache.get('forum/structure')
         if struct:
             return struct
-        forums = list(Forum.objects.all())
+        forums = Forum.objects.select_related()
         struct = {}
         for forum in forums:
             struct[forum.id] = { 'forum': forum }
@@ -1218,3 +1219,6 @@ class SAPost(Post):
 class SAAttachment(Attachment):
     __metaclass__ = type
     pass
+
+
+from inyoka.forum.database import forum_table

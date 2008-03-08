@@ -44,7 +44,9 @@ session.mapper(SAAttachment, attachment_table)
 session.mapper(SAForum, forum_table, properties={
     'last_post': relation(SAPost,
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[forum_table.c.last_post_id])
+        foreign_keys=[forum_table.c.last_post_id]),
+    'parent': relation(SAForum,
+        foreign_keys=[forum_table.c.parent_id])
 })
 session.mapper(SATopic, topic_table, properties={
     'forum': relation(SAForum,
