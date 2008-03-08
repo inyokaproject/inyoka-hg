@@ -364,7 +364,7 @@ class PageManager(models.Manager):
             rev = cache.get(key)
         if rev is None:
             try:
-                rev = Revision.objects.select_related(depth=1) \
+                rev = Revision.objects.select_related(depth=2) \
                                       .filter(page__name=name) \
                                       .latest()
             except Revision.DoesNotExist:
@@ -388,7 +388,7 @@ class PageManager(models.Manager):
         """
         if rev is None:
             return self.get_by_name(name, True, raise_on_deleted)
-        rev = Revision.objects.select_related(depth=1).get(id=int(rev))
+        rev = Revision.objects.select_related(depth=2).get(id=int(rev))
         if rev.page.name != name or (rev.deleted and raise_on_deleted):
             raise Page.DoesNotExist()
         rev.page.rev = rev

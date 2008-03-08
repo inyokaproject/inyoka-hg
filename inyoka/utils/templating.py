@@ -21,72 +21,6 @@ from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 
 
-# we could use the MemcachedFileSystemLoader too
-jinja_env = Environment(loader=FileSystemLoader(
-    os.path.join(os.path.dirname(__file__), os.pardir, 'templates'),
-    use_memcache=not settings.DEBUG,
-    memcache_size=200
-))
-jinja_env.globals.update(
-    INYOKA_REVISION=INYOKA_REVISION,
-    SETTINGS=settings,
-    href=href,
-    h={}
-)
-jinja_env.filters.update(
-    timedeltaformat=
-        lambda use_since=False:
-            lambda env, context, value:
-                format_timedelta(value, use_since=use_since),
-    utctimedeltaformat=
-        lambda use_since=False:
-            lambda env, context, value:
-                format_timedelta(value, use_since=use_since,
-                                 enforce_utc=True),
-    datetimeformat=
-        lambda:
-            lambda env, context, value:
-                format_datetime(value),
-    utcdatetimeformat=
-        lambda:
-            lambda env, context, value:
-                format_datetime(value, enforce_utc=True),
-    dateformat=
-        lambda:
-            lambda env, context, value:
-                natural_date(value),
-    utcdateformat=
-        lambda:
-            lambda env, context, value:
-                natural_date(value, enforce_utc=True),
-    timeformat=
-        lambda:
-            lambda env, context, value:
-                format_time(value),
-    utctimeformat=
-        lambda:
-            lambda env, context, value:
-                format_time(value, enforce_utc=True),
-    specificdatetimeformat=
-        lambda alt=False:
-            lambda env, context, value:
-                format_specific_datetime(value, alt),
-    utcspecificdatetimeformat=
-        lambda alt=False:
-            lambda env, context, value:
-                format_specific_datetime(value, alt,
-                                         enforce_utc=True),
-    hnumber=
-        lambda genus=None:
-            lambda env, context, value:
-                human_number(value, genus),
-    url=
-        lambda action=None:
-            lambda env, context, value:
-                url_for(value, action=action)
-)
-
-
 def populate_context_defaults(context):
     """Fill in context defaults."""
     request = current_request._get_current_object()
@@ -148,6 +82,115 @@ def partial_renderable(template_name, macro_name=None):
         jinja_env.globals['h'][name] = oncall
         return oncall
     return decorate
+
+
+class InyokaEnvironment(Environment):
+    """
+    Beefed up version of the jinja environment but without security features
+    to improve the performance of the lookups.
+    """
+
+    def __init__(self):
+        Environment.__init__(self,
+            # XXX: write a loader that uses the current active cache system
+            loader=FileSystemLoader(os.path.join(os.path.dirname(__file__),
+                                    os.pardir, 'templates'),
+            use_memcache=not settings.DEBUG,
+            memcache_size=200
+        ))
+        self.globals.update(
+            INYOKA_REVISION=INYOKA_REVISION,
+            SETTINGS=settings,
+            href=href,
+            h={}
+        )
+        self.filters.update(
+            timedeltaformat=
+                lambda use_since=False:
+                    lambda env, context, value:
+                        format_timedelta(value, use_since=use_since),
+            utctimedeltaformat=
+                lambda use_since=False:
+                    lambda env, context, value:
+                        format_timedelta(value, use_since=use_since,
+                                         enforce_utc=True),
+            datetimeformat=
+                lambda:
+                    lambda env, context, value:
+                        format_datetime(value),
+            utcdatetimeformat=
+                lambda:
+                    lambda env, context, value:
+                        format_datetime(value, enforce_utc=True),
+            dateformat=
+                lambda:
+                    lambda env, context, value:
+                        natural_date(value),
+            utcdateformat=
+                lambda:
+                    lambda env, context, value:
+                        natural_date(value, enforce_utc=True),
+            timeformat=
+                lambda:
+                    lambda env, context, value:
+                        format_time(value),
+            utctimeformat=
+                lambda:
+                    lambda env, context, value:
+                        format_time(value, enforce_utc=True),
+            specificdatetimeformat=
+                lambda alt=False:
+                    lambda env, context, value:
+                        format_specific_datetime(value, alt),
+            utcspecificdatetimeformat=
+                lambda alt=False:
+                    lambda env, context, value:
+                        format_specific_datetime(value, alt,
+                                                 enforce_utc=True),
+            hnumber=
+                lambda genus=None:
+                    lambda env, context, value:
+                        human_number(value, genus),
+            url=
+                lambda action=None:
+                    lambda env, context, value:
+                        url_for(value, action=action)
+        )
+
+    def finish_var(self, value, ctx, unicode=unicode):
+        """disable fancy jinja finalization."""
+        return unicode(value)
+
+    def get_attribute(self, obj, name, getattr=getattr):
+        """Faster attribute lookup without sanity cehcks."""
+        try:
+            return obj[name]
+        except (TypeError, KeyError, IndexError, AttributeError):
+            try:
+                return getattr(obj, name)
+            except AttributeError:
+                pass
+        return self.undefined_singleton
+
+    def call_function_simple(self, f, context, getattr=getattr):
+        """No sanity checks"""
+        if getattr(f, 'jinja_context_callable', False):
+            return f(self, context)
+        return f()
+
+    def call_function(self, f, context, args, kwargs, dyn_args, dyn_kwargs):
+        """No sanity checks."""
+        if dyn_args is not None:
+            args += tuple(dyn_args)
+        if dyn_kwargs is not None:
+            kwargs.update(dyn_kwargs)
+        if getattr(f, 'jinja_context_callable', False):
+            args = (self, context) + args
+        return f(*args, **kwargs)
+
+
+# setup the template environment
+jinja_env = InyokaEnvironment()
 
 
 # circular imports

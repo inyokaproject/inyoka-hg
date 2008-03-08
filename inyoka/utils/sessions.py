@@ -11,7 +11,7 @@
 """
 from time import time
 from datetime import datetime, timedelta
-from django.db import transaction
+from django.db import connection, transaction
 from django.newforms import ValidationError
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
@@ -23,7 +23,7 @@ from inyoka.utils.local import current_request
 SESSION_DELTA = 300
 
 
-@transaction.commit_on_success
+@transaction.commit_manually
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -31,30 +31,45 @@ def set_session_info(request, action, category=None):
     # table with dozens of entries
     if request.session.new:
         return
+    key = request.session.session_key
 
     if request.user.is_authenticated:
         #XXX: re-type the user in moderator, superuser and so on...
-        user_type = 'user'
-        subject = (request.user.username, user_type, url_for(request.user))
+        user_type = request.user.is_manager and 'team' or 'user'
+        args = (request.user.username, user_type, url_for(request.user))
     else:
         # TODO: check user agent for bots and add extra entries for those.
-        subject = (None, 'anonymous', None)
+        args = (None, 'anonymous', None)
+    args += (datetime.utcnow(), action, request.build_absolute_uri(),
+             category, key)
 
     try:
-        info = SessionInfo.objects.get(key=request.session.session_key)
-    except SessionInfo.DoesNotExist:
-        info = SessionInfo(key=request.session.session_key)
-    info.subject_text, info.subject_type, info.subject_link = subject
-    info.action = action
-    info.action_link = request.build_absolute_uri()
-    info.category = category
-    info.last_change = datetime.utcnow()
-
-    # if there is an exception ignore it
-    try:
-        info.save()
+        cursor = connection.cursor()
+        # try to update first
+        cursor.execute('''
+            update portal_sessioninfo set
+                subject_text = %s, subject_type = %s, subject_link = %s,
+                last_change = %s, action = %s, action_link = %s,
+                category = %s where `key` = %s;
+        ''', args)
+        # if there wasn't an entry insert a new one
+        if not cursor.rowcount:
+            cursor.execute('''
+                insert into portal_sessioninfo (subject_text, subject_type,
+                       subject_link, last_change, action, action_link,
+                       category, key) values (%s, %s, %s, %s, %s, %s, %s, %s)
+                    subject_text = %s, subject_type = %s, subject_link = %s,
+                    last_change = %s, action = %s, action_link = %s,
+                    category = %s where `key` = %s;
+            ''', args)
+        cursor.close()
     except:
-        pass
+        # don't raise the exception here.  We give a shit about broken
+        # session infos as it's unimportant information anyways.
+        transaction.rollback()
+        raise
+    else:
+        transaction.commit()
 
 
 class SurgeProtectionMixin(object):

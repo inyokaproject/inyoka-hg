@@ -134,7 +134,6 @@ SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 MEMCACHE_SERVERS = []
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.gzip.GZipMiddleware',
     'inyoka.middlewares.common.CommonServicesMiddleware',
     'inyoka.middlewares.session.AdvancedSessionMiddleware',
     'inyoka.middlewares.auth.AuthMiddleware',
