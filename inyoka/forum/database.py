@@ -7,7 +7,7 @@
     module is quite ugly and a bit redundant, but it bypasses some
     django limitations and we are going to migrate to SA anyway.
 
-    :copyright: 2008 by Christoph Hack.
+    :copyright: 2008 by Christoph Hack, Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \
@@ -15,8 +15,7 @@ from sqlalchemy import Table, Column, String, Text, Integer, \
     MetaData, select
 from sqlalchemy.orm import relation, backref, scoped_session, create_session
 from inyoka.conf import settings
-from inyoka.portal.models import User
-from inyoka.forum.models import Forum, Topic, Post, Attachment
+from inyoka.forum.models import SAForum, SATopic, SAPost, SAAttachment, SAUser
 
 
 metadata = MetaData()
@@ -39,25 +38,9 @@ user_table = Table('portal_user', metadata, autoload=True)
 attachment_table = Table('forum_attachment', metadata, autoload=True)
 
 
-class SAUser(User):
-    __metaclass__ = type
-    pass
-class SAForum(Forum):
-    __metaclass__ = type
-    pass
-class SATopic(Topic):
-    __metaclass__ = type
-    pass
-class SAPost(Post):
-    __metaclass__ = type
-    pass
-class SAAtachment(Attachment):
-    __metaclass__ = type
-    pass
-
 # set up the mappers for sqlalchemy
 session.mapper(SAUser, user_table)
-session.mapper(SAAtachment, attachment_table)
+session.mapper(SAAttachment, attachment_table)
 session.mapper(SAForum, forum_table, properties={
     'last_post': relation(SAPost,
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
@@ -78,5 +61,5 @@ session.mapper(SAPost, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id==user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(SAAtachment, backref=backref('post')),
+    'attachments': relation(SAAttachment, backref=backref('post')),
 })

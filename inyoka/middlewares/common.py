@@ -15,6 +15,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from django.db import connection
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from werkzeug import import_string
@@ -26,6 +27,10 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
 from inyoka.utils.logger import logger
 from inyoka.utils.urls import get_resolver
 
+try:
+    from pretty import pprint
+except ImportError:
+    from pprint import pprint
 
 core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)
 try:
@@ -86,6 +91,7 @@ class CommonServicesMiddleware(CommonMiddleware):
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
 
+
     def process_response(self, request, response):
         """
         Hook our X-Powered header in (and an easteregg header).  And clean up
@@ -101,7 +107,15 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # clean up after the local manager
         self._local_manager.cleanup()
-
+        if settings.DEBUG:
+            #XXX: remove me!
+            # optimize SQL statements
+            for query in connection.queries:
+                query['sql'] = query['sql'].replace('"', '').replace(',',', ')
+            print "DATABASE QUERIES (%s)" % len(connection.queries)
+            print "-----------------------------------------"
+            print pprint(connection.queries)
+            print "-----------------------------------------"
         return response
 
 
