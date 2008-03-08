@@ -390,6 +390,9 @@ class SearchQueue(models.Model):
 class UserErrorReport(models.Model):
     title = models.CharField('Titel', max_length=50)
     text = models.TextField('Text')
-    user = models.ForeignKey(User, null=True, blank=True)
+    reporter = models.ForeignKey(User, null=True, blank=True,
+                                 related_name='reporter')
     date = models.DateTimeField('Datum')
     url = models.URLField('URL')
+    assigned_to = models.ForeignKey(User, null=True, blank=True)
+    done = models.BooleanField('erledigt', default=False)

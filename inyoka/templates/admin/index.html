@@ -25,7 +25,7 @@
     <tr>
       {{ admin_button(href('admin', 'groups'), 'groups', 'Gruppenkonfiguration') }}
       {{ admin_button(href('admin', 'styles'), 'styles', 'Markup-Stylesheets') }}
-      <td></td>
+      {{ admin_button(href('admin', 'bugs/usererrors'), 'bugs', 'User-Fehlermeldungen') }}
     </tr>
   </table>
 {% endblock %}

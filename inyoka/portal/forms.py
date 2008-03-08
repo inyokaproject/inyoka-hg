@@ -14,7 +14,7 @@ from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
@@ -329,3 +329,7 @@ class UserErrorReportForm(forms.Form):
                            widget=forms.Textarea(attrs={'rows': 3}))
     url = forms.URLField(widget=forms.HiddenInput)
 
+    def clean_url(self):
+        if not is_safe_domain(self.cleaned_data['url']):
+            raise forms.ValidationError(u'Ungültige URL')
+        return self.cleaned_data['url']

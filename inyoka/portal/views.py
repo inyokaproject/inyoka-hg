@@ -940,22 +940,28 @@ def user_error_report(request):
             uer.title = data['title']
             uer.text = data['text']
             uer.url = data['url']
-            uer.user = request.user
             uer.date = datetime.utcnow()
+            uer.reporter = request.user
             uer.save()
+            print '***', `UserErrorReport.objects.get(pk=uer.pk).reporter`
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)
-            print 'flashed and redirected to %s' % data['url']
             return HttpResponseRedirect(data['url'])
     else:
         if 'url' in request.GET:
             form = UserErrorReportForm(initial={'url':request.GET['url']})
         else:
             form = UserErrorReportForm()
-            form.fields['url'].widget = forms.TextInput(attrs={'size':50})
+
+    if 'url' in request.GET:
+        show_url_field = False
+    else:
+        show_url_field = True
+        form.fields['url'].widget = forms.TextInput(attrs={'size':50})
+
     return {
         'form': form,
-        'show_url_field': 'url' not in request.GET,
+        'show_url_field': show_url_field,
     }
 
