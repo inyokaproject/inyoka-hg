@@ -102,10 +102,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         # clean up after the local manager
         self._local_manager.cleanup()
 
-        from django.db import connection
-        import pprint
-        pprint.pprint(connection.queries)
-
         return response
 
 
