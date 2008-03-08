@@ -385,3 +385,11 @@ class SearchQueue(models.Model):
 
     class Meta:
         ordering = ['id']
+
+
+class UserErrorReport(models.Model):
+    title = models.CharField('Titel', max_length=50)
+    text = models.TextField('Text')
+    user = models.ForeignKey(User, null=True, blank=True)
+    date = models.DateTimeField('Datum')
+    url = models.URLField('URL')

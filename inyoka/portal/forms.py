@@ -320,3 +320,12 @@ class DeactivateUserForm(forms.Form):
 class SubscriptionForm(forms.Form):
     #: this is a list of integers of the subscriptions that should get deleted
     delete = forms.MultipleChoiceField()
+
+
+class UserErrorReportForm(forms.Form):
+    title = forms.CharField(label='kurze Beschreibung', max_length=50,
+                            widget=forms.TextInput(attrs={'size':50}))
+    text = forms.CharField(label=u'ausführliche Beschreibung',
+                           widget=forms.Textarea(attrs={'rows': 3}))
+    url = forms.URLField(widget=forms.HiddenInput)
+

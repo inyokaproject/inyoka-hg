@@ -50,6 +50,7 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^calendar/(?P<year>\d{4})/(?P<month>\d{2})/$', 'calendar_month'),
     (r'^calendar/(?P<slug>.*?)/$', 'calendar_detail'),
     (r'^opensearch/(?P<app>[a-z]+)/$', 'open_search'),
+    (r'^error_report/$', 'user_error_report'),
     # static pages
     (r'^([-A-Za-z_]+)/$', 'static_page'),
 )
