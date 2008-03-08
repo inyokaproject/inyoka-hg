@@ -97,7 +97,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 @templated('ikhaya/detail.html', modifier=context_modifier)
 def detail(request, slug):
     """Shows a single article."""
-    article = Article.objects.get(slug=slug)
+    article = Article.objects.select_related().get(slug=slug)
     if article.hidden or article.pub_date > datetime.utcnow():
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
@@ -117,7 +117,7 @@ def detail(request, slug):
         form = EditCommentForm()
     return {
         'article':  article,
-        'comments': list(article.comment_set.all()),
+        'comments': list(article.comment_set.select_related()),
         'form': form
     }
 
