@@ -874,6 +874,7 @@ def styles(request):
         'form': form
     }
 
+
 @require_manager
 @templated('admin/usererrors.html')
 def usererrors(request):
