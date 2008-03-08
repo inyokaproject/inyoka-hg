@@ -38,7 +38,6 @@ class InyokaFormatter(FormatterBase):
             'RecentChanges':   u'LetzteÄnderungen',
             'OrphanedPages':   u'VerwaisteSeiten',
             'WantedPages':     u'FehlendeSeiten',
-            'user':            u'Benutzer',
             'Anchor':          u'Anker',
             'Include':         u'Vorlage',
             'NewPage':         u'NeueSeite',
@@ -47,6 +46,9 @@ class InyokaFormatter(FormatterBase):
         if name in replacements:
             name = replacements[name]
             args = [a.strip() for a in args.split(',')]
+
+        elif name == 'user':
+            return u'[user:%s:]' % args
 
         elif name == 'Anmerkung':
             return u'((%s))' % u''.join(args)

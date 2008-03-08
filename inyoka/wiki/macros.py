@@ -790,25 +790,6 @@ class Anchor(Macro):
         return nodes.Span(id=self.id)
 
 
-class User(Macro):
-    """
-    This macro creates a link to a user.
-    """
-
-    is_static = True
-    arguments = (
-        ('username', unicode, None),
-    )
-
-    def __init__(self, username):
-        self.username = username
-
-    def build_node(self):
-        return nodes.Link(href('portal', 'users', self.username),
-                          class_='userlink',
-                          children=[nodes.Text(self.username)])
-
-
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -831,7 +812,6 @@ ALL_MACROS = {
     u'NeueSeiten':          NewPages,
     u'BR':                  Newline,
     u'Anker':               Anchor,
-    u'Benutzer':            User,
     u'NeueSeite':           NewPage
 }
 
