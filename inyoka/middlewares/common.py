@@ -15,6 +15,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import sys
 from django.db import connection
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
@@ -25,11 +26,6 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
      HttpResponseForbidden
 from inyoka.utils.logger import logger
 from inyoka.utils.urls import get_resolver
-
-try:
-    from pretty import pprint
-except ImportError:
-    from pprint import pprint
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -89,12 +85,13 @@ class CommonServicesMiddleware(CommonMiddleware):
         self._local_manager.cleanup()
 
         if settings.DEBUG:
+            from pprint import pprint
             for query in connection.queries:
                 query['sql'] = query['sql'].replace('"', '').replace(',',', ')
-            print "DATABASE QUERIES (%s)" % len(connection.queries)
-            print "-----------------------------------------"
-            print pprint(connection.queries)
-            print "-----------------------------------------"
+            print >> sys.stderr, "DATABASE QUERIES (%s)" % len(connection.queries)
+            print >> sys.stderr, "-----------------------------------------"
+            pprint(connection.queries, sys.stderr)
+            print >> sys.stderr, "-----------------------------------------"
 
         return response
 
