@@ -22,7 +22,7 @@ from urlparse import urlparse, urlunparse
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.html import build_html_tag, striptags, escape
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_quote_plus
 from inyoka.utils.templating import render_template
 from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
      resolve_interwiki_link
@@ -553,14 +553,15 @@ class InternalLink(Element):
 
     allowed_in_signatures = True
 
-    def __init__(self, page, children=None, force_existing=False, id=None,
-                 style=None, class_=None):
+    def __init__(self, page, children=None, force_existing=False,
+                 anchor=None, id=None, style=None, class_=None):
         page = normalize_pagename(page)
         if not children:
             children = [Text(get_title(page))]
         Element.__init__(self, children, id, style, class_)
         self.force_existing = force_existing
         self.page = page
+        self.anchor = anchor
 
     def generate_markup(self, w):
         w.markup(u'[:%s:' % self.page)
@@ -574,6 +575,8 @@ class InternalLink(Element):
             from inyoka.wiki.models import Page
             missing = not Page.objects.exists(self.page)
         url = href('wiki', self.page)
+        if self.anchor:
+            url += '#' + url_quote_plus(self.anchor)
         yield build_html_tag(u'a',
             href=url,
             id=self.id,
@@ -598,13 +601,14 @@ class InterWikiLink(Element):
 
     allowed_in_signatures = True
 
-    def __init__(self, wiki, page, children=None, id=None, style=None,
-                 class_=None):
+    def __init__(self, wiki, page, children=None, anchor=None,
+                 id=None, style=None, class_=None):
         if not children:
             children = [Text(page)]
         Element.__init__(self, children, id, style, class_)
         self.wiki = wiki
         self.page = page
+        self.anchor = anchor
 
     def generate_markup(self, w):
         w.markup(u'[%s:%s:' % (self.wiki, self.page.replace(':', '::')))
@@ -617,6 +621,8 @@ class InterWikiLink(Element):
             for item in Element.prepare_html(self):
                 yield item
             return
+        if self.anchor:
+            target += '#' + url_quote_plus(self.anchor)
         yield build_html_tag(u'a',
             href=target,
             id=self.id,
