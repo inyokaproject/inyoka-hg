@@ -49,22 +49,13 @@ class Pagination(object):
             self.total = len(query)
 
         if link is None:
-            link_base = request.path
-        elif isinstance(link, basestring):
+            link = request.path
+        if isinstance(link, basestring):
             self.parameters = {}
             self.link_base = link
         else:
-            link_base = link or request.path
             self.parameters = request.GET
-            def link_func(page, parameters):
-                if page == 1:
-                    rv = link_base
-                else:
-                    rv = '%s%d/' % (link_base, page)
-                if parameters:
-                    rv += '?' + parameters.urlencode()
-                return rv
-            self.generate_link = link_func
+            self.generate_link = link
 
     def generate_link(self, page, parameters):
         if page == 1:
