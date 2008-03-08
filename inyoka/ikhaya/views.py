@@ -35,16 +35,28 @@ def context_modifier(request, context):
     `categories`
         A list of all ikhaya categories.
     """
-    archive = list(Article.objects.dates('pub_date', 'month', order='DESC'))
-    if len(archive) > 5:
-        archive = archive[:5]
-        short_archive = True
+    c = cache.get('ikhaya/archive')
+    s = cache.get('ikhaya/short_archive')
+    if c is not None and s is not None:
+        archive = c
+        short_archive = s
     else:
-        short_archive = False
+        archive = list(Article.objects.dates('pub_date', 'month', order='DESC'))
+        if len(archive) > 5:
+            archive = archive[:5]
+            short_archive = True
+        else:
+            short_archive = False
+        cache.set('ikhaya/archive', archive)
+        cache.set('ikhaya/short_archive', short_archive)
+    categories = cache.get('ikhaya/categories')
+    if categories is None:
+        categories = list(Category.objects.all())
+        cache.set('ikhaya/categories', categories)
     context.update(
         archive=archive,
         short_archive=short_archive,
-        categories=list(Category.objects.all())
+        categories=categories
     )
 
 
@@ -70,7 +82,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         articles = articles.filter(pub_date__lte=datetime.utcnow(),
                                    public=True)
 
-    articles = articles.order_by('-pub_date')
+    articles = articles.order_by('-pub_date').select_related()
 
     link = href('ikhaya', *link)
     pagination = Pagination(request, articles, page, 15, link)
