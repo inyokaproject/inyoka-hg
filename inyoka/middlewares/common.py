@@ -93,8 +93,8 @@ class CommonServicesMiddleware(CommonMiddleware):
                     cols = os.environ['COLUMNS'] - 7
                 except:
                     cols = 73
-            print >> sys.stderr "DATABASE QUERIES (%s)" % len(connection.queries)
-            print >> sys.stderr "-----------------------------------------"
+            print >> sys.stderr, "DATABASE QUERIES (%s)" % len(connection.queries)
+            print >> sys.stderr, "-----------------------------------------"
             for q in connection.queries:
                 sys.stdout.write(q['time'] + ': ')
                 f = StringIO.StringIO(q['sql'].replace('"', '').replace(',',', '))
@@ -107,10 +107,10 @@ class CommonServicesMiddleware(CommonMiddleware):
                     if not s:
                         continue
                     if first:
-                        print >> sys.stderr s
+                        print >> sys.stderr, s
                         first = False
                     else:
-                        print >> sys.stderr ' '*6, s
+                        print >> sys.stderr, ' '*6, s
                 print >> sys.stderr
             print >> sys.stderr "-----------------------------------------\n"
 
