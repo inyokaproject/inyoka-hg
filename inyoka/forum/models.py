@@ -843,12 +843,12 @@ class Topic(models.Model):
         if pages == 1:
             return u''
         result = []
-        ellipsis = '<span class="ellipsis"> … </span>'
+        ellipsis = u'<span class="ellipsis"> … </span>'
         was_ellipsis = False
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold:
                 if result and result[-1] != ellipsis:
-                    result.append('<span class="comma">, </span>')
+                    result.append(u'<span class="comma">, </span>')
                 was_space = False
                 link = self.get_absolute_url()
                 if num != 1:

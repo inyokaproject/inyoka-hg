@@ -56,7 +56,7 @@ class Pagination(object):
 
     def get_objects(self):
         idx = (self.page - 1) * self.per_page
-        result = list(self.query[idx:idx + self.per_page])
+        result = self.query[idx:idx + self.per_page]
         if not result and self.page != 1:
             raise PageNotFound()
         return result

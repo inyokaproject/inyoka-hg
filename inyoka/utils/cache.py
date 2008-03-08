@@ -8,7 +8,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
-from werkzeug.contrib.cache import NullCache, MemcachedCache, SimpleCache
+from werkzeug.contrib.cache import MemcachedCache, SimpleCache
 from inyoka.conf import settings
 
 
@@ -25,7 +25,7 @@ def set_real_cache():
     if settings.MEMCACHE_SERVERS:
         _set_cache(MemcachedCache(settings.MEMCACHE_SERVERS))
     else:
-        _set_cache(NullCache())
+        _set_cache(SimpleCache())
 
 
 def set_test_cache():
