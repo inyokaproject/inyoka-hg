@@ -944,7 +944,6 @@ def user_error_report(request):
             uer.date = datetime.utcnow()
             uer.reporter = request.user
             uer.save()
-            print '***', `UserErrorReport.objects.get(pk=uer.pk).reporter`
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)
@@ -965,4 +964,3 @@ def user_error_report(request):
         'form': form,
         'show_url_field': show_url_field,
     }
-

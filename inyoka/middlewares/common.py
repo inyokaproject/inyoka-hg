@@ -113,7 +113,6 @@ class CommonServicesMiddleware(CommonMiddleware):
                         print >> sys.stderr, ' '*6, s
                 print >> sys.stderr
             print >> sys.stderr, "-----------------------------------------\n"
-
         return response
 
 
