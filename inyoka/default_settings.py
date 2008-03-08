@@ -140,8 +140,7 @@ MIDDLEWARE_CLASSES = (
     'inyoka.middlewares.services.ServiceMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
     'inyoka.middlewares.highlighter.HighlighterMiddleware',
-    'inyoka.middlewares.security.SecurityMiddleware',
-    'inyoka.middlewares.common.ExceptionInterceptionMiddleware'
+    'inyoka.middlewares.security.SecurityMiddleware'
 )
 
 TEMPLATE_DIRS = (
