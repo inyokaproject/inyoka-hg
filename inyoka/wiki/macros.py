@@ -248,7 +248,8 @@ class RecentChanges(Macro):
         if format == 'html':
             return '<div class="recent_changes">%s%s</div>' % (
                 table.render(context, format),
-                '<div class="pagination">%s</div>' % pagination.generate()
+                '<div class="pagination">%s<div style="clear: both">'
+                '<div></div>' % pagination.generate()
             )
 
         return table

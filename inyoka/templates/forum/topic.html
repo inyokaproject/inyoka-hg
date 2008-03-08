@@ -46,7 +46,7 @@
   <div class="topic_box">
     <h2>{{ topic.title|e }}</h2>
     <div class="topic_box_content">
-      <div class="pagination">Gehe zu Seite {{ pagination }}</div>
+      {{ pagination.generate('right') }}
       <strong>Status:</strong> <span class="status_{{
         topic.solved and 'solved' or 'unsolved' }}">{{
         topic.solved and 'gelöst' or 'ungelöst' }}</span>
@@ -136,7 +136,7 @@
   
   <div class="topic_box">
     <div class="topic_box_content">
-      <div class="pagination">Gehe zu Seite {{ pagination }}</div>
+      {{ pagination.generate('right') }}
       {{ topic_actions() }}<br />
       {% if privileges.moderate %}
       <span class="linklist">

@@ -162,7 +162,52 @@ li p + p {
   margin-top: 0.5em!important;
 }
 
-/*** Table Style **************************************************************/
+/*** Pagination *************************************************************/
+div.pagination_right {
+    float: right;
+}
+
+div.pagination .pageselect, div.pagination .next, div.pagination .ellipsis {
+    font-size: 13px;
+    float: left;
+    display: block;
+    line-height: 1.4em;
+    background-color: white;
+    height: 1.4em;
+    padding: 0 0.5em 0 0.5em!important;
+    margin-left: 1px;
+}
+
+div.pagination .pageselect, div.pagination .next {
+    border: 1px solid #aaa;
+    padding: 4px;
+    text-decoration: none;
+}
+
+div.pagination span.comma {
+    display: none;
+}
+
+div.pagination .disabled {
+    border-color: #ddd;
+    color: #ddd;
+}
+
+div.pagination span.active {
+    color: white;
+    background-color: #aaa;
+}
+
+div.pagination a {
+    color: #555;
+}
+
+div.pagination a:hover {
+    background-color: #555;
+    color: white;
+}
+
+/*** Table Style ************************************************************/
 
 table {
   width: 100%;

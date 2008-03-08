@@ -55,7 +55,7 @@ def index(request, page=1):
                      href('planet'), 'Planet')
     return {
         'days':         group_by_day(pagination.get_objects()),
-        'pagination':   pagination.generate()
+        'pagination':   pagination
     }
 
 

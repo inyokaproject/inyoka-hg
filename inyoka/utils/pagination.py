@@ -20,11 +20,12 @@
 
     If the page is out of range, it throws a PageNotFound exception.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
 import math
 from inyoka.utils.http import PageNotFound
+from inyoka.utils.html import escape
 
 
 class Pagination(object):
@@ -55,16 +56,15 @@ class Pagination(object):
 
     def get_objects(self):
         idx = (self.page - 1) * self.per_page
-        result = self.query[idx:idx + self.per_page]
+        result = list(self.query[idx:idx + self.per_page])
         if not result and self.page != 1:
             raise PageNotFound()
         return result
 
-    def generate(self, normal='<a href="%(href)s">%(page)d</a>',
-                 active='<strong>%(page)d</strong>',
-                 commata=',\n',
-                 ellipsis=' ...\n',
-                 threshold=3):
+    def generate(self, position=None, threshold=2, show_next_link=True):
+        normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
+        active = u'<span class="pageselect active">%(page)d</span>'
+        ellipsis = u'<span class="ellipsis"> … </span>'
         was_ellipsis = False
         result = []
         if isinstance(self.query, list):
@@ -77,7 +77,7 @@ class Pagination(object):
             if num <= threshold or num > pages - threshold or\
                abs(self.page - num) < math.ceil(threshold / 2.0):
                 if result and result[-1] != ellipsis:
-                    result.append(commata)
+                    result.append(u'<span class="comma">, </span>')
                 was_space = False
                 link = self.link_func(num, params)
                 if num == self.page:
@@ -85,11 +85,23 @@ class Pagination(object):
                 else:
                     template = normal
                 result.append(template % {
-                    'href':     link,
+                    'href':     escape(link),
                     'page':     num,
                 })
             elif not was_ellipsis:
                 was_ellipsis = True
                 result.append(ellipsis)
 
-        return ''.join(result)
+        if show_next_link:
+            if self.page < pages:
+                link = escape(self.link_func(self.page + 1, params))
+                tmpl = u'<a href="%s" class="next"> Weiter » </a>'
+                result.append(tmpl % escape(link))
+            else:
+                result.append(u'<span class="disabled next"> Weiter » </span>')
+
+        class_ = 'pagination'
+        if position:
+            class_ += ' pagination_' + position
+        return u'<div class="%s">%s<div style="clear: both">' \
+               u'</div></div>' % (class_, u''.join(result))

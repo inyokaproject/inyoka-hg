@@ -30,7 +30,7 @@
       </li>
       {%- endfor %}
     </ul>
-    <div class="pagination">Gehe zu: {{ pagination }}</div>
+    {{ pagination.generate() }}
   {%- else %}
     <p>Noch wurden keine Pastes erstellt.</p>
   {%- endif %}

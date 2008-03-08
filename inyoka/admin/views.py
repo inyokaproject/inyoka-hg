@@ -193,7 +193,7 @@ def ikhaya_articles(request, page=1):
     return {
         'table': sortable,
         'articles': list(pagination.get_objects()),
-        'pagination': pagination.generate()
+        'pagination': pagination
     }
 
 

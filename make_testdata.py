@@ -143,7 +143,7 @@ def make_forum():
             for _ in xrange(randint(1, 3)):
                 t = Topic.objects.create(f, title()[:100], sentences(min=1, max=10), author=
                                          choice(users), pub_date=randtime())
-                for _ in xrange(randint(1, 10)):
+                for _ in xrange(randint(1, 40)):
                     t.reply(sentences(min=1, max=10), choice(users), randtime())
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)

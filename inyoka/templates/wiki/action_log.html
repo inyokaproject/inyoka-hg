@@ -76,5 +76,8 @@
     {%- endfor %}
     </table>
   </form>
-  <div class="pagination">{{ pagination.generate() }}</div>
+  <div class="pagination left_pagination">
+    {{ pagination.generate() }}
+    <div style="clear: both"></div>
+  </div>
 {% endblock %}

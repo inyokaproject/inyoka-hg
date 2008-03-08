@@ -74,5 +74,5 @@ def browse(request, page=1):
                      'Paste-Liste')
     return {
         'entries':      list(pagination.get_objects()),
-        'pagination':   pagination.generate()
+        'pagination':   pagination
     }

@@ -101,10 +101,6 @@ table.forum td.last_post {
     font-size: 0.85em;
 }
 
-.pagination {
-    float: right;
-}
-
 .status_solved {
     background-repeat: no-repeat;
     background-image: url('../img/forum_solved.png');
@@ -239,15 +235,14 @@ table td.author img.avatar {
     background-color: white;
 }
 
-table.forum thead td p.actions,
-table.forum thead td p.pagination {
+table.forum thead td p.actions {
     margin: 0;
     padding: 0.3em 0 0.5em 0;
     font-size: 0.85em;
 }
 
-table.forum thead td p.pagination {
-    float: right;
+table.forum thead td div.pagination {
+    padding-top: 3px;
 }
 
 table.forum thead td p.description {
@@ -270,6 +265,7 @@ form.poll ul {
 }
 
 div.forum_offset_pagination {
+    float: none;
     margin: 0;
     font-size: 0.85em;
     border: 1px solid #ccc;
@@ -336,4 +332,26 @@ div.preview_wrapper h2.title {
     font-size: 1em;
     padding: 0.6em 0 0.4em 0;
     border-bottom: 1px solid #ccc;
+}
+
+/* mini pagination */
+span.pagination .pageselect, div.pagination .ellipsis {
+    background-color: white;
+    padding: 2px;
+    margin-left: 1px;
+}
+
+span.pagination span.comma {
+    display: none;
+}
+
+span.pagination .pageselect {
+    border: 1px solid #aaa;
+    color: #555;
+    text-decoration: none;
+}
+
+span.pagination .pageselect:hover {
+    background: #555;
+    color: white;
 }

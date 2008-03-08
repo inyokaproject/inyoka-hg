@@ -837,26 +837,28 @@ class Topic(models.Model):
 
         self.forum.save()
 
-    def get_pagination(self, threshold=3, ellipsis='...\n', commata=',\n'):
+    def get_pagination(self, threshold=3):
         total = self.post_count - 1
         pages = total // POSTS_PER_PAGE + 1
         if pages == 1:
             return u''
         result = []
+        ellipsis = '<span class="ellipsis"> … </span>'
         was_ellipsis = False
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold:
                 if result and result[-1] != ellipsis:
-                    result.append(commata)
+                    result.append('<span class="comma">, </span>')
                 was_space = False
                 link = self.get_absolute_url()
                 if num != 1:
                     link = '%s%d/' % (link, num)
-                result.append(u'<a href="%s">%s</a>' % (link, num))
+                result.append(u'<a href="%s" class="pageselect">%s</a>' %
+                              (link, num))
             elif not was_ellipsis:
                 was_ellipsis = True
                 result.append(ellipsis)
-        return u'(%s)' % u''.join(result)
+        return u'<span class="pagination">%s</span>' % u''.join(result)
 
     @property
     def paginated(self):

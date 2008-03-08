@@ -77,7 +77,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 
     return {
         'articles':      list(pagination.get_objects()),
-        'pagination':    pagination.generate(),
+        'pagination':    pagination,
         'category':      category
     }
 

@@ -43,7 +43,7 @@
   {%- endfor %}
   </tbody>
 </table> 
-<div class="pagination">Gehe zu {{ pagination }}</div>
+{{ pagination.generate() }}
 <p>
   <em>Grau markierte Artikel sind nicht veröffentlicht!</em>
 </p>
