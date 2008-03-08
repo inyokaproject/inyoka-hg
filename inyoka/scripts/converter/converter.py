@@ -789,7 +789,6 @@ def convert_ikhaya():
     meta.bind = engine
     category_table = Table('ikhaya_categories', meta, autoload=True)
     article_table = Table('ikhaya_entries', meta, autoload=True)
-    comment_table = Table('ikhaya_comments', meta, autoload=True)
     icon_table = Table('static_images', meta, autoload=True)
     user_table = Table('auth_users', meta, autoload=True)
 

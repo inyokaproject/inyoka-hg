@@ -74,6 +74,7 @@ class ForumManager(models.Manager):
         If depth is an integer, it also fetches the categories' subforums
         recursively until depth.
         """
+
         o = Forum.objects
         if depth:
             o = o.select_related(depth=depth)
@@ -1196,3 +1197,24 @@ class WelcomeMessage(models.Model):
             request = request._get_current_object()
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, format)
+
+
+#: These Models are created because of our need to hack Django and use
+#: SQLAlchemy for some reasons. Use them only if needed, e.g to reduce
+#: database queries.
+
+class SAUser(User):
+    __metaclass__ = type
+    pass
+class SAForum(Forum):
+    __metaclass__ = type
+    pass
+class SATopic(Topic):
+    __metaclass__ = type
+    pass
+class SAPost(Post):
+    __metaclass__ = type
+    pass
+class SAAttachment(Attachment):
+    __metaclass__ = type
+    pass

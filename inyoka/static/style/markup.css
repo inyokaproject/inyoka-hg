@@ -12,7 +12,7 @@ a.missing {
   color: #999;
 }
 
-a.userlink {
+a.user {
   background-image: url(../img/user.png);
   background-repeat: no-repeat;
   padding-left: 16px;
