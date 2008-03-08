@@ -88,13 +88,13 @@ class CommonServicesMiddleware(CommonMiddleware):
         # clean up after the local manager
         self._local_manager.cleanup()
 
-        #XXX: remove me!
-        for query in connection.queries:
-            query['sql'] = query['sql'].replace('"', '').replace(',',', ')
-        print "DATABASE QUERIES (%s)" % len(connection.queries)
-        print "-----------------------------------------"
-        print pprint(connection.queries)
-        print "-----------------------------------------"
+        if settings.DEBUG:
+            for query in connection.queries:
+                query['sql'] = query['sql'].replace('"', '').replace(',',', ')
+            print "DATABASE QUERIES (%s)" % len(connection.queries)
+            print "-----------------------------------------"
+            print pprint(connection.queries)
+            print "-----------------------------------------"
 
         return response
 
