@@ -89,12 +89,37 @@ class CommonServicesMiddleware(CommonMiddleware):
         self._local_manager.cleanup()
 
         #XXX: remove me!
-        for query in connection.queries:
-            query['sql'] = query['sql'].replace('"', '').replace(',',', ')
-        print "DATABASE QUERIES (%s)" % len(connection.queries)
-        print "-----------------------------------------"
-        print pprint(connection.queries)
-        print "-----------------------------------------"
+        if settings.DEBUG:
+            import sys, os, StringIO
+            try:
+                cols = settings.DEBUG_COLUMNS - 7
+            except:
+                try:
+                    cols = os.environ['COLUMNS'] - 7
+                except:
+                    cols = 73
+            for query in connection.queries:
+                query['sql'] = query['sql'].replace('"', '').replace(',',', ')
+            print "DATABASE QUERIES (%s)" % len(connection.queries)
+            print "-----------------------------------------"
+            for q in connection.queries:
+                sys.stdout.write(q['time'] + ': ')
+                f = StringIO.StringIO(q['sql'])
+                first = True
+                while True:
+                    s = f.readline(cols)
+                    if not s:
+                        break
+                    s = s.rstrip('\n')
+                    if not s:
+                        continue
+                    if first:
+                        print s
+                        first = False
+                    else:
+                        print ' '*6, s
+                print
+            print "-----------------------------------------\n"
 
         return response
 
