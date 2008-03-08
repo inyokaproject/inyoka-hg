@@ -161,6 +161,11 @@ class Article(models.Model):
         """
         return not self.public or self.pub_date > datetime.utcnow()
 
+    @property
+    def comments(self):
+        """This returns all the comments for this article"""
+        return Comment.objects.filter(article=self)
+
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('ikhaya', self.slug),
