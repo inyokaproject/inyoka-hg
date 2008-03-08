@@ -8,19 +8,21 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from django.core import exceptions
+from django.core.mail import mail_admins
 from django.core.handlers.wsgi import WSGIHandler
-from django.views import debug
 from inyoka.conf import settings
+from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
+from inyoka.utils.logger import logger
 from werkzeug import SharedDataMiddleware, Response, get_host
 
 
-# monkey patch the django internal debugger away
-def null_technical_500_response(request, exc_type, exc_value, tb):
-    raise exc_type, exc_value, tb
-debug.technical_500_response = null_technical_500_response
-
-
 _not_found = Response('Not Found', status=404)
+core_exceptions = (SystemExit, KeyboardInterrupt)
+try:
+    core_exceptions += (GeneratorExit,)
+except NameError:
+    pass
 
 
 class StaticDomainHandler(object):
@@ -51,4 +53,52 @@ class StaticDomainHandler(object):
         return self.app(environ, start_response)
 
 
-application = WSGIHandler()
+class InyokaHandler(WSGIHandler):
+    """
+    Improved version of the django WSGI app without the exception handling
+    which is somewhat annoying for our use case.
+    """
+
+    def get_response(self, request):
+        """Like the normal one but faster and less sucky."""
+        # Apply request middleware
+        for middleware_method in self._request_middleware:
+            response = middleware_method(request)
+            if response:
+                return response
+
+        try:
+            callback, args, kwargs = request.resolver.resolve(request.path)
+
+            # Apply view middleware
+            for middleware_method in self._view_middleware:
+                response = middleware_method(request, callback, args, kwargs)
+                if response:
+                    return response
+
+            try:
+                return callback(request, *args, **kwargs)
+            except Exception, e:
+                # If the view raised an exception, run it through exception
+                # middleware, and if the exception middleware returns a
+                # response, use that. Otherwise, reraise the exception.
+                for middleware_method in self._exception_middleware:
+                    response = middleware_method(request, e)
+                    if response:
+                        return response
+                raise
+        except PageNotFound, e:
+            callback, param_dict = resolver.resolve404()
+            return callback(request, **param_dict)
+        except DirectResponse, e:
+            return e.response
+        except core_exceptions:
+            raise
+        except:
+            if settings.DEBUG:
+                raise
+            logger.exception('Exception during request at %r' % request.path)
+            return TemplateResponse('errors/500.html', {}, 500)
+
+
+application = InyokaHandler()

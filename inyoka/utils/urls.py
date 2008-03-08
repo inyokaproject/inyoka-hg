@@ -12,6 +12,7 @@
 """
 import cgi
 from urlparse import urlparse
+from django.core.urlresolvers import RegexURLResolver
 from inyoka.conf import settings
 from werkzeug import import_string, url_encode, url_decode, url_quote, \
      url_quote_plus, url_fix
@@ -23,6 +24,7 @@ _url_reverse_map = dict((v.split('.')[1], k) for k, v in
                         settings.SUBDOMAIN_MAP.iteritems())
 _url_reverse_map['static'] = 'static'
 _url_reverse_map['media'] = 'media'
+_resolvers = {}
 
 
 def href(_module='portal', *parts, **query):
@@ -88,5 +90,10 @@ def get_resolver(host):
     if host.endswith(settings.BASE_DOMAIN_NAME):
         subdomain = host[:-len(settings.BASE_DOMAIN_NAME)].rstrip('.')
         if subdomain in settings.SUBDOMAIN_MAP:
-            return subdomain, settings.SUBDOMAIN_MAP[subdomain]
+            name = settings.SUBDOMAIN_MAP[subdomain]
+            if name not in _resolvers:
+                _resolvers[name] = resolver = RegexURLResolver('^/', name)
+            else:
+                resolver = _resolvers[name]
+            return subdomain, resolver
     return None, None

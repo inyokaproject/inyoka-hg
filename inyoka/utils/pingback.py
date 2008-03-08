@@ -20,7 +20,7 @@ from xmlrpclib import ServerProxy, Fault
 from urlparse import urlparse
 from inyoka.utils import xmlrpc
 from inyoka.utils.html import striptags, escape, unescape
-from inyoka.utils.urls import is_safe_domain, get_resolver
+from inyoka.utils.urls import is_safe_domain
 
 
 _title_re = re.compile(r'<title>(.*?)</title>(?i)')

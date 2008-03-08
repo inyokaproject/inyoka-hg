@@ -18,7 +18,6 @@
 from django.db import connection
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
-from werkzeug import import_string
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
 from inyoka.utils.http import PageNotFound, DirectResponse, \
@@ -31,23 +30,6 @@ try:
     from pretty import pprint
 except ImportError:
     from pprint import pprint
-
-core_exceptions = (SystemExit, KeyboardInterrupt, PageNotFound)
-try:
-    core_exceptions += (GeneratorExit,)
-except NameError:
-    pass
-
-
-class ExceptionInterceptionMiddleware(object):
-    """Hook in as last middleware to bypass django error system."""
-
-    def process_exception(self, request, exception):
-        if isinstance(exception, DirectResponse):
-            return exception.response
-        if not settings.DEBUG and not isinstance(exception, core_exceptions):
-            logger.exception('Exception during request at %r' % request.path)
-            return TemplateResponse('errors/500.html', {}, 500)
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -70,17 +52,16 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain
-        request.subdomain, urlconf = get_resolver(request.get_host())
-        if urlconf:
-            request.urlconf = urlconf
-
-        else:
+        request.subdomain, resolver = get_resolver(request.get_host())
+        if not resolver:
             main_url = 'http://%s/' % settings.BASE_DOMAIN_NAME
             return HttpResponsePermanentRedirect(main_url)
 
+        # this is used by our dispatcher
+        request.resolver = resolver
+
         # check trailing slash setting
-        urlconf = import_string(request.urlconf)
-        if getattr(urlconf, 'require_trailing_slash', True):
+        if getattr(resolver.urlconf_module, 'require_trailing_slash', True):
             if not request.path.endswith('/'):
                 new_url = 'http://%s%s%s' % (
                     request.subdomain and request.subdomain + '.' or '',
@@ -90,7 +71,6 @@ class CommonServicesMiddleware(CommonMiddleware):
                 if request.GET:
                     new_url += '?' + request.GET.urlencode()
                 return HttpResponsePermanentRedirect(new_url)
-
 
     def process_response(self, request, response):
         """
@@ -109,7 +89,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         self._local_manager.cleanup()
         if settings.DEBUG:
             #XXX: remove me!
-            # optimize SQL statements
             for query in connection.queries:
                 query['sql'] = query['sql'].replace('"', '').replace(',',', ')
             print "DATABASE QUERIES (%s)" % len(connection.queries)

@@ -193,6 +193,10 @@ div.pagination .disabled {
     color: #ddd;
 }
 
+div.pagination .ellipsis {
+    background-color: transparent!important;
+}
+
 div.pagination span.active {
     color: white;
     background-color: #aaa;
