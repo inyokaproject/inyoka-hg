@@ -88,7 +88,7 @@ class InyokaHandler(WSGIHandler):
                         return response
                 raise
         except PageNotFound, e:
-            callback, param_dict = resolver.resolve404()
+            callback, param_dict = request.resolver.resolve404()
             return callback(request, **param_dict)
         except DirectResponse, e:
             return e.response
