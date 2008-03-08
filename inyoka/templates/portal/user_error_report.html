@@ -1,0 +1,41 @@
+{#
+    portal/user_error_report
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Enables a user to report an error
+
+    :copyright: 2008 by Marian Sigler.
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Fehler melden'] %}
+
+{% block appheader %}
+  <h1>Inyoka</h1>
+  <h2>Fehler melden</h2>
+{% endblock %}
+{% block portal_content %}
+  <h3>Fehler in Inyoka melden</h3>
+  <form action="/error_report/" method="post">
+    <dl>
+      <dt><label for="id_title">kurze Beschreibung:</label></dt>
+      {%- if form.title.errors %}<dd>{{ form.title.errors }}</dd>{% endif %}
+      <dd>{{ form.title }}</dd>
+      <dt><label for="id_text">ausführliche Beschreibung:</label></dt>
+      {%- if form.text.errors %}<dd>{{ form.text.errors }}</dd>{% endif %}
+      <dd>{{ form.text }}</dd>
+      {%- if show_url_field %}
+      <dt><label for="id_url">Adresse der Seite, auf der Fehler auftrat:</label></dt>
+      {%- if form.url.errors %}<dd>{{ form.url.errors }}</dd>{% endif %}
+      <dd>{{ form.url }}</dd>
+      {%- endif %}
+    </dl>
+    <p>
+      {%- if not show_url_field %}
+      {{- form.url }}
+      {%- endif -%}
+      <input type="submit" value="Fehlermeldung abschicken" /></p>
+  </form>
+
+{% endblock %}

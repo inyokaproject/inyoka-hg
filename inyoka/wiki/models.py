@@ -519,16 +519,18 @@ class PageManager(models.Manager):
                 something reasonable.
 
             remote_addr
-                The remote address of the user that created this page.  If not
-                given it will be ``'127.0.0.1'`` but never the remote addr of
-                the active request object.  This decision was made so that no
-                confusion comes up when creating page objects in the context
-                of a request that are not affiliated with the user.
+                The remote address of the user that created this page.  Either
+                remote_addr or user is required.  This decision was made so
+                that no confusion comes up when creating page objects in the
+                context of a request that are not affiliated with the user.
+
             update_meta
                 This is a boolean that defines whether metadata should be
                 updated or not. It's useful to disable this for converter
                 scripts.
         """
+        if remote_addr is None and user is None:
+            raise TypeError('either user or remote addr required')
         page = Page(name=name)
         if change_date is None:
             change_date = datetime.utcnow()
@@ -545,8 +547,6 @@ class PageManager(models.Manager):
             user = User.objects.get_system_user()
         elif user.is_anonymous:
             user = None
-        if remote_addr is None:
-            remote_addr = '127.0.0.1'
         page.save()
         page.rev = Revision(page=page, text=text, user=user,
                             change_date=change_date, note=note,
@@ -1020,15 +1020,18 @@ class Page(models.Model):
 
             remote_addr
                 The remote address of the user that created this page.  If not
-                given it will be ``'127.0.0.1'`` but never the remote addr of
-                the active request object.  This decision was made so that no
-                confusion comes up when creating page objects in the context
-                of a request that are not affiliated with the user.
+                given it will be None but either remote_addr or user has to
+                be present.  This decision was made so that no confusion comes
+                up when creating page objects in the context of a request that
+                are not affiliated with the user.
+
             update_meta
                 This is a boolean that defines whether metadata should be
                 updated or not. It's useful to disable this for converter
                 scripts.
         """
+        if remote_addr is None and user is None:
+            raise TypeError('either user or remote addr required')
         try:
             rev = self.revisions.latest()
         except Revision.DoesNotExist:
@@ -1057,8 +1060,6 @@ class Page(models.Model):
             user = None
         if change_date is None:
             change_date = datetime.utcnow()
-        if remote_addr is None:
-            remote_addr = '127.0.0.1'
         self.rev = Revision(page=self, text=text, user=user,
                             change_date=change_date, note=note,
                             attachment=attachment, deleted=deleted,
@@ -1205,7 +1206,7 @@ class Revision(models.Model):
     change_date = models.DateTimeField()
     note = models.CharField(max_length=512)
     deleted = models.BooleanField()
-    remote_addr = models.CharField(max_length=200)
+    remote_addr = models.CharField(max_length=200, null=True)
     attachment = models.ForeignKey(Attachment, null=True, blank=True)
 
     @property

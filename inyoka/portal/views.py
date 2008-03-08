@@ -657,7 +657,8 @@ def privmsg_new(request, username=None):
                        })
                         send_notification(recipient, u'Neue private Nachricht'
                                    u' von %s' % (request.user.username), text)
-                flash(u'Die persönliche Nachricht wurde erfolgreich versendet.')
+                flash(u'Die persönliche Nachricht wurde erfolgreich '
+                      u'versandt.', True)
                 return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
@@ -943,7 +944,6 @@ def user_error_report(request):
             uer.date = datetime.utcnow()
             uer.reporter = request.user
             uer.save()
-            print '***', `UserErrorReport.objects.get(pk=uer.pk).reporter`
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)

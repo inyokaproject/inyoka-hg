@@ -143,26 +143,26 @@ table.forum td.last_post {
     background-image: url('../img/forum/hide.png');
 }
 .action_reply {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/comment_add.png');
 }
 .action_subscribe {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/subscribe.png');
 }
 .action_unsolve {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/unsolve.png');
 }
 .action_solve {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/solve.png');
 }
 .action_report {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/report.png');
 }
 
 .action_edit {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/comment_edit.png');
 }
 .action_quote {
-    background-image: url('../img/forum/unlock.png');
+    background-image: url('../img/forum/quote.png');
 }
 
 table.forum a.collapse {

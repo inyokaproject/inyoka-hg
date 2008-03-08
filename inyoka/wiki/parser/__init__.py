@@ -730,18 +730,22 @@ class Parser(object):
         """
         stream.expect('wiki_link_begin')
         wiki, page = stream.expect('link_target').value
+        if '#' in page:
+            page, anchor = page.split('#', 1)
+        else:
+            anchor = None
         children = []
         while stream.current.type != 'wiki_link_end':
             children.append(self.parse_node(stream))
         stream.expect('wiki_link_end')
         if not wiki:
-            return nodes.InternalLink(page, children)
+            return nodes.InternalLink(page, children, anchor=anchor)
         elif wiki == 'user':
             if not children:
                 children = [nodes.Text(page)]
             return nodes.Link(href('portal', 'users', page), children,
                               class_='user')
-        return nodes.InterWikiLink(wiki, page, children)
+        return nodes.InterWikiLink(wiki, page, children, anchor=anchor)
 
     def parse_external_link(self, stream):
         """

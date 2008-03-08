@@ -26,11 +26,6 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
 from inyoka.utils.logger import logger
 from inyoka.utils.urls import get_resolver
 
-try:
-    from pretty import pprint
-except ImportError:
-    from pprint import pprint
-
 
 class CommonServicesMiddleware(CommonMiddleware):
     """Hook in as first middleware for common tasks."""
@@ -87,6 +82,37 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # clean up after the local manager
         self._local_manager.cleanup()
+
+        if settings.DEBUG:
+            from pprint import pprint
+            import sys, os, StringIO
+            try:
+                cols = settings.DEBUG_COLUMNS - 7
+            except:
+                try:
+                    cols = os.environ['COLUMNS'] - 7
+                except:
+                    cols = 73
+            print >> sys.stderr, "DATABASE QUERIES (%s)" % len(connection.queries)
+            print >> sys.stderr, "-----------------------------------------"
+            for q in connection.queries:
+                sys.stdout.write(q['time'] + ': ')
+                f = StringIO.StringIO(q['sql'].replace('"', '').replace(',',', '))
+                first = True
+                while True:
+                    s = f.readline(cols)
+                    if not s:
+                        break
+                    s = s.rstrip('\n')
+                    if not s:
+                        continue
+                    if first:
+                        print >> sys.stderr, q['time'] + ':', s
+                        first = False
+                    else:
+                        print >> sys.stderr, ' '*6, s
+                print >> sys.stderr
+            print >> sys.stderr, "-----------------------------------------\n"
         return response
 
 
