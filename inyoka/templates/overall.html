@@ -191,8 +191,13 @@
       <p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts das Forum.</p>
       <form method="post" action="{{ href('portal', 'error_report') }}">
         <p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>
-        <p><label for="id_text">Details (die Adresse der Seite wird automatisch mitgespeichert):</label> <textarea style="width: 100%;" rows="3" cols="100" name="text"/></textarea></p>
-        <p><input type="hidden" name="url" value="{{ CURRENT_URL }}" /><input type="submit" value="Fehlermeldung speichern" /></p>
+        <p>Details (die Adresse der Seite wird automatisch mitgespeichert):</p>
+        <p><textarea style="width: 100%;" rows="3" cols="100" name="text"></textarea></p>
+        <p>
+          <input type="hidden" name="url" value="{{ CURRENT_URL }}" />
+          <input type="submit" value="Fehlermeldung speichern" />
+          <input type="submit" name="hide" value="Ausblenden" />
+        </p>
       </form>
     </div>
   </body>
