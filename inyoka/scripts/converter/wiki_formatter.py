@@ -236,8 +236,39 @@ class InyokaFormatter(FormatterBase):
         return u'||'
 
     def table_cell(self, on, attrs=None, **kw):
+        attr = {'rowstyle': '', 'cellstyle': '', 'tablestyle': ''}
+        if attrs:
+            for k, v in attrs.iteritems():
+                v = v.strip('"')
+                if k.startswith('table'):
+                    k = k[5:]
+                    prefix = 'table'
+                elif k.startswith('row'):
+                    k = k[3:]
+                    prefix = 'row'
+                elif k.startswith('cell'):
+                    k = k[4:]
+                    prefix = 'cell'
+                else:
+                    prefix = 'cell'
+                try:
+                    attr[prefix + 'style'] += '%s: %s;' % ({
+                        'bgcolor': 'background-color',
+                        'align': 'text-align',
+                        'valign': 'vertical-align',
+                        'width': 'width',
+                        'height': 'height'
+                    }[k], v)
+                except KeyError:
+                    attr[prefix + k] = v
+
+        attr_str = ''
+        for k, v in attr.iteritems():
+            if v:
+                attr_str += ' %s="%s"' % (k, v)
+        print 'cell', attrs, attr_str
         if on:
-            return u'||'
+            return u'||%s' % (attr_str and ('< %s >' % attr_str) or '')
         return u''
 
     def linebreak(self, preformatted=1):
