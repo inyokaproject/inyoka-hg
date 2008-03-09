@@ -56,9 +56,6 @@ PRIV_DEFAULT = PRIV_ALL = 63
 #: constants hold the name used in the frontend.  i call bullshit,
 #: we use english names again and the constants are left as an
 #: exercise for the reader.
-GROUP_ALL = 'all'
-GROUP_REGISTERED = 'registered'
-GROUP_UNREGISTERED = 'unregistered'
 GROUP_OWNER = 'owner'
 
 #: used by the decorator
@@ -111,9 +108,6 @@ class GroupContainer(object):
         self.user = user
         self.page = page_name
         self.cache = None
-        self._fully_loaded = False
-        self.extra = set([GROUP_ALL, user.is_authenticated and
-                          GROUP_REGISTERED or GROUP_UNREGISTERED])
 
     def load(self):
         """Load the data from the database."""
@@ -124,11 +118,8 @@ class GroupContainer(object):
                (item.startswith('@') and item[1:] in self.cache):
                 self.cache.add(GROUP_OWNER)
                 break
-        self._fully_loaded = True
 
     def __contains__(self, obj):
-        if obj in self.extra:
-            return True
         if self.cache is None:
             self.load()
         return obj in self.cache
@@ -143,8 +134,6 @@ class MultiPrivilegeTest(object):
     def __init__(self, user):
         self.user = user
         self.groups = set(x['name'] for x in self.user.groups.values('name'))
-        self.groups.update([GROUP_ALL, user.is_authenticated and
-                            GROUP_REGISTERED or GROUP_UNREGISTERED])
         self.owned_pages = set(Page.objects.get_owned(self.groups))
 
     def get_groups(self, page_name):
