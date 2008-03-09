@@ -15,7 +15,6 @@ from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
-macros = []
 addslashes = lambda x: x.replace('"', '\\"')
 
 
@@ -23,10 +22,6 @@ class InyokaFormatter(FormatterBase):
     list_depth = 0
 
     def macro(self, macro_obj, name, args):
-        if name not in macros:
-            macros.append(name)
-            print name
-        # TODO: Not yet handled are RandomMirror, RedirectCheck, Tasten
         if name in ['Diskussion']:
             # TODO: Do something for discussoin
             return u''
@@ -150,7 +145,7 @@ class InyokaFormatter(FormatterBase):
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
-            return u'{{{\n#!vorlage %s\n%s\n}}}' % (proesssor_name,
+            return u'{{{\n#!vorlage %s\n%s\n}}}\n' % (processor_name,
                                                     u'\n'.join(lines))
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
@@ -236,8 +231,46 @@ class InyokaFormatter(FormatterBase):
         return u'||'
 
     def table_cell(self, on, attrs=None, **kw):
+        attr = {'rowstyle': '', 'cellstyle': '', 'tablestyle': ''}
+        span = None
+        if attrs:
+            for k, v in attrs.iteritems():
+                v = v.strip('"')
+                if k.startswith('table'):
+                    k = k[5:]
+                    prefix = 'table'
+                elif k.startswith('row'):
+                    k = k[3:]
+                    prefix = 'row'
+                elif k.startswith('cell'):
+                    k = k[4:]
+                    prefix = 'cell'
+                else:
+                    prefix = 'cell'
+                try:
+                    attr[prefix + 'style'] += '%s: %s;' % ({
+                        'bgcolor': 'background-color',
+                        'align': 'text-align',
+                        'valign': 'vertical-align',
+                        'width': 'width',
+                        'height': 'height'
+                    }[k], v)
+                except KeyError:
+                    if k == 'colspan':
+                        span = '-' + v
+                    elif k == 'rowspan':
+                        span = '|' + v
+                    else:
+                        attr[prefix + k] = v
+
+        attr_str = ''
+        if span:
+            attr_str += span
+        for k, v in attr.iteritems():
+            if v:
+                attr_str += ' %s="%s"' % (k, v)
         if on:
-            return u'||'
+            return u'||%s' % (attr_str and ('<%s>' % attr_str.strip()) or '')
         return u''
 
     def linebreak(self, preformatted=1):

@@ -23,8 +23,11 @@ from inyoka.utils.local import current_request
 
 def populate_context_defaults(context):
     """Fill in context defaults."""
-    request = current_request._get_current_object()
-    if request.user.is_authenticated:
+    try:
+        request = current_request._get_current_object()
+    except RuntimeError:
+        request = None
+    if request and request.user.is_authenticated:
         key = 'portal/pm_count/%s' % request.user.id
         pms = cache.get(key)
         if pms is None:
@@ -52,11 +55,15 @@ def populate_context_defaults(context):
         global_message = storage['global_message'] or False
         cache.set('utils/global_message', global_message)
 
+    if request:
+        context.update(
+            REQUEST=request,
+            CURRENT_URL=request.build_absolute_uri(),
+            USER=request.user,
+            MESSAGES=get_flashed_messages()
+        )
+
     context.update(
-        REQUEST=request,
-        CURRENT_URL=request.build_absolute_uri(),
-        USER=request and request.user or None,
-        MESSAGES=get_flashed_messages(),
         GLOBAL_MESSAGE=global_message,
         pm_count=pms,
         report_count=reported,
@@ -171,7 +178,9 @@ class InyokaEnvironment(Environment):
         except (TypeError, KeyError, IndexError, AttributeError):
             try:
                 return getattr(obj, name)
-            except AttributeError:
+            except (AttributeError, TypeError):
+                # TypeError is needed because getattr(obj, integer) isn't
+                # allowed
                 pass
         return self.undefined_singleton
 
