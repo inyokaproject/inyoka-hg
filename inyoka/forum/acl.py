@@ -17,6 +17,7 @@ from inyoka.utils.search import search
 
 
 PRIVILEGES_DETAILS = [
+    ('void', 'darf nix'),
     ('read', 'kann lesen'),
     ('reply', 'kann antworten'),
     ('create', 'kann erstellen'),
