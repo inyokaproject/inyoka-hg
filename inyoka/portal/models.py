@@ -39,6 +39,23 @@ class SubscriptionManager(models.Manager):
     """
     Manager class for the `Subscription` model.
     """
+
+    def user_subscribed(self, user, topic=None, wiki_page=None):
+        if topic is not None:
+            column = 'topic_id'
+            ident = topic.id
+        elif wiki_page is not None:
+            column = 'wiki_page_id'
+            ident = wiki_page.id
+        cursor = connection.cursor()
+        cursor.execute('''
+            select 1 from portal_subscription
+             where user_id = %%s and %s = %%s
+        ''' % column, [user.id, ident])
+        row = cursor.fetchone()
+        cursor.close()
+        return row is not None
+
     def delete_list(self, ids):
         cur = connection.cursor()
         cur.execute('''
@@ -396,3 +413,11 @@ class UserErrorReport(models.Model):
     url = models.URLField('URL')
     assigned_to = models.ForeignKey(User, null=True, blank=True)
     done = models.BooleanField('erledigt', default=False)
+
+    def get_absolute_url(self, action='show'):
+        return href(*{
+            'show': ('admin', 'bugs', 'usererrors'),
+            'done': ('admin', 'bugs', 'usererrors', self.id, 'done'),
+            'not_done': ('admin', 'bugs', 'usererrors', self.id, 'not_done'),
+            'assigntome': ('admin', 'bugs', 'usererrors', self.id, 'assigntome'),
+        }[action])

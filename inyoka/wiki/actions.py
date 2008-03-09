@@ -54,9 +54,10 @@ def context_modifier(request, context):
     """
     if 'page' in context:
         page_name = getattr(context['page'], 'name', None)
-        context['is_subscribed'] = bool(Subscription.objects.filter(
-            wiki_page__name=page_name))
         if page_name:
+            context['is_subscribed'] = request.user.is_authenticated and \
+                Subscription.objects.user_subscribed(request.user,
+                                                     wiki_page=context['page'])
             context['can'] = PrivilegeTest(request.user, page_name)
 
 

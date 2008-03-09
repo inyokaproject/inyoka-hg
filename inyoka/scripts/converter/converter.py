@@ -69,7 +69,7 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser as NormalParser
     from inyoka.scripts.converter.create_templates import create
-    #create()
+    create()
 
     # Hack to disable camel case
     class Parser(NormalParser):
@@ -96,9 +96,9 @@ def convert_wiki():
     l = cPickle.load(f)
     f.close()
     #start = False
-    #for i, moin_name in enumerate(l):
+    for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Startseite']):
+    #for i, moin_name in enumerate(['Startseite']):
         name = normalize_pagename(moin_name)
         print i, ':', name
         #if not start and name != 'Wiki/Sandkasten/margin':
@@ -218,7 +218,7 @@ def convert_users():
         data = {
             'pk': row.user_id,
             'username': row.username[:30],
-            'email': row.user_email[:50] or None,
+            'email': row.user_email[:50] or '',
             'password': 'md5$%s' % row.user_password,
             'is_active': row.user_active,
             'last_login': datetime.fromtimestamp(row.user_lastvisit),

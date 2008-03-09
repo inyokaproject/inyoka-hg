@@ -65,7 +65,6 @@ def set_session_info(request, action, category=None):
         # don't raise the exception here.  We give a shit about broken
         # session infos as it's unimportant information anyways.
         transaction.rollback()
-        raise
     else:
         transaction.commit()
 

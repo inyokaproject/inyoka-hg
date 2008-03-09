@@ -3,9 +3,9 @@
     conftest
     ~~~~~~~~
 
-    Configure py.test for support stuff.
+    Configure py.test for support stuff.  No database support right now!
 
-    :copyright: 2007 by Armin Ronacher.
+    :copyright: 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 
@@ -15,32 +15,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import py
 from inyoka.conf import settings
-from inyoka import default_settings
 
-test_settings = {}
-for key, value in default_settings.__dict__.iteritems():
-    if key.isupper():
-        test_settings[key] = value
-
-test_settings.update(
-    TEST_DATABASE_CHARSET='utf8',
-    TEST_DATABASE_COLLATION='utf8_unicode_ci',
-    TEST_DATABASE_NAME='ubuntuusers_test',
-    DATABASE_USER='root',
-    XAPIAN_DATABASE='/tmp/ubuntuusers_test.xapdb',
-    BASE_DOMAIN_NAME='test.ubuntuusers.de',
-    SESSION_COOKIE_DOMAIN='.test.ubuntuusers.de',
-    MEDIA_URL='http://media.test.ubuntuusers.de',
-    STATIC_URL='http://static.test.ubuntuusers.de',
-    ADMIN_MEDIA_PREFIX = 'http://static.test.ubuntuusers.de/_admin/',
-    INYOKA_SYSTEM_USER_EMAIL = 'system@test.ubuntuusers.de'
-)
-settings.configure(**test_settings)
-
-from django.test.utils import create_test_db, destroy_test_db
-from inyoka.utils.search import search
 from inyoka.utils.cache import set_test_cache
-from inyoka.portal.user import User
 from shutil import rmtree
 
 
@@ -49,19 +25,7 @@ set_test_cache()
 
 
 class Directory(py.test.collect.Directory):
-
-    def setup(self):
-        create_test_db(False, True)
-        # create a basic admin user for testing the user models
-        User.objects.register_user('admin', 'admin@example.org', 'default', False)
-        search.get_connection(True)
-
-    def teardown(self):
-        try:
-            rmtree(settings.XAPIAN_DATABASE)
-        except:
-            pass
-        destroy_test_db(None, False)
+    pass
 
 
 class Module(py.test.collect.Module):

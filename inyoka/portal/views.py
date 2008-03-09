@@ -942,7 +942,8 @@ def user_error_report(request):
             uer.text = data['text']
             uer.url = data['url']
             uer.date = datetime.utcnow()
-            uer.reporter = request.user
+            if request.user.username != 'anonymous':
+                uer.reporter = request.user
             uer.save()
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',

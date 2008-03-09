@@ -37,7 +37,7 @@ class Session(SecureCookie):
         elif not '_sk' in self:
             self['_sk'] = md5('%s%s%s' % (random(), time(),
                               settings.SECRET_KEY)).digest() \
-                              .encode('base64').strip(' =')
+                              .encode('base64').strip('\n =')
         return self['_sk']
 
 

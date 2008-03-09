@@ -24,10 +24,22 @@
   {%- for error in errors %}
   <tr>
     <th style="font-weight: normal">
-      <strong>{{ error.title|e }}</strong>
-      berichtet {{ error.date|specificdatetimeformat(true) }}
-      {% if error.reporter %}von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
+      {%- if error.done %}<img src="{{ href('static', 'img', 'check.png') }}" alt="Erledigt" /> {% endif %}
+      <strong>{{ error.title|e }}</strong>, berichtet {{ error.date|specificdatetimeformat(true) }}
+      {%- if error.reporter %} von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
     </th>
+    <td>
+      {#%- if error.assigned %#}
+      {%- if error.assigned_to %}
+      <a href="{{ error.assigned_to|url }}">{{ error.assigned_to.username|e }}</a> erledigt das | 
+      {%- endif %}
+      <a href="{{ error|url('assigntome') }}">Ich erledige das</a> |
+      {%- if error.done %}
+      <a href="{{ error|url('not_done') }}">Doch nicht erledigt</a>
+      {%- else %}
+      <a href="{{ error|url('done') }}">Erledigt!</a>
+      {%- endif %}
+    </td>
   </tr>
   <tr>
     <td>
@@ -40,4 +52,9 @@
   <strong>Es sind derzeit keine Fehlermeldungen vorhanden. <img src="{{ href('static', 'img/icons/smiley.png') }}" /></strong>
   {% endif %}
 </table>
+{%- if show_all %}
+<p><a href="{{ href('admin', 'bugs', 'usererrors') }}">Nur noch nicht erledigte Fehlermeldungen anzeigen</a></p>
+{%- else %}
+<p><a href="{{ href('admin', 'bugs', 'usererrors', 'all') }}">Auch erledigte Fehlermeldungen anzeigen</a></p>
+{%- endif %}
 {% endblock %}

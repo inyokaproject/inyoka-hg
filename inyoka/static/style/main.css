@@ -611,7 +611,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   margin-top: 2em;
   float: right;
   position: absolute;
-  right: 1em;
+  right: 20px;
   list-style-type: none;
 }
 
@@ -965,4 +965,44 @@ div.not_found img {
 .ac_over {
 	background-color: Highlight;
 	color: HighlightText;
+}
+
+/* temporary error reporting foobar */
+
+#user_error_report {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 12em;
+    color: white;
+    padding: 0.8em 0 2em 0;
+    border-top: 8px solid #444;
+    background-color: #222;
+}
+
+#user_error_report p {
+    margin: 0.5em 2em;
+}
+
+#user_error_report_link {
+    float: right;
+    position: relative;
+    top: -1em;
+    text-decoration: none;
+    background: url(../img/icons/bug.png) no-repeat;
+    padding-left: 20px;
+}
+
+#user_error_report input,
+#user_error_report textarea {
+    background-color: #111;
+    color: white;
+    border: 1px solid #444;
+}
+
+#user_error_report input.disabled,
+#user_error_report input:active {
+    background-color: black!important;
 }
