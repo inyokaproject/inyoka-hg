@@ -22,7 +22,7 @@ PRIVILEGES_DETAILS = [
     ('create', 'kann erstellen'),
     ('edit', 'kann bearbeitenen'),
     ('revert', 'kann revidieren'),
-    ('delete', 'kann löschen'),
+    ('delete', u'kann löschen'),
     ('sticky', 'kann anpinnen'),
     ('vote', 'kann abstimmen'),
     ('create_poll', 'kann Umfragen erstellen'),

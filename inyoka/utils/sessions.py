@@ -57,7 +57,8 @@ def set_session_info(request, action, category=None):
             cursor.execute('''
                 insert into portal_sessioninfo (subject_text, subject_type,
                        subject_link, last_change, action, action_link,
-                       category, key) values (%s, %s, %s, %s, %s, %s, %s, %s);
+                       category, `key`)
+                values (%s, %s, %s, %s, %s, %s, %s, %s);
             ''', args)
         cursor.close()
     except:

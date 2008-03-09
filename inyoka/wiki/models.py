@@ -529,6 +529,10 @@ class PageManager(models.Manager):
                 updated or not. It's useful to disable this for converter
                 scripts.
         """
+        if user is None:
+            user = User.objects.get_system_user()
+        elif user.is_anonymous:
+            user = None
         if remote_addr is None and user is None:
             raise TypeError('either user or remote addr required')
         page = Page(name=name)
@@ -543,10 +547,6 @@ class PageManager(models.Manager):
             att.save_file_file(attachment_filename, attachment)
             att.save()
             attachment = att
-        if user is None:
-            user = User.objects.get_system_user()
-        elif user.is_anonymous:
-            user = None
         page.save()
         page.rev = Revision(page=page, text=text, user=user,
                             change_date=change_date, note=note,
@@ -1030,6 +1030,10 @@ class Page(models.Model):
                 updated or not. It's useful to disable this for converter
                 scripts.
         """
+        if user is None:
+            user = User.objects.get_system_user()
+        elif user.is_anonymous:
+            user = None
         if remote_addr is None and user is None:
             raise TypeError('either user or remote addr required')
         try:
@@ -1054,10 +1058,6 @@ class Page(models.Model):
             att.save_file_file(attachment_filename, attachment)
             att.save()
             attachment = att
-        if user is None:
-            user = User.objects.get_system_user()
-        elif user.is_anonymous:
-            user = None
         if change_date is None:
             change_date = datetime.utcnow()
         self.rev = Revision(page=self, text=text, user=user,
