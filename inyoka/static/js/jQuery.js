@@ -884,8 +884,12 @@ jQuery.extend({
 				var swap = [], stack = [];
 
 				// Locate all of the parent display: none elements
-				for ( var a = elem; a && color(a); a = a.parentNode )
+				for ( var a = elem; a && color(a); a = a.parentNode ) {
+          // mitsuhiko: workaround for safari bug
+          if (jQuery.browser.safari && a.style.display === '')
+            a.style.display = 'none';
 					stack.unshift(a);
+        }
 
 				// Go through and make them visible, but in reverse
 				// (It would be better if we knew the exact display type that they had)
