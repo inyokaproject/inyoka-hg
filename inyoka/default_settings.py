@@ -28,15 +28,11 @@ DATABASE_NAME = DATABASE_USER = DATABASE_HOST = DATABASE_PORT = ''
 
 # mysql only
 DATABASE_ENGINE = 'mysql'
-DATABASE_OPTIONS = {
-    'init_command': "set storage_engine=INNODB"
-}
 
 # if we are in debug mode we issue tickets into a trac
 TRAC_URL = 'http://trac.ubuntuusers.de/'
 TRAC_USERNAME = 'ubuntu_de'
 TRAC_PASSWORD = 'G3h31m!'
-
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

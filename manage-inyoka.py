@@ -40,5 +40,29 @@ def action_migrate():
     migrations.upgrade()
 
 
+def action_create_superuser(username='', email='', password=''):
+    """
+    Create a user with all privileges.  If you don't provide an argument
+    the script will prompt you for it.
+    """
+    from getpass import getpass
+    while not username:
+        username = raw_input('username: ')
+    while not email:
+        email = raw_input('email: ')
+    if not password:
+        while not password:
+            password = getpass('password: ')
+            if password:
+                if password == getpass('repeat: '):
+                    break
+                password = ''
+    from inyoka.portal.user import User
+    user = User.objects.register_user(username, email, password, False)
+    user.is_manager = True
+    user.save()
+    print 'created superuser'
+
+
 if __name__ == '__main__':
     script.run()
