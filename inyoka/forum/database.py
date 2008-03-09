@@ -31,6 +31,7 @@ session.mapper(SAForum, forum_table, properties={
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
         foreign_keys=[forum_table.c.last_post_id]),
     'parent': relation(SAForum,
+        primaryjoin=forum_table.c.id==forum_table.c.parent_id,
         foreign_keys=[forum_table.c.parent_id])
 })
 session.mapper(SATopic, topic_table, properties={
