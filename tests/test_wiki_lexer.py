@@ -140,6 +140,22 @@ def test_pre():
     expect('eof')
 
 
+def test_pre_quote_mixture():
+    expect = lexer.tokenize('\n'.join((
+        u'foo',
+        u'{{{',
+        u'> foo',
+        u'}}}',
+        u'bar'
+    ))).expect
+    expect('text', 'foo\n')
+    expect('pre_begin')
+    expect('text', '\n> foo\n')
+    expect('pre_end')
+    expect('text', '\nbar')
+    expect('eof')
+
+
 def test_table():
     expect = lexer.tokenize(
         u'||1||2||3||\n'

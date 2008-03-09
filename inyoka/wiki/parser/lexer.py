@@ -315,6 +315,8 @@ class Lexer(object):
     }
 
     _quote_re = re.compile(r'^(>+) ?(?m)')
+    _block_start_re = re.compile(r'^\{\{\{(?m)')
+    _block_end_re = re.compile(r'\}\}\}\s*$(?m)')
 
     def tokenize(self, string):
         """
@@ -322,6 +324,7 @@ class Lexer(object):
         """
         buffer = []
         stack = [0]
+        open_blocks = [False]
 
         def tokenize_buffer():
             for item in self.tokenize_block(u'\n'.join(buffer)):
@@ -330,24 +333,32 @@ class Lexer(object):
 
         def tokenize_blocks():
             for line in string.splitlines():
-                m = self._quote_re.match(line)
-                if m is None:
-                    level = 0
-                else:
-                    level = len(m.group(1))
-                    line = line[m.end():]
-                if level > stack[-1]:
-                    for item in tokenize_buffer():
-                        yield item
-                    for new_level in xrange(stack[-1] + 1, level + 1):
-                        stack.append(new_level)
-                        yield 'quote_begin', None
-                elif level < stack[-1]:
-                    for item in tokenize_buffer():
-                        yield item
-                    for x in xrange(stack[-1] - level):
-                        stack.pop()
-                        yield 'quote_end', None
+                block_open = open_blocks[-1]
+                if not block_open and self._block_start_re.match(line):
+                    open_blocks[-1] = True
+                elif block_open and self._block_end_re.match(line):
+                    open_blocks[-1] = False
+                elif not block_open:
+                    m = self._quote_re.match(line)
+                    if m is None:
+                        level = 0
+                    else:
+                        level = len(m.group(1))
+                        line = line[m.end():]
+                    if level > stack[-1]:
+                        for item in tokenize_buffer():
+                            yield item
+                        for new_level in xrange(stack[-1] + 1, level + 1):
+                            stack.append(new_level)
+                            open_blocks.append(False)
+                            yield 'quote_begin', None
+                    elif level < stack[-1]:
+                        for item in tokenize_buffer():
+                            yield item
+                        for x in xrange(stack[-1] - level):
+                            stack.pop()
+                            open_blocks.pop()
+                            yield 'quote_end', None
                 buffer.append(line)
 
             for item in tokenize_buffer():
@@ -355,6 +366,7 @@ class Lexer(object):
             while stack:
                 if stack.pop():
                     yield 'quote_end', None
+                open_blocks.pop()
 
         return TokenStream.from_tuple_iter(tokenize_blocks())
 
