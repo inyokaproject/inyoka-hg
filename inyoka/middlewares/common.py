@@ -15,6 +15,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+from time import time
 from django.db import connection
 from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware

@@ -15,7 +15,6 @@ from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 
-macros = []
 addslashes = lambda x: x.replace('"', '\\"')
 
 
@@ -23,10 +22,6 @@ class InyokaFormatter(FormatterBase):
     list_depth = 0
 
     def macro(self, macro_obj, name, args):
-        if name not in macros:
-            macros.append(name)
-            print name
-        # TODO: Not yet handled are RandomMirror, RedirectCheck, Tasten
         if name in ['Diskussion']:
             # TODO: Do something for discussoin
             return u''
@@ -150,7 +145,7 @@ class InyokaFormatter(FormatterBase):
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
-            return u'{{{\n#!vorlage %s\n%s\n}}}' % (proesssor_name,
+            return u'{{{\n#!vorlage %s\n%s\n}}}\n' % (processor_name,
                                                     u'\n'.join(lines))
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
@@ -237,6 +232,7 @@ class InyokaFormatter(FormatterBase):
 
     def table_cell(self, on, attrs=None, **kw):
         attr = {'rowstyle': '', 'cellstyle': '', 'tablestyle': ''}
+        span = None
         if attrs:
             for k, v in attrs.iteritems():
                 v = v.strip('"')
@@ -260,15 +256,21 @@ class InyokaFormatter(FormatterBase):
                         'height': 'height'
                     }[k], v)
                 except KeyError:
-                    attr[prefix + k] = v
+                    if k == 'colspan':
+                        span = '-' + v
+                    elif k == 'rowspan':
+                        span = '|' + v
+                    else:
+                        attr[prefix + k] = v
 
         attr_str = ''
+        if span:
+            attr_str += span
         for k, v in attr.iteritems():
             if v:
                 attr_str += ' %s="%s"' % (k, v)
-        print 'cell', attrs, attr_str
         if on:
-            return u'||%s' % (attr_str and ('< %s >' % attr_str) or '')
+            return u'||%s' % (attr_str and ('<%s>' % attr_str.strip()) or '')
         return u''
 
     def linebreak(self, preformatted=1):

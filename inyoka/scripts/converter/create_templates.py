@@ -10,7 +10,6 @@
     :license: GNU GPL.
 """
 import os
-from inyoka.forum.models import Forum
 from inyoka.wiki.models import Page
 from inyoka.utils.storage import storage
 
@@ -162,7 +161,113 @@ def create_page_templates():
 
 
 def create_markup_stylesheet():
-    storage['markup_styles'] = u""""""
+    storage['markup_styles'] = u"""#page tr.titel {
+    font-weight: bold;
+    background: #E2C890;
+    color: #000000;
+    text-align: center;
+}
+
+#page tr.kopf {
+    font-weight: bold;
+    background: #F9EAAF;
+    color: #000000;
+}
+
+#page tr.trennzeile {
+    background: #DDDDDD;
+    color: #000000;
+}
+
+#page tr.highlight {
+    background: #EEEEEE;
+    color: #000000;
+}
+
+#page tr.verlauf {
+    font-weight: bold;
+    color: #000000;
+    background-image: url(../img/wiki/heading.png);
+    text-align: center;
+}
+
+/* Tabellen Deko KDE ---- */
+#page tr.kde-titel {
+    font-weight: bold;
+    background: #013397;
+    color: white;
+    text-align: center;
+}
+
+#page tr.kde-kopf {
+    font-weight: bold;
+    background: #0169C9;
+    color: white;
+}
+
+#page tr.kde-highlight {
+    background: #AACCEE;
+    color: #000000;
+}
+
+/* Tabellen Deko Xfce ---- */
+#page tr.xfce-titel {
+    font-weight: bold;
+    background: #B3DEFD;
+    color:#000000;
+    text-align: center;
+}
+
+#page tr.xfce-kopf {
+    font-weight: bold;
+    background: #EFEFEF;
+    color: #000000;
+}
+
+#page tr.xfce-highlight {
+    background: #EFEFEF;
+    color: #000000;
+}
+
+/* Tabellen Deko Edubuntu ---- */
+#page tr.edu-titel {
+    font-weight: bold;
+    background: #d41308;
+    color: white;
+    text-align: center;
+}
+
+#page tr.edu-kopf {
+    font-weight: bold;
+    background: #f1480e;
+    color: white;
+}
+
+#page tr.edu-highlight {
+    background: #f68b11;
+    color: #000000;
+}
+
+/* Tabellen Deko ubuntustudio ---- */
+#page tr.studio-titel {
+    font-weight: bold;
+    background: #171717;
+    color:#009bf9;
+    text-align: center;
+}
+
+#page tr.studio-kopf {
+    font-weight: bold;
+    background: #525252;
+    color:#009bf9;
+}
+
+#page tr.studio-highlight {
+    background: #171717;
+    color:#FFFFFF;
+}
+
+"""
 
 
 def create_smilies():
@@ -233,7 +338,11 @@ def create_smilies():
                         note=u'Flaggen automatisch erstellt')
 
 
-if __name__ == '__main__':
+def create():
     create_page_templates()
     create_markup_stylesheet()
     create_smilies()
+
+
+if __name__ == '__main__':
+    create()

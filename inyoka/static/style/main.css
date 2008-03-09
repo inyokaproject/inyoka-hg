@@ -225,10 +225,6 @@ table th {
   text-align: left;
 }
 
-table td {
-  background-color: #fff;
-}
-
 table tr.head th,
 table thead th {
     background-image: url('../img/table-header.png');
