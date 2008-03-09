@@ -58,8 +58,6 @@
         <li class="{{ app }}{% if app == active_app %} active{% endif
           %}"><a href="{{ href(app) }}">{{ app|capitalize }}</a></li>
         {%- endfor %}
-        <li class="bugs {% if active_app == 'bugs' %} active {% endif %}">
-        <a href="{{ href('portal', 'error_report') }}">Bug melden</a>
       </ul>{# .tabbar #}
     </div>{# .header #}
 
@@ -99,6 +97,7 @@
         </ul>{# .navi_global #}
         {%- endif %}
         {% block appheader %}{% endblock %}
+        <a href="{{ href('portal', 'error_report') }}" id="user_error_report_link">Bug melden</a>
       </div>{# .appheader #}
 
       <div class="pathbar">
