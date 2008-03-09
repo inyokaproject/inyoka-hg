@@ -171,7 +171,9 @@ class InyokaEnvironment(Environment):
         except (TypeError, KeyError, IndexError, AttributeError):
             try:
                 return getattr(obj, name)
-            except AttributeError:
+            except (AttributeError, TypeError):
+                # TypeError is needed because getattr(obj, integer) isn't
+                # allowed
                 pass
         return self.undefined_singleton
 
