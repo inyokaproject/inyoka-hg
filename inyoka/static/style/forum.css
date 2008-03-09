@@ -14,6 +14,10 @@ div.content {
     border: none;
 }
 
+table.forum {
+    margin: 0 0 10px 0;
+}
+
 table.forum td.topic, table.forum td.posts, table.forum td.post_count {
 	font-size: 0.9em;
 }
@@ -319,7 +323,7 @@ form.post_editor dd.collapse_enabled {
 
 div.preview_wrapper {
     border: 1px solid #ccc;
-    margin-top: 10px;
+    margin: 10px 0 10px 0;
     padding: 10px 10px 0 10px;
 }
 

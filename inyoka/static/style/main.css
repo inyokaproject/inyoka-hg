@@ -653,7 +653,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   border: 1px solid #bbb;
   padding: 5px 5px 5px 8px;
   font-size: 0.85em;
-  margin: 0 20px 1em;
+  margin: 0 20px 10px 20px;
 }
 
 .pathbar p.trace {
@@ -844,12 +844,13 @@ p.badges img:hover {
 /*** Message Boxes ************************************************************/
 
 .message {
-  margin: 10px 20px;
-  padding: 0.2em 1.5em;
+  margin: -10px 20px 10px 20px;
+  padding: 0.4em 0.8em;
   background-color: #F9EAAF;
   background-repeat: no-repeat;
   background-position: left center;
   border: 1px solid #E8A21A;
+  border-top: none;
   text-align: left;
 }
 

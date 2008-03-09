@@ -140,7 +140,7 @@ $(document).ready(function() {
 
   // add links to the "package" macro
   $('.package-list').each(function(i, elm) {
-    var [apt, aptitude] = $('.bash', elm);
+    var tmp = $('.bash', elm), apt = tmp[0], aptitude = tmp[1];
     $(aptitude).hide();
     $($('p', elm)[0]).append(
       $('<a>apt-get</a>').click(function() {
