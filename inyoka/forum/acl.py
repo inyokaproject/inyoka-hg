@@ -10,7 +10,7 @@
 """
 from itertools import izip
 from django.db import connection
-from inyoka.portal.user import User, Group
+from inyoka.portal.user import User, Group, DEFAULT_GROUP_ID
 from inyoka.forum.models import Forum
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.search import search
@@ -51,8 +51,10 @@ def get_privileges(user, forums):
          where p.forum_id in (%s) and (p.user_id = %%s or p.group_id in
                (select g.id from portal_group g, portal_user u,
                                  portal_user_groups ug
-                 where u.id = ug.user_id and g.id = ug.group_id))
-    ''' % (fields, ', '.join(['%s'] * len(forum_ids))),
+                 where u.id = ug.user_id and g.id = ug.group_id)
+               %s)
+    ''' % (fields, ', '.join(['%s'] * len(forum_ids)),
+        user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''),
         (tuple(forum_ids) + (user.id,)))
     result = {}
     for forum_id in forum_ids:
