@@ -1006,3 +1006,10 @@ div.not_found img {
 #user_error_report input:active {
     background-color: black!important;
 }
+
+#user_error_report :link,
+#user_error_report :visited {
+    text-decoration: none;
+    color: #956205;
+}
+
