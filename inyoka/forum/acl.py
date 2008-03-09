@@ -31,7 +31,7 @@ PRIVILEGES_DETAILS = [
     ('moderate', 'kann moderieren')
 ]
 
-PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS]
+PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
 
 
 def get_forum_privileges(user, forum):
