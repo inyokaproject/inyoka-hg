@@ -40,9 +40,9 @@ def get_forum_privileges(user, forum):
 
 def get_privileges(user, forums):
     """Return all privileges of the applied forums for the `user`"""
-    if not forums:
-        return {}
     forum_ids = [x.id for x in forums]
+    if not forum_ids:
+        return dict.fromkeys(PRIVILEGES, False)
     fields = ', '.join('p.can_' + x for x in PRIVILEGES)
     cur = connection.cursor()
     cur.execute('''
