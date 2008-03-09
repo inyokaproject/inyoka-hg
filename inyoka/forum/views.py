@@ -67,7 +67,9 @@ def index(request, category=None):
     """
     categories = Forum.objects.get_categories(depth=1)
     if category:
-        categories = [categories.get(slug=slugify(category))]
+        categories = [Forum.objects.get(slug=slugify(category))]
+        if categories[0].parent_id:
+            raise PageNotFound
         fmsg = categories[0].find_welcome(request.user)
         if fmsg is not None:
             return welcome(request, fmsg.slug, request.path)
