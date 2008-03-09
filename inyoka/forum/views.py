@@ -213,8 +213,8 @@ def viewtopic(request, topic_slug, page=1):
     subscribed = False
     if request.user.is_authenticated:
         t.mark_read(request.user)
-        subscribed = bool(Subscription.objects.filter(
-            topic=t, user=request.user))
+        subscribed = Subscription.objects.user_subscribed(request.user,
+                                                          topic=t)
     return {
         'topic':        t,
         'forum':        t.forum,

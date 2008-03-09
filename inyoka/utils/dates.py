@@ -114,10 +114,14 @@ def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
     )
     if now is None:
         now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    elif now.tzinfo is not None:
+        now.tzinfo = d.astimezone(pytz.UTC)
     if type(d) is date:
         d = datetime(d.year, d.month, d.day)
-    if now.tzinfo != d.tzinfo:
-        d = d.astimezone(now.tzinfo)
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=pytz.UTC)
+    else:
+        d = d.astimezone(pytz.UTC)
     delta = now - d
 
     since = delta.days * 24 * 60 * 60 + delta.seconds

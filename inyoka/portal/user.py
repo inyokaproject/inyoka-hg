@@ -79,6 +79,19 @@ class Group(models.Model):
 
 class UserManager(models.Manager):
 
+    def get(self, pk=None, **kwargs):
+        if pk is None:
+            pk = kwargs.pop('id__exact', None)
+        if pk is not None:
+            user = cache.get('portal/user/%d' % pk)
+            if user is not None:
+                return user
+            kwargs['pk'] = pk
+        user = models.Manager.get(self, **kwargs)
+        if pk is not None:
+            cache.set('portal/user/%d' % pk, user, 300)
+        return user
+
     def create_user(self, username, email, password=None):
         now = datetime.utcnow()
         user = self.model(
@@ -221,7 +234,8 @@ class User(models.Model):
         """
         self._settings = cPickle.dumps(self.settings)
         super(User, self).save()
-        cache.delete('user/%s/profile' % self.id)
+        cache.delete('portal/user/%s/signature' % self.id)
+        cache.delete('portal/user/%s' % self.id)
 
     def __unicode__(self):
         return self.username
@@ -271,7 +285,7 @@ class User(models.Model):
         context = RenderContext(request)
         if nocache or self.id is None or format != 'html':
             return parse(self.signature).render(context, format)
-        key = 'user/%d/profile' % self.id
+        key = 'portal/user/%d/signature' % self.id
         instructions = cache.get(key)
         if instructions is None:
             instructions = parse(self.signature).compile(format)
