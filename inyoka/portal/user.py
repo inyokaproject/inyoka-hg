@@ -30,7 +30,7 @@ from inyoka.utils.local import current_request
 
 UNUSABLE_PASSWORD = '!'
 _ANONYMOUS_USER = None
-
+DEFAULT_GROUP_ID = 1  # group id for all registered users
 
 class UserBanned(Exception):
     """
@@ -69,6 +69,7 @@ def check_password(raw_password, enc_password, convert_user=None):
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField('Öffentliches Profil')
+    _default_group = None
 
     def get_absolute_url(self):
         return href('portal', 'groups', self.name)
@@ -76,6 +77,12 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+    @classmethod
+    def get_default_group(self):
+        """Return a default group for all registered users."""
+        if not Group._default_group:
+            Group._default_group = Group.objects.get(id=DEFAULT_GROUP_ID)
+        return Group._default_group
 
 class UserManager(models.Manager):
 
@@ -255,6 +262,12 @@ class User(models.Model):
         """Sends an e-mail to this User."""
         from django.core.mail import send_mail
         send_mail(subject, message, from_email, [self.email])
+
+    def get_groups(self):
+        """Get groups inclusive the default group for registered users"""
+        groups = self.is_authenticated and [Group.get_default_group()] or []
+        groups.extend(self.groups.all())
+        return groups
 
     @deferred
     def settings(self):
