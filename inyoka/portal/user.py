@@ -170,9 +170,7 @@ class User(models.Model):
 
     username = models.CharField('Benutzername', max_length=30, unique=True,
         validator_list=[validators.isAlphaNumeric])
-    #email = models.EmailField('E-Mail-Adresse', unique=True)
-    # allow @localhost addresses for easier testing
-    email = models.CharField('E-Mail-Adresse', unique=True, max_length=50)
+    email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)

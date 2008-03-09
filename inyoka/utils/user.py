@@ -17,7 +17,6 @@ from sha import sha
 import random, string
 from inyoka.conf import settings
 from inyoka.utils.urls import href
-from inyoka.utils.captcha import generate_word
 
 
 SESSION_KEY = '_auth_user_id'

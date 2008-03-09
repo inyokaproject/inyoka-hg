@@ -10,26 +10,11 @@
     :copyright: 2008 by Christoph Hack, Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
-from sqlalchemy import Table, Column, String, Text, Integer, \
-    ForeignKey, DateTime, UniqueConstraint, Boolean, create_engine, \
-    MetaData, select
-from sqlalchemy.orm import relation, backref, scoped_session, create_session
-from inyoka.conf import settings
+from sqlalchemy import Table
+from sqlalchemy.orm import relation, backref
+from inyoka.utils.database import metadata, session
 from inyoka.forum.models import SAForum, SATopic, SAPost, SAAttachment, SAUser
 
-
-metadata = MetaData()
-engine = create_engine('%s://%s:%s@%s/%s' % (
-    settings.DATABASE_ENGINE, settings.DATABASE_USER,
-    settings.DATABASE_PASSWORD, settings.DATABASE_HOST, settings.DATABASE_NAME),
-    pool_recycle=300, convert_unicode=True)
-metadata.bind = engine
-
-session = scoped_session(lambda: create_session(engine,
-    transactional=True))
-from django.dispatch import dispatcher
-from django.core.signals import request_finished
-dispatcher.connect(session.remove, request_finished)
 
 forum_table = Table('forum_forum', metadata, autoload=True)
 topic_table = Table('forum_topic', metadata, autoload=True)

@@ -87,6 +87,7 @@ class Category(models.Model):
     def save(self):
         self.slug = slugify(self.name)
         super(Category, self).save()
+        cache.delete('ikhaya/categories')
 
     class Meta:
         verbose_name = 'Kategorie'
@@ -104,12 +105,13 @@ class Article(models.Model):
                                verbose_name='Autor')
     subject = models.CharField('Überschrift', max_length=180)
     category = models.ForeignKey(Category, verbose_name='Kategorie')
-    icon = models.ForeignKey(Icon, blank=True, null=True, verbose_name='Icon')
+    icon = models.ForeignKey(Icon, blank=True, verbose_name='Icon')
     intro = models.TextField('Einleitung')
     text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')
     slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
+    comment_count = models.IntegerField(default=0)
 
     def _simplify(self, text, key):
         """Remove markup of a text that belongs to this Article"""
@@ -231,6 +233,8 @@ class Article(models.Model):
         if suffix_id:
             self.slug = '%s-%s' % (slug, self.id)
             super(Article, self).save()
+        cache.delete('ikhaya/archive')
+        cache.delete('ikhaya/short_archive')
 
     def delete(self):
         """
@@ -277,7 +281,7 @@ class Suggestion(models.Model):
 
 
 class Comment(models.Model):
-    article = models.ForeignKey(Article)
+    article = models.ForeignKey(Article, null=True)
     title = models.CharField(max_length=100)
     text = models.TextField()
     author = models.ForeignKey(User)
@@ -296,6 +300,11 @@ class Comment(models.Model):
             instructions = parse(self.text).compile('html')
             cache.set(key, instructions)
         return render(instructions, context)
+
+    def save(self):
+        super(Comment, self).save()
+        self.article.comment_count += 1
+        self.article.save()
 
 
 class ArticleSearchAuthDecider(object):
@@ -338,3 +347,17 @@ class IkhayaSearchAdapter(SearchAdapter):
         }
 
 search.register(IkhayaSearchAdapter())
+
+
+class SAArticle(Article):
+    __metaclass__ = type
+    pass
+class SACategory(Category):
+    __metaclass__ = type
+    pass
+class SAComment(Comment):
+    __metaclass__ = type
+    pass
+class SAUser(User):
+    __metaclass__ = type
+    pass

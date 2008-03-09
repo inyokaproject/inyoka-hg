@@ -964,4 +964,3 @@ def user_error_report(request):
         'form': form,
         'show_url_field': show_url_field,
     }
-
