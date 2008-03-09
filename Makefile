@@ -36,6 +36,9 @@ test_data:
 convert:
 	@(python inyoka/scripts/converter/converter.py)
 
+server_cherrypy:
+	@(python manage-inyoka.py runcp)
+
 server:
 	@(python manage-inyoka.py runserver)
 

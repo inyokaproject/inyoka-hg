@@ -413,3 +413,11 @@ class UserErrorReport(models.Model):
     url = models.URLField('URL')
     assigned_to = models.ForeignKey(User, null=True, blank=True)
     done = models.BooleanField('erledigt', default=False)
+
+    def get_absolute_url(self, action='show'):
+        return href(*{
+            'show': ('admin', 'bugs', 'usererrors'),
+            'done': ('admin', 'bugs', 'usererrors', self.id, 'done'),
+            'not_done': ('admin', 'bugs', 'usererrors', self.id, 'not_done'),
+            'assigntome': ('admin', 'bugs', 'usererrors', self.id, 'assigntome'),
+        }[action])
