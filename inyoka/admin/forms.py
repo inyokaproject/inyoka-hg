@@ -91,8 +91,7 @@ class EditUserForm(forms.Form):
     new_password = forms.CharField(label=u'Neues Passwort',
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
                                    u'Bitte nur angeben, wenn benötigt'))
-    #XXX: use `EmailField` after testing, see portal.user.User
-    email = forms.CharField(label=u'E-Mail')
+    email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)

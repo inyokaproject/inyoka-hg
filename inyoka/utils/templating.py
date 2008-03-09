@@ -91,11 +91,14 @@ class InyokaEnvironment(Environment):
     """
 
     def __init__(self):
+        use_memcache = settings.TEMPLATE_CACHING
+        if use_memcache is None:
+            use_memcache = not settings.DEBUG
         Environment.__init__(self,
             # XXX: write a loader that uses the current active cache system
             loader=FileSystemLoader(os.path.join(os.path.dirname(__file__),
                                     os.pardir, 'templates'),
-            use_memcache=not settings.DEBUG,
+            use_memcache=use_memcache,
             memcache_size=200
         ))
         self.globals.update(
