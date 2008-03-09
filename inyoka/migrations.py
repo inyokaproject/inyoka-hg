@@ -43,4 +43,14 @@ def create_initial_revision(m):
     execute_script(m.engine, 'initial.sql')
 
 
-MIGRATIONS = [create_initial_revision]
+def fix_ikhaya_icon_relation_definition(m):
+    """
+    This migration fixed a bug in the Article definition of the ikhaya
+    models.
+    """
+    m.engine.execute('''
+        alter table ikhaya_article modify column icon_id integer;
+    ''')
+
+
+MIGRATIONS = [create_initial_revision, fix_ikhaya_icon_relation_definition]

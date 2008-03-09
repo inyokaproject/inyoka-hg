@@ -40,6 +40,7 @@ class ArticleManager(models.Manager):
 
 
 class SuggestionManager(models.Manager):
+
     def delete(self, ids):
         """
         Deletes a list of suggestions with only one query.
@@ -105,7 +106,7 @@ class Article(models.Model):
                                verbose_name='Autor')
     subject = models.CharField('Überschrift', max_length=180)
     category = models.ForeignKey(Category, verbose_name='Kategorie')
-    icon = models.ForeignKey(Icon, blank=True, verbose_name='Icon')
+    icon = models.ForeignKey(Icon, blank=True, null=True, verbose_name='Icon')
     intro = models.TextField('Einleitung')
     text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')
