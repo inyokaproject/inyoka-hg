@@ -19,6 +19,10 @@ DEBUG = False
 # so is the code execution debugger.  never enable on production
 ENABLE_DEBUGGER = False
 
+# template caching.  If none the templates will be cache if the
+# debug stuff is disabled
+TEMPLATE_CACHING = None
+
 # per default there are no managers and admins.  I guess that's
 # unused :)
 MANAGERS = ADMINS = ()

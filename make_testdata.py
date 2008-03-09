@@ -127,7 +127,10 @@ def make_users():
 
 def make_forum():
     print 'Creating forum test data'
-    admin = User.objects.get(username="admin")
+    try:
+        admin = User.objects.select(is_manager=True)[0]
+    except:
+        admin = None
     for name in create_names(7, title):
         parent = None
         if randint(1, 6) != 6:
@@ -137,7 +140,8 @@ def make_forum():
                 pass
         f = Forum(name=name, parent=parent)
         f.save()
-        Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
+        if admin is not None:
+            Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
         forums.append(f)
         if parent != None:
             for _ in xrange(randint(1, 3)):

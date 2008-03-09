@@ -64,5 +64,15 @@ def action_create_superuser(username='', email='', password=''):
     print 'created superuser'
 
 
+def action_runcp(hostname='0.0.0.0', port=8080):
+    """Run the application in CherryPy."""
+    from cherrypy.wsgiserver import CherryPyWSGIServer
+    server = CherryPyWSGIServer((hostname, port), make_app())
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        server.stop()
+
+
 if __name__ == '__main__':
     script.run()

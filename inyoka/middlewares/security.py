@@ -43,7 +43,7 @@ class SecurityMiddleware(object):
                 if csrf_token != submitted_token:
                     raise ValueError()
             except (KeyError, ValueError):
-                return TemplateResponse('errors/400_csrf.html', {})
+                return TemplateResponse('errors/400_csrf.html', {}, 400)
 
     def process_response(self, request, response):
         if response['content-type'].startswith('text/html') and \
