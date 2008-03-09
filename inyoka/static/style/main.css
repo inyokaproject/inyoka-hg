@@ -433,6 +433,7 @@ table.syntaxtable td.linenos {
 .tabbar li.ikhaya a { background-image: url(../img/icons/ikhaya.png); }
 .tabbar li.planet a { background-image: url(../img/icons/planet.png); }
 .tabbar li.community a   { background-image: url(../img/icons/community.png); }
+.tabbar li.bugs a { background-image: url(../img/icons/bugs.png); }
 
 .tabbar li.active {
   background-image: url(../img/tabbar_border.png);
@@ -968,4 +969,18 @@ div.not_found img {
 .ac_over {
 	background-color: Highlight;
 	color: HighlightText;
+}
+
+
+#user_error_report {
+    border-top: 2px solid #AAA;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #EEE;
+}
+
+#user_error_report p {
+    margin:.25em .5em;
 }
