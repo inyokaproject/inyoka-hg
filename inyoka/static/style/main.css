@@ -973,6 +973,7 @@ div.not_found img {
 
 
 #user_error_report {
+    display: none;
     position: fixed;
     bottom: 0;
     left: 0;

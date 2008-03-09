@@ -877,8 +877,34 @@ def styles(request):
 
 @require_manager
 @templated('admin/usererrors.html')
-def usererrors(request):
-    errors = UserErrorReport.objects.order_by('-date')
+def usererrors(request, all=False):
+    if all:
+        errors = UserErrorReport.objects.order_by('-date')
+    else:
+        errors = UserErrorReport.objects.filter(done=False).order_by('-date')
     return {
         'errors': errors,
     }
+
+def usererrors_change(request, id, mode):
+    try:
+        error = UserErrorReport.objects.get(id=id)
+    except UserErrorReport.DoesNotExist:
+        raise PageNotFound
+    if mode == 'assigntome':
+        error.assigned_to = request.user
+        error.save()
+        flash(u'Der Fehler „%s“ wurde dir zugewiesen!' % error.title, True)
+    elif mode == 'done':
+        error.done = True
+        error.save()
+        flash(u'Der Fehler „%s“ wurde als erledigt markiert.'
+              % error.title, True)
+    elif mode == 'not_done':
+        error.done = False
+        error.save()
+        flash(u'Der Fehler „%s“ wurde als nicht erledigt markiert'
+              % error.title, True)
+    else:
+        raise PageNotFound
+    return HttpResponseRedirect(href('admin', 'bugs', 'usererrors'))

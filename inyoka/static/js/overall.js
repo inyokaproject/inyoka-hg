@@ -161,17 +161,19 @@ $(document).ready(function() {
   });
 
   $('#user_error_report_link').click(function() {
-    $('body')
-      .append('<div id="user_error_report">' +
-          '<p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts das Forum.</p>' +
-          '<form method="post" action="http://ubuntuusers.local:8080">' +
-            '<p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>' +
-            '<p><label for="id_text">Details:</label> <textarea style="width: 100%;" rows="3" cols="100" name="title"/></textarea></p>' +
-            '<p><input type="submit" value="Fehlermeldung speichern" /></p>' +
-          '</form>' +
-//          '<a href="." id="user_error_report_x>X</a>' +
-        '</div>')
-      .css('margin-bottom', '12em');
+//     $('body')
+//       .append('<div id="user_error_report">' +
+//           '<p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts das Forum.</p>' +
+//           '<form method="post" action="http://ubuntuusers.local:8080">' +
+//             '<p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>' +
+//             '<p><label for="id_text">Details:</label> <textarea style="width: 100%;" rows="3" cols="100" name="title"/></textarea></p>' +
+//             '<p><input type="submit" value="Fehlermeldung speichern" /></p>' +
+//           '</form>' +
+// //          '<a href="." id="user_error_report_x>X</a>' +
+//         '</div>')
+//       .css('margin-bottom', '12em');
+      $('#user_error_report').slideDown('slow')
+      $('body').css('margin-bottom', '12em')
       $('#id_title')[0].focus();
 //      $('#user_error_report_x').click(function () { $.remove('#user_error_report'); return false });
       return false;

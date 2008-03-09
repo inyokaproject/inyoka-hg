@@ -97,7 +97,7 @@
         </ul>{# .navi_global #}
         {%- endif %}
         {% block appheader %}{% endblock %}
-        <a href="{{ href('portal', 'error_report') }}" id="user_error_report_link">Bug melden</a>
+        <a href="{{ href('portal', 'error_report', url=CURRENT_URL) }}" id="user_error_report_link">Bug melden</a>
       </div>{# .appheader #}
 
       <div class="pathbar">
@@ -187,5 +187,13 @@
         </li>
       </ul>
     </div>{# .footer #}
+    <div id="user_error_report">
+      <p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts das Forum.</p>
+      <form method="post" action="{{ href('portal', 'error_report') }}">
+        <p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>
+        <p><label for="id_text">Details (die Adresse der Seite wird automatisch mitgespeichert):</label> <textarea style="width: 100%;" rows="3" cols="100" name="text"/></textarea></p>
+        <p><input type="hidden" name="url" value="{{ CURRENT_URL }}" /><input type="submit" value="Fehlermeldung speichern" /></p>
+      </form>
+    </div>
   </body>
 </html>
