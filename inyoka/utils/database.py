@@ -17,7 +17,7 @@ from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
 from inyoka.conf import settings
 
-engine = create_engine('mysql://%s:%s@%s/%s' % (
+engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
 ), pool_recycle=300, convert_unicode=True)
