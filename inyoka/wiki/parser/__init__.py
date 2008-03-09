@@ -888,6 +888,7 @@ class Parser(object):
                         row.class_ = u' '.join(args) or None
                     row.style = attrs.get('rowstyle')
                 cell.class_ = attrs.get('cellclass') or None
+                cell.style = attrs.get('cellstyle') or None
                 cell.colspan = attrs.get('colspan', 0)
                 cell.rowspan = attrs.get('rowspan', 0)
                 cell.align = attrs.get('align')
