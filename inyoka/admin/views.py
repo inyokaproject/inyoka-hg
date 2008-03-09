@@ -884,6 +884,7 @@ def usererrors(request, all=False):
         errors = UserErrorReport.objects.filter(done=False).order_by('-date')
     return {
         'errors': errors,
+        'show_all': all,
     }
 
 def usererrors_change(request, id, mode):
