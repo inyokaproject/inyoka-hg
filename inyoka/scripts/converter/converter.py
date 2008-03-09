@@ -214,7 +214,7 @@ def convert_users():
         data = {
             'pk': row.user_id,
             'username': row.username[:30],
-            'email': row.user_email[:50] or None,
+            'email': row.user_email[:50] or '',
             'password': 'md5$%s' % row.user_password,
             'is_active': row.user_active,
             'last_login': datetime.fromtimestamp(row.user_lastvisit),
