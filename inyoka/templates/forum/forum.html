@@ -25,9 +25,9 @@
 {% block forum_content %}
   <table class="forum">
     <thead>
-      <tr><th colspan="4" class="category">{{ forum.name|e }}</th></tr>
+      <tr><th colspan="5" class="category">{{ forum.name|e }}</th></tr>
       <tr>
-        <td colspan="4">
+        <td colspan="5">
           {%- if forum.description %}
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
@@ -44,11 +44,21 @@
     {% endfor %}
     <tr>
       <th class="topic" colspan="2">Thema</th>
-      <th class="post_count">Antworten</th>
-      <th class="last_post">Letzte Antwort</th>
+      <th class="view_count">Aufrufe</th>
+      <th class="last_post" colspan="2">Antworten</th>
     </tr>
     {%- for topic in topics %}
-    <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+      {%- if topic.hidden and not privileges.moderate %}
+      <tr class="deleted">
+        <td class="icon">
+          <img src="{{ href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
+        </td>
+        <td colspan="5">
+          Dieses Thema wurde von einem Moderator gelöscht.
+        </td>
+      </tr>
+      {%- else %}
+      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
           {{ topic_icon(topic) }}
         </td>
@@ -67,15 +77,15 @@
             ]{% endif -%}
           </p>
         </td>
-        <td class="post_count">
-          {{ topic.post_count }} / {{ topic.view_count }}
-        </td>
+        <td class="view_count">{{ topic.view_count }}</td>
+        <td class="post_count">{{ topic.post_count - 1 }}</td>
         <td class="last_post">{% if forum.last_post_id %}
           <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
           von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
         {%- else %}---{% endif %}</td>
       </tr>
+      {%- endif %}
     {% else %}
       <tr>
         <td colspan="5">
