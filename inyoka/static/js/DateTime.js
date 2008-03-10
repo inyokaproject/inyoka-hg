@@ -54,7 +54,7 @@
       this.timetable.hide();
       this.currentTime = '00:00:00';
     }
-    this.input.parent().append(this.container);
+    this.input.after(this.container);
   }
 
   DateTimeField.prototype = {

@@ -9,7 +9,8 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{%- set styles = styles + ['portal.css'] -%}
+{% set styles = styles + ['portal.css', 'datetimefield.css'] %}
+{% set scripts = scripts + ['DateTime.js'] %}
 {% set title_trace = ['Suche'] %}
 {% set title = 'Suche' %}
 
@@ -63,9 +64,21 @@
     <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
     <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
     <dt><label for="id_date_begin">Zeitraum:</label></dt>
-    <dd>{{ searchform.date_begin }} bis {{ searchform.date_end }}<br />
+    <dd>{{ searchform.date_begin }}<span> bis </span>{{ searchform.date_end }}<br />
       <span class="help_text">z.B. <code>2008-12-31</code> oder
       <code>2008-12-31 17:00</code></span></dd>
+      <script>
+        $('input[@name="date_end"]').after(' ',
+          $('<a href="#">').text('Kalender anzeigen').click(function() {
+            $('.help_text', $(this).parent()).hide();
+            $(this).text('Kalender verbergen');
+            var f1 = new DateTimeField('input[@name="date_begin"]', true);
+            var f2 = new DateTimeField('input[@name="date_end"]', true);
+            $(this).hide().parent().css('display', 'table');
+            $('table.datetime', $(this).parent()).extend(f1.container.next()).css({'display': 'table-cell', 'vertical-align': 'middle'});
+          })
+        );
+      </script>
     <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
   </dl>
   <div class="actions">
