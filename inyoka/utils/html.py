@@ -15,6 +15,7 @@
 """
 from __future__ import division
 import re
+from werkzeug import escape, unescape
 from htmlentitydefs import name2codepoint
 from xml.sax.saxutils import quoteattr
 from html5lib import HTMLParser, treewalkers, treebuilders
