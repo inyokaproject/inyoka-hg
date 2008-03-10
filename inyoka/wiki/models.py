@@ -277,6 +277,8 @@ class PageManager(models.Manager):
 
         Reverse method of `get_owners`.
         """
+        if not owners:
+            return []
         cursor = connection.cursor()
         cursor.execute('''
             select p.name from wiki_metadata m, wiki_page p

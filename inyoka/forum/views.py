@@ -1139,15 +1139,19 @@ def newposts(request, page=1):
     Return a list of the latest posts.
     """
     privs = get_privileges(request.user, Forum.objects.all())
-    privs = dict((key, priv['read']) for key, priv in privs.iteritems())
-    all = Post.objects.get_new_posts()
-    posts = []
-    for post in all:
-        if post.id < request.user.forum_last_read:
-            break
-        if privs.get(post.topic.forum_id, False):
-            posts.append(post)
-    pagination = Pagination(request, posts, page, 20,
+    all_topics = cache.get('forum/lasttopics')
+    if not all_topics:
+        all_topics = list(SATopic.query.options(eagerload('author'), \
+            eagerload('last_post'), eagerload('last_post.author')) \
+            .order_by((topic_table.c.last_post_id.desc()))[:80])
+        cache.set('forum/lasttopics', all_topics)
+    topics = []
+    for topic in all_topics:
+        if topic.last_post_id < request.user.forum_last_read:
+            brea
+        if privs.get(topic.forum_id, {}).get('read', False):
+            topics.append(topic)
+    pagination = Pagination(request, topics, page, 20,
         href('forum', 'newposts'))
     return {
         'posts': pagination.objects,
