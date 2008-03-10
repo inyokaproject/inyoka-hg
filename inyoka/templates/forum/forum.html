@@ -48,7 +48,17 @@
       <th class="last_post" colspan="2">Antworten</th>
     </tr>
     {%- for topic in topics %}
-    <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+      {%- if topic.hidden and not privileges.moderate %}
+      <tr class="deleted">
+        <td class="icon">
+          <img src="{{ href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
+        </td>
+        <td colspan="5">
+          Dieses Thema wurde von einem Moderator gelöscht.
+        </td>
+      </tr>
+      {%- else %}
+      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
           {{ topic_icon(topic) }}
         </td>
@@ -75,6 +85,7 @@
           von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
         {%- else %}---{% endif %}</td>
       </tr>
+      {%- endif %}
     {% else %}
       <tr>
         <td colspan="5">

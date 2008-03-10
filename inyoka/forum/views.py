@@ -113,8 +113,6 @@ def forum(request, slug, page=1):
         topics = SATopic.query.options(eagerload('author'), eagerload('last_post'),
             eagerload('last_post.author')).filter_by(forum_id=f.id) \
             .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
-        if privs['moderate']:
-            topics = topics.filter_by(hidden=False)
         subforums = SAForum.query.options(eagerload('last_post'),
                 eagerload('last_post.author')).filter_by(parent_id=f.id).all()
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
@@ -131,6 +129,7 @@ def forum(request, slug, page=1):
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
     data['subforums'] = filter_invisible(request.user, data['subforums'])
+    data['privileges'] = privs
     return data
 
 
