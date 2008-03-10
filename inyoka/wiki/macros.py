@@ -246,7 +246,7 @@ class RecentChanges(Macro):
         # if rendering to html we add a pagination, pagination is stupid fo
         # docbook and other static representations ;)
         if format == 'html':
-            return '<div class="recent_changes">%s%s</div>' % (
+            return u'<div class="recent_changes">%s%s</div>' % (
                 table.render(context, format),
                 '<div class="pagination">%s<div style="clear: both">'
                 '<div></div>' % pagination.generate()

@@ -475,7 +475,7 @@ class PollManager(models.Manager):
         cur.close()
         connection._commit()
 
-    def get_polls(self, topic_id):
+    def get_polls(self, topic_id, user=None):
         """
         This function returns a list of dicts representing polls that belong
         to the topic `topic_id`.
@@ -525,22 +525,21 @@ class PollManager(models.Manager):
                     'multiple':     row[2],
                     'options':      {
                         option['id']:   option
-                    },
-                    # this will be queried later
-                    'participated': False
+                    }
                 }
-        cur.close()
 
         # get the polls the user has already participated in
-        cur = connection.cursor()
-        cur.execute('''
-            select p.id
-             from forum_poll p, forum_voter v
-             where p.id = v.poll_id and
-                   p.id in (%s)
-        ''' % ', '.join(('%s',) * len(polls)), polls.keys())
-        for poll in cur.fetchall():
-            polls[poll[0]]['participated'] = True
+        if user is not None:
+            cur.execute('''
+                select p.id
+                 from forum_poll p, forum_voter v
+                 where p.id = v.poll_id and
+                       p.id in (%s) and
+                       v.voter_id = %%s;
+            ''' % ', '.join(('%s',) * len(polls)), polls.keys() + [user.id])
+            participated = set(x[0] for x in cur.fetchall())
+            for poll_id, poll in polls.iteritems():
+                poll['participated'] = poll_id in participated
         cur.close()
 
         return polls
@@ -936,7 +935,8 @@ class Post(models.Model):
     #: able to see the post anymore.
     hidden = models.BooleanField(u'Verborgen', default=False)
 
-    def render_text(self, request=None, format='html', nocache=False):
+    def render_text(self, request=None, format='html', nocache=False,
+                    force_existing=False):
         if request is None:
             # we have to do that becaus render_text is called during
             # save() which might be triggered outside of a HTTP request
@@ -947,16 +947,18 @@ class Post(models.Model):
                 request = None
         context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
-            return parse(self.text).render(context, format)
+            node = parse(self.text, wiki_force_existing=force_existing)
+            return node.render(context, format)
         key = 'forum/post/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:
-            instructions = parse(self.text).compile(format)
+            node = parse(self.text, wiki_force_existing=force_existing)
+            instructions = node.compile(format)
             cache.set(key, instructions)
         return render(instructions, context)
 
     def save(self):
-        self.rendered_text = self.render_text()
+        self.rendered_text = self.render_text(force_existing=True)
         if self.id is not None:
             try:
                 old = Post.objects.get(id=self.id)
@@ -974,7 +976,6 @@ class Post(models.Model):
         for page in range(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
             cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
-
         self.update_search()
 
     def update_search(self):

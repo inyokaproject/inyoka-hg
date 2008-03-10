@@ -346,6 +346,12 @@ table.syntaxtable {
 table.syntaxtable pre {
   line-height: 1.4em;
   padding: 0.4em 1em;
+  margin: 0;
+  border: none;
+}
+
+table.syntaxtable td {
+  padding: 0;
 }
 
 table.syntaxtable td.linenos {
@@ -975,15 +981,14 @@ div.not_found img {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 12em;
     color: white;
-    padding: 0.8em 0 2em 0;
+    padding: 0.5em 0 1em 0;
     border-top: 8px solid #444;
     background-color: #222;
 }
 
 #user_error_report p {
-    margin: 0.5em 2em;
+    margin: 0.5em 1em;
 }
 
 #user_error_report_link {
@@ -1006,3 +1011,10 @@ div.not_found img {
 #user_error_report input:active {
     background-color: black!important;
 }
+
+#user_error_report :link,
+#user_error_report :visited {
+    text-decoration: none;
+    color: #956205;
+}
+

@@ -137,6 +137,7 @@ MIDDLEWARE_CLASSES = (
     'inyoka.middlewares.common.CommonServicesMiddleware',
     'inyoka.middlewares.session.AdvancedSessionMiddleware',
     'inyoka.middlewares.auth.AuthMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
     'inyoka.middlewares.services.ServiceMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
     'inyoka.middlewares.highlighter.HighlighterMiddleware',

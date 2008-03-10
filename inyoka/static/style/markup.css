@@ -18,6 +18,12 @@ a.user {
   padding-left: 16px;
 }
 
+a.team {
+  background-image: url(../img/team.png);
+  background-repeat: no-repeat;
+  padding-left: 16px;
+}
+
 span.underline {
   text-decoration: underline;
 }

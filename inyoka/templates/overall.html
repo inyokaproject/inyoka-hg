@@ -11,7 +11,7 @@
 -#}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
@@ -66,6 +66,7 @@
         {%- if not hide_quicklinks %}
         {%- if USER.is_manager %}
         <ul class="mod_navi">
+          <li><a href="{{ href('admin', 'bugs', 'usererrors') }}">User-Fehlermeldungen</a></li>
           {%- if report_count %}
           <li><strong><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen ({{ report_count }})</a></strong></li>
           {%- else %}
@@ -188,10 +189,10 @@
       </ul>
     </div>{# .footer #}
     <div id="user_error_report">
-      <p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts das Forum.</p>
+      <p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts ein <a href="http://forum.ubuntuusers.de/forum/56/" title="Rund um Inyoka">eigenes Forum</a>.</p>
       <form method="post" action="{{ href('portal', 'error_report') }}">
         <p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>
-        <p>Details (die Adresse der Seite wird automatisch mitgespeichert):</p>
+        <p>Details (dein Name und die Adresse der Seite wird automatisch mitgespeichert):</p>
         <p><textarea style="width: 100%;" rows="3" cols="100" name="text"></textarea></p>
         <p>
           <input type="hidden" name="url" value="{{ CURRENT_URL }}" />

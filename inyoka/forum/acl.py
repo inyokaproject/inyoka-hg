@@ -17,6 +17,7 @@ from inyoka.utils.search import search
 
 
 PRIVILEGES_DETAILS = [
+    ('void', 'darf nix'),
     ('read', 'kann lesen'),
     ('reply', 'kann antworten'),
     ('create', 'kann erstellen'),
@@ -30,7 +31,7 @@ PRIVILEGES_DETAILS = [
     ('moderate', 'kann moderieren')
 ]
 
-PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS]
+PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
 
 
 def get_forum_privileges(user, forum):
