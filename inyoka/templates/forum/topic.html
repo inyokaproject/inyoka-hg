@@ -86,6 +86,11 @@
   <table class="topic">
    <tbody>
     {%- for post in posts %}
+      {% if post.hidden and not privileges.moderate %}
+      <tr class="deleted">
+        <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
+      </tr>
+      {%- else %}
       {%- set attachments = post.attachments %}      
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
@@ -125,6 +130,7 @@
           {%- endif %}
         </td>
       </tr>
+      {%- endif %}
     {%- endfor %}
     </tbody>
   </table>

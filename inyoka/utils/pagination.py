@@ -38,10 +38,10 @@ class Pagination(object):
         self.per_page = per_page
 
         idx = (self.page - 1) * self.per_page
-        result = query[idx:idx + self.per_page]
+        result = list(query[idx:idx + self.per_page])
         if not result and self.page != 1:
             raise PageNotFound()
-        self.objects = list(result)
+        self.objects = result
 
         if isinstance(query, list):
             self.total = len(query)
@@ -69,7 +69,7 @@ class Pagination(object):
         was_ellipsis = False
         result = []
         add = result.append
-        pages = self.total // self.per_page + 1
+        pages = max(0, self.total - 1) // self.per_page + 1
         params = self.parameters.copy()
         half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
