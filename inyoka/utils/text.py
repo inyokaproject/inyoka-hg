@@ -24,7 +24,7 @@ _slugify_replacement_table = {
     u'\xfc': 'ue',
     u'\xfe': 'th'
 }
-_punctuation_re = re.compile(r'[\s!"#$%&\'()*\-/<=>?@\[\\\]^_`{|}]+')
+_punctuation_re = re.compile(r'[\s!"#$%&\'()*\-/<=>?@\[\\\]^_`{|},;]+')
 
 
 def increment_string(s):
