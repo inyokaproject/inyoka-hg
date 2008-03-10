@@ -161,30 +161,30 @@ def create_page_templates():
 
 
 def create_markup_stylesheet():
-    storage['markup_styles'] = u"""#page tr.titel {
+    storage['markup_styles'] = u"""tr.titel {
     font-weight: bold;
     background: #E2C890;
     color: #000000;
     text-align: center;
 }
 
-#page tr.kopf {
+tr.kopf {
     font-weight: bold;
     background: #F9EAAF;
     color: #000000;
 }
 
-#page tr.trennzeile {
+tr.trennzeile {
     background: #DDDDDD;
     color: #000000;
 }
 
-#page tr.highlight {
+tr.highlight {
     background: #EEEEEE;
     color: #000000;
 }
 
-#page tr.verlauf {
+tr.verlauf {
     font-weight: bold;
     color: #000000;
     background-image: url(../img/wiki/heading.png);
@@ -192,77 +192,77 @@ def create_markup_stylesheet():
 }
 
 /* Tabellen Deko KDE ---- */
-#page tr.kde-titel {
+tr.kde-titel {
     font-weight: bold;
     background: #013397;
     color: white;
     text-align: center;
 }
 
-#page tr.kde-kopf {
+tr.kde-kopf {
     font-weight: bold;
     background: #0169C9;
     color: white;
 }
 
-#page tr.kde-highlight {
+tr.kde-highlight {
     background: #AACCEE;
     color: #000000;
 }
 
 /* Tabellen Deko Xfce ---- */
-#page tr.xfce-titel {
+tr.xfce-titel {
     font-weight: bold;
     background: #B3DEFD;
     color:#000000;
     text-align: center;
 }
 
-#page tr.xfce-kopf {
+tr.xfce-kopf {
     font-weight: bold;
     background: #EFEFEF;
     color: #000000;
 }
 
-#page tr.xfce-highlight {
+tr.xfce-highlight {
     background: #EFEFEF;
     color: #000000;
 }
 
 /* Tabellen Deko Edubuntu ---- */
-#page tr.edu-titel {
+tr.edu-titel {
     font-weight: bold;
     background: #d41308;
     color: white;
     text-align: center;
 }
 
-#page tr.edu-kopf {
+tr.edu-kopf {
     font-weight: bold;
     background: #f1480e;
     color: white;
 }
 
-#page tr.edu-highlight {
+tr.edu-highlight {
     background: #f68b11;
     color: #000000;
 }
 
 /* Tabellen Deko ubuntustudio ---- */
-#page tr.studio-titel {
+tr.studio-titel {
     font-weight: bold;
     background: #171717;
     color:#009bf9;
     text-align: center;
 }
 
-#page tr.studio-kopf {
+tr.studio-kopf {
     font-weight: bold;
     background: #525252;
     color:#009bf9;
 }
 
-#page tr.studio-highlight {
+tr.studio-highlight {
     background: #171717;
     color:#FFFFFF;
 }
