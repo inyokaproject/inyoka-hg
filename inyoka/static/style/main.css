@@ -346,6 +346,12 @@ table.syntaxtable {
 table.syntaxtable pre {
   line-height: 1.4em;
   padding: 0.4em 1em;
+  margin: 0;
+  border: none;
+}
+
+table.syntaxtable td {
+  padding: 0;
 }
 
 table.syntaxtable td.linenos {
