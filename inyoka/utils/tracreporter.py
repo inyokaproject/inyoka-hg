@@ -159,7 +159,7 @@ class Trac(object):
         self.trac_charset = charset
         self.ticket_type = ticket_type
         self._cookie = None
-        if auth_handler is None:
+        if auth_handler is None and password:
             mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, self.trac_url, self.username,
                              password or settings.TRAC_PASSWORD or '')

@@ -36,7 +36,7 @@ DATABASE_ENGINE = 'mysql'
 # if we are in debug mode we issue tickets into a trac
 TRAC_URL = 'http://trac.staging.ubuntuusers.de/'
 TRAC_USERNAME = 'logger'
-TRAC_PASSWORD = ''
+TRAC_PASSWORD = None
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
