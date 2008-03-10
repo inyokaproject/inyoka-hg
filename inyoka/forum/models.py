@@ -935,7 +935,8 @@ class Post(models.Model):
     #: able to see the post anymore.
     hidden = models.BooleanField(u'Verborgen', default=False)
 
-    def render_text(self, request=None, format='html', nocache=False):
+    def render_text(self, request=None, format='html', nocache=False,
+                    force_existing=False):
         if request is None:
             # we have to do that becaus render_text is called during
             # save() which might be triggered outside of a HTTP request
@@ -946,16 +947,18 @@ class Post(models.Model):
                 request = None
         context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
-            return parse(self.text).render(context, format)
+            node = parse(self.text, wiki_force_existing=force_existing)
+            return node.render(context, format)
         key = 'forum/post/%s' % self.id
         instructions = cache.get(key)
         if instructions is None:
-            instructions = parse(self.text).compile(format)
+            node = parse(self.text, wiki_force_existing=force_existing)
+            instructions = node.compile(format)
             cache.set(key, instructions)
         return render(instructions, context)
 
     def save(self):
-        self.rendered_text = self.render_text()
+        self.rendered_text = self.render_text(force_existing=True)
         if self.id is not None:
             try:
                 old = Post.objects.get(id=self.id)
@@ -973,7 +976,6 @@ class Post(models.Model):
         for page in range(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
             cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
-
         self.update_search()
 
     def update_search(self):

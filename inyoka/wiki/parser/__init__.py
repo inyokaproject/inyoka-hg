@@ -160,9 +160,9 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
-def parse(markup):
+def parse(markup, wiki_force_existing=False):
     """Parse markup into a node."""
-    return Parser(markup).parse()
+    return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
 
 
 def render(instructions, context=None):
@@ -318,7 +318,7 @@ class Parser(object):
     parser unittests which can savely user the `Parser` class itself).
     """
 
-    def __init__(self, string, transformers=None):
+    def __init__(self, string, transformers=None, wiki_force_existing=False):
         """
         In theory you never have to instanciate this parser yourself because
         the high level `parse()` function encapsulates this.  However for the
@@ -331,6 +331,7 @@ class Parser(object):
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS[:]
         self.transformers = transformers
+        self.wiki_force_existing = wiki_force_existing
 
         #: node dispatchers
         self._handlers = {
@@ -739,7 +740,8 @@ class Parser(object):
             children.append(self.parse_node(stream))
         stream.expect('wiki_link_end')
         if not wiki:
-            return nodes.InternalLink(page, children, anchor=anchor)
+            return nodes.InternalLink(page, children, anchor=anchor,
+                                      force_existing=self.wiki_force_existing)
         elif wiki == 'user':
             if not children:
                 children = [nodes.Text(page)]
