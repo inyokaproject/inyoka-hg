@@ -21,6 +21,36 @@
 
 {% block portal_content %}
   <h3>Suche</h3>
+  <form action="{{ href('portal', 'search') }}" method="get" class="search_ext">
+    <div class="search_sidebar">
+      <h3>Suchoptionen</h3>
+      <ul>
+        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('titel', 'Titel');">Titelsuche</a></li>
+        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('author', 'Benutzername');">Autorensuche</a></li>
+        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('tag', 'Tag');">Tagsuche</a></li>
+      </ul>
+      <input type="checkbox" name="collapse" value="true" id="search_collapse" />
+      <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>{# TODO: this must stay the same when submitted #}
+    </div>
+    <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
+    Die Suche berücksichtigt keine Groß- und Kleinschreibung und mehrere
+    Suchausdrücke können mit <strong>UND</strong> bzw. <strong>ODER</strong>
+    kombiniert und mit <strong>NICHT</strong> negiert werden, wobei
+    gegebenenfalls eine Klammer zu setzen ist. Komplexere Suchabfragen sind über
+    die Auswahl rechts möglich.</p>
+    <dl>
+      <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
+      <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
+      <dt><label for="id_date_begin">Zeitraum:</label></dt>
+      <dd>{{ searchform.date_begin }}<span> bis </span>{{ searchform.date_end }}<br />
+        <span class="help_text">z.B. <code>2008-12-31</code> oder
+        <code>2008-12-31 17:00</code></span></dd>
+      <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
+    </dl>
+    <div class="actions">
+      <input type="submit" value="Suchen" />
+    </div>
+  </form>
   <script type="text/javascript">
     /*<![CDATA[*/
     addSearchTerm = function(label, value) {
@@ -37,53 +67,18 @@
       // TODO: Internet Explorer Support
       return false;
     }
+
+    $('input[@name="date_end"]').after(' ',
+      $('<a href="#">').text('Kalender anzeigen').click(function() {
+        $('.help_text', $(this).parent()).hide();
+        $(this).text('Kalender verbergen');
+        var f1 = new DateTimeField('input[@name="date_begin"]', true);
+        var f2 = new DateTimeField('input[@name="date_end"]', true);
+        $(this).hide().parent().css('display', 'table');
+        $('table.datetime', $(this).parent()).extend(f1.container.next()).css({'display': 'table-cell', 'vertical-align': 'middle'});
+        return false;
+      })
+    );
     /*]]>*/
   </script>
-  <form action="{{ href('portal', 'search') }}" method="get" class="search_ext">
-
-  <div class="search_sidebar">
-    <h3>Suchoptionen</h3>
-    <ul>
-      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('titel', 'Titel');">Titelsuche</a></li>
-      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('author', 'Benutzername');">Autorensuche</a></li>
-      <li><a href="/nojs/" onclick="javascript:return addSearchTerm('tag', 'Tag');">Tagsuche</a></li>
-    </ul>
-
-    <input type="checkbox" name="collapse" value="true" id="search_collapse" />
-    <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>{# TODO: this must stay the same when submitted #}
-  </div>
-
-  <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
-  Die Suche berücksichtigt keine Groß- und Kleinschreibung und mehrere
-  Suchausdrücke können mit <strong>UND</strong> bzw. <strong>ODER</strong>
-  kombiniert und mit <strong>NICHT</strong> negiert werden, wobei
-  gegebenenfalls eine Klammer zu setzen ist. Komplexere Suchabfragen sind über
-  die Auswahl rechts möglich.</p>
-
-  <dl>
-    <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
-    <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
-    <dt><label for="id_date_begin">Zeitraum:</label></dt>
-    <dd>{{ searchform.date_begin }}<span> bis </span>{{ searchform.date_end }}<br />
-      <span class="help_text">z.B. <code>2008-12-31</code> oder
-      <code>2008-12-31 17:00</code></span></dd>
-      <script>
-        $('input[@name="date_end"]').after(' ',
-          $('<a href="#">').text('Kalender anzeigen').click(function() {
-            $('.help_text', $(this).parent()).hide();
-            $(this).text('Kalender verbergen');
-            var f1 = new DateTimeField('input[@name="date_begin"]', true);
-            var f2 = new DateTimeField('input[@name="date_end"]', true);
-            $(this).hide().parent().css('display', 'table');
-            $('table.datetime', $(this).parent()).extend(f1.container.next()).css({'display': 'table-cell', 'vertical-align': 'middle'});
-            return false;
-          })
-        );
-      </script>
-    <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
-  </dl>
-  <div class="actions">
-    <input type="submit" value="Suchen" />
-  </div>
-  </form>
 {% endblock %}
