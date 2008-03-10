@@ -301,7 +301,11 @@ def _parse_align_args(args, kwargs):
 
 
 class SignatureError(ValueError):
-    pass
+    """Represents a signature error."""
+
+    def __init__(self, message):
+        ValueError.__init__(self, message.encode('utf-8'))
+        self.message = message
 
 
 class Parser(object):
