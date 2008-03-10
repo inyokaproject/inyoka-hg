@@ -109,8 +109,15 @@ table.forum td.last_post {
 
 table.topic tr.deleted {
     text-align: center;
-    background-color: #aaa;
-    color: white;
+    background-color: #eee;
+    color: #444;
+    font-style: italic;
+}
+
+table.forum tr.deleted {
+    background-color: #eee;
+    color: #444;
+    font-style: italic;
 }
 
 .status_solved {

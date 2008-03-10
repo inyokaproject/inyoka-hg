@@ -204,7 +204,7 @@ class PostManager(models.Manager):
         row = cur.fetchone()
         if row is not None:
             post_count, slug = row
-            page = post_count // POSTS_PER_PAGE + 1
+            page = max(0, post_count - 1) // POSTS_PER_PAGE + 1
             return (slug, page, post_id)
 
     def split(self, posts, forum_id=None, title=None, topic_slug=None):
@@ -975,9 +975,8 @@ class Post(models.Model):
                     rev.save()
         super(Post, self).save()
         cache.delete('forum/post/%d' % self.id)
-        for page in range(1, 5):
+        for page in xrange(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.forum_id, page))
-            cache.delete('forum/topics/%dm/%d' % (self.topic.forum_id, page))
         self.update_search()
 
     def update_search(self):
@@ -1019,6 +1018,8 @@ class Post(models.Model):
             self.topic.forum.save()
         self.topic.post_count = self.topic.post_set.count() - 1
         self.topic.save()
+        for idx in xrange(1, 5):
+            cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
 
     def delete(self):
         """
