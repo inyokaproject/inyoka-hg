@@ -675,7 +675,7 @@ def privmsg_new(request, username=None):
                     data['recipient'] = msg.author.username
                 data['text'] = quote_text(msg.text, msg.author)
                 form = PrivateMessageForm(initial=data)
-            except (PrivateMessageEntry.DoesNotExist, ValueError):
+            except (PrivateMessageEntry.DoesNotExist):
                 pass
         if username:
             form = PrivateMessageForm(initial={'recipient': username})

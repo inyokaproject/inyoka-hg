@@ -165,11 +165,9 @@ class PrivateMessageEntry(models.Model):
             return href('portal', 'privmsg', PRIVMSG_FOLDERS[self.folder][1],
                         self.id)
         elif action == 'reply':
-            return HttpResponseRedirect(href('portal', 'privmsg', 'new',
-                reply_to=self.message_id))
+            return href('portal', 'privmsg', 'new', reply_to=self.message_id)
         elif action == 'forward':
-            return HttpResponseRedirect(href('portal', 'privmsg', 'new',
-                forward=self.message_id))
+            return href('portal', 'privmsg', 'new', forward=self.message_id)
 
     def delete(self):
         if self.folder == PRIVMSG_FOLDERS['trash'][0]:
