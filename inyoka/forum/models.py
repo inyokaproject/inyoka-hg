@@ -770,7 +770,7 @@ class Topic(models.Model):
             slug_words = slugify(self.title).split('-')
             while len('-'.join(slug_words)) > 50:
                 slug_words.pop()
-            if not slug_words:
+            if not slug_words or not ''.join(slug_words):
                 slug_words.append(str(random.randrange(10, 5000)))
                 prefix_id = True
             elif slug_words[0].isdigit():
@@ -969,7 +969,7 @@ class Post(models.Model):
             else:
                 if self.text != old.text:
                     rev = PostRevision()
-                    rev.store_date = datetime.now()
+                    rev.store_date = datetime.utcnow()
                     rev.post = self
                     rev.text = old.text
                     rev.save()

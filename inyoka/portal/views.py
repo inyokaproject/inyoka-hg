@@ -38,6 +38,7 @@ from inyoka.utils.cache import cache
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
                                 send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
+from inyoka.wiki.utils import normalize_pagename
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
@@ -380,7 +381,8 @@ def profile(request, username):
     """Shows the user profile if the user is logged in."""
     try:
         user = User.objects.get(username=username)
-        wikipage = WikiPage.objects.get_by_name('Benutzer/%s' % username)
+        key = 'Benutzer/' + normalize_pagename(user.username)
+        wikipage = WikiPage.objects.get_by_name(key)
         content = wikipage.rev.rendered_text
     except WikiPage.DoesNotExist:
         content = u''
