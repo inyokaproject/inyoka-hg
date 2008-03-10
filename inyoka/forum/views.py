@@ -176,8 +176,8 @@ def viewtopic(request, topic_slug, page=1):
                     if not privileges['vote']:
                         return abort_access_denied(request)
                     elif poll['participated']:
-                        flash(u'Sie haben bereits an dieser Abstimmung '
-                              u'teilgenommen.')
+                        flash(u'Du hast bereits an dieser Abstimmung '
+                              u'teilgenommen.', False)
                         continue
                     def _vote(id):
                         # check whether the option selected is inside the
@@ -192,8 +192,7 @@ def viewtopic(request, topic_slug, page=1):
                         _vote(int(v))
                     poll_ids.append(poll['id'])
                     poll['participated'] = True
-                    flash(u'Sie haben erfolgreich an der Abstimmung '
-                          u'teilgenommen.')
+                    flash(u'Deine Stimme wurde gespeichert.', True)
 
             if votings:
                 # write the votes into the database
