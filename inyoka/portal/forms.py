@@ -12,7 +12,7 @@ import md5
 from django import newforms as forms
 from inyoka.conf import settings
 from inyoka.portal.user import User
-from inyoka.utils.user import is_valid_username
+from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
@@ -83,17 +83,16 @@ class RegisterForm(forms.Form):
         in use.
         """
         if 'username' in self.cleaned_data:
-            if not is_valid_username(self.cleaned_data['username']):
-                #XXX: add a note which characters are allowed
+            try:
+                username = normalize_username(self.cleaned_data['username'])
+            except ValueError:
                 raise forms.ValidationError(
                     u'Dein Benutzername enthält nicht benutzbare Zeichen'
                 )
             try:
-                user = User.objects.get(
-                    username__exact=self.cleaned_data['username']
-                )
+                user = User.objects.get(username__exact=username)
             except User.DoesNotExist:
-                return self.cleaned_data['username']
+                return username
 
             raise forms.ValidationError(
                 u'Der Benutzername ist leider schon vergeben. '
