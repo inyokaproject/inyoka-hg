@@ -969,7 +969,7 @@ class Post(models.Model):
             else:
                 if self.text != old.text:
                     rev = PostRevision()
-                    rev.store_date = datetime.now()
+                    rev.store_date = datetime.utcnow()
                     rev.post = self
                     rev.text = old.text
                     rev.save()
