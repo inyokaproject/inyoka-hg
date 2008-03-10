@@ -35,8 +35,8 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-     Post, get_ubuntu_version, Poll, WelcomeMessage, SATopic, SAForum, \
-     SAPost
+     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage, \
+     SATopic, SAForum, SAPost
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
@@ -119,7 +119,7 @@ def forum(request, slug, page=1):
             topics = topics.filter_by(hidden=False)
         subforums = SAForum.query.options(eagerload('last_post'),
                 eagerload('last_post.author')).filter_by(parent_id=f.id).all()
-        pagination = Pagination(request, topics, page, POSTS_PER_PAGE, url_for(f))
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
         data = {
             'forum':        f,
             'subforums':    subforums,
@@ -159,8 +159,7 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
 
     posts = SAPost.query.options(eagerload('attachments')).filter(
-        (SAPost.topic_id == t.id) &
-        (SAPost.text != '')
+        (SAPost.topic_id == t.id)
     )
 
     if t.has_poll:

@@ -20,10 +20,8 @@
       </p>
       {%- endif %}
     </td>
-    <td class="posts">
-      {{ forum.topic_count }} /
-      {{ forum.post_count }}
-    </td>
+    <td class="topic_count" title="Anzahl der Themen">{{ forum.topic_count }}</td>
+    <td class="post_count" title="Anzahl der Beiträge">{{ forum.post_count }}</td>
     <td class="last_post">
     {%- if forum.last_post_id -%}
     <a href="{{ forum.last_post|url }}">{{ forum.last_post.pub_date|datetimeformat }}</a><br />
