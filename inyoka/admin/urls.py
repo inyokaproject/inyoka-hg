@@ -54,7 +54,7 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^styles/$', 'styles'),
     (r'^bugs/usererrors/$', 'usererrors'),
     (r'^bugs/usererrors/all/$', 'usererrors', {'all': True}),
-    (r'^bugs/usererrors/(?P<id>\d+)/(?P<mode>assigntome|done|not_done)/$', 'usererrors_change'),
+    (r'^bugs/usererrors/(?P<id>\d+)/(?P<mode>assigntome|assigntonobody|done|not_done)/$', 'usererrors_change'),
 
 )
 

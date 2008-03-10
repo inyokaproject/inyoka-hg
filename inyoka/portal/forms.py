@@ -263,7 +263,7 @@ class UserCPProfileForm(forms.Form):
                        required=False, min_value=-90, max_value=90)
     coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
                       required=False, min_value=-180, max_value=180)
-    location = forms.CharField(label='Wohnort', required=False)
+    location = forms.CharField(label='Wohnort', required=False, max_length=25)
     occupation = forms.CharField(label='Beruf', required=False)
     interests = forms.CharField(label='Interessen', required=False)
     website = forms.URLField(label='Webseite', required=False)

@@ -76,6 +76,7 @@
             var f2 = new DateTimeField('input[@name="date_end"]', true);
             $(this).hide().parent().css('display', 'table');
             $('table.datetime', $(this).parent()).extend(f1.container.next()).css({'display': 'table-cell', 'vertical-align': 'middle'});
+            return false;
           })
         );
       </script>

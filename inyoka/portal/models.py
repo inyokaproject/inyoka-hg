@@ -266,7 +266,7 @@ class Event(models.Model):
     time = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField(blank=True)
     author = models.ForeignKey(User)
-    location = models.CharField(max_length=50, blank=True)
+    location = models.CharField(max_length=25, blank=True)
     location_town = models.CharField(max_length=20, blank=True)
     location_lat = models.FloatField(u'Koordinaten (Länge)',
                                      blank=True, null=True)
@@ -420,4 +420,5 @@ class UserErrorReport(models.Model):
             'done': ('admin', 'bugs', 'usererrors', self.id, 'done'),
             'not_done': ('admin', 'bugs', 'usererrors', self.id, 'not_done'),
             'assigntome': ('admin', 'bugs', 'usererrors', self.id, 'assigntome'),
+            'assigntonobody': ('admin', 'bugs', 'usererrors', self.id, 'assigntonobody'),
         }[action])

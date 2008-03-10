@@ -896,6 +896,10 @@ def usererrors_change(request, id, mode):
         error.assigned_to = request.user
         error.save()
         flash(u'Der Fehler „%s“ wurde dir zugewiesen!' % error.title, True)
+    elif mode == 'assigntonobody':
+        error.assigned_to = None
+        error.save()
+        flash(u'Der Fehler „%s“ wurde niemandem zugewiesen!' % error.title, True)
     elif mode == 'done':
         error.done = True
         error.save()

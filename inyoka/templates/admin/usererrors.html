@@ -29,11 +29,14 @@
       {%- if error.reporter and error.reporter.username != 'Anonymous' %} von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
     </th>
     <td>
-      {#%- if error.assigned %#}
-      {%- if error.assigned_to %}
+      {%- if USER == error.assigned_to %}
+      <strong>Du erledigst das</strong> |
+      <a href="{{ error|url('assigntonobody') }}">Doch nicht</a> |
+      {%- elif not error.assigned_to %}
+      <a href="{{ error|url('assigntome') }}">Ich erledige das</a> |
+      {%- else %}
       <a href="{{ error.assigned_to|url }}">{{ error.assigned_to.username|e }}</a> erledigt das | 
       {%- endif %}
-      <a href="{{ error|url('assigntome') }}">Ich erledige das</a> |
       {%- if error.done %}
       <a href="{{ error|url('not_done') }}">Doch nicht erledigt</a>
       {%- else %}
