@@ -21,7 +21,7 @@ a.user {
 a.team {
   background-image: url(../img/team.png);
   background-repeat: no-repeat;
-  padding-left: no-repeat;
+  padding-left: 16px;
 }
 
 span.underline {

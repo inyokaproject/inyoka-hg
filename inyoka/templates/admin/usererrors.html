@@ -26,7 +26,7 @@
     <th style="font-weight: normal">
       {%- if error.done %}<img src="{{ href('static', 'img', 'check.png') }}" alt="Erledigt" /> {% endif %}
       <strong>{{ error.title|e }}</strong>, berichtet {{ error.date|specificdatetimeformat(true) }}
-      {%- if error.reporter %} von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
+      {%- if error.reporter and error.reporter.username != 'Anonymous' %} von <a href="{{ error.reporter|url }}">{{ error.reporter.username|e }}</a>{% endif %}
     </th>
     <td>
       {#%- if error.assigned %#}

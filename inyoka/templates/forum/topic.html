@@ -28,9 +28,9 @@
   <span class="linklist">
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
     {%- if is_subscribed %}
-    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">de-abonieren</a> |
+    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">de-abonnieren</a> |
     {%- else %}
-    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonieren</a> |
+    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonnieren</a> |
     {%- endif %}
     {%- if topic.solved %}
     <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a> |
