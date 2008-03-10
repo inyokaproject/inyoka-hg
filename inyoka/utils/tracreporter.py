@@ -114,7 +114,6 @@ class TracHandler(Handler):
                 summary += '...'
 
         return {
-            'keyword':      keyword,
             'summary':      summary,
             'description':  description,
             'priority':     priority
