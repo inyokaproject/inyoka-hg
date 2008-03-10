@@ -18,7 +18,8 @@ table.forum {
     margin: 0 0 10px 0;
 }
 
-table.forum td.topic, table.forum td.posts, table.forum td.post_count {
+table.forum td.topic, table.forum td.topic_count, table.forum td.post_count,
+table.forum td.view_count {
 	font-size: 0.9em;
 }
 
@@ -51,18 +52,19 @@ table.forum tr.entry p.subforums {
     padding: 4px 0 3px 5px;
 }
 
-table.forum th.post_count {
+table.forum th.view_count {
     text-align: center;
 }
 
-table.forum td.posts, table.forum td.post_count {
+table.forum td.post_count, table.forum td.view_count,
+table.forum td.topic_count {
     text-align: center;
     color: #888;
-    width: 140px;
+    width: 6%;
 }
 
-table.forum th.last_post {
-    text-align: right;
+table.forum th.last_post, table.forum th.topic, table.forum th.view_count {
+    text-align: center;
 }
 
 table.forum td.last_post {
@@ -103,6 +105,12 @@ table.forum td.last_post {
     padding: 5px 10px 5px 10px;
     line-height: 170%;
     font-size: 0.85em;
+}
+
+table.topic tr.deleted {
+    text-align: center;
+    background-color: #aaa;
+    color: white;
 }
 
 .status_solved {

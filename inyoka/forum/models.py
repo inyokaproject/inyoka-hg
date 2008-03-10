@@ -29,8 +29,8 @@ from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
 
 
-
 POSTS_PER_PAGE = 10
+TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
     '4.10': '4.10 (Warty Warthog)',
     '5.04': '5.04 (Hoary Hedgehog)',
@@ -842,8 +842,7 @@ class Topic(models.Model):
         self.forum.save()
 
     def get_pagination(self, threshold=3):
-        total = self.post_count - 1
-        pages = total // POSTS_PER_PAGE + 1
+        pages = max(0, self.post_count - 1) // POSTS_PER_PAGE + 1
         if pages == 1:
             return u''
         result = []
@@ -866,7 +865,7 @@ class Topic(models.Model):
 
     @property
     def paginated(self):
-        return bool(((self.post_count) // (POSTS_PER_PAGE)))
+        return bool(self.post_count // POSTS_PER_PAGE)
 
     def get_ubuntu_version(self):
         if not (self.ubuntu_version or self.ubuntu_distro):
@@ -1002,7 +1001,6 @@ class Post(models.Model):
                                 .exclude(id=self.id)[0]
             except IndexError:
                 self.topic.last_post = None
-            self.topic.save()
         if self.id == self.topic.forum.last_post.id:
             cur = connection.cursor()
             cur.execute('''
@@ -1019,6 +1017,8 @@ class Post(models.Model):
             except TypeError:
                 self.topic.forum.last_post = None
             self.topic.forum.save()
+        self.topic.post_count = self.topic.post_set.count() - 1
+        self.topic.save()
 
     def delete(self):
         """
@@ -1208,21 +1208,28 @@ class WelcomeMessage(models.Model):
 #: SQLAlchemy for some reasons. Use them only if needed, e.g to reduce
 #: database queries.
 
+class _DoesNotSuckBase(type(User)):
+    __new__ = type.__new__
+
 class SAUser(User):
-    __metaclass__ = type
-    pass
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
+
 class SAForum(Forum):
-    __metaclass__ = type
-    pass
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
+
 class SATopic(Topic):
-    __metaclass__ = type
-    pass
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
+
 class SAPost(Post):
-    __metaclass__ = type
-    pass
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
+
 class SAAttachment(Attachment):
-    __metaclass__ = type
-    pass
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 
 from inyoka.forum.database import forum_table
