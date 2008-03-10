@@ -129,7 +129,7 @@ table.forum tr.deleted {
 .status_unsolved {
     background-repeat: no-repeat;
     background-image: url('../img/forum_unsolved.png');
-    padding-left: 25px;;
+    padding-left: 25px;
 }
 
 .action {

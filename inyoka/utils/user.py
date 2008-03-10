@@ -23,11 +23,25 @@ SESSION_KEY = '_auth_user_id'
 
 
 _username_re = re.compile(r'[\w0-9_]{1,30}(?u)')
+_username_split_re = re.compile(r'[\s_]+')
 
 
 def is_valid_username(name):
     """Check if the username entered is a valid one."""
-    return _username_re.search(name) is not None
+    try:
+        normalize_username(name)
+    except ValueError:
+        return False
+    return True
+
+
+def normalize_username(name):
+    """Normalize the username."""
+    if _username_re.search(name) is not None:
+        rv = ' '.join(_username_split_re.split(name))
+        if rv:
+            return rv
+    raise ValueError('invalid username')
 
 
 def gen_activation_key(user):

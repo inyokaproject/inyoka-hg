@@ -32,6 +32,7 @@ UNUSABLE_PASSWORD = '!'
 _ANONYMOUS_USER = None
 DEFAULT_GROUP_ID = 1  # group id for all registered users
 
+
 class UserBanned(Exception):
     """
     Simple exception that is raised while
@@ -83,6 +84,7 @@ class Group(models.Model):
         if not Group._default_group:
             Group._default_group = Group.objects.get(id=DEFAULT_GROUP_ID)
         return Group._default_group
+
 
 class UserManager(models.Manager):
 
