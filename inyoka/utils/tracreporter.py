@@ -240,7 +240,7 @@ class Trac(object):
         old_ts = old_ts.group(1)
 
         self.open_trac(resource, {
-            'comment':  comment_formatter.format(record),
+            'comment':  comment,
             'action':   'leave',
             'author':   self.username,
             'ts':       old_ts
