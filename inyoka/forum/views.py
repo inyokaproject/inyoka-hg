@@ -10,19 +10,16 @@
 """
 import re
 from django.utils.text import truncate_html_words
-from werkzeug import url_unquote
 from sqlalchemy.orm import eagerload
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
-from inyoka.portal.utils import simple_check_login, check_login, \
-                                abort_access_denied
+from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated, AccessDeniedResponse, \
-     PageNotFound, HttpResponse, HttpResponseRedirect, \
-     does_not_exist_is_404
+from inyoka.utils.http import templated, does_not_exist_is_404, \
+     PageNotFound, HttpResponse, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -551,6 +548,9 @@ def edit(request, post_id):
     polls and the options (e.g.  sticky) of the topic.
     """
     post = Post.objects.get(id=post_id)
+    #: the properties of the topic the user can edit when editing the topic's
+    #: root post.
+    topic_values = ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']
     privileges = get_forum_privileges(request.user, post.topic.forum)
     if not privileges['edit']:
         return abort_access_denied(request)
@@ -562,7 +562,7 @@ def edit(request, post_id):
         options = request.POST.getlist('options')
     attachments = list(Attachment.objects.filter(post=post))
     if request.method == 'POST':
-        form = EditPostForm(request.POST)
+        form = EditPostForm(request.POST, is_first_post=is_first_post)
         if 'attach' in request.POST:
             if not privileges['upload']:
                 return abort_access_denied(request)
@@ -641,16 +641,18 @@ def edit(request, post_id):
             data = form.cleaned_data
             post.text = data['text']
             post.save()
-            if 'sticky' in data:
-                post.topic.sticky = data['sticky']
+            if is_first_post:
+                for k in topic_values:
+                    setattr(post.topic, k, data[k])
                 post.topic.save()
             flash(u'Der Beitrag wurde erfolgreich bearbeitet')
             return HttpResponseRedirect(href('forum', 'post', post.id))
     else:
         initial = {'text': post.text}
         if is_first_post:
-            initial['sticky'] = post.topic.sticky
-        form = EditPostForm(initial=initial)
+            for k in topic_values:
+                initial[k] = getattr(post.topic, k)
+        form = EditPostForm(initial=initial, is_first_post=is_first_post)
 
     d = {
         'form': form,
@@ -1138,15 +1140,19 @@ def newposts(request, page=1):
     Return a list of the latest posts.
     """
     privs = get_privileges(request.user, Forum.objects.all())
-    privs = dict((key, priv['read']) for key, priv in privs.iteritems())
-    all = Post.objects.get_new_posts()
-    posts = []
-    for post in all:
-        if post.id < request.user.forum_last_read:
+    all_topics = cache.get('forum/lasttopics')
+    if not all_topics:
+        all_topics = list(SATopic.query.options(eagerload('author'), \
+            eagerload('last_post'), eagerload('last_post.author')) \
+            .order_by((topic_table.c.last_post_id.desc()))[:80])
+        cache.set('forum/lasttopics', all_topics)
+    topics = []
+    for topic in all_topics:
+        if topic.last_post_id < request.user.forum_last_read:
             break
-        if privs.get(post.topic.forum_id, False):
-            posts.append(post)
-    pagination = Pagination(request, posts, page, 20,
+        if privs.get(topic.forum_id, {}).get('read', False):
+            topics.append(topic)
+    pagination = Pagination(request, topics, page, 20,
         href('forum', 'newposts'))
     return {
         'posts': pagination.objects,

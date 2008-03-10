@@ -118,9 +118,7 @@
                 {%- endif %}
               {%- endif %}
             </div>
-            <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false">
-              <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
-            </a>
+            <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date.strftime('%d.%m.%Y, %H:%M') }}
           </div>
           {{ post.rendered_text }}

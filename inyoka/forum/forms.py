@@ -37,12 +37,29 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
 class EditPostForm(forms.Form):
     """
     Allows the user to edit the text of a post.
+    This form takes the additional keyword argument `is_first_post`.
     It's generally used together with `AddAttachmentForm`.
     """
     text = forms.CharField(widget=forms.Textarea)
-    #: this field only appears if the post is the first post of the topic.
+    # the following fields only appear if the post is the first post of the
+    # topic.
     #: the user can select, whether the post's topic should be sticky or not.
     sticky = forms.BooleanField(required=False)
+    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}));
+    ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
+                                                required=False)
+    ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
+
+    def __init__(self, *args, **kwargs):
+        self.is_first_post = kwargs.pop('is_first_post', False)
+        forms.Form.__init__(self, *args, **kwargs)
+
+    def clean(self):
+        data = self.cleaned_data
+        if not self.is_first_post:
+            for k in ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']:
+                self._errors.pop(k, None)
+        return data
 
 
 class NewTopicForm(SurgeProtectionMixin, forms.Form):

@@ -21,7 +21,7 @@ from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify
 from inyoka.utils.html import escape
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache
@@ -134,6 +134,7 @@ class TopicManager(models.Manager):
         topic.save()
         post = Post(text=text, author=author, pub_date=pub_date, topic=topic)
         post.save()
+        author.inc_post_count()
         topic.last_post = post
         topic.first_post = post
         topic.forum.last_post = post
@@ -722,9 +723,11 @@ class Topic(models.Model):
     has_poll = models.BooleanField(default=False)
 
     def reply(self, text, author=None, pub_date=None):
-        post = Post(text=text, author=author or current_request.user,
+        author = author or current_request.user
+        post = Post(text=text, author=author,
                     pub_date=pub_date or datetime.utcnow(), topic=self)
         post.save()
+        author.inc_post_count()
         self.post_count += 1
         self.last_post = post
         self.forum.last_post = post
