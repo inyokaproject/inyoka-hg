@@ -36,7 +36,10 @@ def get_user_timezone():
     Return the timezone of the current user or UTC if there is no user
     available (eg: no web request).
     """
-    user = getattr(current_request, 'user', None)
+    try:
+        user = getattr(current_request, 'user', None)
+    except RuntimeError:
+        user = None
     try:
         return pytz.timezone(user.settings.get('timezone', ''))
     except:
