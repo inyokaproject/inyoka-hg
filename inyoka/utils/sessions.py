@@ -31,14 +31,13 @@ def set_session_info(request, action, category=None):
     # table with dozens of entries
     if request.session.new:
         return
-    key = request.session.session_key
 
     if request.user.is_authenticated:
-        #XXX: re-type the user in moderator, superuser and so on...
+        key = 'user:%s' % request.user.user_id
         user_type = request.user.is_manager and 'team' or 'user'
         args = (request.user.username, user_type, url_for(request.user))
     else:
-        # TODO: check user agent for bots and add extra entries for those.
+        key = request.session.session_key
         args = (None, 'anonymous', None)
     args += (datetime.utcnow(), action, request.build_absolute_uri(),
              category, key)
