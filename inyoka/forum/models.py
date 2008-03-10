@@ -29,7 +29,7 @@ from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
 
 
-POSTS_PER_PAGE = 10
+POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
     '4.10': '4.10 (Warty Warthog)',
