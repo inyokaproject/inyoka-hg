@@ -86,9 +86,9 @@
   <table class="topic">
    <tbody>
     {%- for post in posts %}
-      {% if post.hidden %}{#and not privileges.moderator %}#}
+      {% if post.hidden and not privileges.moderate %}
       <tr class="deleted">
-        <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</a>
+        <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
       {%- set attachments = post.attachments %}      
