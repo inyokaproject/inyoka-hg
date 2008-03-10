@@ -12,7 +12,6 @@ import re
 import pytz
 from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
-from inyoka.conf import settings
 from inyoka.utils.local import current_request
 
 
