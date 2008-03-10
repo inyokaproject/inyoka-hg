@@ -11,14 +11,11 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
-import md5
 from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django import newforms as forms
-from django.core.exceptions import ObjectDoesNotExist
-
 from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
@@ -38,7 +35,7 @@ from inyoka.utils.cache import cache
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
                                 send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
-from inyoka.wiki.utils import normalize_pagename
+from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
@@ -554,7 +551,7 @@ def usercp_deactivate(request):
             data = form.cleaned_data
             if request.user.check_password(data['password_confirmation']):
                 deactivate_user(request.user)
-                do_logout(request)
+                User.objects.logout(request)
                 return HttpResponseRedirect(href('portal'))
             else:
                 form.errors['password_confirmation'] = [u'Das eingegebene'
@@ -583,10 +580,7 @@ def privmsg(request, folder=None, entry_id=None):
             entry.save()
             cache.delete('portal/pm_count/%s' % request.user.id)
         action = request.GET.get('action')
-        if action == 'reply':
-            return HttpResponseRedirect(href('portal', 'privmsg', 'new',
-                reply_to=entry.message_id))
-        elif action == 'delete':
+        if action == 'delete':
             folder = entry.folder
             entry.delete()
             if not entry.read:
@@ -664,18 +658,22 @@ def privmsg_new(request, username=None):
                 return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
-        if request.GET.get('reply_to') and \
-           request.GET['reply_to'].isnumeric():
+        reply_to = request.GET.get('reply_to', '')
+        forward = request.GET.get('forward', '')
+        try:
+            int(reply_to or forward)
+        except ValueError:
+            pass
+        else:
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,
-                    message=int(request.GET.get('reply_to')))
+                    message=int(reply_to or forward))
                 msg = entry.message
                 data['subject'] = msg.subject.lower().startswith(u're: ') and \
                                   msg.subject or u'Re: %s' % msg.subject
-                data['recipient'] = msg.author.username
-                data['text'] = u'%s schrieb:\n%s' % (
-                    msg.author.username,
-                    '\n'.join('> %s' % l for l in msg.text.splitlines()))
+                if reply_to:
+                    data['recipient'] = msg.author.username
+                data['text'] = quote_text(msg.text, msg.author)
                 form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist, ValueError):
                 pass
@@ -916,7 +914,7 @@ def calendar_detail(self, slug):
     try:
         event = Event.objects.get(slug=slug)
     except Event.DoesNotExist:
-        raise HttpNotFound
+        raise PageNotFound
     return {
         'event': event,
         'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
