@@ -21,6 +21,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
+from inyoka.wiki.parser import parse, RenderContext
 
 
 def not_found(request, err_message=None):
@@ -98,13 +99,17 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 def detail(request, slug):
     """Shows a single article."""
     article = Article.objects.select_related().get(slug=slug)
+    preview = None
     if article.hidden or article.pub_date > datetime.utcnow():
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
     if request.method == 'POST':
         form = EditCommentForm(request.POST)
-        if form.is_valid():
+        if 'preview' in request.POST:
+            ctx = RenderContext(request)
+            preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+        elif form.is_valid():
             data = form.cleaned_data
             c = Comment(**data)
             c.article = article
@@ -118,7 +123,8 @@ def detail(request, slug):
     return {
         'article':  article,
         'comments': list(article.comment_set.select_related()),
-        'form': form
+        'form': form,
+        'preview': preview
     }
 
 
