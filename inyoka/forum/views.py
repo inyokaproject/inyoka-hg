@@ -27,7 +27,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.wiki.utils import quote_text
+from inyoka.wiki.utils import quote_text, normalize_pagename
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
@@ -361,7 +361,7 @@ def newtopic(request, slug=None, article=None):
     if article:
         # the user wants to create a wiki discussion
         f = Forum.objects.get(slug=settings.WIKI_DISCUSSION_FORUM)
-        article = WikiPage.objects.get(name=article)
+        article = WikiPage.objects.get(name=normalize_pagename(article))
         if request.method != 'POST':
             flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
                   u'Wenn du willst, kannst du hier eine neue anlegen.' % \
