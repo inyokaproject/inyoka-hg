@@ -93,7 +93,7 @@ class TracHandler(Handler):
         Thread(target=self.submit, args=(record,)).start()
 
     def analyseForTicket(self, record):
-        for level, priority in self.priorities:
+        for level, priority in self.trac.priorities:
             if level >= record.levelno:
                 break
         else:
@@ -134,7 +134,7 @@ class TracHandler(Handler):
                 self.trac.submit_new_ticket(keyword, **details)
             else:
                 details = self.analyseForComment(record)
-                self.submit_comment(record_ticket, **details)
+                self.trac.submit_comment(record_ticket, **details)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -159,10 +159,10 @@ class Trac(object):
         self.trac_charset = charset
         self.ticket_type = ticket_type
         self._cookie = None
+        password = password or settings.TRAC_PASSWORD
         if auth_handler is None and password:
             mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self.trac_url, self.username,
-                             password or settings.TRAC_PASSWORD or '')
+            mgr.add_password(None, self.trac_url, self.username, password)
             auth_handler = urllib2.HTTPBasicAuthHandler(mgr)
         self.opener = urllib2.build_opener(auth_handler)
         self.opener.addheaders = [('User-Agent', USER_AGENT)]
