@@ -106,7 +106,8 @@ def forum(request, slug, page=1):
     fmsg = f.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    key = 'forum/topics/%d%s/%d' % (f.id, privs['moderate'] and 'm' or '', int(page))
+    page = int(page)
+    key = 'forum/topics/%d/%d' % (f.id, int(page))
     data = cache.get(key)
     if not data:
         topics = SATopic.query.options(eagerload('author'), eagerload('last_post'),
@@ -123,7 +124,8 @@ def forum(request, slug, page=1):
             'topics':       pagination.objects,
             'pagination':   pagination
         }
-        if page <= 4:
+        # if you alter this value, change it in Post.delete too
+        if page < 5:
             cache.set(key, data)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
@@ -912,7 +914,7 @@ def hide_post(request, post_id):
         flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
               u'gemacht.' % (url_for(post), escape(post.author.username)),
               success=True)
-    return HttpResponseRedirect(url_for(post.topic))
+    return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
 def restore_post(request, post_id):
@@ -928,7 +930,7 @@ def restore_post(request, post_id):
     flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde wieder sichtbar '
           u'gemacht.' % (url_for(post), escape(post.author.username)),
           success=True)
-    return HttpResponseRedirect(url_for(post.topic))
+    return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
 def delete_post(request, post_id):
@@ -936,7 +938,6 @@ def delete_post(request, post_id):
     In contrast to `hide_post` this function does really remove this post.
     This action is irrevocable and can only get executed by administrators.
     """
-    # XXX: Only administrators are allowed to do this, not moderators
     post = Post.objects.get(id=post_id)
     if not have_privilege(request.user, post.topic.forum, 'delete'):
         return abort_access_denied(request)

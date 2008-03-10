@@ -204,7 +204,7 @@ class PostManager(models.Manager):
         row = cur.fetchone()
         if row is not None:
             post_count, slug = row
-            page = post_count // POSTS_PER_PAGE + 1
+            page = max(0, post_count - 1) // POSTS_PER_PAGE + 1
             return (slug, page, post_id)
 
     def split(self, posts, forum_id=None, title=None, topic_slug=None):
@@ -1019,6 +1019,8 @@ class Post(models.Model):
             self.topic.forum.save()
         self.topic.post_count = self.topic.post_set.count() - 1
         self.topic.save()
+        for idx in xrange(1, 5):
+            cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
 
     def delete(self):
         """
