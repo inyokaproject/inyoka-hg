@@ -35,7 +35,7 @@
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <h2>{{ title_trace[0] }}</h2>
     <dl>
-      {%- if isnewtopic %}
+      {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
       <dt>Titel:</dt>
       <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>

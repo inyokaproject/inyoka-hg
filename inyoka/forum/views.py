@@ -552,6 +552,9 @@ def edit(request, post_id):
     polls and the options (e.g.  sticky) of the topic.
     """
     post = Post.objects.get(id=post_id)
+    #: the properties of the topic the user can edit when editing the topic's
+    #: root post.
+    topic_values = ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']
     privileges = get_forum_privileges(request.user, post.topic.forum)
     if not privileges['edit']:
         return abort_access_denied(request)
@@ -563,7 +566,7 @@ def edit(request, post_id):
         options = request.POST.getlist('options')
     attachments = list(Attachment.objects.filter(post=post))
     if request.method == 'POST':
-        form = EditPostForm(request.POST)
+        form = EditPostForm(request.POST, is_first_post=is_first_post)
         if 'attach' in request.POST:
             if not privileges['upload']:
                 return abort_access_denied(request)
@@ -642,16 +645,18 @@ def edit(request, post_id):
             data = form.cleaned_data
             post.text = data['text']
             post.save()
-            if 'sticky' in data:
-                post.topic.sticky = data['sticky']
+            if is_first_post:
+                for k in topic_values:
+                    setattr(post.topic, k, data[k])
                 post.topic.save()
             flash(u'Der Beitrag wurde erfolgreich bearbeitet')
             return HttpResponseRedirect(href('forum', 'post', post.id))
     else:
         initial = {'text': post.text}
         if is_first_post:
-            initial['sticky'] = post.topic.sticky
-        form = EditPostForm(initial=initial)
+            for k in topic_values:
+                initial[k] = getattr(post.topic, k)
+        form = EditPostForm(initial=initial, is_first_post=is_first_post)
 
     d = {
         'form': form,
