@@ -43,10 +43,10 @@ class Pagination(object):
             raise PageNotFound()
         self.objects = list(result)
 
-        if hasattr(query, 'count'):
-            self.total = query.count()
-        else:
+        if isinstance(query, list):
             self.total = len(query)
+        else:
+            self.total = query.count()
 
         if link is None:
             link = request.path
