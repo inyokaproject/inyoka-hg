@@ -538,8 +538,8 @@ class PollManager(models.Manager):
                        v.voter_id = %%s;
             ''' % ', '.join(('%s',) * len(polls)), polls.keys() + [user.id])
             participated = set(x[0] for x in cur.fetchall())
-            for poll in polls:
-                poll['participated'] = poll['id'] in participated
+            for poll_id, poll in polls.iteritems():
+                poll['participated'] = poll_id in participated
         cur.close()
 
         return polls
