@@ -60,7 +60,7 @@
   {%- if polls %}
   <form action="" method="post" class="poll">
     {%- for pid, poll in polls.iteritems() %}
-    <strong>{{ poll.question|e }}</strong>
+    <div><strong>{{ poll.question|e }}</strong></div>
     <ul>
       {%- for oid, option in poll.options.iteritems() %}
       <li>

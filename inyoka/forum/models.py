@@ -475,7 +475,7 @@ class PollManager(models.Manager):
         cur.close()
         connection._commit()
 
-    def get_polls(self, topic_id):
+    def get_polls(self, topic_id, user=None):
         """
         This function returns a list of dicts representing polls that belong
         to the topic `topic_id`.
@@ -525,22 +525,21 @@ class PollManager(models.Manager):
                     'multiple':     row[2],
                     'options':      {
                         option['id']:   option
-                    },
-                    # this will be queried later
-                    'participated': False
+                    }
                 }
-        cur.close()
 
         # get the polls the user has already participated in
-        cur = connection.cursor()
-        cur.execute('''
-            select p.id
-             from forum_poll p, forum_voter v
-             where p.id = v.poll_id and
-                   p.id in (%s)
-        ''' % ', '.join(('%s',) * len(polls)), polls.keys())
-        for poll in cur.fetchall():
-            polls[poll[0]]['participated'] = True
+        if user is not None:
+            cur.execute('''
+                select p.id
+                 from forum_poll p, forum_voter v
+                 where p.id = v.poll_id and
+                       p.id in (%s) and
+                       v.voter_id = %%s;
+            ''' % ', '.join(('%s',) * len(polls)), polls.keys() + [user.id])
+            participated = set(x[0] for x in cur.fetchall())
+            for poll in polls:
+                poll['participated'] = poll['id'] in participated
         cur.close()
 
         return polls
