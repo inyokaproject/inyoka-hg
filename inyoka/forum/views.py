@@ -10,19 +10,16 @@
 """
 import re
 from django.utils.text import truncate_html_words
-from werkzeug import url_unquote
 from sqlalchemy.orm import eagerload
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
-from inyoka.portal.utils import simple_check_login, check_login, \
-                                abort_access_denied
+from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated, AccessDeniedResponse, \
-     PageNotFound, HttpResponse, HttpResponseRedirect, \
-     does_not_exist_is_404
+from inyoka.utils.http import templated, does_not_exist_is_404, \
+     PageNotFound, HttpResponse, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -35,8 +32,7 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-     Post, get_ubuntu_version, Poll, WelcomeMessage, SATopic, SAForum, \
-     SAPost
+     Post, get_ubuntu_version, Poll, SATopic, SAForum, SAPost
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
@@ -1153,7 +1149,7 @@ def newposts(request, page=1):
     topics = []
     for topic in all_topics:
         if topic.last_post_id < request.user.forum_last_read:
-            brea
+            break
         if privs.get(topic.forum_id, {}).get('read', False):
             topics.append(topic)
     pagination = Pagination(request, topics, page, 20,

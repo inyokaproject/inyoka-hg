@@ -18,7 +18,7 @@ from md5 import md5
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from django.db import models
+from django.db import models, connection
 from django.core import validators
 from inyoka.conf import settings
 from inyoka.utils.decorators import deferred
@@ -250,6 +250,19 @@ class User(models.Model):
     is_anonymous = property(lambda x: x.id == 1)
     is_authenticated = property(lambda x: not x.is_anonymous)
     is_banned = property(lambda x: x.banned is not None)
+
+    def inc_post_count(self):
+        """Increment the post count in a safe way."""
+        cur = connection.cursor()
+        cur.execute('''
+            update portal_user
+               set post_count = post_count + 1
+             where id = %s;
+        ''', [self.id])
+        cur.close()
+        connection._commit()
+        self.post_count += 1
+        cache.delete('portal/user/%d' % self.id)
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
