@@ -660,6 +660,7 @@ def edit(request, post_id):
         'attach_form': attach_form,
         'attachments': attachments,
         'isedit': True,
+        'can_attach':  privileges['upload'],
     }
     if is_first_post:
         d.update({
