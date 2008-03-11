@@ -1066,6 +1066,8 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     else:
         if slug:
             forum = Forum.objects.get(slug=slug)
+            if not have_privilege(request.user, forum, 'read'):
+                return abort_access_denied()
             topics = forum.topic_set
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,
@@ -1082,8 +1084,6 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 rights=href('portal', 'lizenz'),
             )
 
-        if not have_privilege(request.user, forum, 'read'):
-            return abort_access_denied()
         topics = topics.order_by('-id')[:count]
 
         for topic in topics:
