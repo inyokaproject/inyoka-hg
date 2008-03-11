@@ -85,9 +85,9 @@ def gen_activation_key(user):
             will be generated for.
     """
     return md5('%d%s%s%s' % (
-        user.id, user.username,
+        user.id, user.username.encode('utf-8'),
         settings.SECRET_KEY,
-        user.email
+        user.email.encode('utf-8')
     )).hexdigest()
 
 
