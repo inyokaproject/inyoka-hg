@@ -65,7 +65,13 @@ comment_formatter = SimpleFormatter("""\
 
 
 def get_record_hash(record):
-    message = raw_formatter.format(record)
+    # if the record is a traceback, hash the traceback only
+    if record.exc_info:
+        lines = traceback.format_exception(*record.exc_info)
+        message = ''.join(lines)
+    # otherwise hash the message
+    else:
+        message = raw_formatter.format(record)
     if isinstance(message, unicode):
         message = message.encode('utf-8', 'replace')
     return md5(message).hexdigest()

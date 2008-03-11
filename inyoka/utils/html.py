@@ -220,6 +220,7 @@ class CleanupFilter(object):
 
                 elif token['name'] == 'a' and \
                      attrs.get('href', '').startswith('#'):
+                    attrs.pop('target', None)
                     deferred_links[attrs['href'][1:]] = token
 
                 elif token['name'] == 'font':
@@ -246,6 +247,11 @@ class CleanupFilter(object):
                         style = attrs.get('style')
                         attrs['style'] = (style and style.rstrip(';') + ' ;'
                                           or '') + '; '.join(styles) + ';'
+
+                elif token['name'] == 'img':
+                    attrs.pop('border', None)
+                    if 'alt' not in attrs:
+                        attrs['alt'] = ''
 
                 if 'id' in attrs:
                     element_id = original_id = attrs['id']
