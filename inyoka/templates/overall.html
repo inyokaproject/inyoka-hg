@@ -47,6 +47,9 @@
                        'overall.js'] + scripts %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
+    <!--[if lt IE 7.]>
+    <script defer type="text/javascript" src="{{ href('static', 'js/ie7.js') }}"></script>
+    <![endif]-->
     {%- endblock %}
   </head>
   <body>
