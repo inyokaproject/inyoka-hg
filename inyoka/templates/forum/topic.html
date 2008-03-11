@@ -61,25 +61,38 @@
   <form action="" method="post" class="poll">
     {%- for pid, poll in polls.iteritems() %}
     <div><strong>{{ poll.question|e }}</strong></div>
-    <ul>
+    <table class="poll">
       {%- for oid, option in poll.options.iteritems() %}
-      <li>
-        {%- if not poll.participated %}
-        <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
-               name="poll_{{ pid }}" id="poll_{{ oid }}"
-               value="{{ oid }}" />
+      <tr>
+        <td>
+          {%- if not poll.participated and not show_vote_results %}
+          <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
+                 name="poll_{{ pid }}" id="poll_{{ oid }}"
+                 value="{{ oid }}" />
+          <label for="poll_{{ oid }}">{{ option.name|e }}</label>
+          {%- else %}
+          {{ option.name|e }}
+          {%- endif %}
+        </td>
+        {%- if poll.participated or show_vote_results %}
+        <td class="vote_bar"><div style="width: {{ option.percent * 2 }}px;"></div></td>
+        <td>{{ option.percent }}%</td>
+        <td>[ {{ option.votes }} ]</td>
         {%- endif %}
-        <label{% if not poll.participated %} for="poll_{{ oid }}"{% endif %}>
-          {{ option.name|e }}: {{ option.percent }}%
-          ({{ option.votes }} Stimme{% if option.votes != 1 %}n{% endif %})
-        </label>
-      </li>
+      </tr>
       {%- endfor %}
-    </ul>
-    {%- if loop.last and can_vote %}
-    <input type="submit" name="vote" value="Abstimmen" />
-    {%- endif %}
+    </table>
     {%- endfor %}
+    {%- if can_vote %}
+    <p>
+      <input type="submit" name="vote" value="Abstimmen" />
+      {%- if show_vote_results %}
+      <a href="?">Ergebnisse verbergen</a>
+      {%- else %}
+      <a href="?action=vote_results">Ergebnisse anzeigen</a>
+      {%- endif %}
+    </p>
+    {%- endif %}
   </form>
   {%- endif %}
 
