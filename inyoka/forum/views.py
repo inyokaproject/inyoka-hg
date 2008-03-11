@@ -222,7 +222,8 @@ def viewtopic(request, topic_slug, page=1):
         'pagination':   pagination,
         'polls':        polls,
         'can_vote':     polls and (False in [p['participated'] for p in
-                                             polls.values()]) or False
+                                             polls.values()]) or False,
+        'show_vote_results': request.GET.get('action', '') == 'vote_results'
     }
 
 

@@ -64,22 +64,29 @@
     <ul>
       {%- for oid, option in poll.options.iteritems() %}
       <li>
-        {%- if not poll.participated %}
+        {%- if not poll.participated and not show_vote_results %}
         <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
                name="poll_{{ pid }}" id="poll_{{ oid }}"
                value="{{ oid }}" />
+        <label for="poll_{{ oid }}">{{ option.name|e }}</label>
+        {%- else %}
+        {{ option.name|e }}: {{ option.percent  }}%
+        ({{ option.votes }} {% trans v=option.votes %}Stimme{% pluralize %}Stimmen{% endtrans %})
         {%- endif %}
-        <label{% if not poll.participated %} for="poll_{{ oid }}"{% endif %}>
-          {{ option.name|e }}: {{ option.percent }}%
-          ({{ option.votes }} Stimme{% if option.votes != 1 %}n{% endif %})
-        </label>
       </li>
       {%- endfor %}
     </ul>
-    {%- if loop.last and can_vote %}
-    <input type="submit" name="vote" value="Abstimmen" />
-    {%- endif %}
     {%- endfor %}
+    {%- if can_vote %}
+    <p>
+      <input type="submit" name="vote" value="Abstimmen" />
+      {%- if show_vote_results %}
+      <a href="?">Ergebnisse verbergen</a>
+      {%- else %}
+      <a href="?action=vote_results">Ergebnisse anzeigen</a>
+      {%- endif %}
+    </p>
+    {%- endif %}
   </form>
   {%- endif %}
 
