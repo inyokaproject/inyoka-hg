@@ -376,10 +376,6 @@ def do_edit(request, name):
             form = PageEditForm(request.user, name, page and
                                 page.rev.text.value or '', form_data)
             if form.is_valid() and not merged_this_request:
-                if not test_changes_allowed(request.user, name, page and
-                                            page.rev.text.value or '',
-                                            form.cleaned_data['text']):
-                    raise RuntimeError('security error. XXX: render error')
                 remote_addr = request.META.get('REMOTE_ADDR')
                 if page is not None:
                     if form.cleaned_data['text'] == page.rev.text.value:

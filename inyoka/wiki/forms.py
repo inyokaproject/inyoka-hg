@@ -47,7 +47,7 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
         if has_conflicts(tree):
             raise forms.ValidationError(u'Im Text befinden sich Konflikt '
                                         u'Markierungen.')
-        elif self.user is not None and not \
+        elif self.user is not None and not \
              test_changes_allowed(self.user, self.page_name, self.old_text,
                                   self.cleaned_data['text']):
             raise forms.ValidationError(u'Du hast Änderungen vorgenommen, '
