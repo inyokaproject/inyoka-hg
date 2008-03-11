@@ -10,6 +10,7 @@
 """
 from django import newforms as forms
 from inyoka.wiki.utils import has_conflicts
+from inyoka.wiki.parser import parse, StackExhaused
 from inyoka.utils.sessions import SurgeProtectionMixin
 
 
@@ -29,11 +30,17 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
                            widget=forms.TextInput(attrs={'size': 50}))
 
     def clean_text(self):
-        if 'text' in self.cleaned_data:
-            if has_conflicts(self.cleaned_data['text']):
-                raise forms.ValidationError(u'Im Text befinden sich Konflikt '
-                                            u'Markierungen.')
-            return self.cleaned_data['text']
+        if 'text' not in self.cleaned_data:
+            return
+        try:
+            tree = parse(self.cleaned_data['text'], catch_stack_errors=False)
+        except StackExhaused:
+            raise forms.ValidationError(u'Im Text befinden sich zu tief '
+                                        u'verschachtelte Elemente.')
+        if has_conflicts(tree):
+            raise forms.ValidationError(u'Im Text befinden sich Konflikt '
+                                        u'Markierungen.')
+        return self.cleaned_data['text']
 
 
 class AddAttachmentForm(forms.Form):
