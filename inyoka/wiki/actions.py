@@ -37,8 +37,7 @@ from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.utils import get_title, normalize_pagename
-from inyoka.wiki.acl import require_privilege, has_privilege, \
-     test_changes_allowed, PrivilegeTest
+from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
 
@@ -374,7 +373,8 @@ def do_edit(request, name):
             preview = parse(text).render(context, 'html')
             form.initial['text'] = text
         else:
-            form = PageEditForm(form_data)
+            form = PageEditForm(request.user, name, page and
+                                page.rev.text.value or '', form_data)
             if form.is_valid() and not merged_this_request:
                 if not test_changes_allowed(request.user, name, page and
                                             page.rev.text.value or '',
