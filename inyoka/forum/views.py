@@ -1045,7 +1045,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             kwargs = {}
             if mode == 'full':
                 kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s%s</div>' % post.rendered_text
+                                    u'xhtml">%s</div>' % post.rendered_text
                 kwargs['content_type'] = 'xhtml'
             if mode == 'short':
                 summary = truncate_html_words(post.rendered_text, 100)
