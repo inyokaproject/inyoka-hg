@@ -48,10 +48,11 @@ $(document).ready(function() {
       $('.search_query').addClass('area_' + $currentSearchArea);
     $('form.search')
       .submit(function() {
-        var url = $(this).attr('action'), tmp;
-        if (tmp = $('input.search_query').val()) {
-          if ($('input.search_query').hasClass('default_value'))
-            tmp = '';
+        var url = $(this).attr('action'),
+            tmp = $('input.search_query').val();
+        if ($('input.search_query').hasClass('default_value'))
+          tmp = '';
+        if (tmp) {
           url += '?query=' + encodeURIComponent(tmp);
           if ($currentSearchArea != 'all')
             url += '&area=' + $currentSearchArea;

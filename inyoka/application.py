@@ -97,7 +97,8 @@ class InyokaHandler(WSGIHandler):
         except:
             if settings.DEBUG:
                 raise
-            logger.exception('Exception during request at %r' % request.path)
+            logger.exception('Exception during request at %r' %
+                             request.build_absolute_uri())
             return TemplateResponse('errors/500.html', {}, 500)
 
 

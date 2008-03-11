@@ -348,17 +348,3 @@ class IkhayaSearchAdapter(SearchAdapter):
         }
 
 search.register(IkhayaSearchAdapter())
-
-
-class SAArticle(Article):
-    __metaclass__ = type
-    pass
-class SACategory(Category):
-    __metaclass__ = type
-    pass
-class SAComment(Comment):
-    __metaclass__ = type
-    pass
-class SAUser(User):
-    __metaclass__ = type
-    pass
