@@ -103,6 +103,10 @@ table.search_results .score {
     width: 6em;
 }
 
+form.search_ext #id_query {
+    max-width: 100%;
+}
+
 
 /*** Usermap ******************************************************************/
 div.usermap {
