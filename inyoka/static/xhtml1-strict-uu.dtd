@@ -226,6 +226,7 @@
   id          ID             #IMPLIED
   xmlns       %URI;          #FIXED 'http://www.w3.org/1999/xhtml'
   xmlns:cc    %URI;          #FIXED 'http://creativecommons.org/ns#'
+  xmlns:inyoka %URI;         #FIXED 'http://inyoka.pocoo.org/'
   >
 
 <!--================ Document Head =======================================-->

@@ -429,6 +429,7 @@ def usercp_profile(request):
             request.user.save()
             flash(u'Deine Profilinformationen wurden erfolgreich '
                   u'aktualisiert.', True)
+            return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
         else:
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
                   u'auf. Bitte behebe sie.')
