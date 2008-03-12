@@ -9,9 +9,9 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 -#}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
+{{ XHTML_DTD }}
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#"
+      xmlns:inyoka="http://inyoka.pocoo.org/" xml:lang="de" lang="de" dir="ltr">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
@@ -53,7 +53,6 @@
   <body>
     <div class="header">
       <h1><a href="/"><span>ubuntuusers.de</span></a></h1>
-
       <ul class="tabbar">
         {%- for app in ('portal', 'forum', 'wiki', 'ikhaya', 'planet') %}
         <li class="{{ app }}{% if app == active_app %} active{% endif
@@ -178,7 +177,8 @@
         <li class="license">
           <img src="{{ href('static', 'img/copyleft.png') }}" alt="Copyleft" />
           2004 – 2008 ubuntuusers.de • Einige Rechte vorbehalten<br />
-          <a href="{{ href('portal', 'lizenz') }}">Lizenz</a> •
+          <a href="http://creativecommons.org/licenses/by-nc-sa/2.0/de/deed.de" rel="license">CC</a>
+          <a href="{{ href('portal', 'lizenz') }}" rel="cc:morePermissions">Lizenz</a> •
           <a href="{{ href('portal', 'kontakt') }}">Kontakt</a> •
           <a href="{{ href('portal', 'datenschutz') }}">Datenschutz</a> •
           <a href="{{ href('portal', 'impressum') }}">Impressum</a>
