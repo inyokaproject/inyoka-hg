@@ -136,7 +136,6 @@ class Lexer(object):
             rule(r',,', enter='sub'),
             rule(r'\^\^', enter='sup'),
             rule(r'\(\(', enter='footnote'),
-            rule(r'\\\\[ \t]*(\n|$)(?m)', 'newline'),
             rule(r'\[\[([\w_]+)', bygroups('macro_name'),
                  enter='macro'),
             rule(r'\[color\s*=\s*(.*?)\s*\]', bygroups('color_value'),
