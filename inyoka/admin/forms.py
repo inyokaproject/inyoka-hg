@@ -93,6 +93,8 @@ class EditUserForm(forms.Form):
                                    u'Bitte nur angeben, wenn benötigt'))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
+    is_manager = forms.BooleanField(label=u'Teammitglied', required=False,
+        help_text=u'Der Benutzer kann das Administrationspanel benutzen')
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
@@ -109,6 +111,9 @@ class EditUserForm(forms.Form):
     msn = forms.CharField(label=u'MSN', max_length=200, required=False)
     aim = forms.CharField(label=u'AIM', max_length=200, required=False)
     yim = forms.CharField(label=u'YIM', max_length=200, required=False)
+    skype = forms.CharField(label=u'Skype', required=False)
+    wengophone = forms.CharField(label=u'WengoPhone', required=False)
+    sip = forms.CharField(label=u'SIP', required=False)
 
     # misc other things
     signature = forms.CharField(label=u'Signatur', required=False,

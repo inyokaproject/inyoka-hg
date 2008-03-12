@@ -34,7 +34,7 @@
   </p>
 
   <dl>
-    {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', 'banned', inline=true) }}
+    {{ h.render_form(form, 'username', 'is_active', 'is_manager', 'new_password', 'email', 'banned', inline=true) }}
     <dd class="note_link bann_user_event">
       Benutzer sperren
     </dd>
@@ -66,7 +66,7 @@
   <h3>Persönliche Details von {{ user.username|e }}</h3>
   {{ h.render_form(form, 'website', 'interests', 'location') }}
   <h3>Benachrichtigungs-Einstellungen</h3>
-  {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
+  {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip') }}
   <h3>Sonstige Einstellungen</h3>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>

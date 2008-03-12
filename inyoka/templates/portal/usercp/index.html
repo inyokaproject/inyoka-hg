@@ -47,6 +47,12 @@
           Benutzer deaktivieren
         </a>
       </td>
+      <td>
+        <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">
+          <img src="{{ href('static', 'img/usercp/usercp-wikipage.png') }}" alt="Benutzerseite" /><br />
+          Benutzerseite
+        </a>
+      </td>
     </tr>
   </table>
 {% endblock %}
