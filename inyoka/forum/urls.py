@@ -14,7 +14,7 @@ from django.conf.urls.defaults import patterns
 urlpatterns = patterns('inyoka.forum.views',
     (r'^$', 'index'),
     (r'^topic/(?P<topic_slug>[^/]+)/$', 'viewtopic'),
-    (r'^topic/(?P<topic_slug>[^/]+)/(?P<page>\d)/$', 'viewtopic'),
+    (r'^topic/(?P<topic_slug>[^/]+)/(?P<page>\d+)/$', 'viewtopic'),
     (r'^topic/(?P<topic_slug>[^/]+)/reply/$', 'newpost'),
     (r'^topic/(?P<topic_slug>[^/]+)/delete/$', 'delete_topic'),
     (r'^topic/(?P<topic_slug>[^/]+)/hide/$', 'hide_topic'),
