@@ -16,7 +16,7 @@
 
 {% block portal_content %}
 <form enctype="multipart/form-data" class="usercp_form" method="post" action="">
-  <h3>Profileinstellungen</h3>
+  <h3>Avatareinstellungen</h3>
   <dl>
     <dt>Avatar:</dt>
     <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
@@ -28,6 +28,15 @@
     </dd>
     <dd>{{ form.delete_avatar }} Aktuellen Avatar löschen</dd>
     {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
+  </dl>
+  <h3>Kontakt-Adressen</h3>
+  <dl>
+    <dd>
+      <p class="note">
+        Die E-Mail und Jabber Adressen werden standardmäßig nicht im öffentlichen Profil angezeigt.<br />
+        Um diese anzuzeigen, musst du das Feld „im Profil anzeigen“ neben den Adressfeldern aktivieren.
+      </p>
+    </dd>
     {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip'] %}
     <dt><label for="{{ form[item].auto_id }}">{{ form[item].label }}</label></dt>
     <dd>{{ form[item] }}
