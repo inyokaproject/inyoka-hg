@@ -48,6 +48,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
+from inyoka.utils.tracreporter import Trac
 
 
 @templated('errors/404.html')
@@ -938,14 +939,33 @@ def user_error_report(request):
         form = UserErrorReportForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            uer = UserErrorReport()
-            uer.title = data['title']
-            uer.text = data['text']
-            uer.url = data['url']
-            uer.date = datetime.utcnow()
-            if request.user.username != 'anonymous':
-                uer.reporter = request.user
-            uer.save()
+            text =u"'''URL:''' %s" % data['url']
+            if request.user.id != 1:
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s]" % (
+                    request.user.get_absolute_url(),
+                    escape(request.user.username)
+                ))
+            text += u'\n\n%s' % data['text']
+            trac = Trac(
+                trac_url=settings.TRAC_URL,
+                username=settings.TRAC_USERNAME,
+                password=settings.TRAC_PASSWORD,
+            )
+            trac.submit_new_ticket(
+                keywords='userreport',
+                summary=data['title'],
+                description = text,
+                component = 'userreports',
+            )
+
+#             uer = UserErrorReport()
+#             uer.title = data['title']
+#             uer.text = data['text']
+#             uer.url = data['url']
+#             uer.date = datetime.utcnow()
+#             if request.user.username != 'anonymous':
+#                 uer.reporter = request.user
+#             uer.save()
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)

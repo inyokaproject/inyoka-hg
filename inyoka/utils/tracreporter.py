@@ -215,10 +215,10 @@ class Trac(object):
                 return int(line[0])
 
     def submit_new_ticket(self, keywords='', summary='', description='',
-                          priority='major', ticket_type=None):
+                          priority='major', ticket_type=None, component=None):
         if not isinstance(keywords, basestring):
             keywords = ' '.join(keywords)
-        self.open_trac('newticket', {
+        data = {
             'field_summary':        summary,
             'field_description':    description,
             'field_keywords':       keywords,
@@ -226,7 +226,10 @@ class Trac(object):
             'field_type':           ticket_type or self.ticket_type,
             'field_status':         'new',
             'author':               self.username
-        })
+        }
+        if component is not None:
+            data['field_component'] = component
+        self.open_trac('newticket', data)
 
     def submit_comment(self, ticket_id, comment=''):
         resource = 'ticket/%d' % ticket_id
