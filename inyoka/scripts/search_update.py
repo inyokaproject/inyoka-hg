@@ -21,6 +21,12 @@ from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
 
+# import required adapters
+import inyoka.forum.search
+import inyoka.planet.models
+import inyoka.wiki.search
+import inyoka.ikhaya.models
+
 
 def update(limit=None):
     """
