@@ -626,13 +626,14 @@ def privmsg_new(request, username=None):
             try:
                 recipient_names = set(r.strip() for r in \
                                       d['recipient'].split(';') if r)
-                if request.user.username in recipient_names:
-                    flash(u'Du kannst dir selber keine Nachrichten schicken.',
-                          False)
-                    recipient_names = []
                 recipients = []
                 for recipient in recipient_names:
-                    recipients.append(User.objects.get(username__exact=recipient))
+                    user = User.objects.get(username__exact=recipient)
+                    if user.id == request.user.id:
+                        flash(u'Du kannst dir selber keine Nachrichten '
+                              u'schicken.', False)
+                        recipient_names = []
+                    recipients.append(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
