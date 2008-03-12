@@ -26,7 +26,9 @@
       Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
       Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
     </dd>
-    <dd>{{ form.delete_avatar }} Aktuellen Avatar löschen</dd>
+    {%- if user.avatar %}
+    <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
+    {%- endif %}
     {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
   </dl>
   <h3>Kontakt-Adressen</h3>
