@@ -221,6 +221,7 @@ class SearchSystem(object):
         self.prefix_handlers = {}
         self.auth_deciders = {}
         self.adapters = {}
+        self._connection = None
 
     def index(self, component, docid):
         self.adapters[component].store(docid)
@@ -232,8 +233,10 @@ class SearchSystem(object):
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
         if writeable:
-            return xapian.WritableDatabase(settings.XAPIAN_DATABASE,
-                                           xapian.DB_CREATE_OR_OPEN)
+            if not self._connection:
+                self._connection = xapian.WritableDatabase(
+                    settings.XAPIAN_DATABASE, xapian.DB_CREATE_OR_OPEN)
+            return self._connection
         thread = get_current_thread()
         if thread not in self.connections:
             self.connections[thread] = connection = \
@@ -358,6 +361,15 @@ class SearchSystem(object):
 
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)
+
+    def flush(self):
+        if self._connection:
+            self._connection.flush()
+
+    def close(self):
+        if self._connection:
+            self._connection.close()
+            self._connection = None
 
 # setup the singleton instance
 search = None
