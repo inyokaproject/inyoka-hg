@@ -53,4 +53,19 @@ def fix_ikhaya_icon_relation_definition(m):
     ''')
 
 
-MIGRATIONS = [create_initial_revision, fix_ikhaya_icon_relation_definition]
+def add_skype_and_sip(m):
+    """
+    This migration added support for skype and SIP profile fields.
+    """
+    m.engine.execute('''
+        alter table portal_user
+            add column skype varchar(200) not null after yim,
+            add column wengophone varchar(200) not null after skype,
+            add column sip varchar(200) not null after wengophone;
+    ''')
+
+
+MIGRATIONS = [
+    create_initial_revision, fix_ikhaya_icon_relation_definition,
+    add_skype_and_sip
+]

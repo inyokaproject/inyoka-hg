@@ -36,9 +36,9 @@
         <td>{{ entry.message.pub_date|e }}</td>
         <td>
           {% if not entry.is_own_message %}
-          <a href="{{ entry|url }}?action=reply" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
+          <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
           {% endif %}
-          <img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" title="Weiterleiten" />
+          <a href="{{ entry|url('forward') }}" title="Weiterleiten"><img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" /></a>
           {% if not entry.in_archive %}
           <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
           {% endif %}

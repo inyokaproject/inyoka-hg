@@ -39,7 +39,9 @@ _schema_re = re.compile(r'[a-z]://')
 def has_conflicts(text):
     """Returns `True` if there are conflict markers in the text."""
     from inyoka.wiki.parser import parse, nodes
-    return parse(text).query.all.by_type(nodes.ConflictMarker).has_any
+    if isinstance(text, basestring):
+        text = parse(text)
+    return text.query.all.by_type(nodes.ConflictMarker).has_any
 
 
 def pagename_join(name1, name2):

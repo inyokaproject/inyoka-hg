@@ -65,7 +65,13 @@ comment_formatter = SimpleFormatter("""\
 
 
 def get_record_hash(record):
-    message = raw_formatter.format(record)
+    # if the record is a traceback, hash the traceback only
+    if record.exc_info:
+        lines = traceback.format_exception(*record.exc_info)
+        message = ''.join(lines)
+    # otherwise hash the message
+    else:
+        message = raw_formatter.format(record)
     if isinstance(message, unicode):
         message = message.encode('utf-8', 'replace')
     return md5(message).hexdigest()
@@ -93,7 +99,7 @@ class TracHandler(Handler):
         Thread(target=self.submit, args=(record,)).start()
 
     def analyseForTicket(self, record):
-        for level, priority in self.priorities:
+        for level, priority in self.trac.priorities:
             if level >= record.levelno:
                 break
         else:
@@ -114,7 +120,6 @@ class TracHandler(Handler):
                 summary += '...'
 
         return {
-            'keyword':      keyword,
             'summary':      summary,
             'description':  description,
             'priority':     priority
@@ -134,7 +139,7 @@ class TracHandler(Handler):
                 self.trac.submit_new_ticket(keyword, **details)
             else:
                 details = self.analyseForComment(record)
-                self.submit_comment(record_ticket, **details)
+                self.trac.submit_comment(record_ticket, **details)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -159,10 +164,10 @@ class Trac(object):
         self.trac_charset = charset
         self.ticket_type = ticket_type
         self._cookie = None
-        if auth_handler is None:
+        password = password or settings.TRAC_PASSWORD
+        if auth_handler is None and password:
             mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            mgr.add_password(None, self.trac_url, self.username,
-                             password or settings.TRAC_PASSWORD or '')
+            mgr.add_password(None, self.trac_url, self.username, password)
             auth_handler = urllib2.HTTPBasicAuthHandler(mgr)
         self.opener = urllib2.build_opener(auth_handler)
         self.opener.addheaders = [('User-Agent', USER_AGENT)]
@@ -241,7 +246,7 @@ class Trac(object):
         old_ts = old_ts.group(1)
 
         self.open_trac(resource, {
-            'comment':  comment_formatter.format(record),
+            'comment':  comment,
             'action':   'leave',
             'author':   self.username,
             'ts':       old_ts

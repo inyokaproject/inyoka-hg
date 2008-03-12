@@ -202,7 +202,7 @@ class RecentChanges(Macro):
                 parameters['page'] = str(page_num)
             rv = href('wiki', context.wiki_page)
             if parameters:
-                rv += '?' + parameters.url_encode()
+                rv += '?' + parameters.urlencode()
             return rv
         pagination = Pagination(context.request, Revision.objects.
                                 select_related(depth=1), page_num,
@@ -243,7 +243,7 @@ class RecentChanges(Macro):
                     ], class_='note')
                 ]))
 
-        # if rendering to html we add a pagination, pagination is stupid fo
+        # if rendering to html we add a pagination, pagination is stupid for
         # docbook and other static representations ;)
         if format == 'html':
             return u'<div class="recent_changes">%s%s</div>' % (

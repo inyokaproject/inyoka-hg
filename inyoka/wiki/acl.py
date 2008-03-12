@@ -244,8 +244,9 @@ def test_changes_allowed(user, page_name, old_text, new_text):
 
     old = set()
     new = set()
-    for text, metadata in (old_text, old), (new_text, new):
-        tree = parse(text)
+    for tree, metadata in (old_text, old), (new_text, new):
+        if isinstance(tree, basestring):
+            tree = parse(tree)
         for node in tree.query.by_type(MetaData):
             if node.key.startswith('X-') and \
                node.key not in LENIENT_METADATA_KEYS:

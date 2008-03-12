@@ -15,7 +15,7 @@ from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.utils.text import slugify
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, does_not_exist_is_404, \
@@ -27,7 +27,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.wiki.utils import quote_text
+from inyoka.wiki.utils import quote_text, normalize_pagename
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
@@ -222,7 +222,8 @@ def viewtopic(request, topic_slug, page=1):
         'pagination':   pagination,
         'polls':        polls,
         'can_vote':     polls and (False in [p['participated'] for p in
-                                             polls.values()]) or False
+                                             polls.values()]) or False,
+        'show_vote_results': request.GET.get('action', '') == 'vote_results'
     }
 
 
@@ -361,7 +362,7 @@ def newtopic(request, slug=None, article=None):
     if article:
         # the user wants to create a wiki discussion
         f = Forum.objects.get(slug=settings.WIKI_DISCUSSION_FORUM)
-        article = WikiPage.objects.get(name=article)
+        article = WikiPage.objects.get(name=normalize_pagename(article))
         if request.method != 'POST':
             flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
                   u'Wenn du willst, kannst du hier eine neue anlegen.' % \
@@ -660,6 +661,7 @@ def edit(request, post_id):
         'attach_form': attach_form,
         'attachments': attachments,
         'isedit': True,
+        'can_attach':  privileges['upload'],
     }
     if is_first_post:
         d.update({
@@ -1045,7 +1047,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             kwargs = {}
             if mode == 'full':
                 kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s%s</div>' % post.rendered_text
+                                    u'xhtml">%s</div>' % post.rendered_text
                 kwargs['content_type'] = 'xhtml'
             if mode == 'short':
                 summary = truncate_html_words(post.rendered_text, 100)
@@ -1066,6 +1068,8 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     else:
         if slug:
             forum = Forum.objects.get(slug=slug)
+            if not have_privilege(request.user, forum, 'read'):
+                return abort_access_denied()
             topics = forum.topic_set
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,
@@ -1082,8 +1086,6 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 rights=href('portal', 'lizenz'),
             )
 
-        if not have_privilege(request.user, forum, 'read'):
-            return abort_access_denied()
         topics = topics.order_by('-id')[:count]
 
         for topic in topics:
@@ -1173,10 +1175,10 @@ def welcome(request, slug, path=None):
     if request.method == 'POST':
         accepted = request.POST.get('accept', False)
         forum.read_welcome(request.user, accepted)
-        if accepted:
+        target_url = request.POST.get('goto_url')
+        if accepted and target_url and is_safe_domain(target_url):
             return HttpResponseRedirect(request.POST.get('goto_url'))
-        else:
-            return HttpResponseRedirect(href('forum'))
+        return HttpResponseRedirect(href('forum'))
     return {
         'goto_url': goto_url,
         'message': forum.welcome_message,

@@ -112,12 +112,7 @@ class Entry(models.Model):
         super(Entry, self).save()
         self.update_search()
 
-    def delete(self):
-        """
-        Deletes the xapian document
-        """
-        Document(self.xapian_docid).delete()
-        super(Entry, self).delete()
+    # XXX: add delete() to update search
 
     class Meta:
         verbose_name = 'Eintrag'

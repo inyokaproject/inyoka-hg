@@ -34,6 +34,21 @@
     href('wiki', 'Verwaltung/Moderatoren-Team/Forenregeln') }}">Regeln</a> beachtest,
     kann nichts schiefgehen ;-)
   </p>
+  {%- if ikhaya_latest %}
+  {{ feed_button(href('portal', 'feeds', _anchor='ikhaya')) }}
+  <h3>Neues von ubuntuusers.de</h3>
+  <div class="articles">
+    {%- for article in ikhaya_latest %}
+    <div class="article" onclick="document.location.href='{{ article|url }}'">
+      <div class="date">{{ article.pub_date|datetimeformat }}</div>
+      <a href="{{ article|url }}">{{ article.subject|e }}</a>
+      <p>
+        {{ article.simplified_intro|truncate(250, true)|e }}
+      </p>
+    </div>
+    {%- endfor %}
+  </div>
+  {%- endif %}
   <h3>Wer ist online?</h3>
   <p>
     {% trans all=sessions.all %}
@@ -64,19 +79,4 @@
     keine
   {%- endfor %}
   </p>
-  {%- if ikhaya_latest %}
-  {{ feed_button(href('portal', 'feeds', _anchor='ikhaya')) }}
-  <h3>Neues von ubuntuusers.de</h3>
-  <div class="articles">
-    {%- for article in ikhaya_latest %}
-    <div class="article" onclick="document.location.href='{{ article|url }}'">
-      <div class="date">{{ article.pub_date|datetimeformat }}</div>
-      <a href="{{ article|url }}">{{ article.subject|e }}</a>
-      <p>
-        {{ article.simplified_intro|truncate(250, true)|e }}
-      </p>
-    </div>
-    {%- endfor %}
-  </div>
-  {%- endif %}
 {% endblock %}

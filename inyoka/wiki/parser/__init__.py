@@ -136,6 +136,7 @@ import re
 import unicodedata
 from inyoka.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.decorators import patch_wrapper
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
@@ -145,6 +146,9 @@ from inyoka.wiki.parser import nodes
 
 __all__ = ['parse', 'render', 'stream', 'escape']
 
+
+# the maximum depth of stack-protected nodes
+MAXIMUM_DEPTH = 200
 
 _hex_color_re = re.compile(r'#([a-f0-9]{3}){1,2}$')
 
@@ -160,9 +164,18 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
-def parse(markup, wiki_force_existing=False):
+def parse(markup, wiki_force_existing=False, catch_stack_errors=True):
     """Parse markup into a node."""
-    return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
+    try:
+        return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
+    except StackExhaused:
+        if not catch_stack_errors:
+            raise
+        return nodes.Paragraph([
+            nodes.Strong([nodes.Text('Interner Parser Fehler: ')]),
+            nodes.Text(u'Der Parser konnte den Text nicht verarbeiten weil '
+                       u'zu tief verschachtelte Elemente gefunden wurden.')
+        ])
 
 
 def render(instructions, context=None):
@@ -189,7 +202,11 @@ def validate_signature(signature):
                 raise SignatureError(u'Deine Signature enhält '
                                      u'unerlaubte Syntax-Elemente.')
         return node
-    text = _walk(parse(signature)).text.strip()
+    try:
+        text = _walk(parse(signature, True, False)).text.strip()
+    except StackExhaused:
+        raise SignatureError(u'Deine Signatur enthält zu viele ver'
+                             u'schachtelte Elemente.')
     if len(text) > settings.SIGNATURE_LENGTH:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
@@ -300,8 +317,19 @@ def _parse_align_args(args, kwargs):
     return attributes, args_left
 
 
+class StackExhaused(ValueError):
+    """
+    Raised if the parser recognizes nested structures that would hit the
+    stack limit.
+    """
+
+
 class SignatureError(ValueError):
-    pass
+    """Represents a signature error."""
+
+    def __init__(self, message):
+        ValueError.__init__(self, message.encode('utf-8'))
+        self.message = message
 
 
 class Parser(object):
@@ -328,6 +356,7 @@ class Parser(object):
         """
         self.string = string
         self.lexer = Lexer()
+        self.stack_depth = 0
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS[:]
         self.transformers = transformers
@@ -387,7 +416,14 @@ class Parser(object):
         sure the parser never calls `parse_node` on not existing nodes when
         extending the lexer / parser.
         """
-        return self._handlers[stream.current.type](stream)
+        # stack exhausted, return a node that represents that
+        if self.stack_depth >= MAXIMUM_DEPTH:
+            raise StackExhaused()
+        self.stack_depth += 1
+        try:
+            return self._handlers[stream.current.type](stream)
+        finally:
+            self.stack_depth -= 1
 
     def parse_text(self, stream):
         """Expects a ``'text'`` token and returns a `nodes.Text`."""
@@ -1028,6 +1064,7 @@ class Parser(object):
 
     def parse_source_link(self, stream):
         """
+        Parse a link to a source [1] etc.
         """
         sourcenumber = stream.expect('sourcelink').value[1:-1]
         return nodes.SourceLink(id=sourcenumber)

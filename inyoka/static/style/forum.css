@@ -283,6 +283,25 @@ form.poll ul {
     padding: 0;
 }
 
+table.poll {
+  border: 0;    
+  width: auto;
+}
+
+table.poll td {
+  border: 0;
+  padding: 0 2.5em 0 0;
+}
+
+table.poll td.vote_bar {
+  width: 200px;
+}
+
+table.poll td.vote_bar div {
+  background-color: #EAD1A2;
+  height: 0.8em;
+}
+
 div.forum_offset_pagination {
     float: none;
     margin: 0;

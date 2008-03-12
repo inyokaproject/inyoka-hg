@@ -10,7 +10,7 @@
 {% extends 'portal/overall.html' %}
 
 {% set title_trace = [user.username|e, 'Mitglieder'] %}
-{% set styles = styles + ['portal.css'] %}
+{% set styles = styles + ['portal.css', 'highlight.css'] %}
 
 {% block appheader %}
   <h1>Mitglieder</h1>
@@ -33,7 +33,7 @@
     <tr>
       <th>Name</th>
       <td>{{ user.username|e }}</td>
-      <td rowspan="5"><img class="userinfo_avatar" src="{{ user.avatar_url }}" alt="Avatar von „{{ user.username|e }}“" /></td>
+      <td rowspan="6"><img class="userinfo_avatar" src="{{ user.avatar_url }}" alt="Avatar von „{{ user.username|e }}“" /></td>
     </tr>
     <tr>
       <th>E-Mail-Adresse</th>
@@ -83,11 +83,21 @@
     </tr>
     <tr>
       <th>Yahoo Messenger</th>
+      <th>Skype</th>
+      <th>WengoPhone</th>
+    </tr>
+    <tr>
+      <td>{{ user.yim|e or '–' }}</td>
+      <td>{{ user.skype|e or '–' }}</td>
+      <td>{{ user.wengophone|e or '–' }}</td>
+    </tr>
+    <tr>
+      <th>SIP</th>
       <th>Jabber</th>
       <th>Kontakt</th>
     </tr>
     <tr>
-      <td>{{ user.yim|e or '–' }}</td>
+      <td>{{ user.sip|e or '–' }}</td>
       {{ show_item('jabber') }}
       <td>
         <a href="{{ user|url('privmsg') }}">Private Nachricht</a>

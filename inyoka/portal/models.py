@@ -10,20 +10,10 @@
                                   Marian Sigler.
     :license: GNU GPL.
 """
-from sha import sha
-import os
-import cPickle
-import datetime
-from PIL import Image
-from StringIO import StringIO
 from django.db import models, connection
-from django.core import validators
-from django.db.models.manager import EmptyManager
-from inyoka.conf import settings
-from inyoka.utils.decorators import deferred
+from inyoka.utils.http import HttpResponseRedirect
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
-from inyoka.utils.captcha import generate_word
 from inyoka.utils.local import current_request
 from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
@@ -170,9 +160,14 @@ class PrivateMessageEntry(models.Model):
     def in_archive(self):
         return self.folder == PRIVMSG_FOLDERS['archive'][0]
 
-    def get_absolute_url(self):
-        return href('portal', 'privmsg', PRIVMSG_FOLDERS[self.folder][1],
-                    self.id)
+    def get_absolute_url(self, action='view'):
+        if action == 'view':
+            return href('portal', 'privmsg', PRIVMSG_FOLDERS[self.folder][1],
+                        self.id)
+        elif action == 'reply':
+            return href('portal', 'privmsg', 'new', reply_to=self.message_id)
+        elif action == 'forward':
+            return href('portal', 'privmsg', 'new', forward=self.message_id)
 
     def delete(self):
         if self.folder == PRIVMSG_FOLDERS['trash'][0]:
