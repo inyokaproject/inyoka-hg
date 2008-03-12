@@ -19,6 +19,7 @@ import re
 from inyoka.wiki.parser import nodes
 
 
+_newline_re = re.compile(r'(\n)(?!$)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
 _german_typography_rules = [
@@ -102,13 +103,11 @@ class AutomaticParagraphs(Transformer):
                     except StopIteration:
                         is_paragraph = False
                     if block:
-                        inserted_line = False
-                        for line in block.splitlines():
-                            if line:
-                                if inserted_line:
-                                    paragraphs[-1].append(nodes.Newline())
-                                paragraphs[-1].append(nodes.Text(line))
-                                inserted_line = True
+                        for piece in _newline_re.split(block):
+                            if piece == '\n':
+                                paragraphs[-1].append(nodes.Newline())
+                            elif piece:
+                                paragraphs[-1].append(nodes.Text(piece))
                     if is_paragraph:
                         paragraphs.append([])
             elif child.is_block_tag:
