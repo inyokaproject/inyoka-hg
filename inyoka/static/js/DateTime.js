@@ -7,7 +7,7 @@
  * It's based on django code that implements a similar widget for the admin
  * panel.
  *
- * :copyright: 2007 by Benjamin Wiegand, Django Project.
+ * :copyright: 2007-2008 by Benjamin Wiegand, Armin Ronacher, Django Project.
  * :license: GNU GPL.
  */
 
@@ -19,7 +19,7 @@
   var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
 
-  function IsLeapYear(year) {
+  function isLeapYear(year) {
     return (((year % 4) == 0) && ((year % 100) != 0) || ((year % 400) == 0));
   }
 
@@ -29,7 +29,7 @@
       days = 31;
     } else if ($.inArray(month, [4, 6, 9, 11]) != -1) {
       days = 30;
-    } else if (month == 2 && IsLeapYear(year)) {
+    } else if (month == 2 && isLeapYear(year)) {
       days = 29;
     } else {
       days = 28;
@@ -253,4 +253,4 @@
       this.input.show();
     }
   }
-})()
+})();

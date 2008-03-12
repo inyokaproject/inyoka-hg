@@ -16,7 +16,7 @@
   "{{ XHTML_DTD }}">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#"
       xmlns:inyoka="http://inyoka.pocoo.org/" xml:lang="de" lang="de" dir="ltr">
-  <head inyoka:foo="bar">
+  <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
@@ -57,7 +57,6 @@
   <body>
     <div class="header">
       <h1><a href="/"><span>ubuntuusers.de</span></a></h1>
-
       <ul class="tabbar">
         {%- for app in ('portal', 'forum', 'wiki', 'ikhaya', 'planet') %}
         <li class="{{ app }}{% if app == active_app %} active{% endif
