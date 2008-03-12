@@ -103,11 +103,14 @@ class AutomaticParagraphs(Transformer):
                     except StopIteration:
                         is_paragraph = False
                     if block:
-                        for piece in _newline_re.split(block):
+                        inserted_text = False
+                        for  piece in _newline_re.split(block):
                             if piece == '\n':
-                                paragraphs[-1].append(nodes.Newline())
+                                if inserted_text:
+                                    paragraphs[-1].append(nodes.Newline())
                             elif piece:
                                 paragraphs[-1].append(nodes.Text(piece))
+                                inserted_text = True
                     if is_paragraph:
                         paragraphs.append([])
             elif child.is_block_tag:
