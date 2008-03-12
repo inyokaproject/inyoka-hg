@@ -37,7 +37,7 @@ def populate_context_defaults(context):
                 os.path.join(os.path.dirname(__file__), '..',
                              'static', 'xhtml1-strict-uu.dtd'))
         else:
-            xhtml_dtd = href('static', 'static', 'xhtml1-strict-uu.dtd')
+            xhtml_dtd = href('static', 'xhtml1-strict-uu.dtd')
     try:
         request = current_request._get_current_object()
     except RuntimeError:
