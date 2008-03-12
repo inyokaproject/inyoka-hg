@@ -21,8 +21,23 @@ from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 
 
+# path to the dtd.  In debug mode we refer to the file system, otherwise
+# URL.  We do that because the firefox validator extension is unable to
+# load DTDs from URLs...  On first rendering the path is calculated because
+# of circular imports "href()" could cause.
+xhtml_dtd = None
+
+
 def populate_context_defaults(context):
     """Fill in context defaults."""
+    global xhtml_dtd
+    if xhtml_dtd is None:
+        if settings.DEBUG:
+            xhtml_dtd = os.path.realpath(
+                os.path.join(os.path.dirname(__file__), '..',
+                             'static', 'xhtml1-strict-uu.dtd'))
+        else:
+            xhtml_dtd = href('static', 'static', 'xhtml1-strict-uu.dtd')
     try:
         request = current_request._get_current_object()
     except RuntimeError:
@@ -57,6 +72,7 @@ def populate_context_defaults(context):
 
     if request:
         context.update(
+            XHTML_DTD=xhtml_dtd,
             REQUEST=request,
             CURRENT_URL=request.build_absolute_uri(),
             USER=request.user,
