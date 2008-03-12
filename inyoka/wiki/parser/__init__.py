@@ -97,7 +97,6 @@ r"""
     ~~~~~~~~~~~~~~~~~~~~~~~
 
     -   Elements must be closed and cannot spawn multiple paragraphs
-    -   \\ at the end of a line with a newline following creates a newline
     -   Macros, parsers, table definitions and some other syntax elements
         that allow arguments have an fixed argument syntax:  a list of
         arguments, whitespace or comma keeps arguments apart and if you
@@ -390,7 +389,6 @@ class Parser(object):
             'wiki_link_begin':      self.parse_wiki_link,
             'external_link_begin':  self.parse_external_link,
             'free_link':            self.parse_free_link,
-            'newline':              self.parse_newline,
             'ruler':                self.parse_ruler,
             'macro_begin':          self.parse_macro,
             'pre_begin':            self.parse_pre_block,
@@ -807,18 +805,6 @@ class Parser(object):
         """
         target = stream.expect('free_link').value
         return nodes.Link(target, shorten=True)
-
-    def parse_newline(self, stream):
-        """
-        Parse a simple newline marker.  Note that the parser does not process
-        paragraphs because it's not safe to guess their positions before the
-        parsing and macro expansion process took place.  Have a look at the
-        `AutomaticParagraphs` transformer for more details.
-
-        Returns a `Newline` node.
-        """
-        token = stream.expect('newline')
-        return nodes.Newline()
 
     def parse_ruler(self, stream):
         """

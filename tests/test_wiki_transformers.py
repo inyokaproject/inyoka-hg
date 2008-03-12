@@ -35,7 +35,7 @@ def test_automatic_paragraphs():
             nodes.Emphasized([
                 nodes.Text('baz\n\n')
             ]),
-            nodes.Text('blub.\n')
+            nodes.Text('blub.')
         ]),
         nodes.List('unordered', [
             nodes.ListItem([nodes.Paragraph([nodes.Text('foo')])])
