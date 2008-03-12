@@ -119,7 +119,7 @@ def feed(request, mode='short', count=25):
         kwargs = {}
         if mode == 'full':
             kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                u'xhtml">%s%s</div>' % entry.text
+                                u'xhtml">%s</div>' % entry.text
             kwargs['content_type'] = 'xhtml'
         if mode == 'short':
             summary = truncate_html_words(entry.text, 100)
