@@ -15,7 +15,7 @@ from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.utils.text import slugify
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, does_not_exist_is_404, \
@@ -1175,10 +1175,10 @@ def welcome(request, slug, path=None):
     if request.method == 'POST':
         accepted = request.POST.get('accept', False)
         forum.read_welcome(request.user, accepted)
-        if accepted:
+        target_url = request.POST.get('goto_url')
+        if accepted and target_url and is_safe_domain(target_url):
             return HttpResponseRedirect(request.POST.get('goto_url'))
-        else:
-            return HttpResponseRedirect(href('forum'))
+        return HttpResponseRedirect(href('forum'))
     return {
         'goto_url': goto_url,
         'message': forum.welcome_message,

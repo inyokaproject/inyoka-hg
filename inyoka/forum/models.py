@@ -748,22 +748,9 @@ class Topic(models.Model):
         connection._commit()
 
     def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('forum', 'topic', self.slug),
-            'reply': ('forum', 'topic', self.slug, 'reply'),
-            'report': ('forum', 'topic', self.slug, 'report'),
-            'split': ('forum', 'topic', self.slug, 'split'),
-            'move': ('forum', 'topic', self.slug, 'move'),
-            'lock': ('forum', 'topic', self.slug, 'lock'),
-            'unlock': ('forum', 'topic', self.slug, 'unlock'),
-            'restore': ('forum', 'topic', self.slug, 'restore'),
-            'delete': ('forum', 'topic', self.slug, 'delete'),
-            'hide': ('forum', 'topic', self.slug, 'hide'),
-            'solve': ('forum', 'topic', self.slug, 'solve'),
-            'unsolve': ('forum', 'topic', self.slug, 'unsolve'),
-            'subscribe': ('forum', 'topic', self.slug, 'subscribe'),
-            'unsubscribe': ('forum', 'topic', self.slug, 'unsubscribe')
-        }[action])
+        if action == 'show':
+            return href('forum', 'topic', self.slug)
+        return href('forum', 'topic', self.slug, action)
 
     def save(self):
         if self.slug is None:

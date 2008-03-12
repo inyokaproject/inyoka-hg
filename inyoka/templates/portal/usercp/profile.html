@@ -28,7 +28,7 @@
     </dd>
     <dd>{{ form.delete_avatar }} Aktuellen Avatar löschen</dd>
     {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
-    {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim'] %}
+    {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip'] %}
     <dt><label for="{{ form[item].auto_id }}">{{ form[item].label }}</label></dt>
     <dd>{{ form[item] }}
     {%- if item in ['email', 'jabber'] %} <span class="note">{{ form['show_' + item] }} <label for="id_show_{{ item }}">im Profil anzeigen</label></span>

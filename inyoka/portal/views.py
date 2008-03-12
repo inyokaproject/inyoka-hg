@@ -416,6 +416,7 @@ def usercp_profile(request):
         if form.is_valid():
             data = form.cleaned_data
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
+                        'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
                         'interests', 'website', 'email', 'gpgkey'):
                 setattr(request.user, key, data[key])

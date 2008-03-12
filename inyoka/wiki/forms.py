@@ -10,6 +10,7 @@
 """
 from django import newforms as forms
 from inyoka.wiki.utils import has_conflicts
+from inyoka.wiki.acl import test_changes_allowed
 from inyoka.wiki.parser import parse, StackExhaused
 from inyoka.utils.sessions import SurgeProtectionMixin
 
@@ -29,6 +30,12 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
     note = forms.CharField(max_length=512, required=False,
                            widget=forms.TextInput(attrs={'size': 50}))
 
+    def __init__(self, user=None, page_name=None, old_text=None, data=None):
+        forms.Form.__init__(self, data)
+        self.user = user
+        self.page_name = page_name
+        self.old_text = old_text
+
     def clean_text(self):
         if 'text' not in self.cleaned_data:
             return
@@ -40,6 +47,12 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
         if has_conflicts(tree):
             raise forms.ValidationError(u'Im Text befinden sich Konflikt '
                                         u'Markierungen.')
+        elif self.user is not None and not \
+             test_changes_allowed(self.user, self.page_name, self.old_text,
+                                  self.cleaned_data['text']):
+            raise forms.ValidationError(u'Du hast Änderungen vorgenommen, '
+                                        u'die dir durch die Zugriffsrechte '
+                                        u'verwehrt werden.')
         return self.cleaned_data['text']
 
 
