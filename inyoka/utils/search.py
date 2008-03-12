@@ -240,7 +240,7 @@ class SearchSystem(object):
                 xapian.Database(settings.XAPIAN_DATABASE)
         else:
             connection = self.connections[thread]
-            connection.reopen()
+        connection.reopen()
         return connection
 
     def register(self, adapter):
