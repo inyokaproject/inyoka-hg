@@ -852,7 +852,7 @@ class Topic(models.Model):
 
     @property
     def paginated(self):
-        return bool(self.post_count - 1 // POSTS_PER_PAGE)
+        return bool(max(0, self.post_count -1) // POSTS_PER_PAGE)
 
     def get_ubuntu_version(self):
         if not (self.ubuntu_version or self.ubuntu_distro):
