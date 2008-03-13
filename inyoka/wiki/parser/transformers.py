@@ -19,7 +19,7 @@ import re
 from inyoka.wiki.parser import nodes
 
 
-_newline_re = re.compile(r'(\n)(?!$)')
+_newline_re = re.compile(r'(\n)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
 _german_typography_rules = [
@@ -116,7 +116,7 @@ class AutomaticParagraphs(Transformer):
                     except StopIteration:
                         is_paragraph = False
                     if block:
-                        skip = not paragraphs[-1]
+                        skip = not paragraphs[-1] or paragraphs[-1][-1].is_block_tag
                         paragraphs[-1].extend(self.break_lines(block, skip))
                     if is_paragraph:
                         paragraphs.append([])
@@ -137,14 +137,16 @@ class AutomaticParagraphs(Transformer):
 
         return parent
 
-    def transform(self, parent):
+    def transform(self, parent, previous_sibling=None):
         """Sets linebreaks and paragraphs."""
         # first we recurse to all the children.  We do that in the head
         # so that the paragraph and linebreak rewriters can already work
         # with the modified children
+        internal_previous_sibling = None
         for node in parent.children:
             if node.is_container and not node.is_raw:
-                self.transform(node)
+                self.transform(node, internal_previous_sibling)
+            internal_previous_sibling = node
 
         # if a node does not support paragraphs (usually inline nodes)
         # we still rewrite the children's text nodes but just for
@@ -152,12 +154,12 @@ class AutomaticParagraphs(Transformer):
         if not parent.allows_paragraphs:
             new_children = []
             for child in self.joined_text_iter(parent):
-                skip = new_children
                 if child.is_text_node:
-                    skip = not new_children
+                    skip = previous_sibling and previous_sibling.is_block_tag
                     new_children.extend(self.break_lines(child.text, skip))
                 else:
-                    new_children.append(self.transform(child))
+                    last_child = new_children and new_children[-1] or None
+                    new_children.append(self.transform(child, last_child))
             parent.children[:] = new_children
             return parent
 
