@@ -29,6 +29,8 @@ from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
 
 
+
+
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
@@ -53,7 +55,6 @@ VERSION_REGEXES = [
     (i, re.compile(REGEX % (i, name.split(' ')[0].lower())))
     for i, name in UBUNTU_VERSIONS.iteritems()
 ]
-
 
 def get_ubuntu_version(request):
     """
@@ -787,12 +788,19 @@ class Topic(models.Model):
             self.slug = '-'.join(slug_words)[:50]
             self.save()
 
+    def update_search(self):
+        """
+        This updates the xapian search index.
+        """
+        # To avoid a circular import
+        from inyoka.forum.search import ForumSearchAdapter
+        ForumSearchAdapter.queue(self.id)
+
     def delete(self):
         """
         This function removes all posts in this topic first to prevent
         database integrity errors.
         """
-        # XXX: Update search
         self.first_post = None
         self.last_post = None
         self.deregister()
@@ -804,6 +812,8 @@ class Topic(models.Model):
         ''', [self.id])
         cur.close()
         connection._commit()
+        # update search
+        self.update_search()
         super(Topic, self).delete()
 
     def register(self):
@@ -970,7 +980,9 @@ class Post(models.Model):
         """
         This updates the xapian search index.
         """
-        search.queue('f', self.id)
+        # To avoid a circular import
+        from inyoka.forum.search import ForumSearchAdapter
+        ForumSearchAdapter.queue(self.id)
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
@@ -1013,8 +1025,9 @@ class Post(models.Model):
         This removes all relations to this post (to prevent database integrity
         errors) and deletes it.
         """
-        # XXX: Update search
         self.deregister()
+        # update search
+        self.update_search()
         super(Post, self).delete()
 
     def __unicode__(self):
