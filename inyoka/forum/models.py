@@ -253,7 +253,7 @@ class PostManager(models.Manager):
             t.forum.topic_count += 1
         else:
             t = Topic.objects.get(slug=topic_slug)
-            t.post_count = t.post_count + len(posts)
+            t.post_count += len(posts)
             if posts[-1].id > t.last_post.id:
                 t.last_post = posts[-1]
             if posts[0].id < t.first_post.id:
@@ -299,8 +299,9 @@ class PostManager(models.Manager):
 
         if not remove_topic:
             old_topic.post_count-= len(posts)
-            old_topic.last_post = Post.objects.filter(topic__id=old_topic.id)\
-                                              .order_by('-id')[0]
+            if old_topic.last_post.id == posts[-1].id:
+                old_topic.last_post = Post.objects.filter(topic__id=
+                                        old_topic.id).order_by('-id')[0]
             if old_topic.first_post.id == posts[0].id:
                 old_topic.first_post = Post.objects.order_by('id') \
                                            .filter(topic__id=old_topic.id)[0]

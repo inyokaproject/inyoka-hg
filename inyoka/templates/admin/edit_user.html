@@ -88,7 +88,7 @@
 
   if (banned.val()) {
     bann_user_event.text('Sperrung aufheben');
-    banned = new DateTimeField('input[@name="banned"]', true);
+    banned = new DateTimeField('input[@name="banned"]', false, true);
   } else {
     banned.hide()
   }
@@ -102,7 +102,7 @@
           .hide();
         bann_user_event.text('Benutzer sperren')
       } else {
-        banned = new DateTimeField('input[@name="banned"]', true);
+        banned = new DateTimeField('input[@name="banned"]', false, true);
         bann_user_event.text('Sperrung aufheben');
       }
     });

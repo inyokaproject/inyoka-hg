@@ -15,7 +15,8 @@ from inyoka.portal.user import User
 from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
-from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
+from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
+                               HiddenCaptchaField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -297,8 +298,8 @@ class SearchForm(forms.Form):
                              required=False)
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     per_page = forms.IntegerField(required=False, widget=forms.HiddenInput)
-    date_begin = forms.DateTimeField(required=False)
-    date_end = forms.DateTimeField(required=False)
+    date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
+    date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
         required=False)
 

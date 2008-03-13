@@ -17,11 +17,9 @@
 }
 
 .datetime td {
-}
-
-.datetime td {
   border: 0 !important;
   vertical-align: top;
+  padding: 0.4em 0 0 0;
 }
 
 .calendar {
@@ -42,9 +40,10 @@
   width: 15em;
 }
 
-.timetable td input {
-  width: 6em;
-  text-align: center;
+.timetable a.close {
+  background-color: #EFEFEF;
+  color: #888;
+  border-top: 1px solid #ccc;
 }
 
 .calendar th.caption, .timetable th.caption {

@@ -11,6 +11,18 @@
  * :license: GNU GPL.
  */
 
+/* Get all inputs with type date or datetime and create a DateTimeField for
+ * them. */
+$(function() {
+  $('input[@type="text"]').each(function() {
+    if ($(this).attr('type') == 'datetime') {
+      new DateTimeField(this, true);
+    } else if ($(this).attr('type') == 'date') {
+      new DateTimeField(this, true, true);
+    }
+  })
+});
+
 /* create a closure for all of our stuff so that we don't export the
    helper functions and variables.  The only thing that is defined as
    a global is the `DateTimeField`. */
@@ -37,14 +49,22 @@
     return days;
   }
 
-  DateTimeField = function(editor, only_date) {
+  DateTimeField = function(editor, auto_show, only_date) {
     var self = this;
-    this.input = $(editor).hide();
+    this.input = $(editor).focus(function () {
+      self.container.css({position: 'absolute', left: self.input.offset().left}).show();
+    });
+    this.auto_show = auto_show || false;
     this.only_date = only_date || false;
     this.readDateTime();
     this.calendarMonth = this.currentMonth;
     this.calendarYear = this.currentYear;
     this.container = $('<table class="datetime"></table>');
+    if (auto_show) {
+      this.container.hide();
+    } else {
+      this.input.hide();
+    }
     var row = $('<tr></tr>').appendTo(this.container);
     this.calendar = $('<td></td>').appendTo(row);
     this.timetable = $('<td></td>').appendTo(row);
@@ -82,9 +102,6 @@
       this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay + ' ' +
                      this.currentTime)
     },
-    toggle: function() {
-      this.container.toggle();
-    },
     drawTimetable: function() {
       var self = this;
       var timetable = $('<table class="timetable"></table>').append(
@@ -103,19 +120,16 @@
         timetable.append($('<tr></tr>').append($('<td></td>').append(
           $('<a></a>').text(time[0]).click(function() {
             self.currentTime = time[1];
-            self.timeField.val(time[1]);
             self.writeDateTime();
           })
         )));
       })
-      var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable));
-      this.timeField = $('<input type="text"></input>')
-        .appendTo(col)
-        .val(this.currentTime)
-        .change(function() {
-          self.currentTime = self.timeField.val();
-          self.writeDateTime();
-        });
+      var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable))
+      if (this.auto_show) {
+        $('<a class="close">Schließen</a>').click(function() {
+          self.container.hide();
+        }).appendTo(col);
+      }
     },
     drawCalendar: function() {
       var self = this;
@@ -154,9 +168,10 @@
                       return false;
                     }
                   })
+                  .blur(function(evt) { $(this).change(); })
               );
               $(this).next().focus();
-            })
+            }).attr('title', 'Klicke hier, um schnell einen anderen Monat auszuwählen')
           )
         )
       );
