@@ -49,7 +49,7 @@ def get_dtd():
             '  "%s">' % (settings.DEBUG and os.path.realpath(
                     os.path.join(os.path.dirname(__file__), '..',
                                  'static', 'xhtml1-strict-uu.dtd')) or
-                    href('static', 'Xhtml1-strict-uu.dtd'))
+                    href('static', 'xhtml1-strict-uu.dtd'))
         )
     try:
         ua = UserAgent(current_request.META['HTTP_USER_AGENT'])

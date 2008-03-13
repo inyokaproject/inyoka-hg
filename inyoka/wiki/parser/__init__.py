@@ -1052,5 +1052,5 @@ class Parser(object):
         """
         Parse a link to a source [1] etc.
         """
-        sourcenumber = stream.expect('sourcelink').value[1:-1]
-        return nodes.SourceLink(id=sourcenumber)
+        sourcenumber = stream.expect('sourcelink').value
+        return nodes.SourceLink(int(sourcenumber))
