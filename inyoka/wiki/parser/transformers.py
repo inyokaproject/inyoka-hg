@@ -109,7 +109,7 @@ class AutomaticParagraphs(Transformer):
 
         for child in self.joined_text_iter(parent):
             if child.is_text_node:
-                blockiter = iter(_paragraph_re.split(child.text))
+                blockiter = iter(_paragraph_re.split(child.text.strip('\n')))
                 for block in blockiter:
                     try:
                         is_paragraph = blockiter.next()
