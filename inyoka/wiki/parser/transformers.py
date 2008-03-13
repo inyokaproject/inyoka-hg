@@ -85,21 +85,16 @@ class AutomaticParagraphs(Transformer):
         for item in flush_text_buf():
             yield item
 
-    def break_lines(self, text, last_node_hint=None):
+    def break_lines(self, text, ignore_next=False):
         """
         This function sets soft line breaks which are also possible in
         sections where paragraphs are not supported as line breaks are
-        inline elements.  The last_node_hint is used to avoid line breaks
-        after block level elements.  If None an inline node is assumed.
+        inline elements.
         """
-        ignore_next = last_node_hint is not None \
-                      and not last_node_hint.is_block_tag
         result = []
         for piece in _newline_re.split(text):
             if piece == '\n':
                 if not ignore_next:
-                    ignore_next = False
-                else:
                     result.append(nodes.Newline())
             elif piece:
                 result.append(nodes.Text(piece))
@@ -121,9 +116,8 @@ class AutomaticParagraphs(Transformer):
                     except StopIteration:
                         is_paragraph = False
                     if block:
-                        paragraphs[-1].extend(self.break_lines(block,
-                                              paragraphs[-1] and \
-                                              paragraphs[-1][-1] or None))
+                        skip = not paragraphs[-1]
+                        paragraphs[-1].extend(self.break_lines(block, skip))
                     if is_paragraph:
                         paragraphs.append([])
             elif child.is_block_tag:
@@ -158,9 +152,10 @@ class AutomaticParagraphs(Transformer):
         if not parent.allows_paragraphs:
             new_children = []
             for child in self.joined_text_iter(parent):
+                skip = new_children
                 if child.is_text_node:
-                    hint = new_children and new_children[-1] or None
-                    new_children.extend(self.break_lines(child.text, hint))
+                    skip = not new_children
+                    new_children.extend(self.break_lines(child.text, skip))
                 else:
                     new_children.append(self.transform(child))
             parent.children[:] = new_children
