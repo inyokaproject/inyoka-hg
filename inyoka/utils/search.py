@@ -373,10 +373,6 @@ class SearchSystem(object):
         if self._connection:
             self._connection.flush()
 
-    def close(self):
-        if self._connection:
-            self._connection.close()
-            self._connection = None
 
 # setup the singleton instance
 search = None
