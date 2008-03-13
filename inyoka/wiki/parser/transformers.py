@@ -19,6 +19,7 @@ import re
 from inyoka.wiki.parser import nodes
 
 
+_newline_re = re.compile(r'(\n)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
 _german_typography_rules = [
@@ -84,25 +85,39 @@ class AutomaticParagraphs(Transformer):
         for item in flush_text_buf():
             yield item
 
-    def transform(self, parent):
-        for node in parent.children[:]:
-            if node.is_container:
-                self.transform(node)
+    def break_lines(self, text, ignore_next=False):
+        """
+        This function sets soft line breaks which are also possible in
+        sections where paragraphs are not supported as line breaks are
+        inline elements.
+        """
+        result = []
+        for piece in _newline_re.split(text):
+            if piece == '\n':
+                if not ignore_next:
+                    result.append(nodes.Newline())
+            elif piece:
+                result.append(nodes.Text(piece))
+                ignore_next = False
+        return result
 
-        if not parent.allows_paragraphs:
-            return parent
+    def set_paragraphs(self, parent):
+        """
+        Insert real paragraphs into the node and return it.
+        """
         paragraphs = [[]]
 
         for child in self.joined_text_iter(parent):
             if child.is_text_node:
-                blockiter = iter(_paragraph_re.split(child.text))
+                blockiter = iter(_paragraph_re.split(child.text.strip('\n')))
                 for block in blockiter:
                     try:
                         is_paragraph = blockiter.next()
                     except StopIteration:
                         is_paragraph = False
                     if block:
-                        paragraphs[-1].append(nodes.Text(block))
+                        skip = not paragraphs[-1] or paragraphs[-1][-1].is_block_tag
+                        paragraphs[-1].extend(self.break_lines(block, skip))
                     if is_paragraph:
                         paragraphs.append([])
             elif child.is_block_tag:
@@ -121,6 +136,38 @@ class AutomaticParagraphs(Transformer):
                         break
 
         return parent
+
+    def transform(self, parent, previous_sibling=None):
+        """Sets linebreaks and paragraphs."""
+        # first we recurse to all the children.  We do that in the head
+        # so that the paragraph and linebreak rewriters can already work
+        # with the modified children
+        internal_previous_sibling = None
+        for node in parent.children:
+            if node.is_container and not node.is_raw:
+                self.transform(node, internal_previous_sibling)
+            internal_previous_sibling = node
+
+        # if a node does not support paragraphs (usually inline nodes)
+        # we still rewrite the children's text nodes but just for
+        # linebreaks and not paragraphs.
+        if not parent.allows_paragraphs:
+            new_children = []
+            for child in self.joined_text_iter(parent):
+                if child.is_text_node:
+                    skip = previous_sibling and previous_sibling.is_block_tag
+                    new_children.extend(self.break_lines(child.text, skip))
+                elif node.is_container:
+                    last_child = new_children and new_children[-1] or None
+                    new_children.append(self.transform(child, last_child))
+                else:
+                    new_children.append(child)
+            parent.children[:] = new_children
+            return parent
+
+        # At this point we now set the paragraphs for the node as
+        # this node supports supports paragraphs.
+        return self.set_paragraphs(parent)
 
 
 class GermanTypography(Transformer):

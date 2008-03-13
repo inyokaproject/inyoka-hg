@@ -102,6 +102,14 @@ class CaptchaWidget(Input):
                  rnd=randrange(1, sys.maxint)), input)
 
 
+class DateTimeWidget(Input):
+    input_type = 'datetime'
+
+
+class DateWidget(Input):
+    input_type = 'date'
+
+
 class CaptchaField(forms.Field):
     widget = CaptchaWidget
 

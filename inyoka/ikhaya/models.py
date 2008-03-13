@@ -244,7 +244,7 @@ class Article(models.Model):
         id = self.id
         super(Article, self).delete()
         # update search
-        IkhayaSearchAdapter.queue(id)
+        self.update_search()
 
     class Meta:
         verbose_name = 'Artikel'

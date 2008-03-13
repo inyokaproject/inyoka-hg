@@ -221,9 +221,13 @@ class SearchSystem(object):
         self.prefix_handlers = {}
         self.auth_deciders = {}
         self.adapters = {}
+        self._connection = None
 
     def index(self, component, docid):
-        self.adapters[component].store(docid)
+        try:
+            self.adapters[component].store(docid)
+        except ObjectDoesNotExist:
+            self.delete(component, docid)
 
     def queue(self, component, docid):
         from inyoka.portal.models import SearchQueue
@@ -232,8 +236,10 @@ class SearchSystem(object):
     def get_connection(self, writeable=False):
         """Get a new connection to the database."""
         if writeable:
-            return xapian.WritableDatabase(settings.XAPIAN_DATABASE,
-                                           xapian.DB_CREATE_OR_OPEN)
+            if not self._connection:
+                self._connection = xapian.WritableDatabase(
+                    settings.XAPIAN_DATABASE, xapian.DB_CREATE_OR_OPEN)
+            return self._connection
         thread = get_current_thread()
         if thread not in self.connections:
             self.connections[thread] = connection = \
@@ -358,6 +364,15 @@ class SearchSystem(object):
 
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)
+
+    def delete(self, component, docid):
+        full_id = (component.lower(), docid)
+        self.get_connection(True).delete_document('Q%s:%d' % full_id)
+
+    def flush(self):
+        if self._connection:
+            self._connection.flush()
+
 
 # setup the singleton instance
 search = None

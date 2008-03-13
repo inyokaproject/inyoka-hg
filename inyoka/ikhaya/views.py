@@ -19,6 +19,7 @@ from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import MONTHS
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
@@ -55,6 +56,7 @@ def context_modifier(request, context):
         categories = list(Category.objects.all())
         cache.set('ikhaya/categories', categories)
     context.update(
+        MONTHS=dict(enumerate([''] + MONTHS)),
         archive=archive,
         short_archive=short_archive,
         categories=categories

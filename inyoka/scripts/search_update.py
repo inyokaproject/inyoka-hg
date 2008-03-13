@@ -38,6 +38,7 @@ def update(limit=None):
         search.index(component, doc_id)
         last_id = id
     SearchQueue.objects.remove(last_id)
+    search.flush()
 
 
 def reindex(app=None):

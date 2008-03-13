@@ -36,7 +36,7 @@
     <li><a href="{{ href('ikhaya') }}">Aktuelle Artikel</a></li>
     {%- for date in archive -%}
       <li><a href="{{ href('ikhaya', date.strftime('%Y/%m')) }}">{{
-          date.strftime('%B %Y') }}</a></li>
+          MONTHS[date.month] }} {{ date.strftime('%Y') }}</a></li>
     {%- endfor %}
     {%- if short_archive %}
     <li><a href="{{ href('ikhaya', 'archive') }}">Komplettes Archiv</a></li>

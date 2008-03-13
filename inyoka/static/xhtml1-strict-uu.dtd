@@ -2,26 +2,29 @@
    UbuntuUsers Extensible HTML version 1.0 Strict DTD
 
    This DTD extends the regular XHTML dtd by supporting additional namespaces
-   for ccREL and more.
+   for ccREL and more.  Most important changes to a normal XHTML 1 DTD:
 
-   Based on the regular XHTML 1 Strict DTD Copyright by w3.org
+  - we allow empty UL/OL/DL/SELECT and some more
+  - our input elements know date / datetime / time for the widgets
+
+   Based on the regular XHTML 1 Strict DTD Copyright by w3.org, Armin Ronacher.
 -->
 
 <!--================ Character mnemonic entities =========================-->
 
 <!ENTITY % HTMLlat1 PUBLIC
    "-//W3C//ENTITIES Latin 1 for XHTML//EN"
-   "xhtml-lat1.ent">
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent">
 %HTMLlat1;
 
 <!ENTITY % HTMLsymbol PUBLIC
    "-//W3C//ENTITIES Symbols for XHTML//EN"
-   "xhtml-symbol.ent">
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent">
 %HTMLsymbol;
 
 <!ENTITY % HTMLspecial PUBLIC
    "-//W3C//ENTITIES Special for XHTML//EN"
-   "xhtml-special.ent">
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml-special.ent">
 %HTMLspecial;
 
 <!--================== Imported Names ====================================-->
@@ -226,6 +229,7 @@
   id          ID             #IMPLIED
   xmlns       %URI;          #FIXED 'http://www.w3.org/1999/xhtml'
   xmlns:cc    %URI;          #FIXED 'http://creativecommons.org/ns#'
+  xmlns:inyoka %URI;         #FIXED 'http://inyoka.pocoo.org/'
   >
 
 <!--================ Document Head =======================================-->
@@ -391,14 +395,14 @@
 
 <!-- Unordered list -->
 
-<!ELEMENT ul (li)+>
+<!ELEMENT ul (li)*>
 <!ATTLIST ul
   %attrs;
   >
 
 <!-- Ordered (numbered) list -->
 
-<!ELEMENT ol (li)+>
+<!ELEMENT ol (li)*>
 <!ATTLIST ol
   %attrs;
   >
@@ -412,7 +416,7 @@
 
 <!-- definition lists - dt for term, dd for its definition -->
 
-<!ELEMENT dl (dt|dd)+>
+<!ELEMENT dl (dt|dd)*>
 <!ATTLIST dl
   %attrs;
   >
@@ -703,8 +707,8 @@
 
 <!ENTITY % InputType
   "(text | password | checkbox |
-    radio | submit | reset |
-    file | hidden | image | button)"
+    radio | submit | reset | datetime |
+    date | file | hidden | image | button)"
    >
 
 <!-- the name attribute is required for all but submit & reset -->
@@ -730,7 +734,7 @@
   autocomplete (on,off)      #IMPLIED
   >
 
-<!ELEMENT select (optgroup|option)+>  <!-- option selector -->
+<!ELEMENT select (optgroup|option)*>  <!-- option selector -->
 <!ATTLIST select
   %attrs;
   name        CDATA          #IMPLIED

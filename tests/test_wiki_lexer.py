@@ -49,12 +49,11 @@ def test_inline_markup():
 def test_extra():
     expect = lexer.tokenize(
         u'--------------------\n'
-        u'foo\\\\\n'
+        u'foo'
     ).expect
 
     expect('ruler')
     expect('text', 'foo')
-    expect('newline')
     expect('eof')
 
 

@@ -136,7 +136,6 @@ class Lexer(object):
             rule(r',,', enter='sub'),
             rule(r'\^\^', enter='sup'),
             rule(r'\(\(', enter='footnote'),
-            rule(r'\\\\[ \t]*(\n|$)(?m)', 'newline'),
             rule(r'\[\[([\w_]+)', bygroups('macro_name'),
                  enter='macro'),
             rule(r'\[color\s*=\s*(.*?)\s*\]', bygroups('color_value'),
@@ -147,7 +146,7 @@ class Lexer(object):
                  enter='font')
         ),
         'links': ruleset(
-            rule(r'\[\s*(\d+)\s*\]', 'sourcelink'),
+            rule(r'\[\s*(\d+)\s*\]', bygroups('sourcelink')),
             rule(r'(\[\s*)((?:%s|\?|#)\S+)(\s*\])' % _url_pattern, bygroups(
                  'external_link_begin', 'link_target', 'external_link_end')),
             rule(r'\[((?:%s|\?).*?)\s+' % _url_pattern, bygroups('link_target'),
@@ -257,7 +256,7 @@ class Lexer(object):
             include('function_call')
         ),
         'parser_data': ruleset(
-            rule(r'^\}\}\}\s*$(?m)', leave=1)
+            rule(r'\}\}\}(?m)', leave=1)
         ),
         # a table row. with spans and all that stuff
         'table_row': ruleset(
@@ -283,7 +282,7 @@ class Lexer(object):
             include('function_call')
         ),
         'box_contents': ruleset(
-            rule(r'^\|\}\}\s*$(?m)', leave=1),
+            rule(r'\|\}\}(?m)', leave=1),
             include('everything')
         ),
         # the macro base is that part where the lexer waits for an upcoming
