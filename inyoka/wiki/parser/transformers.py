@@ -157,9 +157,11 @@ class AutomaticParagraphs(Transformer):
                 if child.is_text_node:
                     skip = previous_sibling and previous_sibling.is_block_tag
                     new_children.extend(self.break_lines(child.text, skip))
-                else:
+                elif node.is_container:
                     last_child = new_children and new_children[-1] or None
                     new_children.append(self.transform(child, last_child))
+                else:
+                    new_children.append(child)
             parent.children[:] = new_children
             return parent
 
