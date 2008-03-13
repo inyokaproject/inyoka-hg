@@ -457,8 +457,8 @@ def do_delete(request, name):
             page.edit(user=request.user, deleted=True,
                       remote_addr=request.META.get('REMOTE_ADDR'),
                       note=request.POST.get('note', '') or
-                           'Seite wurde gelöscht')
-            flash('Seite wurde erfolgreich gelöscht', success=True)
+                           u'Seite wurde gelöscht')
+            flash(u'Seite wurde erfolgreich gelöscht', success=True)
     else:
         flash(render_template('wiki/action_delete.html', {'page': page}))
     return HttpResponseRedirect(url_for(page))

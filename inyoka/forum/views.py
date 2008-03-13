@@ -307,9 +307,8 @@ def newpost(request, topic_slug=None, quote_id=None):
             Attachment.objects.update_post_ids(att_ids, post.id)
             t.save()
             # update cache
-            for page in range(1, 5):
+            for page in xrange(1, 5):
                 cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
-                cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
             # send notifications
             for s in Subscription.objects.filter(topic=t):
                 text = render_template('mails/new_post.txt', {

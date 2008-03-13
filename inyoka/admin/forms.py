@@ -11,7 +11,8 @@
 from datetime import datetime
 from django import newforms as forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
-                               DATE_INPUT_FORMATS, TIME_INPUT_FORMATS
+                               DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
+                               DateTimeWidget
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 
 
@@ -57,7 +58,7 @@ class EditArticleForm(forms.Form):
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
-        u'angezeigt.')
+        u'angezeigt.', widget=DateTimeWidget)
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False,
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
