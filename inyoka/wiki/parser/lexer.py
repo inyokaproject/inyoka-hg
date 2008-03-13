@@ -146,7 +146,7 @@ class Lexer(object):
                  enter='font')
         ),
         'links': ruleset(
-            rule(r'\[\s*(\d+)\s*\]', 'sourcelink'),
+            rule(r'\[\s*(\d+)\s*\]', bygroups('sourcelink')),
             rule(r'(\[\s*)((?:%s|\?|#)\S+)(\s*\])' % _url_pattern, bygroups(
                  'external_link_begin', 'link_target', 'external_link_end')),
             rule(r'\[((?:%s|\?).*?)\s+' % _url_pattern, bygroups('link_target'),

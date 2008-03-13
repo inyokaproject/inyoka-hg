@@ -970,14 +970,29 @@ class SourceLink(Element):
 
     allowed_in_signatures = False
 
+    def __init__(self, target, children=None, id=None, style=None, class_=None):
+        if children is None:
+            children = [Text('[%d]' % target)]
+        Element.__init__(self, children, id, style, class_)
+        self.target = target
+
+    @property
+    def text(self):
+        return '[%d]' % self.target
+
     def generate_markup(self, w):
-        w.markup(u"[%s]" % self.id)
+        w.markup(self.text)
 
     def prepare_html(self):
-        yield u'<sup><a href="#source-%s">[%s]</a></sup>' % (self.id, self.id)
+        yield build_html_tag(u'sup', id=self.id, style=self.style,
+                             class_=self.class_)
+        yield u'<a href="#source-%d">' % self.id
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</a></sup>'
 
     def prepare_docbook(self):
-        yield u'[%s]' % self.id
+        yield self.text
 
 
 class Code(Element):
