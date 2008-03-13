@@ -224,7 +224,10 @@ class SearchSystem(object):
         self._connection = None
 
     def index(self, component, docid):
-        self.adapters[component].store(docid)
+        try:
+            self.adapters[component].store(docid)
+        except ObjectDoesNotExist:
+            self.delete(component, docid)
 
     def queue(self, component, docid):
         from inyoka.portal.models import SearchQueue
@@ -362,14 +365,14 @@ class SearchSystem(object):
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)
 
+    def delete(self, component, docid):
+        full_id = (component.lower(), docid)
+        self.get_connection(True).delete_document('Q%s:%d' % full_id)
+
     def flush(self):
         if self._connection:
             self._connection.flush()
 
-    def close(self):
-        if self._connection:
-            self._connection.close()
-            self._connection = None
 
 # setup the singleton instance
 search = None
