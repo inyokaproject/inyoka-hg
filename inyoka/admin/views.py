@@ -683,8 +683,10 @@ def groups(request):
             return HttpResponseRedirect(href(
                 'admin', 'groups', 'edit', name
             ))
+    groups = Group.objects.all()
     return {
-        'groups_exist': bool(Group.objects.count())
+        'groups': groups,
+        'groups_exist': len(groups),
     }
 
 

@@ -26,7 +26,11 @@
 {% else %}
 <p>Wähle eine Gruppe aus, die du editieren möchtest:</p>
 <form action="" method="post">
-  <input type="text" id="group_query" name="group" />
+  <select name="group" size="10">
+  {% for group in groups %}
+    <option>{{ group.name }}</option>
+  {% endfor %}
+  </select>
   <input type="submit" value="Auswählen" />
 </form>
 {% endif %}
@@ -35,12 +39,4 @@
   Oder <a href="{{ href('admin', 'groups', 'new') }}">erstelle eine neue Gruppe</a>.
 </p>
 {% endif %}
-<script type="text/javascript">
-  /* <![CDATA[ */
-  (function () {
-    $('#group_query').autocomplete("/?__service__=admin.get_group_autocompletion", {
-      delay: 40, maxItemsToShow: 15, cacheLength: 10});
-  })();
-  /* ]]> */
-</script>
 {% endblock %}
