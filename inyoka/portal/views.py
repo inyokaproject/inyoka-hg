@@ -648,12 +648,15 @@ def privmsg_new(request, username=None):
                 msg.send(recipients)
                 # send notification
                 for recipient in recipients:
+                    entry = PrivateMessageEntry.objects.get(message=msg,
+                                                            user=recipient)
                     if 'pm_new' in recipient.settings.get('notifications',
                                                           ('pm_new',)):
                         text = render_template('mails/new_pm.txt', {
-                            'username': recipient.username,
-                            'sender':   request.user.username,
-                            'subject':  d['subject']
+                            'user':     recipient,
+                            'sender':   request.user,
+                            'subject':  d['subject'],
+                            'entry':    entry,
                        })
                         send_notification(recipient, u'Neue private Nachricht'
                                    u' von %s' % (request.user.username), text)
