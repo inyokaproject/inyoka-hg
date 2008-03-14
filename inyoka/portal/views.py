@@ -32,8 +32,9 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import datetime_to_timezone
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
-                                send_new_user_password
+     send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category
@@ -351,7 +352,8 @@ def search(request):
         results = search_system.query(request.user,
             d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
-            date_begin=d['date_begin'], date_end=d['date_end'],
+            date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
+            date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
             exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
         )

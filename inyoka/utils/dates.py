@@ -100,7 +100,7 @@ def format_iso8601(obj):
     return obj.strftime('%Y-%d-%mT%H:%M:%SZ')
 
 
-def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
+def format_timedelta(d, now=None, use_since=False):
     """
     Format a timedelta.  Currently this method only works with
     dates in the past.
@@ -117,7 +117,9 @@ def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
     if now is None:
         now = datetime.utcnow().replace(tzinfo=pytz.UTC)
     elif now.tzinfo is not None:
-        now.tzinfo = d.astimezone(pytz.UTC)
+        now = d.astimezone(pytz.UTC)
+    else:
+        now = d.replace(tzinfo=pytz.UTC)
     if type(d) is date:
         d = datetime(d.year, d.month, d.day)
     if d.tzinfo is None:

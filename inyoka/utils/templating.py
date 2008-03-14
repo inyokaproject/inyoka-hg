@@ -44,12 +44,11 @@ def get_dtd():
                              'static', 'xhtml1-strict-uu.dtd'))
         else:
             dtd_path = href('static', 'xhtml1-strict-uu.dtd')
-        inyoka_dtd = (
-            '<!DOCTYPE html PUBLIC "-//INYOKA//DTD XHTML STRICT 1.0//EN"\n'
-            '  "%s">' % (settings.DEBUG and os.path.realpath(
-                    os.path.join(os.path.dirname(__file__), '..',
-                                 'static', 'xhtml1-strict-uu.dtd')) or
-                    href('static', 'xhtml1-strict-uu.dtd'))
+        inyoka_dtd = '<!DOCTYPE html SYSTEM "%s">' % (
+            settings.DEBUG and os.path.realpath(
+                os.path.join(os.path.dirname(__file__), '..',
+                             'static', 'xhtml1-strict-uu.dtd'))
+            or href('static', 'xhtml1-strict-uu.dtd')
         )
     try:
         ua = UserAgent(current_request.META['HTTP_USER_AGENT'])
