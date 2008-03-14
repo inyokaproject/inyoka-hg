@@ -130,6 +130,16 @@ def forum(request, slug, page=1):
                      'besuche das Forum')
     data['subforums'] = filter_invisible(request.user, data['subforums'])
     data['privileges'] = privs
+
+    if request.user.is_authenticated:
+        key = 'subscription/forum/%d' % f.id
+        subscribed = cache.get(key)
+        if not subscribed:
+             subscribed = Subscription.objects.filter(
+                user=request.user, forum=f)
+        data['is_subscribed'] = subscribed
+        f.mark_read(request.user)
+
     return data
 
 
@@ -311,7 +321,7 @@ def newpost(request, topic_slug=None, quote_id=None):
                 cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
             # send notifications
             for s in Subscription.objects.filter(topic=t,
-                user__not=request.user, notified=False):
+                notified=False).excluded(user=request.user):
                 text = render_template('mails/new_post.txt', {
                     'username': s.user.username,
                     'post':     post,
@@ -510,6 +520,21 @@ def newtopic(request, slug=None, article=None):
                     send_notification(s.user, (u'Neue Diskussion für die'
                         u' Seite „%s“ wurde eröffnet')
                         % article.title, text)
+                    s.notified = True
+                    s.save()
+            else:
+                # topic is a normal topic
+                for s in Subscription.objects.filter(forum=f,
+                    user__not=request.user, notified=False):
+                    text = render_template('mails/new_topic.txt', {
+                        'username' : s.user.username,
+                        'forum' : f,
+                        'topic' : topic,
+                    })
+                    send_notification(s.user, (u'Ein neues Thema wurde'
+                        u'im Forum „%s“ eröffnet' % f.title))
+                    s.notified = True
+                    s.save()
 
             return HttpResponseRedirect(topic.get_absolute_url())
 
@@ -690,6 +715,45 @@ def change_status(request, topic_slug, solved=None, locked=None):
                                                     u'entsperrt'))
     t.save()
     return HttpResponseRedirect(t.get_absolute_url())
+
+@simple_check_login
+def subscribe_forum(request, slug):
+    """
+    If the user has already subscribed to this forum, this view removes it.
+    If there isn't such a subscription, a new one is created.
+    """
+    f = Forum.objects.get(slug=slug)
+    if not have_privilege(request.user, f, 'read'):
+        return abort_access_denied(request)
+    try:
+        s = Subscription.objects.get(user=request.user, forum=f)
+    except Subscription.DoesNotExist:
+        # there's no such subscription yet, create a new one
+        Subscription(user=request.user, forum=f).save()
+        flash(u'Du wirst ab jetzt bei neuen Themen in diesem Forum '
+              u'benachrichtigt.')
+    return HttpResponseRedirect(url_for(f))
+
+@simple_check_login
+def unsubscribe_forum(request, slug):
+    """
+    If the user has already subscribed to this forum, this view removes it.
+    If there isn't such a subscription, a new one is created.
+    """
+    f = Forum.objects.get(slug=slug)
+    if not have_privilege(request.user, f, 'read'):
+        return abort_access_denied(request)
+    try:
+        s = Subscription.objects.get(user=request.user, forum=f)
+    except Subscription.DoesNotExist:
+        pass
+    else:
+        # there's already a subscription for this forum, remove it
+        s.delete()
+        flash(u'Du wirst ab nun bei neuen Themen in diesem Forum nicht '
+              u' mehr benachrichtigt')
+    return HttpResponseRedirect(url_for(f))
+
 
 
 @simple_check_login
@@ -1134,6 +1198,9 @@ def markread(request, slug=None):
         user.forum_last_read = Post.objects.get_max_id()
         user.forum_read_status = ''
         user.save()
+        # to trigger subscriptions
+        for forum in Forum.objects.all():
+            forum.mark_read(user)
     return HttpResponseRedirect(href('forum'))
 
 
