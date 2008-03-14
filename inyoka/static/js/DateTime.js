@@ -54,29 +54,28 @@ $(document).click(function() {
 
   DateTimeField = function(editor, auto_show, only_date) {
     var self = this;
+    // check whether the browser implements its own date time editor
+    if (editor.type == 'datetime') return false;
     this.input = $(editor).click(function() {
       $('table.datetime').each(function() {
         if (self.container[0] !== this)
           $(this).hide();
         else
-          self.container.css({
-            position: 'absolute',
-            left:     self.input.offset().left
-          }).show();
+          self.show();
       });
       return false; 
     });
     this.auto_show = auto_show || false;
     this.only_date = only_date || false;
     this.readDateTime();
-    this.calendarMonth = this.currentMonth;
-    this.calendarYear = this.currentYear;
-    this.container = $('<table class="datetime"></table>');
+    this.container = $('<table class="datetime"></table>').click(function() {
+        return false;
+    });
     auto_show ? this.container.hide() : this.input.hide();
     var row = $('<tr></tr>').appendTo(this.container);
     this.calendar = $('<td></td>').appendTo(row);
     this.timetable = $('<td></td>').appendTo(row);
-    this.drawCalendar();
+    this.drawDate(this.currentYear, this.currentMonth);
     this.drawTimetable();
     if (only_date) {
       this.timetable.hide();
@@ -86,6 +85,14 @@ $(document).click(function() {
   }
 
   DateTimeField.prototype = {
+    show: function() {
+      this.readDateTime();
+      this.drawDate(this.currentYear, this.currentMonth);
+      this.container.css({
+        position: 'absolute',
+        left:     this.input.offset().left
+      }).show();
+    },
     readDateTime: function() {
       var self = this;
       var set_vars = function(year, month, day, time) {
@@ -126,7 +133,7 @@ $(document).click(function() {
       ];
       $.each(times, function(i, time) {
         timetable.append($('<tr></tr>').append($('<td></td>').append(
-          $('<a></a>').text(time[0]).click(function() {
+          $('<a/>').text(time[0]).click(function() {
             self.currentTime = time[1];
             self.writeDateTime();
             return false;
