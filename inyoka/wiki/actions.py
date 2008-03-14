@@ -102,6 +102,13 @@ def do_show(request, name):
     if page.rev.deleted:
         return do_missing_page(request, name, page)
 
+    try: 
+        s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
+        s.notified = False
+        s.save()
+    except Subscription.DoesNotExist:
+        pass 
+
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (
                         escape(url_for(page)),
@@ -401,15 +408,16 @@ def do_edit(request, name):
                     ))
 
                 # send notifications
-                for s in Subscription.objects.filter(wiki_page=page) \
-                                             .exclude(user=request.user):
+                for s in Subscription.objects.filter(wiki_page=page,
+                    notified=False).exclude(user=request.user):
                     text = render_template('mails/page_edited.txt', {
                         'username': s.user.username,
                         'rev':      page.revisions.latest()
                     })
                     send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
-                                      % page.title, text)
-
+                                    % page.title, text)
+                    s.notified = True
+                    s.save()
 
                 if page.metadata.get('weiterleitung'):
                     url = href('wiki', page.name, redirect='no')

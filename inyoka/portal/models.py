@@ -20,8 +20,8 @@ from inyoka.utils.dates import format_specific_datetime, \
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.portal.user import User
-from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
+from inyoka.forum.models import Topic, Forum
 from inyoka.wiki.parser import parse, render, RenderContext
 
 
@@ -237,7 +237,10 @@ class Subscription(models.Model):
     objects = SubscriptionManager()
     user = models.ForeignKey(User)
     topic = models.ForeignKey(Topic, null=True)
+    forum = models.ForeignKey(Forum, null=True)
     wiki_page = models.ForeignKey(Page, null=True)
+    notified = models.BooleanField('User was already notified',
+                                   default=False)
 
     def __unicode__(self):
         if self.topic:
@@ -246,6 +249,9 @@ class Subscription(models.Model):
         elif self.wiki_page:
             type = u'wiki_page'
             title = self.wiki_page.title
+        elif self.forum:
+            type = u'forum'
+            title = self.forum.title
         return u'Subscription(%s, %s, "%s")' % (
             self.user.username,
             type, title

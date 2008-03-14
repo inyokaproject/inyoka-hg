@@ -256,7 +256,7 @@ class Lexer(object):
             include('function_call')
         ),
         'parser_data': ruleset(
-            rule(r'^\}\}\}\s*$(?m)', leave=1)
+            rule(r'\}\}\}(?m)', leave=1)
         ),
         # a table row. with spans and all that stuff
         'table_row': ruleset(
@@ -282,7 +282,7 @@ class Lexer(object):
             include('function_call')
         ),
         'box_contents': ruleset(
-            rule(r'^\|\}\}\s*$(?m)', leave=1),
+            rule(r'\|\}\}(?m)', leave=1),
             include('everything')
         ),
         # the macro base is that part where the lexer waits for an upcoming
