@@ -87,6 +87,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         if settings.DEBUG:
             from pprint import pprint
             import sys, os, StringIO
+            stdout_encoding = sys.stdout.encoding or sys.getfilesystemencoding()
             try:
                 cols = settings.DEBUG_COLUMNS - 7
             except:
@@ -108,10 +109,10 @@ class CommonServicesMiddleware(CommonMiddleware):
                     if not s:
                         continue
                     if first:
-                        print >> sys.stderr, q['time'] + ':', s
+                        print >> sys.stderr, q['time'] + ':', s.encode(stdout_encoding)
                         first = False
                     else:
-                        print >> sys.stderr, ' '*6, s
+                        print >> sys.stderr, ' '*6, s.encode(stdout_encoding)
                 print >> sys.stderr
             print >> sys.stderr, "-----------------------------------------\n"
         return response
