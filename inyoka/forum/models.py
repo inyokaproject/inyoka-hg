@@ -588,7 +588,9 @@ class Forum(models.Model):
             'show': ('forum', self.parent_id and 'forum' or 'category', self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
             'welcome': ('forum', 'forum', self.slug, 'welcome'),
-            'edit': ('admin', 'forum', 'edit', self.id)
+            'edit': ('admin', 'forum', 'edit', self.id),
+            'subscribe': ('forum', 'forum', self.slug, 'subscribe'),
+            'unsubscribe': ('forum', 'forum', self.slug, 'unsubscribe')
         }[action])
 
     @property
@@ -634,6 +636,14 @@ class Forum(models.Model):
         Mark all topics in this forum and all related subforums as
         read for the specificed user.
         """
+        from inyoka.portal.models import Subscription
+        try:
+            s = Subscription.objects.get(forum=self, user=user)
+            s.notified = False
+            s.save()
+        except Subscription.DoesNotExist:
+            pass
+
         forums = [self]
         while forums:
             forum = forums.pop()
