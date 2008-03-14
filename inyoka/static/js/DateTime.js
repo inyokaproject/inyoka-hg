@@ -14,13 +14,16 @@
 /* Get all inputs with type date or datetime and create a DateTimeField for
  * them. */
 $(function() {
-  $('input[@type="text"]').each(function() {
-    if ($(this).attr('type') == 'datetime') {
+  $('input').each(function() {
+    if ($(this).attr('type') == 'datetime')
       new DateTimeField(this, true);
-    } else if ($(this).attr('type') == 'date') {
+    else if ($(this).attr('type') == 'date')
       new DateTimeField(this, true, true);
-    }
-  })
+  });
+});
+
+$(document).click(function() {
+  $('table.datetime').hide();
 });
 
 /* create a closure for all of our stuff so that we don't export the
@@ -28,7 +31,8 @@ $(function() {
    a global is the `DateTimeField`. */
 
 (function() {
-  var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
+                'August', 'September', 'Oktober', 'November', 'Dezember'];
   var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
 
   function isLeapYear(year) {
@@ -37,22 +41,30 @@ $(function() {
 
   function getDaysInMonth(month, year) {
     var days;
-    if ($.inArray(month, [1, 3, 5, 7, 8, 10, 12]) != -1) {
+    if ($.inArray(month, [1, 3, 5, 7, 8, 10, 12]) != -1)
       days = 31;
-    } else if ($.inArray(month, [4, 6, 9, 11]) != -1) {
+    else if ($.inArray(month, [4, 6, 9, 11]) != -1)
       days = 30;
-    } else if (month == 2 && isLeapYear(year)) {
+    else if (month == 2 && isLeapYear(year))
       days = 29;
-    } else {
+    else
       days = 28;
-    }
     return days;
   }
 
   DateTimeField = function(editor, auto_show, only_date) {
     var self = this;
-    this.input = $(editor).focus(function () {
-      self.container.css({position: 'absolute', left: self.input.offset().left}).show();
+    this.input = $(editor).click(function() {
+      $('table.datetime').each(function() {
+        if (self.container[0] !== this)
+          $(this).hide();
+        else
+          self.container.css({
+            position: 'absolute',
+            left:     self.input.offset().left
+          }).show();
+      });
+      return false; 
     });
     this.auto_show = auto_show || false;
     this.only_date = only_date || false;
@@ -60,11 +72,7 @@ $(function() {
     this.calendarMonth = this.currentMonth;
     this.calendarYear = this.currentYear;
     this.container = $('<table class="datetime"></table>');
-    if (auto_show) {
-      this.container.hide();
-    } else {
-      this.input.hide();
-    }
+    auto_show ? this.container.hide() : this.input.hide();
     var row = $('<tr></tr>').appendTo(this.container);
     this.calendar = $('<td></td>').appendTo(row);
     this.timetable = $('<td></td>').appendTo(row);
@@ -128,6 +136,7 @@ $(function() {
       if (this.auto_show) {
         $('<a class="close">Schließen</a>').click(function() {
           self.container.hide();
+          return false;
         }).appendTo(col);
       }
     },
