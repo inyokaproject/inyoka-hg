@@ -29,8 +29,6 @@ from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
 
 
-
-
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
@@ -890,12 +888,22 @@ class Topic(models.Model):
 
     def mark_read(self, user):
         """
-        Mark the current topic as read for a given user.
+        Mark the current topic as read for a given user
+        and set his subscription.notified to false if any.
         """
+        from inyoka.portal.models import Subscription
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
+
+        try:
+            s = Subscription.objects.get(topic=self, user=user)
+            s.notified = False
+            s.save()
+        except Subscription.DoesNotExist:
+            pass
+
         if self.last_post_id and not self.last_post_id in read_status:
             read_status.add(self.last_post.id)
             maxid = Post.objects.get_max_id()

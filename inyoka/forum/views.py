@@ -310,14 +310,17 @@ def newpost(request, topic_slug=None, quote_id=None):
             for page in xrange(1, 5):
                 cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
             # send notifications
-            for s in Subscription.objects.filter(topic=t):
+            for s in Subscription.objects.filter(topic=t,
+                user__not=request.user, notified=False):
                 text = render_template('mails/new_post.txt', {
                     'username': s.user.username,
                     'post':     post,
                     'topic':    t
                 })
                 send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
-                                  % t.title, text)
+                                % t.title, text)
+                s.notified = True
+                s.save()
             resp = HttpResponseRedirect(post.get_absolute_url())
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
