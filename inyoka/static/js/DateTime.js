@@ -129,6 +129,7 @@ $(document).click(function() {
           $('<a></a>').text(time[0]).click(function() {
             self.currentTime = time[1];
             self.writeDateTime();
+            return false;
           })
         )));
       })
@@ -149,10 +150,12 @@ $(document).click(function() {
         $('<tr></tr>').append(
           $('<th colspan="7" class="caption"></th>').append(
             $('<a class="calendarnav-next"></a>').text('>').click(function() {
-              self.drawNextMonth()
+              self.drawNextMonth();
+              return false;
             }),
             $('<a class="calendarnav-previous"></a>').text('<').click(function() {
-              self.drawPreviousMonth()
+              self.drawPreviousMonth();
+              return false;
             }),
             $('<span>' + months[month-1] + ' ' + year + '</span>').click(function() {
               $(this).hide().after(
@@ -161,9 +164,9 @@ $(document).click(function() {
                   .change(function() {
                     var dayRegex = /(\d{1,2})-(\d{1,2})-(\d+)/
                     dayRegex.exec($(this).val())
-                    if (RegExp.$1) {
+                    if (RegExp.$1)
                       self.drawDate(RegExp.$3, RegExp.$2, RegExp.$1);
-                    } else {
+                    else {
                       var monthRegex = /(\d{1,2})-(\d+)/
                       monthRegex.exec($(this).val())
                       if (RegExp.$1) {
@@ -197,16 +200,14 @@ $(document).click(function() {
 
       // Draw blanks before first of month
       var row = $('<tr></tr>').appendTo(tbody);
-      for (var i = 0; i < starting_pos; i++) {
+      for (var i = 0; i < starting_pos; i++)
         $('<td style="background-color: #f3f3f3;"></td>').appendTo(row);
-      }
 
       // Draw days of month
       var currentDay = 1;
       for (var i = starting_pos; currentDay <= days; i++) {
-        if (i % 7 == 0 && currentDay != 1) {
+        if (i % 7 == 0 && currentDay != 1)
           row = $('<tr></tr>').appendTo(tbody);
-        }
         var td = $('<td></td>').append(
           $('<a></a>').text(currentDay).click(function() {
             $('.selected', $(this).parent().parent().parent()).removeClass('selected');
@@ -215,18 +216,18 @@ $(document).click(function() {
             self.currentMonth = month;
             self.currentYear = year;
             self.writeDateTime();
+            return false;
           })
         ).appendTo(row);
-        if (year == this.currentYear && month == this.currentMonth && currentDay == this.currentDay) {
+        if (year == this.currentYear && month == this.currentMonth &&
+            currentDay == this.currentDay)
           td.addClass('selected');
-        }
         currentDay++;
       }
 
       // Draw blanks after end of month (optional, but makes code valid)
-      while (row.children().length < 7) {
+      while (row.children().length < 7)
         row.append($('<td class="nonday"></td>'));
-      }
 
       this.calendar.append(calendar);
     },
