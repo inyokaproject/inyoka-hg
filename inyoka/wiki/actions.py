@@ -103,7 +103,7 @@ def do_show(request, name):
         return do_missing_page(request, name, page)
 
     try: 
-        s = Subscription.objects.get(wiki_page=page, user=user, notified=True)
+        s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
         s.notified = False
         s.save()
     except Subscription.DoesNotExist:
