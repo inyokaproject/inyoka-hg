@@ -332,12 +332,12 @@ class User(models.Model):
     def save_avatar(self, img):
         """Save the avater to the file system."""
         avatar = Image.open(StringIO(img.content))
+        ext = avatar.format
         if avatar.size > settings.AVATAR_SIZE:
             avatar = avatar.resize(settings.AVATAR_SIZE)
-        actual_path = self.get_avatar_filename()
-        fn = 'portal/avatars/avatar_user%d.png' % (self.id)
-        pth = path.join(settings.MEDIA_ROOT, fn)
-        avatar.save(pth, "PNG")
+        fn = 'portal/avatars/avatar_user%d.%s' % (self.id, ext.lower())
+        avatar_path = path.join(settings.MEDIA_ROOT, fn)
+        avatar.save(avatar_path, ext)
         self.avatar = fn
 
     def delete_avatar(self):
