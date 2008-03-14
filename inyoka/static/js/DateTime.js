@@ -89,19 +89,19 @@ $(document).click(function() {
     readDateTime: function() {
       var self = this;
       var set_vars = function(year, month, day, time) {
-        self.currentYear = year;
-        self.currentMonth = month,
-        self.currentDay = day;
+        self.currentYear = parseInt(year, 10);
+        self.currentMonth = parseInt(month, 10),
+        self.currentDay = parseInt(day, 10);
         self.currentTime = time;
       };
       var dateTimeRegex = /(\d{4})-(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2}):(\d{2})/
       var input_value = this.input.val();
-      if (input_value == '') {
+      var found = dateTimeRegex.exec(input_value);
+      if (input_value == '' || !found) {
         var today = new Date();
         set_vars(today.getFullYear(), today.getMonth()+1, today.getDate(),
                  [today.getHours(), today.getMinutes(), today.getSeconds()].join(':'));
       } else {
-        dateTimeRegex.exec(input_value);
         set_vars(RegExp.$1, RegExp.$2, RegExp.$3,
                  [RegExp.$4, RegExp.$5, RegExp.$6].join(':'));
       }
