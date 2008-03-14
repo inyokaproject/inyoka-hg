@@ -33,13 +33,12 @@
           {%- endif %}
           {{ pagination.generate('right') }}
           <p class="actions">
-            <a href="{{ forum|url('newtopic') }}">Neues Thema</a>
+            <a href="{{ forum|url('newtopic') }}">Neues Thema</a> | 
             {%- if is_subscribed %}
-            <a href="{{ forum|url('unsubscribe') }}" class="action action_subscribe">de-abonnieren</a> |
+            <a href="{{ forum|url('unsubscribe') }}" class="action action_subscribe">de-abonnieren</a>
             {%- else %}
-            <a href="{{ forum|url('subscribe') }}" class="action action_subscribe">abonnieren</a> |
+            <a href="{{ forum|url('subscribe') }}" class="action action_subscribe">abonnieren</a>
             {%- endif %}
-
           </p>
         </td>
       </tr>

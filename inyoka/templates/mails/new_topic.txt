@@ -1,6 +1,6 @@
 Hallo {{ username }},
 
-Der Benutzer {{ post.author }} hat einen neuen Thread im Forum „{{ forum.title }}“ geschrieben.
+Der Benutzer {{ post.author }} hat einen neuen Thread im Forum „{{ forum.name }}“ geschrieben.
 Du kannst ihn dir hier ansehen: {{ topic|url }}
 
 Falls du bei Beiträgen in diesem Thema in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ forum|url('subscribe') }}
