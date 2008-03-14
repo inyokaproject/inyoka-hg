@@ -10,6 +10,7 @@
 """
 import re
 import pytz
+from operator import itemgetter
 from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
 from inyoka.utils.local import current_request
@@ -28,6 +29,37 @@ _iso8601_re = re.compile(
     # time
     r'(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?(Z?|[+-]\d{2}:\d{2})?)?$'
 )
+
+
+def group_by_day(entries, date_func=itemgetter('pub_date'),
+                 enforce_utc=False):
+    """
+    Group a list of entries by the date but in the users's timezone
+    (or UTC if enforce_utc is set to `True`).  Per defualt the pub_date
+    Attribute is used.  If this is not desired a different `date_func`
+    can be provided.  It's important that the list is already sorted
+    by date otherwise the behavior is undefined.
+    """
+    days = []
+    days_found = set()
+    if enforce_utc:
+        tzinfo = pytz.UTC
+    else:
+        tzinfo = get_user_timezone()
+    for entry in entries:
+        d = date_func(entry)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=pytz.UTC)
+        d = d.astimezone(tzinfo)
+        key = (d.year, d.month, d.day)
+        if key not in days_found:
+            days.append((key, []))
+            days_found.add(key)
+        days[-1][1].append(entry)
+    return [{
+        'date':     date(*key),
+        'articles': entries
+    } for key, entries in days if entries]
 
 
 def get_user_timezone():
@@ -58,6 +90,23 @@ def datetime_to_timezone(dt, enforce_utc=False):
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=pytz.UTC)
     return dt.astimezone(tz)
+
+
+def datetime_to_naive_utc(dt):
+    """
+    Convert a datetime object with a timezone information into a datetime
+    object without timezone information in UTC timezone.  If the object
+    did not contain a timezone information it's returned unchainged.
+    """
+    if dt.tzinfo is None:
+        return dt
+    return dt.astimezone(pytz.UTC).replace(tzinfo=None)
+
+
+def date_time_to_datetime(d, t):
+    """Merge two datetime.date and datetime.time objects into one datetime"""
+    return datetime(d.year, d.month, d.day, t.hour, t.minute, t.second,
+                    t.microsecond)
 
 
 def parse_iso8601(value):
@@ -162,20 +211,23 @@ def format_timedelta(d, now=None, use_since=False):
 def natural_date(value, prefix=False, enforce_utc=False):
     """
     Format a value using dateformat but also use today, tomorrow and
-    yesterday.
+    yesterday.  If a date object is given no timezone logic is applied,
+    otherwise the usual timezone conversion rules apply.
     """
     if not isinstance(value, datetime):
         value = datetime(value.year, value.month, value.day)
-    if value.tzinfo is not None:
-        value = value.astimezone(pytz.UTC)
-    delta = value.replace(tzinfo=None) - datetime.utcnow()
+        delta = value - datetime.utcnow()
+    else:
+        if value.tzinfo is None
+            value = value.replace(tzinfo=None)
+        value = datetime_to_timezone(value, enforce_utc)
+        delta = value - datetime.utcnow().replace(tzinfo=pytz.UTC)
     if delta.days == 0:
         return u'heute'
     elif delta.days == -1:
         return u'gestern'
     elif delta.days == 1:
         return u'morgen'
-    value = datetime_to_timezone(value, enforce_utc)
     return (prefix and 'am ' or '') + DateFormat(value).format('j. F Y')
 
 
@@ -192,17 +244,6 @@ def format_datetime(value, enforce_utc=False):
     """Just format a datetime object."""
     value = datetime_to_timezone(value, enforce_utc)
     rv = DateFormat(value).format('j. F Y H:i')
-    if enforce_utc:
-        rv += ' (UTC)'
-    return rv
-
-
-def format_date(value, enforce_utc=False):
-    """Just format a datetime object."""
-    if isinstance(value, date):
-        value = datetime(value.year, value.month, value.day)
-    value = datetime_to_timezone(value, enforce_utc)
-    rv = DateFormat(value).format('j. F Y')
     if enforce_utc:
         rv += ' (UTC)'
     return rv
@@ -227,9 +268,3 @@ def format_specific_datetime(value, alt=False, enforce_utc=False):
         string = (alt and 'am %s um ' or 'vom %s um ') % \
             DateFormat(value).format('j. F Y')
     return string + format_time(value, enforce_utc)
-
-
-def date_time_to_datetime(d, t):
-    """Merge two datetime.date and datetime.time objects into one datetime"""
-    return datetime(d.year, d.month, d.day, t.hour, t.minute, t.second,
-                    t.microsecond)

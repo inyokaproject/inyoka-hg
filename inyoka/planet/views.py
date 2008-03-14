@@ -22,9 +22,9 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import group_by_date
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
-from inyoka.planet.utils import group_by_day
 from inyoka.utils.feeds import FeedBuilder
 
 

@@ -172,13 +172,13 @@ class InyokaEnvironment(Environment):
                     lambda env, context, value:
                         format_datetime(value, enforce_utc=True),
             dateformat=
-                lambda:
+                lambda prefix=False:
                     lambda env, context, value:
-                        natural_date(value),
+                        natural_date(value, prefix),
             utcdateformat=
-                lambda:
+                lambda prefix=False:
                     lambda env, context, value:
-                        natural_date(value, enforce_utc=True),
+                        natural_date(value, prefix, enforce_utc=True),
             timeformat=
                 lambda:
                     lambda env, context, value:

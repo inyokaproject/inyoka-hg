@@ -48,7 +48,7 @@ def get_hexdigest(salt, raw_password):
     """
     if isinstance(raw_password, unicode):
         raw_password = raw_password.encode('utf-8')
-    return sha(salt + raw_password).hexdigest()
+    return sha(str(salt) + raw_password).hexdigest()
 
 
 def check_password(raw_password, enc_password, convert_user=None):
