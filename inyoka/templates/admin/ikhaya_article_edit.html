@@ -37,8 +37,8 @@
   {%- if article.icon %}
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
-  {{ h.render_form(form, 'subject', 'intro', 'text', 'author', 'category',
-                         'icon', 'pub_date', 'slug', 'public') }}
+  {{ h.render_form(form, 'subject', 'intro', 'text', 'author', 'category_id',
+                         'icon_id', 'pub_date', 'slug', 'public') }}
   <p>
     <input type="submit" value="Speichern" />
     {%- if article %}
@@ -69,18 +69,18 @@
     {%- endfor %}
   };
   
-  $('#id_category').change(function () {
-    var category = $('#id_category').val();
+  $('#id_category_id').change(function () {
+    var category = $('#id_category_id').val();
     if (category in category_icons) {
-      icons = document.getElementById('id_icon');
-      $('#id_icon').children().each(function(i, opt) {
+      icons = document.getElementById('id_icon_id');
+      $('#id_icon_id').children().each(function(i, opt) {
         if (opt.value == category_icons[category]) {
-          $('#id_icon')[0].selectedIndex = i;
+          $('#id_icon_id')[0].selectedIndex = i;
         }
       })
     }
   });
-  $(function() { $('#id_category').change() });
+  $(function() { $('#id_category_id').change() });
   /* ]]> */
 </script>
 {%- endblock %}

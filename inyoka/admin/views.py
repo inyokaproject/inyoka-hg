@@ -209,8 +209,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Category.objects.all()]
         icons = [(i.id, i.identifier) for i in Icon.objects.all()]
-        form.fields['icon'].choices = icons
-        form.fields['category'].choices = categories
+        form.fields['icon_id'].choices = icons
+        form.fields['category_id'].choices = categories
 
     if article:
         article = Article.objects.get(slug=article)
@@ -220,8 +220,6 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            data['category_id'] = data.pop('category')
-            data['icon_id'] = data.pop('icon')
             data['author'] = data['author'] or request.user
             if not article:
                 article = Article(**data)
@@ -253,8 +251,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 'intro': article.intro,
                 'text': article.text,
                 'author': article.author,
-                'category': article.category,
-                'icon': article.icon,
+                'category_id': article.category.id,
+                'icon_id': article.icon and article.icon.id or None,
                 'pub_date': article.pub_date,
                 'public': article.public,
                 'slug': article.slug
