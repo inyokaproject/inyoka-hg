@@ -218,7 +218,7 @@ def natural_date(value, prefix=False, enforce_utc=False):
         value = datetime(value.year, value.month, value.day)
         delta = value - datetime.utcnow()
     else:
-        if value.tzinfo is None
+        if value.tzinfo is None:
             value = value.replace(tzinfo=None)
         value = datetime_to_timezone(value, enforce_utc)
         delta = value - datetime.utcnow().replace(tzinfo=pytz.UTC)

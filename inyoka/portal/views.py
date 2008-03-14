@@ -251,8 +251,8 @@ def set_new_password(request, username, new_password_key):
             data['user'].set_password(data['password'])
             data['user'].new_password_key = ''
             data['user'].save()
-            flash('Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
-                  'einloggen.', True)
+            flash(u'Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
+                  u'einloggen.', True)
             return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = SetNewPasswordForm(initial={
