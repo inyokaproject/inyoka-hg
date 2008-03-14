@@ -27,6 +27,9 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
+# der böse import
+#from inyoka.portal.models import Subscription
+
 
 
 
@@ -890,12 +893,21 @@ class Topic(models.Model):
 
     def mark_read(self, user):
         """
-        Mark the current topic as read for a given user.
+        Mark the current topic as read for a given user
+        and set his subscription.notified to false if any.
         """
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
+        
+        try:
+            s = Subscription.objects.get(topic=self, user=user)
+            s.notified = False
+            s.save()
+        except Subscription.DoesNotExist:
+            pass
+
         if self.last_post_id and not self.last_post_id in read_status:
             read_status.add(self.last_post.id)
             maxid = Post.objects.get_max_id()
