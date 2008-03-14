@@ -19,6 +19,9 @@ DEBUG = False
 # so is the code execution debugger.  never enable on production
 ENABLE_DEBUGGER = False
 
+# enable logging to trac. Maybe only for development use...
+ENABLE_TRAC_LOGGING = True
+
 # template caching.  If none the templates will be cache if the
 # debug stuff is disabled
 TEMPLATE_CACHING = None
