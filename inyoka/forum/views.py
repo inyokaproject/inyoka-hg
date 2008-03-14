@@ -139,7 +139,6 @@ def forum(request, slug, page=1):
                 user=request.user, forum=f)
         data['is_subscribed'] = subscribed
         f.mark_read(request.user)
-
     return data
 
 
@@ -525,14 +524,14 @@ def newtopic(request, slug=None, article=None):
             else:
                 # topic is a normal topic
                 for s in Subscription.objects.filter(forum=f,
-                    user__not=request.user, notified=False):
+                    notified=False).exclude(user=request.user):
                     text = render_template('mails/new_topic.txt', {
                         'username' : s.user.username,
                         'forum' : f,
                         'topic' : topic,
                     })
                     send_notification(s.user, (u'Ein neues Thema wurde'
-                        u'im Forum „%s“ eröffnet' % f.title))
+                        u'im Forum „%s“ eröffnet' % f.name), text)
                     s.notified = True
                     s.save()
 
@@ -716,85 +715,76 @@ def change_status(request, topic_slug, solved=None, locked=None):
     t.save()
     return HttpResponseRedirect(t.get_absolute_url())
 
-@simple_check_login
-def subscribe_forum(request, slug):
+def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
     """
-    If the user has already subscribed to this forum, this view removes it.
-    If there isn't such a subscription, a new one is created.
+    Generates a subscriber-function to deal with objects of type `obj`
+    which have the slug `slug` and are registered in the subscribtion by
+    `subscriptionkw` and have the flashing-test `flasher`
     """
-    f = Forum.objects.get(slug=slug)
-    if not have_privilege(request.user, f, 'read'):
-        return abort_access_denied(request)
-    try:
-        s = Subscription.objects.get(user=request.user, forum=f)
-    except Subscription.DoesNotExist:
-        # there's no such subscription yet, create a new one
-        Subscription(user=request.user, forum=f).save()
-        flash(u'Du wirst ab jetzt bei neuen Themen in diesem Forum '
-              u'benachrichtigt.')
-    return HttpResponseRedirect(url_for(f))
+    @simple_check_login
+    def subscriber(request, **kwargs):
+        """
+        If the user has already subscribed to this %s, it just redirects.
+        If there isn't such a subscription, a new one is created.
+        """ % obj_slug
+        slug = kwargs[obj_slug]
+        x = obj.objects.get(slug=slug)
+        if not have_privilege(request.user, x, 'read'):
+            return abort_access_denied(request)
+        try:
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
+        except Subscription.DoesNotExist:
+            # there's no such subscription yet, create a new one
+            Subscription(user=request.user,**{subscriptionkw : x}).save()
+            flash(flasher)
+        return HttpResponseRedirect(url_for(x))
+    return subscriber
 
-@simple_check_login
-def unsubscribe_forum(request, slug):
+def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
     """
-    If the user has already subscribed to this forum, this view removes it.
-    If there isn't such a subscription, a new one is created.
+    Generates an unsubscriber-function to deal with objects of type `obj`
+    which have the slug `slug` and are registered in the subscribtion by
+    `subscriptionkw` and have the flashing-test `flasher`
     """
-    f = Forum.objects.get(slug=slug)
-    if not have_privilege(request.user, f, 'read'):
-        return abort_access_denied(request)
-    try:
-        s = Subscription.objects.get(user=request.user, forum=f)
-    except Subscription.DoesNotExist:
-        pass
-    else:
-        # there's already a subscription for this forum, remove it
-        s.delete()
-        flash(u'Du wirst ab nun bei neuen Themen in diesem Forum nicht '
-              u' mehr benachrichtigt')
-    return HttpResponseRedirect(url_for(f))
+    @simple_check_login
+    def subscriber(request, **kwargs):
+        """ If the user has already subscribed to this %s, this view removes it.
+        """ % obj_slug
+        slug = kwargs[obj_slug]
+        x = obj.objects.get(slug=slug)
+        if not have_privilege(request.user, x, 'read'):
+            return abort_access_denied(request)
+        try:
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
+        except Subscription.DoesNotExist:
+            pass
+        else:
+            # there's already a subscription for this forum, remove it
+            s.delete()
+            flash(flasher)
+        return HttpResponseRedirect(url_for(x))
+    return subscriber
 
-
-
-@simple_check_login
-def subscribe_topic(request, topic_slug):
-    """
-    If the user has already subscribed to this topic, this view removes it.
-    If there isn't such a subscription, a new one is created.
-    """
-    t = Topic.objects.get(slug=topic_slug)
-    if not have_privilege(request.user, t.forum, 'read'):
-        return abort_access_denied(request)
-    try:
-        s = Subscription.objects.get(user=request.user, topic=t)
-    except Subscription.DoesNotExist:
-        # there's no such subscription yet, create a new one
-        Subscription(user=request.user, topic=t).save()
-        flash(u'Du wirst ab jetzt bei neuen Beiträgen in diesem Thema '
-              u'benachrichtigt.')
-    return HttpResponseRedirect(url_for(t))
+subscribe_forum = _generate_subscriber(Forum, 
+    'slug', 'forum',
+    (u'Du wirst ab nun bei neuen Themen in diesem Forum '
+     u'benachrichtigt'))
 
 
-@simple_check_login
-def unsubscribe_topic(request, topic_slug):
-    """
-    If the user has already subscribed to this topic, this view removes it.
-    If there isn't such a subscription, a new one is created.
-    """
-    t = Topic.objects.get(slug=topic_slug)
-    if not have_privilege(request.user, t.forum, 'read'):
-        return abort_access_denied(request)
-    try:
-        s = Subscription.objects.get(user=request.user, topic=t)
-    except Subscription.DoesNotExist:
-        pass
-    else:
-        # there's already a subscription for this topic, remove it
-        s.delete()
-        flash(u'Du wirst ab nun bei neuen Beiträgen in diesem Thema nicht '
-              u' mehr benachrichtigt')
-    return HttpResponseRedirect(url_for(t))
+unsubscribe_forum = _generate_unsubscriber(Forum, 
+    'slug', 'forum',
+    (u'Du wirst ab nun bei neuen Themen in diesem Forum nicht '
+              u' mehr benachrichtigt'))
 
+subscribe_topic = _generate_subscriber(Topic,
+    'topic_slug', 'topic',
+    (u'Du wirst ab jetzt bei neuen Beiträgen in diesem Thema '
+              u'benachrichtigt.'))
+
+unsubscribe_topic = _generate_unsubscriber(Topic,
+    'topic_slug', 'topic',
+    (u'Du wirst ab nun bei neuen Beiträgen in diesem Thema nicht '
+              u'mehr benachrichtigt'))
 
 @simple_check_login
 @templated('forum/report.html')
