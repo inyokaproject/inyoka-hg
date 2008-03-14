@@ -10,7 +10,7 @@
 """
 import re
 import pytz
-from operator import itemgetter
+from operator import attrgetter
 from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
 from inyoka.utils.local import current_request
@@ -31,7 +31,7 @@ _iso8601_re = re.compile(
 )
 
 
-def group_by_day(entries, date_func=itemgetter('pub_date'),
+def group_by_day(entries, date_func=attrgetter('pub_date'),
                  enforce_utc=False):
     """
     Group a list of entries by the date but in the users's timezone
