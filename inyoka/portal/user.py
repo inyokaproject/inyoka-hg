@@ -335,9 +335,10 @@ class User(models.Model):
         ext = avatar.format
         if avatar.size > settings.AVATAR_SIZE:
             avatar = avatar.resize(settings.AVATAR_SIZE)
-        fn = 'portal/avatars/avatar_user%d.%s' % (self.id, ext.lower())
+        fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
+            avatar.format.lower())
         avatar_path = path.join(settings.MEDIA_ROOT, fn)
-        avatar.save(avatar_path, ext)
+        avatar.save(avatar_path)
         self.avatar = fn
 
     def delete_avatar(self):
