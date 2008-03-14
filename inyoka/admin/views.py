@@ -266,11 +266,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             }
         form = EditArticleForm(initial=initial)
         _add_field_choices()
-
-    category_icons = dict((c.id, c.icon_id) for c in Category.objects.all())
     return {
         'form': form,
-        'category_icons': category_icons,
         'article': article
     }
 

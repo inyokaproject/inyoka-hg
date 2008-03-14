@@ -62,25 +62,6 @@
       intro_skipped = true;
     }
   })
-
-  var category_icons = {
-    {%- for k, v in category_icons.iteritems() %}
-    '{{ k }}': '{{ v }}',
-    {%- endfor %}
-  };
-  
-  $('#id_category_id').change(function () {
-    var category = $('#id_category_id').val();
-    if (category in category_icons) {
-      icons = document.getElementById('id_icon_id');
-      $('#id_icon_id').children().each(function(i, opt) {
-        if (opt.value == category_icons[category]) {
-          $('#id_icon_id')[0].selectedIndex = i;
-        }
-      })
-    }
-  });
-  $(function() { $('#id_category_id').change() });
   /* ]]> */
 </script>
 {%- endblock %}
