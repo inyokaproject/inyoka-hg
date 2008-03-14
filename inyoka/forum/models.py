@@ -27,11 +27,6 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.portal.user import User, Group
-# der böse import
-#from inyoka.portal.models import Subscription
-
-
-
 
 
 POSTS_PER_PAGE = 15
@@ -896,11 +891,12 @@ class Topic(models.Model):
         Mark the current topic as read for a given user
         and set his subscription.notified to false if any.
         """
+        from inyoka.portal.models import Subscription
         try:
             read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
-        
+
         try:
             s = Subscription.objects.get(topic=self, user=user)
             s.notified = False
