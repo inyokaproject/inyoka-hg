@@ -954,16 +954,12 @@ def user_error_report(request):
                     escape(request.user.username)
                 ))
             text += u'\n\n%s' % data['text']
-            trac = Trac(
-                trac_url=settings.TRAC_URL,
-                username=settings.TRAC_USERNAME,
-                password=settings.TRAC_PASSWORD,
-            )
+            trac = Trac()
             trac.submit_new_ticket(
                 keywords='userreport',
                 summary=data['title'],
                 description = text,
-                component = 'userreports',
+                component = '-',
                 ticket_type = 'userreport',
             )
 
