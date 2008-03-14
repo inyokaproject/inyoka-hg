@@ -242,6 +242,7 @@ class UserCPSettingsForm(forms.Form):
         widget=forms.CheckboxSelectMultiple)
     timezone = forms.ChoiceField(label='Zeitzone', required=True,
         choices=zip(TIMEZONES, TIMEZONES))
+    hide_profile = forms.BooleanField(label='Online-Status verstecken')
     hide_avatars = forms.BooleanField(label='Avatare ausblenden')
     hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
 
