@@ -962,6 +962,7 @@ def user_error_report(request):
                 summary=data['title'],
                 description = text,
                 component = 'userreports',
+                ticket_type = 'userreport',
             )
 
 #             uer = UserErrorReport()
