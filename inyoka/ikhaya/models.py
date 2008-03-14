@@ -243,6 +243,7 @@ class Article(models.Model):
         """
         id = self.id
         super(Article, self).delete()
+        self.id = id
         # update search
         self.update_search()
 
