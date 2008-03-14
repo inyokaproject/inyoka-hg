@@ -83,6 +83,7 @@ div.actions {
 
 select {
   border: 1px solid #AAA;
+  padding: 0.5em;
 }
 
 hr {

@@ -11,6 +11,9 @@
 {% extends 'overall.html' %}
 
 {% set title_trace = title_trace + ['Planet'] %}
+{% set navigation_trace = [
+  (href('planet'), 'Planet')
+  ] + navigation_trace %}
 {% set active_app = 'planet' %}
 {% set navi_type  = 'sidebar' %}
 {% set styles = styles + ['planet.css'] %}

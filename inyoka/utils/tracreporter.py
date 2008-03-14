@@ -122,7 +122,8 @@ class TracHandler(Handler):
         return {
             'summary':      summary,
             'description':  description,
-            'priority':     priority
+            'priority':     priority,
+            'component':    'servererrors',
         }
 
     def analyseForComment(self, record):

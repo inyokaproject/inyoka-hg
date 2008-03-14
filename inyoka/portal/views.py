@@ -475,7 +475,8 @@ def usercp_settings(request):
                                                     NOTIFICATION_CHOICES]),
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
-            'hide_signatures': settings.get('hide_signatures', False)
+            'hide_signatures': settings.get('hide_signatures', False),
+            'hide_profile': settings.get('hide_profile', False)
         }
         form = UserCPSettingsForm(values)
     return {
@@ -963,6 +964,7 @@ def user_error_report(request):
                 summary=data['title'],
                 description = text,
                 component = 'userreports',
+                ticket_type = 'userreport',
             )
 
 #             uer = UserErrorReport()

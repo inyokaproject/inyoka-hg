@@ -320,7 +320,7 @@ def newpost(request, topic_slug=None, quote_id=None):
                 cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
             # send notifications
             for s in Subscription.objects.filter(topic=t,
-                notified=False).excluded(user=request.user):
+                notified=False).exclude(user=request.user):
                 text = render_template('mails/new_post.txt', {
                     'username': s.user.username,
                     'post':     post,
