@@ -35,17 +35,22 @@ div.wrap {
 }
 
 div.wrap2 {
-  background-image:url(../img/head.jpg);
+  background-image:url(../img/float-top.jpg);
   background-repeat:repeat-x;
 }
 
 div.wrap3 {
+  background-image:url(../img/head.jpg);
+  background-repeat:no-repeat;
+}
+
+div.wrap4 {
   background-image:url(../img/float-right.jpg);
   background-position:right;
   background-repeat:repeat-y;
 }
 
-div.wrap4 {
+div.wrap5 {
   background-image:url(../img/head-right.png);
   background-position:top right;
   background-repeat:no-repeat;
@@ -599,7 +604,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 
 .navi_tabbar ul li a.active {
   font-weight: bold;
-  background: red;
+  background: white;
   border-color: #999;
   padding-bottom: 3px;
 }
