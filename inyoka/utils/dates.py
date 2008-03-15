@@ -216,18 +216,12 @@ def natural_date(value, prefix=False, enforce_utc=False):
     """
     if not isinstance(value, datetime):
         value = datetime(value.year, value.month, value.day)
-        delta = value - datetime.utcnow()
+        delta = datetime.utcnow() - value
     else:
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=None)
         value = datetime_to_timezone(value, enforce_utc)
-        delta = value - datetime.utcnow().replace(tzinfo=pytz.UTC)
-    if delta.days == 0:
-        return u'heute'
-    elif delta.days == -1:
-        return u'gestern'
-    elif delta.days == 1:
-        return u'morgen'
+        delta = datetime.utcnow().replace(tzinfo=pytz.UTC) - value
+    if -1 <= delta.days <= 1:
+        return (u'heute', u'gestern', u'morgen')[delta.days + 1]
     return (prefix and 'am ' or '') + DateFormat(value).format('j. F Y')
 
 
