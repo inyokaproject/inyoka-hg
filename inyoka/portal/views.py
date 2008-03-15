@@ -421,7 +421,8 @@ def usercp_profile(request):
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email', 'gpgkey'):
+                        'interests', 'website', 'email', 'gpgkey',
+                        'coordinates_lat', 'coordinates_long'):
                 setattr(request.user, key, data[key])
             if data['delete_avatar']:
                 request.user.delete_avatar()

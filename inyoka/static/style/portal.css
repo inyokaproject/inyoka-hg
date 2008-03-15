@@ -13,6 +13,12 @@ h3 {
     color: #444;
 }
 
+h4 {
+  font-size: 1.3em;
+  color: #444;
+  border-bottom: 1px solid #ded2bb;
+}
+
 form.usercp_form ul {
   list-style: none;
 }
