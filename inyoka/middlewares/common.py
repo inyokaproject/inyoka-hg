@@ -74,12 +74,11 @@ class CommonServicesMiddleware(CommonMiddleware):
         the werkzeug local.
         """
         response = CommonMiddleware.process_response(self, request, response)
+        powered_by = 'Inyoka'
         if INYOKA_REVISION:
-            powered_by = 'Inyoka/rev-%s' % INYOKA_REVISION
-        else:
-            powered_by = 'Inyoka'
+            powered_by += '/rev-%s' % INYOKA_REVISION
         response['X-Powered-By'] = powered_by
-        response['X-Sucks'] = 'PHP in any version'
+        response['X-Sucks'] = 'PHP --- every version'
 
         # clean up after the local manager
         self._local_manager.cleanup()

@@ -40,7 +40,8 @@
         $MEDIA_URL = {{ href('media')|jsonencode }},
         $BASE_DOMAIN_NAME = {{ SETTINGS.BASE_DOMAIN_NAME|jsonencode }},
         $CURRENT_USER = {{ USER.username|jsonencode if USER.is_authenticated else 'null' }},
-        $IS_LOGGED_IN = {{ USER.is_authenticated|jsonencode }};
+        $IS_LOGGED_IN = {{ USER.is_authenticated and 'true' or 'false' }},
+        $SIDEBAR_HIDDEN = {{ USER.settings.sidebar_hidden and 'true' or 'false' }};
     /*]]>*/
     </script>
     {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
