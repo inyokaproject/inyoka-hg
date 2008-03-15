@@ -45,11 +45,6 @@
 {% endmacro %}
 
 {% block forum_content %}
-
-  {% for parent in forum.parents %}
-  <strong>{{ parent }}</strong>
-  {% endfor %}
-
   <div class="topic_box">
     <h2>{{ topic.title|e }}</h2>
     <div class="topic_box_content">
