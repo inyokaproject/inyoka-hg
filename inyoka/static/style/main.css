@@ -19,15 +19,39 @@
 
 body {
   font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
-  font-size: 0.95em;
+  font-size: 0.9em;
 }
 
 html, body {
-  background-color: #f2f2f2;
+  background-color: #b3ab9a;
+}
+
+div.wrap {
+  margin:10px;
+  background-image:url(../img/float-left.jpg);
+  background-repeat:repeat-y;
+  background-color:#FFFFFF;
+  border-bottom:#aba393 1px solid;
+}
+
+div.wrap2 {
+  background-image:url(../img/head.jpg);
+  background-repeat:repeat-x;
+}
+
+div.wrap3 {
+  background-image:url(../img/float-right.jpg);
+  background-position:right;
+  background-repeat:repeat-y;
+}
+
+div.wrap4 {
+  background-image:url(../img/head-right.png);
+  background-position:top right;
+  background-repeat:no-repeat;
 }
 
 div.body {
-  background-color: white;
   padding: 10px 0 20px 0;
 }
 
@@ -370,7 +394,7 @@ table.syntaxtable td.linenos {
 
 .header {
   height: 106px;
-  background-image: url(../img/header.jpg);
+//  background-image: url(../img/header.jpg);
 }
 
 .header img {
@@ -380,7 +404,7 @@ table.syntaxtable td.linenos {
 .header h1 {
   background-image: url(../img/logo.png);
   background-repeat: no-repeat;
-  background-position: 10px 5px;
+  background-position: 15px 15px;
   padding: 5px;
   margin: 0;
 }
@@ -401,8 +425,8 @@ table.syntaxtable td.linenos {
 .tabbar {
   position: absolute;
   margin: 0;
-  top: 0px;
-  right: 10px;
+  top: 12px;
+  right: 20px;
 }
 
 .tabbar li {
@@ -575,7 +599,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 
 .navi_tabbar ul li a.active {
   font-weight: bold;
-  background: white;
+  background: red;
   border-color: #999;
   padding-bottom: 3px;
 }
@@ -594,17 +618,19 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .appheader h1 {
-  color: #666;
+  color: #a48f65;
   font-family: 'Trebuchet MS',sans-serif;
   font-size: 2.6em;
   margin: 0 0 0.2em 0;
+  display:inline;
 }
 
 .appheader h2 {
-  color: #000;
+  color: #816a3b;
   font-family: 'Trebuchet MS',sans-serif;
   font-size: 1.5em;
-  margin: -0.3em 0 0 1em;
+  margin: -0.3em 0 0 0.5em;
+  display:inline;
 }
 
 .navi_global {
@@ -777,7 +803,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 /*** Footer *******************************************************************/
 
 .footer {
-  border-top: 1px solid #AAA;
+  border-top: 1px solid #aba393;
   clear: both;
   color: #555;
   font-size: 0.8em;
