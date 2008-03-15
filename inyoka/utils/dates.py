@@ -81,8 +81,10 @@ def datetime_to_timezone(dt, enforce_utc=False):
     """
     Convert a datetime object to the user's timezone or UTC if the
     user is not available or `enforce_utc` was set to `True` to enforce
-    UTC.
+    UTC.  If the object is `None` it's returned unchanged.
     """
+    if dt is None:
+        return None
     if enforce_utc:
         tz = pytz.UTC
     else:
