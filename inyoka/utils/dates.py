@@ -248,17 +248,19 @@ def format_specific_datetime(value, alt=False, enforce_utc=False):
     Use German grammar to format a datetime object for a
     specific datetime.
     """
-    if value.tzinfo is not None:
-        value = value.astimezone(pytz.UTC)
-    s_value = value.replace(tzinfo=None)
-    delta = s_value - datetime.utcnow()
-    if delta.days == 0:
-        string = alt and 'heute um ' or 'von heute '
-    elif delta.days == -1:
-        string = alt and 'gestern um ' or 'von gestern '
-    elif delta.days == 1:
-        string = alt and 'morgen um ' or 'von morgen '
+    if not isinstance(value, datetime):
+        value = datetime(value.year, value.month, value.day)
+        delta = datetime.utcnow() - value
     else:
-        string = (alt and 'am %s um ' or 'vom %s um ') % \
+        value = datetime_to_timezone(value, enforce_utc)
+        delta = datetime.utcnow().replace(tzinfo=pytz.UTC) - value
+    if -1 <= delta.days <= 1:
+        string = (
+            (u'von morgen ', u'morgen um '),
+            (u'von heute ', u'heute um '),
+            (u'von gestern ', 'gestern um ')
+        )[delta.days + 1][bool(alt)]
+    else:
+        string = (alt and u'am %s um' or 'vom %s um ') % \
             DateFormat(value).format('j. F Y')
     return string + format_time(value, enforce_utc)
