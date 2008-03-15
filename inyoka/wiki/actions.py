@@ -32,6 +32,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.html import escape
+from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
@@ -503,7 +504,7 @@ def do_log(request, name):
             parameters['page'] = str(p)
         rv = url_for(page)
         if parameters:
-            rv += '?' + parameters.urlencode()
+            rv += '?' + url_encode(parameters)
         return rv
 
     if request.GET.get('format') == 'atom':

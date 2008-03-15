@@ -34,7 +34,7 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
     att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean_text(self):
-        if not self.cleaned_data.text.strip():
+        if not self.cleaned_data['text'].strip():
             raise forms.ValidationError('Text darf nicht leer sein')
 
 
