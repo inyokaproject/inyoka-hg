@@ -10,49 +10,24 @@
 
 {% extends 'portal/usercp/overall.html' %}
 
+{% macro usercp_button(link, icon, name) %}
+  <li>
+    <span><a href="{{ link }}">
+      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      {{ name }}
+    </a></span>
+  </li>
+{% endmacro %}
+
 {% block portal_content %}
-  <table class="usercp_control">
-    <tr>
-      <td>
-        <a href="{{ href('portal', 'usercp', 'profile') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-profile.png') }}" alt="Profilinformationen" /><br />
-          Profilinformationen
-        </a>
-      </td>
-      <td>
-        <a href="{{ href('portal', 'usercp', 'settings') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-preferences.png') }}" alt="Benutzereinstellungen" /><br />
-          Benutzereinstellungen
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="{{ href('portal', 'usercp', 'password') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-password.png') }}" alt="Passwort ändern" /><br />
-          Passwort ändern
-        </a>
-      </td>
-      <td>
-        <a href="{{ href('portal', 'usercp', 'subscriptions') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-subscriptions.png') }}" alt="Benachrichtigungen" /><br />
-          Benachrichtigungen
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="{{ href('portal', 'usercp', 'deactivate') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-deactivate.png') }}" alt="Benutzer deaktivieren" /><br />
-          Benutzer deaktivieren
-        </a>
-      </td>
-      <td>
-        <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">
-          <img src="{{ href('static', 'img/usercp/usercp-wikipage.png') }}" alt="Benutzerseite" /><br />
-          Benutzerseite
-        </a>
-      </td>
-    </tr>
-  </table>
+  <div class="usercp_control">
+    <ul>
+      {{ usercp_button(href('portal', 'usercp', 'profile'), 'profile', 'Profilinformationen') }}
+      {{ usercp_button(href('portal', 'usercp', 'settings'), 'preferences', 'Benutzereinstellungen') }}
+      {{ usercp_button(href('portal', 'usercp', 'password'), 'password', 'Passwort ändern') }}
+      {{ usercp_button(href('portal', 'usercp', 'subscriptions'), 'subscriptions', 'Benachrichtigungen') }}
+      {{ usercp_button(href('portal', 'usercp', 'deactivate'), 'deactivate', 'Benutzer deaktivieren') }}
+      {{ usercp_button(href('wiki', 'Benutzer', user.username|e, action='edit'), 'wikipage', 'Benutzerseite') }}
+    </ul>
+  </div>
 {% endblock %}
