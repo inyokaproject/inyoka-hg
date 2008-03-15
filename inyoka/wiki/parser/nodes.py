@@ -986,7 +986,7 @@ class SourceLink(Element):
     def prepare_html(self):
         yield build_html_tag(u'sup', id=self.id, style=self.style,
                              class_=self.class_)
-        yield u'<a href="#source-%d">' % self.id
+        yield u'<a href="#source-%d">' % self.target
         for item in Element.prepare_html(self):
             yield item
         yield u'</a></sup>'
