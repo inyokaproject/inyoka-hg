@@ -53,8 +53,8 @@ class EditArticleForm(forms.Form):
     author = UserField(label=u'Autor', initial='',
         help_text=u'Wenn du dieses Feld leer lässt, wirst du automatisch '
                   u'als Autor eingetragen.')
-    category = forms.ChoiceField(label=u'Kategorie')
-    icon = forms.ChoiceField(label=u'Icon', required=False)
+    category_id = forms.ChoiceField(label=u'Kategorie')
+    icon_id = forms.ChoiceField(label=u'Icon', required=False)
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '

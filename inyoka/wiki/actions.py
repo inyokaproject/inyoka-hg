@@ -32,6 +32,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.html import escape
+from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
@@ -101,6 +102,13 @@ def do_show(request, name):
             return HttpResponseRedirect(href('wiki', redirect))
     if page.rev.deleted:
         return do_missing_page(request, name, page)
+
+    try: 
+        s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
+        s.notified = False
+        s.save()
+    except Subscription.DoesNotExist:
+        pass 
 
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (
@@ -401,15 +409,16 @@ def do_edit(request, name):
                     ))
 
                 # send notifications
-                for s in Subscription.objects.filter(wiki_page=page) \
-                                             .exclude(user=request.user):
+                for s in Subscription.objects.filter(wiki_page=page,
+                    notified=False).exclude(user=request.user):
                     text = render_template('mails/page_edited.txt', {
                         'username': s.user.username,
                         'rev':      page.revisions.latest()
                     })
                     send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
-                                      % page.title, text)
-
+                                    % page.title, text)
+                    s.notified = True
+                    s.save()
 
                 if page.metadata.get('weiterleitung'):
                     url = href('wiki', page.name, redirect='no')
@@ -495,7 +504,7 @@ def do_log(request, name):
             parameters['page'] = str(p)
         rv = url_for(page)
         if parameters:
-            rv += '?' + parameters.urlencode()
+            rv += '?' + url_encode(parameters)
         return rv
 
     if request.GET.get('format') == 'atom':

@@ -34,6 +34,7 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      ArgumentCollector
 from inyoka.wiki.models import Page, Revision
 from inyoka.utils.text import human_number
+from inyoka.utils.urls import url_encode
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
 from inyoka.utils.urls import url_for
@@ -202,7 +203,7 @@ class RecentChanges(Macro):
                 parameters['page'] = str(page_num)
             rv = href('wiki', context.wiki_page)
             if parameters:
-                rv += '?' + parameters.urlencode()
+                rv += '?' + url_encode(parameters)
             return rv
         pagination = Pagination(context.request, Revision.objects.
                                 select_related(depth=1), page_num,

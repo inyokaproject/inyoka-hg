@@ -32,8 +32,9 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import datetime_to_timezone
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
-                                send_new_user_password
+     send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category
@@ -250,8 +251,8 @@ def set_new_password(request, username, new_password_key):
             data['user'].set_password(data['password'])
             data['user'].new_password_key = ''
             data['user'].save()
-            flash('Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
-                  'einloggen.', True)
+            flash(u'Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
+                  u'einloggen.', True)
             return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = SetNewPasswordForm(initial={
@@ -351,7 +352,8 @@ def search(request):
         results = search_system.query(request.user,
             d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
-            date_begin=d['date_begin'], date_end=d['date_end'],
+            date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
+            date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
             exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
         )
@@ -473,7 +475,8 @@ def usercp_settings(request):
                                                     NOTIFICATION_CHOICES]),
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
-            'hide_signatures': settings.get('hide_signatures', False)
+            'hide_signatures': settings.get('hide_signatures', False),
+            'hide_profile': settings.get('hide_profile', False)
         }
         form = UserCPSettingsForm(values)
     return {
@@ -951,16 +954,13 @@ def user_error_report(request):
                     escape(request.user.username)
                 ))
             text += u'\n\n%s' % data['text']
-            trac = Trac(
-                trac_url=settings.TRAC_URL,
-                username=settings.TRAC_USERNAME,
-                password=settings.TRAC_PASSWORD,
-            )
+            trac = Trac()
             trac.submit_new_ticket(
                 keywords='userreport',
                 summary=data['title'],
                 description = text,
-                component = 'userreports',
+                component = '-',
+                ticket_type = 'userreport',
             )
 
 #             uer = UserErrorReport()

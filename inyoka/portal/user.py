@@ -48,7 +48,7 @@ def get_hexdigest(salt, raw_password):
     """
     if isinstance(raw_password, unicode):
         raw_password = raw_password.encode('utf-8')
-    return sha(salt + raw_password).hexdigest()
+    return sha(str(salt) + raw_password).hexdigest()
 
 
 def check_password(raw_password, enc_password, convert_user=None):
@@ -332,12 +332,22 @@ class User(models.Model):
     def save_avatar(self, img):
         """Save the avater to the file system."""
         avatar = Image.open(StringIO(img.content))
+        ext = avatar.format
+        fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
+            avatar.format.lower())
+        avatar_path = path.join(settings.MEDIA_ROOT, fn)
+        # clear the filesystem
+        self.delete_avatar()
+
         if avatar.size > settings.AVATAR_SIZE:
             avatar = avatar.resize(settings.AVATAR_SIZE)
-        actual_path = self.get_avatar_filename()
-        fn = 'portal/avatars/avatar_user%d.png' % (self.id)
-        pth = path.join(settings.MEDIA_ROOT, fn)
-        avatar.save(pth, "PNG")
+            avatar.save(avatar_path)
+        else:
+            f = open(avatar_path, 'wb')
+            try:
+                f.write(img.content)
+            finally:
+                f.close()
         self.avatar = fn
 
     def delete_avatar(self):

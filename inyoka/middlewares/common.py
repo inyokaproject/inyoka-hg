@@ -74,12 +74,11 @@ class CommonServicesMiddleware(CommonMiddleware):
         the werkzeug local.
         """
         response = CommonMiddleware.process_response(self, request, response)
+        powered_by = 'Inyoka'
         if INYOKA_REVISION:
-            powered_by = 'Inyoka/rev-%s' % INYOKA_REVISION
-        else:
-            powered_by = 'Inyoka'
+            powered_by += '/rev-%s' % INYOKA_REVISION
         response['X-Powered-By'] = powered_by
-        response['X-Sucks'] = 'PHP in any version'
+        response['X-Sucks'] = 'PHP --- every version'
 
         # clean up after the local manager
         self._local_manager.cleanup()
@@ -87,6 +86,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         if settings.DEBUG:
             from pprint import pprint
             import sys, os, StringIO
+            stdout_encoding = sys.stdout.encoding or sys.getfilesystemencoding()
             try:
                 cols = settings.DEBUG_COLUMNS - 7
             except:
@@ -108,10 +108,10 @@ class CommonServicesMiddleware(CommonMiddleware):
                     if not s:
                         continue
                     if first:
-                        print >> sys.stderr, q['time'] + ':', s
+                        print >> sys.stderr, q['time'] + ':', s.encode(stdout_encoding)
                         first = False
                     else:
-                        print >> sys.stderr, ' '*6, s
+                        print >> sys.stderr, ' '*6, s.encode(stdout_encoding)
                 print >> sys.stderr
             print >> sys.stderr, "-----------------------------------------\n"
         return response

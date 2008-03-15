@@ -22,6 +22,8 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^users/(?P<page>\d+)/$', 'memberlist'),
     (r'^users/(?P<username>.+)/$', 'profile'),
     (r'^groups/$', 'grouplist'),
+    # XXX: This may conflict with groupnames that contain only digits
+    (r'^groups/(?P<page>\d+)/$', 'grouplist'),
     (r'^groups/(?P<name>.+)/$', 'group'),
     (r'^groups/(?P<name>.+)/(?P<page>\d+)/$', 'group'),
     (r'^usercp/$', 'usercp'),

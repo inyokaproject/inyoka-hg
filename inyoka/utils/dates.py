@@ -10,6 +10,7 @@
 """
 import re
 import pytz
+from operator import attrgetter
 from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
 from inyoka.utils.local import current_request
@@ -28,6 +29,37 @@ _iso8601_re = re.compile(
     # time
     r'(?:T(\d{2}):(\d{2})(?::(\d{2}(?:\.\d+)?))?(Z?|[+-]\d{2}:\d{2})?)?$'
 )
+
+
+def group_by_day(entries, date_func=attrgetter('pub_date'),
+                 enforce_utc=False):
+    """
+    Group a list of entries by the date but in the users's timezone
+    (or UTC if enforce_utc is set to `True`).  Per defualt the pub_date
+    Attribute is used.  If this is not desired a different `date_func`
+    can be provided.  It's important that the list is already sorted
+    by date otherwise the behavior is undefined.
+    """
+    days = []
+    days_found = set()
+    if enforce_utc:
+        tzinfo = pytz.UTC
+    else:
+        tzinfo = get_user_timezone()
+    for entry in entries:
+        d = date_func(entry)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=pytz.UTC)
+        d = d.astimezone(tzinfo)
+        key = (d.year, d.month, d.day)
+        if key not in days_found:
+            days.append((key, []))
+            days_found.add(key)
+        days[-1][1].append(entry)
+    return [{
+        'date':     date(*key),
+        'articles': entries
+    } for key, entries in days if entries]
 
 
 def get_user_timezone():
@@ -58,6 +90,23 @@ def datetime_to_timezone(dt, enforce_utc=False):
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=pytz.UTC)
     return dt.astimezone(tz)
+
+
+def datetime_to_naive_utc(dt):
+    """
+    Convert a datetime object with a timezone information into a datetime
+    object without timezone information in UTC timezone.  If the object
+    did not contain a timezone information it's returned unchainged.
+    """
+    if dt.tzinfo is None:
+        return dt
+    return dt.astimezone(pytz.UTC).replace(tzinfo=None)
+
+
+def date_time_to_datetime(d, t):
+    """Merge two datetime.date and datetime.time objects into one datetime"""
+    return datetime(d.year, d.month, d.day, t.hour, t.minute, t.second,
+                    t.microsecond)
 
 
 def parse_iso8601(value):
@@ -100,7 +149,7 @@ def format_iso8601(obj):
     return obj.strftime('%Y-%d-%mT%H:%M:%SZ')
 
 
-def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
+def format_timedelta(d, now=None, use_since=False):
     """
     Format a timedelta.  Currently this method only works with
     dates in the past.
@@ -117,7 +166,9 @@ def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
     if now is None:
         now = datetime.utcnow().replace(tzinfo=pytz.UTC)
     elif now.tzinfo is not None:
-        now.tzinfo = d.astimezone(pytz.UTC)
+        now = d.astimezone(pytz.UTC)
+    else:
+        now = d.replace(tzinfo=pytz.UTC)
     if type(d) is date:
         d = datetime(d.year, d.month, d.day)
     if d.tzinfo is None:
@@ -160,20 +211,17 @@ def format_timedelta(d, now=None, use_since=False, enforce_utc=False):
 def natural_date(value, prefix=False, enforce_utc=False):
     """
     Format a value using dateformat but also use today, tomorrow and
-    yesterday.
+    yesterday.  If a date object is given no timezone logic is applied,
+    otherwise the usual timezone conversion rules apply.
     """
     if not isinstance(value, datetime):
         value = datetime(value.year, value.month, value.day)
-    if value.tzinfo is not None:
-        value = value.astimezone(pytz.UTC)
-    delta = value.replace(tzinfo=None) - datetime.utcnow()
-    if delta.days == 0:
-        return u'heute'
-    elif delta.days == -1:
-        return u'gestern'
-    elif delta.days == 1:
-        return u'morgen'
-    value = datetime_to_timezone(value, enforce_utc)
+        delta = datetime.utcnow() - value
+    else:
+        value = datetime_to_timezone(value, enforce_utc)
+        delta = datetime.utcnow().replace(tzinfo=pytz.UTC) - value
+    if -1 <= delta.days <= 1:
+        return (u'morgen', u'heute', u'gestern')[delta.days + 1]
     return (prefix and 'am ' or '') + DateFormat(value).format('j. F Y')
 
 
@@ -195,39 +243,24 @@ def format_datetime(value, enforce_utc=False):
     return rv
 
 
-def format_date(value, enforce_utc=False):
-    """Just format a datetime object."""
-    if isinstance(value, date):
-        value = datetime(value.year, value.month, value.day)
-    value = datetime_to_timezone(value, enforce_utc)
-    rv = DateFormat(value).format('j. F Y')
-    if enforce_utc:
-        rv += ' (UTC)'
-    return rv
-
-
 def format_specific_datetime(value, alt=False, enforce_utc=False):
     """
     Use German grammar to format a datetime object for a
     specific datetime.
     """
-    if value.tzinfo is not None:
-        value = value.astimezone(pytz.UTC)
-    s_value = value.replace(tzinfo=None)
-    delta = s_value - datetime.utcnow()
-    if delta.days == 0:
-        string = alt and 'heute um ' or 'von heute '
-    elif delta.days == -1:
-        string = alt and 'gestern um ' or 'von gestern '
-    elif delta.days == 1:
-        string = alt and 'morgen um ' or 'von morgen '
+    if not isinstance(value, datetime):
+        value = datetime(value.year, value.month, value.day)
+        delta = datetime.utcnow() - value
     else:
-        string = (alt and 'am %s um ' or 'vom %s um ') % \
+        value = datetime_to_timezone(value, enforce_utc)
+        delta = datetime.utcnow().replace(tzinfo=pytz.UTC) - value
+    if -1 <= delta.days <= 1:
+        string = (
+            (u'von morgen ', u'morgen um '),
+            (u'von heute ', u'heute um '),
+            (u'von gestern ', 'gestern um ')
+        )[delta.days + 1][bool(alt)]
+    else:
+        string = (alt and u'am %s um' or 'vom %s um ') % \
             DateFormat(value).format('j. F Y')
     return string + format_time(value, enforce_utc)
-
-
-def date_time_to_datetime(d, t):
-    """Merge two datetime.date and datetime.time objects into one datetime"""
-    return datetime(d.year, d.month, d.day, t.hour, t.minute, t.second,
-                    t.microsecond)
