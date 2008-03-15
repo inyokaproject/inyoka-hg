@@ -8,3 +8,5 @@ Neuer Vorschlag für einen Blog im Planet
     Beschreibung:
 
         {{ description|wordwrap(60)|indent(8) }}
+
+    Kontaktinformationen des Autors: {{ url_for(USER) }}

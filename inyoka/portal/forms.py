@@ -263,9 +263,9 @@ class UserCPProfileForm(forms.Form):
     show_jabber = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
+    coordinates_long = forms.DecimalField(label='Koordinaten (Länge)',
                        required=False, min_value=-90, max_value=90)
-    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Breite)',
                       required=False, min_value=-180, max_value=180)
     location = forms.CharField(label='Wohnort', required=False, max_length=25)
     occupation = forms.CharField(label='Beruf', required=False)

@@ -13,16 +13,19 @@
 {% extends 'forum/page.html' %}
 
 {% set title_trace = [topic.title|e] %}
-{% set navigation_trace =  [
-    (forum|url, forum.name),
-    (topic|url, topic.title)
-  ] + navigation_trace %}
 {% set name = 'Thema „%s“ - ' % topic.title|e %}
 {% set feeds = [
   (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/25')),
   (name ~ 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/25')),
   (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/25'))
 ] %}
+{% for parent in forum.parents %}
+  {% set navigation_trace = navigation_trace + [(parent|url, parent.name)] ! %}
+{% endfor %}
+{% set navigation_trace = navigation_trace + [
+    (forum|url, forum.name),
+    (topic|url, topic.title)
+  ] %}
 
 {% macro topic_actions %}
   <span class="linklist">
@@ -42,6 +45,10 @@
 {% endmacro %}
 
 {% block forum_content %}
+
+  {% for parent in forum.parents %}
+  <strong>{{ parent }}</strong>
+  {% endfor %}
 
   <div class="topic_box">
     <h2>{{ topic.title|e }}</h2>
