@@ -52,15 +52,12 @@ img.icon {
   max-height: 120px;
 }
 
-ul {
-  list-style: none;
-}
-
-ul.comments li.comment {
+ul.comments > li.comment {
   border-style: solid;
   border-color: #CCC;
   border-width: 0 0 1px 0;
   padding: 1em;
+  list-style: none;
 }
 
 a.comment_link:hover {
