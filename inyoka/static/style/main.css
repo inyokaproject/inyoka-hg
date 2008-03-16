@@ -630,6 +630,11 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   display:inline;
 }
 
+.appheader h1:after {
+  content:" /";
+  color:#917b4e;
+}
+
 .appheader h2 {
   color: #816a3b;
   font-family: 'Trebuchet MS',sans-serif;
