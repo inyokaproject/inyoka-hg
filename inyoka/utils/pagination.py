@@ -79,7 +79,7 @@ class Pagination(object):
                abs(self.page - num) < half_threshold:
                 if result and result[-1] != ellipsis:
                     add(u'<span class="comma">, </span>')
-                was_space = False
+                was_ellipsis = False
                 link = self.generate_link(num, params)
                 if num == self.page:
                     template = active
