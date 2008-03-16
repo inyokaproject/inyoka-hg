@@ -314,8 +314,8 @@ class Lexer(object):
     }
 
     _quote_re = re.compile(r'^(>+) ?(?m)')
-    _block_start_re = re.compile(r'(?<!\\)\{\{\{(?m)')
-    _block_end_re = re.compile(r'(?<!\\)\}\}\}(?m)')
+    _block_start_re = re.compile(r'(?<!\\)\{\{\{')
+    _block_end_re = re.compile(r'(?<!\\)\}\}\}')
 
     def tokenize(self, string):
         """
@@ -330,12 +330,28 @@ class Lexer(object):
                 yield item
             del buffer[:]
 
+        def changes_block_state(line, reverse):
+            primary = self._block_start_re.search
+            secondary = self._block_end_re.search
+            if reverse:
+                primary, secondary = secondary, primary
+            match = primary(line)
+            if match is None:
+                return False
+            while 1:
+                match = secondary(line, match.end())
+                if match is None:
+                    return True
+                match = primary(line, match.end())
+                if match is None:
+                    return False
+
         def tokenize_blocks():
             for line in string.splitlines():
                 block_open = open_blocks[-1]
-                if not block_open and self._block_start_re.match(line):
+                if not block_open and changes_block_state(line, False):
                     open_blocks[-1] = True
-                elif block_open and self._block_end_re.match(line):
+                elif block_open and changes_block_state(line, True):
                     open_blocks[-1] = False
                 elif not block_open:
                     m = self._quote_re.match(line)
