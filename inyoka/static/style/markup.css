@@ -53,9 +53,12 @@ div.bash {
   border: 1px solid #666;
   clear: both;
   margin: 0.3em 1em;
+  padding: 0 0.3em;
 }
 
-div.bash p {
+div.bash pre {
+  background-color: transparent;
+  border: 0;
   margin: 0;
   padding: 0 0.3em;
 }

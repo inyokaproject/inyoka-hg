@@ -93,8 +93,7 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
 '''Parameterfehler''': Ungültiges Datum
 <@ endif @> """,
-    u'Befehl': u"""{{|<class="bash"><@ $arguments as array_of_lines join_with('[[BR]]') @>
-|}}""",
+    u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>
 <@ if ['hash','#'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/hash.png)]]

@@ -40,7 +40,7 @@ class InyokaFormatter(FormatterBase):
 
         if name in replacements:
             name = replacements[name]
-            args = [a.strip() for a in args.split(',')]
+            args = [a.strip() for a in (args or '').split(',')]
 
         elif name == 'user':
             return u'[user:%s:]' % args
