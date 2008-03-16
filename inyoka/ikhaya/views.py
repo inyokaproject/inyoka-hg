@@ -140,7 +140,7 @@ def archive(request):
 
 
 @check_login(message=u'Bitte melde dich an, um einen Ikhaya-Artikel '
-                     u'vorzuschlagen')
+                     u'vorzuschlagen.')
 @templated('ikhaya/suggest.html', modifier=context_modifier)
 def suggest(request):
     """

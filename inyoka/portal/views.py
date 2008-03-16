@@ -375,7 +375,7 @@ def search(request):
 
 
 @check_login(message=u'Du musst eingeloggt sein um ein Benutzerprofil zu '
-                     u'sehen')
+                     u'sehen.')
 @templated('portal/profile.html')
 def profile(request, username):
     """Shows the user profile if the user is logged in."""
