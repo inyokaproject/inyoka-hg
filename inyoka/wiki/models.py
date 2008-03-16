@@ -674,7 +674,7 @@ class Text(models.Model):
             value = templates.process(self.value, template_context)
         else:
             value = self.value
-        return parser.parse(value)
+        return parser.parse(value, transformers=[])
 
     def find_meta(self):
         """

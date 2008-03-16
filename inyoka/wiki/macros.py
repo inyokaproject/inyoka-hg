@@ -632,10 +632,8 @@ class Template(Macro):
         except Page.DoesNotExist:
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
                                    u'Template existiert nicht.')
-        return nodes.Container([
-            page.rev.text.parse(self.context),
-            nodes.MetaData('X-Attach', (self.template,))
-        ])
+        return nodes.Container(page.rev.text.parse(self.context).children +
+                               [nodes.MetaData('X-Attach', (self.template,))])
 
 
 class Picture(Macro):

@@ -163,10 +163,11 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
-def parse(markup, wiki_force_existing=False, catch_stack_errors=True):
+def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
+          transformers=None):
     """Parse markup into a node."""
     try:
-        return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
+        return Parser(markup, transformers, wiki_force_existing).parse()
     except StackExhaused:
         if not catch_stack_errors:
             raise
