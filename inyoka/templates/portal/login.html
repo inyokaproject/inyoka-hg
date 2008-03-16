@@ -64,7 +64,12 @@
   <form action="" method="post" class="loginform">
     <dl>
       {{ h.render_form(form, 'username', 'password', inline=true) }}
-      <dd>{{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label></dd>
+      <dd>
+        {{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label>
+        <div class="help_text">Wähle dies nicht aus, wenn du dich von einem öffentlichen
+          Computer aus anmeldest, da sonst andere Zugriff auf deinen Benutzer erhalten
+          können.</div>
+      </dd>
     </dl>
     <div class="actions">
       <input type="hidden" name="redirect" value="" />

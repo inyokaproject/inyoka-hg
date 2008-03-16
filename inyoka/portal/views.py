@@ -375,7 +375,7 @@ def search(request):
 
 
 @check_login(message=u'Du musst eingeloggt sein um ein Benutzerprofil zu '
-                     u'sehen')
+                     u'sehen.')
 @templated('portal/profile.html')
 def profile(request, username):
     """Shows the user profile if the user is logged in."""
@@ -950,10 +950,12 @@ def user_error_report(request):
             data = form.cleaned_data
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
-                text += (u" [[BR]]\n'''Benutzer:''' [%s %s]" % (
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
                     request.user.get_absolute_url(),
-                    escape(request.user.username)
+                    escape(request.user.username),
+                    request.user.get_absolute_url('privmsg'),
                 ))
+            reporter = request.user.id == 1 and '' or request.user.username
             text += u'\n\n%s' % data['text']
             trac = Trac()
             trac.submit_new_ticket(
@@ -962,6 +964,7 @@ def user_error_report(request):
                 description = text,
                 component = '-',
                 ticket_type = 'userreport',
+                reporter = reporter,
             )
 
 #             uer = UserErrorReport()

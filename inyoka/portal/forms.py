@@ -251,14 +251,17 @@ class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
     email = forms.EmailField(label='E-Mail', required=True)
-    jabber = forms.CharField(label='Jabber', required=False)
-    icq = forms.CharField(label='ICQ', required=False)
-    msn = forms.CharField(label='MSN Messenger', required=False)
-    aim = forms.CharField(label='AIM', required=False)
-    yim = forms.CharField(label='Yahoo Instant Messenger', required=False)
-    skype = forms.CharField(label='Skype', required=False)
-    wengophone = forms.CharField(label='WengoPhone', required=False)
-    sip = forms.CharField(label='SIP', required=False)
+    jabber = forms.EmailField(label='Jabber', required=False)
+    icq = forms.IntegerField(label='ICQ', required=False,
+                             min_value=1, max_value=1000000000)
+    msn = forms.EmailField(label='MSN Messenger', required=False)
+    aim = forms.CharField(label='AIM', required=False, max_length=25)
+    yim = forms.CharField(label='Yahoo Instant Messenger', required=False,
+                         max_length=25)
+    skype = forms.CharField(label='Skype', required=False, max_length=25)
+    wengophone = forms.CharField(label='WengoPhone', required=False,
+                                 max_length=25)
+    sip = forms.CharField(label='SIP', required=False, max_length=25)
     show_email = forms.BooleanField(required=False)
     show_jabber = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
@@ -268,14 +271,15 @@ class UserCPProfileForm(forms.Form):
     coordinates_lat = forms.DecimalField(label=u'Koordinaten (Breite)',
                       required=False, min_value=-180, max_value=180)
     location = forms.CharField(label='Wohnort', required=False, max_length=25)
-    occupation = forms.CharField(label='Beruf', required=False)
-    interests = forms.CharField(label='Interessen', required=False)
+    occupation = forms.CharField(label='Beruf', required=False, max_length=25)
+    interests = forms.CharField(label='Interessen', required=False,
+                                max_length=50)
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                  max_length=10, required=False, help_text=u'Hier kannst du '
                  u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
                  u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
-                 u'_of_Trust">hier</a>.')
+                 u'_of_Trust">im Wiki</a>.')
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()

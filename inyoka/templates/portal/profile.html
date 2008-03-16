@@ -110,7 +110,7 @@
       <td colspan="3">
         {%- for group in groups -%}
         <a href="{{ group|url }}">{{ group.name|e }}</a>
-        {%- if not loop.last %},{% endif %}
+        {%- if not loop.last %}, {% endif %}
         {%- else %}
         „{{ user.username|e }}“ ist in keiner Gruppe Mitglied.
         {%- endfor %}
