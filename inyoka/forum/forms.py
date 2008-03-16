@@ -34,8 +34,10 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
     att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean_text(self):
-        if not self.cleaned_data['text'].strip():
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
             raise forms.ValidationError('Text darf nicht leer sein')
+        return text
 
 
 class EditPostForm(forms.Form):
@@ -95,8 +97,10 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
     sticky = forms.BooleanField(required=False)
 
     def clean_text(self):
-        if not self.cleaned_data['text'].strip():
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
             raise forms.ValidationError('Text darf nicht leer sein')
+        return text
 
 
 class MoveTopicForm(forms.Form):
