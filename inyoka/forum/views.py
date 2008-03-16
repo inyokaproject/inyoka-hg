@@ -872,7 +872,7 @@ def movetopic(request, topic_slug):
 
     t = Topic.objects.get(slug=topic_slug)
     if not have_privilege(request.user, t.forum, 'moderate'):
-        return abort_access_denied()
+        return abort_access_denied(request)
 
     forums = filter_invisible(request.user, Forum.objects.get_forums()
                               .exclude(id=t.forum.id), 'read')
@@ -1090,7 +1090,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     if component == 'topic':
         topic = Topic.objects.get(slug=slug)
         if not have_privilege(request.user, topic.forum, 'read'):
-            return abort_access_denied()
+            return abort_access_denied(request)
         posts = topic.post_set.order_by('-pub_date')[:count]
         feed = FeedBuilder(
             title=u'ubuntuusers Thema – „%s“' % topic.title,
@@ -1125,7 +1125,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
         if slug:
             forum = Forum.objects.get(slug=slug)
             if not have_privilege(request.user, forum, 'read'):
-                return abort_access_denied()
+                return abort_access_denied(request)
             topics = forum.topic_set
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,

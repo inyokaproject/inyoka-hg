@@ -260,7 +260,7 @@ class UserCPProfileForm(forms.Form):
                          max_length=25)
     skype = forms.CharField(label='Skype', required=False, max_length=25)
     wengophone = forms.CharField(label='WengoPhone', required=False,
-                                 max_length=25))
+                                 max_length=25)
     sip = forms.CharField(label='SIP', required=False, max_length=25)
     show_email = forms.BooleanField(required=False)
     show_jabber = forms.BooleanField(required=False)
