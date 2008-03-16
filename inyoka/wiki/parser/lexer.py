@@ -314,8 +314,8 @@ class Lexer(object):
     }
 
     _quote_re = re.compile(r'^(>+) ?(?m)')
-    _block_start_re = re.compile(r'^\{\{\{(?m)')
-    _block_end_re = re.compile(r'\}\}\}\s*$(?m)')
+    _block_start_re = re.compile(r'(?<!\\)\{\{\{(?m)')
+    _block_end_re = re.compile(r'(?<!\\)\}\}\}(?m)')
 
     def tokenize(self, string):
         """
