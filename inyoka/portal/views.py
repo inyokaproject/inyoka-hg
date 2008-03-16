@@ -414,6 +414,7 @@ def usercp(request):
 @templated('portal/usercp/profile.html')
 def usercp_profile(request):
     """User control panel view for changing the user's profile"""
+    user = request.user
     if request.method == 'POST':
         form = UserCPProfileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -421,16 +422,18 @@ def usercp_profile(request):
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email', 'gpgkey',
-                        'coordinates_lat', 'coordinates_long'):
-                setattr(request.user, key, data[key])
+                        'interests', 'website', 'email', 'gpgkey'):
+                setattr(user, key, data[key] or '')
+            if data['coordinates']:
+                user.coordinates_lat, user.coordinates_long = \
+                    data['coordinates']
             if data['delete_avatar']:
-                request.user.delete_avatar()
+                user.delete_avatar()
             if data['avatar']:
-                request.user.save_avatar(data['avatar'])
+                user.save_avatar(data['avatar'])
             for key in ('show_email', 'show_jabber'):
-                request.user.settings[key] = data[key]
-            request.user.save()
+                user.settings[key] = data[key]
+            user.save()
             flash(u'Deine Profilinformationen wurden erfolgreich '
                   u'aktualisiert.', True)
             return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
@@ -438,16 +441,22 @@ def usercp_profile(request):
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
                   u'auf. Bitte behebe sie.')
     else:
-        values = model_to_dict(request.user)
+        values = model_to_dict(user)
+        lat = values.pop('coordinates_lat')
+        long = values.pop('coordinates_long')
+        if lat is not None and long is not None:
+            values['coordinates'] = '%s, %s' % (lat, long)
+        else:
+            values['coordinates'] = ''
         values.update(dict(
-            ((k, v) for k, v in request.user.settings.iteritems()
+            ((k, v) for k, v in user.settings.iteritems()
              if k.startswith('show_'))
         ))
-        settings = request.user.settings
         form = UserCPProfileForm(values)
     return {
-        'form': form,
-        'user': request.user
+        'form':         form,
+        'user':         request.user,
+        'gmaps_apikey': settings.GOOGLE_MAPS_APIKEY
     }
 
 

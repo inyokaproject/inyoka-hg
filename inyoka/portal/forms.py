@@ -266,20 +266,21 @@ class UserCPProfileForm(forms.Form):
     show_jabber = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    coordinates_long = forms.DecimalField(label='Koordinaten (Länge)',
-                       required=False, min_value=-90, max_value=90)
-    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Breite)',
-                      required=False, min_value=-180, max_value=180)
+    coordinates = forms.CharField(label='Koordinaten (Länge, Breite)',
+                                  required=False, help_text=u'''
+    Probleme beim bestimmen der Koordinaten?
+    <a href="http://www.fallingrain.com/world/">Suche einfach deinen Ort</a>
+    und übernimm die Koordinaten.''')
     location = forms.CharField(label='Wohnort', required=False, max_length=25)
     occupation = forms.CharField(label='Beruf', required=False, max_length=25)
     interests = forms.CharField(label='Interessen', required=False,
                                 max_length=50)
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
-                 max_length=10, required=False, help_text=u'Hier kannst du '
-                 u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
-                 u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
-                 u'_of_Trust">im Wiki</a>.')
+                 max_length=10, required=False, help_text=u'''
+    Hier kannst du deinen GPG-Public-Key eintragen. Näheres zu diesem Thema
+    erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web_of_Trust">im
+    Wiki</a>.''')
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
@@ -294,6 +295,24 @@ class UserCPProfileForm(forms.Form):
         except SignatureError, e:
             raise forms.ValidationError(e.message)
         return signature
+
+    def clean_coordinates(self):
+        coords = self.cleaned_data.get('coordinates', '').strip()
+        if not coords:
+            return None
+        try:
+            coords = [float(x.strip()) for x in coords.split(',')]
+            if len(coords) != 2:
+                raise forms.ValidationError(u'Koordinaten müssen im Format '
+                                            u'"Länge, Breite" angegeben werden.')
+            lat, long = coords
+        except ValueError:
+            raise forms.ValidationError(u'Koordinaten müssen Dezimalzahlen sein.')
+        if not -90 < lat < 90:
+            raise forms.ValidationError(u'Längenmaße müssen zwischen -90 und 90 sein.')
+        if not -180 < long < 180:
+            raise forms.ValidationError(u'Breitenmaße müssen zwischen -180 und 180 sein.')
+        return lat, long
 
 
 class SearchForm(forms.Form):
