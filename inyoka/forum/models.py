@@ -886,15 +886,13 @@ class Topic(models.Model):
 
     def get_read_status(self, user):
         if user.is_anonymous or self.last_post_id <= user.forum_last_read:
-            return  user.is_anonymous or self.last_post_id <= user.forum_last_read
+            return user.is_anonymous or self.last_post_id <= user.forum_last_read
         try:
-            read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
+            # get set of read posts from user object
+            read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
-        if self.last_post_id in read_status:
-            return True
-        else:
-            return False
+        return self.last_post_id in read_status
 
     def mark_read(self, user):
         """
