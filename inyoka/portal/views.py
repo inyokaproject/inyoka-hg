@@ -302,8 +302,7 @@ def login(request):
                     user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
-            else:
-                failed = True
+            failed = True
     else:
         if 'username' in request.GET:
             form = LoginForm(initial={'username':request.GET['username']})
