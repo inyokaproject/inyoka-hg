@@ -85,7 +85,7 @@ class Sortable(object):
                 self.order_column
             )
             img = '<img src="%s" alt="" />' % href('static', 'img',
-                '%s.png' % (self.order.startswith('-') and 'up' or 'down'))
+                '%s.png' % (self.order.startswith('-') and 'down' or 'up'))
         else:
             new_order = key
             img = ''

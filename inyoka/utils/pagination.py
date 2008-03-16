@@ -59,9 +59,10 @@ class Pagination(object):
 
     def generate_link(self, page, params):
         if page == 1:
-            return self.link_base
-        return '%s%d/%s' % (self.link_base, page,
-                            params and '?' + url_encode(params) or '')
+            url = self.link_base
+        else:
+            url = '%s%d/' % (self.link_base, page)
+        return url + (params and '?' + url_encode(params) or '')
 
     def generate(self, position=None, threshold=2, show_next_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
