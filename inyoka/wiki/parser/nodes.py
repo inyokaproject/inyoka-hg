@@ -441,11 +441,12 @@ class Image(Node):
     formatter could bundle images and refer to them.
     """
 
-    def __init__(self, href, alt, id=None, class_=None):
+    def __init__(self, href, alt, id=None, class_=None, style=None):
         self.href = href
         self.alt = alt
         self.id = id
         self.class_ = class_
+        self.style = style
 
     @property
     def text(self):
@@ -456,7 +457,7 @@ class Image(Node):
 
     def prepare_html(self):
         yield build_html_tag(u'img', src=self.href, alt=self.alt, id=self.id,
-                             class_=self.class_)
+                             class_=self.class_, style=self.style)
 
     def prepare_docbook(self):
         yield u'<mediaobject><imageobject>'

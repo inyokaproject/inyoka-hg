@@ -70,6 +70,11 @@ def is_safe_domain(url):
     return ('.' + netloc).endswith('.' + settings.BASE_DOMAIN_NAME)
 
 
+def is_http_link(url):
+    """Check whether `url` points to a http url"""
+    return urlparse(url)[0] == 'http'
+
+
 def get_query_string(url):
     """Return the query string of a URL"""
     return urlparse(url)[4]

@@ -69,7 +69,11 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser as NormalParser
     from inyoka.scripts.converter.create_templates import create
-    create()
+    from _mysql_exceptions import IntegrityError
+    try:
+        create()
+    except IntegrityError:
+        print 'wiki templates are already created'
 
     # Hack to disable camel case
     class Parser(NormalParser):
@@ -82,29 +86,25 @@ def convert_wiki():
 
     from inyoka.scripts.converter.wiki_formatter import InyokaFormatter
     from inyoka.wiki.utils import normalize_pagename
-    from _mysql_exceptions import IntegrityError
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    us = User.objects.all()
-    for u in us:
-        users[u.username] = u
-    del us
+    #us = User.objects.all()
+    #for u in us:
+    #    users[u.username] = u
+    #del us
     import cPickle
     f = file('pagelist', 'r')
     l = cPickle.load(f)
     f.close()
     #start = False
+    transaction.enter_transaction_management()
+    transaction.managed(True)
     for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
     #for i, moin_name in enumerate(['Startseite']):
         name = normalize_pagename(moin_name)
-        print i, ':', name
-        #if not start and name != 'Wiki/Sandkasten/margin':
-        #    continue
-        #else:
-        #    start = True
         page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -183,6 +183,7 @@ def convert_wiki():
         text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
+        transaction.commit()
 
 
 def convert_users():
