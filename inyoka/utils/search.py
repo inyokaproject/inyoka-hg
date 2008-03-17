@@ -23,7 +23,7 @@ from inyoka.conf import settings
 from inyoka.utils.parsertools import TokenStream
 
 
-_word_re = re.compile(r'\w+(?u)')
+_word_re = re.compile(r'(?<!\w)\w{3,20}(?!\w)', re.U)
 
 _token_re = re.compile(r'''(?x)
     (?P<operator>[()-])     |
