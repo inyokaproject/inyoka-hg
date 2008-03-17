@@ -358,6 +358,10 @@ class SearchSystem(object):
                 text = [text]
             for block in text:
                 for token in tokenize(block):
+                    if len(token) > 245:
+                        # ignore long tokens (they cause xapian to raise an
+                        # error)
+                        continue
                     doc.add_posting(token, pos)
                     pos += 1
                 pos += 20
