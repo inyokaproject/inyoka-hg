@@ -160,3 +160,16 @@ code {
   background-color: #fff;
 }
 
+.key {
+  display: inline;
+  border-width: 0.2em;
+  border-style: solid;
+  border-color: #ddd #bbb #bbb #ddd;
+  background-color: #eee;
+  padding: 0.1em 0.4em;
+  font-size: 0.8em;
+}
+
+.key * {
+  display: inline;
+}
