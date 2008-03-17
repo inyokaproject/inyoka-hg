@@ -34,7 +34,7 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      ArgumentCollector
 from inyoka.wiki.models import Page, Revision
 from inyoka.utils.text import human_number
-from inyoka.utils.urls import url_encode
+from inyoka.utils.urls import url_encode, is_http_link
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
 from inyoka.utils.urls import url_for
@@ -656,10 +656,15 @@ class Picture(Macro):
     )
 
     def __init__(self, target, dimensions, alignment, alt):
+        #: a image on another server
+        self.is_http_link = is_http_link(target)
+        #: a wiki attachment on a different page
         self.is_external = is_external_target(target)
-        if not self.is_external:
-            self.metadata = [nodes.MetaData('X-Attach', [target])]
-        self.target = normalize_pagename(target)
+        if not self.is_http_link:
+            if not self.is_external:
+                self.metadata = [nodes.MetaData('X-Attach', [target])]
+            target = normalize_pagename(target)
+        self.target = target
         self.alt = alt or target
         if dimensions:
             if 'x' in dimensions:
@@ -683,15 +688,23 @@ class Picture(Macro):
 
     def build_node(self, context, format):
         target = self.target
-        if not self.is_external and context.wiki_page:
-            target = pagename_join(context.wiki_page, self.target)
-        target = href('wiki', '_image',
-            target=target,
-            width=self.width,
-            height=self.height
-        )
-        return nodes.Image(target, self.alt, class_='image-' +
-                           (self.align or 'default'))
+        if self.is_http_link:
+            style = '%s%s' % (
+                self.width and ('width: %spx;' % self.width) or '',
+                self.height and ('height: %spx;' % self.height) or ''
+            )
+            return nodes.Image(target, self.alt, class_='image-' +
+                               (self.align or 'default'), style=style or None)
+        else:
+            if not self.is_external and context.wiki_page:
+                target = pagename_join(context.wiki_page, self.target)
+            target = href('wiki', '_image',
+                target=target,
+                width=self.width,
+                height=self.height
+            )
+            return nodes.Image(target, self.alt, class_='image-' +
+                               (self.align or 'default'))
 
 
 class Date(Macro):
