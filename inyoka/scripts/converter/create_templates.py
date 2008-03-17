@@ -96,43 +96,39 @@ Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
     u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>
-<@ if ['hash','#'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/hash.png)]]
-<@ elseif ['^'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/zirklumflex.png)]]
-<@ elseif ['.'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fullstop.png)]]
-<@ elseif ['<'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/lt.png)]]
-<@ elseif ['plus'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/plus.png)]]
-<@ elseif [','] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/comma.png)]]
-<@ elseif ['alt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/alt.png)]]
-<@ elseif ['fn'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fn.png)]]
-<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/home.png)]]
-<@ elseif ['ende','end'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/end.png)]]
-<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/enter.png)]]
-<@ elseif ['','space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/space.png)]]
-<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/up.png)]]
-<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/backspace.png)]]
-<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/down.png)]]
-<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/left.png)]]
-<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/right.png)]]
-<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgup.png)]]
-<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgdown.png)]]
-<@ elseif ['strg','ctrl'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ctrl.png)]]
-<@ elseif ['alt gr','altgr'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/altgr.png)]]
-<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/shift.png)]]
-<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/caps.png)]]
-<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/del.png)]]
-<@ elseif ['win','windows'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/win.png)]]
-<@ elseif ['tab','tabulator'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tab.png)]]
-<@ elseif ['esc','escape'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/esc.png)]]
-<@ elseif ['druck','print'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/print.png)]]
-<@ elseif ['minus','-'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/dash.png)]]
-<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/apple.png)]]
-<@ elseif ['einfg','ins'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ins.png)]]
-<@ elseif ['ß','s'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/sz.png)]]
-<@ elseif ['`',"'"] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tick.png)]]
-<@ elseif $key matches_regex "^[a-zA-Z0-9]{1}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
-<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
+<@ if $loop.first @><@ else @> + <@ endif @>
+<@ if ['hash','#'] contains $key as lowercase @>{{|<class="key">#|}}
+<@ elseif ['^', '.', '<', 'plus', ',', 'alt', 'fn'] contains $key as lowercase @>{{|<class="key"><@ $key as lowercase @>|}}
+<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>{{|<class="key">Pos 1|}}
+<@ elseif ['ende','end'] contains $key as lowercase @>{{|<class="key">Ende|}}
+<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>{{|<class="key">⏎|}}
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key"> |}}
+<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>{{|<class="key">↑|}}
+<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">Backspace|}}
+<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>{{|<class="key">↓|}}
+<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>{{|<class="key">←|}}
+<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>{{|<class="key">→|}}
+<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>{{|<class="key">Bild ↑|}}
+<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>{{|<class="key">Bild ↓|}}
+<@ elseif ['strg','ctrl'] contains $key as lowercase @>{{|<class="key">Strg|}}
+<@ elseif ['alt gr','altgr'] contains $key as lowercase @>{{|<class="key">Alt Gr|}}
+<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>{{|<class="key">⇧|}}
+<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>{{|<class="key">⇩|}}
+<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>{{|<class="key">Entf|}}
+<@ elseif ['win','windows'] contains $key as lowercase @>{{|<class="key">Windows|}}
+<@ elseif ['tab','tabulator'] contains $key as lowercase @>{{|<class="key">Tab ⇆|}}
+<@ elseif ['esc','escape'] contains $key as lowercase @>{{|<class="key">Esc|}}
+<@ elseif ['druck','print'] contains $key as lowercase @>{{|<class="key">Druck|}}
+<@ elseif ['minus','-'] contains $key as lowercase @>{{|<class="key">-|}}
+<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">Apfel|}}
+<@ elseif ['einfg','ins'] contains $key as lowercase @>{{|<class="key">Einfg|}}
+<@ elseif ['ß','ss'] contains $key as lowercase @>{{|<class="key">ß|}}
+<@ elseif ['`',"'"] contains $key as lowercase @>{{|<class="key">`|}}
+<@ elseif $key matches_regex "^[a-zA-Z0-9]{1}$" @>{{|<class="key"><@ $key as lowercase @>|}}
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as lowercase @>|}}
 <@ endif @>
-<@ endfor @>""",
+<@ endfor @>
+""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
 <@ for $arg in $arguments @>
  * [[Anker(source-<@ $loop.index @>)]]<@ $loop.index @>: <@ $arg @>
@@ -149,14 +145,14 @@ def create_page_templates():
                             note=u'Vorlage automatisch erstellt')
 
     # attach key images to Tasten macro
-    pth = os.path.join(os.path.dirname(__file__), 'keys')
-    for name in os.listdir(pth):
-        f = file(os.path.join(pth, name))
-        name = name.replace('key-', '')
-        Page.objects.create(u'Wiki/Vorlagen/Tasten/%s' % name,
-                    u'', note=u'Vorlage automatisch erstellt',
-                    attachment=f.read(), attachment_filename=name)
-        f.close()
+    #pth = os.path.join(os.path.dirname(__file__), 'keys')
+    #for name in os.listdir(pth):
+    #    f = file(os.path.join(pth, name))
+    #    name = name.replace('key-', '')
+    #    Page.objects.create(u'Wiki/Vorlagen/Tasten/%s' % name,
+    #                u'', note=u'Vorlage automatisch erstellt',
+    #                attachment=f.read(), attachment_filename=name)
+    #    f.close()
 
 
 def create_markup_stylesheet():
