@@ -44,7 +44,7 @@ class WikiSearchAdapter(SearchAdapter):
         search.store(
             component='w',
             uid=rev.page.id,
-            title=rev.title,
+            title=rev.page.name,
             user=rev.user_id,
             date=rev.change_date,
             auth=rev.page.name,
