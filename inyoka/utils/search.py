@@ -23,7 +23,7 @@ from inyoka.conf import settings
 from inyoka.utils.parsertools import TokenStream
 
 
-_word_re = re.compile(r'(?<!\w)\w{3,20}(?!\w)', re.U)
+_word_re = re.compile(r'\b\w\w{2,20}\b', re.U)
 
 _token_re = re.compile(r'''(?x)
     (?P<operator>[()-])     |
@@ -358,10 +358,6 @@ class SearchSystem(object):
                 text = [text]
             for block in text:
                 for token in tokenize(block):
-                    if len(token) > 245:
-                        # ignore long tokens (they cause xapian to raise an
-                        # error)
-                        continue
                     doc.add_posting(token, pos)
                     pos += 1
                 pos += 20
