@@ -105,7 +105,7 @@ class BaseStorage(object):
         ''', [self.behavior_key])
 
         objects = []
-        for raw_text, page_name, rewest_rev in cur.fetchall():
+        for raw_text, page_name in cur.fetchall():
             block = self.find_block(raw_text)
             objects.append(self.extract_data(block))
         cur.close()
