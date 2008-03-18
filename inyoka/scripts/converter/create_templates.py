@@ -78,7 +78,7 @@ Paketliste zum Kopieren:
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo apt-get install <@ $arguments join_with " " @>')]]
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo aptitude install <@ $arguments join_with " " @>')]]
 |}}""",
-    u'InArbeit': u"""{{|<class="workinprogress">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
+    u'InArbeit': u"""{{|<class="box workinprogress">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
 <@ if $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
 Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
