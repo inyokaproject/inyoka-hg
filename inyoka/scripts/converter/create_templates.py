@@ -78,21 +78,14 @@ Paketliste zum Kopieren:
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo apt-get install <@ $arguments join_with " " @>')]]
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo aptitude install <@ $arguments join_with " " @>')]]
 |}}""",
-    u'InArbeit': u"""<@ if $arguments.0 as stripped == "" or $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
-Dieser Artikel wird momentan
-<@if $arguments.1 @>
-von [http://ubuntuusers.de/users/<@ $arguments.1 @> <@ $arguments.1 @>]
-<@ endif @>
-überarbeitet.
-<@ if $arguments.0 as stripped @>
+    u'InArbeit': u"""{{|<class="workinprogress">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
+<@ if $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
 Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
-<@ else @> Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, kontrolliere das Datum der letzten Änderung und entscheide, wie du weiter vorgehst.
+<@ else @>
+Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, kontrolliere das Datum der letzten Änderung und entscheide, wie du weiter vorgehst.
 <@ endif @>
 ----
-'''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!
-<@ else @>
-'''Parameterfehler''': Ungültiges Datum
-<@ endif @> """,
+'''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!|}}""",
     u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
     u'Tasten': u"""
 <@ for $key in $arguments split_by "+" @>
