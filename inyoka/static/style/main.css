@@ -469,6 +469,14 @@ table.syntaxtable td.linenos {
   background-image: url(../img/tabbar_border.png);
 }
 
+.tabbar li.active:hover {
+  background-image: url(../img/tabbar_border.png);
+}
+
+.tabbar li:hover {
+  background-image: url(../img/tabbar_border_hover.png);
+}
+
 /*** Navigation / Page Content ************************************************/
 
 .page_content {
