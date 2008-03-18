@@ -171,8 +171,9 @@ class TemplateParser(Parser):
         for idx, arg in enumerate(args[1:] + (data,)):
             items.append(('arguments.%d' % idx, arg))
         if not u'/' in args[0]:
-            args[0] = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
-        self.template = args[0]
+            self.template = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
+        else:
+            self.template = args[0]
         self.context = items
 
     def build_node(self):
