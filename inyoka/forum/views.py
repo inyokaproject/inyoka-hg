@@ -328,7 +328,7 @@ def newpost(request, topic_slug=None, quote_id=None):
                   u'Bitte überprüfe <a href="#recent_posts">hier</a>, ob '
                   u'dies für deine Antwort relevant ist, bevor du sie '
                   u'abschickst.')
-            starttime = datetime.utcnow()
+            start_time = datetime.utcnow()
         elif form.is_valid():
             data = form.cleaned_data
             post = t.reply(text=data['text'], author=request.user)
