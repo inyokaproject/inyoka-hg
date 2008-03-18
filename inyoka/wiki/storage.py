@@ -86,7 +86,7 @@ class BaseStorage(object):
 
         cur = connection.cursor()
         cur.execute('''
-            select t.value, p.name, max(r.id)
+            select t.value, p.name
               from wiki_page p,
                    wiki_revision r,
                    wiki_text t,
@@ -94,6 +94,9 @@ class BaseStorage(object):
              where p.id = r.page_id and
                    p.id = m.page_id and
                    t.id = r.text_id and
+                   r.id = (select max(id)
+                             from wiki_revision
+                            where page_id = p.id) and
                    not r.deleted and
                    m.key = 'X-Behave' and
                    m.value = %s
@@ -102,7 +105,7 @@ class BaseStorage(object):
         ''', [self.behavior_key])
 
         objects = []
-        for raw_text, page_name, rewest_rev in cur.fetchall():
+        for raw_text, page_name in cur.fetchall():
             block = self.find_block(raw_text)
             objects.append(self.extract_data(block))
         cur.close()
@@ -182,30 +185,39 @@ class SmileyMap(DictStorage):
     behavior_key = 'Smiley-Map'
     multi_key = True
 
-    def extract_data(self, text):
-        data = list(DictStorage.extract_data(self, text))
-        mapping = dict((d[1], d[0]) for d in data)
+    def combine_data(self, objects):
+        mapping = {}
+        for obj in objects:
+            for code, page in obj:
+                mapping.setdefault(page, []).append(code)
+        if not mapping:
+            return []
+
         cur = connection.cursor()
-        # XXX: is someone able to do this without a subquery?
         cur.execute('''
             select a.file, p.name
-              from wiki_attachment a, wiki_revision r, wiki_page p
-              where a.id = r.attachment_id and
-                    r.page_id = p.id and r.id in (
-                select max(r.id)
-                  from wiki_page p, wiki_revision r
-                  where p.id = r.page_id and
-                        p.name in (%s)
-                  group by page_id
-              )
-         ''' % ', '.join(('%s',) * len(data)), tuple(d[1] for d in data))
-        for fname, page_name in cur.fetchall():
-            yield mapping[page_name], urljoin(settings.MEDIA_URL, fname)
+              from wiki_attachment a,
+                   wiki_revision r,
+                   wiki_page p
+             where p.id = r.page_id
+               and r.attachment_id = a.id
+               and a.id in (select r.attachment_id
+                              from wiki_revision r,
+                                   wiki_page p
+                             where r.page_id = p.id
+                               and p.name in (%s)
+                               and r.id = (select max(id)
+                                             from wiki_revision
+                                            where page_id = p.id)
+                         and not r.deleted)
+         ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
 
-    def combine_data(self, objects):
         result = []
-        for obj in objects:
-            result.extend(obj)
+        for filename, page in cur.fetchall():
+            path = urljoin(settings.MEDIA_URL, filename)
+            for code in mapping[page]:
+                result.append((code, path))
+        cur.close()
         return result
 
 

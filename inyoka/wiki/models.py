@@ -665,7 +665,7 @@ class Text(models.Model):
     hash = models.CharField(max_length=40, unique=True)
     cached_formats = ['html']
 
-    def parse(self, template_context=None):
+    def parse(self, template_context=None, transformers=None):
         """
         Parse the markup into a tree.  This also expands template code if the
         template context provided is not None.
@@ -674,7 +674,7 @@ class Text(models.Model):
             value = templates.process(self.value, template_context)
         else:
             value = self.value
-        return parser.parse(value, transformers=[])
+        return parser.parse(value, transformers=transformers)
 
     def find_meta(self):
         """
