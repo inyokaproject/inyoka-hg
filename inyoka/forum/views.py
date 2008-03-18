@@ -10,7 +10,7 @@
 """
 import re
 from time import localtime
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from inyoka.conf import settings
@@ -358,6 +358,9 @@ def newpost(request, topic_slug=None, quote_id=None):
             form = NewPostForm(initial={'text': text})
         else:
             form = NewPostForm()
+            if datetime.now() - t.last_post.pub_date > timedelta(days=182):
+                flash(u'Seit der letzten Nachricht in diesem Thema ist schon '
+                      u'mehr als ein halbes Jahr vergangen.')
         attachments = []
 
     set_session_info(request, u'schreibt einen neuen Beitrag in „<a href="'
