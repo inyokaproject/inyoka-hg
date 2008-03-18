@@ -86,7 +86,7 @@ class BaseStorage(object):
 
         cur = connection.cursor()
         cur.execute('''
-            select t.value, p.name, max(r.id)
+            select t.value, p.name
               from wiki_page p,
                    wiki_revision r,
                    wiki_text t,
@@ -94,6 +94,9 @@ class BaseStorage(object):
              where p.id = r.page_id and
                    p.id = m.page_id and
                    t.id = r.text_id and
+                   r.id = (select max(id)
+                             from wiki_revision
+                            where page_id = p.id)
                    not r.deleted and
                    m.key = 'X-Behave' and
                    m.value = %s
@@ -185,25 +188,35 @@ class SmileyMap(DictStorage):
     def combine_data(self, objects):
         mapping = {}
         for obj in objects:
-            mapping.update(obj)
+            for code, page in obj:
+                mapping.setdefault(page, []).append(code)
 
         cur = connection.cursor()
         cur.execute('''
-            select a.file, p.name, max(r.id)
-              from wiki_page p,
+            select a.file, p.name
+              from wiki_attachment a,
                    wiki_revision r,
-                   wiki_attachment a
+                   wiki_page p
              where p.id = r.page_id
                and r.attachment_id = a.id
-               and p.name in (%s)
-          group by p.id;
+               and id in (select r.attachment_id
+                            from wiki_revision r,
+                                 wiki_page p
+                           where r.page_id = p.id
+                             and p.name in (%s)
+                             and r.id = (select max(id)
+                                           from wiki_revision
+                                          where page_id = p.id))
          ''' % ', '.join(('%s',) * len(mapping)),
             [v for v in mapping.values()])
-        try:
-            return [(mapping[p], urljoin(settings.MEDIA_URL, f))
-                    for f, p, r in cur.fetchall()]
-        finally:
-            cur.close()
+
+        result = []
+        for filename, page in cur.fetchall():
+            path = urljoin(settings.MEDIA_URL, filename)
+            for code in mapping[page]:
+                result.append((code, path))
+        cur.close()
+        return result
 
 
 class InterwikiMap(DictStorage):
