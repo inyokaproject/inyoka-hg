@@ -200,7 +200,7 @@ class SmileyMap(DictStorage):
          ''' % ', '.join(('%s',) * len(mapping)), [v for v in data.values()])
         try:
             return [(mapping[p], urljoin(settings.MEDIA_URL, f))
-                    for p, f, r in cur.fetchall()]
+                    for f, p, r in cur.fetchall()]
         finally:
             cur.close()
 
