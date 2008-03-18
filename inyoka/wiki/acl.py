@@ -134,7 +134,7 @@ class MultiPrivilegeTest(object):
     def __init__(self, user):
         self.user = user
         self.groups = set(x.name for x in self.user.get_groups())
-        self.owned_pages = set(Page.objects.get_owned(self.get_groups()))
+        self.owned_pages = set(Page.objects.get_owned(self.groups))
 
     def get_groups(self, page_name):
         if page_name in self.owned_pages:
