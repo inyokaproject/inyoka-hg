@@ -197,7 +197,8 @@ class SmileyMap(DictStorage):
                and r.attachment_id = a.id
                and p.name in (%s)
           group by p.id;
-         ''' % ', '.join(('%s',) * len(mapping)), [v for v in data.values()])
+         ''' % ', '.join(('%s',) * len(mapping)),
+            [v for v in mapping.values()])
         try:
             return [(mapping[p], urljoin(settings.MEDIA_URL, f))
                     for f, p, r in cur.fetchall()]
