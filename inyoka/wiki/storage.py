@@ -190,6 +190,8 @@ class SmileyMap(DictStorage):
         for obj in objects:
             for code, page in obj:
                 mapping.setdefault(page, []).append(code)
+        if not mapping:
+            return []
 
         cur = connection.cursor()
         cur.execute('''
