@@ -208,8 +208,7 @@ class SmileyMap(DictStorage):
                                            from wiki_revision
                                           where page_id = p.id)
                          and not r.deleted)
-         ''' % ', '.join(('%s',) * len(mapping)),
-            [v for v in mapping.values()])
+         ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
 
         result = []
         for filename, page in cur.fetchall():
