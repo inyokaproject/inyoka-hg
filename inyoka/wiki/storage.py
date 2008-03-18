@@ -206,7 +206,8 @@ class SmileyMap(DictStorage):
                              and p.name in (%s)
                              and r.id = (select max(id)
                                            from wiki_revision
-                                          where page_id = p.id))
+                                          where page_id = p.id)
+                         and not r.deleted)
          ''' % ', '.join(('%s',) * len(mapping)),
             [v for v in mapping.values()])
 
