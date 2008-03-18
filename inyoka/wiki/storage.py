@@ -96,7 +96,7 @@ class BaseStorage(object):
                    t.id = r.text_id and
                    r.id = (select max(id)
                              from wiki_revision
-                            where page_id = p.id)
+                            where page_id = p.id) and
                    not r.deleted and
                    m.key = 'X-Behave' and
                    m.value = %s
