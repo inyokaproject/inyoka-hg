@@ -199,14 +199,14 @@ class SmileyMap(DictStorage):
                    wiki_page p
              where p.id = r.page_id
                and r.attachment_id = a.id
-               and id in (select r.attachment_id
-                            from wiki_revision r,
-                                 wiki_page p
-                           where r.page_id = p.id
-                             and p.name in (%s)
-                             and r.id = (select max(id)
-                                           from wiki_revision
-                                          where page_id = p.id)
+               and a.id in (select r.attachment_id
+                              from wiki_revision r,
+                                   wiki_page p
+                             where r.page_id = p.id
+                               and p.name in (%s)
+                               and r.id = (select max(id)
+                                             from wiki_revision
+                                            where page_id = p.id)
                          and not r.deleted)
          ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
 
