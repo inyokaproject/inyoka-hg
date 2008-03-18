@@ -701,12 +701,12 @@ class Picture(Macro):
         else:
             if context.wiki_page:
                 target = pagename_join(context.wiki_page, self.target)
-            target = href('wiki', '_image',
+            source = href('wiki', '_image',
                 target=target,
                 width=self.width,
                 height=self.height
             )
-            img = nodes.Image(target, self.alt, class_='image-' +
+            img = nodes.Image(source, self.alt, class_='image-' +
                               (self.align or 'default'))
             if self.width or self.height:
                 return nodes.Link(href('wiki', '_image', target=target), [img])
