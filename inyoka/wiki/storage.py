@@ -182,31 +182,27 @@ class SmileyMap(DictStorage):
     behavior_key = 'Smiley-Map'
     multi_key = True
 
-    def extract_data(self, text):
-        data = list(DictStorage.extract_data(self, text))
-        mapping = dict((d[1], d[0]) for d in data)
-        cur = connection.cursor()
-        # XXX: is someone able to do this without a subquery?
-        cur.execute('''
-            select a.file, p.name
-              from wiki_attachment a, wiki_revision r, wiki_page p
-              where a.id = r.attachment_id and
-                    r.page_id = p.id and r.id in (
-                select max(r.id)
-                  from wiki_page p, wiki_revision r
-                  where p.id = r.page_id and
-                        p.name in (%s)
-                  group by page_id
-              )
-         ''' % ', '.join(('%s',) * len(data)), tuple(d[1] for d in data))
-        for fname, page_name in cur.fetchall():
-            yield mapping[page_name], urljoin(settings.MEDIA_URL, fname)
-
     def combine_data(self, objects):
-        result = []
+        mapping = {}
         for obj in objects:
-            result.extend(obj)
-        return result
+            mapping.update(obj)
+
+        cur = connection.cursor()
+        cur.execute('''
+            select a.file, p.name, max(r.id)
+              from wiki_page p,
+                   wiki_revision r,
+                   wiki_attachment a
+             where p.id = r.page_id
+               and r.attachment_id = a.id
+               and p.name in (%s)
+          group by p.id;
+         ''' % ', '.join(('%s',) * len(mapping)), [v for v in data.values()])
+        try:
+            return [(mapping[p], urljoin(settings.MEDIA_URL, f))
+                    for p, f, r in cur.fetchall()]
+        finally:
+            cur.close()
 
 
 class InterwikiMap(DictStorage):
