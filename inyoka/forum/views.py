@@ -372,7 +372,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         'can_attach':  privileges['upload'],
         'isnewpost' :  True,
         'preview':     preview,
-        'start_time':  start_time
+        'start_time':  int(start_time.strftime('%s'))
     }
 
 
