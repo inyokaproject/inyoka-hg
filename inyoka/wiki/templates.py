@@ -922,10 +922,13 @@ def join_array(array, delimiter):
         result.append(unicode(key))
     return unicode(delimiter).join(result)
 
+def abc(a, b):
+    print a, b
+    return b in a
 
 BINARY_FUNCTIONS = {
     'contain':          lambda a, b: b in a,
-    'contains':         lambda a, b: b in a,
+    'contains':         abc,
     'has_key':          lambda a, b: a.has_key(b),
     'starts_with':      lambda a, b: unicode(a).startswith(b),
     'ends_with':        lambda a, b: unicode(a).endswith(b),

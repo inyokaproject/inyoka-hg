@@ -78,7 +78,7 @@ Paketliste zum Kopieren:
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo apt-get install <@ $arguments join_with " " @>')]]
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo aptitude install <@ $arguments join_with " " @>')]]
 |}}""",
-    u'InArbeit': u"""{{|<class="box workinprogress">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
+    u'InArbeit': u"""{{|<class="box workinprogress" title="Artikel in Arbeit">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
 <@ if $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
 Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
 <@ else @>
@@ -87,17 +87,18 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 ----
 '''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!|}}""",
     u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
-    u'Tasten': u"""
-<@ for $key in $arguments split_by "+" @>
+    u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
 <@ if $loop.first @><@ else @> + <@ endif @>
-<@ if ['hash','#'] contains $key as lowercase @>{{|<class="key">#|}}
-<@ elseif ['^', '.', '<', 'plus', ',', 'alt', 'fn'] contains $key as lowercase @>{{|<class="key"><@ $key as lowercase @>|}}
+<@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @>{{|<class="key"><@ $key as uppercase @>|}}
+<@ elseif ['hash','#'] contains $key as lowercase @>{{|<class="key">#|}}
+<@ elseif ['^', '.', '<', ',', 'alt', 'fn'] contains $key as lowercase @>{{|<class="key"><@ $key as title @>|}}
+<@ elseif $key == 'plus' @>{{|<class="key">+|}}
 <@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>{{|<class="key">Pos 1|}}
 <@ elseif ['ende','end'] contains $key as lowercase @>{{|<class="key">Ende|}}
 <@ elseif ['return','enter','eingabe'] contains $key as lowercase @>{{|<class="key">⏎|}}
-<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key"> |}}
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key">   |}}
 <@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>{{|<class="key">↑|}}
-<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">Backspace|}}
+<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">⌫|}}
 <@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>{{|<class="key">↓|}}
 <@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>{{|<class="key">←|}}
 <@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>{{|<class="key">→|}}
@@ -113,15 +114,13 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ elseif ['esc','escape'] contains $key as lowercase @>{{|<class="key">Esc|}}
 <@ elseif ['druck','print'] contains $key as lowercase @>{{|<class="key">Druck|}}
 <@ elseif ['minus','-'] contains $key as lowercase @>{{|<class="key">-|}}
-<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">Apfel|}}
+<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">⌘|}}
 <@ elseif ['einfg','ins'] contains $key as lowercase @>{{|<class="key">Einfg|}}
 <@ elseif ['ß','ss'] contains $key as lowercase @>{{|<class="key">ß|}}
 <@ elseif ['`',"'"] contains $key as lowercase @>{{|<class="key">`|}}
-<@ elseif $key matches_regex "^[a-zA-Z0-9]{1}$" @>{{|<class="key"><@ $key as lowercase @>|}}
-<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as lowercase @>|}}
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as uppercase @>|}}
 <@ endif @>
-<@ endfor @>
-""",
+<@ endfor @>""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
 <@ for $arg in $arguments @>
  * [[Anker(source-<@ $loop.index @>)]]<@ $loop.index @>: <@ $arg @>

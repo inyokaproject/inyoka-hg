@@ -693,8 +693,11 @@ class Picture(Macro):
                 self.width and ('width: %spx;' % self.width) or '',
                 self.height and ('height: %spx;' % self.height) or ''
             )
-            return nodes.Image(target, self.alt, class_='image-' +
-                               (self.align or 'default'), style=style or None)
+            img = nodes.Image(target, self.alt, class_='image-' +
+                              (self.align or 'default'), style=style or None)
+            if self.width or self.height:
+                return nodes.Link(target, [img])
+            return img
         else:
             if context.wiki_page:
                 target = pagename_join(context.wiki_page, self.target)
@@ -703,8 +706,11 @@ class Picture(Macro):
                 width=self.width,
                 height=self.height
             )
-            return nodes.Image(target, self.alt, class_='image-' +
-                               (self.align or 'default'))
+            img = nodes.Image(target, self.alt, class_='image-' +
+                              (self.align or 'default'))
+            if self.width or self.height:
+                return nodes.Link(href('wiki', '_image', target=target), [img])
+            return img
 
 
 class Date(Macro):
