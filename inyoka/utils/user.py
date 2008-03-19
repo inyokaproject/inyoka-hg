@@ -78,7 +78,7 @@ def check_activation_key(user, key):
 
 def send_activation_mail(user):
     """send an activation mail"""
-    from django.core.mail import send_mail
+    from inyoka.utils.mail import send_mail
     from inyoka.utils.templating import render_template
     message = render_template('mails/activation_mail.txt', {
         'username':         user.username,
@@ -91,7 +91,7 @@ def send_activation_mail(user):
 
 
 def send_new_user_password(user):
-    from django.core.mail import send_mail
+    from inyoka.utils.mail import send_mail
     from inyoka.utils.templating import render_template
     new_password_key = ''.join(random.choice(string.lowercase + string.digits) for _ in range(24))
     user.new_password_key = new_password_key

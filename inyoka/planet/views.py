@@ -8,7 +8,6 @@
     :copyright: 2007 by Benjamin Wiegand, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django.core.mail import send_mail
 from django.utils.text import truncate_html_words
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
@@ -22,6 +21,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.mail import send_mail
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import group_by_day
 from inyoka.planet.models import Blog, Entry

@@ -6,8 +6,8 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from django.core.mail import send_mail
 from inyoka.conf import settings
+from inyoka.utils.mail import send_mail
 from inyoka.utils.jabber import send as send_jabber
 
 
