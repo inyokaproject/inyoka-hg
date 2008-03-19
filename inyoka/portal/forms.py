@@ -16,7 +16,7 @@ from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
-                               HiddenCaptchaField
+                               HiddenCaptchaField, EmailField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -65,7 +65,7 @@ class RegisterForm(forms.Form):
     for bots that just fill out everything.
     """
     username = forms.CharField(label='Benutzername')
-    email = forms.EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
+    email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
         u'garantiert</a>, dass sie nicht weitergegeben wird.' % href('portal',
@@ -157,8 +157,7 @@ class LostPasswordForm(forms.Form):
     a hidden and a visible image CAPTCHA too.
     """
     username = forms.CharField(label=u'Benutzername', required=False)
-    #email = forms.EmailField(label=u'E-Mail', required=False)
-    email = forms.CharField(label=u'E-Mail', required=False)
+    email = EmailField(label=u'E-Mail', required=False)
     captcha = CaptchaField(label='CAPTCHA')
     hidden_captcha = HiddenCaptchaField(required=False)
 
@@ -250,11 +249,11 @@ class UserCPSettingsForm(forms.Form):
 class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
-    email = forms.EmailField(label='E-Mail', required=True)
-    jabber = forms.EmailField(label='Jabber', required=False)
+    email = EmailField(label='E-Mail', required=True)
+    jabber = forms.CharField(label='Jabber', required=False)
     icq = forms.IntegerField(label='ICQ', required=False,
                              min_value=1, max_value=1000000000)
-    msn = forms.EmailField(label='MSN Messenger', required=False)
+    msn = forms.CharField(label='MSN Messenger', required=False)
     aim = forms.CharField(label='AIM', required=False, max_length=25)
     yim = forms.CharField(label='Yahoo Instant Messenger', required=False,
                          max_length=25)

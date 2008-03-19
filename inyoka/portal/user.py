@@ -25,6 +25,7 @@ from inyoka.utils.decorators import deferred
 from inyoka.utils.urls import href
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.cache import cache
+from inyoka.utils.mail import send_mail
 from inyoka.utils.local import current_request
 
 
@@ -292,7 +293,6 @@ class User(models.Model):
 
     def email_user(self, subject, message, from_email=None):
         """Sends an e-mail to this User."""
-        from django.core.mail import send_mail
         send_mail(subject, message, from_email, [self.email])
 
     def get_groups(self):
