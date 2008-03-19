@@ -43,14 +43,15 @@ _referrer_re = re.compile(
 _tag_re = re.compile(r'(<!--.*?-->|<[^>]*>)(?s)')
 _tagname_re = re.compile(r'<(/)?([a-zA-Z0-9]+)(?=\s|>)')
 _isolated = set(('script', 'head', 'style', 'textarea', 'option'))
-_umlaut_choices = {
-    'ss':   ur'(?:ss|ß)',
-    'sz':   ur'(?:sz|ß)',
-    'ae':   ur'(?:ae|ä|æ)',
-    'ue':   ur'(?:ue|ü)',
-    'oe':   ur'(?:oe|ö|ø)',
-    'e':    ur'(?:e|é|è)'
-}
+_umlaut_choices = [
+    ('a',   ur'(?:a|ä)'),
+    ('e',   ur'(?:e|é|è)'),
+    ('ss',  ur'(?:ss|ß)'),
+    ('sz',  ur'(?:sz|ß)'),
+    ('ae',  ur'(?:ae|ä|æ)'),
+    ('ue',  ur'(?:ue|ü)'),
+    ('oe',  ur'(?:oe|ö|ø)')
+]
 
 
 def _handle_match(match):
@@ -60,7 +61,7 @@ def _handle_match(match):
 def _make_replacer(words):
     def quote(x):
         rv = re.escape(x)
-        for find, regex in _umlaut_choices.iteritems():
+        for find, regex in _umlaut_choices:
             rv = rv.replace(find, regex)
         return rv
     return re.compile(ur'\b(%s)\w*\b(?iu)' % '|'.join(map(quote, words))).sub
