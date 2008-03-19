@@ -4,6 +4,6 @@ der Benutzer „{{ rev.user.username|e }}“ hat die Wiki-Seite „{{ rev.page.t
 {% if rev.note %}
 Es wurde folgende Änderungsnotiz angegeben: „{{ rev.note|e }}“
 {% endif %}
-Du kannst dir die Änderungen hier ansehen: {{ href('wiki', r.page.name, action='diff', new_rev=rev.id, rev=old_rev.id) }}
+Du kannst dir die Änderungen hier ansehen: {{ href('wiki', rev.page.name, action='diff', new_rev=rev.id, rev=old_rev.id) }}
 
 Falls du bei Veränderungen an dieser Seite in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ href('wiki', rev.page.name, action='subscribe')|e }}
