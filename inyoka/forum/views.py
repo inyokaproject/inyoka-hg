@@ -516,8 +516,13 @@ def newtopic(request, slug=None, article=None):
 
         elif form.is_valid():
             data = form.cleaned_data
+            text = data['text']
+            if article:
+                text = u'{{|<class="box" title="Hinweis">Dieses Thema ist '
+                       u'eine Diskussion zu dem Wikiartikel [:%s:].|}}\n%s' \
+                            % (article.title, text)
             # write the topic into the database
-            topic = Topic.objects.create(f, data['title'], data['text'],
+            topic = Topic.objects.create(f, data['title'], text,
                         author=request.user, has_poll=bool(poll_ids),
                         ubuntu_distro=data['ubuntu_distro'],
                         ubuntu_version=data['ubuntu_version'],
