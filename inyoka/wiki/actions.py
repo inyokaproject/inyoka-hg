@@ -308,7 +308,7 @@ def do_edit(request, name):
         ``preview``
             If we are in preview mode this is a rendered HTML preview.
     """
-    rev = request.GET.get('rev')
+    rev = request.REQUEST.get('rev')
     rev = rev is not None and rev.isdigit() and int(rev) or None
     try:
         page = Page.objects.get_by_name_and_rev(name, rev)
@@ -316,6 +316,9 @@ def do_edit(request, name):
         page = None
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
+        current_rev_id = ''
+    else:
+        current_rev_id = str(page.rev.id)
 
     # attachments have a custom editor
     if page and page.rev.attachment:
@@ -420,7 +423,7 @@ def do_edit(request, name):
                     s.notified = True
                     s.save()
 
-                if page.metadata.get('weiterleitung'):
+                if page.metadata.get('redirect'):
                     url = href('wiki', page.name, redirect='no')
                 else:
                     url = href('wiki', page.name)
@@ -450,7 +453,8 @@ def do_edit(request, name):
         'page':         page,
         'form':         form,
         'preview':      preview,
-        'edit_time':    edit_time.strftime('%s')
+        'edit_time':    edit_time.strftime('%s'),
+        'rev':          current_rev_id
     }
 
 
