@@ -518,7 +518,7 @@ def newtopic(request, slug=None, article=None):
             data = form.cleaned_data
             text = data['text']
             if article:
-                text = u'{{|<class="box" title="Hinweis">Dieses Thema ist '
+                text = u'{{|<class="box" title="Hinweis">Dieses Thema ist ' \
                        u'eine Diskussion zu dem Wikiartikel [:%s:].|}}\n%s' \
                             % (article.title, text)
             # write the topic into the database
