@@ -411,9 +411,11 @@ def do_edit(request, name):
                 # send notifications
                 for s in Subscription.objects.filter(wiki_page=page,
                     notified=False).exclude(user=request.user):
+                    rev, old_rev = page.revisions.all()[:2]
                     text = render_template('mails/page_edited.txt', {
                         'username': s.user.username,
-                        'rev':      page.revisions.latest()
+                        'rev':      rev,
+                        'old_rev':  old_rev
                     })
                     send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
                                     % page.title, text)

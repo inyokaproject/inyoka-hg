@@ -25,7 +25,7 @@ from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.wiki.models import Page
 from inyoka.wiki.actions import PAGE_ACTIONS
 from inyoka.wiki.utils import normalize_pagename, get_thumbnail, \
-     is_external_target, pagename_join
+     pagename_join
 from inyoka.wiki.acl import has_privilege
 
 
@@ -104,8 +104,8 @@ def missing_resource(request):
 
 def get_image_resource(request):
     """
-    Deliver the attachment or external URL as image.  This is used by the
-    `Picture` macro mainly.  The idea is that we can still check privileges
+    Deliver the attachment  as image.  This is used by the `Picture` macro
+    mainly.  The idea is that we can still check privileges
     and that the image URL does not change if a new revision is uploaded.
     """
     try:
@@ -120,16 +120,15 @@ def get_image_resource(request):
     if not target:
         raise PageNotFound()
 
-    if not is_external_target(target):
-        target = normalize_pagename(target)
-        if not has_privilege(request.user, target, 'read'):
-            return AccessDeniedResponse()
+    target = normalize_pagename(target)
+    if not has_privilege(request.user, target, 'read'):
+        return AccessDeniedResponse()
 
     if height or width:
         target = urljoin(settings.MEDIA_URL,
                          get_thumbnail(target, width, height,
                                        request.GET.get('force') == 'yes'))
-    elif not is_external_target(target):
+    else:
         target = Page.objects.attachment_for_page(target)
         target = href('media', target)
     if not target:

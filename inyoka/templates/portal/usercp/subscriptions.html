@@ -33,6 +33,8 @@
         Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
         {%- elif sub.wiki_page -%}
         Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>
+        {%- elif sub.forum -%}
+        Forum: <a href="{{ sub.forum|url }}">{{ sub.forum.name|e }}</a>
         {%- endif -%}
       </td>
       <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>

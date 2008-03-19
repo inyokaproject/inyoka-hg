@@ -70,11 +70,6 @@ def is_safe_domain(url):
     return ('.' + netloc).endswith('.' + settings.BASE_DOMAIN_NAME)
 
 
-def is_http_link(url):
-    """Check whether `url` points to a http url"""
-    return urlparse(url)[0] == 'http'
-
-
 def get_query_string(url):
     """Return the query string of a URL"""
     return urlparse(url)[4]
@@ -85,7 +80,7 @@ def get_path_info(url, charset='utf-8'):
     return urlparse(url)[2].decode(charset, 'utf-8', 'ignore')
 
 
-def get_server_name(url):
+def get_server_name(url, charset='utf-8'):
     """Return the server name for a URL."""
     return urlparse(url)[1].decode(charset, 'utf-8', 'ignore')
 

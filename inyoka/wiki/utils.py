@@ -33,7 +33,7 @@ from inyoka.utils.html import escape
 
 _path_crop = re.compile(r'^(..?/)+')
 _unsupported_re = re.compile(r'[\x00-\x19#%?]+')
-_schema_re = re.compile(r'[a-z]://')
+_schema_re = re.compile(r'[a-z]+://')
 
 
 def has_conflicts(text):

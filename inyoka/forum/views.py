@@ -9,6 +9,8 @@
     :license: GNU GPL.
 """
 import re
+from time import localtime
+from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from inyoka.conf import settings
@@ -255,6 +257,14 @@ def newpost(request, topic_slug=None, quote_id=None):
     else:
         t = Topic.objects.get(slug=topic_slug)
 
+    #: this is the time when the user started replying to this topic.
+    #: When submitting the form it's used for checking for new posts that were
+    #: written since then.
+    try:
+        start_time = datetime(*localtime(int(request.POST['start_time']))[:7])
+    except (KeyError, ValueError):
+        start_time = datetime.utcnow()
+
     privileges = get_forum_privileges(request.user, t.forum)
     if t.locked and not privileges['moderate']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
@@ -310,6 +320,15 @@ def newpost(request, topic_slug=None, quote_id=None):
             ctx = RenderContext(request)
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
 
+        elif form.is_valid() and start_time < t.last_post.pub_date:
+            # the user wants to submit his post but since starting to write
+            # it, another user has written one.
+            flash(u'Während du diese Seite geöffnet hattest, hat ein '
+                  u'anderer Benutzer einen neuen Beitrag geschrieben. '
+                  u'Bitte überprüfe <a href="#recent_posts">hier</a>, ob '
+                  u'dies für deine Antwort relevant ist, bevor du sie '
+                  u'abschickst.')
+            start_time = datetime.utcnow()
         elif form.is_valid():
             data = form.cleaned_data
             post = t.reply(text=data['text'], author=request.user)
@@ -339,6 +358,9 @@ def newpost(request, topic_slug=None, quote_id=None):
             form = NewPostForm(initial={'text': text})
         else:
             form = NewPostForm()
+            if datetime.now() - t.last_post.pub_date > timedelta(days=182):
+                flash(u'Seit der letzten Nachricht in diesem Thema ist schon '
+                      u'mehr als ein halbes Jahr vergangen.')
         attachments = []
 
     set_session_info(request, u'schreibt einen neuen Beitrag in „<a href="'
@@ -352,7 +374,8 @@ def newpost(request, topic_slug=None, quote_id=None):
         'attachments': list(attachments),
         'can_attach':  privileges['upload'],
         'isnewpost' :  True,
-        'preview':     preview
+        'preview':     preview,
+        'start_time':  int(start_time.strftime('%s'))
     }
 
 
