@@ -204,9 +204,8 @@ class RecentChanges(Macro):
             if parameters:
                 rv += '?' + url_encode(parameters)
             return rv
-        pagination = Pagination(context.request, Revision.objects.
-                                select_related(depth=1), page_num,
-                                self.per_page, link_func)
+        pagination = Pagination(context.request, Revision.objects,
+                                page_num, self.per_page, link_func)
 
         for revision in pagination.objects:
             d = revision.change_date
