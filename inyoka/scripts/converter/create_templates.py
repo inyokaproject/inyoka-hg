@@ -56,14 +56,14 @@ Ubuntu-Versionen getestet:" class="box tested_for">
 <@ if $arguments contain 'general' @>
 Dieser Artikel ist größtenteils für alle Ubuntu-Versionen gültig.
 <@ else @>
-<@ if $arguments contain 'dapper' @>
-  * [:Ubuntu_Dapper_Drake:Ubuntu Dapper Drake 6.06]
-<@ endif @><@ if $arguments contain 'edgy' @>
-  * [:Ubuntu_Edgy_Eft:Ubuntu Edgy Eft 6.10]
+<@ if $arguments contain 'gutsy' @>
+  * [:Gutsy_Gibbon:Ubuntu Gutsy Gibbon 7.10]
 <@ endif @><@ if $arguments contain 'feisty' @>
-  * [:Ubuntu_Feisty_Fawn:Ubuntu Feisty Fawn 7.04]
-<@ endif @><@ if $arguments contain 'gutsy' @>
-  * [:Ubuntu_Gutsy_Gibbon:Ubuntu Gutsy Gibbon 7.10]
+  * [:Feisty_Fawn:Ubuntu Feisty Fawn 7.04]
+<@ endif @><@ if $arguments contain 'edgy' @>
+  * [:Edgy_Eft:Ubuntu Edgy Eft 6.10]
+<@ endif @><@ if $arguments contain 'dapper' @>
+  * [:Dapper_Drake:Ubuntu Dapper Drake 6.06]
 <@ endif @>
 <@ endif @>
 |}}""",
@@ -96,7 +96,7 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>{{|<class="key">Pos 1|}}
 <@ elseif ['ende','end'] contains $key as lowercase @>{{|<class="key">Ende|}}
 <@ elseif ['return','enter','eingabe'] contains $key as lowercase @>{{|<class="key">⏎|}}
-<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key">   |}}
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key">     |}}
 <@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>{{|<class="key">↑|}}
 <@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">⌫|}}
 <@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>{{|<class="key">↓|}}
@@ -117,7 +117,7 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">⌘|}}
 <@ elseif ['einfg','ins'] contains $key as lowercase @>{{|<class="key">Einfg|}}
 <@ elseif ['ß','ss'] contains $key as lowercase @>{{|<class="key">ß|}}
-<@ elseif ['`',"'"] contains $key as lowercase @>{{|<class="key">`|}}
+<@ elseif ["`","'"] contains $key @>{{|<class="key">\`|}}
 <@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as uppercase @>|}}
 <@ endif @>
 <@ endfor @>""",
@@ -287,6 +287,8 @@ def create_smilies():
         ':idea:': 'idea.png',
         ':arrow:': 'arrow.png',
         '<3': 'favorite.png',
+        '{dl}': 'download.png',
+        '{*}': 'ubuntu.png',
     }
 
     pth = os.path.join(os.path.dirname(__file__), 'smilies')

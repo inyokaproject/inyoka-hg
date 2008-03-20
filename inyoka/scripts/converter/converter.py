@@ -104,6 +104,11 @@ def convert_wiki():
     for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
     #for i, moin_name in enumerate(['Startseite']):
+        if name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub', 'StartSeite',
+                    'XGL', 'YaKuake', 'Gedit', 'root']:
+            # ignore these pages (since gedit equals Gedit in inyoka these
+            # pages are duplicates)
+            continue
         name = normalize_pagename(moin_name)
         page = Page(request, moin_name, formatter=formatter)
         request.page = page

@@ -54,6 +54,8 @@ class InyokaFormatter(FormatterBase):
         elif name in templates.keys() or name == 'Ausbaufaehig':
             if name in ('Pakete', 'Getestet', 'InArbeit'):
                 args = [a.strip() for a in args.split(',')]
+            elif name == 'Tasten':
+                args = '+'.join(a.strip() for a in args.split('+'))
             else:
                 args = args and [args] or []
             args = [name.replace('ae', u'ä')] + args
