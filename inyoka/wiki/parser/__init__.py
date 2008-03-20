@@ -163,10 +163,11 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
-def parse(markup, wiki_force_existing=False, catch_stack_errors=True):
+def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
+          transformers=None):
     """Parse markup into a node."""
     try:
-        return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
+        return Parser(markup, transformers, wiki_force_existing).parse()
     except StackExhaused:
         if not catch_stack_errors:
             raise
@@ -364,6 +365,7 @@ class Parser(object):
         #: node dispatchers
         self._handlers = {
             'text':                 self.parse_text,
+            'nl':                   self.parse_nl,
             'conflict_begin':       self.parse_conflict_left,
             'conflict_switch':      self.parse_conflict_middle,
             'conflict_end':         self.parse_conflict_end,
@@ -391,6 +393,7 @@ class Parser(object):
             'free_link':            self.parse_free_link,
             'ruler':                self.parse_ruler,
             'macro_begin':          self.parse_macro,
+            'template_begin':       self.parse_template,
             'pre_begin':            self.parse_pre_block,
             'table_row_begin':      self.parse_table,
             'box_begin':            self.parse_box,
@@ -426,6 +429,11 @@ class Parser(object):
     def parse_text(self, stream):
         """Expects a ``'text'`` token and returns a `nodes.Text`."""
         return nodes.Text(stream.expect('text').value)
+
+    def parse_nl(self, stream):
+        """Expects a ``'nl'`` token and returns a `nodes.Newline`."""
+        stream.expect('nl')
+        return nodes.Newline()
 
     def parse_conflict_left(self, stream):
         """The begin conflict marker."""
@@ -844,6 +852,15 @@ class Parser(object):
         elif macro.is_static:
             return macro.build_node()
         return nodes.Macro(macro)
+
+    def parse_template(self, stream):
+        """Parse the template macro shortcut."""
+        from inyoka.wiki.macros import Template
+        stream.expect('template_begin')
+        name = stream.expect('template_name').value
+        args, kwargs = self.parse_arguments(stream, 'template_end')
+        stream.next()
+        return Template((name,) + args, kwargs).build_node()
 
     def parse_pre_block(self, stream):
         """

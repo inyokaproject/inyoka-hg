@@ -84,7 +84,18 @@ def add_subscription_notified_and_forum(m):
     ''')
 
 
+def add_wiki_revision_change_date_index(m):
+    """
+    This revision added an index on the change date
+    """
+    m.engine.execute('''
+        alter table wiki_revision
+            add index wiki_revision_change_date(change_date);
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
-    add_skype_and_sip, add_subscription_notified_and_forum
+    add_skype_and_sip, add_subscription_notified_and_forum,
+    add_wiki_revision_change_date_index
 ]

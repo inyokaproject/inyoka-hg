@@ -77,7 +77,7 @@ def from_html(obj):
             should_add_base = False
         elif obj.tag == 'img':
             element = Image(obj.attributes.get('src', '#'),
-                            obj.attribtues.get('alt', ''))
+                            obj.attributes.get('alt', ''))
         elif obj.tag == 'div':
             element = Layer()
         elif obj.tag == 'a':
@@ -441,11 +441,12 @@ class Image(Node):
     formatter could bundle images and refer to them.
     """
 
-    def __init__(self, href, alt, id=None, class_=None):
+    def __init__(self, href, alt, id=None, class_=None, style=None):
         self.href = href
         self.alt = alt
         self.id = id
         self.class_ = class_
+        self.style = style
 
     @property
     def text(self):
@@ -456,7 +457,7 @@ class Image(Node):
 
     def prepare_html(self):
         yield build_html_tag(u'img', src=self.href, alt=self.alt, id=self.id,
-                             class_=self.class_)
+                             class_=self.class_, style=self.style)
 
     def prepare_docbook(self):
         yield u'<mediaobject><imageobject>'
@@ -986,7 +987,7 @@ class SourceLink(Element):
     def prepare_html(self):
         yield build_html_tag(u'sup', id=self.id, style=self.style,
                              class_=self.class_)
-        yield u'<a href="#source-%d">' % self.id
+        yield u'<a href="#source-%d">' % self.target
         for item in Element.prepare_html(self):
             yield item
         yield u'</a></sup>'

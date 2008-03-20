@@ -9,7 +9,6 @@
     :license: GNU GPL.
 """
 from django.core import exceptions
-from django.core.mail import mail_admins
 from django.core.handlers.wsgi import WSGIHandler
 from inyoka.conf import settings
 from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse

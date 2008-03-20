@@ -89,6 +89,9 @@
       {{ form.att_ids }}
       {{ form.polls }}
       {{ h.field_errors(form.errors.__all__) }}
+      {%- if isnewpost -%}
+      <input type="hidden" name="start_time" value="{{ start_time }}" />
+      {%- endif %}
       <input type="submit" value="Speichern" name="send" />
       <input type="submit" value="Vorschau" name="preview" />
       <input type="submit" value="Abbrechen" name="cancel" />
@@ -109,7 +112,7 @@
         output = $('<div class="preview" />')
       var preview = $('<div class="preview_wrapper" />')
         .hide()
-        .append('<h2 class="title">Vorschau<\/h2>')
+        .append('<h2 id="preview" class="title">Vorschau<\/h2>')
         .append(output);
 
       $('form input[@name="preview"]').click(function() {
@@ -119,6 +122,7 @@
         }, function(data) {
           output.html(data);
           preview.slideDown('fast');
+          document.location.href += '#preview';
         });
         return false;
       }).parent().parent().parent().append(preview);
@@ -128,7 +132,7 @@
   {%- if isnewpost %}
   <table class="topic">
     <thead>
-      <tr><th colspan="2">Letzte Einträge</th></tr>
+      <tr><th id="recent_posts" colspan="2">Letzte Einträge</th></tr>
     </thead>
     <tbody>
       {%- for post in posts %}

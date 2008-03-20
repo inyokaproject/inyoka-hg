@@ -34,7 +34,6 @@ from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      ArgumentCollector
 from inyoka.wiki.models import Page, Revision
 from inyoka.utils.text import human_number
-from inyoka.utils.urls import url_encode
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
 from inyoka.utils.urls import url_for
@@ -205,9 +204,8 @@ class RecentChanges(Macro):
             if parameters:
                 rv += '?' + url_encode(parameters)
             return rv
-        pagination = Pagination(context.request, Revision.objects.
-                                select_related(depth=1), page_num,
-                                self.per_page, link_func)
+        pagination = Pagination(context.request, Revision.objects.all(),
+                                page_num, self.per_page, link_func)
 
         for revision in pagination.objects:
             d = revision.change_date
@@ -325,7 +323,7 @@ class PageList(Macro):
     )
 
     def __init__(self, pattern, case_sensitive, shorten_title):
-        self.pattern = pattern
+        self.pattern = normalize_pagename(pattern)
         self.case_sensitive = case_sensitive
         self.shorten_title = shorten_title
 
@@ -354,7 +352,7 @@ class AttachmentList(Macro):
     )
 
     def __init__(self, page):
-        self.page = page
+        self.page = normalize_pagename(page)
 
     def build_node(self, context, format):
         result = nodes.List('unordered')
@@ -579,7 +577,7 @@ class Include(Macro):
     )
 
     def __init__(self, page, silent):
-        self.page = page
+        self.page = normalize_pagename(page)
         self.silent = silent
         self.context = []
         if self.page:
@@ -620,7 +618,8 @@ class Template(Macro):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):
             items.append(('arguments.%d' % idx, arg))
-        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                      normalize_pagename(args[0], False))
         self.context = items
 
     def build_node(self):
@@ -631,11 +630,11 @@ class Template(Macro):
             page = Page.objects.get_by_name(self.template)
         except Page.DoesNotExist:
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
-                                   u'Template existiert nicht.')
-        return nodes.Container([
-            page.rev.text.parse(self.context),
-            nodes.MetaData('X-Attach', (self.template,))
-        ])
+                                   u'Template „%s“ existiert nicht.' %
+                                   self.template)
+        document = page.rev.text.parse(self.context, transformers=[])
+        return nodes.Container(document.children +
+                               [nodes.MetaData('X-Attach', (self.template,))])
 
 
 class Picture(Macro):
@@ -658,10 +657,12 @@ class Picture(Macro):
     )
 
     def __init__(self, target, dimensions, alignment, alt):
+        #: a image on another server
         self.is_external = is_external_target(target)
         if not self.is_external:
             self.metadata = [nodes.MetaData('X-Attach', [target])]
-        self.target = normalize_pagename(target)
+            target = normalize_pagename(target, True)
+        self.target = target
         self.alt = alt or target
         if dimensions:
             if 'x' in dimensions:
@@ -685,15 +686,29 @@ class Picture(Macro):
 
     def build_node(self, context, format):
         target = self.target
-        if not self.is_external and context.wiki_page:
-            target = pagename_join(context.wiki_page, self.target)
-        target = href('wiki', '_image',
-            target=target,
-            width=self.width,
-            height=self.height
-        )
-        return nodes.Image(target, self.alt, class_='image-' +
-                           (self.align or 'default'))
+        if self.is_external:
+            style = '%s%s' % (
+                self.width and ('width: %spx;' % self.width) or '',
+                self.height and ('height: %spx;' % self.height) or ''
+            )
+            img = nodes.Image(target, self.alt, class_='image-' +
+                              (self.align or 'default'), style=style or None)
+            if self.width or self.height:
+                return nodes.Link(target, [img])
+            return img
+        else:
+            if context.wiki_page:
+                target = pagename_join(context.wiki_page, self.target)
+            source = href('wiki', '_image',
+                target=target,
+                width=self.width,
+                height=self.height
+            )
+            img = nodes.Image(source, self.alt, class_='image-' +
+                              (self.align or 'default'))
+            if self.width or self.height:
+                return nodes.Link(href('wiki', '_image', target=target), [img])
+            return img
 
 
 class Date(Macro):

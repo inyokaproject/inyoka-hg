@@ -59,9 +59,10 @@ class Pagination(object):
 
     def generate_link(self, page, params):
         if page == 1:
-            return self.link_base
-        return '%s%d/%s' % (self.link_base, page,
-                            params and '?' + url_encode(params) or '')
+            url = self.link_base
+        else:
+            url = '%s%d/' % (self.link_base, page)
+        return url + (params and '?' + url_encode(params) or '')
 
     def generate(self, position=None, threshold=2, show_next_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
@@ -78,7 +79,7 @@ class Pagination(object):
                abs(self.page - num) < half_threshold:
                 if result and result[-1] != ellipsis:
                     add(u'<span class="comma">, </span>')
-                was_space = False
+                was_ellipsis = False
                 link = self.generate_link(num, params)
                 if num == self.page:
                     template = active

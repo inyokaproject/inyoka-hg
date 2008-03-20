@@ -29,7 +29,7 @@
   </p>
   {%- else %}
   <p>
-    Hier kannst du dich mit deinem Benutzer einloggen, wenn du dich schon 
+    Hier kannst du dich mit deinem Benutzer anmelden, wenn du dich schon 
     <a href="{{ href('portal', 'register') }}">registriert hast</a>.
     Falls du dein Passwort vergessen hast, kannst du dir <a href="
     {{- href('portal', 'lost_password') }}">hier</a> ein neues zuschicken lassen.
@@ -64,7 +64,12 @@
   <form action="" method="post" class="loginform">
     <dl>
       {{ h.render_form(form, 'username', 'password', inline=true) }}
-      <dd>{{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label></dd>
+      <dd>
+        {{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label>
+        <div class="help_text">Wähle dies nicht aus, wenn du dich von einem öffentlichen
+          Computer aus anmeldest, da sonst andere Zugriff auf deinen Benutzer erhalten
+          können.</div>
+      </dd>
     </dl>
     <div class="actions">
       <input type="hidden" name="redirect" value="" />

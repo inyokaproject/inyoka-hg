@@ -886,15 +886,13 @@ class Topic(models.Model):
 
     def get_read_status(self, user):
         if user.is_anonymous or self.last_post_id <= user.forum_last_read:
-            return  user.is_anonymous or self.last_post_id <= user.forum_last_read
+            return user.is_anonymous or self.last_post_id <= user.forum_last_read
         try:
-            read_status = cPickle.loads(str(user.forum_read_status))         #get set of read posts from user object
+            # get set of read posts from user object
+            read_status = cPickle.loads(str(user.forum_read_status))
         except:
             read_status = set()
-        if self.last_post_id in read_status:
-            return True
-        else:
-            return False
+        return self.last_post_id in read_status
 
     def mark_read(self, user):
         """
@@ -976,7 +974,9 @@ class Post(models.Model):
         return render(instructions, context)
 
     def save(self):
-        self.rendered_text = self.render_text(force_existing=True)
+        # this is temporarily disabled to speed up the converter
+        # this work is done instead on first view of the post
+        #self.rendered_text = self.render_text(force_existing=True)
         if self.id is not None:
             try:
                 old = Post.objects.get(id=self.id)

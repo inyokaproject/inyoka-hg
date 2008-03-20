@@ -17,7 +17,7 @@
   <form action="{{ href('portal', 'privmsg', 'new') }}" method="post">
     {{ h.render_form(form, 'recipient', 'subject', 'text') }}
     <script type="text/javascript">
-      var editor = new WikiEditor('textarea[@name="text"]')
+      var editor = new WikiEditor('textarea[@name="text"]', 'forum')
     </script>
     <p>
       <input type="submit" value="Nachricht absenden" />

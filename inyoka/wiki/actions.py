@@ -19,7 +19,6 @@
                                   Benjamin Wiegand.
     :license: GNU GPL.
 """
-from time import localtime
 from datetime import datetime
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
@@ -309,15 +308,17 @@ def do_edit(request, name):
         ``preview``
             If we are in preview mode this is a rendered HTML preview.
     """
-    rev = request.GET.get('rev')
-    if rev is not None and not rev.isdigit():
-        rev = None
+    rev = request.REQUEST.get('rev')
+    rev = rev is not None and rev.isdigit() and int(rev) or None
     try:
         page = Page.objects.get_by_name_and_rev(name, rev)
     except Page.DoesNotExist:
         page = None
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
+        current_rev_id = ''
+    else:
+        current_rev_id = str(page.rev.id)
 
     # attachments have a custom editor
     if page and page.rev.attachment:
@@ -349,7 +350,7 @@ def do_edit(request, name):
     # conflict.  We do that before the actual form processing
     merged_this_request = False
     try:
-        edit_time = datetime(*localtime(int(request.POST['edit_time']))[:7])
+        edit_time = datetime.utcfromtimestamp(int(request.POST['edit_time']))
     except (KeyError, ValueError):
         edit_time = datetime.utcnow()
     if rev is None:
@@ -411,16 +412,18 @@ def do_edit(request, name):
                 # send notifications
                 for s in Subscription.objects.filter(wiki_page=page,
                     notified=False).exclude(user=request.user):
+                    rev, old_rev = page.revisions.all()[:2]
                     text = render_template('mails/page_edited.txt', {
                         'username': s.user.username,
-                        'rev':      page.revisions.latest()
+                        'rev':      rev,
+                        'old_rev':  old_rev
                     })
                     send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
                                     % page.title, text)
                     s.notified = True
                     s.save()
 
-                if page.metadata.get('weiterleitung'):
+                if page.metadata.get('redirect'):
                     url = href('wiki', page.name, redirect='no')
                 else:
                     url = href('wiki', page.name)
@@ -450,7 +453,8 @@ def do_edit(request, name):
         'page':         page,
         'form':         form,
         'preview':      preview,
-        'edit_time':    int(edit_time.strftime('%s'))
+        'edit_time':    edit_time.strftime('%s'),
+        'rev':          current_rev_id
     }
 
 

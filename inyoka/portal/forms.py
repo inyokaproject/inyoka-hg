@@ -16,7 +16,7 @@ from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
-                               HiddenCaptchaField
+                               HiddenCaptchaField, EmailField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -65,7 +65,7 @@ class RegisterForm(forms.Form):
     for bots that just fill out everything.
     """
     username = forms.CharField(label='Benutzername')
-    email = forms.EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
+    email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
         u'garantiert</a>, dass sie nicht weitergegeben wird.' % href('portal',
@@ -157,8 +157,7 @@ class LostPasswordForm(forms.Form):
     a hidden and a visible image CAPTCHA too.
     """
     username = forms.CharField(label=u'Benutzername', required=False)
-    #email = forms.EmailField(label=u'E-Mail', required=False)
-    email = forms.CharField(label=u'E-Mail', required=False)
+    email = EmailField(label=u'E-Mail', required=False)
     captcha = CaptchaField(label='CAPTCHA')
     hidden_captcha = HiddenCaptchaField(required=False)
 
@@ -250,32 +249,37 @@ class UserCPSettingsForm(forms.Form):
 class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
-    email = forms.EmailField(label='E-Mail', required=True)
+    email = EmailField(label='E-Mail', required=True)
     jabber = forms.CharField(label='Jabber', required=False)
-    icq = forms.CharField(label='ICQ', required=False)
+    icq = forms.IntegerField(label='ICQ', required=False,
+                             min_value=1, max_value=1000000000)
     msn = forms.CharField(label='MSN Messenger', required=False)
-    aim = forms.CharField(label='AIM', required=False)
-    yim = forms.CharField(label='Yahoo Instant Messenger', required=False)
-    skype = forms.CharField(label='Skype', required=False)
-    wengophone = forms.CharField(label='WengoPhone', required=False)
-    sip = forms.CharField(label='SIP', required=False)
+    aim = forms.CharField(label='AIM', required=False, max_length=25)
+    yim = forms.CharField(label='Yahoo Instant Messenger', required=False,
+                         max_length=25)
+    skype = forms.CharField(label='Skype', required=False, max_length=25)
+    wengophone = forms.CharField(label='WengoPhone', required=False,
+                                 max_length=25)
+    sip = forms.CharField(label='SIP', required=False, max_length=25)
     show_email = forms.BooleanField(required=False)
     show_jabber = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
-                       required=False, min_value=-90, max_value=90)
-    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
-                      required=False, min_value=-180, max_value=180)
+    coordinates = forms.CharField(label='Koordinaten (Länge, Breite)',
+                                  required=False, help_text=u'''
+    Probleme beim bestimmen der Koordinaten?
+    <a href="http://www.fallingrain.com/world/">Suche einfach deinen Ort</a>
+    und übernimm die Koordinaten.''')
     location = forms.CharField(label='Wohnort', required=False, max_length=25)
-    occupation = forms.CharField(label='Beruf', required=False)
-    interests = forms.CharField(label='Interessen', required=False)
+    occupation = forms.CharField(label='Beruf', required=False, max_length=25)
+    interests = forms.CharField(label='Interessen', required=False,
+                                max_length=50)
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
-                 max_length=10, required=False, help_text=u'Hier kannst du '
-                 u'deinen GPG-Public-Key eintragen. Näheres zu diesem Thema '
-                 u'erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web'
-                 u'_of_Trust">hier</a>.')
+                 max_length=10, required=False, help_text=u'''
+    Hier kannst du deinen GPG-Public-Key eintragen. Näheres zu diesem Thema
+    erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web_of_Trust">im
+    Wiki</a>.''')
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
@@ -290,6 +294,24 @@ class UserCPProfileForm(forms.Form):
         except SignatureError, e:
             raise forms.ValidationError(e.message)
         return signature
+
+    def clean_coordinates(self):
+        coords = self.cleaned_data.get('coordinates', '').strip()
+        if not coords:
+            return None
+        try:
+            coords = [float(x.strip()) for x in coords.split(',')]
+            if len(coords) != 2:
+                raise forms.ValidationError(u'Koordinaten müssen im Format '
+                                            u'"Länge, Breite" angegeben werden.')
+            lat, long = coords
+        except ValueError:
+            raise forms.ValidationError(u'Koordinaten müssen Dezimalzahlen sein.')
+        if not -90 < lat < 90:
+            raise forms.ValidationError(u'Längenmaße müssen zwischen -90 und 90 sein.')
+        if not -180 < long < 180:
+            raise forms.ValidationError(u'Breitenmaße müssen zwischen -180 und 180 sein.')
+        return lat, long
 
 
 class SearchForm(forms.Form):

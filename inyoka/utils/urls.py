@@ -80,7 +80,7 @@ def get_path_info(url, charset='utf-8'):
     return urlparse(url)[2].decode(charset, 'utf-8', 'ignore')
 
 
-def get_server_name(url):
+def get_server_name(url, charset='utf-8'):
     """Return the server name for a URL."""
     return urlparse(url)[1].decode(charset, 'utf-8', 'ignore')
 

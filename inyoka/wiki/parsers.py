@@ -21,7 +21,7 @@
 from inyoka.conf import settings
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr, \
-     pagename_join
+     pagename_join, normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.utils.highlight import highlight_code
 
@@ -170,7 +170,8 @@ class TemplateParser(Parser):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:] + (data,)):
             items.append(('arguments.%d' % idx, arg))
-        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE, args[0])
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                      normalize_pagename(args[0], False))
         self.context = items
 
     def build_node(self):

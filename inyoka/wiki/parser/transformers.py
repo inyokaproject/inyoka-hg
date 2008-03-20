@@ -85,6 +85,54 @@ class AutomaticParagraphs(Transformer):
         for item in flush_text_buf():
             yield item
 
+    def transform(self, parent):
+        """
+        Insert real paragraphs into the node and return it.
+        """
+        for node in parent.children:
+            if node.is_container and not node.is_raw and \
+               node.allows_paragraphs:
+                self.transform(node)
+
+        paragraphs = [[]]
+
+        for child in self.joined_text_iter(parent):
+            if child.is_text_node:
+                blockiter = iter(_paragraph_re.split(child.text))
+                for block in blockiter:
+                    try:
+                        is_paragraph = blockiter.next()
+                    except StopIteration:
+                        is_paragraph = False
+                    if block:
+                        paragraphs[-1].append(nodes.Text(block))
+                    if is_paragraph:
+                        paragraphs.append([])
+            elif child.is_block_tag:
+                paragraphs.extend((child, []))
+            else:
+                paragraphs[-1].append(child)
+
+        del parent.children[:]
+        for paragraph in paragraphs:
+            if not isinstance(paragraph, list):
+                parent.children.append(paragraph)
+            else:
+                for node in paragraph:
+                    if not node.is_text_node or node.text:
+                        parent.children.append(nodes.Paragraph(paragraph))
+                        break
+
+        return parent
+
+
+class BozoNewlines(AutomaticParagraphs):
+    """
+    This transformer is half broken and should automatically set paragraphs
+    and newlines...  This however requires the newline token to be disabled
+    at lexer level.
+    """
+
     def break_lines(self, text, ignore_next=False):
         """
         This function sets soft line breaks which are also possible in

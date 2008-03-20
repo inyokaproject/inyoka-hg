@@ -302,8 +302,7 @@ def login(request):
                     user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
-            else:
-                failed = True
+            failed = True
     else:
         if 'username' in request.GET:
             form = LoginForm(initial={'username':request.GET['username']})
@@ -375,7 +374,7 @@ def search(request):
 
 
 @check_login(message=u'Du musst eingeloggt sein um ein Benutzerprofil zu '
-                     u'sehen')
+                     u'sehen.')
 @templated('portal/profile.html')
 def profile(request, username):
     """Shows the user profile if the user is logged in."""
@@ -414,6 +413,7 @@ def usercp(request):
 @templated('portal/usercp/profile.html')
 def usercp_profile(request):
     """User control panel view for changing the user's profile"""
+    user = request.user
     if request.method == 'POST':
         form = UserCPProfileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -422,14 +422,17 @@ def usercp_profile(request):
                         'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
                         'interests', 'website', 'email', 'gpgkey'):
-                setattr(request.user, key, data[key])
+                setattr(user, key, data[key] or '')
+            if data['coordinates']:
+                user.coordinates_lat, user.coordinates_long = \
+                    data['coordinates']
             if data['delete_avatar']:
-                request.user.delete_avatar()
+                user.delete_avatar()
             if data['avatar']:
-                request.user.save_avatar(data['avatar'])
+                user.save_avatar(data['avatar'])
             for key in ('show_email', 'show_jabber'):
-                request.user.settings[key] = data[key]
-            request.user.save()
+                user.settings[key] = data[key]
+            user.save()
             flash(u'Deine Profilinformationen wurden erfolgreich '
                   u'aktualisiert.', True)
             return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
@@ -437,16 +440,22 @@ def usercp_profile(request):
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
                   u'auf. Bitte behebe sie.')
     else:
-        values = model_to_dict(request.user)
+        values = model_to_dict(user)
+        lat = values.pop('coordinates_lat')
+        long = values.pop('coordinates_long')
+        if lat is not None and long is not None:
+            values['coordinates'] = '%s, %s' % (lat, long)
+        else:
+            values['coordinates'] = ''
         values.update(dict(
-            ((k, v) for k, v in request.user.settings.iteritems()
+            ((k, v) for k, v in user.settings.iteritems()
              if k.startswith('show_'))
         ))
-        settings = request.user.settings
         form = UserCPProfileForm(values)
     return {
-        'form': form,
-        'user': request.user
+        'form':         form,
+        'user':         request.user,
+        'gmaps_apikey': settings.GOOGLE_MAPS_APIKEY
     }
 
 
@@ -949,10 +958,12 @@ def user_error_report(request):
             data = form.cleaned_data
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
-                text += (u" [[BR]]\n'''Benutzer:''' [%s %s]" % (
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
                     request.user.get_absolute_url(),
-                    escape(request.user.username)
+                    escape(request.user.username),
+                    request.user.get_absolute_url('privmsg'),
                 ))
+            reporter = request.user.id == 1 and '' or request.user.username
             text += u'\n\n%s' % data['text']
             trac = Trac()
             trac.submit_new_ticket(
@@ -961,6 +972,7 @@ def user_error_report(request):
                 description = text,
                 component = '-',
                 ticket_type = 'userreport',
+                reporter = reporter,
             )
 
 #             uer = UserErrorReport()
