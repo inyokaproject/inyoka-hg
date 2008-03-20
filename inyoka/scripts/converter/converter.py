@@ -377,7 +377,6 @@ def convert_forum():
 
 
     print 'Converting posts'
-    f = open("dump-missing-topics", "w")
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
@@ -385,8 +384,6 @@ def convert_forum():
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(s):
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
@@ -397,20 +394,20 @@ def convert_forum():
             'author_id': row[post_table.c.poster_id],
             'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
         }
-        p = Post(**data)
-        try:
-            p.save()
-        except Topic.DoesNotExist:
-            f.write("%s %s %s\n" % (data['pk'],data['topic_id'],data['pub_date']))
-            f.flush()
-            pass
-        connection.queries = []
+        cur = connection.cursor()
+        cur.execute('''
+            insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
+                values (%s,%s,%s,%s,%s,'',False);
+
+        ''', (row[post_table.c.post_id], row[post_table.c.topic_id],
+              text, row[post_table.c.poster_id],
+              datetime.fromtimestamp(row[post_table.c.post_time])))
         if i == 500:
-            transaction.commit()
+            connection._commit()
+            connection.queries = []
             i = 0
         else:
             i += 1
-    f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
