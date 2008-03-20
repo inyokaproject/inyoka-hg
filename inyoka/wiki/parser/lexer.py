@@ -143,7 +143,8 @@ class Lexer(object):
             rule(r'\[size\s*=\s*(.*?)\s*\]', bygroups('font_size'),
                  enter='size'),
             rule(r'\[font\s*=\s*(.*?)\s*\]', bygroups('font_face'),
-                 enter='font')
+                 enter='font'),
+            rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl')
         ),
         'links': ruleset(
             rule(r'\[\s*(\d+)\s*\]', bygroups('sourcelink')),

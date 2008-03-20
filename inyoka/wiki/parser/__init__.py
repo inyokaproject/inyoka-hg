@@ -365,6 +365,7 @@ class Parser(object):
         #: node dispatchers
         self._handlers = {
             'text':                 self.parse_text,
+            'nl':                   self.parse_nl,
             'conflict_begin':       self.parse_conflict_left,
             'conflict_switch':      self.parse_conflict_middle,
             'conflict_end':         self.parse_conflict_end,
@@ -427,6 +428,11 @@ class Parser(object):
     def parse_text(self, stream):
         """Expects a ``'text'`` token and returns a `nodes.Text`."""
         return nodes.Text(stream.expect('text').value)
+
+    def parse_nl(self, stream):
+        """Expects a ``'nl'`` token and returns a `nodes.Newline`."""
+        stream.expect('nl')
+        return nodes.Newline()
 
     def parse_conflict_left(self, stream):
         """The begin conflict marker."""

@@ -54,17 +54,18 @@ _umlaut_choices = [
 ]
 
 
-def _handle_match(match):
-    return u'<span class="highlight">%s</span>' % match.group()
-
-
 def _make_replacer(words):
     def quote(x):
         rv = re.escape(x)
         for find, regex in _umlaut_choices:
             rv = rv.replace(find, regex)
         return rv
-    return re.compile(ur'\b(%s)\w*\b(?iu)' % '|'.join(map(quote, words))).sub
+
+    def handle_match(match):
+        return u'<span class="highlight">%s</span>' % match.group()
+
+    sub = re.compile(ur'\b(%s)\w*\b(?iu)' % '|'.join(map(quote, words))).sub
+    return lambda x: sub(handle_match, x)
 
 
 class HighlighterMiddleware(object):
@@ -134,7 +135,7 @@ class HighlighterMiddleware(object):
         skip_to = None
         for idx, data in enumerate(buffer):
             if idx % 2 == 0 and not skip_to:
-                buffer[idx] = sub(_handle_match, data)
+                buffer[idx] = sub(data)
             else:
                 match = _tagname_re.match(data)
                 if match is None:

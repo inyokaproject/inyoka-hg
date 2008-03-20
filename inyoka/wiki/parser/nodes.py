@@ -77,7 +77,7 @@ def from_html(obj):
             should_add_base = False
         elif obj.tag == 'img':
             element = Image(obj.attributes.get('src', '#'),
-                            obj.attribtues.get('alt', ''))
+                            obj.attributes.get('alt', ''))
         elif obj.tag == 'div':
             element = Layer()
         elif obj.tag == 'a':
