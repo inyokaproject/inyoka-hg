@@ -387,13 +387,6 @@ def convert_forum():
     for row in select_blocks(s):
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
-        data = {
-            'pk': row[post_table.c.post_id],
-            'topic_id': row[post_table.c.topic_id],
-            'text': text,
-            'author_id': row[post_table.c.poster_id],
-            'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
-        }
         cur = connection.cursor()
         cur.execute('''
             insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
