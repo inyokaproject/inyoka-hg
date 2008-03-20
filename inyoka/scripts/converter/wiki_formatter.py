@@ -67,7 +67,7 @@ class InyokaFormatter(FormatterBase):
             if name in ('Pakete', 'Getestet', 'InArbeit'):
                 args = [a.strip() for a in args.split(',')]
             elif name == 'Tasten':
-                args = '+'.join(a.strip() for a in args.split('+'))
+                args = ['+'.join(a.strip() for a in args.split('+'))]
             else:
                 args = args and [args] or []
             args = [name.replace('ae', u'ä')] + args
@@ -247,7 +247,6 @@ class InyokaFormatter(FormatterBase):
     def table_cell(self, on, attrs=None, **kw):
         attr = {'rowstyle': '', 'cellstyle': '', 'tablestyle': ''}
         span = None
-        print attrs
         if attrs:
             for k, v in attrs.iteritems():
                 v = v.strip('"')
@@ -282,7 +281,6 @@ class InyokaFormatter(FormatterBase):
                             v += ';'
                         attr[prefix + 'style'] += v
                     else:
-                        print prefix, '|', k, '=', v
                         attr[prefix + k] = v
 
         attr_str = ''
@@ -291,8 +289,6 @@ class InyokaFormatter(FormatterBase):
         for k, v in attr.iteritems():
             if v:
                 attr_str += ' %s="%s"' % (k, v.strip())
-        print attr, attr_str
-        print '!' * 100
         if on:
             return u'||%s' % (attr_str and ('<%s>' % attr_str.strip()) or '')
         return u''

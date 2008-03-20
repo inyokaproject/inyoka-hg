@@ -24,6 +24,10 @@ a.team {
   padding-left: 16px;
 }
 
+#page table {
+  width: auto;
+}
+
 span.underline {
   text-decoration: underline;
 }
