@@ -64,19 +64,26 @@ def pagename_join(name1, name2):
     return _path_crop.sub('', posixpath.normpath(path))
 
 
-def normalize_pagename(name):
+def normalize_pagename(name, strip_location_markers=True):
     """
     Normalize a pagename.  Strip unsupported characters.  You have to call
     this function whenever you get a pagename from user input.  The models
     itself never check for normalized names and passing unnormalized page
     names to the models can cause serious breakage.
+
+    If the second parameter is set to `False` the leading slashes or slash
+    like path location markers are not removed.  That way the pagename is
+    left unnormalized to a part but will be fully normalized after a
+    `pagename_join` call.
     """
-    name = u'_'.join(_unsupported_re.sub('', name).split())
+    name = u'_'.join(_unsupported_re.sub('', name).split()).rstrip('/')
+    if not strip_location_markers:
+        return name
     if name.startswith('./'):
         return name[2:]
     elif name.startswith('../'):
         return name[3:]
-    return name.strip('/')
+    return name.lstrip('/')
 
 
 def is_external_target(location):

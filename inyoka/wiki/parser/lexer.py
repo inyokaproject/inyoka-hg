@@ -138,6 +138,8 @@ class Lexer(object):
             rule(r'\(\(', enter='footnote'),
             rule(r'\[\[([\w_]+)', bygroups('macro_name'),
                  enter='macro'),
+            rule(r'\[@(.+?)\s*\(', bygroups('template_name'),
+                 enter='template'),
             rule(r'\[color\s*=\s*(.*?)\s*\]', bygroups('color_value'),
                  enter='color'),
             rule(r'\[size\s*=\s*(.*?)\s*\]', bygroups('font_size'),
@@ -302,6 +304,11 @@ class Lexer(object):
         # can only be entered by the `macro` ruleset.
         'macro_arguments': ruleset(
             rule(r'\)\s*\]\]', leave=2),
+            include('function_call')
+        ),
+        # the template alias works pretty much like a macro
+        'template': ruleset(
+            rule(r'\s*\)\s*@?\]', leave=1),
             include('function_call')
         ),
         # function calls (parse string arguments and implicit strings)

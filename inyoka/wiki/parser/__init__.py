@@ -393,6 +393,7 @@ class Parser(object):
             'free_link':            self.parse_free_link,
             'ruler':                self.parse_ruler,
             'macro_begin':          self.parse_macro,
+            'template_begin':       self.parse_template,
             'pre_begin':            self.parse_pre_block,
             'table_row_begin':      self.parse_table,
             'box_begin':            self.parse_box,
@@ -851,6 +852,15 @@ class Parser(object):
         elif macro.is_static:
             return macro.build_node()
         return nodes.Macro(macro)
+
+    def parse_template(self, stream):
+        """Parse the template macro shortcut."""
+        from inyoka.wiki.macros import Template
+        stream.expect('template_begin')
+        name = stream.expect('template_name').value
+        args, kwargs = self.parse_arguments(stream, 'template_end')
+        stream.next()
+        return Template((name,) + args, kwargs).build_node()
 
     def parse_pre_block(self, stream):
         """

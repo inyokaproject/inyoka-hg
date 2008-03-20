@@ -323,7 +323,7 @@ class PageList(Macro):
     )
 
     def __init__(self, pattern, case_sensitive, shorten_title):
-        self.pattern = pattern
+        self.pattern = normalize_pagename(pattern)
         self.case_sensitive = case_sensitive
         self.shorten_title = shorten_title
 
@@ -352,7 +352,7 @@ class AttachmentList(Macro):
     )
 
     def __init__(self, page):
-        self.page = page
+        self.page = normalize_pagename(page)
 
     def build_node(self, context, format):
         result = nodes.List('unordered')
@@ -577,7 +577,7 @@ class Include(Macro):
     )
 
     def __init__(self, page, silent):
-        self.page = page
+        self.page = normalize_pagename(page)
         self.silent = silent
         self.context = []
         if self.page:
@@ -618,10 +618,8 @@ class Template(Macro):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):
             items.append(('arguments.%d' % idx, arg))
-        self.template = normalize_pagename(args[0])
-        if not u'/' in self.template:
-            self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
-                                          self.template)
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                      normalize_pagename(args[0], False))
         self.context = items
 
     def build_node(self):
@@ -632,7 +630,8 @@ class Template(Macro):
             page = Page.objects.get_by_name(self.template)
         except Page.DoesNotExist:
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
-                                   u'Template existiert nicht.')
+                                   u'Template „%s“ existiert nicht.' %
+                                   self.template)
         document = page.rev.text.parse(self.context, transformers=[])
         return nodes.Container(document.children +
                                [nodes.MetaData('X-Attach', (self.template,))])
@@ -662,7 +661,7 @@ class Picture(Macro):
         self.is_external = is_external_target(target)
         if not self.is_external:
             self.metadata = [nodes.MetaData('X-Attach', [target])]
-            target = normalize_pagename(target)
+            target = normalize_pagename(target, True)
         self.target = target
         self.alt = alt or target
         if dimensions:

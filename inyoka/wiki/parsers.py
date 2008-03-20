@@ -170,10 +170,8 @@ class TemplateParser(Parser):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:] + (data,)):
             items.append(('arguments.%d' % idx, arg))
-        self.template = normalize_pagename(args[0])
-        if not u'/' in self.template:
-            self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
-                                          self.template)
+        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+                                      normalize_pagename(args[0], False))
         self.context = items
 
     def build_node(self):
