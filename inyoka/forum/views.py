@@ -247,7 +247,6 @@ def viewtopic(request, topic_slug, page=1):
                 end
         ''' % u'\n'.join(('when %s then %s',) * len(to_save)), tuple(_()))
         connection._commit()
-        print connection.queries
     return {
         'topic':        t,
         'forum':        t.forum,
