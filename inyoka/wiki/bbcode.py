@@ -149,7 +149,7 @@ class Parser(object):
                                         self.token.name in name and
                                         not self.token.attr):
                 if raw:
-                    children.append(unicode(self.token))
+                    children.append(self.token)
                     self.next()
                 else:
                     children.append(self.parse_node())
@@ -224,13 +224,11 @@ class Parser(object):
 
     def parse_mark(self):
         """
-        Parse [mark]-tags.  Because we no longer have the concept of marked
-        text this just renders into a strong node.  As a matter of fact it is
-        part of the normal parsing process and thus unhandled inside
-        preformatted blocks.
+        Parse [mark]-tags.  Because of popular request these are not still
+        supported like before.
         """
         self.expect_tag('mark')
-        return nodes.Strong(self.parse_until('/mark'))
+        return nodes.Highlighted(self.parse_until('/mark'))
 
     def parse_color(self):
         """parse [color]-tags"""
@@ -278,8 +276,35 @@ class Parser(object):
     def parse_code(self):
         """parse [code]-tags"""
         token = self.expect_tag('code')
-        text = nodes.Text(self.parse_until('/code', raw=True))
-        return nodes.Preformatted([text])
+        children = []
+        textbuf = []
+
+        def flush():
+            data = u''.join(textbuf)
+            if data:
+                children.append(nodes.Text(data))
+            del textbuf[:]
+            self.next()
+
+        while not self.eos and not (self.token.type == 'tag' and
+                                    self.token.name == '/code' and
+                                    not self.token.attr):
+            if self.token.type == 'tag' and \
+               self.token.name == 'mark':
+                flush()
+                markbuf = []
+                while not (self.token.type == 'tag' and
+                           self.token.name == '/mark' and
+                           not self.token.attr):
+                    markbuf.append(unicode(self.token))
+                    self.next()
+                data = u''.join(markbuf)
+                children.append(nodes.Highlighted([nodes.Text(data)]))
+            else:
+                textbuf.append(unicode(self.token))
+            self.next()
+        flush()
+        return nodes.Preformatted(children)
 
     def parse_list(self):
         """

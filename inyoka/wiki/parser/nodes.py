@@ -504,6 +504,13 @@ class Document(Container):
     allowed_in_signatures = True
 
 
+class Raw(Container):
+    """
+    A raw container.
+    """
+    is_raw = True
+
+
 class Element(Container):
     """
     Baseclass for elements.
@@ -938,6 +945,27 @@ class Strong(Element):
         for item in Element.prepare_docbook(self):
             yield item
         yield u'</emphasis>'
+
+
+class Highlighted(Strong):
+    """
+    Marks highlighted text.
+    """
+
+    def generate_markup(self, w):
+        w.markup('[mark]')
+        Element.generate_markup(self, w)
+        w.markup('[/mark]')
+
+    def prepare_html(self):
+        classes = ['highlighted']
+        if self.class_:
+            classes.append(self._class)
+        yield build_htlm_tag(u'strong', id=self.id, style=self.style,
+                             classes=classes)
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</strong>'
 
 
 class Emphasized(Element):

@@ -22,21 +22,32 @@ from inyoka.wiki.parser import nodes
 _newline_re = re.compile(r'(\n)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
+_punctuation = r'[!"#$%\'()*+,-.\\/:;<=>?@\[\]^_`{|}~]'
+_closing_class = r'[^\s\[\{\(\-]'
+
 _german_typography_rules = [
+    (re.compile(r'\'(?=%s\B)' % _punctuation), u'‚'),
+    (re.compile(r'"(?=%s\B)' % _punctuation), u'„'),
+    (re.compile(r'"\'(?=\w)'), u'„‚'),
+    (re.compile(r'"\'(?=\w)'), u'‚„'),
+    (re.compile(r'\B\'(?=\d{2}s)'), u'’'),
+    (re.compile(r'(?:\s|---?)(\')(?=\w)(?u)'), ur'‚'),
+    (re.compile(r'%s(\')(?!\s|s\b|\d|$)(?u)' % _closing_class), ur'’'),
+    (re.compile(r'%s(\')(?!\s|\b|\d|$)(?u)' % _closing_class), ur'’'),
+    (re.compile(r'%s(\')(\s|s\b|$)(?u)' % _closing_class), ur'’'),
+    (re.compile(r'\''), u'‚'),
+    (re.compile(r'(?:\s|---?)(")(?=\w)(?u)'), ur'„'),
+    (re.compile(r'"(?=\s|$)(?um)'), ur'”'),
+    (re.compile(r'%s(")'), ur'”'),
+    (re.compile(r'"'), u'„'),
     (re.compile(r'(?<!\.)\.\.\.(?!\.)'), u'…'),
     (re.compile(r'(?<!-)---(?!-)'), u'—'),
     (re.compile(r'(?<!-)--(?!-)'), u'–'),
-    (re.compile(r'\d(")(?u)'), u'″'),
-    (re.compile(r'\d(\')(?u)'), u'′'),
     (re.compile(r'\+\-'), u'±'),
     (re.compile(r'\(c\)'), u'©'),
     (re.compile(r'\(R\)'), u'®'),
     (re.compile(r'\(TM\)'), u'™'),
-    (re.compile(r'\d\s+(x)\s+\d(?u)'), u'×'),
-    (re.compile(r'(?:^|\s)(\')(?u)'), u'‚'),
-    (re.compile(r'\S(\')(?u)'), u'‘'),
-    (re.compile(r'(?:^|\s)(")(?u)'), u'„'),
-    (re.compile(r'\S(")(?u)'), u'“')
+    (re.compile(r'\d\s+(x)\s+\d(?u)'), u'×')
 ]
 
 
@@ -260,7 +271,7 @@ class SmileyInjector(Transformer):
             smilies = dict(storage.smilies)
         if not smilies:
             return tree
-        smiley_re = re.compile(r'(?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u)' %
+        smiley_re = re.compile(r'(?:^|\s|[^\w\d])(%s)(?:$|\s|[^\w\d])(?u)' %
                                '|'.join(re.escape(s) for s in sorted(smilies,
                                         key=lambda x: -len(x))))
 

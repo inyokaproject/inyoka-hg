@@ -365,7 +365,9 @@ class Parser(object):
         #: node dispatchers
         self._handlers = {
             'text':                 self.parse_text,
+            'raw':                  self.parse_raw,
             'nl':                   self.parse_nl,
+            'highlighted_begin':    self.parse_highlighted,
             'conflict_begin':       self.parse_conflict_left,
             'conflict_switch':      self.parse_conflict_middle,
             'conflict_end':         self.parse_conflict_end,
@@ -430,10 +432,23 @@ class Parser(object):
         """Expects a ``'text'`` token and returns a `nodes.Text`."""
         return nodes.Text(stream.expect('text').value)
 
+    def parse_raw(self, stream):
+        """Parse a raw marked section."""
+        return nodes.Raw([nodes.Text(stream.expect('raw').value)])
+
     def parse_nl(self, stream):
         """Expects a ``'nl'`` token and returns a `nodes.Newline`."""
         stream.expect('nl')
         return nodes.Newline()
+
+    def parse_highlighted(self, stream):
+        """Parse a highlighted section."""
+        stream.expect('highlighted_begin')
+        children = []
+        while stream.current.type != 'highlighted_end':
+            children.append(self.parse_node(stream))
+        stream.expect('highlighted_end')
+        return nodes.Highlighted(children)
 
     def parse_conflict_left(self, stream):
         """The begin conflict marker."""
@@ -880,23 +895,25 @@ class Parser(object):
             args, kwargs = self.parse_arguments(stream, 'parser_end')
             stream.next()
         else:
-            name = 'text'
+            name = None
 
-        buffer = []
-        while stream.current.type == 'text':
-            buffer.append(stream.current.value)
-            stream.next()
+        children = []
+        text_node = None
+        while stream.current.type != 'pre_end':
+            node = self.parse_node(stream)
+            if node.is_text_node:
+                if text_node is None and node.text[:1] == '\n':
+                    node.text = node.text[1:]
+                text_node = node
+            children.append(node)
+        if text_node is not None and text_node.text[-1:] == '\n':
+            text_node.text = text_node.text[:-1]
         stream.expect('pre_end')
-        data = u''.join(buffer)
 
-        # strip exactly one leading or trailing newline before creating a node.
-        if data[:1] == '\n':
-            data = data[1:]
-        if data[-1:] == '\n':
-            data = data[:-1]
+        if name is None:
+            return nodes.Preformatted(children)
 
-        if name == 'text':
-            return nodes.Preformatted([nodes.Text(data)])
+        data = u''.join(x.text for x in children)
         parser = get_parser(name, args, kwargs, data)
         if parser is None:
             return nodes.Preformatted([nodes.Text(data)])
