@@ -29,6 +29,7 @@ except:
 sys.path.append(WIKI_PATH)
 
 from os import path
+from werkzeug.utils import url_unquote
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
@@ -101,11 +102,11 @@ def convert_wiki():
     #start = False
     transaction.enter_transaction_management()
     transaction.managed(True)
-    for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Startseite']):
-        if name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub', 'StartSeite',
-                    'XGL', 'YaKuake', 'Gedit', 'root']:
+    for i, moin_name in enumerate(['Startseite']):
+        if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
+                         'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)
             continue
@@ -148,7 +149,7 @@ def convert_wiki():
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
-                att = line.extra
+                att = url_unquote(line.extra)
                 att_name = '%s/%s' % (name, att)
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
