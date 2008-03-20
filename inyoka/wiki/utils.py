@@ -199,7 +199,7 @@ def resolve_interwiki_link(wiki, page):
     rule = storage.interwiki.get(wiki)
     if rule is None:
         return
-    quoted_page = url_quote(page)
+    quoted_page = url_quote(page, safe='%')
     if '$PAGE' not in page:
         link = rule + page
     else:
