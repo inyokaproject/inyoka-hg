@@ -23,6 +23,7 @@
     {{ h.field_errors(form.errors.__all__) }}
     <div class="actions">
       <input type="hidden" name="edit_time" value="{{ edit_time }}" />
+      <input type="hidden" name="rev" value="{{ rev }}" />
       <input type="submit" value="Speichern" />
       <input type="submit" name="preview" value="Vorschau" />
       <input type="submit" name="cancel" value="Abbrechen" />

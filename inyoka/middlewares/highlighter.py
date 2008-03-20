@@ -43,10 +43,28 @@ _referrer_re = re.compile(
 _tag_re = re.compile(r'(<!--.*?-->|<[^>]*>)(?s)')
 _tagname_re = re.compile(r'<(/)?([a-zA-Z0-9]+)(?=\s|>)')
 _isolated = set(('script', 'head', 'style', 'textarea', 'option'))
+_umlaut_choices = [
+    ('a',   ur'(?:a|ä)'),
+    ('e',   ur'(?:e|é|è)'),
+    ('ss',  ur'(?:ss|ß)'),
+    ('sz',  ur'(?:sz|ß)'),
+    ('ae',  ur'(?:ae|ä|æ)'),
+    ('ue',  ur'(?:ue|ü)'),
+    ('oe',  ur'(?:oe|ö|ø)')
+]
 
 
 def _handle_match(match):
     return u'<span class="highlight">%s</span>' % match.group()
+
+
+def _make_replacer(words):
+    def quote(x):
+        rv = re.escape(x)
+        for find, regex in _umlaut_choices:
+            rv = rv.replace(find, regex)
+        return rv
+    return re.compile(ur'\b(%s)\w*\b(?iu)' % '|'.join(map(quote, words))).sub
 
 
 class HighlighterMiddleware(object):
@@ -83,7 +101,7 @@ class HighlighterMiddleware(object):
                 if request.GET:
                     plain_url += '?' + request.GET.urlencode()
             if search_words:
-                request.highlight_searchwords = search_words.split()
+                request.highlight_searchwords = search_words.lower().split()
                 flash(u'Suchergebnisse werden hervorgehoben. Suchwörter '
                       u'<a class="hide_searchwords" href="%s">ausblenden</a>.'
                       % escape(plain_url),
@@ -110,8 +128,7 @@ class HighlighterMiddleware(object):
         except UnicodeError:
             return response
 
-        sub = re.compile(ur'\b(%s)\w*\b(?iu)' % '|'.join(re.escape(x)
-                         for x in request.highlight_searchwords)).sub
+        sub = _make_replacer(request.highlight_searchwords)
 
         buffer = _tag_re.split(data)
         skip_to = None
