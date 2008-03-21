@@ -14,6 +14,7 @@
 {% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
 
 {% block ikhaya_content %}
+  <ul class="articles"><li class="article"><div class="article-top-right">
   <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
   {%- if article.icon -%}
   <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
@@ -95,4 +96,5 @@
     /* ]]> */
   </script>
   {%- endif %}
+  </div></li></ul>
 {% endblock %}

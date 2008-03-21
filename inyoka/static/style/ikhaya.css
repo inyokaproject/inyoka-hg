@@ -13,6 +13,16 @@
 .navi_sidebar .navi_archive      { background-image: url('../img/icons/archive.png'); }
 .navi_sidebar .navi_categories   { background-image: url('../img/icons/categories.png'); }
 
+div.content_sidebar {
+  padding: 0;
+  border:none;
+}
+
+div.content_sidebar_bk {
+  border: solid 1px #ccc;
+  padding: 15px 20px;
+}
+
 ul.articles {
   list-style-type: none;
   padding: 0;
@@ -20,13 +30,21 @@ ul.articles {
 }
 
 li.article {
-  border-bottom: solid 1px #aaa;
-  padding: 0 0.0em;
+//  border: solid 1px #ccc;
   margin: 0.0em;
-  margin-bottom: 1.5em;
+  margin-bottom: 1.0em;
+  background-image:url(../img/ikhaya/article.jpg);
+  background-repeat:no-repeat;
 }
 
+div.article-top-right {
+  padding: 5px 10px 10px 10px;
+  background-image:url(../img/ikhaya/article-top-right.png);
+  background-position:top right;
+  background-repeat:no-repeat;
+}
 h3.title {
+  margin-bottom: 1.0em;
 }
 
 p {
@@ -37,7 +55,7 @@ div.intro {
   font-size: 0.95em;
   color: #777;
   font-weight: bold;
-  margin-left: 1.0em;
+  margin-bottom: 1.0em;
 }
 
 p.meta {

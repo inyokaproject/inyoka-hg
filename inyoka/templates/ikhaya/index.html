@@ -29,6 +29,7 @@
   <ul class="articles">
     {%- for article in articles %}
     <li class="article{{ article.hidden and ' hidden' or '' }}">
+    <div class="article-top-right">
       <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
       {%- if article.icon %}
       <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier|e }}" />
@@ -45,6 +46,7 @@
         {%- if REQUEST.user.is_manager %} | <a href="{{ article|url('edit') }}">Bearbeiten</a>{% endif %}
 
       </p>
+    </div>
     </li>
     {%- endfor %}
   </ul>
