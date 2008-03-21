@@ -260,7 +260,7 @@ table thead th {
     background-image: url('../img/table-header.png');
     background-repeat: repeat-x;
     background-color: #f5f1e6;
-    padding: 0.6em 0 0.4em 0;
+    padding: 0.3em 0;
     text-align: center;
     color: #000;
     vertical-align:middle;
@@ -300,8 +300,7 @@ table tbody td {
 table tbody th {
   background: #f2f2f2 url(../img/table-header-alternative.png);
   color: black;
-  padding: 0.5em;
-  font-size: 0.9em;
+  padding: 0.3em 0;
 }
 
 table tbody th a {
