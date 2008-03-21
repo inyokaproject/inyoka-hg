@@ -43,11 +43,16 @@ img.cat {
   border-color: #D4D4D4;
   font-size: 0.9em;
   margin: 0.1em;
+  margin-bottom: 0.5em;
   padding: 1em;
   cursor: pointer;
   background-image: url(../img/portal/boxbg.png);
   background-position: top;
   background-repeat: repeat-x;
+}
+
+.article:hover {
+  border: 1px solid #E6A66B;
 }
 
 .article .date {
