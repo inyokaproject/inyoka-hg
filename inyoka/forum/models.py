@@ -79,7 +79,8 @@ class Forum(object):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('forum', self.parent_id and 'forum' or 'category', self.slug),
+            'show': ('forum', self.parent_id and 'forum' or 'category',
+                     self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
             'welcome': ('forum', 'forum', self.slug, 'welcome'),
             'edit': ('admin', 'forum', 'edit', self.id)
@@ -130,9 +131,9 @@ class Forum(object):
         """
         forums = self.parents
         forums.append(self)
-        read = user.is_authenticated and user.forum_welcome and \
-                set(int(i) for i in user.forum_welcome.split(',')) \
-                or set()
+        read = set()
+        if user.is_authenticated and user.forum_welcome:
+            read = set(int(i) for i in user.forum_welcome.split(','))
         for forum in forums:
             if forum.welcome_message_id is not None and \
                forum.id not in read:
@@ -142,8 +143,9 @@ class Forum(object):
     def read_welcome(self, user, read=True):
         if user.is_anonymous:
             return
-        status = user.forum_welcome and \
-                set(int(i) for i in user.forum_welcome.split(',')) or set()
+        status = set()
+        if user.forum_welcome:
+            status = set(int(i) for i in user.forum_welcome.split(','))
         if read:
             status.add(self.id)
         else:
