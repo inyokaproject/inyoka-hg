@@ -149,7 +149,7 @@ class Parser(object):
                                         self.token.name in name and
                                         not self.token.attr):
                 if raw:
-                    children.append(self.token)
+                    children.append(unicode(self.token))
                     self.next()
                 else:
                     children.append(self.parse_node())
