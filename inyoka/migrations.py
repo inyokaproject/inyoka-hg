@@ -52,5 +52,16 @@ def fix_ikhaya_icon_relation_definition(m):
         alter table ikhaya_article modify column icon_id integer;
     ''')
 
+def fix_sqlalchemy_forum(m):
+    """
+    This migration alters some forum tables to match the new
+    sqlalchemy layout.
+    """
+    m.engine.execute('''
+        alter table forum_topic change column slug
+            slug varchar(50) not null;
+    ''')
 
-MIGRATIONS = [create_initial_revision, fix_ikhaya_icon_relation_definition]
+
+MIGRATIONS = [create_initial_revision, fix_ikhaya_icon_relation_definition,
+             fix_sqlalchemy_forum]

@@ -240,7 +240,7 @@ class SearchSystem(object):
                 xapian.Database(settings.XAPIAN_DATABASE)
         else:
             connection = self.connections[thread]
-            connection.reopen()
+        connection.reopen()
         return connection
 
     def register(self, adapter):
@@ -277,7 +277,6 @@ class SearchSystem(object):
             qry = xapian.Query(xapian.Query.OP_FILTER, qry,
                                xapian.Query('P%s' % component.lower()))
         if exclude:
-            # XXX: negative filters seems to be not possible in xapian
             qry = xapian.Query(xapian.Query.OP_AND_NOT, qry,
                                xapian.Query(xapian.Query.OP_OR, exclude))
         if date_begin or date_end:

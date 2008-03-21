@@ -241,7 +241,8 @@ class StaticPage(models.Model):
 class Subscription(models.Model):
     objects = SubscriptionManager()
     user = models.ForeignKey(User)
-    topic = models.ForeignKey(Topic, null=True)
+    topic_id = models.IntegerField(null=True)
+    # XXX fix it!
     wiki_page = models.ForeignKey(Page, null=True)
 
     def __unicode__(self):

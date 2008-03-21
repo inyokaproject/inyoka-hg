@@ -767,7 +767,7 @@ class Page(models.Model):
     """
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True)
-    topic = models.ForeignKey(Topic, blank=True, null=True)
+    topic_id = models.IntegerField(null=True)
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -850,6 +850,11 @@ class Page(models.Model):
             return MultiMap(cur.fetchall())
         finally:
             cur.close()
+
+    @property
+    def topic(self):
+        # XXX: own foreign-key mapping for django
+        return self.topic_id and Topic.query.get(self.topic_id)
 
     @property
     def is_main_page(self):

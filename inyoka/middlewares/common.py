@@ -26,6 +26,7 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
      HttpResponseForbidden
 from inyoka.utils.logger import logger
 from inyoka.utils.urls import get_resolver
+from inyoka.utils.database import session
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -83,6 +84,7 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # clean up after the local manager
         self._local_manager.cleanup()
+        session.remove()
 
         if settings.DEBUG:
             from pprint import pprint

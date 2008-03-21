@@ -13,7 +13,7 @@
 {% extends 'forum/page.html' %}
 
 {% set title_trace = [topic.title|e] %}
-{% set navigation_trace =  [
+{% set navigation_trace = [
     (forum|url, forum.name),
     (topic|url, topic.title)
   ] + navigation_trace %}
