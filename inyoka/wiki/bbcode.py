@@ -289,7 +289,8 @@ class Parser(object):
             if data:
                 children.append(nodes.Text(data))
             del textbuf[:]
-            self.next()
+            if not self.eos:
+                self.next()
 
         while not self.eos and not (self.token.type == 'tag' and
                                     self.token.name == '/code' and
