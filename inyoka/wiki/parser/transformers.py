@@ -25,13 +25,11 @@ _paragraph_re = re.compile(r'(\s*?\n){2,}')
 def _trule(regex, replacement):
     """typography helper"""
     def handle_match(match):
-        all = match.group()
         if not match.groups():
             return replacement
-        offset = match.start()
-        return all[:match.start(1) - offset] + \
-               replacement + \
-               all[match.end(1) - offset:]
+        s = match.group()
+        o = match.start()
+        return s[:match.start(1) - o] + replacement + s[match.end(1) - o:]
     return re.compile(regex), handle_match
 
 _opening_class = r'[({\[<]'
@@ -279,7 +277,6 @@ class SmileyInjector(Transformer):
         smiley_re = re.compile(r'(?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u)' %
                                '|'.join(re.escape(s) for s in sorted(smilies,
                                         key=lambda x: -len(x))))
-        print smiley_re.pattern
 
         new_children = []
         for node in tree.children:
