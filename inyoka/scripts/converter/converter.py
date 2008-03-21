@@ -104,7 +104,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Kile']):
+    for i, moin_name in enumerate(['menu.lst']):
         if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
                          'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
@@ -425,8 +425,10 @@ def convert_forum():
     conn.close()
 
     # Fix anon user:
-    connection.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
-    connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
+    cur = connection.cursor()
+    cur.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
+    cur.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
+    connection._commit()
 
 def convert_groups():
     from inyoka.portal.user import Group
