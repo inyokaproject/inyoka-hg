@@ -1232,24 +1232,24 @@ class _DoesNotSuckBase(type(User)):
     __new__ = type.__new__
 
 class SAUser(User):
-    __metaclass__ = type #_DoesNotSuckBase
-    #_meta = objects = None
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 class SAForum(Forum):
-    __metaclass__ = type # _DoesNotSuckBase
-    #_meta = objects = None
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 class SATopic(Topic):
-    __metaclass__ = type # _DoesNotSuckBase
-    #_meta = objects = None
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 class SAPost(Post):
-    __metaclass__ = type # _DoesNotSuckBase
-    #_meta = objects = None
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 class SAAttachment(Attachment):
-    __metaclass__ = type # _DoesNotSuckBase
-    #_meta = objects = None
+    __metaclass__ = _DoesNotSuckBase
+    _meta = objects = None
 
 
 from inyoka.forum.database import forum_table
