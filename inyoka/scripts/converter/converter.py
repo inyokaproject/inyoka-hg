@@ -29,6 +29,7 @@ except:
 sys.path.append(WIKI_PATH)
 
 from os import path
+from werkzeug.utils import url_unquote
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
@@ -101,11 +102,11 @@ def convert_wiki():
     #start = False
     transaction.enter_transaction_management()
     transaction.managed(True)
-    for i, moin_name in enumerate(l):
+    #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Startseite']):
-        if name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub', 'StartSeite',
-                    'XGL', 'YaKuake', 'Gedit', 'root']:
+    for i, moin_name in enumerate(['Kile']):
+        if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
+                         'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)
             continue
@@ -148,7 +149,7 @@ def convert_wiki():
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
-                att = line.extra
+                att = url_unquote(line.extra)
                 att_name = '%s/%s' % (name, att)
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
@@ -376,7 +377,6 @@ def convert_forum():
 
 
     print 'Converting posts'
-    f = open("dump-missing-topics", "w")
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
@@ -384,32 +384,23 @@ def convert_forum():
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(s):
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
-        data = {
-            'pk': row[post_table.c.post_id],
-            'topic_id': row[post_table.c.topic_id],
-            'text': text,
-            'author_id': row[post_table.c.poster_id],
-            'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
-        }
-        p = Post(**data)
-        try:
-            p.save()
-        except Topic.DoesNotExist:
-            f.write("%s %s %s\n" % (data['pk'],data['topic_id'],data['pub_date']))
-            f.flush()
-            pass
-        connection.queries = []
+        cur = connection.cursor()
+        cur.execute('''
+            insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
+                values (%s,%s,%s,%s,%s,'',False);
+
+        ''', (row[post_table.c.post_id], row[post_table.c.topic_id],
+              text, row[post_table.c.poster_id],
+              datetime.fromtimestamp(row[post_table.c.post_time])))
         if i == 500:
-            transaction.commit()
+            connection._commit()
+            connection.queries = []
             i = 0
         else:
             i += 1
-    f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,

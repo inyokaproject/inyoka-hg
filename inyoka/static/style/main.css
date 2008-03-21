@@ -142,6 +142,7 @@ pre {
   border: 1px solid #aaa;
   padding: 0 0.4em;
   margin: 0.5em 1em;
+  overflow: auto;
 }
 
 ol, ul {

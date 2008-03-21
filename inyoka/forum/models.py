@@ -974,7 +974,9 @@ class Post(models.Model):
         return render(instructions, context)
 
     def save(self):
-        self.rendered_text = self.render_text(force_existing=True)
+        # this is temporarily disabled to speed up the converter
+        # this work is done instead on first view of the post
+        #self.rendered_text = self.render_text(force_existing=True)
         if self.id is not None:
             try:
                 old = Post.objects.get(id=self.id)
