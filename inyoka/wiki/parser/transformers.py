@@ -12,7 +12,7 @@
     stage attribute set to 'final' are expanded after all the transformers
     finished their job.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack.
     :license: GNU GPL.
 """
 import re
@@ -22,32 +22,32 @@ from inyoka.wiki.parser import nodes
 _newline_re = re.compile(r'(\n)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
-_punctuation = r'[!"#$%\'()*+,-.\\/:;<=>?@\[\]^_`{|}~]'
-_closing_class = r'[^\s\[\{\(\-]'
+def _trule(regex, replacement):
+    """typography helper"""
+    def handle_match(match):
+        all = match.group()
+        if not match.groups():
+            return replacement
+        offset = match.start()
+        return all[:match.start(1) - offset] + \
+               replacement + \
+               all[match.end(1) - offset:]
+    return re.compile(regex), handle_match
 
+_opening_class = r'[({\[<]'
 _german_typography_rules = [
-    (re.compile(r'\'(?=%s\B)' % _punctuation), u'‚'),
-    (re.compile(r'"(?=%s\B)' % _punctuation), u'„'),
-    (re.compile(r'"\'(?=\w)'), u'„‚'),
-    (re.compile(r'"\'(?=\w)'), u'‚„'),
-    (re.compile(r'\B\'(?=\d{2}s)'), u'’'),
-    (re.compile(r'(?:\s|---?)(\')(?=\w)(?u)'), ur'‚'),
-    (re.compile(r'%s(\')(?!\s|s\b|\d|$)(?u)' % _closing_class), ur'’'),
-    (re.compile(r'%s(\')(?!\s|\b|\d|$)(?u)' % _closing_class), ur'’'),
-    (re.compile(r'%s(\')(\s|s\b|$)(?u)' % _closing_class), ur'’'),
-    (re.compile(r'\''), u'‚'),
-    (re.compile(r'(?:\s|---?)(")(?=\w)(?u)'), ur'„'),
-    (re.compile(r'"(?=\s|$)(?um)'), ur'”'),
-    (re.compile(r'%s(")'), ur'”'),
-    (re.compile(r'"'), u'„'),
-    (re.compile(r'(?<!\.)\.\.\.(?!\.)'), u'…'),
-    (re.compile(r'(?<!-)---(?!-)'), u'—'),
-    (re.compile(r'(?<!-)--(?!-)'), u'–'),
-    (re.compile(r'\+\-'), u'±'),
-    (re.compile(r'\(c\)'), u'©'),
-    (re.compile(r'\(R\)'), u'®'),
-    (re.compile(r'\(TM\)'), u'™'),
-    (re.compile(r'\d\s+(x)\s+\d(?u)'), u'×')
+    _trule(r'(?:^|\s|%s)(\')(?u)' % _opening_class, u'‚'),
+    _trule(r'(?:^|\s|%s)(")(?u)' % _opening_class, u'„'),
+    _trule(r'"', u'“'),
+    _trule(r'\'', u'‘'),
+    _trule(r'(?<!\.)\.\.\.(?!\.)', u'…'),
+    _trule(r'\+\-', u'±'),
+    _trule(r'\(c\)', u'©'),
+    _trule(r'\(R\)', u'®'),
+    _trule(r'\(TM\)', u'™'),
+    _trule(r'\d\s+(x)\s+\d(?u)', u'×'),
+    _trule(r'(?<!-)---(?!-)', u'—'),
+    _trule(r'(?<!-)--(?!-)', u'–')
 ]
 
 
@@ -101,9 +101,11 @@ class AutomaticParagraphs(Transformer):
         Insert real paragraphs into the node and return it.
         """
         for node in parent.children:
-            if node.is_container and not node.is_raw and \
-               node.allows_paragraphs:
+            if node.is_container and not node.is_raw:
                 self.transform(node)
+
+        if not parent.allows_paragraphs:
+            return parent
 
         paragraphs = [[]]
 
@@ -236,22 +238,25 @@ class GermanTypography(Transformer):
     """
 
     def transform(self, tree):
-        def handle_match(match):
-            all = match.group()
-            if not match.groups():
-                return replacement
-            offset = match.start()
-            return all[:match.start(1) - offset] + \
-                   replacement + \
-                   all[match.end(1) - offset:]
-
-        if tree.is_container and not tree.is_raw:
-            for node in tree.children:
-                if node.is_text_node:
-                    for regexp, replacement in _german_typography_rules:
-                        node.text = regexp.sub(handle_match, node.text)
-                elif node.is_container:
-                    self.transform(node)
+        def walk(tree, last_text_node):
+            if tree.is_container and not tree.is_raw:
+                for node in tree.children:
+                    if node.is_text_node:
+                        if last_text_node is not None:
+                            text = last_text_node.text + node.text
+                            offset = len(last_text_node.text)
+                        else:
+                            text = node.text
+                            offset = 0
+                        for regexp, handler in _german_typography_rules:
+                            text = regexp.sub(handler, text, offset)
+                        node.text = text[offset:]
+                        last_text_node = node
+                    elif node.is_container:
+                        last_text_node = walk(node, not node.is_block_tag and
+                                              last_text_node or None)
+            return last_text_node
+        walk(tree, None)
         return tree
 
 

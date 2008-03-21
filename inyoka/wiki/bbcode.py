@@ -13,7 +13,7 @@
     >>> doc = bbcode.parse('...')
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
+    :copyright: Copyright 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 import re
