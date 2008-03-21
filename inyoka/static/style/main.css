@@ -31,13 +31,13 @@ div.body {
   padding: 10px 0 20px 0;
 }
 
-:link, :visited {
+a, :link, :visited {
   color: #956205;
   text-decoration: underline;
   cursor: pointer;
 }
 
-:link img, :visited img {
+a img, :link img, :visited img {
   border: none;
 }
 
