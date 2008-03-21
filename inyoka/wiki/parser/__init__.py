@@ -533,7 +533,7 @@ class Parser(object):
         """
         stream.expect('escaped_code_begin')
         buffer = []
-        while stream.current.type == 'text':
+        while stream.current.type != 'escaped_code_end':
             buffer.append(stream.current.value)
             stream.next()
         stream.expect('escaped_code_end')
