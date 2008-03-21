@@ -75,7 +75,7 @@ class Parser(object):
 
     def __init__(self, text, transformers=None):
         self.tokens = []
-        self.pos = 0
+        self.pos = self.depth = 0
         text = text.replace('\r\n', '\n')
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS
@@ -171,19 +171,24 @@ class Parser(object):
 
     def parse_node(self):
         """Parsing dispatcher."""
-        if self.token.type == 'text':
-            val = self.token.value
-            self.next()
-            return nodes.Text(val)
-        elif self.token.type == 'newline':
-            self.next()
-            return nodes.Newline()
-        elif self.token.type == 'tag' and self.token.name in self.handlers:
-            return self.handlers[self.token.name]()
-        else:
-            val = unicode(self.token)
-            self.next()
-            return nodes.Text(val)
+        self.depth += 1
+        try:
+            if self.token.type == 'text':
+                val = self.token.value
+                self.next()
+                return nodes.Text(val)
+            elif self.token.type == 'newline':
+                self.next()
+                return nodes.Newline()
+            elif self.depth < 180 and self.token.type == 'tag' and \
+                 self.token.name in self.handlers:
+                return self.handlers[self.token.name]()
+            else:
+                val = unicode(self.token)
+                self.next()
+                return nodes.Text(val)
+        finally:
+            self.depth -= 1
 
     def parse_strong(self):
         """parse [b]-tags"""
