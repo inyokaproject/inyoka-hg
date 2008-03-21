@@ -199,7 +199,7 @@ def validate_signature(signature):
             for n in node.children:
                 _walk(n)
             if not node.allowed_in_signatures:
-                raise SignatureError(u'Deine Signature enhält '
+                raise SignatureError(u'Deine Signatur enthält '
                                      u'unerlaubte Syntax-Elemente.')
         return node
     try:

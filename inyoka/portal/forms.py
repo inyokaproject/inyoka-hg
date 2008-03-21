@@ -277,7 +277,7 @@ class UserCPProfileForm(forms.Form):
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                  max_length=10, required=False, help_text=u'''
-    Hier kannst du deinen GPG-Public-Key eintragen. Näheres zu diesem Thema
+    Hier kannst du deinen GPG-Key eintragen. Näheres zu diesem Thema
     erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web_of_Trust">im
     Wiki</a>.''')
 
