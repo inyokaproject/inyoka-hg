@@ -69,6 +69,128 @@ def get_ubuntu_version(request):
             return i
 
 
+class SearchMapperExtension(MapperExtension):
+    """
+    Simple MapperExtension that listen on some events
+    to get the xapian database up to date.
+    """
+    def after_delete(self, mapper, connection, instance):
+        search.queue('f', instance.id)
+
+
+class ForumMapperExtension(MapperExtension):
+
+    def before_insert(self, mapper, connection, instance):
+        if not instance.slug:
+            instance.slug = slugify(instance.name)
+
+
+class TopicMapperExtension(MapperExtension):
+
+    def before_insert(self, mapper, connection, instance):
+        if not instance.forum or instance.forum.parent_id is None:
+            raise ValueError('Invalid Forum')
+        instance.slug = slugify(instance.title)
+        if Topic.query.filter_by(slug=instance.slug).first():
+            slugs = connection.execute(select([topic_table.c.slug],
+                topic_table.c.slug.like('%s-%%' % instance.slug)))
+            start = len(instance.slug) + 1
+            try:
+                instance.slug += '-%d' % (max(int(s[0][start:]) for s in slugs \
+                    if s[0][start:].isdigit()) + 1)
+            except ValueError:
+                instance.slug += '-1'
+
+    def after_insert(self, mapper, connection, instance):
+        parent_ids = list(p.id for p in instance.forum.parents)
+        parent_ids.append(instance.forum_id)
+        connection.execute(forum_table.update(
+            forum_table.c.id.in_(parent_ids), values={
+            'topic_count': forum_table.c.post_count + 1,
+        }))
+
+    def before_delete(self, mapper, connection, instance):
+        self.deregister(mapper, connection, instance)
+        connection.execute(forum_table.update(
+            forum_table.c.last_post_id.in_(select([post_table.c.id],
+                post_table.c.topic_id == instance.id)), values={
+            'last_post_id': None
+        }))
+        connection.execute(topic_table.update(
+            topic_table.c.id == instance.id, values={
+            'last_post_id': None,
+            'first_post_id': None
+        }))
+        connection.execute(post_table.delete(
+            post_table.c.topic_id == instance.id
+        ))
+
+    def deregister(self, mapper, connection, instance):
+        """Remove references and decrement post counts for this topic."""
+        def collect_children_ids(forum, children):
+            for child in forum.children:
+                children.append(child.id)
+                collect_children_ids(child, children)
+        forums = instance.forum.parents
+        forums.append(instance.forum)
+        for forum in forums:
+            forum.topic_count = forum_table.c.topic_count - 1
+            forum.post_count = forum_table.c.post_count - instance.post_count
+            if forum.last_post_id == instance.last_post_id:
+                children = []
+                collect_children_ids(forum, children)
+                forum.last_post_id = select([func.max(post_table.c.id)], and_(
+                    post_table.c.topic_id != instance.id,
+                    topic_table.c.forum_id.in_(children),
+                    topic_table.c.id == post_table.c.topic_id))
+        dbsession.flush()
+
+
+class PostMapperExtension(MapperExtension):
+
+    def before_insert(self, mapper, connection, instance):
+        instance.rendered_text = instance.render_text()
+        if not instance.pub_date:
+            instance.pub_date = datetime.utcnow()
+
+    def after_insert(self, mapper, connection, instance):
+        connection.execute(user_table.update(
+            user_table.c.id==instance.author_id, values={
+            'post_count': user_table.c.post_count + 1
+        }))
+        cache.delete('portal/user/%d' % instance.author_id)
+        values = {
+            'post_count': topic_table.c.post_count + 1,
+            'last_post_id': instance.id
+        }
+        if instance.topic.first_post_id is None:
+            values['first_post_id'] = instance.id
+        connection.execute(topic_table.update(
+            topic_table.c.id==instance.topic_id, values=values))
+        parent_ids = list(p.id for p in instance.topic.forum.parents)
+        parent_ids.append(instance.topic.forum_id)
+        connection.execute(forum_table.update(
+            forum_table.c.id.in_(parent_ids), values={
+            'post_count': forum_table.c.post_count + 1,
+            'last_post_id': instance.id
+        }))
+        for page in xrange(1, 5):
+            cache.delete('forum/topics/%d/%d' % (instance.topic.forum_id,
+                page))
+        search.queue('f', instance.id)
+
+    def unregister(self, mapper, connection, instance):
+        forums = instance.topic.forum.parents
+        forums.append(instance.topic.forum)
+        parent_ids.append(instance.topic.forum_id)
+        connection.ex
+
+    def before_delete(self, mapper, connection, instance):
+        # TODO: unregister
+        pass
+
+
+
 class Forum(object):
     """
     This is a forum that may contain subforums or threads.
@@ -153,7 +275,7 @@ class Forum(object):
         else:
             status.discard(self.id)
         user.forum_welcome = ','.join(str(i) for i in status)
-        user.save()
+        dbsession.flush(user)
 
     def __unicode__(self):
         return self.name
@@ -165,13 +287,6 @@ class Forum(object):
             self.slug.encode('utf-8'),
             self.name.encode('utf-8')
         )
-
-
-class ForumMapperExtension(MapperExtension):
-
-    def before_insert(self, mapper, connection, instance):
-        if not instance.slug:
-            instance.slug = slugify(instance.name)
 
 
 class Topic(object):
@@ -209,25 +324,6 @@ class Topic(object):
             return href('forum', 'topic', self.slug)
         return href('forum', 'topic', self.slug, action)
 
-    def delete(self):
-        """
-        This function removes all posts in this topic first to prevent
-        database integrity errors.
-        """
-        # XXX: Update search
-        self.first_post = None
-        self.last_post = None
-        self.deregister()
-        self.save()
-
-        cur = connection.cursor()
-        cur.execute('''
-            delete from forum_post
-              where topic_id = %s
-        ''', [self.id])
-        cur.close()
-        connection._commit()
-        super(Topic, self).delete()
 
     def register(self):
         self.forum.post_count += self.post_count
@@ -326,68 +422,6 @@ class Topic(object):
             self.id,
             self.title.encode('utf8')
         )
-
-
-class TopicMapperExtension(MapperExtension):
-
-    def before_insert(self, mapper, connection, instance):
-        if not instance.forum or instance.forum.parent_id is None:
-            raise ValueError('Invalid Forum')
-        instance.slug = slugify(instance.title)
-        if Topic.query.filter_by(slug=instance.slug).first():
-            slugs = connection.execute(select([topic_table.c.slug],
-                topic_table.c.slug.like('%s-%%' % instance.slug)))
-            start = len(instance.slug) + 1
-            try:
-                instance.slug += '-%d' % (max(int(s[0][start:]) for s in slugs \
-                    if s[0][start:].isdigit()) + 1)
-            except ValueError:
-                instance.slug += '-1'
-
-    def after_insert(self, mapper, connection, instance):
-        parent_ids = list(p.id for p in instance.forum.parents)
-        parent_ids.append(instance.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'topic_count': forum_table.c.post_count + 1,
-        }))
-
-    def before_delete(self, mapper, connection, instance):
-        #self.deregister(mapper, connection, instance)
-        connection.execute(forum_table.update(
-            forum_table.c.last_post_id.in_(select([post_table.c.id],
-                post_table.c.topic_id == instance.id)), values={
-            'last_post_id': None
-        }))
-        connection.execute(topic_table.update(
-            topic_table.c.id == instance.id, values={
-            'last_post_id': None,
-            'first_post_id': None
-        }))
-        connection.execute(post_table.delete(
-            post_table.c.topic_id == instance.id
-        ))
-
-    def deregister(self, mapper, connection, instance):
-        """Remove references and decrement post counts for this topic."""
-        def collect_children_ids(forum, children):
-            for child in forum.children:
-                children.append(child.id)
-                collect_children_ids(child, children)
-        forums = instance.forum.parents
-        forums.append(instance.forum)
-        for forum in forums:
-            forum.topic_count = forum_table.c.topic_count - 1
-            forum.post_count = forum_table.c.post_count - instance.post_count
-            if forum.last_post_id == instance.last_post_id:
-                children = []
-                collect_children_ids(forum, children)
-                forum.last_post_id = select([func.max(post_table.c.id)], and_(
-                    post_table.c.topic_id != instance.id,
-                    topic_table.c.forum_id.in_(children),
-                    topic_table.c.id == post_table.c.topic_id))
-        dbsession.flush()
-
 
 
 class Post(object):
@@ -497,53 +531,6 @@ class Post(object):
         get_latest_by = 'id'
 
 
-class PostMapperExtension(MapperExtension):
-
-    def before_insert(self, mapper, connection, instance):
-        instance.rendered_text = instance.render_text()
-        if not instance.pub_date:
-            instance.pub_date = datetime.utcnow()
-
-    def after_insert(self, mapper, connection, instance):
-        connection.execute(user_table.update(
-            user_table.c.id==instance.author_id, values={
-            'post_count': user_table.c.post_count + 1
-        }))
-        cache.delete('portal/user/%d' % instance.author_id)
-        values = {
-            'post_count': topic_table.c.post_count + 1,
-            'last_post_id': instance.id
-        }
-        if instance.topic.first_post_id is None:
-            values['first_post_id'] = instance.id
-        connection.execute(topic_table.update(
-            topic_table.c.id==instance.topic_id, values=values))
-        parent_ids = list(p.id for p in instance.topic.forum.parents)
-        parent_ids.append(instance.topic.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'post_count': forum_table.c.post_count + 1,
-            'last_post_id': instance.id
-        }))
-        for page in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d' % (instance.topic.forum_id,
-                page))
-        search.queue('f', instance.id)
-
-    def unregister(self, mapper, connection, instance):
-        forums = instance.topic.forum.parents
-        forums.append(instance.topic.forum)
-        parent_ids.append(instance.topic.forum_id)
-        connection.ex
-
-    def before_delete(self, mapper, connection, instance):
-        # TODO: unregister
-        pass
-
-    def after_delete(self, mapper, connection, instance):
-        search.queue('f', instance.id)
-
-
 class PostRevision(object):
     """
     This saves old revisions of posts. It can be used to restore posts if
@@ -560,7 +547,6 @@ class PostRevision(object):
             self.post.topic.title,
             self.store_date.strftime('%Y-%m-%d %H:%M')
         )
-
 
 
 class Attachment(object):
@@ -688,7 +674,6 @@ class WelcomeMessage(object):
             request = request._get_current_object()
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, format)
-
 
 
 # set up the mappers for sqlalchemy
