@@ -173,5 +173,12 @@
       {% endif %}
     </div>
   </div>
-
+      <div class="pathbar">
+        <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
+          navigation_trace %}
+          <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
+            %} »{% endif %}
+        {%- endfor %}</p>
+        <div style="clear:both;"></div>
+      </div>{# .pathbar #}
 {% endblock %}
