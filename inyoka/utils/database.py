@@ -23,5 +23,6 @@ engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8' % (
 ), pool_recycle=300, convert_unicode=False, echo=settings.DEBUG)
 metadata = MetaData(bind=engine)
 
-session = scoped_session(lambda: create_session(engine, transactional=True))
+session = scoped_session(lambda: create_session(engine,
+    autoflush=True, transactional=True))
 dispatcher.connect(session.remove, request_finished)
