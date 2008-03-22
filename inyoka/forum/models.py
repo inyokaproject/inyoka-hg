@@ -83,6 +83,8 @@ class Forum(object):
                      self.slug),
             'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
             'welcome': ('forum', 'forum', self.slug, 'welcome'),
+            'subscribe': ('forum', 'forum', self.slug, 'subscribe'),
+            'unsubscribe': ('forum', 'forum', self.slug, 'unsubscribe'),
             'edit': ('admin', 'forum', 'edit', self.id)
         }[action])
 
