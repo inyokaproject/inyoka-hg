@@ -166,7 +166,7 @@ def viewtopic(request, topic_slug, page=1):
     )
 
     if t.has_poll:
-        polls = Poll.objects.get_polls(t.id, request.user)
+        polls = Poll.query.get_polls(t.id, request.user)
 
         if request.method == 'POST':
             # the user participated in a poll

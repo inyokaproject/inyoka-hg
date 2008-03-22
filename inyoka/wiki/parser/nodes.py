@@ -28,6 +28,7 @@ from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
      resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
+from inyoka.utils.local import current_request
 
 
 def error_box(title, message):
@@ -697,6 +698,15 @@ class Link(Element):
         if self.scheme == 'javascript':
             yield escape(self.caption)
             return
+        if self.scheme == 'mailto':
+            try:
+                request = current_request._get_current_object()
+                if not request.user.is_authenticated:
+                    href = escape(self.href[7:])
+                    yield href
+                    return
+            except RuntimeError:
+                pass
         rel = style = title = None
         if not self.netloc or self.netloc == settings.BASE_DOMAIN_NAME or \
            self.netloc.endswith('.' + settings.BASE_DOMAIN_NAME):
