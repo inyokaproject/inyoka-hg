@@ -464,8 +464,8 @@ def newtopic(request, slug=None, article=None):
                 poll = Poll(question=d['question'], options=d['options'],
                              multiple_votes=d['multiple'])
                 polls.append(poll)
-                poll_ids.append(poll.id)
                 session.commit()
+                poll_ids.append(poll.id)
                 flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
                       escape(poll.question), success=True)
                 # clean the poll formular
@@ -937,7 +937,7 @@ def splittopic(request, topic_slug):
         if form.is_valid():
             data = form.cleaned_data
             if data['select_following']:
-                p = Post.qeuery.filter(and_(
+                p = Post.query.filter(and_(
                     Post.c.topic_id==t.id, Post.c.id >= data['start']))
             else:
                 p = Post.query.filter(Post.c.id.in_(data['select']))
