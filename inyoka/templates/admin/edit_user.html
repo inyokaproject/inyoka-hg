@@ -34,7 +34,7 @@
   </p>
 
   <dl>
-    {{ h.render_form(form, 'username', 'is_active', 'new_password', 'email', 'banned', inline=true) }}
+    {{ h.render_form(form, 'username', 'is_active', 'is_manager', 'new_password', 'email', 'banned', inline=true) }}
     <dd class="note_link bann_user_event">
       Benutzer sperren
     </dd>
@@ -60,13 +60,13 @@
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
     <dt>Ikhaya-Privilegien:</dt>
     <dd>{{ form.is_ikhaya_writer }} {{ form.is_ikhaya_writer.label }}</dd>
-  {{ h.render_form(form, 'date_joined', inline=true) }}
+    {{ h.render_form(form, 'date_joined', inline=true) }}
     <dd class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</dd>
   </dl>
   <h3>Persönliche Details von {{ user.username|e }}</h3>
   {{ h.render_form(form, 'website', 'interests', 'location') }}
   <h3>Benachrichtigungs-Einstellungen</h3>
-  {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim') }}
+  {{ h.render_form(form, 'jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip') }}
   <h3>Sonstige Einstellungen</h3>
   {{ h.render_form(form, 'signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey') }}
   <p>
@@ -88,7 +88,7 @@
 
   if (banned.val()) {
     bann_user_event.text('Sperrung aufheben');
-    banned = new DateTimeField('input[@name="banned"]', true);
+    banned = new DateTimeField('input[@name="banned"]', false, true);
   } else {
     banned.hide()
   }
@@ -102,7 +102,7 @@
           .hide();
         bann_user_event.text('Benutzer sperren')
       } else {
-        banned = new DateTimeField('input[@name="banned"]', true);
+        banned = new DateTimeField('input[@name="banned"]', false, true);
         bann_user_event.text('Sperrung aufheben');
       }
     });

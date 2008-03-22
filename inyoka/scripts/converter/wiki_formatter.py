@@ -40,7 +40,7 @@ class InyokaFormatter(FormatterBase):
 
         if name in replacements:
             name = replacements[name]
-            args = [a.strip() for a in args.split(',')]
+            args = [a.strip() for a in (args or '').split(',')]
 
         elif name == 'user':
             return u'[user:%s:]' % args
@@ -51,9 +51,23 @@ class InyokaFormatter(FormatterBase):
         elif name == 'Tags':
             return u'# X-Tags: ' + args
 
+        elif name == 'MailTo':
+            args = [a.strip() for a in (args or '').split(',')]
+            replacements = {
+                'AT': '@',
+                'DOT': '.',
+                'DASH': '-',
+                ' ': ''
+            }
+            for s, r in replacements.iteritems():
+                args[0] = args[0].replace(s, r)
+            return u'[mailto:%s%s]' % (args[0],
+                                       args[1] and u' ' + args[1] or u'')
         elif name in templates.keys() or name == 'Ausbaufaehig':
             if name in ('Pakete', 'Getestet', 'InArbeit'):
                 args = [a.strip() for a in args.split(',')]
+            elif name == 'Tasten':
+                args = ['+'.join(a.strip() for a in args.split('+'))]
             else:
                 args = args and [args] or []
             args = [name.replace('ae', u'ä')] + args
@@ -248,7 +262,7 @@ class InyokaFormatter(FormatterBase):
                 else:
                     prefix = 'cell'
                 try:
-                    attr[prefix + 'style'] += '%s: %s;' % ({
+                    attr[prefix + 'style'] += '%s: %s; ' % ({
                         'bgcolor': 'background-color',
                         'align': 'text-align',
                         'valign': 'vertical-align',
@@ -257,9 +271,15 @@ class InyokaFormatter(FormatterBase):
                     }[k], v)
                 except KeyError:
                     if k == 'colspan':
-                        span = '-' + v
-                    elif k == 'rowspan':
-                        span = '|' + v
+                        if int(v) > 1:
+                            span = '-' + v
+                    elif prefix + k == 'rowspan':
+                        if int(v) > 1:
+                            span = '|' + v
+                    elif k == 'style':
+                        if not v.endswith(';'):
+                            v += ';'
+                        attr[prefix + 'style'] += v
                     else:
                         attr[prefix + k] = v
 
@@ -268,7 +288,7 @@ class InyokaFormatter(FormatterBase):
             attr_str += span
         for k, v in attr.iteritems():
             if v:
-                attr_str += ' %s="%s"' % (k, v)
+                attr_str += ' %s="%s"' % (k, v.strip())
         if on:
             return u'||%s' % (attr_str and ('<%s>' % attr_str.strip()) or '')
         return u''

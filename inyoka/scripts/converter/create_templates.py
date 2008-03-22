@@ -56,14 +56,14 @@ Ubuntu-Versionen getestet:" class="box tested_for">
 <@ if $arguments contain 'general' @>
 Dieser Artikel ist größtenteils für alle Ubuntu-Versionen gültig.
 <@ else @>
-<@ if $arguments contain 'dapper' @>
-  * [:Ubuntu_Dapper_Drake:Ubuntu Dapper Drake 6.06]
-<@ endif @><@ if $arguments contain 'edgy' @>
-  * [:Ubuntu_Edgy_Eft:Ubuntu Edgy Eft 6.10]
+<@ if $arguments contain 'gutsy' @>
+  * [:Gutsy_Gibbon:Ubuntu Gutsy Gibbon 7.10]
 <@ endif @><@ if $arguments contain 'feisty' @>
-  * [:Ubuntu_Feisty_Fawn:Ubuntu Feisty Fawn 7.04]
-<@ endif @><@ if $arguments contain 'gutsy' @>
-  * [:Ubuntu_Gutsy_Gibbon:Ubuntu Gutsy Gibbon 7.10]
+  * [:Feisty_Fawn:Ubuntu Feisty Fawn 7.04]
+<@ endif @><@ if $arguments contain 'edgy' @>
+  * [:Edgy_Eft:Ubuntu Edgy Eft 6.10]
+<@ endif @><@ if $arguments contain 'dapper' @>
+  * [:Dapper_Drake:Ubuntu Dapper Drake 6.06]
 <@ endif @>
 <@ endif @>
 |}}""",
@@ -78,60 +78,47 @@ Paketliste zum Kopieren:
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo apt-get install <@ $arguments join_with " " @>')]]
 [[Vorlage(Wiki/Vorlagen/Befehl, 'sudo aptitude install <@ $arguments join_with " " @>')]]
 |}}""",
-    u'InArbeit': u"""<@ if $arguments.0 as stripped == "" or $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
-Dieser Artikel wird momentan
-<@if $arguments.1 @>
-von [http://ubuntuusers.de/users/<@ $arguments.1 @> <@ $arguments.1 @>]
-<@ endif @>
-überarbeitet.
-<@ if $arguments.0 as stripped @>
+    u'InArbeit': u"""{{|<class="box workinprogress" title="Artikel in Arbeit">Dieser Artikel wird momentan <@if $arguments.1 @>von [user:<@ $arguments.1 @>:]<@ endif @> überarbeitet.
+<@ if $arguments.0 matches_regex "(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})" @>
 Als Fertigstellungsdatum wurde der <@ $arguments.0 @> angegeben.
-<@ else @> Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, kontrolliere das Datum der letzten Änderung und entscheide, wie du weiter vorgehst.
+<@ else @>
+Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, kontrolliere das Datum der letzten Änderung und entscheide, wie du weiter vorgehst.
 <@ endif @>
 ----
-'''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!
-<@ else @>
-'''Parameterfehler''': Ungültiges Datum
-<@ endif @> """,
-    u'Befehl': u"""{{|<class="bash"><@ $arguments as array_of_lines join_with('[[BR]]') @>
-|}}""",
-    u'Tasten': u"""
-<@ for $key in $arguments split_by "+" @>
-<@ if ['hash','#'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/hash.png)]]
-<@ elseif ['^'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/zirklumflex.png)]]
-<@ elseif ['.'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fullstop.png)]]
-<@ elseif ['<'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/lt.png)]]
-<@ elseif ['plus'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/plus.png)]]
-<@ elseif [','] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/comma.png)]]
-<@ elseif ['alt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/alt.png)]]
-<@ elseif ['fn'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/fn.png)]]
-<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/home.png)]]
-<@ elseif ['ende','end'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/end.png)]]
-<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/enter.png)]]
-<@ elseif ['','space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/space.png)]]
-<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/up.png)]]
-<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/backspace.png)]]
-<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/down.png)]]
-<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/left.png)]]
-<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/right.png)]]
-<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgup.png)]]
-<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/pgdown.png)]]
-<@ elseif ['strg','ctrl'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ctrl.png)]]
-<@ elseif ['alt gr','altgr'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/altgr.png)]]
-<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/shift.png)]]
-<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/caps.png)]]
-<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/del.png)]]
-<@ elseif ['win','windows'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/win.png)]]
-<@ elseif ['tab','tabulator'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tab.png)]]
-<@ elseif ['esc','escape'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/esc.png)]]
-<@ elseif ['druck','print'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/print.png)]]
-<@ elseif ['minus','-'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/dash.png)]]
-<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/apple.png)]]
-<@ elseif ['einfg','ins'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/ins.png)]]
-<@ elseif ['ß','s'] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/sz.png)]]
-<@ elseif ['`',"'"] contains $key as lowercase @>[[Bild(Wiki/Vorlagen/Tasten/tick.png)]]
-<@ elseif $key matches_regex "^[a-zA-Z0-9]{1}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
-<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>[[Bild(Wiki/Vorlagen/Tasten/<@ $key as lowercase @>.png)]]
+'''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!|}}""",
+    u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
+    u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
+<@ if $loop.first @><@ else @> + <@ endif @>
+<@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @>{{|<class="key"><@ $key as uppercase @>|}}
+<@ elseif ['hash','#'] contains $key as lowercase @>{{|<class="key">#|}}
+<@ elseif ['^', '.', '<', ',', 'alt', 'fn'] contains $key as lowercase @>{{|<class="key"><@ $key as title @>|}}
+<@ elseif $key == 'plus' @>{{|<class="key">+|}}
+<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>{{|<class="key">Pos 1|}}
+<@ elseif ['ende','end'] contains $key as lowercase @>{{|<class="key">Ende|}}
+<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>{{|<class="key">⏎|}}
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key">     |}}
+<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>{{|<class="key">↑|}}
+<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">⌫|}}
+<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>{{|<class="key">↓|}}
+<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>{{|<class="key">←|}}
+<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>{{|<class="key">→|}}
+<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>{{|<class="key">Bild ↑|}}
+<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>{{|<class="key">Bild ↓|}}
+<@ elseif ['strg','ctrl'] contains $key as lowercase @>{{|<class="key">Strg|}}
+<@ elseif ['alt gr','altgr'] contains $key as lowercase @>{{|<class="key">Alt Gr|}}
+<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>{{|<class="key">⇧|}}
+<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>{{|<class="key">⇩|}}
+<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>{{|<class="key">Entf|}}
+<@ elseif ['win','windows'] contains $key as lowercase @>{{|<class="key">Windows|}}
+<@ elseif ['tab','tabulator'] contains $key as lowercase @>{{|<class="key">Tab ⇆|}}
+<@ elseif ['esc','escape'] contains $key as lowercase @>{{|<class="key">Esc|}}
+<@ elseif ['druck','print'] contains $key as lowercase @>{{|<class="key">Druck|}}
+<@ elseif ['minus','-'] contains $key as lowercase @>{{|<class="key">-|}}
+<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">⌘|}}
+<@ elseif ['einfg','ins'] contains $key as lowercase @>{{|<class="key">Einfg|}}
+<@ elseif ['ß','ss'] contains $key as lowercase @>{{|<class="key">ß|}}
+<@ elseif ["`","'"] contains $key @>{{|<class="key">\`|}}
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as uppercase @>|}}
 <@ endif @>
 <@ endfor @>""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
@@ -150,41 +137,41 @@ def create_page_templates():
                             note=u'Vorlage automatisch erstellt')
 
     # attach key images to Tasten macro
-    pth = os.path.join(os.path.dirname(__file__), 'keys')
-    for name in os.listdir(pth):
-        f = file(os.path.join(pth, name))
-        name = name.replace('key-', '')
-        Page.objects.create(u'Wiki/Vorlagen/Tasten/%s' % name,
-                    u'', note=u'Vorlage automatisch erstellt',
-                    attachment=f.read(), attachment_filename=name)
-        f.close()
+    #pth = os.path.join(os.path.dirname(__file__), 'keys')
+    #for name in os.listdir(pth):
+    #    f = file(os.path.join(pth, name))
+    #    name = name.replace('key-', '')
+    #    Page.objects.create(u'Wiki/Vorlagen/Tasten/%s' % name,
+    #                u'', note=u'Vorlage automatisch erstellt',
+    #                attachment=f.read(), attachment_filename=name)
+    #    f.close()
 
 
 def create_markup_stylesheet():
-    storage['markup_styles'] = u"""#page tr.titel {
+    storage['markup_styles'] = u"""tr.titel {
     font-weight: bold;
     background: #E2C890;
     color: #000000;
     text-align: center;
 }
 
-#page tr.kopf {
+tr.kopf {
     font-weight: bold;
     background: #F9EAAF;
     color: #000000;
 }
 
-#page tr.trennzeile {
+tr.trennzeile {
     background: #DDDDDD;
     color: #000000;
 }
 
-#page tr.highlight {
+tr.highlight {
     background: #EEEEEE;
     color: #000000;
 }
 
-#page tr.verlauf {
+tr.verlauf {
     font-weight: bold;
     color: #000000;
     background-image: url(../img/wiki/heading.png);
@@ -192,77 +179,77 @@ def create_markup_stylesheet():
 }
 
 /* Tabellen Deko KDE ---- */
-#page tr.kde-titel {
+tr.kde-titel {
     font-weight: bold;
     background: #013397;
     color: white;
     text-align: center;
 }
 
-#page tr.kde-kopf {
+tr.kde-kopf {
     font-weight: bold;
     background: #0169C9;
     color: white;
 }
 
-#page tr.kde-highlight {
+tr.kde-highlight {
     background: #AACCEE;
     color: #000000;
 }
 
 /* Tabellen Deko Xfce ---- */
-#page tr.xfce-titel {
+tr.xfce-titel {
     font-weight: bold;
     background: #B3DEFD;
     color:#000000;
     text-align: center;
 }
 
-#page tr.xfce-kopf {
+tr.xfce-kopf {
     font-weight: bold;
     background: #EFEFEF;
     color: #000000;
 }
 
-#page tr.xfce-highlight {
+tr.xfce-highlight {
     background: #EFEFEF;
     color: #000000;
 }
 
 /* Tabellen Deko Edubuntu ---- */
-#page tr.edu-titel {
+tr.edu-titel {
     font-weight: bold;
     background: #d41308;
     color: white;
     text-align: center;
 }
 
-#page tr.edu-kopf {
+tr.edu-kopf {
     font-weight: bold;
     background: #f1480e;
     color: white;
 }
 
-#page tr.edu-highlight {
+tr.edu-highlight {
     background: #f68b11;
     color: #000000;
 }
 
 /* Tabellen Deko ubuntustudio ---- */
-#page tr.studio-titel {
+tr.studio-titel {
     font-weight: bold;
     background: #171717;
     color:#009bf9;
     text-align: center;
 }
 
-#page tr.studio-kopf {
+tr.studio-kopf {
     font-weight: bold;
     background: #525252;
     color:#009bf9;
 }
 
-#page tr.studio-highlight {
+tr.studio-highlight {
     background: #171717;
     color:#FFFFFF;
 }
@@ -300,6 +287,8 @@ def create_smilies():
         ':idea:': 'idea.png',
         ':arrow:': 'arrow.png',
         '<3': 'favorite.png',
+        '{dl}': 'download.png',
+        '{*}': 'ubuntu.png',
     }
 
     pth = os.path.join(os.path.dirname(__file__), 'smilies')

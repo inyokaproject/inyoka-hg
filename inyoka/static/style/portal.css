@@ -13,6 +13,12 @@ h3 {
     color: #444;
 }
 
+h4 {
+  font-size: 1.3em;
+  color: #444;
+  border-bottom: 1px solid #ded2bb;
+}
+
 form.usercp_form ul {
   list-style: none;
 }
@@ -103,6 +109,10 @@ table.search_results .score {
     width: 6em;
 }
 
+form.search_ext #id_query {
+    max-width: 100%;
+}
+
 
 /*** Usermap ******************************************************************/
 div.usermap {
@@ -143,24 +153,34 @@ table.userinfo td.hidden {
 
 /* User Control Panel *******************************************************/
 
-table.usercp_control {
+
+div.usercp_control ul {
+  list-style: none;
   text-align: center;
-  border:none;
+  border: none;
 }
 
-table.usercp_control td {
+div.usercp_control ul li {
+  display: inline;
+}
+
+div.usercp_control ul li span {
+  text-align: center;
+  display: table-cell;
   border: 1px dotted #E3D6C4;
   padding: 0;
 }
 
-table.usercp_control td a {
+div.usercp_control ul li span a {
+  width: 250px;
+  height: 150px;
+  padding: 5px 10px 0 10px;
+  display: block;
   text-decoration: none;
   color: #888;
-  display: block;
-  padding: 10px;
 }
 
-table.usercp_control td:hover a {
+div.usercp_control ul li a:hover {
   color: #444;
 }
 
@@ -169,10 +189,10 @@ img.usercp_avatar {
 }
 
 /* Some additional features for non ie users */
-table.usercp_control a img {
+div.usercp_control ul li a img {
   opacity: 0.6;
 }
-table.usercp_control a:hover img {
+div.usercp_control ul li a:hover img {
   opacity: 1;
 }
 

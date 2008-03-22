@@ -11,14 +11,11 @@
                                   Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
-import md5
 from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django import newforms as forms
-from django.core.exceptions import ObjectDoesNotExist
-
 from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
@@ -35,10 +32,11 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import datetime_to_timezone
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
-                                send_new_user_password
+     send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
-from inyoka.wiki.utils import normalize_pagename
+from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category
 from inyoka.forum.models import Forum
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
@@ -51,6 +49,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
+from inyoka.utils.tracreporter import Trac
 
 
 @templated('errors/404.html')
@@ -252,8 +251,8 @@ def set_new_password(request, username, new_password_key):
             data['user'].set_password(data['password'])
             data['user'].new_password_key = ''
             data['user'].save()
-            flash('Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
-                  'einloggen.', True)
+            flash(u'Es wurde ein neues Passwort gesetzt. Du kannst dich nun '
+                  u'einloggen.', True)
             return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = SetNewPasswordForm(initial={
@@ -303,8 +302,7 @@ def login(request):
                     user.login(request)
                     return HttpResponseRedirect(redirect)
                 inactive = True
-            else:
-                failed = True
+            failed = True
     else:
         if 'username' in request.GET:
             form = LoginForm(initial={'username':request.GET['username']})
@@ -353,7 +351,8 @@ def search(request):
         results = search_system.query(request.user,
             d['query'],
             page=d['page'] or 1, per_page=d['per_page'] or 20,
-            date_begin=d['date_begin'], date_end=d['date_end'],
+            date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
+            date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
             exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
         )
@@ -375,7 +374,7 @@ def search(request):
 
 
 @check_login(message=u'Du musst eingeloggt sein um ein Benutzerprofil zu '
-                     u'sehen')
+                     u'sehen.')
 @templated('portal/profile.html')
 def profile(request, username):
     """Shows the user profile if the user is logged in."""
@@ -414,37 +413,49 @@ def usercp(request):
 @templated('portal/usercp/profile.html')
 def usercp_profile(request):
     """User control panel view for changing the user's profile"""
+    user = request.user
     if request.method == 'POST':
         form = UserCPProfileForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
+                        'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
                         'interests', 'website', 'email', 'gpgkey'):
-                setattr(request.user, key, data[key])
+                setattr(user, key, data[key] or '')
+            if data['coordinates']:
+                user.coordinates_lat, user.coordinates_long = \
+                    data['coordinates']
             if data['delete_avatar']:
-                request.user.delete_avatar()
+                user.delete_avatar()
             if data['avatar']:
-                request.user.save_avatar(data['avatar'])
+                user.save_avatar(data['avatar'])
             for key in ('show_email', 'show_jabber'):
-                request.user.settings[key] = data[key]
-            request.user.save()
+                user.settings[key] = data[key]
+            user.save()
             flash(u'Deine Profilinformationen wurden erfolgreich '
                   u'aktualisiert.', True)
+            return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
         else:
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
                   u'auf. Bitte behebe sie.')
     else:
-        values = model_to_dict(request.user)
+        values = model_to_dict(user)
+        lat = values.pop('coordinates_lat')
+        long = values.pop('coordinates_long')
+        if lat is not None and long is not None:
+            values['coordinates'] = '%s, %s' % (lat, long)
+        else:
+            values['coordinates'] = ''
         values.update(dict(
-            ((k, v) for k, v in request.user.settings.iteritems()
+            ((k, v) for k, v in user.settings.iteritems()
              if k.startswith('show_'))
         ))
-        settings = request.user.settings
         form = UserCPProfileForm(values)
     return {
-        'form': form,
-        'user': request.user
+        'form':         form,
+        'user':         request.user,
+        'gmaps_apikey': settings.GOOGLE_MAPS_APIKEY
     }
 
 
@@ -473,7 +484,8 @@ def usercp_settings(request):
                                                     NOTIFICATION_CHOICES]),
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
-            'hide_signatures': settings.get('hide_signatures', False)
+            'hide_signatures': settings.get('hide_signatures', False),
+            'hide_profile': settings.get('hide_profile', False)
         }
         form = UserCPSettingsForm(values)
     return {
@@ -554,7 +566,7 @@ def usercp_deactivate(request):
             data = form.cleaned_data
             if request.user.check_password(data['password_confirmation']):
                 deactivate_user(request.user)
-                do_logout(request)
+                User.objects.logout(request)
                 return HttpResponseRedirect(href('portal'))
             else:
                 form.errors['password_confirmation'] = [u'Das eingegebene'
@@ -583,10 +595,7 @@ def privmsg(request, folder=None, entry_id=None):
             entry.save()
             cache.delete('portal/pm_count/%s' % request.user.id)
         action = request.GET.get('action')
-        if action == 'reply':
-            return HttpResponseRedirect(href('portal', 'privmsg', 'new',
-                reply_to=entry.message_id))
-        elif action == 'delete':
+        if action == 'delete':
             folder = entry.folder
             entry.delete()
             if not entry.read:
@@ -630,13 +639,14 @@ def privmsg_new(request, username=None):
             try:
                 recipient_names = set(r.strip() for r in \
                                       d['recipient'].split(';') if r)
-                if request.user.username in recipient_names:
-                    flash(u'Du kannst dir selber keine Nachrichten schicken.',
-                          False)
-                    recipient_names = []
                 recipients = []
                 for recipient in recipient_names:
-                    recipients.append(User.objects.get(username__exact=recipient))
+                    user = User.objects.get(username__exact=recipient)
+                    if user.id == request.user.id:
+                        flash(u'Du kannst dir selber keine Nachrichten '
+                              u'schicken.', False)
+                        recipient_names = []
+                    recipients.append(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
@@ -650,12 +660,15 @@ def privmsg_new(request, username=None):
                 msg.send(recipients)
                 # send notification
                 for recipient in recipients:
+                    entry = PrivateMessageEntry.objects.get(message=msg,
+                                                            user=recipient)
                     if 'pm_new' in recipient.settings.get('notifications',
                                                           ('pm_new',)):
                         text = render_template('mails/new_pm.txt', {
-                            'username': recipient.username,
-                            'sender':   request.user.username,
-                            'subject':  d['subject']
+                            'user':     recipient,
+                            'sender':   request.user,
+                            'subject':  d['subject'],
+                            'entry':    entry,
                        })
                         send_notification(recipient, u'Neue private Nachricht'
                                    u' von %s' % (request.user.username), text)
@@ -664,20 +677,24 @@ def privmsg_new(request, username=None):
                 return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
-        if request.GET.get('reply_to') and \
-           request.GET['reply_to'].isnumeric():
+        reply_to = request.GET.get('reply_to', '')
+        forward = request.GET.get('forward', '')
+        try:
+            int(reply_to or forward)
+        except ValueError:
+            pass
+        else:
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,
-                    message=int(request.GET.get('reply_to')))
+                    message=int(reply_to or forward))
                 msg = entry.message
                 data['subject'] = msg.subject.lower().startswith(u're: ') and \
                                   msg.subject or u'Re: %s' % msg.subject
-                data['recipient'] = msg.author.username
-                data['text'] = u'%s schrieb:\n%s' % (
-                    msg.author.username,
-                    '\n'.join('> %s' % l for l in msg.text.splitlines()))
+                if reply_to:
+                    data['recipient'] = msg.author.username
+                data['text'] = quote_text(msg.text, msg.author)
                 form = PrivateMessageForm(initial=data)
-            except (PrivateMessageEntry.DoesNotExist, ValueError):
+            except (PrivateMessageEntry.DoesNotExist):
                 pass
         if username:
             form = PrivateMessageForm(initial={'recipient': username})
@@ -916,7 +933,7 @@ def calendar_detail(self, slug):
     try:
         event = Event.objects.get(slug=slug)
     except Event.DoesNotExist:
-        raise HttpNotFound
+        raise PageNotFound
     return {
         'event': event,
         'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
@@ -939,14 +956,33 @@ def user_error_report(request):
         form = UserErrorReportForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            uer = UserErrorReport()
-            uer.title = data['title']
-            uer.text = data['text']
-            uer.url = data['url']
-            uer.date = datetime.utcnow()
-            if request.user.username != 'anonymous':
-                uer.reporter = request.user
-            uer.save()
+            text =u"'''URL:''' %s" % data['url']
+            if request.user.id != 1:
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
+                    request.user.get_absolute_url(),
+                    escape(request.user.username),
+                    request.user.get_absolute_url('privmsg'),
+                ))
+            reporter = request.user.id == 1 and '' or request.user.username
+            text += u'\n\n%s' % data['text']
+            trac = Trac()
+            trac.submit_new_ticket(
+                keywords='userreport',
+                summary=data['title'],
+                description = text,
+                component = '-',
+                ticket_type = 'userreport',
+                reporter = reporter,
+            )
+
+#             uer = UserErrorReport()
+#             uer.title = data['title']
+#             uer.text = data['text']
+#             uer.url = data['url']
+#             uer.date = datetime.utcnow()
+#             if request.user.username != 'anonymous':
+#                 uer.reporter = request.user
+#             uer.save()
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)

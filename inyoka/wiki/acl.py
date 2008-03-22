@@ -112,7 +112,7 @@ class GroupContainer(object):
     def load(self):
         """Load the data from the database."""
         from inyoka.wiki.models import Page
-        self.cache = set(x['name'] for x in self.user.groups.values('name'))
+        self.cache = set(x.name for x in self.user.get_groups())
         for item in Page.objects.get_owners(self.page):
             if item == self.user.username or \
                (item.startswith('@') and item[1:] in self.cache):
@@ -133,7 +133,7 @@ class MultiPrivilegeTest(object):
 
     def __init__(self, user):
         self.user = user
-        self.groups = set(x['name'] for x in self.user.groups.values('name'))
+        self.groups = set(x.name for x in self.user.get_groups())
         self.owned_pages = set(Page.objects.get_owned(self.groups))
 
     def get_groups(self, page_name):
@@ -244,8 +244,9 @@ def test_changes_allowed(user, page_name, old_text, new_text):
 
     old = set()
     new = set()
-    for text, metadata in (old_text, old), (new_text, new):
-        tree = parse(text)
+    for tree, metadata in (old_text, old), (new_text, new):
+        if isinstance(tree, basestring):
+            tree = parse(tree)
         for node in tree.query.by_type(MetaData):
             if node.key.startswith('X-') and \
                node.key not in LENIENT_METADATA_KEYS:

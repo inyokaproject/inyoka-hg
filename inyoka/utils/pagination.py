@@ -29,6 +29,7 @@
 import math
 from inyoka.utils.http import PageNotFound
 from inyoka.utils.html import escape
+from werkzeug import url_encode
 
 
 class Pagination(object):
@@ -50,17 +51,18 @@ class Pagination(object):
 
         if link is None:
             link = request.path
+        self.parameters = request.GET
         if isinstance(link, basestring):
-            self.parameters = {}
             self.link_base = link
         else:
-            self.parameters = request.GET
             self.generate_link = link
 
-    def generate_link(self, page, parameters):
+    def generate_link(self, page, params):
         if page == 1:
-            return self.link_base
-        return '%s%d/' % (self.link_base, page)
+            url = self.link_base
+        else:
+            url = '%s%d/' % (self.link_base, page)
+        return url + (params and '?' + url_encode(params) or '')
 
     def generate(self, position=None, threshold=2, show_next_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
@@ -70,14 +72,14 @@ class Pagination(object):
         result = []
         add = result.append
         pages = max(0, self.total - 1) // self.per_page + 1
-        params = self.parameters.copy()
+        params = dict((k, v[0]) for k, v in self.parameters.iteritems())
         half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
                abs(self.page - num) < half_threshold:
                 if result and result[-1] != ellipsis:
                     add(u'<span class="comma">, </span>')
-                was_space = False
+                was_ellipsis = False
                 link = self.generate_link(num, params)
                 if num == self.page:
                     template = active

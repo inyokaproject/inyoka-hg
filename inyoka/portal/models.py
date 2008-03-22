@@ -10,28 +10,18 @@
                                   Marian Sigler.
     :license: GNU GPL.
 """
-from sha import sha
-import os
-import cPickle
-import datetime
-from PIL import Image
-from StringIO import StringIO
 from django.db import models, connection
-from django.core import validators
-from django.db.models.manager import EmptyManager
-from inyoka.conf import settings
-from inyoka.utils.decorators import deferred
+from inyoka.utils.http import HttpResponseRedirect
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
-from inyoka.utils.captcha import generate_word
 from inyoka.utils.local import current_request
 from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.portal.user import User
-from inyoka.forum.models import Topic
 from inyoka.wiki.models import Page
+from inyoka.forum.models import Topic, Forum
 from inyoka.wiki.parser import parse, render, RenderContext
 
 
@@ -170,9 +160,14 @@ class PrivateMessageEntry(models.Model):
     def in_archive(self):
         return self.folder == PRIVMSG_FOLDERS['archive'][0]
 
-    def get_absolute_url(self):
-        return href('portal', 'privmsg', PRIVMSG_FOLDERS[self.folder][1],
-                    self.id)
+    def get_absolute_url(self, action='view'):
+        if action == 'view':
+            return href('portal', 'privmsg', PRIVMSG_FOLDERS[self.folder][1],
+                        self.id)
+        elif action == 'reply':
+            return href('portal', 'privmsg', 'new', reply_to=self.message_id)
+        elif action == 'forward':
+            return href('portal', 'privmsg', 'new', forward=self.message_id)
 
     def delete(self):
         if self.folder == PRIVMSG_FOLDERS['trash'][0]:
@@ -243,7 +238,11 @@ class Subscription(models.Model):
     user = models.ForeignKey(User)
     topic_id = models.IntegerField(null=True)
     # XXX fix it!
-    wiki_page = models.ForeignKey(Page, null=True)
+    #topic = models.ForeignKey(Topic, null=True)
+    #forum = models.ForeignKey(Forum, null=True)
+    #wiki_page = models.ForeignKey(Page, null=True)
+    #notified = models.BooleanField('User was already notified',
+    #                               default=False)
 
     def __unicode__(self):
         if self.topic:
@@ -252,6 +251,9 @@ class Subscription(models.Model):
         elif self.wiki_page:
             type = u'wiki_page'
             title = self.wiki_page.title
+        elif self.forum:
+            type = u'forum'
+            title = self.forum.title
         return u'Subscription(%s, %s, "%s")' % (
             self.user.username,
             type, title

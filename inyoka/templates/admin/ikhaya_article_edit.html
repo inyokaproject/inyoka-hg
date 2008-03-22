@@ -37,8 +37,8 @@
   {%- if article.icon %}
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
-  {{ h.render_form(form, 'subject', 'intro', 'text', 'author', 'category',
-                         'icon', 'pub_date', 'slug', 'public') }}
+  {{ h.render_form(form, 'subject', 'intro', 'text', 'author', 'category_id',
+                         'icon_id', 'pub_date', 'slug', 'public') }}
   <p>
     <input type="submit" value="Speichern" />
     {%- if article %}
@@ -51,7 +51,6 @@
   /* <![CDATA[ */
   var text = new WikiEditor('textarea[@name="text"]');
   var intro = new WikiEditor('textarea[@name="intro"]');
-  var date = new DateTimeField('input[@name="pub_date"]');
 
   var intro_skipped = false;
   $('#id_intro').keyup(function () {
@@ -63,25 +62,6 @@
       intro_skipped = true;
     }
   })
-
-  var category_icons = {
-    {%- for k, v in category_icons.iteritems() %}
-    '{{ k }}': '{{ v }}',
-    {%- endfor %}
-  };
-  
-  $('#id_category').change(function () {
-    var category = $('#id_category').val();
-    if (category in category_icons) {
-      icons = document.getElementById('id_icon');
-      $('#id_icon').children().each(function(i, opt) {
-        if (opt.value == category_icons[category]) {
-          $('#id_icon')[0].selectedIndex = i;
-        }
-      })
-    }
-  });
-  $(function() { $('#id_category').change() });
   /* ]]> */
 </script>
 {%- endblock %}

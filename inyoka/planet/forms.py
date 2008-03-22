@@ -13,7 +13,9 @@ from django import newforms as forms
 
 class SuggestBlogForm(forms.Form):
     """Form to suggest a new blog url for the planet."""
-    name = forms.CharField(label=u'Name')
+    name = forms.CharField(label=u'Name des Blogs')
     url =  forms.URLField(label=u'URL')
     description = forms.CharField(label=u'Beschreibung',
-                                  widget=forms.Textarea)
+        widget=forms.Textarea,
+        help_text=(u'Die Beschreibung dient dem Ikhaya Team '
+              u'sich einen besseren Überblick zu verschaffen.'))

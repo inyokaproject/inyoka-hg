@@ -77,7 +77,7 @@ def from_html(obj):
             should_add_base = False
         elif obj.tag == 'img':
             element = Image(obj.attributes.get('src', '#'),
-                            obj.attribtues.get('alt', ''))
+                            obj.attributes.get('alt', ''))
         elif obj.tag == 'div':
             element = Layer()
         elif obj.tag == 'a':
@@ -441,11 +441,12 @@ class Image(Node):
     formatter could bundle images and refer to them.
     """
 
-    def __init__(self, href, alt, id=None, class_=None):
+    def __init__(self, href, alt, id=None, class_=None, style=None):
         self.href = href
         self.alt = alt
         self.id = id
         self.class_ = class_
+        self.style = style
 
     @property
     def text(self):
@@ -456,7 +457,7 @@ class Image(Node):
 
     def prepare_html(self):
         yield build_html_tag(u'img', src=self.href, alt=self.alt, id=self.id,
-                             class_=self.class_)
+                             class_=self.class_, style=self.style)
 
     def prepare_docbook(self):
         yield u'<mediaobject><imageobject>'
@@ -501,6 +502,13 @@ class Document(Container):
     allows_paragraphs = True
     is_document = True
     allowed_in_signatures = True
+
+
+class Raw(Container):
+    """
+    A raw container.
+    """
+    is_raw = True
 
 
 class Element(Container):
@@ -939,6 +947,27 @@ class Strong(Element):
         yield u'</emphasis>'
 
 
+class Highlighted(Strong):
+    """
+    Marks highlighted text.
+    """
+
+    def generate_markup(self, w):
+        w.markup('[mark]')
+        Element.generate_markup(self, w)
+        w.markup('[/mark]')
+
+    def prepare_html(self):
+        classes = ['highlighted']
+        if self.class_:
+            classes.append(self._class)
+        yield build_htlm_tag(u'strong', id=self.id, style=self.style,
+                             classes=classes)
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</strong>'
+
+
 class Emphasized(Element):
     """
     Like `Strong`, but with slightly less importance.  Usually rendered
@@ -970,14 +999,29 @@ class SourceLink(Element):
 
     allowed_in_signatures = False
 
+    def __init__(self, target, children=None, id=None, style=None, class_=None):
+        if children is None:
+            children = [Text('[%d]' % target)]
+        Element.__init__(self, children, id, style, class_)
+        self.target = target
+
+    @property
+    def text(self):
+        return '[%d]' % self.target
+
     def generate_markup(self, w):
-        w.markup(u"[%s]" % self.id)
+        w.markup(self.text)
 
     def prepare_html(self):
-        yield u'<sup><a href="#source-%s">[%s]</a></sup>' % (self.id, self.id)
+        yield build_html_tag(u'sup', id=self.id, style=self.style,
+                             class_=self.class_)
+        yield u'<a href="#source-%d">' % self.target
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</a></sup>'
 
     def prepare_docbook(self):
-        yield u'[%s]' % self.id
+        yield self.text
 
 
 class Code(Element):

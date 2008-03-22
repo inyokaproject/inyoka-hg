@@ -1,6 +1,6 @@
 Hallo {{ username }},
 
-Herzlich willkommen bei ubuntuusers.de!
+Herzlich Willkommen bei ubuntuusers.de!
 
 
 Es wurde ein Benutzerkonto registriert, und diese E-Mail-Adresse ({{ email }}) für die Bestätigung ausgewählt.

@@ -19,6 +19,44 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.flashing import get_flashed_messages
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
+from werkzeug import UserAgent
+
+
+# path to the dtd.  In debug mode we refer to the file system, otherwise
+# URL.  We do that because the firefox validator extension is unable to
+# load DTDs from URLs...  On first rendering the path is calculated because
+# of circular imports "href()" could cause.
+inyoka_dtd = None
+
+
+def get_dtd():
+    """
+    This returns either our dtd or our dtd + xml comment.  Neither is stricly
+    valid as XML documents with custom doctypes must be served as XML but
+    currently as MSIE is pain in the ass we have to workaround that IE bug
+    by removing the XML PI comment.
+    """
+    global inyoka_dtd
+    if inyoka_dtd is None:
+        if settings.DEBUG:
+            dtd_path = os.path.realpath(
+                os.path.join(os.path.dirname(__file__), '..',
+                             'static', 'xhtml1-strict-uu.dtd'))
+        else:
+            dtd_path = href('static', 'xhtml1-strict-uu.dtd')
+        inyoka_dtd = '<!DOCTYPE html SYSTEM "%s">' % (
+            settings.DEBUG and os.path.realpath(
+                os.path.join(os.path.dirname(__file__), '..',
+                             'static', 'xhtml1-strict-uu.dtd'))
+            or href('static', 'xhtml1-strict-uu.dtd')
+        )
+    try:
+        ua = UserAgent(current_request.META['HTTP_USER_AGENT'])
+        if ua.browser == 'msie':
+            return inyoka_dtd
+    except:
+        pass
+    return '<?xml version="1.0" encoding="utf-8"?>\n' + inyoka_dtd
 
 
 def populate_context_defaults(context):
@@ -57,6 +95,7 @@ def populate_context_defaults(context):
 
     if request:
         context.update(
+            XHTML_DTD=get_dtd(),
             REQUEST=request,
             CURRENT_URL=request.build_absolute_uri(),
             USER=request.user,
@@ -133,13 +172,13 @@ class InyokaEnvironment(Environment):
                     lambda env, context, value:
                         format_datetime(value, enforce_utc=True),
             dateformat=
-                lambda:
+                lambda prefix=False:
                     lambda env, context, value:
-                        natural_date(value),
+                        natural_date(value, prefix),
             utcdateformat=
-                lambda:
+                lambda prefix=False:
                     lambda env, context, value:
-                        natural_date(value, enforce_utc=True),
+                        natural_date(value, prefix, enforce_utc=True),
             timeformat=
                 lambda:
                     lambda env, context, value:

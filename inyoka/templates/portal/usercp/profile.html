@@ -13,47 +13,82 @@
 {% set scripts = ['WikiEditor.js'] %}
 {% set styles = ['editor.css'] %}
 {% set selected = 'profile' %}
+{% block html_head %}
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ gmaps_apikey|e(true)
+    }}" type="text/javascript"></script>
+  {{ super() }}
+{% endblock %}
 
 {% block portal_content %}
-<form enctype="multipart/form-data" class="usercp_form" method="post" action="">
-  <h3>Profileinstellungen</h3>
-  <dl>
-    <dt>Avatar:</dt>
-    <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
-    <dd>{{ form.avatar }}</dd>
-    <dd class="note">
-      Beachte, dass der Avatar maximal <strong>{{ SETTINGS.AVATAR_SIZE[0] }} x {{ SETTINGS.AVATAR_SIZE[1] }}</strong> Pixel groß sein darf.<br />
-      Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
-      Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
-    </dd>
-    <dd>{{ form.delete_avatar }} Aktuellen Avatar löschen</dd>
-    {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
-    {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim'] %}
-    <dt><label for="{{ form[item].auto_id }}">{{ form[item].label }}</label></dt>
-    <dd>{{ form[item] }}
-    {%- if item in ['email', 'jabber'] %} <span class="note">{{ form['show_' + item] }} <label for="id_show_{{ item }}">im Profil anzeigen</label></span>
-    {%- endif -%}
-    </dd>
-    {%- if form.errors[item] %}<dd>{{ form.errors[item] }}</dd>{% endif %}
-    {% endfor %}
-  </dl>
-  <h3>Sonstige Einstellungen</h3>
-  {{ h.render_form(form, 'location', 'occupation', 'interests', 'website',
-                         'gpgkey') }}
-  <h3>Signatur</h3>
-  <p class="note">
-    Dieser Text wird an jeden Beitrag von dir angehängt.<br />
-    Er darf nicht mehr als {{ SETTINGS.SIGNATURE_LENGTH }} Zeichen enthalten.
-  </p>
-  <p>
-    {{ form.signature }}
-    <script type="text/javascript">
-      var editor = new WikiEditor('textarea[@name="signature"]')
-    </script>
-  </p>
-  {{ h.field_errors(form.errors.signature) }}
-  <p>
-    <input type="submit" value="Speichern" />
-  </p>
-</form>
+  <form enctype="multipart/form-data" class="usercp_form" method="post" action="">
+    <h3>Avatareinstellungen</h3>
+    <dl>
+      <dt>Avatar:</dt>
+      <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
+      <dd>{{ form.avatar }}</dd>
+      <dd class="note">
+        Beachte, dass der Avatar maximal <strong>{{ SETTINGS.AVATAR_SIZE[0] }} x {{ SETTINGS.AVATAR_SIZE[1] }}</strong> Pixel groß sein darf.<br />
+        Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
+        Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
+      </dd>
+      {%- if user.avatar %}
+      <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
+      {%- endif %}
+      {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
+    </dl>
+    <h3>Kontakt-Adressen</h3>
+    <dl>
+      <dd>
+        <p class="note">
+          Die E-Mail- und die Jabber-Adresse werden standardmäßig nicht im öffentlichen Profil angezeigt.<br />
+          Um diese anzuzeigen, musst du das Feld „im Profil anzeigen“ neben den Adressfeldern aktivieren.
+        </p>
+      </dd>
+      {% for item in ['email', 'jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip'] %}
+      <dt><label for="{{ form[item].auto_id }}">{{ form[item].label }}</label></dt>
+      <dd>{{ form[item] }}
+      {%- if item in ['email', 'jabber'] %} <span class="note">{{ form['show_' + item] }} <label for="id_show_{{ item }}">im Profil anzeigen</label></span>
+      {%- endif -%}
+      </dd>
+      {%- if form.errors[item] %}<dd>{{ form.errors[item] }}</dd>{% endif %}
+      {% endfor %}
+    </dl>
+    <h3>Sonstige Einstellungen</h3>
+    {{ h.render_form(form, 'occupation', 'interests', 'website',
+                           'gpgkey') }}
+    <h4>Geographische Lage</h4>
+    {{ h.render_form(form, 'location', 'coordinates') }}
+    <h3>Signatur</h3>
+    <p class="note">
+      Dieser Text wird an jeden Beitrag von dir angehängt.<br />
+      Er darf nicht mehr als {{ SETTINGS.SIGNATURE_LENGTH }} Zeichen enthalten.
+    </p>
+    <p>
+      {{ form.signature }}
+      <script type="text/javascript">
+        var editor = new WikiEditor('textarea[@name="signature"]')
+      </script>
+    </p>
+    {{ h.field_errors(form.errors.signature) }}
+    <p>
+      <input type="submit" value="Speichern" />
+      <a href="{{ href('portal', 'users', user.username ) }}">Eigenes Profil anzeigen</a>
+    </p>
+  </form>
+  <script type="text/javascript">
+    /*<![CDATA[*/
+      $(function() {
+        $('p.note', $('#id_coordinates').parent())
+          .html('Solltest du deine Koordinaten nicht kennen gibt einfach deine ' +
+                'Adresse an und klicke auf <a href="javascript:findCoords()">' +
+                'Koordinaten suchen</a>.');
+      });
+      function findCoords() {
+        var geocoder = new GClientGeocoder();
+        geocoder.getLatLng($('#id_coordinates').val(), function(p) {
+          $('#id_coordinates').val(p ? p.lat() + ', ' + p.lng() : '');
+        });
+      }
+    /*]]>*/
+  </script>
 {% endblock %}

@@ -15,7 +15,7 @@ from inyoka.conf import settings
 logger = logging.getLogger('inyoka')
 
 
-if settings.DEBUG:
+if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
     from inyoka.utils.tracreporter import TracHandler
     logging_handler = TracHandler()
     logging_handler.setLevel(logging.ERROR)

@@ -33,6 +33,8 @@ def set_session_info(request, action, category=None):
         return
 
     if request.user.is_authenticated:
+        if request.user.settings.get('hide_profile', False):
+            return
         key = 'user:%s' % request.user.id
         user_type = request.user.is_manager and 'team' or 'user'
         args = (request.user.username, user_type, url_for(request.user))

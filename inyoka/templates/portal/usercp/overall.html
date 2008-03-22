@@ -23,6 +23,6 @@
     <li><a href="{{ href('portal', 'usercp', 'password') }}"{{ selected == 'password' and ' class="active"' or '' }}>Passwort ändern</a></li>
     <li><a href="{{ href('portal', 'usercp', 'subscriptions') }}"{{ selected == 'subscriptions' and ' class="active"' or '' }}>Benachrichtigungen</a></li>
     <li><a href="{{ href('portal', 'usercp', 'deactivate') }}"{{ selected == 'deactivate' and ' class="active"' or '' }}>Deaktivieren</a></li>
+    <li><a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}"{{ selected == 'deactivate' and 'class="active"' or ''}}>Benutzerseite</a></li>
   </ul>
 {% endblock %}
-

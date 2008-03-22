@@ -33,10 +33,18 @@ class Blog(models.Model):
             return href('static', 'img', 'planet', 'anonymous.png')
         return self.get_icon_url()
 
+    def update_search(self):
+        """
+        This updates the xapian search index.
+        """
+        PlanetSearchAdapter.queue(self.id) 
+
     def delete(self):
         for entry in self.entry_set.all():
             entry.delete()
         self.delete_icon()
+        # update search
+        self.update_search()
         super(Blog, self).delete()
 
     def delete_icon(self):
@@ -106,18 +114,16 @@ class Entry(models.Model):
         """
         This updates the xapian search index.
         """
-        search.queue('p', self.id)
+        PlanetSearchAdapter.queue(self.id) 
 
     def save(self):
         super(Entry, self).save()
         self.update_search()
 
+
     def delete(self):
-        """
-        Deletes the xapian document
-        """
-        Document(self.xapian_docid).delete()
-        super(Entry, self).delete()
+        # update search
+        self.update_search()
 
     class Meta:
         verbose_name = 'Eintrag'

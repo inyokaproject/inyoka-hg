@@ -4,10 +4,9 @@
  *
  * Some general scripts for the whole portal (requires jQuery).
  *
- * :copyright: 2007 by Christoph Hack, Armin Ronacher, Benjamin Wiegand.
+ * :copyright: 2007-2008 by Christoph Hack, Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
-
 
 $(document).ready(function() {
   // add a hide message link to all flash messages
@@ -48,10 +47,11 @@ $(document).ready(function() {
       $('.search_query').addClass('area_' + $currentSearchArea);
     $('form.search')
       .submit(function() {
-        var url = $(this).attr('action'), tmp;
-        if (tmp = $('input.search_query').val()) {
-          if ($('input.search_query').hasClass('default_value'))
-            tmp = '';
+        var url = $(this).attr('action'),
+            tmp = $('input.search_query').val();
+        if ($('input.search_query').hasClass('default_value'))
+          tmp = '';
+        if (tmp) {
           url += '?query=' + encodeURIComponent(tmp);
           if ($currentSearchArea != 'all')
             url += '&area=' + $currentSearchArea;
@@ -112,17 +112,25 @@ $(document).ready(function() {
   // add a sidebar toggler if there is an sidebar
   (function() {
     var sidebar = $('.navi_sidebar');
-    var togglebutton = $('<button class="navi_toggle_up" title="Navigation ' +
-                         'ausblenden" ></button>');
-    if (sidebar.length) togglebutton
-      .click(function() {
-        var content = $('.content_sidebar');
-        sidebar.toggle()
-        content.toggleClass('content_full')
-        togglebutton.toggleClass('navi_toggle_up')
-        togglebutton.toggleClass('navi_toggle_down')
-        return false;
-      }).insertAfter('form.search');
+    if (!sidebar.length)
+      return;
+    var togglebutton =
+      $('<button class="navi_toggle_up" title="Navigation ausblenden" />')
+        .click(function() {
+          $('.content_sidebar').toggleClass('content_full');
+          sidebar.toggle();
+          togglebutton
+            .toggleClass('navi_toggle_up')
+            .toggleClass('navi_toggle_down');
+          if ($IS_LOGGED_IN)
+            $.get('/?__service__=portal.toggle_sidebar', {
+              hide: !sidebar.is(':visible')
+            });
+          return false;
+        })
+        .insertAfter('form.search');
+    if ($SIDEBAR_HIDDEN)
+      togglebutton.click();
   })();
 
   // use javascript to deactivate the submit button on click

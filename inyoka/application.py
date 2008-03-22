@@ -9,7 +9,6 @@
     :license: GNU GPL.
 """
 from django.core import exceptions
-from django.core.mail import mail_admins
 from django.core.handlers.wsgi import WSGIHandler
 from inyoka.conf import settings
 from inyoka.utils.http import PageNotFound, DirectResponse, TemplateResponse
@@ -68,7 +67,14 @@ class InyokaHandler(WSGIHandler):
                 return response
 
         try:
-            callback, args, kwargs = request.resolver.resolve(request.path)
+            # we've had the situation that there was no resolver.  In theory
+            # that should never happen but if a middleware is broken it may
+            # be the case.  in that case abort with 404
+            resolver = getattr(request, 'resolver', None)
+            if resolver is None:
+                raise PageNotFound()
+
+            callback, args, kwargs = resolver.resolve(request.path)
 
             # Apply view middleware
             for middleware_method in self._view_middleware:
@@ -97,7 +103,8 @@ class InyokaHandler(WSGIHandler):
         except:
             if settings.DEBUG:
                 raise
-            logger.exception('Exception during request at %r' % request.path)
+            logger.exception('Exception during request at %r' %
+                             request.build_absolute_uri())
             return TemplateResponse('errors/500.html', {}, 500)
 
 

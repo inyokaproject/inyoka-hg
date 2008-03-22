@@ -36,8 +36,8 @@ def on_get_current_user(request):
 def on_get_usermap_markers(request):
     """Return markers for the usermap."""
     markers = []
-    for user in User.objects.exclude(coordinates_long=None) \
-                            .exclude(coordinates_lat=None):
+    for user in User.objects.filter(coordinates_long__isnull=False,
+                                    coordinates_lat__isnull=False):
         long = user.coordinates_long
         lat = user.coordinates_lat
         markers.append({
@@ -87,11 +87,23 @@ def on_get_calendar_entry(request):
     return render_template('portal/_calendar_detail.html', data)
 
 
+def on_toggle_sidebar(request):
+    if not request.user.is_authenticated:
+        return False
+    if request.GET.get('hide') == 'true':
+        request.user.settings['sidebar_hidden'] = True
+    else:
+        request.user.settings.pop('sidebar_hidden')
+    request.user.save()
+    return True
+
+
 dispatcher = SimpleDispatcher(
     get_current_user=on_get_current_user,
     get_usermap_markers=on_get_usermap_markers,
     get_random_password=on_get_random_password,
     get_captcha=on_get_captcha,
     get_calendar_entry=on_get_calendar_entry,
+    toggle_sidebar=on_toggle_sidebar,
     xmlrpc=xmlrpc
 )

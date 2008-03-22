@@ -85,9 +85,9 @@ def gen_activation_key(user):
             will be generated for.
     """
     return md5('%d%s%s%s' % (
-        user.id, user.username,
+        user.id, user.username.encode('utf-8'),
         settings.SECRET_KEY,
-        user.email
+        user.email.encode('utf-8')
     )).hexdigest()
 
 
@@ -107,7 +107,7 @@ def check_activation_key(user, key):
 
 def send_activation_mail(user):
     """send an activation mail"""
-    from django.core.mail import send_mail
+    from inyoka.utils.mail import send_mail
     message = render_template('mails/activation_mail.txt', {
         'username':         user.username,
         'email':            user.email,
@@ -119,7 +119,7 @@ def send_activation_mail(user):
 
 
 def send_new_user_password(user):
-    from django.core.mail import send_mail
+    from inyoka.utils.mail import send_mail
     new_password_key = ''.join(random.choice(string.lowercase + string.digits)
                                for _ in range(24))
     user.new_password_key = new_password_key

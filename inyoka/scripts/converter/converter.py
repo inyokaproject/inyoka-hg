@@ -29,6 +29,7 @@ except:
 sys.path.append(WIKI_PATH)
 
 from os import path
+from werkzeug.utils import url_unquote
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
@@ -69,7 +70,11 @@ def convert_wiki():
     from MoinMoin.wikiutil import version2timestamp
     from MoinMoin.parser.wiki import Parser as NormalParser
     from inyoka.scripts.converter.create_templates import create
-    create()
+    from _mysql_exceptions import IntegrityError
+    try:
+        create()
+    except IntegrityError:
+        print 'wiki templates are already created'
 
     # Hack to disable camel case
     class Parser(NormalParser):
@@ -82,29 +87,30 @@ def convert_wiki():
 
     from inyoka.scripts.converter.wiki_formatter import InyokaFormatter
     from inyoka.wiki.utils import normalize_pagename
-    from _mysql_exceptions import IntegrityError
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    us = User.objects.all()
-    for u in us:
-        users[u.username] = u
-    del us
+    #us = User.objects.all()
+    #for u in us:
+    #    users[u.username] = u
+    #del us
     import cPickle
     f = file('pagelist', 'r')
     l = cPickle.load(f)
     f.close()
     #start = False
-    for i, moin_name in enumerate(l):
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    #for i, moin_name in enumerate(['Startseite']):
+    for i, moin_name in enumerate(['menu.lst']):
+        if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
+                         'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
+            # ignore these pages (since gedit equals Gedit in inyoka these
+            # pages are duplicates)
+            continue
         name = normalize_pagename(moin_name)
-        print i, ':', name
-        #if not start and name != 'Wiki/Sandkasten/margin':
-        #    continue
-        #else:
-        #    start = True
         page = Page(request, moin_name, formatter=formatter)
         request.page = page
         for line in editlog.EditLog(request, rootpagename=name):
@@ -143,7 +149,7 @@ def convert_wiki():
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
-                att = line.extra
+                att = url_unquote(line.extra)
                 att_name = '%s/%s' % (name, att)
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
@@ -183,6 +189,7 @@ def convert_wiki():
         text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
+        transaction.commit()
 
 
 def convert_users():
@@ -370,7 +377,6 @@ def convert_forum():
 
 
     print 'Converting posts'
-    f = open("dump-missing-topics", "w")
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
@@ -378,32 +384,23 @@ def convert_forum():
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(s):
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
-        data = {
-            'pk': row[post_table.c.post_id],
-            'topic_id': row[post_table.c.topic_id],
-            'text': text,
-            'author_id': row[post_table.c.poster_id],
-            'pub_date': datetime.fromtimestamp(row[post_table.c.post_time])
-        }
-        p = Post(**data)
-        try:
-            p.save()
-        except Topic.DoesNotExist:
-            f.write("%s %s %s\n" % (data['pk'],data['topic_id'],data['pub_date']))
-            f.flush()
-            pass
-        connection.queries = []
+        cur = connection.cursor()
+        cur.execute('''
+            insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
+                values (%s,%s,%s,%s,%s,'',False);
+
+        ''', (row[post_table.c.post_id], row[post_table.c.topic_id],
+              text, row[post_table.c.poster_id],
+              datetime.fromtimestamp(row[post_table.c.post_time])))
         if i == 500:
-            transaction.commit()
+            connection._commit()
+            connection.queries = []
             i = 0
         else:
             i += 1
-    f.close()
     print 'fixing forum references'
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
@@ -428,8 +425,10 @@ def convert_forum():
     conn.close()
 
     # Fix anon user:
-    connection.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
-    connection.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
+    cur = connection.cursor()
+    cur.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
+    cur.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
+    connection._commit()
 
 def convert_groups():
     from inyoka.portal.user import Group

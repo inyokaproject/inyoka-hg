@@ -97,7 +97,6 @@ r"""
     ~~~~~~~~~~~~~~~~~~~~~~~
 
     -   Elements must be closed and cannot spawn multiple paragraphs
-    -   \\ at the end of a line with a newline following creates a newline
     -   Macros, parsers, table definitions and some other syntax elements
         that allow arguments have an fixed argument syntax:  a list of
         arguments, whitespace or comma keeps arguments apart and if you
@@ -136,6 +135,7 @@ import re
 import unicodedata
 from inyoka.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.decorators import patch_wrapper
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
@@ -145,6 +145,9 @@ from inyoka.wiki.parser import nodes
 
 __all__ = ['parse', 'render', 'stream', 'escape']
 
+
+# the maximum depth of stack-protected nodes
+MAXIMUM_DEPTH = 200
 
 _hex_color_re = re.compile(r'#([a-f0-9]{3}){1,2}$')
 
@@ -160,9 +163,19 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
-def parse(markup, wiki_force_existing=False):
+def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
+          transformers=None):
     """Parse markup into a node."""
-    return Parser(markup, wiki_force_existing=wiki_force_existing).parse()
+    try:
+        return Parser(markup, transformers, wiki_force_existing).parse()
+    except StackExhaused:
+        if not catch_stack_errors:
+            raise
+        return nodes.Paragraph([
+            nodes.Strong([nodes.Text('Interner Parser Fehler: ')]),
+            nodes.Text(u'Der Parser konnte den Text nicht verarbeiten weil '
+                       u'zu tief verschachtelte Elemente gefunden wurden.')
+        ])
 
 
 def render(instructions, context=None):
@@ -189,7 +202,11 @@ def validate_signature(signature):
                 raise SignatureError(u'Deine Signature enhält '
                                      u'unerlaubte Syntax-Elemente.')
         return node
-    text = _walk(parse(signature)).text.strip()
+    try:
+        text = _walk(parse(signature, True, False)).text.strip()
+    except StackExhaused:
+        raise SignatureError(u'Deine Signatur enthält zu viele ver'
+                             u'schachtelte Elemente.')
     if len(text) > settings.SIGNATURE_LENGTH:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
@@ -300,8 +317,19 @@ def _parse_align_args(args, kwargs):
     return attributes, args_left
 
 
+class StackExhaused(ValueError):
+    """
+    Raised if the parser recognizes nested structures that would hit the
+    stack limit.
+    """
+
+
 class SignatureError(ValueError):
-    pass
+    """Represents a signature error."""
+
+    def __init__(self, message):
+        ValueError.__init__(self, message.encode('utf-8'))
+        self.message = message
 
 
 class Parser(object):
@@ -328,6 +356,7 @@ class Parser(object):
         """
         self.string = string
         self.lexer = Lexer()
+        self.stack_depth = 0
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS[:]
         self.transformers = transformers
@@ -336,6 +365,9 @@ class Parser(object):
         #: node dispatchers
         self._handlers = {
             'text':                 self.parse_text,
+            'raw':                  self.parse_raw,
+            'nl':                   self.parse_nl,
+            'highlighted_begin':    self.parse_highlighted,
             'conflict_begin':       self.parse_conflict_left,
             'conflict_switch':      self.parse_conflict_middle,
             'conflict_end':         self.parse_conflict_end,
@@ -361,9 +393,9 @@ class Parser(object):
             'wiki_link_begin':      self.parse_wiki_link,
             'external_link_begin':  self.parse_external_link,
             'free_link':            self.parse_free_link,
-            'newline':              self.parse_newline,
             'ruler':                self.parse_ruler,
             'macro_begin':          self.parse_macro,
+            'template_begin':       self.parse_template,
             'pre_begin':            self.parse_pre_block,
             'table_row_begin':      self.parse_table,
             'box_begin':            self.parse_box,
@@ -387,11 +419,36 @@ class Parser(object):
         sure the parser never calls `parse_node` on not existing nodes when
         extending the lexer / parser.
         """
-        return self._handlers[stream.current.type](stream)
+        # stack exhausted, return a node that represents that
+        if self.stack_depth >= MAXIMUM_DEPTH:
+            raise StackExhaused()
+        self.stack_depth += 1
+        try:
+            return self._handlers[stream.current.type](stream)
+        finally:
+            self.stack_depth -= 1
 
     def parse_text(self, stream):
         """Expects a ``'text'`` token and returns a `nodes.Text`."""
         return nodes.Text(stream.expect('text').value)
+
+    def parse_raw(self, stream):
+        """Parse a raw marked section."""
+        return nodes.Raw([nodes.Text(stream.expect('raw').value)])
+
+    def parse_nl(self, stream):
+        """Expects a ``'nl'`` token and returns a `nodes.Newline`."""
+        stream.expect('nl')
+        return nodes.Newline()
+
+    def parse_highlighted(self, stream):
+        """Parse a highlighted section."""
+        stream.expect('highlighted_begin')
+        children = []
+        while stream.current.type != 'highlighted_end':
+            children.append(self.parse_node(stream))
+        stream.expect('highlighted_end')
+        return nodes.Highlighted(children)
 
     def parse_conflict_left(self, stream):
         """The begin conflict marker."""
@@ -476,7 +533,7 @@ class Parser(object):
         """
         stream.expect('escaped_code_begin')
         buffer = []
-        while stream.current.type == 'text':
+        while stream.current.type != 'escaped_code_end':
             buffer.append(stream.current.value)
             stream.next()
         stream.expect('escaped_code_end')
@@ -772,18 +829,6 @@ class Parser(object):
         target = stream.expect('free_link').value
         return nodes.Link(target, shorten=True)
 
-    def parse_newline(self, stream):
-        """
-        Parse a simple newline marker.  Note that the parser does not process
-        paragraphs because it's not safe to guess their positions before the
-        parsing and macro expansion process took place.  Have a look at the
-        `AutomaticParagraphs` transformer for more details.
-
-        Returns a `Newline` node.
-        """
-        token = stream.expect('newline')
-        return nodes.Newline()
-
     def parse_ruler(self, stream):
         """
         Parses a horizontal ruler.
@@ -823,6 +868,15 @@ class Parser(object):
             return macro.build_node()
         return nodes.Macro(macro)
 
+    def parse_template(self, stream):
+        """Parse the template macro shortcut."""
+        from inyoka.wiki.macros import Template
+        stream.expect('template_begin')
+        name = stream.expect('template_name').value
+        args, kwargs = self.parse_arguments(stream, 'template_end')
+        stream.next()
+        return Template((name,) + args, kwargs).build_node()
+
     def parse_pre_block(self, stream):
         """
         Parse a pre block or parser block.  If a shebang is present the parser
@@ -841,23 +895,25 @@ class Parser(object):
             args, kwargs = self.parse_arguments(stream, 'parser_end')
             stream.next()
         else:
-            name = 'text'
+            name = None
 
-        buffer = []
-        while stream.current.type == 'text':
-            buffer.append(stream.current.value)
-            stream.next()
+        children = []
+        text_node = None
+        while stream.current.type != 'pre_end':
+            node = self.parse_node(stream)
+            if node.is_text_node:
+                if text_node is None and node.text[:1] == '\n':
+                    node.text = node.text[1:]
+                text_node = node
+            children.append(node)
+        if text_node is not None and text_node.text[-1:] == '\n':
+            text_node.text = text_node.text[:-1]
         stream.expect('pre_end')
-        data = u''.join(buffer)
 
-        # strip exactly one leading or trailing newline before creating a node.
-        if data[:1] == '\n':
-            data = data[1:]
-        if data[-1:] == '\n':
-            data = data[:-1]
+        if name is None:
+            return nodes.Preformatted(children)
 
-        if name == 'text':
-            return nodes.Preformatted([nodes.Text(data)])
+        data = u''.join(x.text for x in children)
         parser = get_parser(name, args, kwargs, data)
         if parser is None:
             return nodes.Preformatted([nodes.Text(data)])
@@ -1028,6 +1084,7 @@ class Parser(object):
 
     def parse_source_link(self, stream):
         """
+        Parse a link to a source [1] etc.
         """
-        sourcenumber = stream.expect('sourcelink').value[1:-1]
-        return nodes.SourceLink(id=sourcenumber)
+        sourcenumber = stream.expect('sourcelink').value
+        return nodes.SourceLink(int(sourcenumber))

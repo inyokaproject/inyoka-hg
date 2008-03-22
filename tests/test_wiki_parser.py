@@ -184,11 +184,10 @@ def test_pre():
 
 
 def test_breakers():
-    """Test newline and the ruler."""
-    tree = parse('foo\\\\\n-----------------')
+    """Test the ruler."""
+    tree = parse('foo\n-----------------')
     assert tree == nodes.Document([
-        nodes.Text('foo'),
-        nodes.Newline(),
+        nodes.Text('foo\n'),
         nodes.Ruler()
     ])
 

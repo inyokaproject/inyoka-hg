@@ -12,30 +12,40 @@
     stage attribute set to 'final' are expanded after all the transformers
     finished their job.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack.
     :license: GNU GPL.
 """
 import re
 from inyoka.wiki.parser import nodes
 
 
+_newline_re = re.compile(r'(\n)')
 _paragraph_re = re.compile(r'(\s*?\n){2,}')
 
+def _trule(regex, replacement):
+    """typography helper"""
+    def handle_match(match):
+        if not match.groups():
+            return replacement
+        s = match.group()
+        o = match.start()
+        return s[:match.start(1) - o] + replacement + s[match.end(1) - o:]
+    return re.compile(regex), handle_match
+
+_opening_class = r'[({\[<]'
 _german_typography_rules = [
-    (re.compile(r'(?<!\.)\.\.\.(?!\.)'), u'…'),
-    (re.compile(r'(?<!-)---(?!-)'), u'—'),
-    (re.compile(r'(?<!-)--(?!-)'), u'–'),
-    (re.compile(r'\d(")(?u)'), u'″'),
-    (re.compile(r'\d(\')(?u)'), u'′'),
-    (re.compile(r'\+\-'), u'±'),
-    (re.compile(r'\(c\)'), u'©'),
-    (re.compile(r'\(R\)'), u'®'),
-    (re.compile(r'\(TM\)'), u'™'),
-    (re.compile(r'\d\s+(x)\s+\d(?u)'), u'×'),
-    (re.compile(r'(?:^|\s)(\')(?u)'), u'‚'),
-    (re.compile(r'\S(\')(?u)'), u'‘'),
-    (re.compile(r'(?:^|\s)(")(?u)'), u'„'),
-    (re.compile(r'\S(")(?u)'), u'“')
+    _trule(r'(?:^|\s|%s)(\')(?u)' % _opening_class, u'‚'),
+    _trule(r'(?:^|\s|%s)(")(?u)' % _opening_class, u'„'),
+    _trule(r'"', u'“'),
+    _trule(r'\'', u'‘'),
+    _trule(r'(?<!\.)\.\.\.(?!\.)', u'…'),
+    _trule(r'\+\-', u'±'),
+    _trule(r'\(c\)', u'©'),
+    _trule(r'\(R\)', u'®'),
+    _trule(r'\(TM\)', u'™'),
+    _trule(r'\d\s+(x)\s+\d(?u)', u'×'),
+    _trule(r'(?<!-)---(?!-)', u'—'),
+    _trule(r'(?<!-)--(?!-)', u'–')
 ]
 
 
@@ -85,12 +95,16 @@ class AutomaticParagraphs(Transformer):
             yield item
 
     def transform(self, parent):
-        for node in parent.children[:]:
-            if node.is_container:
+        """
+        Insert real paragraphs into the node and return it.
+        """
+        for node in parent.children:
+            if node.is_container and not node.is_raw:
                 self.transform(node)
 
         if not parent.allows_paragraphs:
             return parent
+
         paragraphs = [[]]
 
         for child in self.joined_text_iter(parent):
@@ -123,6 +137,98 @@ class AutomaticParagraphs(Transformer):
         return parent
 
 
+class BozoNewlines(AutomaticParagraphs):
+    """
+    This transformer is half broken and should automatically set paragraphs
+    and newlines...  This however requires the newline token to be disabled
+    at lexer level.
+    """
+
+    def break_lines(self, text, ignore_next=False):
+        """
+        This function sets soft line breaks which are also possible in
+        sections where paragraphs are not supported as line breaks are
+        inline elements.
+        """
+        result = []
+        for piece in _newline_re.split(text):
+            if piece == '\n':
+                if not ignore_next:
+                    result.append(nodes.Newline())
+            elif piece:
+                result.append(nodes.Text(piece))
+                ignore_next = False
+        return result
+
+    def set_paragraphs(self, parent):
+        """
+        Insert real paragraphs into the node and return it.
+        """
+        paragraphs = [[]]
+
+        for child in self.joined_text_iter(parent):
+            if child.is_text_node:
+                blockiter = iter(_paragraph_re.split(child.text.strip('\n')))
+                for block in blockiter:
+                    try:
+                        is_paragraph = blockiter.next()
+                    except StopIteration:
+                        is_paragraph = False
+                    if block:
+                        skip = not paragraphs[-1] or paragraphs[-1][-1].is_block_tag
+                        paragraphs[-1].extend(self.break_lines(block, skip))
+                    if is_paragraph:
+                        paragraphs.append([])
+            elif child.is_block_tag:
+                paragraphs.extend((child, []))
+            else:
+                paragraphs[-1].append(child)
+
+        del parent.children[:]
+        for paragraph in paragraphs:
+            if not isinstance(paragraph, list):
+                parent.children.append(paragraph)
+            else:
+                for node in paragraph:
+                    if not node.is_text_node or node.text:
+                        parent.children.append(nodes.Paragraph(paragraph))
+                        break
+
+        return parent
+
+    def transform(self, parent, previous_sibling=None):
+        """Sets linebreaks and paragraphs."""
+        # first we recurse to all the children.  We do that in the head
+        # so that the paragraph and linebreak rewriters can already work
+        # with the modified children
+        internal_previous_sibling = None
+        for node in parent.children:
+            if node.is_container and not node.is_raw:
+                self.transform(node, internal_previous_sibling)
+            internal_previous_sibling = node
+
+        # if a node does not support paragraphs (usually inline nodes)
+        # we still rewrite the children's text nodes but just for
+        # linebreaks and not paragraphs.
+        if not parent.allows_paragraphs:
+            new_children = []
+            for child in self.joined_text_iter(parent):
+                if child.is_text_node:
+                    skip = previous_sibling and previous_sibling.is_block_tag
+                    new_children.extend(self.break_lines(child.text, skip))
+                elif node.is_container:
+                    last_child = new_children and new_children[-1] or None
+                    new_children.append(self.transform(child, last_child))
+                else:
+                    new_children.append(child)
+            parent.children[:] = new_children
+            return parent
+
+        # At this point we now set the paragraphs for the node as
+        # this node supports supports paragraphs.
+        return self.set_paragraphs(parent)
+
+
 class GermanTypography(Transformer):
     """
     This class enables German typography for a tree.  Basically simple inch
@@ -130,22 +236,25 @@ class GermanTypography(Transformer):
     """
 
     def transform(self, tree):
-        def handle_match(match):
-            all = match.group()
-            if not match.groups():
-                return replacement
-            offset = match.start()
-            return all[:match.start(1) - offset] + \
-                   replacement + \
-                   all[match.end(1) - offset:]
-
-        if tree.is_container and not tree.is_raw:
-            for node in tree.children:
-                if node.is_text_node:
-                    for regexp, replacement in _german_typography_rules:
-                        node.text = regexp.sub(handle_match, node.text)
-                elif node.is_container:
-                    self.transform(node)
+        def walk(tree, last_text_node):
+            if tree.is_container and not tree.is_raw:
+                for node in tree.children:
+                    if node.is_text_node:
+                        if last_text_node is not None:
+                            text = last_text_node.text + node.text
+                            offset = len(last_text_node.text)
+                        else:
+                            text = node.text
+                            offset = 0
+                        for regexp, handler in _german_typography_rules:
+                            text = regexp.sub(handler, text, offset)
+                        node.text = text[offset:]
+                        last_text_node = node
+                    elif node.is_container:
+                        last_text_node = walk(node, not node.is_block_tag and
+                                              last_text_node or None)
+            return last_text_node
+        walk(tree, None)
         return tree
 
 

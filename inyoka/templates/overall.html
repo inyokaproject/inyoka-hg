@@ -9,9 +9,10 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 -#}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de" dir="ltr">
+{{ XHTML_DTD }}
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="de" lang="de" dir="ltr">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
@@ -40,19 +41,20 @@
         $MEDIA_URL = {{ href('media')|jsonencode }},
         $BASE_DOMAIN_NAME = {{ SETTINGS.BASE_DOMAIN_NAME|jsonencode }},
         $CURRENT_USER = {{ USER.username|jsonencode if USER.is_authenticated else 'null' }},
-        $IS_LOGGED_IN = {{ USER.is_authenticated|jsonencode }};
+        $IS_LOGGED_IN = {{ USER.is_authenticated and 'true' or 'false' }},
+        $SIDEBAR_HIDDEN = {{ USER.settings.sidebar_hidden and 'true' or 'false' }};
     /*]]>*/
     </script>
     {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
                        'overall.js'] + scripts %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
+    <!--[if lt IE 7.]><script defer type="text/javascript" src="{{ href('static', 'js/ie7.js') }}"></script><![endif]-->
     {%- endblock %}
   </head>
   <body>
     <div class="header">
       <h1><a href="/"><span>ubuntuusers.de</span></a></h1>
-
       <ul class="tabbar">
         {%- for app in ('portal', 'forum', 'wiki', 'ikhaya', 'planet') %}
         <li class="{{ app }}{% if app == active_app %} active{% endif
@@ -177,7 +179,8 @@
         <li class="license">
           <img src="{{ href('static', 'img/copyleft.png') }}" alt="Copyleft" />
           2004 – 2008 ubuntuusers.de • Einige Rechte vorbehalten<br />
-          <a href="{{ href('portal', 'lizenz') }}">Lizenz</a> •
+          <a href="http://creativecommons.org/licenses/by-nc-sa/2.0/de/deed.de" rel="license">CC</a>
+          <a href="{{ href('portal', 'lizenz') }}" rel="cc:morePermissions">Lizenz</a> •
           <a href="{{ href('portal', 'kontakt') }}">Kontakt</a> •
           <a href="{{ href('portal', 'datenschutz') }}">Datenschutz</a> •
           <a href="{{ href('portal', 'impressum') }}">Impressum</a>

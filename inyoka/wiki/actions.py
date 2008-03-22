@@ -19,7 +19,6 @@
                                   Benjamin Wiegand.
     :license: GNU GPL.
 """
-from time import localtime
 from datetime import datetime
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
@@ -32,13 +31,13 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.html import escape
+from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.utils import get_title, normalize_pagename
-from inyoka.wiki.acl import require_privilege, has_privilege, \
-     test_changes_allowed, PrivilegeTest
+from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
 
@@ -102,6 +101,13 @@ def do_show(request, name):
             return HttpResponseRedirect(href('wiki', redirect))
     if page.rev.deleted:
         return do_missing_page(request, name, page)
+
+    try: 
+        s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
+        s.notified = False
+        s.save()
+    except Subscription.DoesNotExist:
+        pass 
 
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (
@@ -302,15 +308,17 @@ def do_edit(request, name):
         ``preview``
             If we are in preview mode this is a rendered HTML preview.
     """
-    rev = request.GET.get('rev')
-    if rev is not None and not rev.isdigit():
-        rev = None
+    rev = request.REQUEST.get('rev')
+    rev = rev is not None and rev.isdigit() and int(rev) or None
     try:
         page = Page.objects.get_by_name_and_rev(name, rev)
     except Page.DoesNotExist:
         page = None
         if not has_privilege(request.user, name, 'create'):
             return AccessDeniedResponse()
+        current_rev_id = ''
+    else:
+        current_rev_id = str(page.rev.id)
 
     # attachments have a custom editor
     if page and page.rev.attachment:
@@ -342,7 +350,7 @@ def do_edit(request, name):
     # conflict.  We do that before the actual form processing
     merged_this_request = False
     try:
-        edit_time = datetime(*localtime(int(request.POST['edit_time']))[:7])
+        edit_time = datetime.utcfromtimestamp(int(request.POST['edit_time']))
     except (KeyError, ValueError):
         edit_time = datetime.utcnow()
     if rev is None:
@@ -374,12 +382,9 @@ def do_edit(request, name):
             preview = parse(text).render(context, 'html')
             form.initial['text'] = text
         else:
-            form = PageEditForm(form_data)
+            form = PageEditForm(request.user, name, page and
+                                page.rev.text.value or '', form_data)
             if form.is_valid() and not merged_this_request:
-                if not test_changes_allowed(request.user, name, page and
-                                            page.rev.text.value or '',
-                                            form.cleaned_data['text']):
-                    raise RuntimeError('security error. XXX: render error')
                 remote_addr = request.META.get('REMOTE_ADDR')
                 if page is not None:
                     if form.cleaned_data['text'] == page.rev.text.value:
@@ -405,17 +410,20 @@ def do_edit(request, name):
                     ))
 
                 # send notifications
-                for s in Subscription.objects.filter(wiki_page=page) \
-                                             .exclude(user=request.user):
+                for s in Subscription.objects.filter(wiki_page=page,
+                    notified=False).exclude(user=request.user):
+                    rev, old_rev = page.revisions.all()[:2]
                     text = render_template('mails/page_edited.txt', {
                         'username': s.user.username,
-                        'rev':      page.revisions.latest()
+                        'rev':      rev,
+                        'old_rev':  old_rev
                     })
                     send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
-                                      % page.title, text)
+                                    % page.title, text)
+                    s.notified = True
+                    s.save()
 
-
-                if page.metadata.get('weiterleitung'):
+                if page.metadata.get('redirect'):
                     url = href('wiki', page.name, redirect='no')
                 else:
                     url = href('wiki', page.name)
@@ -445,7 +453,8 @@ def do_edit(request, name):
         'page':         page,
         'form':         form,
         'preview':      preview,
-        'edit_time':    int(edit_time.strftime('%s'))
+        'edit_time':    edit_time.strftime('%s'),
+        'rev':          current_rev_id
     }
 
 
@@ -461,8 +470,8 @@ def do_delete(request, name):
             page.edit(user=request.user, deleted=True,
                       remote_addr=request.META.get('REMOTE_ADDR'),
                       note=request.POST.get('note', '') or
-                           'Seite wurde gelöscht')
-            flash('Seite wurde erfolgreich gelöscht', success=True)
+                           u'Seite wurde gelöscht')
+            flash(u'Seite wurde erfolgreich gelöscht', success=True)
     else:
         flash(render_template('wiki/action_delete.html', {'page': page}))
     return HttpResponseRedirect(url_for(page))
@@ -499,7 +508,7 @@ def do_log(request, name):
             parameters['page'] = str(p)
         rv = url_for(page)
         if parameters:
-            rv += '?' + parameters.urlencode()
+            rv += '?' + url_encode(parameters)
         return rv
 
     if request.GET.get('format') == 'atom':

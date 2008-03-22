@@ -26,14 +26,14 @@ def parse(source, transformer):
 
 def test_automatic_paragraphs():
     """Test the automatic paragraph insertion."""
-    tree = parse("foo\n\nbar ''baz\n\n''blub.\n * foo\n{{{\nfoo\n}}}",
+    tree = parse("foo\n\nbar ''baz''blub.\n * foo\n{{{\nfoo\n}}}\n\nblub",
                  AutomaticParagraphs())
     assert tree == nodes.Document([
         nodes.Paragraph([nodes.Text('foo')]),
         nodes.Paragraph([
             nodes.Text('bar '),
             nodes.Emphasized([
-                nodes.Text('baz\n\n')
+                nodes.Text('baz')
             ]),
             nodes.Text('blub.\n')
         ]),
@@ -42,6 +42,9 @@ def test_automatic_paragraphs():
         ]),
         nodes.Preformatted([
             nodes.Text('foo')
+        ]),
+        nodes.Paragraph([
+            nodes.Text('blub')
         ])
     ])
 

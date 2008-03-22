@@ -21,6 +21,12 @@ from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
 
+# import required adapters
+import inyoka.forum.search
+import inyoka.planet.models
+import inyoka.wiki.search
+import inyoka.ikhaya.models
+
 
 def update(limit=None):
     """
@@ -31,6 +37,7 @@ def update(limit=None):
     for id, component, doc_id in SearchQueue.objects.next():
         search.index(component, doc_id)
         last_id = id
+    search.flush()
     SearchQueue.objects.remove(last_id)
 
 

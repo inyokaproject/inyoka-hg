@@ -33,6 +33,12 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
     text = forms.CharField(widget=forms.Textarea)
     att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
 
+    def clean_text(self):
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
+            raise forms.ValidationError('Text darf nicht leer sein')
+        return text
+
 
 class EditPostForm(forms.Form):
     """
@@ -80,7 +86,8 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
         The ubuntu distribution the user has.
     It's used together with `AddAttachmentForm` in general.
     """
-    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}));
+    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}),
+                            max_length=100)
     text = forms.CharField(widget=forms.Textarea)
     att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
     polls = forms.CharField(widget=forms.HiddenInput, required=False)
@@ -88,6 +95,12 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
                                                 required=False)
     ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
     sticky = forms.BooleanField(required=False)
+
+    def clean_text(self):
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
+            raise forms.ValidationError('Text darf nicht leer sein')
+        return text
 
 
 class MoveTopicForm(forms.Form):

@@ -19,6 +19,9 @@ DEBUG = False
 # so is the code execution debugger.  never enable on production
 ENABLE_DEBUGGER = False
 
+# enable logging to trac. Maybe only for development use...
+ENABLE_TRAC_LOGGING = True
+
 # template caching.  If none the templates will be cache if the
 # debug stuff is disabled
 TEMPLATE_CACHING = None
@@ -32,11 +35,6 @@ DATABASE_NAME = DATABASE_USER = DATABASE_HOST = DATABASE_PORT = ''
 
 # mysql only
 DATABASE_ENGINE = 'mysql'
-
-# if we are in debug mode we issue tickets into a trac
-TRAC_URL = 'http://trac.ubuntuusers.de/'
-TRAC_USERNAME = 'ubuntu_de'
-TRAC_PASSWORD = 'G3h31m!'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

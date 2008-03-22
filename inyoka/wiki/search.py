@@ -31,7 +31,7 @@ class WikiSearchAdapter(SearchAdapter):
     def recv(self, page_id):
         rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
         return {
-            'title': rev.title,
+            'title': rev.page.name,
             'user': rev.user,
             'date': rev.change_date,
             'url': url_for(rev.page),
@@ -44,7 +44,7 @@ class WikiSearchAdapter(SearchAdapter):
         search.store(
             component='w',
             uid=rev.page.id,
-            title=rev.title,
+            title=rev.page.name,
             user=rev.user_id,
             date=rev.change_date,
             auth=rev.page.name,
