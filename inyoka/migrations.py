@@ -52,50 +52,16 @@ def fix_ikhaya_icon_relation_definition(m):
         alter table ikhaya_article modify column icon_id integer;
     ''')
 
-
-def add_skype_and_sip(m):
+def fix_sqlalchemy_forum(m):
     """
-    This migration added support for skype and SIP profile fields.
+    This migration alters some forum tables to match the new
+    sqlalchemy layout.
     """
     m.engine.execute('''
-        alter table portal_user
-            add column skype varchar(200) not null after yim,
-            add column wengophone varchar(200) not null after skype,
-            add column sip varchar(200) not null after wengophone;
+        alter table forum_topic change column slug
+            slug varchar(50) not null;
     ''')
 
 
-def add_subscription_notified_and_forum(m):
-    """
-    This migration added two fields to the subscription table.
-    """
-    m.engine.execute('''
-        begin;
-        alter table portal_subscription
-            add column forum_id integer null after topic_id,
-            add column notified bool not null after wiki_page_id;
-        create index portal_subscription_forum_id
-            on portal_subscription (forum_id);
-        commit;
-        alter table portal_subscription
-            add constraint forum_id_refs_id_7009f990
-                foreign key forum_id_refs_id_7009f990 (forum_id)
-                references forum_forum (id);
-    ''')
-
-
-def add_wiki_revision_change_date_index(m):
-    """
-    This revision added an index on the change date
-    """
-    m.engine.execute('''
-        alter table wiki_revision
-            add index wiki_revision_change_date(change_date);
-    ''')
-
-
-MIGRATIONS = [
-    create_initial_revision, fix_ikhaya_icon_relation_definition,
-    add_skype_and_sip, add_subscription_notified_and_forum,
-    add_wiki_revision_change_date_index
-]
+MIGRATIONS = [create_initial_revision, fix_ikhaya_icon_relation_definition,
+             fix_sqlalchemy_forum]
