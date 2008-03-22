@@ -68,7 +68,6 @@ def convert_wiki():
     from MoinMoin.request import RequestCLI
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
-    from MoinMoin.parser.wiki import Parser as NormalParser
     from inyoka.scripts.converter.create_templates import create
     from _mysql_exceptions import IntegrityError
     try:
@@ -76,16 +75,8 @@ def convert_wiki():
     except IntegrityError:
         print 'wiki templates are already created'
 
-    # Hack to disable camel case
-    class Parser(NormalParser):
-        def __init__(self, raw, request, **kw):
-            self.formatting_rules = re.sub(r"\(\?P<word>.*\n", "",
-                                           self.formatting_rules)
-            self.formatting_rules = re.sub(r"\(\?P<interwiki>.*\n", "",
-                                           self.formatting_rules)
-            NormalParser.__init__(self, raw, request, **kw)
-
-    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter
+    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter, \
+            InyokaParser
     from inyoka.wiki.utils import normalize_pagename
     request = RequestCLI()
     formatter = InyokaFormatter(request)
@@ -104,7 +95,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['menu.lst']):
+    for i, moin_name in enumerate(['VirtualBox']):
         if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
                          'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
@@ -185,7 +176,7 @@ def convert_wiki():
 
         # edit the wiki page for syntax converting
         formatter.setPage(page)
-        parser = Parser(text, request)
+        parser = InyokaParser(text, request)
         text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')

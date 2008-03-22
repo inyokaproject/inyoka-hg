@@ -14,12 +14,28 @@ from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
+from MoinMoin.parser.wiki import Parser
 
 addslashes = lambda x: x.replace('"', '\\"')
 
 
+# Hack to disable camel case
+class InyokaParser(Parser):
+    def __init__(self, raw, request, **kw):
+        self.formatting_rules = re.sub(r"\(\?P<word>.*\n", "",
+                                       self.formatting_rules)
+        self.formatting_rules = re.sub(r"\(\?P<interwiki>.*\n", "",
+                                       self.formatting_rules)
+        Parser.__init__(self, raw, request, **kw)
+
+
 class InyokaFormatter(FormatterBase):
     list_depth = 0
+
+    def _format(self, text):
+        """Format a string"""
+        parser = InyokaParser(text, self.request)
+        return self.request.redirectedOutput(parser.format, self)
 
     def macro(self, macro_obj, name, args):
         if name in ['Diskussion']:
@@ -147,20 +163,18 @@ class InyokaFormatter(FormatterBase):
             return u''.join(result)
 
         if processor_name == 'Wissen':
-            links = []
+            content = []
+            content_re = re.compile('\s+\*\s+\[\d+\]:(.+)')
             for line in lines:
-                for match in re.findall('\[([^\]]+)\]', line):
-                    try:
-                        int(match)
-                    except ValueError:
-                        links.append(u"'[%s]'" % match)
+                line = content_re.match(line).groups()[0].strip()
+                content.append("'%s'" % self._format(line))
             return u'[[Vorlage(%s, %s)]]' % (processor_name,
-                                             u', '.join(links))
+                                             u', '.join(content))
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
             return u'{{{\n#!vorlage %s\n%s\n}}}\n' % (processor_name,
-                                                    u'\n'.join(lines))
+                                      self._format(u'\n'.join(lines)))
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
         pagename = normalize_pagename(pagename)
