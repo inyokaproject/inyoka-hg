@@ -15,7 +15,7 @@ import cPickle
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
-from sqlalchemy.sql import select, func, and_
+from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -26,7 +26,7 @@ from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
-from inyoka.utils.database import session
+from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table
@@ -187,38 +187,25 @@ class Topic(object):
         """Move the topic to an other forum."""
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        session.execute(forum_table.update(forum_table.c.id.in_(ids), values={
+        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count - 1,
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
         topic.forum = forum
-        session.flush(self)
+        dbsession.flush(self)
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        session.execute(forum_table.update(forum_table.c.id.in_(ids), values={
+        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count + 1,
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
 
     def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('forum', 'topic', self.slug),
-            'reply': ('forum', 'topic', self.slug, 'reply'),
-            'report': ('forum', 'topic', self.slug, 'report'),
-            'split': ('forum', 'topic', self.slug, 'split'),
-            'move': ('forum', 'topic', self.slug, 'move'),
-            'lock': ('forum', 'topic', self.slug, 'lock'),
-            'unlock': ('forum', 'topic', self.slug, 'unlock'),
-            'restore': ('forum', 'topic', self.slug, 'restore'),
-            'delete': ('forum', 'topic', self.slug, 'delete'),
-            'hide': ('forum', 'topic', self.slug, 'hide'),
-            'solve': ('forum', 'topic', self.slug, 'solve'),
-            'unsolve': ('forum', 'topic', self.slug, 'unsolve'),
-            'subscribe': ('forum', 'topic', self.slug, 'subscribe'),
-            'unsubscribe': ('forum', 'topic', self.slug, 'unsubscribe')
-        }[action])
+        if action == 'show':
+            return href('forum', 'topic', self.slug)
+        return href('forum', 'topic', self.slug, action)
 
     def delete(self):
         """
@@ -230,6 +217,7 @@ class Topic(object):
         self.last_post = None
         self.deregister()
         self.save()
+
         cur = connection.cursor()
         cur.execute('''
             delete from forum_post
@@ -396,7 +384,7 @@ class TopicMapperExtension(MapperExtension):
                     post_table.c.topic_id != instance.id,
                     topic_table.c.forum_id.in_(children),
                     topic_table.c.id == post_table.c.topic_id))
-        session.flush()
+        dbsession.flush()
 
 
 
@@ -442,7 +430,7 @@ class Post(object):
 
     @staticmethod
     def url_for_post(id, paramstr=None):
-        row = session.execute(select(
+        row = dbsession.execute(select(
             [func.count(post_table.c.id), topic_table.c.slug], and_(
                 topic_table.c.id == post_table.c.topic_id,
                 topic_table.c.id == select(
@@ -459,36 +447,33 @@ class Post(object):
 
     @staticmethod
     def get_max_id():
-        return session.execute(select([func.max(Post.c.id)])).fetchone()[0]
+        return dbsession.execute(select([func.max(Post.c.id)])).fetchone()[0]
 
     def deregister(self):
         """
         This function removes all relations to this post.
         """
-        if self.id == self.topic.last_post.id:
+        pt, tt = post_table, topic_table
+        if self.id == self.topic.last_post_id:
             try:
-                self.topic.last_post = self.topic.post_set.order_by('id') \
-                                .exclude(id=self.id)[0]
+                self.topic.last_post = dbsession.query(Post).filter(and_(
+                    pt.c.topic_id==self.topic.id,
+                    not_(pt.c.id==self.id)
+                )).order_by(pt.c.id)[0]
             except IndexError:
                 self.topic.last_post = None
-        if self.id == self.topic.forum.last_post.id:
-            cur = connection.cursor()
-            cur.execute('''
-                select p.id
-                 from forum_post p, forum_topic t, forum_forum f
-                 where p.topic_id = t.id and
-                       t.forum_id = %s and
-                       p.id != %s
-                 order by id desc
-                 limit 1
-            ''', [self.topic.forum.id, self.id])
+        if self.id == self.topic.forum.last_post_id:
+            last_post = dbsession.query(Post).filter(and_(
+                pt.c.topic_id==tt.c.id,
+                tt.c.forum_id==self.topic.forum.id,
+                pt.c.id!=self.id
+            )).order_by(pt.c.id.desc()).limit(1)[0]
             try:
-                self.topic.forum.last_post_id = cur.fetchone()[0]
+                self.topic.forum.last_post = last_post
             except TypeError:
                 self.topic.forum.last_post = None
-            self.topic.forum.save()
-        self.topic.post_count = self.topic.post_set.count() - 1
-        self.topic.save()
+        self.topic.post_count -= 1
+        dbsession.commit()
         for idx in xrange(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
 
@@ -713,19 +698,19 @@ class SAUser(object):
     def __unicode__(self):
         return self.username
 
-session.mapper(SAUser, user_table)
-session.mapper(Privilege, privilege_table, properties={
+dbsession.mapper(SAUser, user_table)
+dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })
 
-session.mapper(Forum, forum_table, properties={
+dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic),
     'children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
     'last_post': relation(Post)},
     extension=ForumMapperExtension()
 )
-session.mapper(Topic, topic_table, properties={
+dbsession.mapper(Topic, topic_table, properties={
     'author': relation(SAUser,
         primaryjoin=topic_table.c.author_id == user_table.c.id,
         foreign_keys=[topic_table.c.author_id]),
@@ -741,23 +726,23 @@ session.mapper(Topic, topic_table, properties={
         primaryjoin=topic_table.c.id == post_table.c.topic_id)
     }, extension=TopicMapperExtension()
 )
-session.mapper(Post, post_table, properties={
+dbsession.mapper(Post, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
     'attachments': relation(Attachment)},
     extension=PostMapperExtension()
 )
-session.mapper(Attachment, attachment_table)
-session.mapper(Poll, poll_table, properties={
+dbsession.mapper(Attachment, attachment_table)
+dbsession.mapper(Poll, poll_table, properties={
     'topic': relation(Topic, backref='polls')
 })
-session.mapper(PollOption, poll_option_table, properties={
+dbsession.mapper(PollOption, poll_option_table, properties={
     'poll': relation(Poll, backref='options')
 })
 """
-session.mapper(SAAttachment, attachment_table)
-session.mapper(SAForum, forum_table, properties={
+dbsession.mapper(SAAttachment, attachment_table)
+dbsession.mapper(SAForum, forum_table, properties={
     'last_post': relation(SAPost,
         primaryjoin=forum_table.c.last_post_id==post_table.c.id,
         foreign_keys=[forum_table.c.last_post_id]),
@@ -765,7 +750,7 @@ session.mapper(SAForum, forum_table, properties={
         primaryjoin=forum_table.c.id==forum_table.c.parent_id,
         foreign_keys=[forum_table.c.parent_id])
 })
-session.mapper(SATopic, topic_table, properties={
+dbsession.mapper(SATopic, topic_table, properties={
     'forum': relation(SAForum,
         primaryjoin=topic_table.c.forum_id==forum_table.c.id,
         foreign_keys=[topic_table.c.forum_id]),
@@ -776,7 +761,7 @@ session.mapper(SATopic, topic_table, properties={
         primaryjoin=topic_table.c.last_post_id==post_table.c.id,
         foreign_keys=[topic_table.c.last_post_id])
 })
-session.mapper(SAPost, post_table, properties={
+dbsession.mapper(SAPost, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id==user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
