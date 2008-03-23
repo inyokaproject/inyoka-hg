@@ -8,6 +8,7 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
+from sqlalchemy import not_
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
@@ -22,6 +23,7 @@ from inyoka.utils.http import HttpResponse, HttpResponseRedirect, \
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.database import session as dbsession
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditIconForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -33,6 +35,7 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum, Privilege
+from inyoka.forum.database import forum_table
 
 
 @require_manager
@@ -445,7 +448,8 @@ def ikhaya_date_edit(request, date=None):
 @require_manager
 @templated('admin/forums.html')
 def forums(request):
-    sortable = Sortable(Forum.objects.all(), request.GET, '-name')
+    sortable = Sortable(Forum.query, request.GET, '-name',
+        sqlalchemy=True, sao_column=forum_table.c.name)
     return {
         'table': sortable
     }
@@ -461,18 +465,19 @@ def forums_edit(request, id=None):
     new_forum = id is None
 
     def _add_field_choices():
-        query = Forum.objects.all()
+        query = Forum.query
         if id:
-            query = query.exclude(id=id)
+            query = query.filter(forum_table.c.id!=id)
         categories = [(c.id, c.name) for c in query]
         form.fields['parent'].choices = [(-1, "-")] + categories
 
     if id is None:
         f = Forum()
     else:
-        f = Forum.objects.get(id=id)
+        f = Forum.query.get(id)
 
     if request.method == 'POST':
+        forums = Forum.query
         form = EditForumForm(request.POST)
         _add_field_choices()
         if form.is_valid():
@@ -480,7 +485,7 @@ def forums_edit(request, id=None):
             f.name = data['name']
             f.position = data['position']
             if f.slug != data['slug']:
-                if Forum.objects.filter(slug=data['slug']):
+                if forums.filter(forum_table.c.slug==data['slug']):
                     form.errors['slug'] = (
                         (u'Bitte einen anderen Slug angeben,'
                          u'„%s“ ist schon vergeben.'
@@ -490,13 +495,9 @@ def forums_edit(request, id=None):
                     f.slug = data['slug']
 
             f.description = data['description']
-            try:
-                if int(data['parent']) != -1:
-                    f.parent = Forum.objects.get(id=data['parent'])
-            except Forum.DoesNotExist:
-                form.errors['parent'] = (u'Forum %s existiert nicht'
-                                         % escape(data['parent']),)
-            f.save()
+            if int(data['parent']) != -1:
+                f.parent = forums.get(data['parent'])
+            dbsession.commit()
             if not form.errors:
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
                       escape(f.name), new_forum and 'angelegt' or 'editiert'))
