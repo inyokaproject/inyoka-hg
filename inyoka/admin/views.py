@@ -8,7 +8,7 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
-from sqlalchemy import not_
+from sqlalchemy import not_, and_
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
@@ -35,7 +35,7 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
 from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
 from inyoka.forum.models import Forum, Privilege
-from inyoka.forum.database import forum_table
+from inyoka.forum.database import forum_table, privilege_table
 
 
 @require_manager
@@ -592,22 +592,24 @@ def edit_user(request, username):
                 user.banned = data['banned']
 
             #: forum privileges
+            privileges = Privilege.query
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
-                    try:
-                        privilege = Privilege.objects.get(forum__id=forum_id,
-                            group__isnull=True, user=user)
-                        privilege.user = user
-                        privilege.forum = Forum.objects.get(id=forum_id)
-                        _set_privileges()
-                    except Privilege.DoesNotExist:
+                    privilege = privileges.filter(and_(
+                        privilege_table.c.forum_id==forum_id,
+                        privilege_table.c.group_id==None,
+                        privilege_table.c.user_id==user.id
+                    )).first()
+                    if privilege is None:
                         privilege = Privilege(
                             user=user,
-                            forum=Forum.objects.get(id=forum_id)
+                            forum=Forum.query.get(forum_id)
                         )
-                        _set_privileges()
-                    privilege.save()
+                        dbsession.save(privilege)
+
+                    _set_privileges()
+                    dbsession.flush()
 
             # group editing
             groups_joined = [groups.get(name=gn) for gn in
@@ -617,8 +619,10 @@ def edit_user(request, username):
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
 
-            # save the user object back to the database
+            # save the user object back to the database as well as other
+            # database changes
             user.save()
+            dbsession.commit()
 
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
                   % escape(user.username), True)
@@ -630,22 +634,25 @@ def edit_user(request, username):
 
     # collect forum privileges
     forum_privileges = []
-    forums = Forum.objects.all()
+    forums = Forum.query.all()
     for forum in forums:
-        try:
-            privilege = Privilege.objects.get(forum=forum, user=user)
-            forum_privileges.append((forum.id,
+        privilege = Privilege.query.filter(and_(
+            privilege_table.c.forum_id==forum.id,
+            privilege_table.c.user_id==user.id
+        )).first()
+        if privilege:
+            forum_privileges.append((
+                forum.id,
                 forum.name,
                 filter(lambda p: getattr(privilege, 'can_' + p, False),
-                        [p[0] for p in PRIVILEGES_DETAILS])
-                )
-            )
-        except Privilege.DoesNotExist:
+                       [p[0] for p in PRIVILEGES_DETAILS])
+            ))
+        else:
             forum_privileges.append((forum.id, forum.name, []))
 
     groups_joined = groups_joined or user.groups.all()
-    groups_not_joined = groups_not_joined or [x for x in groups
-                                              if not x in groups_joined]
+    groups_not_joined = groups_not_joined or \
+                        [x for x in groups if not x in groups_joined]
 
     return {
         'user': user,
@@ -735,21 +742,25 @@ def groups_edit(request, name=None):
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
-                    try:
-                        privilege = Privilege.objects.get(forum__id=forum_id,
-                            user__isnull=True, group=group)
-                        privilege.group = group
-                        privilege.forum = Forum.objects.get(id=forum_id)
-                        _set_privileges()
-                    except Privilege.DoesNotExist:
+                    privilege = Privilege.query.filter(and_(
+                        privilege_table.c.forum_id==forum_id,
+                        privilege_table.c.user_id==None,
+                        privilege_table.c.group_id==group.id
+                    )).first()
+                    if not privilege:
                         privilege = Privilege(
                             group=group,
-                            forum=Forum.objects.get(id=forum_id)
+                            forum=Forum.query.get(forum_id)
                         )
-                        _set_privileges()
-                    privilege.save()
+                        dbsession.save(privilege)
 
+                    _set_privileges()
+                    dbsession.flush()
+
+            # save changes to the database
             group.save()
+            dbsession.commit()
+
             flash(u'Die Gruppe „%s“ wurde erfolgreich %s'
                   % (escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
@@ -759,17 +770,20 @@ def groups_edit(request, name=None):
 
     # collect forum privileges
     forum_privileges = []
-    forums = Forum.objects.all()
+    forums = Forum.query.all()
     for forum in forums:
-        try:
-            privilege = Privilege.objects.get(forum=forum, group=group)
-            forum_privileges.append((forum.id,
-                forum.name,
+        privilege = Privilege.query.filter(and_(
+            privilege_table.c.forum_id==forum.id,
+            privilege_table.c.group_id==group.id,
+        )).first()
+
+        if privilege:
+            forum_privileges.append((
+                forum.id, forum.name,
                 filter(lambda p: getattr(privilege, 'can_' + p, False),
-                        [p[0] for p in PRIVILEGES_DETAILS])
-                )
-            )
-        except Privilege.DoesNotExist:
+                       [p[0] for p in PRIVILEGES_DETAILS])
+            ))
+        else:
             forum_privileges.append((forum.id, forum.name, []))
 
     return {

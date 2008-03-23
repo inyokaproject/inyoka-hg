@@ -628,6 +628,20 @@ class Attachment(object):
         return self.get_file_url()
 
 
+class Privilege(object):
+
+    def __init__(self, forum, group=None, user=None, **kwargs):
+        if group is None and user is None:
+            raise ValueError('Privilege needs at least one group or user')
+        uid = user and user.id or None
+        gid = group and group.id or None
+        self.group_id = gid
+        self.user_id = uid
+        self.forum_id = forum.id
+        for permission, value in kwargs.iteritems():
+            setattr(self, permission, value)
+
+
 class Poll(object):
 
     def __init__(self, question, options, multiple_votes):
@@ -647,10 +661,6 @@ class PollOption(object):
 class Voter(object):
     #voter = models.ForeignKey(User)
     #poll = models.ForeignKey(Poll)
-    pass
-
-
-class Privilege(object):
     pass
 
 
@@ -684,6 +694,7 @@ class SAUser(object):
 
     def __unicode__(self):
         return self.username
+
 
 dbsession.mapper(SAUser, user_table)
 dbsession.mapper(Privilege, privilege_table, properties={
