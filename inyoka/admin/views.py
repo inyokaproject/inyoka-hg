@@ -475,6 +475,11 @@ def forums_edit(request, id=None):
         f = Forum()
     else:
         f = Forum.query.get(id)
+    if f is None:
+        flash(u'Forum mit der ID „%s“ existiert nicht'
+              % id)
+        return HttpResponseRedirect(href('admin', 'forum'))
+
 
     if request.method == 'POST':
         forums = Forum.query
@@ -496,8 +501,15 @@ def forums_edit(request, id=None):
 
             f.description = data['description']
             if int(data['parent']) != -1:
-                f.parent = forums.get(data['parent'])
+                parent = forums.filter(data['parent'])
+            if parent:
+                f.parent = parent[0]
+            else:
+                form.errors['parent'] = (u'Forum %s existiert nicht'
+                                         % escape(data['parent']),)
+
             dbsession.commit()
+
             if not form.errors:
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
                       escape(f.name), new_forum and 'angelegt' or 'editiert'))
