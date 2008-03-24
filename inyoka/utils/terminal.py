@@ -25,6 +25,8 @@ _formats = {
 
 def get_dimensions():
     """Return the current terminal dimensions."""
+    if not hasattr(sys.stdout, 'fileno'):
+        return (80, 24)
     from struct import pack, unpack
     from fcntl import ioctl
     from termios import TIOCGWINSZ

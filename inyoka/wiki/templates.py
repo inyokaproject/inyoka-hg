@@ -624,7 +624,7 @@ class Value(Expr):
         if isinstance(this, (int, long, float)):
             return float(this)
         elif isinstance(this, basestring):
-            m = number_re.match(this)
+            m = number_re.search(this)
             if m:
                 return float(m.group())
         return default
@@ -669,6 +669,9 @@ class Value(Expr):
         elif isinstance(self.value, dict):
             return u', '.join(u'%s: %s' % x for x in self.value.iteritems())
         return unicode(self.value)
+
+    def __str__(self):
+        return str(unicode(self))
 
     def __hash__(self):
         if isinstance(self.value, (list, tuple)):
@@ -788,32 +791,6 @@ class Var(Expr):
         return context[self.name]
 
 
-class And(Expr):
-
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-    def evaluate(self, context):
-        val = self.left.evaluate(context)
-        if not val:
-            return val
-        return self.right.evaluate(context)
-
-
-class Or(Expr):
-
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-    def evaluate(self, context):
-        val = self.left.evaluate(context)
-        if val:
-            return val
-        return self.right.evaluate(context)
-
-
 class Bin(Expr):
     operation = None
 
@@ -826,6 +803,24 @@ class Bin(Expr):
             self.left.evaluate(context),
             self.right.evaluate(context)
         )
+
+
+class And(Bin):
+
+    def evaluate(self, context):
+        val = self.left.evaluate(context)
+        if not val:
+            return val
+        return self.right.evaluate(context)
+
+
+class Or(Bin):
+
+    def evaluate(self, context):
+        val = self.left.evaluate(context)
+        if val:
+            return val
+        return self.right.evaluate(context)
 
 
 class Add(Bin):
