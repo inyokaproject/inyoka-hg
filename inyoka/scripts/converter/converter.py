@@ -95,7 +95,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['VirtualBox']):
+    for i, moin_name in enumerate(['Ubuntu FAQ', 'Galerie']):
         if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
                          'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these

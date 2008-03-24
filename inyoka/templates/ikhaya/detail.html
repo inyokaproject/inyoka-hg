@@ -86,6 +86,7 @@
           text: editor.val()
         }, function(data) {
           output.html(data);
+          makeCommentLinks(output);
           preview.slideDown('fast');
         });
         return false;
