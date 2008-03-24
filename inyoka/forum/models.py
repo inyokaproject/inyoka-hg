@@ -131,6 +131,8 @@ class TopicMapperExtension(MapperExtension):
             for child in forum.children:
                 children.append(child.id)
                 collect_children_ids(child, children)
+        if not instance.forum:
+            return
         forums = instance.forum.parents
         forums.append(instance.forum)
         for forum in forums:
@@ -143,7 +145,6 @@ class TopicMapperExtension(MapperExtension):
                     post_table.c.topic_id != instance.id,
                     topic_table.c.forum_id.in_(children),
                     topic_table.c.id == post_table.c.topic_id))
-        dbsession.flush()
 
 
 class PostMapperExtension(MapperExtension):
