@@ -236,11 +236,13 @@ class StaticPage(models.Model):
 class Subscription(models.Model):
     objects = SubscriptionManager()
     user = models.ForeignKey(User)
-    topic = models.ForeignKey(Topic, null=True)
-    forum = models.ForeignKey(Forum, null=True)
-    wiki_page = models.ForeignKey(Page, null=True)
-    notified = models.BooleanField('User was already notified',
-                                   default=False)
+    topic_id = models.IntegerField(null=True)
+    # XXX fix it!
+    #topic = models.ForeignKey(Topic, null=True)
+    #forum = models.ForeignKey(Forum, null=True)
+    #wiki_page = models.ForeignKey(Page, null=True)
+    #notified = models.BooleanField('User was already notified',
+    #                               default=False)
 
     def __unicode__(self):
         if self.topic:

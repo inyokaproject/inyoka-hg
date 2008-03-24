@@ -13,6 +13,10 @@
 {% extends 'forum/page.html' %}
 
 {% set title_trace = [topic.title|e] %}
+{% set navigation_trace =  [
+    (forum|url, forum.name),
+    (topic|url, topic.title)
+  ] + navigation_trace %}
 {% set name = 'Thema „%s“ - ' % topic.title|e %}
 {% set feeds = [
   (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/25')),

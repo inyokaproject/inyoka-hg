@@ -9,7 +9,7 @@ fi
 
 cd /opt
 
-aptitude install --assume-yes mercurial subversion python-simplejson mysql-server mysql-client python-openid python-tz python-mysqldb python-xapian
+aptitude install --assume-yes mercurial subversion python-simplejson mysql-server mysql-client python-openid python-tz python-mysqldb python-xapian python-dnspython
 
 svn co http://code.djangoproject.com/svn/django/trunk/ django
 ln -s /opt/django/django /usr/lib/python2.5/site-packages/

@@ -70,13 +70,16 @@ from inyoka.utils.urls import href
 
 class Sortable(object):
 
-    def __init__(self, objects, args, default):
+    def __init__(self, objects, args, default, sqlalchemy=False,
+                 sao_column=None):
         self.objects = objects
         self.order = args.get('order') or default
         self.order_column = self.order.startswith('-') and self.order[1:] or \
                             self.order
+        self.sao_column = sao_column
         self.related = args.get('related') or False
         self.default = default
+        self.is_sqlalchemy = sqlalchemy
 
     def get_html(self, key, value, related=False):
         if key == self.order_column:
@@ -96,9 +99,16 @@ class Sortable(object):
             new_order, related_q, value, img)
 
     def get_objects(self):
+        order = self.order
+        if self.is_sqlalchemy:
+            order = self.order.startswith('-') and self.sao_column.desc() or \
+                    self.sao_column.asc()
         if self.related:
-            return self.objects.order_by(self.order).select_related()
-        return self.objects.order_by(self.order)
+            if self.is_sqlalchemy:
+                return self.objects.order_by(order)
+            else:
+                return self.objects.order_by(order).select_related()
+        return self.objects.order_by(order)
 
 
 class Filterable(object):

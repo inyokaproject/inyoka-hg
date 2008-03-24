@@ -15,10 +15,11 @@ from datetime import datetime
 from jinja.constants import LOREM_IPSUM_WORDS
 from inyoka.conf import settings
 from inyoka.portal.user import User, Group
-from inyoka.forum.models import Forum, Topic, Privilege
+from inyoka.forum.models import Forum, Topic, Post, Privilege
 from inyoka.forum.acl import PRIVILEGES
 from inyoka.ikhaya.models import Category, Article, Comment
 from inyoka.wiki.models import Page
+from inyoka.utils.database import session
 
 MARKS = ('.', ';', '!', '?')
 WORDS = LOREM_IPSUM_WORDS.split(' ')
@@ -128,7 +129,7 @@ def make_users():
 def make_forum():
     print 'Creating forum test data'
     try:
-        admin = User.objects.select(is_manager=True)[0]
+        admin = User.objects.filter(is_manager=True)[0]
     except:
         admin = None
     for name in create_names(7, title):
@@ -139,23 +140,25 @@ def make_forum():
             except IndexError:
                 pass
         f = Forum(name=name, parent=parent)
-        f.save()
         if admin is not None:
-            Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True)).save()
+            Privilege(user_id=admin.id, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True))
         forums.append(f)
-        if parent != None:
+        session.commit()
+        if parent:
             for _ in xrange(randint(1, 3)):
-                t = Topic.objects.create(f, title()[:100], sentences(min=1, max=10), author=
-                                         choice(users), pub_date=randtime())
+                author = choice(users)
+                t = Topic(title=title()[:100], author_id=author.id, forum=f)
+                p = Post(topic=t, text=sentences(min=1, max=10), author_id=author.id, pub_date=randtime())
+                session.commit()
                 for _ in xrange(randint(1, 40)):
-                    t.reply(sentences(min=1, max=10), choice(users), randtime())
+                    p = Post(topic=t, text=sentences(min=1, max=10), author_id=choice(users).id, pub_date=randtime())
+            session.commit()
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)
-    f.save()
     d = Forum(name=u'Diskussionen', slug=settings.WIKI_DISCUSSION_FORUM, parent=f)
-    d.save()
     forums.append(f)
     forums.append(d)
+    session.commit()
 
 
 def make_ikhaya():

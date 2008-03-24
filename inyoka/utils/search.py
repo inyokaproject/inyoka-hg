@@ -283,7 +283,6 @@ class SearchSystem(object):
             qry = xapian.Query(xapian.Query.OP_FILTER, qry,
                                xapian.Query('P%s' % component.lower()))
         if exclude:
-            # XXX: negative filters seems to be not possible in xapian
             qry = xapian.Query(xapian.Query.OP_AND_NOT, qry,
                                xapian.Query(xapian.Query.OP_OR, exclude))
         if date_begin or date_end:

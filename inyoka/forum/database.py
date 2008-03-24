@@ -10,44 +10,111 @@
     :copyright: 2008 by Christoph Hack, Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
-from sqlalchemy import Table
-from sqlalchemy.orm import relation, backref
+from sqlalchemy import Table, Column, String, Text, Integer, \
+        ForeignKey, DateTime, UniqueConstraint, Boolean
 from inyoka.utils.database import metadata, session
-from inyoka.forum.models import SAForum, SATopic, SAPost, SAAttachment, SAUser
 
 
-forum_table = Table('forum_forum', metadata, autoload=True)
-topic_table = Table('forum_topic', metadata, autoload=True)
-post_table = Table('forum_post', metadata, autoload=True)
+forum_table = Table('forum_forum', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), nullable=False),
+    Column('slug', String(100), nullable=False, unique=True, index=True),
+    Column('description', String(500), nullable=False, default=''),
+    Column('parent_id', Integer, ForeignKey('forum_forum.id'),
+           nullable=True, index=True),
+    Column('position', Integer, nullable=False, default=0),
+    Column('last_post_id', Integer, ForeignKey('forum_post.id',
+            use_alter=True, name='forum_forum_lastpost_fk'), nullable=True),
+    Column('post_count', Integer, default=0, nullable=False),
+    Column('topic_count', Integer, default=0, nullable=False),
+    Column('welcome_message_id', Integer, ForeignKey('forum_welcomemessage.id'),
+           nullable=True)
+)
+
+topic_table = Table('forum_topic', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('forum_id', Integer, ForeignKey('forum_forum.id'), index=True),
+    Column('title', String(100), nullable=False),
+    Column('slug', String(50), nullable=False, index=True),
+    Column('view_count', Integer, default=0, nullable=False),
+    Column('post_count', Integer, default=0, nullable=False),
+    Column('sticky', Boolean, default=False, nullable=False),
+    Column('solved', Boolean, default=False, nullable=False),
+    Column('locked', Boolean, default=False, nullable=False),
+    Column('reported', Text(), nullable=True),
+    Column('reporter_id', Integer, ForeignKey('portal_user.id'),
+            nullable=True),
+    Column('hidden', Boolean, default=False, nullable=False),
+    Column('ubuntu_version', String(5), nullable=True),
+    Column('ubuntu_distro', String(40), nullable=True),
+    Column('author_id', Integer, ForeignKey('portal_user.id'),
+            nullable=False),
+    Column('first_post_id', Integer, ForeignKey('forum_post.id',
+            use_alter=True, name='forum_topic_firstpost_fk'), nullable=True),
+    Column('last_post_id', Integer, ForeignKey('forum_post.id',
+            use_alter=True, name='forum_topic_lastpost_fk'), nullable=True),
+    Column('ikhaya_article_id', Integer, ForeignKey('ikhaya_article.id'),
+            nullable=True),
+    Column('has_poll', Boolean, default=False, nullable=False)
+)
+
+post_table = Table('forum_post', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('text', Text(), nullable=False),
+    Column('rendered_text', Text(), nullable=False),
+    Column('author_id', Integer, ForeignKey('portal_user.id'),
+           nullable=False),
+    Column('pub_date', DateTime, nullable=False),
+    Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=False),
+    Column('hidden', Boolean, default=False, nullable=False)
+)
+
+poll_table = Table('forum_poll', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('question', String(250), nullable=False),
+    Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=True,
+          index=True),
+    Column('start_time', DateTime, nullable=False),
+    Column('end_time', DateTime, nullable=False),
+    Column('multiple_votes', Boolean, default=False, nullable=False)
+)
+
+poll_option_table = Table('forum_polloption', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('poll_id', Integer, ForeignKey('forum_poll.id'), nullable=False),
+    Column('name', String(250), nullable=False),
+    Column('votes', Integer, default=0, nullable=False)
+)
+
+privilege_table = Table('forum_privilege', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('group_id', Integer, nullable=True),
+    Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=True),
+    Column('forum_id', Integer, ForeignKey('forum_forum.id'), nullable=False),
+    Column('can_read', Boolean, default=False, nullable=False),
+    Column('can_reply', Boolean, default=False, nullable=False),
+    Column('can_create', Boolean, default=False, nullable=False),
+    Column('can_edit', Boolean, default=False, nullable=False),
+    Column('can_revert', Boolean, default=False, nullable=False),
+    Column('can_delete', Boolean, default=False, nullable=False),
+    Column('can_sticky', Boolean, default=False, nullable=False),
+    Column('can_vote', Boolean, default=False, nullable=False),
+    Column('can_create_poll', Boolean, default=False, nullable=False),
+    Column('can_upload', Boolean, default=False, nullable=False),
+    Column('can_moderate', Boolean, default=False, nullable=False)
+)
+
 user_table = Table('portal_user', metadata, autoload=True)
-attachment_table = Table('forum_attachment', metadata, autoload=True)
+ikhaya_article = Table('ikhaya_article', metadata, autoload=True)
+forum_welcomemessage_table = Table('forum_welcomemessage', metadata,
+                                   autoload=True)
+attachment_table = Table('forum_attachment', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('file', String(100), unique=True, nullable=False),
+    Column('name', String(255), nullable=False),
+    Column('comment', Text(), nullable=True),
+    Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=True)
+)
 
 
-# set up the mappers for sqlalchemy
-session.mapper(SAUser, user_table)
-session.mapper(SAAttachment, attachment_table)
-session.mapper(SAForum, forum_table, properties={
-    'last_post': relation(SAPost,
-        primaryjoin=forum_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[forum_table.c.last_post_id]),
-    'parent': relation(SAForum,
-        primaryjoin=forum_table.c.id==forum_table.c.parent_id,
-        foreign_keys=[forum_table.c.parent_id])
-})
-session.mapper(SATopic, topic_table, properties={
-    'forum': relation(SAForum,
-        primaryjoin=topic_table.c.forum_id==forum_table.c.id,
-        foreign_keys=[topic_table.c.forum_id]),
-    'author': relation(SAUser,
-        primaryjoin=topic_table.c.author_id==user_table.c.id,
-        foreign_keys=[topic_table.c.author_id]),
-    'last_post': relation(SAPost,
-        primaryjoin=topic_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[topic_table.c.last_post_id])
-})
-session.mapper(SAPost, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id==user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(SAAttachment, backref=backref('post')),
-})
+metadata.create_all()
