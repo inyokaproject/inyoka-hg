@@ -219,7 +219,6 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         article = Article.objects.get(slug=article)
 
     if request.method == 'POST':
-        print request.POST['pub_date']
         form = EditArticleForm(request.POST)
         _add_field_choices()
         if form.is_valid():
