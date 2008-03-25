@@ -352,6 +352,15 @@ def newpost(request, topic_slug=None, quote_id=None):
                 })
                 send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
                                   % t.title, text)
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = t.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             resp = HttpResponseRedirect(post.get_absolute_url())
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])

@@ -244,6 +244,8 @@ class UserCPSettingsForm(forms.Form):
     hide_profile = forms.BooleanField(label='Online-Status verstecken')
     hide_avatars = forms.BooleanField(label='Avatare ausblenden')
     hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
+    autosubscribe = forms.BooleanField(required=False,
+                        label='Thema bei Antwort automatisch abonnieren')
 
 
 class UserCPProfileForm(forms.Form):
