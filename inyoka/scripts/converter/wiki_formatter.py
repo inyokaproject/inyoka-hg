@@ -324,14 +324,10 @@ class InyokaFormatter(FormatterBase):
         return u')--'
 
     def attachment_link(self, url, text, **kw):
-        # TODO: Implement something like [attachment:asd.tar.gz:asd] that
-        #       links directly to the attachment and not on the attachment
-        #       wiki page
         return u'[attachment:%s/%s:%s]' % (self.page.page_name, url, text)
 
     def attachment_image(self, url, **kw):
-        # TODO
-        return u''
+        return u'[[Bild(%s/%s)]]' % (self.page.page_name, url)
 
     def definition_list(self, on, **kw):
         if not on:

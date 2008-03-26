@@ -220,6 +220,12 @@ class Forum(object):
             forum = forum.parent
             parents.append(forum)
         return parents
+    
+    def get_latest_topics(self, count=100):
+        return Topic.query.filter_by(forum_id=self.id) \
+	    .order_by(Topic.id.desc()).limit(100)
+
+    latest_topics = property(get_latest_topics)
 
     def get_read_status(self, user):
         """
@@ -231,7 +237,7 @@ class Forum(object):
         for forum in self.children:
             if not forum.get_read_status(user):
                 return False
-        for topic in self.topics[:-100]:
+        for topic in self.latest_topics:
             if not topic.get_read_status(user):
                 return False
         return True
@@ -244,7 +250,7 @@ class Forum(object):
         forums = [self]
         while forums:
             forum = forums.pop()
-            for topic in forum.topics[:-100]:
+            for topic in forum.latest_topics:
                 topic.mark_read(user)
             forums.extend(forum.children)
 

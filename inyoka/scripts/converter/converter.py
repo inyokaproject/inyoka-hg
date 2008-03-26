@@ -96,7 +96,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Icons']):
+    for i, moin_name in enumerate(['Downloads/Gutsy_Gibbon/Statisch']):
         if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
                          'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
@@ -196,8 +196,6 @@ def convert_users():
     odd_coordinates = []
     mail_error = []
     for row in select_blocks(users_table.select()):
-        if row.user_id <= 49047:
-            continue
         avatar = ''
         co_long = co_lat = None
         if row.user_avatar != '':
@@ -261,7 +259,7 @@ def convert_users():
                 mail_error.append(row.user_id)
             else:
                 print e
-                #sys.exit(1)
+                sys.exit(1)
         users[u.username] = u
         connection.queries = []
     #print odd_coordinates, mail_error
@@ -283,7 +281,7 @@ def convert_forum():
     print 'Converting forum structue'
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
-    """s = select([forums_table])
+    s = select([forums_table])
     result = conn.execute(s)
     forum_cat_map = {}
 
@@ -318,9 +316,9 @@ def convert_forum():
             forum.parent_id = new_id
             forum.save()
 
-    print 'Converting topics'"""
+    print 'Converting topics'
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
-    """s = select([topic_table])
+    s = select([topic_table])
 
     # maybe make it dynamic, but not now ;)
     ubuntu_version_map = {
@@ -368,20 +366,18 @@ def convert_forum():
             transaction.commit()
             i = 0
         else:
-            i += 1"""
+            i += 1
 
 
     print 'Converting posts'
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
-    """s = select([post_table, post_text_table],
+    s = select([post_table, post_text_table],
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
-    for row in select_blocks(s, start_with=1059018):
-        if int(row[post_table.c.post_id]) <= 1059018:
-            continue
+    for row in select_blocks(s):
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
         cur = connection.cursor()
@@ -397,7 +393,7 @@ def convert_forum():
             connection.queries = []
             i = 0
         else:
-            i += 1"""
+            i += 1
     print 'fixing forum references'
 
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
