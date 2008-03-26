@@ -36,9 +36,6 @@ img.cat {
   background-image: url(../img/caption.png);
   background-repeat: repeat-x;
   background-color: #DFCB9D; 
-}
-
-.container.get_ubuntu {
   border: 1px solid #E6A66B;
 }
 
