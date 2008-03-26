@@ -86,6 +86,12 @@ poll_option_table = Table('forum_polloption', metadata,
     Column('votes', Integer, default=0, nullable=False)
 )
 
+poll_vote_table = Table('forum_voter', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('voter_id', Integer, ForeignKey('portal_user.id'), nullable=False),
+    Column('poll_id', Integer, ForeignKey('forum_poll.id'), nullable=False)
+)
+
 privilege_table = Table('forum_privilege', metadata,
     Column('id', Integer, primary_key=True),
     Column('group_id', Integer, nullable=True),

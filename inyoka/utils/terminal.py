@@ -68,7 +68,7 @@ class FancyPrinter(object):
             self._stream.write(text)
         else:
             if isinstance(text, unicode):
-                encoding = getattr(self._stream, 'encoding') or 'latin1'
+                encoding = getattr(self._stream, 'encoding', None) or 'latin1'
                 text = text.encode(encoding, 'ignore')
             codes = []
             if self._color is not None:
@@ -79,4 +79,4 @@ class FancyPrinter(object):
             self._stream.write('\x1b[%sm%s\x1b[0m' % (';'.join(codes), text))
         return self
 
-    __lshift__ = __rlshift__ = __call__
+    __lshift__ = __call__
