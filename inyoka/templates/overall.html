@@ -138,19 +138,49 @@
       {%- endfor %}
 
       <div class="page_content">
+<<<<<<< local
+<<<<<<< local
+        {%- if navi_type -%}
+        {%- if navi_type == 'both' %}
+        <div class="navigation navi_tabbar">
+          {%- block opt_tabbar_navigation %}{% endblock -%}
+        </div>
+        {%- else %}
+        <div class="navigation navi_{{ navi_type }}">
+          {%- block navigation %}{% endblock -%}
+=======
+=======
+>>>>>>> other
         {% set tabbar = navi_type in ['tabbar', 'both'] %}
         {% set sidebar = navi_type in ['sidebar', 'both'] %}
         {%- if tabbar %}
         <div class="navi_tabbar navigation">
           {%- block tabbar %}{% endblock -%}
+<<<<<<< local
+>>>>>>> other
+=======
+>>>>>>> other
         </div>
         {%- endif %}
+<<<<<<< local
+<<<<<<< local
+        <div class="content content_{{ navi_typ }}">
+        {%- else %}
+        <div class="content">
+        {%- endif %}
+=======
+=======
+>>>>>>> other
         {%- if sidebar %}
         <div class="navi_sidebar navigation">
           {%- block sidebar %}{% endblock -%}
         </div>
         {%- endif %}        
         <div class="content{{ tabbar and ' content_tabbar' or '' }}{{ sidebar and ' content_sidebar' or '' }}">
+<<<<<<< local
+>>>>>>> other
+=======
+>>>>>>> other
           {%- block content %}{% endblock -%}
         </div>
       </div>
