@@ -137,3 +137,94 @@ def whoisonline(args, match):
     return href('portal', 'whoisonline')
 
 
+@legacy.url(r'^/privmsg(:?\.php)/?$')
+def privmsg(args, match):
+    if 'mode' in args and args['mode'] == 'post':
+        try:
+            user = User.query.get(id=args['u'])
+            if user is None:
+                return
+            return href('portal', 'privmsg', 'new', user.username)
+        except KeyError:
+            return
+    else:
+        return href('portal', 'privmsg')
+
+
+@legacy.url(r'^/privmsg/new/?$')
+def privmsg_new(args, match):
+    if 'u' in args:
+        try:
+            user = User.query.get(id=args['u'])
+            if user is None:
+                return
+            return href('portal', 'privmsg', 'new', user.username)
+        except KeyError:
+            return
+    else:
+        return href('portal', 'privmsg', 'new')
+
+
+@legacy.url(r'^/privmsg/folder/([^/]+)(:?/view/(\d+))/?$')
+def privmsg_folder(args, match, folder, privmsg_id=None):
+    FOLDER_MAPPING = {
+        'inbox': 'inbox',
+        'sentbox': 'sent',
+        'outbox': 'sent',
+        'savebox': 'archive',
+    }
+    try:
+        if 'mode' in args and args['mode'] == 'read':
+            return href('portal', 'privmsg', FOLDER_MAPPING[folder], int(args['p']))
+        else:
+            return href('portal', 'privmsg', FOLDER_MAPPING[folder], privmsg_id)
+    except (KeyError, ValueError):
+        return
+
+
+@legacy.url('^/privmsg/(:?reply|quote)/(\d+)/?$')
+def privmsg_reply(args, match, privmsg_id):
+    try:
+        return href('portal', 'privmsg', 'new', reply_to=int(privmsg_id))
+    except ValueError:
+        return
+
+
+@legacy.url('^/profile/?$')
+def profile(args, match):
+    if 'mode' not in args:
+        return href('portal', 'usercp')
+    elif args['mode'] == 'sendpassword':
+        return href('portal', 'lost_password')
+    elif args['mode'] == 'viewprofile':
+        try:
+            user = User.query.get(id=int(args['u']))
+            if user is None:
+                return
+            return href('portal', 'users', user.username)
+        except (KeyError, ValueError):
+            return
+    elif args['mode'] == 'email':
+        try:
+            user = User.query.get(id=int(args['u']))
+            if user is None:
+                return
+            return href('portal', 'users', user.username)
+        except (KeyError, ValueError):
+            return
+
+
+@legacy.url('^/register/?$')
+def register(args, match):
+    return href('portal', 'register')
+
+
+@legacy.url('^/login/?$')
+def login(args, match):
+    return href('portal', 'login')
+
+
+@legacy.url('^/logout/?$')
+def logout(args, match):
+    return href('portal', 'logout')
+
