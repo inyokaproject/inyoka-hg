@@ -95,7 +95,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['VirtualBox']):
+    for i, moin_name in enumerate(['LTSP']):
         if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
                          'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
             # ignore these pages (since gedit equals Gedit in inyoka these
@@ -176,6 +176,7 @@ def convert_wiki():
 
         # edit the wiki page for syntax converting
         formatter.setPage(page)
+        formatter.inyoka_page = new_page
         parser = InyokaParser(text, request)
         text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),

@@ -12,14 +12,22 @@ from inyoka.forum.acl import get_privileges
 from inyoka.forum.models import Post, Forum
 from inyoka.utils.urls import url_for
 from inyoka.utils.search import search, SearchAdapter
+from inyoka.utils.decorators import deferred
 
 
 class ForumSearchAuthDecider(object):
     """Decides whetever a user can display a search result or not."""
 
     def __init__(self, user):
-        privs = get_privileges(user, Forum.objects.all())
-        self.privs = dict((key, priv['read']) for key, priv in privs.iteritems())
+        self.user = user
+
+    @deferred
+    def privs(self):
+        # the privileges are set on first call and not on init because this
+        # would create one useless query if the user e.g. just searched the
+        # wiki.
+        privs = get_privileges(self.user, Forum.objects.all())
+        return dict((key, priv['read']) for key, priv in privs.iteritems())
 
     def __call__(self, auth):
         # TODO: Hide hidden topics

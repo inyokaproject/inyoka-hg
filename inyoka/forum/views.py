@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import re
+from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_
@@ -166,22 +167,23 @@ def viewtopic(request, topic_slug, page=1):
     )
 
     if t.has_poll:
-        polls = Poll.query.get_polls(t.id, request.user)
+        polls = Poll.query.options(eagerload('options')).filter(Poll.c.topic_id==t.id).all()
+        print "POLLS", polls, t.id
 
         if request.method == 'POST':
             # the user participated in a poll
             votings = []
             poll_ids = []
-            for poll in polls.values():
+            for poll in polls:
                 # get the votes for every poll in this topic
-                if poll['multiple']:
-                    v = request.POST.getlist('poll_%s' % poll['id'])
+                if poll.multiple_votes:
+                    v = request.POST.getlist('poll_%s' % poll.id)
                 else:
-                    v = request.POST.get('poll_%s' % poll['id'])
+                    v = request.POST.get('poll_%s' % poll.id)
                 if v:
                     if not privileges['vote']:
                         return abort_access_denied(request)
-                    elif poll['participated']:
+                    elif poll.participated:
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
@@ -191,7 +193,7 @@ def viewtopic(request, topic_slug, page=1):
                         if id in poll['options'] and id not in votings:
                             votings.append(id)
                             poll['options'][id]['votes'] += 1
-                    if poll['multiple']:
+                    if poll.multiple_votes:
                         for id in v:
                             _vote(int(id))
                     else:
@@ -203,10 +205,6 @@ def viewtopic(request, topic_slug, page=1):
             if votings:
                 # write the votes into the database
                 Poll.objects.do_vote(request.user.id, votings, poll_ids)
-
-        # calculate how many percent the options have of the total votes
-        # this has to be done after voting
-        Poll.objects.calculate_percentage(polls)
     else:
         polls = None
 
@@ -219,16 +217,39 @@ def viewtopic(request, topic_slug, page=1):
         request.user.save()
         subscribed = Subscription.objects.user_subscribed(request.user,
                                                           topic=t)
+    post_objects = pagination.objects
+    to_save = []
+    for post in post_objects:
+        if not post.rendered_text:
+            post.rendered_text = post.render_text(force_existing=True)
+            to_save.append(post)
+    if to_save:
+        def _():
+            for post in to_save:
+                yield post.id
+                yield post.rendered_text
+
+        cur = connection.cursor()
+        cur.execute(u'''
+            update forum_post
+                set rendered_text = case id
+                    %s
+                    else rendered_text
+                end
+        ''' % u'\n'.join(('when %s then %s',) * len(to_save)), tuple(_()))
+        connection._commit()
+
     return {
         'topic':        t,
         'forum':        t.forum,
-        'posts':        pagination.objects,
+        'posts':        post_objects,
         'privileges':   privileges,
         'is_subscribed':subscribed,
         'pagination':   pagination,
         'polls':        polls,
-        'can_vote':     polls and (False in [p['participated'] for p in
-                                             polls.values()]) or False
+        'show_vote_results': request.GET.get('action') == 'vote_results',
+        'can_vote':     polls and (False in [p.participated for p in
+                                             polls]) or False
     }
 
 
@@ -329,6 +350,15 @@ def newpost(request, topic_slug=None, quote_id=None):
                 })
                 send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
                                   % t.title, text)
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = t.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             resp = HttpResponseRedirect(post.get_absolute_url())
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
@@ -372,7 +402,7 @@ def newtopic(request, slug=None, article=None):
 
     if article:
         # the user wants to create a wiki discussion
-        f = Forum.objects.get(slug=settings.WIKI_DISCUSSION_FORUM)
+        f = Forum.query.select_by(slug=settings.WIKI_DISCUSSION_FORUM)
         article = WikiPage.objects.get(name=article)
         if request.method != 'POST':
             flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
@@ -463,8 +493,9 @@ def newtopic(request, slug=None, article=None):
                 d = poll_form.cleaned_data
                 poll = Poll(question=d['question'], options=d['options'],
                              multiple_votes=d['multiple'])
-                polls.append(poll)
                 session.commit()
+                print "POLL_ID", poll.id
+                polls.append(poll)
                 poll_ids.append(poll.id)
                 flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
                       escape(poll.question), success=True)
@@ -508,7 +539,9 @@ def newtopic(request, slug=None, article=None):
             #Attachment.objects.update_post_ids(att_ids,
             #                                   topic.first_post_id)
             # bind all new polls to the new topic
-            #Poll.objects.update_topic_ids(poll_ids, topic.id)
+            session.flush([topic])
+            print "POLL_BIND", poll_ids, topic.id
+            Poll.bind(poll_ids, topic.id)
 
             if article:
                 # the topic is a wiki discussion, bind it to the wiki
@@ -526,6 +559,15 @@ def newtopic(request, slug=None, article=None):
                         % article.title, text)
 
             session.commit()
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = topic.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             return HttpResponseRedirect(topic.get_absolute_url())
 
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
@@ -1219,7 +1261,7 @@ def newposts(request, page=1):
     privs = get_privileges(request.user, Forum.objects.all())
     all_topics = cache.get('forum/lasttopics')
     if not all_topics:
-        all_topics = list(SATopic.query.options(eagerload('author'), \
+        all_topics = list(Topic.query.options(eagerload('author'), \
             eagerload('last_post'), eagerload('last_post.author')) \
             .order_by((topic_table.c.last_post_id.desc()))[:80])
         cache.set('forum/lasttopics', all_topics)

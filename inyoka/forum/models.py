@@ -15,7 +15,7 @@ import cPickle
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
-from sqlalchemy.sql import select, func, and_, not_
+from sqlalchemy.sql import select, func, and_, not_, exists
 from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -29,7 +29,7 @@ from inyoka.utils.local import current_request
 from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table
+        poll_option_table, poll_vote_table
 from inyoka.portal.user import User, Group
 
 
@@ -131,6 +131,8 @@ class TopicMapperExtension(MapperExtension):
             for child in forum.children:
                 children.append(child.id)
                 collect_children_ids(child, children)
+        if not instance.forum:
+            return
         forums = instance.forum.parents
         forums.append(instance.forum)
         for forum in forums:
@@ -143,7 +145,6 @@ class TopicMapperExtension(MapperExtension):
                     post_table.c.topic_id != instance.id,
                     topic_table.c.forum_id.in_(children),
                     topic_table.c.id == post_table.c.topic_id))
-        dbsession.flush()
 
 
 class PostMapperExtension(MapperExtension):
@@ -653,14 +654,39 @@ class Poll(object):
             self.options.append(option)
         self.multiple_votes = multiple_votes
 
+    @staticmethod
+    def bind(poll_ids, topic_id):
+        """Bind the polls given in poll_ids to the given topic id."""
+        if not poll_ids:
+            return False
+        dbsession.execute(poll_table.update(and_(poll_table.c.id.in_(poll_ids),
+            poll_table.c.topic_id == None), values={
+                'topic_id': topic_id
+        }))
+
+    @property
+    def votes(self):
+        """Calculate the total number of votes in this poll."""
+        return sum(o.votes for o in self.options)
+
+    def has_participated(self, user=None):
+        user = user or current_request.user
+        return dbsession.execute(select([exists([PollVote.c.id],
+            and_(PollVote.c.id == self.id,
+            PollVote.c.voter_id == user.id))])).fetchone()[0]
+
+    participated = property(has_participated)
+
 
 class PollOption(object):
-    pass
+
+    @property
+    def percentage(self):
+        """Calculate the percentage of votes for this poll option."""
+        return int(round(self.votes / self.poll.votes * 100))
 
 
-class Voter(object):
-    #voter = models.ForeignKey(User)
-    #poll = models.ForeignKey(Poll)
+class PollVote(object):
     pass
 
 
@@ -733,10 +759,14 @@ dbsession.mapper(Post, post_table, properties={
 )
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={
-    'topic': relation(Topic, backref='polls')
+    'topic': relation(Topic, backref='polls'),
+    'options': relation(PollOption)
 })
 dbsession.mapper(PollOption, poll_option_table, properties={
-    'poll': relation(Poll, backref='options')
+    'poll': relation(Poll)
+})
+dbsession.mapper(PollVote, poll_vote_table, properties={
+    'poll': relation(Poll)
 })
 """
 dbsession.mapper(SAAttachment, attachment_table)
