@@ -404,7 +404,7 @@ def newtopic(request, slug=None, article=None):
 
     if article:
         # the user wants to create a wiki discussion
-        f = Forum.objects.get(slug=settings.WIKI_DISCUSSION_FORUM)
+        f = Forum.query.select_by(slug=settings.WIKI_DISCUSSION_FORUM)
         article = WikiPage.objects.get(name=article)
         if request.method != 'POST':
             flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
