@@ -240,9 +240,10 @@ class Subscription(models.Model):
     # XXX fix it!
     #topic = models.ForeignKey(Topic, null=True)
     #forum = models.ForeignKey(Forum, null=True)
-    #wiki_page = models.ForeignKey(Page, null=True)
-    #notified = models.BooleanField('User was already notified',
-    #                               default=False)
+    forum_id = models.IntegerField(null=True)
+    wiki_page = models.ForeignKey(Page, null=True)
+    notified = models.BooleanField('User was already notified',
+                                   default=False)
 
     def __unicode__(self):
         if self.topic:
