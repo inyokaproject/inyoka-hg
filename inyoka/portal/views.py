@@ -861,7 +861,7 @@ def feedselector(request, app=None):
             r['errors'] = errors
 
 
-    r['forums'] = Forum.objects.all()
+    r['forums'] = Forum.query.all()
     r['ikhaya_categories'] = Category.objects.all()
     return r
 
