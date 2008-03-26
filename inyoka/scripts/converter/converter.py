@@ -40,23 +40,24 @@ from datetime import datetime
 users = {}
 
 
-def select_blocks(query, block_size=1000):
+def select_blocks(query, block_size=1000, start_with=0):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
     table = list(query._table_iterator())[0]
     # get the tables primary key (a little bit hackish)
     key_name = list(table.primary_key)[0].name
     key = table.c[key_name]
-    range = (0, block_size)
+    range = (start_with, start_with + block_size)
     failed = 0
     while 1:
+        print range
         result = query.where(key.between(*range)).execute()
         i = 0
         for i, row in enumerate(result):
             yield row
         if i == 0:
             failed += 1
-            if failed == 5:
+            if failed == 10:
                 break
         else:
             failed = 0
@@ -195,6 +196,8 @@ def convert_users():
     odd_coordinates = []
     mail_error = []
     for row in select_blocks(users_table.select()):
+        if row.user_id <= 49047:
+            continue
         avatar = ''
         co_long = co_lat = None
         if row.user_avatar != '':
@@ -258,7 +261,7 @@ def convert_users():
                 mail_error.append(row.user_id)
             else:
                 print e
-                sys.exit(1)
+                #sys.exit(1)
         users[u.username] = u
         connection.queries = []
     #print odd_coordinates, mail_error
@@ -280,7 +283,7 @@ def convert_forum():
     print 'Converting forum structue'
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
     categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
-    s = select([forums_table])
+    """s = select([forums_table])
     result = conn.execute(s)
     forum_cat_map = {}
 
@@ -315,9 +318,9 @@ def convert_forum():
             forum.parent_id = new_id
             forum.save()
 
-    print 'Converting topics'
+    print 'Converting topics'"""
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
-    s = select([topic_table])
+    """s = select([topic_table])
 
     # maybe make it dynamic, but not now ;)
     ubuntu_version_map = {
@@ -365,18 +368,20 @@ def convert_forum():
             transaction.commit()
             i = 0
         else:
-            i += 1
+            i += 1"""
 
 
     print 'Converting posts'
     post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
     post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
                             autoload=True)
-    s = select([post_table, post_text_table],
+    """s = select([post_table, post_text_table],
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
     i = 0
-    for row in select_blocks(s):
+    for row in select_blocks(s, start_with=1059018):
+        if int(row[post_table.c.post_id]) <= 1059018:
+            continue
         text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
             row[post_text_table.c.bbcode_uid], '')).to_markup()
         cur = connection.cursor()
@@ -392,8 +397,9 @@ def convert_forum():
             connection.queries = []
             i = 0
         else:
-            i += 1
+            i += 1"""
     print 'fixing forum references'
+
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
         settings.DATABASE_HOST, settings.DATABASE_NAME)
