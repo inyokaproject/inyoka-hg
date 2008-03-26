@@ -146,19 +146,29 @@ class Lexer(object):
                  enter='size'),
             rule(r'\[font\s*=\s*(.*?)\s*\]', bygroups('font_face'),
                  enter='font'),
-            rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl')
+            rule(r'\[raw\](.*?)\[/raw\]', bygroups('raw')),
+            rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl'),
+            include('highlightable')
         ),
         'links': ruleset(
             rule(r'\[\s*(\d+)\s*\]', bygroups('sourcelink')),
             rule(r'(\[\s*)((?:%s|\?|#)\S+)(\s*\])' % _url_pattern, bygroups(
                  'external_link_begin', 'link_target', 'external_link_end')),
-            rule(r'\[((?:%s|\?).*?)\s+' % _url_pattern, bygroups('link_target'),
+            rule(r'\[((?:%s|\?|#).*?)\s+' % _url_pattern, bygroups('link_target'),
                  enter='external_link'),
             rule(r'\[\s*([^:\]]+?)?\s*:\s*((?:::|[^:])*)\s*:\s*',
                  astuple('link_target'), enter='wiki_link'),
             rule(_url_pattern + '[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?',
                  'free_link')
         ),
+        'highlightable': ruleset(
+            rule(r'\[mark\]', enter='highlighted')
+        ),
+        # highlighted code
+        'highlighted': ruleset(
+            rule(r'\[/mark\]', leave=1)
+        ),
+        # metadata defs
         'metadata': ruleset(
             rule(r'\s*(\n|$)(?m)', leave=1),
             rule(r'\s*,\s*', 'func_argument_delimiter'),
@@ -190,6 +200,7 @@ class Lexer(object):
         ),
         'escaped_code': ruleset(
             rule('``', leave=1),
+            rule('`', enter='code')
         ),
         'code': ruleset(
             rule('`', leave=1),
@@ -251,7 +262,7 @@ class Lexer(object):
         'pre': ruleset(
             rule(r'\n?#!([\w_]+)', bygroups('parser_begin'),
                  switch='parser_arguments'),
-            switch('parser_data')
+            switch('pre_data')
         ),
         'parser_arguments': ruleset(
             rule(r'(?=\n|$)(?m)', 'parser_end', switch='parser_data'),
@@ -260,6 +271,10 @@ class Lexer(object):
         ),
         'parser_data': ruleset(
             rule(r'\}\}\}(?m)', leave=1)
+        ),
+        'pre_data': ruleset(
+            include('parser_data'),
+            include('highlightable')
         ),
         # a table row. with spans and all that stuff
         'table_row': ruleset(

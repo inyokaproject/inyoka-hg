@@ -26,6 +26,8 @@
         {{ h.field_errors(form.errors.hide_signatures) }}</dd>
     <dd>{{ form.hide_profile }} <label for="id_hide_profile">{{ form.hide_profile.label }}</label>
         {{ h.field_errors(form.errors.hide_profile) }}</dd>
+    <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
+        {{ h.field_errors(form.errors.autosubscribe) }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

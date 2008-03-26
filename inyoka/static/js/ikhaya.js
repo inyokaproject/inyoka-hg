@@ -8,8 +8,8 @@
  * :license: GNU GPL.
  */
 
-$(function() {
-  $('ul.comments > li.comment > p').each(function(i, comment) {
+function makeCommentLinks(elm) {
+  $('p', elm).each(function(i, comment) {
     $(comment).html($(comment).html().replace(/@(\d+)/g, '<a href="#comment_$1" class="comment_link">@$1</a>'));
   });
   $('.comment_link').mouseover(function() {
@@ -26,4 +26,8 @@ $(function() {
   }).mouseout(function() {
     this.tooltip.remove()
   });
+}
+
+$(function() {
+  makeCommentLinks($('ul.comments > li.comment'));
 })

@@ -25,7 +25,6 @@ from inyoka.conf import settings
 
 SQL_FILES = join(dirname(__file__), 'sql')
 
-
 def execute_script(con, name):
     """Execute a script on a connectable."""
     f = file(join(SQL_FILES, name))
@@ -94,8 +93,20 @@ def add_wiki_revision_change_date_index(m):
     ''')
 
 
+def fix_sqlalchemy_forum(m):
+    """
+    This migration alters some forum tables to match the new
+    sqlalchemy layout.
+    """
+    m.engine.execute('''
+        alter table forum_topic change column slug
+            slug varchar(50) not null;
+    ''')
+
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
-    add_wiki_revision_change_date_index
+    add_wiki_revision_change_date_index, fix_sqlalchemy_forum
 ]

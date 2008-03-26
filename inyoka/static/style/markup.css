@@ -185,3 +185,10 @@ code {
 .key * {
   display: inline;
 }
+
+.anchor {
+  float: right;
+  width: 16px;
+  height: 16px;
+  background-image: url(../img/anchor.png);
+}
