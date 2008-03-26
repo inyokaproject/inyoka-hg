@@ -27,7 +27,7 @@
   <h2>{{ title_trace[:-1]|join(' » ') }}</h2>
 {% endblock %}
 
-{% block navigation %}
+{% block tabbar %}
   {% if can.read %}
   <ul>
     <li><a href="?action=show"{{ action == 'show' and ' class="active"' or '' }}>Artikel</a></li>

@@ -484,7 +484,8 @@ table.syntaxtable td.linenos {
   margin-top: 0px;
 }
 
-.content_sidebar, .content_tabbar {
+.content {
+  clear: right;
   border: solid 1px #ccc;
   background-color: #fff;
   padding: 15px 20px;
@@ -492,15 +493,6 @@ table.syntaxtable td.linenos {
 
 .content_sidebar {
   margin-left: 15.0em;
-  clear: right;
-}
-
-.content_full {
-  margin-left: 0.0em;
-}
-
-.content_tabbar {
-  clear: both;
 }
 
 button.navi_toggle_down, button.navi_toggle_up {
@@ -530,13 +522,16 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .navi_sidebar {
+  float: left;
+}
+
+.navi_sidebar .container {
   border: solid 1px #ccc;
   background-color: #fff;
   background-image: url(../img/boxbg.png);
   background-repeat: repeat-x;
-  padding: 0.5em 1.0em;
-  float: left;
-  width: 12.0em;
+  padding: 0em 1em 0.5em 1em;
+  width: 12em;
   margin-bottom: 1.0em;
 }
 

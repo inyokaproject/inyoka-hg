@@ -32,6 +32,35 @@ img.cat {
   margin: 0.5em 0 0.5em 0.5em;
 }
 
+.container.get_ubuntu {
+  background-image: url(../img/caption.png);
+  background-repeat: repeat-x;
+  background-color: #DFCB9D; 
+}
+
+.get_ubuntu a {
+  display: block;
+  text-decoration: none;
+  border: 1px solid #E6A66B;
+  margin: 0 -1em -0.5em -1em;
+  padding: 0.5em 1em 0.5em 45px;
+  color: #555;
+  background-image: url(../img/download.png);
+  background-repeat: no-repeat;
+  background-position: center left;
+}
+
+.get_ubuntu h3 {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font-size: 1.1em;
+}
+
+.get_ubuntu span {
+  font-size: 0.8em;
+}
+
 .articles {
   margin: 0.7em 0 0.7em 1em;
   border-collapse: collapse;

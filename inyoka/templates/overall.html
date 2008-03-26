@@ -138,34 +138,24 @@
       {%- endfor %}
 
       <div class="page_content">
-        {%- if navi_type -%}
-        {%- if navi_type == 'tabbar' %}
+        {% set tabbar = navi_type in ['tabbar', 'both'] %}
+        {% set sidebar = navi_type in ['sidebar', 'both'] %}
+        {%- if tabbar %}
         <div class="navi_tabbar navigation">
-        {%- else %}
-        <div class="navi_sidebar navigation">
-        {%- endif %}
-          {% block navigation %}{% endblock %}
-        </div>{# .navi_tabbar .navi_sidebar .content #}
-        
-        {%- if navi_type == 'both' %}
-        <div class="navi_tabbar navigation">
-        {% block opt_tabbar_navigation %}{% endblock %}
+          {%- block tabbar %}{% endblock -%}
         </div>
         {%- endif %}
-        
-        {%- if navi_type == 'tabbar' %}
-        <div class="content_tabbar content">
-        {%- else %}
-        <div class="content_sidebar content">
-        {%- endif %}
-        {%- else %}
-        <div class="content">
-        {%- endif %}
-          {%- block content %}{% endblock %}
-        </div>{# .content_tabbar .content_sidebar .content #}
-      </div>{# .page_content #}
+        {%- if sidebar %}
+        <div class="navi_sidebar navigation">
+          {%- block sidebar %}{% endblock -%}
+        </div>
+        {%- endif %}        
+        <div class="content{{ tabbar and ' content_tabbar' or '' }}{{ sidebar and ' content_sidebar' or '' }}">
+          {%- block content %}{% endblock -%}
+        </div>
+      </div>
       <div style="clear: both"></div>
-    </div>{# .body #}
+    </div>
 
     <div class="footer">
       <ul>

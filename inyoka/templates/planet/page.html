@@ -23,22 +23,24 @@
   <h2>Was passiert in der Ubuntu-Welt?</h2>
 {% endblock %}
 
-{% block navigation %}
-  <h3 class="navi_planet">Planet</h3>
-  <p>
-    Der Planet stellt Nachrichten aus Blogs der Ubuntu- und
-    Open-Source- Gemeinschaft zusammen.  Wenn du ein Ubuntu-bezogenes Blog
-    kennst oder selber führst, kannst du es beim Moderationsteam <a href="{{
-    href('planet', 'suggest') }}">vorschlagen</a> und eintragen lassen.
-  </p>
-  {%- if blogs %}
-  <h3 class="navi_blogs">Blogs</h3>
-  <ul>
-  {%- for blog in blogs %}
-    <li><a href="{{ blog|url|e }}">{{ blog.name|e }}</a></li>
-  {%- endfor %}
-  </ul>
-  {%- endif %}
+{% block sidebar %}
+  <div class="container">
+    <h3 class="navi_planet">Planet</h3>
+    <p>
+      Der Planet stellt Nachrichten aus Blogs der Ubuntu- und
+      Open-Source- Gemeinschaft zusammen.  Wenn du ein Ubuntu-bezogenes Blog
+      kennst oder selber führst, kannst du es beim Moderationsteam <a href="{{
+      href('planet', 'suggest') }}">vorschlagen</a> und eintragen lassen.
+    </p>
+    {%- if blogs %}
+    <h3 class="navi_blogs">Blogs</h3>
+    <ul>
+    {%- for blog in blogs %}
+      <li><a href="{{ blog|url|e }}">{{ blog.name|e }}</a></li>
+    {%- endfor %}
+    </ul>
+    {%- endif %}
+  </div>
 {% endblock %}
 
 {% block content %}
