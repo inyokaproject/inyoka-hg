@@ -102,6 +102,25 @@ def missing_resource(request):
     """
 
 
+def get_attachment(request):
+    """
+    Get an attachment directly and do privilege check.
+    """
+    target = request.GET.get('target')
+    if not target:
+        raise PageNotFound()
+
+    target = normalize_pagename(target)
+    if not has_privilege(request.user, target, 'read'):
+        return AccessDeniedResponse()
+
+    target = Page.objects.attachment_for_page(target)
+    target = href('media', target)
+    if not target:
+        raise PageNotFound()
+    return HttpResponseRedirect(target)
+
+
 def get_image_resource(request):
     """
     Deliver the attachment  as image.  This is used by the `Picture` macro
