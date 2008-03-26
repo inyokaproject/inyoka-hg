@@ -690,7 +690,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .pathbar {
-  background-color: #fafafa;
+  background-color: #f6f6f6;
   border: 1px solid #bbb;
   padding: 5px 5px 5px 8px;
   font-size: 0.85em;

@@ -22,12 +22,7 @@
 {% endblock %}
 
 {% block sidebar %}
-  <div class="container get_ubuntu">
-    <a href="{# XXX: #}">
-      <h3>Hol' dir Ubuntu!</h3>
-      <span>8.04 „Hardy Heron“</span>
-    </a>
-  </div>
+  {%- block pre_navigation %}{% endblock -%}
   <div class="container">
     <h3 class="navi_ubuntu"><a href="http://www.ubuntu.com">Ubuntu</a></h3>
     <ul>

@@ -38,10 +38,17 @@ img.cat {
   background-color: #DFCB9D; 
 }
 
+.container.get_ubuntu {
+  border: 1px solid #E6A66B;
+}
+
+.get_ubuntu:hover * {
+  color: #888;
+}
+
 .get_ubuntu a {
   display: block;
   text-decoration: none;
-  border: 1px solid #E6A66B;
   margin: 0 -1em -0.5em -1em;
   padding: 0.5em 1em 0.5em 45px;
   color: #555;

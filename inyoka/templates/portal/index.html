@@ -18,6 +18,15 @@
   <h2>Übersicht</h2>
 {% endblock %}
 
+{% block pre_navigation %}
+  <div class="container get_ubuntu">
+    <a href="{# XXX: #}">
+      <h3>Hol' dir Ubuntu!</h3>
+      <span>8.04 „Hardy Heron“</span>
+    </a>
+  </div>
+{% endblock %}
+
 {% block portal_content %}
   <h3>Hallo</h3>
   <img src="{{ href('static', 'img', 'portal', 'ubuntu.png') }}" alt="Ubuntu" class="cat" />
