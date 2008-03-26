@@ -23,7 +23,7 @@ $(function () {
     $('#id_add_option').click(function addReply() {
       count = $('.newtopic_polls_replies').length;
       $($('.newtopic_polls_replies')[count-1])
-        .after('<dd class="newtopic_polls_sub newtopic_polls_replies">Antwort ' +
+        .after('<dd class="newtopic_polls_replies collapse_enabled">Antwort ' +
         (count + 1) + ': <input type="text" name="options" value="" />');
       $('#id_add_option').remove();
       $($('.newtopic_polls_replies')[count])

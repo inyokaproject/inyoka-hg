@@ -558,6 +558,15 @@ def newtopic(request, slug=None, article=None):
                         % article.title, text)
 
             session.commit()
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = topic.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             return HttpResponseRedirect(topic.get_absolute_url())
 
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
