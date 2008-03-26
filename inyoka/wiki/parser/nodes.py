@@ -28,6 +28,7 @@ from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
      resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
+from inyoka.utils.local import current_request
 
 
 def error_box(title, message):
@@ -504,6 +505,13 @@ class Document(Container):
     allowed_in_signatures = True
 
 
+class Raw(Container):
+    """
+    A raw container.
+    """
+    is_raw = True
+
+
 class Element(Container):
     """
     Baseclass for elements.
@@ -690,6 +698,15 @@ class Link(Element):
         if self.scheme == 'javascript':
             yield escape(self.caption)
             return
+        if self.scheme == 'mailto':
+            try:
+                request = current_request._get_current_object()
+                if not request.user.is_authenticated:
+                    href = escape(self.href[7:])
+                    yield href
+                    return
+            except RuntimeError:
+                pass
         rel = style = title = None
         if not self.netloc or self.netloc == settings.BASE_DOMAIN_NAME or \
            self.netloc.endswith('.' + settings.BASE_DOMAIN_NAME):
@@ -902,6 +919,7 @@ class Headline(Element):
             style=self.style,
             class_=self.class_
         )
+        yield u'<a href="#%s" class="anchor"></a>' % self.id
         for item in Element.prepare_html(self):
             yield item
         yield u'</h%d>' % (self.level + 1)
@@ -938,6 +956,27 @@ class Strong(Element):
         for item in Element.prepare_docbook(self):
             yield item
         yield u'</emphasis>'
+
+
+class Highlighted(Strong):
+    """
+    Marks highlighted text.
+    """
+
+    def generate_markup(self, w):
+        w.markup('[mark]')
+        Element.generate_markup(self, w)
+        w.markup('[/mark]')
+
+    def prepare_html(self):
+        classes = ['highlighted']
+        if self.class_:
+            classes.append(self._class)
+        yield build_htlm_tag(u'strong', id=self.id, style=self.style,
+                             classes=classes)
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</strong>'
 
 
 class Emphasized(Element):

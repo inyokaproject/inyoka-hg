@@ -803,7 +803,8 @@ class Anchor(Macro):
         self.id = id
 
     def build_node(self):
-        return nodes.Span(id=self.id)
+        return nodes.Link(u'#%s' % self.id, id=self.id, class_='anchor',
+                          children=[nodes.Text(u'')])
 
 
 #: this mapping is used by the `get_macro()` function to map public

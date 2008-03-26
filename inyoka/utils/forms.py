@@ -28,6 +28,7 @@ DATETIME_INPUT_FORMATS = (
     '%d.%m.%y %H:%M:%S',
     '%Y-%m-%d %H:%M',
     '%Y-%m-%d %H:%M:%S',
+    '%Y-%m-%dT%H:%MZ',
     '%Y-%m-%d, %H:%M',
     '%Y-%m-%d, %H:%M:%S',
     '%d.%m.%Y, %H:%M',

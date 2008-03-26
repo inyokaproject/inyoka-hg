@@ -290,6 +290,8 @@ def do_edit(request, name):
     form to update the attachment next to the description box.  If it's a
     normal page or no page yet this just displays a text box for the page
     text and an input field for the change note.
+    If the user is not logged in, he gets a warning that his IP will be
+    visible for everyone until Sankt-nimmerleinstag (forever).
 
     **Template**
         ``'wiki/action_edit.html'``
@@ -428,6 +430,12 @@ def do_edit(request, name):
                 else:
                     url = href('wiki', page.name)
                 return HttpResponseRedirect(url)
+    elif not request.user.is_authenticated:
+        flash(u'Du bearbeitest diese Seite unangemeldet. Wenn du speicherst, '
+              u'wird deine aktuelle IP-Adresse in der Versionsgeschichte '
+              u'aufgezeichnet und ist damit unwiderruflich öffentlich '
+              u'einsehbar.')
+
 
     # if we have merged this request we should inform the user about that,
     # and that we haven't saved the page yet.

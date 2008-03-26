@@ -26,6 +26,7 @@ from inyoka.utils.http import PageNotFound, DirectResponse, \
      HttpResponseForbidden
 from inyoka.utils.logger import logger
 from inyoka.utils.urls import get_resolver
+from inyoka.utils.database import session
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -82,38 +83,26 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # clean up after the local manager
         self._local_manager.cleanup()
+        session.remove()
 
         if settings.DEBUG:
-            from pprint import pprint
-            import sys, os, StringIO
-            stdout_encoding = sys.stdout.encoding or sys.getfilesystemencoding()
-            try:
-                cols = settings.DEBUG_COLUMNS - 7
-            except:
-                try:
-                    cols = os.environ['COLUMNS'] - 7
-                except:
-                    cols = 73
-            print >> sys.stderr, "DATABASE QUERIES (%s)" % len(connection.queries)
-            print >> sys.stderr, "-----------------------------------------"
-            for q in connection.queries:
-                sys.stdout.write(q['time'] + ': ')
-                f = StringIO.StringIO(q['sql'].replace('"', '').replace(',',', '))
-                first = True
-                while True:
-                    s = f.readline(cols)
-                    if not s:
-                        break
-                    s = s.rstrip('\n')
-                    if not s:
-                        continue
-                    if first:
-                        print >> sys.stderr, q['time'] + ':', s.encode(stdout_encoding)
-                        first = False
-                    else:
-                        print >> sys.stderr, ' '*6, s.encode(stdout_encoding)
-                print >> sys.stderr
-            print >> sys.stderr, "-----------------------------------------\n"
+            import sys
+            import re
+            from pprint import pformat
+            from textwrap import wrap
+            from inyoka.utils.terminal import get_dimensions, FancyPrinter
+            p = FancyPrinter(sys.stderr)
+            comma_re = re.compile(r',(?=\S)')
+            cols, rows = get_dimensions()
+
+            p.bold << '=' * cols << '\n'
+            p.red << 'DATABASE QUERIES (%s)\n' % len(connection.queries)
+            p.bold << '-' * cols << '\n'
+            for idx, q in enumerate(connection.queries):
+                p.green << '%s%s:\n' % (idx and '\n' or '', q['time'])
+                for line in wrap(comma_re.sub(', ', q['sql']), cols - 6):
+                    p << '    %s\n' % line.rstrip()
+            p.bold << '=' * cols << '\n'
         return response
 
 

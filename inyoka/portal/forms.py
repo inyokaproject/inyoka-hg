@@ -244,6 +244,8 @@ class UserCPSettingsForm(forms.Form):
     hide_profile = forms.BooleanField(label='Online-Status verstecken')
     hide_avatars = forms.BooleanField(label='Avatare ausblenden')
     hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
+    autosubscribe = forms.BooleanField(required=False,
+                        label='Thema bei Antwort automatisch abonnieren')
 
 
 class UserCPProfileForm(forms.Form):
@@ -277,7 +279,7 @@ class UserCPProfileForm(forms.Form):
     website = forms.URLField(label='Webseite', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                  max_length=10, required=False, help_text=u'''
-    Hier kannst du deinen GPG-Public-Key eintragen. Näheres zu diesem Thema
+    Hier kannst du deinen GPG-Key eintragen. Näheres zu diesem Thema
     erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web_of_Trust">im
     Wiki</a>.''')
 

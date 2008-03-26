@@ -13,7 +13,7 @@
     >>> doc = bbcode.parse('...')
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
+    :copyright: Copyright 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 import re
@@ -75,7 +75,7 @@ class Parser(object):
 
     def __init__(self, text, transformers=None):
         self.tokens = []
-        self.pos = 0
+        self.pos = self.depth = 0
         text = text.replace('\r\n', '\n')
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS
@@ -171,19 +171,24 @@ class Parser(object):
 
     def parse_node(self):
         """Parsing dispatcher."""
-        if self.token.type == 'text':
-            val = self.token.value
-            self.next()
-            return nodes.Text(val)
-        elif self.token.type == 'newline':
-            self.next()
-            return nodes.Newline()
-        elif self.token.type == 'tag' and self.token.name in self.handlers:
-            return self.handlers[self.token.name]()
-        else:
-            val = unicode(self.token)
-            self.next()
-            return nodes.Text(val)
+        self.depth += 1
+        try:
+            if self.token.type == 'text':
+                val = self.token.value
+                self.next()
+                return nodes.Text(val)
+            elif self.token.type == 'newline':
+                self.next()
+                return nodes.Newline()
+            elif self.depth < 180 and self.token.type == 'tag' and \
+                 self.token.name in self.handlers:
+                return self.handlers[self.token.name]()
+            else:
+                val = unicode(self.token)
+                self.next()
+                return nodes.Text(val)
+        finally:
+            self.depth -= 1
 
     def parse_strong(self):
         """parse [b]-tags"""
@@ -224,13 +229,11 @@ class Parser(object):
 
     def parse_mark(self):
         """
-        Parse [mark]-tags.  Because we no longer have the concept of marked
-        text this just renders into a strong node.  As a matter of fact it is
-        part of the normal parsing process and thus unhandled inside
-        preformatted blocks.
+        Parse [mark]-tags.  Because of popular request these are not still
+        supported like before.
         """
         self.expect_tag('mark')
-        return nodes.Strong(self.parse_until('/mark'))
+        return nodes.Highlighted(self.parse_until('/mark'))
 
     def parse_color(self):
         """parse [color]-tags"""
@@ -278,8 +281,36 @@ class Parser(object):
     def parse_code(self):
         """parse [code]-tags"""
         token = self.expect_tag('code')
-        text = nodes.Text(self.parse_until('/code', raw=True))
-        return nodes.Preformatted([text])
+        children = []
+        textbuf = []
+
+        def flush():
+            data = u''.join(textbuf)
+            if data:
+                children.append(nodes.Text(data))
+            del textbuf[:]
+            if not self.eos:
+                self.next()
+
+        while not self.eos and not (self.token.type == 'tag' and
+                                    self.token.name == '/code' and
+                                    not self.token.attr):
+            if self.token.type == 'tag' and \
+               self.token.name == 'mark':
+                flush()
+                markbuf = []
+                while not (self.token.type == 'tag' and
+                           self.token.name == '/mark' and
+                           not self.token.attr):
+                    markbuf.append(unicode(self.token))
+                    self.next()
+                data = u''.join(markbuf)
+                children.append(nodes.Highlighted([nodes.Text(data)]))
+            else:
+                textbuf.append(unicode(self.token))
+            self.next()
+        flush()
+        return nodes.Preformatted(children)
 
     def parse_list(self):
         """

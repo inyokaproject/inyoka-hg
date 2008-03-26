@@ -46,7 +46,7 @@ from django.conf import settings
 from inyoka.utils.cache import cache
 
 
-_block_re = re.compile(r'^\{\{\{(?:\n?#.*?$)?(.*?)^\}\}\}(?sm)')
+_block_re = re.compile(r'\{\{\{(?:\n?#.*?$)?(.*?)\}\}\}(?sm)')
 
 
 class StorageManager(object):

@@ -16,6 +16,7 @@ from Cookie import SimpleCookie
 from threading import Thread
 from inyoka.conf import settings
 from inyoka.utils.urls import url_encode
+from inyoka import INYOKA_REVISION
 
 try:
     from hashlib import md5
@@ -46,7 +47,9 @@ class SimpleFormatter(Formatter):
         if record.exc_info:
             if not record.exc_text:
                 record.exc_text = self.formatException(record.exc_info)
-        return self._fmt % record.__dict__
+        dct = dict(record.__dict__)
+        dct['revision'] = INYOKA_REVISION
+        return self._fmt % dct
 
 
 raw_formatter = Formatter()
@@ -57,11 +60,12 @@ description_formatter = SimpleFormatter("""\
 || '''Level''' || %(levelname)s ||
 || '''First occurrence''' || %(asctime)s ||
 || '''Module''' || %(module)s ||
-|| '''Line''' || %(lineno)s ||""")
+|| '''Line''' || %(lineno)s ||
+|| '''Revision''' || %(revision)s ||""")
 
 comment_formatter = SimpleFormatter("""\
 '''New occourrence''' on %(asctime)s in `%(module)s:%(lineno)s`\
-""")
+ (revision: %(revision)s)""")
 
 
 def get_record_hash(record):
