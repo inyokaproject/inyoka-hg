@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import re
+from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_
@@ -216,10 +217,32 @@ def viewtopic(request, topic_slug, page=1):
         request.user.save()
         subscribed = Subscription.objects.user_subscribed(request.user,
                                                           topic=t)
+    post_objects = pagination.objects
+    to_save = []
+    for post in post_objects:
+        if not post.rendered_text:
+            post.rendered_text = post.render_text(force_existing=True)
+            to_save.append(post)
+    if to_save:
+        def _():
+            for post in to_save:
+                yield post.id
+                yield post.rendered_text
+
+        cur = connection.cursor()
+        cur.execute(u'''
+            update forum_post
+                set rendered_text = case id
+                    %s
+                    else rendered_text
+                end
+        ''' % u'\n'.join(('when %s then %s',) * len(to_save)), tuple(_()))
+        connection._commit()
+
     return {
         'topic':        t,
         'forum':        t.forum,
-        'posts':        pagination.objects,
+        'posts':        post_objects,
         'privileges':   privileges,
         'is_subscribed':subscribed,
         'pagination':   pagination,
@@ -327,6 +350,15 @@ def newpost(request, topic_slug=None, quote_id=None):
                 })
                 send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
                                   % t.title, text)
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = t.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             resp = HttpResponseRedirect(post.get_absolute_url())
             return resp
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
@@ -370,7 +402,7 @@ def newtopic(request, slug=None, article=None):
 
     if article:
         # the user wants to create a wiki discussion
-        f = Forum.objects.get(slug=settings.WIKI_DISCUSSION_FORUM)
+        f = Forum.query.select_by(slug=settings.WIKI_DISCUSSION_FORUM)
         article = WikiPage.objects.get(name=article)
         if request.method != 'POST':
             flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
@@ -527,6 +559,15 @@ def newtopic(request, slug=None, article=None):
                         % article.title, text)
 
             session.commit()
+            try:
+                if request.user.settings['autosubscribe']:
+                    subscription = Subscription(
+                        user = request.user,
+                        topic_id = topic.id,
+                    )
+                    subscription.save()
+            except KeyError:
+                pass
             return HttpResponseRedirect(topic.get_absolute_url())
 
         form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
@@ -1220,7 +1261,7 @@ def newposts(request, page=1):
     privs = get_privileges(request.user, Forum.objects.all())
     all_topics = cache.get('forum/lasttopics')
     if not all_topics:
-        all_topics = list(SATopic.query.options(eagerload('author'), \
+        all_topics = list(Topic.query.options(eagerload('author'), \
             eagerload('last_post'), eagerload('last_post.author')) \
             .order_by((topic_table.c.last_post_id.desc()))[:80])
         cache.set('forum/lasttopics', all_topics)

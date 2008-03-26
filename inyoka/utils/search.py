@@ -262,7 +262,7 @@ class SearchSystem(object):
     def register_prefix_handler(self, prefixes, handler):
         """
         Register a prefix handler which can be used to search for
-        spezific terms in the database.  Instead of a simple prefix->value
+        specific terms in the database.  Instead of a simple prefix->value
         map, we use own handlers which can do additional transformations
         and database lookups, but they must all return a xapian.Query
         object (or None in case of failure).

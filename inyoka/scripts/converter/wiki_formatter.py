@@ -10,11 +10,11 @@
     :license: GNU GPL.
 """
 import re
-from MoinMoin.formatter.text_html import Formatter
 from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 from MoinMoin.parser.wiki import Parser
+from inyoka.forum.models import Topic
 
 addslashes = lambda x: x.replace('"', '\\"')
 
@@ -39,7 +39,9 @@ class InyokaFormatter(FormatterBase):
 
     def macro(self, macro_obj, name, args):
         if name in ['Diskussion']:
-            # TODO: Do something for discussoin
+            topic_id = int(args.split(',')[0].strip())
+            if Topic.query.get(topic_id):
+                self.inyoka_page.topic_id = topic_id
             return u''
 
         replacements = {
@@ -208,6 +210,7 @@ class InyokaFormatter(FormatterBase):
         return text
 
     def paragraph(self, on, **kwargs):
+        FormatterBase.paragraph(self, on)
         return u''
 
     def bullet_list(self, on, **kw):
@@ -309,7 +312,7 @@ class InyokaFormatter(FormatterBase):
 
     def linebreak(self, preformatted=1):
         if preformatted:
-            return u'\n\n'
+            return u'\\\n'
         return u'\n'
 
     def code(self, on, **kw):
@@ -360,3 +363,9 @@ class InyokaFormatter(FormatterBase):
 
     def sub(self, on, **kw):
         return u',,'
+
+    def comment(self, text):
+        text = text.replace('#', '')
+        if text.strip().startswith('acl'):
+            return u''
+        return u'##%s' % text
