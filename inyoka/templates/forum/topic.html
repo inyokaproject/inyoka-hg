@@ -65,17 +65,17 @@
 
   {%- if polls %}
   <form action="" method="post" class="poll">
-    {%- for pid, poll in polls.iteritems() %}
+    {%- for poll in polls %}
     <div><strong>{{ poll.question|e }}</strong></div>
     <table class="poll">
-      {%- for oid, option in poll.options.iteritems() %}
+      {%- for option in poll.options %}
       <tr>
         <td>
           {%- if not poll.participated and not show_vote_results %}
           <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
-                 name="poll_{{ pid }}" id="poll_{{ oid }}"
-                 value="{{ oid }}" />
-          <label for="poll_{{ oid }}">{{ option.name|e }}</label>
+                 name="poll_{{ poll.id }}" id="poll_{{ poll.id }}"
+                 value="{{ option.id }}" />
+          <label for="poll_{{ option.id }}">{{ option.name|e }}</label>
           {%- else %}
           {{ option.name|e }}
           {%- endif %}

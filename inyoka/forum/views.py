@@ -166,22 +166,23 @@ def viewtopic(request, topic_slug, page=1):
     )
 
     if t.has_poll:
-        polls = Poll.query.get_polls(t.id, request.user)
+        polls = Poll.query.options(eagerload('options')).filter(Poll.c.topic_id==t.id).all()
+        print "POLLS", polls, t.id
 
         if request.method == 'POST':
             # the user participated in a poll
             votings = []
             poll_ids = []
-            for poll in polls.values():
+            for poll in polls:
                 # get the votes for every poll in this topic
-                if poll['multiple']:
-                    v = request.POST.getlist('poll_%s' % poll['id'])
+                if poll.multiple_votes:
+                    v = request.POST.getlist('poll_%s' % poll.id)
                 else:
-                    v = request.POST.get('poll_%s' % poll['id'])
+                    v = request.POST.get('poll_%s' % poll.id)
                 if v:
                     if not privileges['vote']:
                         return abort_access_denied(request)
-                    elif poll['participated']:
+                    elif poll.participated:
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
@@ -191,7 +192,7 @@ def viewtopic(request, topic_slug, page=1):
                         if id in poll['options'] and id not in votings:
                             votings.append(id)
                             poll['options'][id]['votes'] += 1
-                    if poll['multiple']:
+                    if poll.multiple_votes:
                         for id in v:
                             _vote(int(id))
                     else:
@@ -203,10 +204,6 @@ def viewtopic(request, topic_slug, page=1):
             if votings:
                 # write the votes into the database
                 Poll.objects.do_vote(request.user.id, votings, poll_ids)
-
-        # calculate how many percent the options have of the total votes
-        # this has to be done after voting
-        Poll.objects.calculate_percentage(polls)
     else:
         polls = None
 
@@ -227,8 +224,9 @@ def viewtopic(request, topic_slug, page=1):
         'is_subscribed':subscribed,
         'pagination':   pagination,
         'polls':        polls,
-        'can_vote':     polls and (False in [p['participated'] for p in
-                                             polls.values()]) or False
+        'show_vote_results': request.GET.get('action') == 'vote_results',
+        'can_vote':     polls and (False in [p.participated for p in
+                                             polls]) or False
     }
 
 
@@ -463,8 +461,9 @@ def newtopic(request, slug=None, article=None):
                 d = poll_form.cleaned_data
                 poll = Poll(question=d['question'], options=d['options'],
                              multiple_votes=d['multiple'])
-                polls.append(poll)
                 session.commit()
+                print "POLL_ID", poll.id
+                polls.append(poll)
                 poll_ids.append(poll.id)
                 flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
                       escape(poll.question), success=True)
@@ -508,7 +507,9 @@ def newtopic(request, slug=None, article=None):
             #Attachment.objects.update_post_ids(att_ids,
             #                                   topic.first_post_id)
             # bind all new polls to the new topic
-            #Poll.objects.update_topic_ids(poll_ids, topic.id)
+            session.flush([topic])
+            print "POLL_BIND", poll_ids, topic.id
+            Poll.bind(poll_ids, topic.id)
 
             if article:
                 # the topic is a wiki discussion, bind it to the wiki
