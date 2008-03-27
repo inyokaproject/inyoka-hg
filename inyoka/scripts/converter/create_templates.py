@@ -89,37 +89,37 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
     u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
     u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
 <@ if $loop.first @><@ else @> + <@ endif @>
-<@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @>{{|<class="key"><@ $key as uppercase @>|}}
-<@ elseif ['hash','#'] contains $key as lowercase @>{{|<class="key">#|}}
-<@ elseif ['^', '.', '<', ',', 'alt', 'fn'] contains $key as lowercase @>{{|<class="key"><@ $key as title @>|}}
-<@ elseif $key == 'plus' @>{{|<class="key">+|}}
-<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>{{|<class="key">Pos 1|}}
-<@ elseif ['ende','end'] contains $key as lowercase @>{{|<class="key">Ende|}}
-<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>{{|<class="key">⏎|}}
-<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>{{|<class="key">     |}}
-<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>{{|<class="key">↑|}}
-<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>{{|<class="key">⌫|}}
-<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>{{|<class="key">↓|}}
-<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>{{|<class="key">←|}}
-<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>{{|<class="key">→|}}
-<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>{{|<class="key">Bild ↑|}}
-<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>{{|<class="key">Bild ↓|}}
-<@ elseif ['strg','ctrl'] contains $key as lowercase @>{{|<class="key">Strg|}}
-<@ elseif ['alt gr','altgr'] contains $key as lowercase @>{{|<class="key">Alt Gr|}}
-<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>{{|<class="key">⇧|}}
-<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>{{|<class="key">⇩|}}
-<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>{{|<class="key">Entf|}}
-<@ elseif ['win','windows'] contains $key as lowercase @>{{|<class="key">Windows|}}
-<@ elseif ['tab','tabulator'] contains $key as lowercase @>{{|<class="key">Tab ⇆|}}
-<@ elseif ['esc','escape'] contains $key as lowercase @>{{|<class="key">Esc|}}
-<@ elseif ['druck','print'] contains $key as lowercase @>{{|<class="key">Druck|}}
-<@ elseif ['minus','-'] contains $key as lowercase @>{{|<class="key">-|}}
-<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>{{|<class="key">⌘|}}
-<@ elseif ['einfg','ins'] contains $key as lowercase @>{{|<class="key">Einfg|}}
-<@ elseif ['ß','ss'] contains $key as lowercase @>{{|<class="key">ß|}}
-<@ elseif ["`","'"] contains $key @>{{|<class="key">\`|}}
-<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @>{{|<class="key"><@ $key as uppercase @>|}}
-<@ endif @>
+{{|<class="key"><@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @><@ $key as uppercase @>
+<@ elseif ['hash','#'] contains $key as lowercase @>#
+<@ elseif ['^', '.', '<', ',', 'alt', 'fn'] contains $key as lowercase @><@ $key as title @>
+<@ elseif $key == 'plus' @>+
+<@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>Pos 1
+<@ elseif ['ende','end'] contains $key as lowercase @>Ende
+<@ elseif ['return','enter','eingabe'] contains $key as lowercase @>⏎
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>     
+<@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>↑
+<@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>⌫
+<@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>↓
+<@ elseif ['left','links','pfeil links','pfeil-links'] contains $key as lowercase @>←
+<@ elseif ['right','rechts','pfeil rechts','pfeil-rechts'] contains $key as lowercase @>→
+<@ elseif ['bild auf','bild-auf','bild-rauf'] contains $key as lowercase @>Bild ↑
+<@ elseif ['bild ab','bild-ab','bild-runter'] contains $key as lowercase @>Bild ↓
+<@ elseif ['strg','ctrl'] contains $key as lowercase @>Strg
+<@ elseif ['alt gr','altgr'] contains $key as lowercase @>Alt Gr
+<@ elseif ['umschalt','umsch','shift'] contains $key as lowercase @>⇧
+<@ elseif ['feststell','feststelltaste','groß','caps'] contains $key as lowercase @>⇩
+<@ elseif ['entf','delete','entfernen','del'] contains $key as lowercase @>Entf
+<@ elseif ['win','windows'] contains $key as lowercase @>Windows
+<@ elseif ['tab','tabulator'] contains $key as lowercase @>Tab ⇆
+<@ elseif ['esc','escape'] contains $key as lowercase @>Esc
+<@ elseif ['druck','print'] contains $key as lowercase @>Druck
+<@ elseif ['minus','-'] contains $key as lowercase @>-
+<@ elseif ['apple','mac','apfel'] contains $key as lowercase @>⌘
+<@ elseif ['einfg','ins'] contains $key as lowercase @>Einfg
+<@ elseif ['ß','ss'] contains $key as lowercase @>ß
+<@ elseif ["`","'"] contains $key @>\`
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @><@ $key as uppercase @>
+<@ endif @>|}}
 <@ endfor @>""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
 <@ for $arg in $arguments @>
