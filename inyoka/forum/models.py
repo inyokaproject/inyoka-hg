@@ -95,9 +95,7 @@ class ForumMapperExtension(MapperExtension):
         cache_key = 'forum/forum/%d' % int(key[1][0])
         forum = cache.get(cache_key)
         if not forum:
-            print '\n\nCACHE: reloading forum'
             forum = query._get(key, ident, **kwargs)
-            x = forum.children
             cache.set(cache_key, forum)
         else:
             forum = query.session.merge(forum, dont_load=True)
@@ -242,7 +240,6 @@ class Forum(object):
     def parents(self):
         """Return a list of all parent forums up to the root level."""
         parents = []
-        print 'PARENTS "%s", "%s"' % (self, self.parent)
         forum = self
         while forum.parent_id:
             forum = forum.parent
@@ -251,11 +248,14 @@ class Forum(object):
 
     @property
     def children(self):
-        if not hasattr(self, '_children_ids'):
-            print '\nReloading children'
-            self._children_ids = [row[0] for row in dbsession.execute(select([forum_table.c.id],
-                forum_table.c.parent_id == self.id)).fetchall()]
-        children = [Forum.query.get(id) for id in self._children_ids]
+        cache_key = 'forum/children/%d' % self.id
+        children_ids = cache.get(cache_key)
+        if children_ids is None:
+            children_ids = [row[0] for row in dbsession.execute(select(
+                [forum_table.c.id], forum_table.c.parent_id == self.id)) \
+                .fetchall()]
+            cache.set(cache_key, children_ids)
+        children = [Forum.query.get(id) for id in children_ids]
         return children
 
     def get_latest_topics(self, count=None):
