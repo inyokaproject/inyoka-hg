@@ -90,11 +90,18 @@ class ForumMapperExtension(MapperExtension):
             forum = query._get(key, ident, **kwargs)
             x = forum.children
             cache.set(cache_key, forum)
+        else:
+            forum = query.session.merge(forum, dont_load=True)
+            #forum._identity_key = None
+            #query.session.update(forum)
         return forum
 
     def before_insert(self, mapper, connection, instance):
         if not instance.slug:
             instance.slug = slugify(instance.name)
+
+    def after_update(self, mapper, connection, instance):
+        cache.delete('forum/forum/%d' % instance.id)
 
 
 class TopicMapperExtension(MapperExtension):

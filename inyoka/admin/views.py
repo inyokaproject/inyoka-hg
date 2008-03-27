@@ -462,57 +462,54 @@ def forums_edit(request, id=None):
     Display an interface to let the user create or edit an forum.
     If `id` is given, the forum with id `id` will be edited.
     """
-    new_forum = id is None
 
     def _add_field_choices():
-        query = Forum.query
         if id:
-            query = query.filter(forum_table.c.id!=id)
+            query = Forum.query.filter(forum_table.c.id!=id)
+        else:
+            query = Forum.query.all()
         categories = [(c.id, c.name) for c in query]
         form.fields['parent'].choices = [(-1, "-")] + categories
 
-    if id is None:
-        f = Forum()
-    else:
-        f = Forum.query.get(id)
-    if f is None:
-        flash(u'Forum mit der ID „%s“ existiert nicht'
-              % id)
-        return HttpResponseRedirect(href('admin', 'forum'))
-
+    forum = None
+    errors = False
+    if id:
+        forum = Forum.query.get(int(id))
+        if forum is None:
+            flash(u'Forum mit der ID „%s“ existiert nicht' % id)
+            return HttpResponseRedirect(href('admin', 'forum'))
 
     if request.method == 'POST':
-        forums = Forum.query
         form = EditForumForm(request.POST)
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            f.name = data['name']
-            f.position = data['position']
-            if f.slug != data['slug']:
-                if forums.filter(forum_table.c.slug==data['slug']):
-                    form.errors['slug'] = (
-                        (u'Bitte einen anderen Slug angeben,'
-                         u'„%s“ ist schon vergeben.'
-                         % escape(data['slug'])),
-                    )
-                else:
-                    f.slug = data['slug']
-
-            f.description = data['description']
+            slug = data['slug']
+            if Forum.query.filter(and_(Forum.slug == slug, Forum.id != id)).first():
+                form.errors['slug'] = (
+                    (u'Bitte einen anderen Slug angeben,'
+                     u'„%s“ ist schon vergeben.'
+                     % escape(data['slug'])),
+                )
+                errors = True
+            if not id:
+                forum = Forum()
+            forum.name = data['name']
+            forum.position = data['position']
+            forum.slug = slug
+            forum.description = data['description']
             if int(data['parent']) != -1:
-                parent = forums.filter(data['parent'])
-            if parent:
-                f.parent = parent[0]
-            else:
-                form.errors['parent'] = (u'Forum %s existiert nicht'
-                                         % escape(data['parent']),)
+                parent = Forum.query.get(int(data['parent']))
+                if not parent:
+                    form.errors['parent'] = (u'Forum %s existiert nicht'
+                                             % escape(data['parent']),)
+                else:
+                    forum.parent = parent
 
-            dbsession.commit()
-
-            if not form.errors:
+            if not form.errors and not errors:
+                dbsession.commit()
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
-                      escape(f.name), new_forum and 'angelegt' or 'editiert'))
+                      escape(forum.name), id and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
             else:
                 flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
@@ -522,17 +519,17 @@ def forums_edit(request, id=None):
             form = EditForumForm()
         else:
             form = EditForumForm({
-                'name': f.name,
-                'slug': f.slug,
-                'description': f.description,
-                'parent': f.parent_id,
-                'position': f.position
+                'name': forum.name,
+                'slug': forum.slug,
+                'description': forum.description,
+                'parent': forum.parent_id,
+                'position': forum.position
             })
         _add_field_choices()
     return {
         'form': form,
-        'new': new_forum,
-        'forum_name': f.name
+        'new': bool(id),
+        'forum_name': id and forum.name or 'Neues Forum'
     }
 
 
