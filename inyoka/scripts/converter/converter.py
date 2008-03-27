@@ -29,7 +29,6 @@ except:
 sys.path.append(WIKI_PATH)
 
 from os import path
-from werkzeug.utils import url_unquote
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
@@ -52,6 +51,7 @@ PAGE_REPLACEMENTS = {
     'Gedit': 'gedit',
     'StartSeite': 'Startseite',
 }
+ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
 
 def select_blocks(query, block_size=1000, start_with=0):
     """Execute a query blockwise to prevent lack of ram"""
@@ -153,8 +153,9 @@ def convert_wiki():
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
-                att = url_unquote(line.extra)
-                att_name = '%s/%s' % (name, att)
+                att = ESCAPE_RE.sub(lambda m: chr(int(m.group(1), 16)),
+                                    line.extra)
+                att_name = normalize_pagename('%s/%s' % (name, att))
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
                     f = file(pth)
