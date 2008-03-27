@@ -14,7 +14,8 @@ import random
 import cPickle
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
+        EXT_CONTINUE
 from sqlalchemy.sql import select, func, and_, not_, exists
 from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
@@ -79,6 +80,17 @@ class SearchMapperExtension(MapperExtension):
 
 
 class ForumMapperExtension(MapperExtension):
+
+    def get(self, query, ident, *args, **kwargs):
+        key = query.mapper.identity_key_from_primary_key(ident)
+        cache_key = 'forum/forum/%d' % key[1]
+        forum = cache.get(key)
+        if not forum:
+            print '\n\nCACHE: reloading forum'
+            forum = query._get(key, ident, **kwargs)
+            print forum.children, hasattr(forum, '_children_ids')
+            cache.set(cache_key, forum)
+        return forum
 
     def before_insert(self, mapper, connection, instance):
         if not instance.slug:
@@ -191,7 +203,6 @@ class PostMapperExtension(MapperExtension):
         pass
 
 
-
 class Forum(object):
     """
     This is a forum that may contain subforums or threads.
@@ -215,11 +226,21 @@ class Forum(object):
     def parents(self):
         """Return a list of all parent forums up to the root level."""
         parents = []
+        print 'PARENTS "%s", "%s"' % (self, self.parent)
         forum = self
         while forum.parent_id:
             forum = forum.parent
             parents.append(forum)
         return parents
+
+    @property
+    def children(self):
+        if not hasattr(self, '_children_ids'):
+            print '\n\nCHILDREN'
+            self._children_ids = [row[0] for row in dbsession.execute(select([forum_table.c.id],
+                forum_table.c.parent_id == self.id)).fetchall()]
+        children = [Forum.query.get(id) for id in self._children_ids]
+        return children
 
     def get_latest_topics(self, count=None):
         """
@@ -748,10 +769,9 @@ dbsession.mapper(SAUser, user_table)
 dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })
-
 dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic),
-    'children': relation(Forum, backref=backref('parent',
+    '_children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
     'last_post': relation(Post)},
     extension=ForumMapperExtension()
@@ -790,33 +810,3 @@ dbsession.mapper(PollOption, poll_option_table, properties={
 dbsession.mapper(PollVote, poll_vote_table, properties={
     'poll': relation(Poll)
 })
-"""
-dbsession.mapper(SAAttachment, attachment_table)
-dbsession.mapper(SAForum, forum_table, properties={
-    'last_post': relation(SAPost,
-        primaryjoin=forum_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[forum_table.c.last_post_id]),
-    'parent': relation(SAForum,
-        primaryjoin=forum_table.c.id==forum_table.c.parent_id,
-        foreign_keys=[forum_table.c.parent_id])
-})
-dbsession.mapper(SATopic, topic_table, properties={
-    'forum': relation(SAForum,
-        primaryjoin=topic_table.c.forum_id==forum_table.c.id,
-        foreign_keys=[topic_table.c.forum_id]),
-    'author': relation(SAUser,
-        primaryjoin=topic_table.c.author_id==user_table.c.id,
-        foreign_keys=[topic_table.c.author_id]),
-    'last_post': relation(SAPost,
-        primaryjoin=topic_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[topic_table.c.last_post_id])
-})
-dbsession.mapper(SAPost, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id==user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(SAAttachment, backref=backref('post')),
-    pass
-    pass
-})
-"""
