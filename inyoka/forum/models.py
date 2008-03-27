@@ -287,6 +287,7 @@ class Forum(object):
         """
         if user.is_anonymous or self.last_post_id <= user.forum_last_read:
             return True
+	return True # XXX: just testing	
         for forum in self.children:
             if not forum.get_read_status(user):
                 return False
