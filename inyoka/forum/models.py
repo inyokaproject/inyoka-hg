@@ -83,7 +83,7 @@ class ForumMapperExtension(MapperExtension):
 
     def get(self, query, ident, *args, **kwargs):
         key = query.mapper.identity_key_from_primary_key(ident)
-        cache_key = 'forum/forum/%d' % key[1]
+        cache_key = 'forum/forum/%d' % int(key[1][0])
         forum = cache.get(cache_key)
         if not forum:
             print '\n\nCACHE: reloading forum'
@@ -545,14 +545,14 @@ class Post(object):
         pt, tt = post_table, topic_table
         if self.id == self.topic.last_post_id:
             try:
-                self.topic.last_post = dbsession.query(Post).filter(and_(
+                self.topic.last_post = Post.query.filter(and_(
                     pt.c.topic_id==self.topic.id,
                     not_(pt.c.id==self.id)
                 )).order_by(pt.c.id)[0]
             except IndexError:
                 self.topic.last_post = None
         if self.id == self.topic.forum.last_post_id:
-            last_post = dbsession.query(Post).filter(and_(
+            last_post = Post.query.filter(and_(
                 pt.c.topic_id==tt.c.id,
                 tt.c.forum_id==self.topic.forum.id,
                 pt.c.id!=self.id
@@ -565,6 +565,95 @@ class Post(object):
         dbsession.commit()
         for idx in xrange(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
+
+    @staticmethod
+    def split(posts, forum_id=None, title=None, topic_slug=None):
+        posts = list(posts)
+        old_topic = posts[0].topic
+
+        if len(posts) == old_topic.post_count:
+            # The user selected to split all posts out of the topic --> delete
+            # the topic.
+            remove_topic = True
+        else:
+            remove_topic = False
+
+        if forum_id and title:
+            action = 'new'
+        elif topic_slug:
+            action = 'add'
+        else:
+            return None
+
+        if action == 'new':
+            t = Topic(
+                title=title,
+                author=posts[0].author,
+                last_post=posts[-1],
+                forum_id=forum_id,
+                slug=None,
+                post_count=len(posts)
+            )
+            dbsession.flush()
+            t.forum.topic_count += 1
+        else:
+            t = Topic.query.filter_by(slug=topic_slug).first()
+            t.post_count += len(posts)
+            if posts[-1].id > t.last_post.id:
+                t.last_post = posts[-1]
+            if posts[0].id < t.first_post.id:
+                t.first_post = posts[0]
+                t.author = posts[0].author
+
+        dbsession.flush()
+        ids = [p.id for p in posts]
+        dbsession.execute(post_table.update(
+            post_table.c.id.in_(ids), values={
+                'topic_id': t.id
+        }))
+        dbsession.commit()
+
+        if old_topic.forum.id != t.forum.id:
+            # update post count of the forums
+            old_topic.forum.post_count -= len(posts)
+            t.forum.post_count += len(posts)
+            # update last post of the forums
+            if not t.forum.last_post or posts[-1].id > t.forum.last_post.id:
+                t.forum.last_post = posts[-1]
+            if posts[-1].id == old_topic.forum.last_post.id:
+                last_post = Post.query.filter(and_(
+                    post_table.c.topic_id==topic_table.c.id,
+                    topic_table.c.forum_id==old_topic.forum_id
+                )).first()
+
+                old_topic.forum.last_post_id = last_post and last_post.id \
+                                               or None
+
+        dbsession.commit()
+
+        if not remove_topic:
+            old_topic.post_count -= len(posts)
+            if old_topic.last_post.id == posts[-1].id:
+                post = Post.query.filter(
+                    topic_table.c.id==old_topic.id
+                ).order_by(topic_table.c.id.desc()).first()
+                old_topic.last_post = post
+            if old_topic.first_post.id == posts[0].id:
+                post = Post.query.filter(
+                    topic_table.c.id==old_topic.id
+                ).order_by(topic_table.c.id.asc()).first()
+                old_topic.first_post = post
+        else:
+            dbsession.delete(old_topic)
+
+        dbsession.commit()
+
+        # update the search index which has the post --> topic mapping indexed
+        for post in posts:
+            post.topic = t
+            post.update_search()
+
+        return t
 
     def __unicode__(self):
         return '%s - %s' % (
@@ -579,9 +668,6 @@ class Post(object):
             self.author
         )
 
-    class Meta:
-        ordering = ('id',)
-        get_latest_by = 'id'
 
 
 class PostRevision(object):
