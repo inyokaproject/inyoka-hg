@@ -154,7 +154,7 @@ def convert_wiki():
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
                 att = url_unquote(line.extra)
-                att_name = '%s/%s' % (name, att)
+                att_name = normalize_pagename('%s/%s' % (name, att))
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
                     f = file(pth)
