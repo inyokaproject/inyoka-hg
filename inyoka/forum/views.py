@@ -12,7 +12,7 @@ import re
 from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, select
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
@@ -41,7 +41,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import post_table, topic_table
+from inyoka.forum.database import post_table, topic_table, forum_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -65,7 +65,7 @@ def index(request, category=None):
     """
     categories = []
     if category:
-        category = Forum.query.filter_by(slug=category).first()
+        category = Forum.query.get(category)
         if not category or category.parent_id != None:
             raise PageNotFound
         fmsg = None # category.find_welcome(request.user)
@@ -77,7 +77,9 @@ def index(request, category=None):
                          u'Kategorieübersicht')
         categories = [category]
     else:
-        categories = Forum.query.filter_by(parent_id=None).all()
+        category_ids = session.execute(select([forum_table.c.id],
+            forum_table.c.parent_id == None)).fetchall()
+        categories = [Forum.query.get(row[0]) for row in category_ids]
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
 
