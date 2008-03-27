@@ -30,7 +30,7 @@ class InyokaParser(Parser):
 
 
 class InyokaFormatter(FormatterBase):
-    list_depth = 0
+    list_trace = []
 
     def _format(self, text):
         """Format a string"""
@@ -214,29 +214,29 @@ class InyokaFormatter(FormatterBase):
         return u''
 
     def bullet_list(self, on, **kw):
-        self.list_type = 'bullet'
         if on:
-            self.list_depth += 1
+            self.list_trace.append('bullet')
+            return u''
         else:
-            self.list_depth -= 1
-        return u'\n'
+            self.list_trace.pop()
+            return u''
 
     def number_list(self, on, type=None, start=None, **kw):
-        self.list_type = 'number'
         if on:
-            self.list_depth += 1
+            self.list_trace.append('number')
+            return u''
         else:
-            self.list_depth -= 1
-        return u'\n'
+            self.list_trace.pop()
+            return u''
 
     def listitem(self, on, **kwargs):
         if on:
-            spaces = u' ' * self.list_depth
-            if self.list_type == 'bullet':
-                return u'%s* ' % spaces
+            spaces = u' ' * len(self.list_trace)
+            if self.list_trace[-1] == 'bullet':
+                return u'\n%s* ' % spaces
             else:
-                return u'%s1. ' % spaces
-        return u'\n'
+                return u'\n%s1. ' % spaces
+        return u''
 
     def heading(self, on, depth, **kwargs):
         if on:
@@ -364,4 +364,4 @@ class InyokaFormatter(FormatterBase):
         text = text.replace('#', '')
         if text.strip().startswith('acl'):
             return u''
-        return u'##%s' % text
+        return u'##%s\n' % text

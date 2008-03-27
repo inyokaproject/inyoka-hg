@@ -919,9 +919,9 @@ class Headline(Element):
             style=self.style,
             class_=self.class_
         )
-        yield u'<a href="#%s" class="anchor"></a>' % self.id
         for item in Element.prepare_html(self):
             yield item
+        yield u'<a href="#%s" class="headerlink">¶</a>' % self.id
         yield u'</h%d>' % (self.level + 1)
 
     def prepare_docbook(self):
