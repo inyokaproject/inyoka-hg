@@ -655,7 +655,7 @@ class Value(Expr):
             except (ValueError, TypeError, IndexError, KeyError):
                 try:
                     return self.value[unicode(key)]
-                except KeyError:
+                except (KeyError, TypeError):
                     pass
         return NoneValue
 

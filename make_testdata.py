@@ -140,8 +140,9 @@ def make_forum():
             except IndexError:
                 pass
         f = Forum(name=name, parent=parent)
+        session.flush()
         if admin is not None:
-            Privilege(user_id=admin.id, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True))
+            Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True))
         forums.append(f)
         session.commit()
         if parent:

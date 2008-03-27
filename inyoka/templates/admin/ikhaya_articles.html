@@ -19,6 +19,12 @@
 
 {% block admin_content %}
 <h3>{{ title_trace[0] }}</h3>
+<p>
+  <em>Grau markierte Artikel sind nicht veröffentlicht!</em>
+</p>
+<p>
+  <a href="{{ href('admin', 'ikhaya', 'articles', 'new') }}">Neuen Artikel erstellen</a>
+</p>
 <table class="ikhaya_articles">
   <thead>
   <tr>
@@ -44,8 +50,4 @@
   </tbody>
 </table> 
 {{ pagination.generate() }}
-<p>
-  <em>Grau markierte Artikel sind nicht veröffentlicht!</em>
-</p>
-<a href="{{ href('admin', 'ikhaya', 'articles', 'new') }}">Neuen Artikel erstellen</a>
 {% endblock %}

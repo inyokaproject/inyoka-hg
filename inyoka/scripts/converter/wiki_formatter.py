@@ -11,6 +11,7 @@
 """
 import re
 from MoinMoin.formatter.base import FormatterBase
+from inyoka.scripts.converter.converter import PAGE_REPLACEMENTS
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 from MoinMoin.parser.wiki import Parser
@@ -31,6 +32,18 @@ class InyokaParser(Parser):
 
 class InyokaFormatter(FormatterBase):
     list_trace = []
+    in_link = False
+    link_target = None
+    #: This integer determines whether paragraph() should create line breaks
+    #: or not (0 means no, everything bigger than 0 means yes)
+    #: Don't set it manually bug use the _paragraph_breaks() function.
+    no_paragraph_breaks = 0
+
+    def _paragraph_breaks(self, yes):
+        if not yes:
+            self.no_paragraph_breaks += 1
+        else:
+            self.no_paragraph_breaks -= 1
 
     def _format(self, text):
         """Format a string"""
@@ -156,32 +169,38 @@ class InyokaFormatter(FormatterBase):
     def processor(self, processor_name, lines, is_parser=0):
         # remove the #!name thing
         lines.pop(0)
-
         if processor_name == 'Text':
             result = [self.preformatted(1)]
             for line in lines:
                 result.append(line + u'\n')
             result.append(self.preformatted(0))
             return u''.join(result)
-
+        self._paragraph_breaks(False)
         if processor_name == 'Wissen':
             content = []
             content_re = re.compile('\s+\*\s+\[\d+\]:(.+)')
             for line in lines:
                 line = content_re.match(line).groups()[0].strip()
-                content.append("'%s'" % self._format(line))
-            return u'[[Vorlage(%s, %s)]]' % (processor_name,
-                                             u', '.join(content))
+                content.append(self._format(line))
+            code = u'{{{#!vorlage Wissen\n%s\n}}}' % u'\n'.join(content)
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
-            return u'{{{\n#!vorlage %s\n%s\n}}}\n' % (processor_name,
+            code = u'{{{#!vorlage %s\n%s\n}}}\n' % (processor_name,
                                       self._format(u'\n'.join(lines)))
+        self._paragraph_breaks(True)
+        return code
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
+        if pagename in PAGE_REPLACEMENTS:
+            pagename = PAGE_REPLACEMENTS[pagename]
         pagename = normalize_pagename(pagename)
         if on:
+            self.in_link = True
+            self.link_target = pagename
             return u'[:%s:' % (pagename)
+        self.in_link = False
+        self.link_target = None
         return u']'
 
     def interwikilink(self, on, interwiki, pagename, **kw):
@@ -207,26 +226,34 @@ class InyokaFormatter(FormatterBase):
         return text
 
     def text(self, text):
+        if self.in_link and self.link_target == text:
+            return u''
         return text
 
     def paragraph(self, on, **kwargs):
         FormatterBase.paragraph(self, on)
-        return u''
+        if self.no_paragraph_breaks:
+            return u''
+        return u'\n'
 
     def bullet_list(self, on, **kw):
         if on:
+            self._paragraph_breaks(False)
             self.list_trace.append('bullet')
             return u''
         else:
             self.list_trace.pop()
+            self._paragraph_breaks(True)
             return u''
 
     def number_list(self, on, type=None, start=None, **kw):
         if on:
+            self._paragraph_breaks(False)
             self.list_trace.append('number')
             return u''
         else:
             self.list_trace.pop()
+            self._paragraph_breaks(True)
             return u''
 
     def listitem(self, on, **kwargs):
@@ -240,21 +267,23 @@ class InyokaFormatter(FormatterBase):
 
     def heading(self, on, depth, **kwargs):
         if on:
-            return u'\n%s ' % (u'=' * depth)
-        return ' %s\n' % ('=' * depth)
+            return u'%s ' % (u'=' * depth)
+        return ' %s' % ('=' * depth)
 
     def rule(self, size=None, **kw):
-        return u'\n----\n'
+        return u'----'
 
     def preformatted(self, on, **kwargs):
         if on:
-            return u'\n{{{'
-        return u'}}}\n'
+            return u'{{{'
+        return u'}}}'
 
     def table(self, on, attrs=None, **kw):
-        if not on:
-            return u'\n'
-        return u''
+        if on:
+            self._paragraph_breaks(False)
+            return u''
+        self._paragraph_breaks(True)
+        return u'\n'
 
     def table_row(self, on, attrs=None, **kw):
         if on:
@@ -330,9 +359,11 @@ class InyokaFormatter(FormatterBase):
         return u'[[Bild(%s/%s)]]' % (self.page.page_name, url)
 
     def definition_list(self, on, **kw):
-        if not on:
-            return u'\n'
-        return u''
+        if on:
+            self._paragraph_breaks(False)
+            return u''
+        self._paragraph_breaks(True)
+        return u'\n'
 
     def definition_term(self, on, **kw):
         if on:
@@ -364,4 +395,10 @@ class InyokaFormatter(FormatterBase):
         text = text.replace('#', '')
         if text.strip().startswith('acl'):
             return u''
+        if text.strip().startswith('redirect'):
+            try:
+                page = normalize_pagename(' '.join(text.split(' ')[1:]))
+                return u'# X-Redirect: %s\n' % page
+            except (IndexError, ValueError):
+                return u''
         return u'##%s\n' % text
