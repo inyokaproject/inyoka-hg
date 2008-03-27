@@ -122,8 +122,8 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ endif @>|}}
 <@ endfor @>""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
-<@ for $arg in $arguments @>
- * [[Anker(source-<@ $loop.index @>)]]<@ $loop.index @>: <@ $arg @>
+<@ for $arg in $arguments join_with '\n' split_by '\n' @>
+ 1. [[Anker(source-<@ $loop.index @>)]] <@ $arg @>
 <@ endfor @>
 |}}""",
     u'Warnung': simple_box(u'Achtung!', 'warning'),
