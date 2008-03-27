@@ -1193,7 +1193,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             forum = Forum.query.filter_by(slug=slug).one()
             if forum is None:
                 raise PageNotFound
-            topics = forum.topics
+            topics = forum.get_latest_topics(count)
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,
                 url=url_for(forum),
@@ -1204,15 +1204,13 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             if not have_privilege(request.user, forum, 'read'):
                 return abort_access_denied()
         else:
-            topics = Topic.query
+            topics = Topic.query.order_by(Topic.id.desc())[:count]
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum',
                 url=href('forum'),
                 feed_url=request.build_absolute_uri(),
                 rights=href('portal', 'lizenz'),
             )
-
-        topics = topics.order_by(Topic.id.desc())[:count]
 
         for topic in topics:
             kwargs = {}
