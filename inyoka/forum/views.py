@@ -985,10 +985,9 @@ def splittopic(request, topic_slug):
                 p = Post.query.filter(Post.c.id.in_(data['select']))
 
             if data['action'] == 'new':
-                new = Post.objects.split(p, data['forum'],
-                                         title=data['title'])
+                new = Post.split(p, data['forum'], title=data['title'])
             else:
-                new = Post.objects.split(p, topic_slug=data['topic_slug'])
+                new = Post.split(p, topic_slug=data['topic_slug'])
             return HttpResponseRedirect(new.get_absolute_url())
     else:
         form = SplitTopicForm()
