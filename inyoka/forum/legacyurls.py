@@ -51,9 +51,8 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
             except (KeyError, ValueError):
                 return
             return href('forum', 'post', post_id)
-    try:
-        topic = Topic.objects.get(id=topic_id)
-    except Topic.DoesNotExist:
+    topic = Topic.query.get(topic_id)
+    if not topic:
         return
     if offset is None:
         try:
