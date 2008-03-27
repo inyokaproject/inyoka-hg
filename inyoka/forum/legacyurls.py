@@ -63,7 +63,7 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
             return
     else:
         page = (offset / POSTS_PER_PAGE) + 1
-    kwargs = []
+    kwargs = {}
     if 'vote' in args and args['vote'] == 'viewresult':
         kwargs['action'] = 'vote_results'
     if page <= 1:
