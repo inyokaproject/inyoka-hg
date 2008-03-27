@@ -95,7 +95,8 @@ class ForumMapperExtension(MapperExtension):
         cache_key = 'forum/forum/%d' % int(key[1][0])
         forum = cache.get(cache_key)
         if not forum:
-            forum = query._get(key, ident, **kwargs)
+            forum = query.options(eagerload('last_post'), \
+                eagerload('last_post.author'))._get(key, ident, **kwargs)
             cache.set(cache_key, forum)
         else:
             forum = query.session.merge(forum, dont_load=True)
