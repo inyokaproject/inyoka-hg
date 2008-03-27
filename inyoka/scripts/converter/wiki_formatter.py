@@ -180,7 +180,10 @@ class InyokaFormatter(FormatterBase):
             content = []
             content_re = re.compile('\s+\*\s+\[\d+\]:(.+)')
             for line in lines:
-                line = content_re.match(line).groups()[0].strip()
+                match = content_re.match(line)
+                if not match:
+                    continue
+                line = match.groups()[0].strip()
                 content.append(self._format(line))
             code = u'{{{#!vorlage Wissen\n%s\n}}}' % u'\n'.join(content)
         else:

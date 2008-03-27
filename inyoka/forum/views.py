@@ -65,7 +65,7 @@ def index(request, category=None):
     """
     categories = []
     if category:
-        category = Forum.query.get_by(slug=category)
+        category = Forum.query.filter_by(slug=category).first()
         if not category or category.parent_id != None:
             raise PageNotFound
         fmsg = None # category.find_welcome(request.user)
@@ -144,7 +144,7 @@ def viewtopic(request, topic_slug, page=1):
     topic is deleted and is redirected to the topic's forum.  Moderators can
     see these topics.
     """
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     privileges = get_forum_privileges(request.user, t.forum)
@@ -272,7 +272,7 @@ def newpost(request, topic_slug=None, quote_id=None):
             raise PageNotFound
         t = quote.topic
     else:
-        t = Topic.query.get_by(slug=topic_slug)
+        t = Topic.query.filter_by(slug=topic_slug).first()
         if not t:
             raise PageNotFound
 
@@ -409,7 +409,7 @@ def newtopic(request, slug=None, article=None):
                   u'Wenn du willst, kannst du hier eine neue anlegen.' % \
                                                     (escape(article.name)))
     else:
-        f = Forum.query.get_by(slug=slug)
+        f = Forum.query.filter_by(slug=slug).first()
         if not f:
             raise PageNotFound
         if 0:# this is sooo annoying. request.method != 'POST':
@@ -735,7 +735,7 @@ def edit(request, post_id):
 
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'read'):
@@ -829,7 +829,7 @@ unsubscribe_topic = _generate_unsubscriber(Topic,
 @templated('forum/report.html')
 def report(request, topic_slug):
     """Change the report_status of a topic and redirect to it"""
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'read'):
@@ -913,7 +913,7 @@ def movetopic(request, topic_slug):
         """Add dynamic field choices to the move topic formular"""
         form.fields['forum_id'].choices = [(f.id, f.name) for f in forums]
 
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'moderate'):
@@ -966,7 +966,7 @@ def splittopic(request, topic_slug):
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in posts]
 
-    t = Topic.query.options(eagerload('posts')).get_by(slug=topic_slug)
+    t = Topic.query.options(eagerload('posts')).filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     posts = t.posts
@@ -1074,7 +1074,7 @@ def hide_topic(request, topic_slug):
     Sets the hidden flag of a topic to True which has the effect that normal
     users can't see it anymore (moderators still can).
     """
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
@@ -1091,7 +1091,7 @@ def restore_topic(request, topic_slug):
     This function removes the hidden flag of a topic to make it visible for
     normal users again.
     """
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
@@ -1109,7 +1109,7 @@ def delete_topic(request, topic_slug):
     This action is irrevocable and can only get executed by administrators.
     """
     # XXX: Only administrators are allowed to do this, not moderators
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
