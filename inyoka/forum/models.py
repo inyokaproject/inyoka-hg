@@ -84,11 +84,11 @@ class ForumMapperExtension(MapperExtension):
     def get(self, query, ident, *args, **kwargs):
         key = query.mapper.identity_key_from_primary_key(ident)
         cache_key = 'forum/forum/%d' % key[1]
-        forum = cache.get(key)
+        forum = cache.get(cache_key)
         if not forum:
             print '\n\nCACHE: reloading forum'
             forum = query._get(key, ident, **kwargs)
-            print forum.children, hasattr(forum, '_children_ids')
+            x = forum.children
             cache.set(cache_key, forum)
         return forum
 
@@ -236,7 +236,7 @@ class Forum(object):
     @property
     def children(self):
         if not hasattr(self, '_children_ids'):
-            print '\n\nCHILDREN'
+            print '\nReloading children'
             self._children_ids = [row[0] for row in dbsession.execute(select([forum_table.c.id],
                 forum_table.c.parent_id == self.id)).fetchall()]
         children = [Forum.query.get(id) for id in self._children_ids]
