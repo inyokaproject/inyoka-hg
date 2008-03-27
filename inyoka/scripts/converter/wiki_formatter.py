@@ -11,6 +11,7 @@
 """
 import re
 from MoinMoin.formatter.base import FormatterBase
+from inyoka.scripts.converter.converter import PAGE_REPLACEMENTS
 from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 from MoinMoin.parser.wiki import Parser
@@ -191,6 +192,8 @@ class InyokaFormatter(FormatterBase):
         return code
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
+        if pagename in PAGE_REPLACEMENTS:
+            pagename = PAGE_REPLACEMENTS[pagename]
         pagename = normalize_pagename(pagename)
         if on:
             self.in_link = True
@@ -392,4 +395,10 @@ class InyokaFormatter(FormatterBase):
         text = text.replace('#', '')
         if text.strip().startswith('acl'):
             return u''
+        if text.strip().startswith('redirect'):
+            try:
+                page = normalize_pagename(' '.join(text.split(' ')[1:]))
+                return u'# X-Redirect: %s\n' % page
+            except (IndexError, ValueError):
+                return u''
         return u'##%s\n' % text
