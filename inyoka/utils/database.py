@@ -31,5 +31,5 @@ if settings.DEBUG and False:
     import logging
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-    handler = logging.FileHandler('inyoka.log')
+    handler = logging.FileHandler('db.log')
     logging.getLogger('sqlalchemy.engine').addHandler(handler)
