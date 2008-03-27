@@ -100,8 +100,9 @@ class ForumMapperExtension(MapperExtension):
 class TopicMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
-        if not (instance.forum or instance.forum_id) or \
-           instance.forum.parent_id is None:
+        if not instance.forum and instance.forum_id:
+            instance.forum = Forum.query.get(instance.forum_id)
+        if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
         instance.slug = slugify(instance.title)
         if Topic.query.filter_by(slug=instance.slug).first():
