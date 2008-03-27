@@ -260,6 +260,10 @@ class InyokaFormatter(FormatterBase):
             return u''
 
     def listitem(self, on, **kwargs):
+        if not self.list_trace:
+            # moin generates list items without lists sometimes, no idea why
+            # just ignore it
+            return u''
         if on:
             spaces = u' ' * len(self.list_trace)
             if self.list_trace[-1] == 'bullet':
