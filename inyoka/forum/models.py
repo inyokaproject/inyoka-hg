@@ -220,10 +220,26 @@ class Forum(object):
             forum = forum.parent
             parents.append(forum)
         return parents
-    
-    def get_latest_topics(self, count=100):
-        return Topic.query.filter_by(forum_id=self.id) \
-	    .order_by(Topic.id.desc()).limit(100)
+
+    def get_latest_topics(self, count=None):
+        """
+        Return a list of the latest topics in this forum. If no count is
+        given the default value from the settings will be used and the whole
+        output will be cached (highly recommended!).
+        """
+        limit = max(settings.FORUM_TOPIC_CACHE, count)
+        key = 'forum/latest_topics/%d' % self.id
+        topics = (limit == 100) and cache.get(key) or None
+
+        if not topics:
+            topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
+                eagerload('last_post.author')).filter_by(forum_id=self.id) \
+                .order_by((Topic.sticky.desc(), Topic.last_post_id.desc())).limit(limit)
+            if limit == settings.FORUM_TOPIC_CACHE:
+                topics = topics.all()
+                cache.set(key, topics)
+
+        return (count < limit) and topics[:count] or topics
 
     latest_topics = property(get_latest_topics)
 
