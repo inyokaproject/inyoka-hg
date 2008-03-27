@@ -82,6 +82,15 @@ class SearchMapperExtension(MapperExtension):
 class ForumMapperExtension(MapperExtension):
 
     def get(self, query, ident, *args, **kwargs):
+        if isinstance(ident, basestring):
+            slug_map = cache.get('forum/slugs')
+            if slug_map is None:
+                slug_map = dict(dbsession.execute(select(
+                    [forum_table.c.slug, forum_table.c.id])).fetchall())
+                cache.set('forum/slugs', slug_map)
+            ident = slug_map.get(ident)
+            if ident is None:
+                return None
         key = query.mapper.identity_key_from_primary_key(ident)
         cache_key = 'forum/forum/%d' % int(key[1][0])
         forum = cache.get(cache_key)
@@ -92,8 +101,6 @@ class ForumMapperExtension(MapperExtension):
             cache.set(cache_key, forum)
         else:
             forum = query.session.merge(forum, dont_load=True)
-            #forum._identity_key = None
-            #query.session.update(forum)
         return forum
 
     def before_insert(self, mapper, connection, instance):

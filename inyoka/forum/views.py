@@ -98,7 +98,7 @@ def forum(request, slug, page=1):
     """
     Return a single forum to show a topic list.
     """
-    f = Forum.query.filter_by(slug=slug).first()
+    f = Forum.query.get(slug)
     # if the forum is a category we raise PageNotFound.  categories have
     # their own url at /category.
     if not f or f.parent_id is None:
