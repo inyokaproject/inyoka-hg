@@ -26,9 +26,8 @@ def get_old_forum_url(args, match, forum_id=None, offset=None):
             forum_id = int(args['f'])
         except (KeyError, ValueError):
             return
-    try:
-        forum = Forum.objects.get(id=forum_id)
-    except Forum.DoesNotExist:
+    forum = Forum.query.get(forum_id)
+    if not forum:
         return
     if offset is None:
         page = 1
@@ -51,9 +50,8 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
             except (KeyError, ValueError):
                 return
             return href('forum', 'post', post_id)
-    try:
-        topic = Topic.objects.get(id=topic_id)
-    except Topic.DoesNotExist:
+    topic = Topic.query.get(topic_id)
+    if not topic:
         return
     if offset is None:
         try:
@@ -64,7 +62,7 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
             return
     else:
         page = (offset / POSTS_PER_PAGE) + 1
-    kwargs = []
+    kwargs = {}
     if 'vote' in args and args['vote'] == 'viewresult':
         kwargs['action'] = 'vote_results'
     if page <= 1:

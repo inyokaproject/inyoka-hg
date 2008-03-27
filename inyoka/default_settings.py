@@ -91,6 +91,7 @@ IMAGEMAGICK_PATH = ''
 
 # forum settings
 FORUM_LIMIT_UNREAD = 10000
+FORUM_TOPIC_CACHE = 100
 
 # the id of the ikhaya team group
 IKHAYA_GROUP_ID = 1

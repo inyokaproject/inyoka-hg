@@ -27,9 +27,9 @@ session = scoped_session(lambda: create_session(engine,
     autoflush=True, transactional=True))
 dispatcher.connect(session.remove, request_finished)
 
-if settings.DEBUG:
+if settings.DEBUG and False:
     import logging
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-    handler = logging.FileHandler('inyoka.log')
+    handler = logging.FileHandler('db.log')
     logging.getLogger('sqlalchemy.engine').addHandler(handler)

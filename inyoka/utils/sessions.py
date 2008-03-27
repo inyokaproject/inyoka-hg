@@ -87,7 +87,8 @@ class SurgeProtectionMixin(object):
         # only perform surge protection tests if the form is valid up
         # to that point.  This is important because otherwise form
         # errors would trigger the surge protection!
-        if self.is_valid:
+        # Don't use surge protection if the user is a manager :)
+        if self.is_valid and not current_request._get_current_object().user.is_manager:
             identifier = self.source_protection_identifier or \
                          self.__class__.__module__.split('.')[1]
             storage = current_request.session.setdefault('sp', {})

@@ -29,7 +29,6 @@ except:
 sys.path.append(WIKI_PATH)
 
 from os import path
-from werkzeug.utils import url_unquote
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, update
@@ -39,24 +38,39 @@ from inyoka.portal.user import User
 from datetime import datetime
 users = {}
 
+#: These pages got duplicates because we use a case insensitiva collation
+#: now.
+#: It's in the format deprecated --> new
+PAGE_REPLACEMENTS = {
+    'Audioplayer': 'AudioPlayer',
+    'Centerim': 'CenterIM',
+    'Gnome': 'GNOME',
+    'Grub': 'GRUB',
+    'XGL': 'Xgl',
+    'YaKuake': 'Yakuake',
+    'Gedit': 'gedit',
+    'StartSeite': 'Startseite',
+}
+ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
 
-def select_blocks(query, block_size=1000):
+def select_blocks(query, block_size=1000, start_with=0):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
     table = list(query._table_iterator())[0]
     # get the tables primary key (a little bit hackish)
     key_name = list(table.primary_key)[0].name
     key = table.c[key_name]
-    range = (0, block_size)
+    range = (start_with, start_with + block_size)
     failed = 0
     while 1:
+        print range
         result = query.where(key.between(*range)).execute()
         i = 0
         for i, row in enumerate(result):
             yield row
         if i == 0:
             failed += 1
-            if failed == 5:
+            if failed == 10:
                 break
         else:
             failed = 0
@@ -95,9 +109,8 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Icons']):
-        if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
-                         'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
+    for i, moin_name in enumerate(['ATI-Grafikkarten', 'ATI-Grafikkarten/fglrx', 'fglrx']):
+        if moin_name in PAGE_REPLACEMENTS:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)
             continue
@@ -140,8 +153,9 @@ def convert_wiki():
                 else:
                     new_page.edit(text=text, deleted=False, **kwargs)
             elif line.action == 'ATTNEW':
-                att = url_unquote(line.extra)
-                att_name = '%s/%s' % (name, att)
+                att = ESCAPE_RE.sub(lambda m: chr(int(m.group(1), 16)),
+                                    line.extra)
+                att_name = normalize_pagename('%s/%s' % (name, att))
                 pth = path.join(page.getPagePath(), 'attachments', att)
                 try:
                     f = file(pth)
@@ -394,6 +408,7 @@ def convert_forum():
         else:
             i += 1
     print 'fixing forum references'
+
     DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
         settings.DATABASE_USER, settings.DATABASE_PASSWORD,
         settings.DATABASE_HOST, settings.DATABASE_NAME)

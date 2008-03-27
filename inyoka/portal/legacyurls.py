@@ -28,6 +28,7 @@ def feeds(args, match):
     # users shall select a new feed themselves
     return href('static', 'feeds_update.xml')
 
+
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
 @legacy.url(r'^/portal\.php$')

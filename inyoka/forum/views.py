@@ -12,7 +12,7 @@ import re
 from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, select
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
@@ -41,7 +41,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import post_table, topic_table
+from inyoka.forum.database import post_table, topic_table, forum_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -65,7 +65,7 @@ def index(request, category=None):
     """
     categories = []
     if category:
-        category = Forum.query.get_by(slug=category)
+        category = Forum.query.get(category)
         if not category or category.parent_id != None:
             raise PageNotFound
         fmsg = None # category.find_welcome(request.user)
@@ -77,7 +77,9 @@ def index(request, category=None):
                          u'Kategorieübersicht')
         categories = [category]
     else:
-        categories = Forum.query.filter_by(parent_id=None).all()
+        category_ids = session.execute(select([forum_table.c.id],
+            forum_table.c.parent_id == None)).fetchall()
+        categories = [Forum.query.get(row[0]) for row in category_ids]
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
 
@@ -98,7 +100,7 @@ def forum(request, slug, page=1):
     """
     Return a single forum to show a topic list.
     """
-    f = Forum.query.get_by(slug=slug)
+    f = Forum.query.get(slug)
     # if the forum is a category we raise PageNotFound.  categories have
     # their own url at /category.
     if not f or f.parent_id is None:
@@ -144,7 +146,7 @@ def viewtopic(request, topic_slug, page=1):
     topic is deleted and is redirected to the topic's forum.  Moderators can
     see these topics.
     """
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     privileges = get_forum_privileges(request.user, t.forum)
@@ -272,7 +274,7 @@ def newpost(request, topic_slug=None, quote_id=None):
             raise PageNotFound
         t = quote.topic
     else:
-        t = Topic.query.get_by(slug=topic_slug)
+        t = Topic.query.filter_by(slug=topic_slug).first()
         if not t:
             raise PageNotFound
 
@@ -409,7 +411,7 @@ def newtopic(request, slug=None, article=None):
                   u'Wenn du willst, kannst du hier eine neue anlegen.' % \
                                                     (escape(article.name)))
     else:
-        f = Forum.query.get_by(slug=slug)
+        f = Forum.query.filter_by(slug=slug).first()
         if not f:
             raise PageNotFound
         if 0:# this is sooo annoying. request.method != 'POST':
@@ -735,7 +737,7 @@ def edit(request, post_id):
 
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'read'):
@@ -829,7 +831,7 @@ unsubscribe_topic = _generate_unsubscriber(Topic,
 @templated('forum/report.html')
 def report(request, topic_slug):
     """Change the report_status of a topic and redirect to it"""
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'read'):
@@ -913,7 +915,7 @@ def movetopic(request, topic_slug):
         """Add dynamic field choices to the move topic formular"""
         form.fields['forum_id'].choices = [(f.id, f.name) for f in forums]
 
-    t = Topic.query.get_by(slug=topic_slug)
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, 'moderate'):
@@ -966,7 +968,7 @@ def splittopic(request, topic_slug):
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in posts]
 
-    t = Topic.query.options(eagerload('posts')).get_by(slug=topic_slug)
+    t = Topic.query.options(eagerload('posts')).filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     posts = t.posts
@@ -985,10 +987,9 @@ def splittopic(request, topic_slug):
                 p = Post.query.filter(Post.c.id.in_(data['select']))
 
             if data['action'] == 'new':
-                new = Post.objects.split(p, data['forum'],
-                                         title=data['title'])
+                new = Post.split(p, data['forum'], title=data['title'])
             else:
-                new = Post.objects.split(p, topic_slug=data['topic_slug'])
+                new = Post.split(p, topic_slug=data['topic_slug'])
             return HttpResponseRedirect(new.get_absolute_url())
     else:
         form = SplitTopicForm()
@@ -1075,7 +1076,7 @@ def hide_topic(request, topic_slug):
     Sets the hidden flag of a topic to True which has the effect that normal
     users can't see it anymore (moderators still can).
     """
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
@@ -1092,7 +1093,7 @@ def restore_topic(request, topic_slug):
     This function removes the hidden flag of a topic to make it visible for
     normal users again.
     """
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
@@ -1110,7 +1111,7 @@ def delete_topic(request, topic_slug):
     This action is irrevocable and can only get executed by administrators.
     """
     # XXX: Only administrators are allowed to do this, not moderators
-    topic = Topic.query.get_by(slug=topic_slug)
+    topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
     if not have_privilege(request.user, topic.forum, 'moderate'):
@@ -1134,14 +1135,14 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
     """show the feeds for the forum"""
 
     if component not in ('forum', 'topic'):
-        raise PageNotFound()
+        raise PageNotFound
 
     if mode not in ('full', 'short', 'title'):
-        raise PageNotFound()
+        raise PageNotFound
 
     count = int(count)
     if count not in (5, 10, 15, 20, 25, 50, 75, 100):
-        raise PageNotFound()
+        raise PageNotFound
 
     key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
     content = cache.get(key)
@@ -1150,10 +1151,13 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
         return HttpResponse(content, content_type=content_type)
 
     if component == 'topic':
-        topic = Topic.objects.get(slug=slug)
+        topic = Topic.query.filter_by(slug=slug).one()
+        if topic is None:
+            raise PageNotFound
         if not have_privilege(request.user, topic.forum, 'read'):
             return abort_access_denied()
-        posts = topic.post_set.order_by('-pub_date')[:count]
+
+        posts = topic.posts.order_by(Post.pub_date.desc())[:count]
         feed = FeedBuilder(
             title=u'ubuntuusers Thema – „%s“' % topic.title,
             url=url_for(topic),
@@ -1172,6 +1176,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
                                     u'xhtml">%s</div>' % summary
                 kwargs['summary_type'] = 'xhtml'
+
             feed.add(
                 title='%s (%s)' % (
                     post.author.username,
@@ -1183,18 +1188,24 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 updated=post.pub_date,
                 **kwargs
             )
+
     else:
         if slug:
-            forum = Forum.objects.get(slug=slug)
-            topics = forum.topic_set
+            forum = Forum.query.filter_by(slug=slug).one()
+            if forum is None:
+                raise PageNotFound
+            topics = forum.get_latest_topics(count)
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum – „%s“' % forum.name,
                 url=url_for(forum),
                 feed_url=request.build_absolute_uri(),
                 rights=href('portal', 'lizenz'),
             )
+
+            if not have_privilege(request.user, forum, 'read'):
+                return abort_access_denied()
         else:
-            topics = Topic.objects.all()
+            topics = Topic.query.order_by(Topic.id.desc())[:count]
             feed = FeedBuilder(
                 title=u'ubuntuusers Forum',
                 url=href('forum'),
@@ -1202,13 +1213,14 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 rights=href('portal', 'lizenz'),
             )
 
-        if not have_privilege(request.user, forum, 'read'):
-            return abort_access_denied()
-        topics = topics.order_by('-id')[:count]
-
         for topic in topics:
             kwargs = {}
             post = topic.first_post
+
+            if not have_privilege(request.user, topic.forum, 'read'):
+                continue
+                #XXX: this way there might be less than `count` items
+
             if mode == 'full':
                 kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
                                     u'xhtml">%s</div>' % post.rendered_text

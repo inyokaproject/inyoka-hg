@@ -14,7 +14,8 @@ import random
 import cPickle
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
+        EXT_CONTINUE
 from sqlalchemy.sql import select, func, and_, not_, exists
 from inyoka.conf import settings
 from inyoka.ikhaya.models import Article
@@ -80,14 +81,40 @@ class SearchMapperExtension(MapperExtension):
 
 class ForumMapperExtension(MapperExtension):
 
+    def get(self, query, ident, *args, **kwargs):
+        if isinstance(ident, basestring):
+            slug_map = cache.get('forum/slugs')
+            if slug_map is None:
+                slug_map = dict(dbsession.execute(select(
+                    [forum_table.c.slug, forum_table.c.id])).fetchall())
+                cache.set('forum/slugs', slug_map)
+            ident = slug_map.get(ident)
+            if ident is None:
+                return None
+        key = query.mapper.identity_key_from_primary_key(ident)
+        cache_key = 'forum/forum/%d' % int(key[1][0])
+        forum = cache.get(cache_key)
+        if not forum:
+            forum = query.options(eagerload('last_post'), \
+                eagerload('last_post.author'))._get(key, ident, **kwargs)
+            cache.set(cache_key, forum)
+        else:
+            forum = query.session.merge(forum, dont_load=True)
+        return forum
+
     def before_insert(self, mapper, connection, instance):
         if not instance.slug:
             instance.slug = slugify(instance.name)
+
+    def after_update(self, mapper, connection, instance):
+        cache.delete('forum/forum/%d' % instance.id)
 
 
 class TopicMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
+        if not instance.forum and instance.forum_id:
+            instance.forum = Forum.query.get(instance.forum_id)
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
         instance.slug = slugify(instance.title)
@@ -191,7 +218,6 @@ class PostMapperExtension(MapperExtension):
         pass
 
 
-
 class Forum(object):
     """
     This is a forum that may contain subforums or threads.
@@ -221,6 +247,40 @@ class Forum(object):
             parents.append(forum)
         return parents
 
+    @property
+    def children(self):
+        cache_key = 'forum/children/%d' % self.id
+        children_ids = cache.get(cache_key)
+        if children_ids is None:
+            children_ids = [row[0] for row in dbsession.execute(select(
+                [forum_table.c.id], forum_table.c.parent_id == self.id)) \
+                .fetchall()]
+            cache.set(cache_key, children_ids)
+        children = [Forum.query.get(id) for id in children_ids]
+        return children
+
+    def get_latest_topics(self, count=None):
+        """
+        Return a list of the latest topics in this forum. If no count is
+        given the default value from the settings will be used and the whole
+        output will be cached (highly recommended!).
+        """
+        limit = max(settings.FORUM_TOPIC_CACHE, count)
+        key = 'forum/latest_topics/%d' % self.id
+        topics = (limit == 100) and cache.get(key) or None
+
+        if not topics:
+            topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
+                eagerload('last_post.author')).filter_by(forum_id=self.id) \
+                .order_by((Topic.sticky.desc(), Topic.last_post_id.desc())).limit(limit)
+            if limit == settings.FORUM_TOPIC_CACHE:
+                topics = topics.all()
+                cache.set(key, topics)
+
+        return (count < limit) and topics[:count] or topics
+
+    latest_topics = property(get_latest_topics)
+
     def get_read_status(self, user):
         """
         Determine the read status of the whole forum for a specific
@@ -228,10 +288,11 @@ class Forum(object):
         """
         if user.is_anonymous or self.last_post_id <= user.forum_last_read:
             return True
+	return True # XXX: just testing	
         for forum in self.children:
             if not forum.get_read_status(user):
                 return False
-        for topic in self.topics:
+        for topic in self.latest_topics:
             if not topic.get_read_status(user):
                 return False
         return True
@@ -244,7 +305,7 @@ class Forum(object):
         forums = [self]
         while forums:
             forum = forums.pop()
-            for topic in forum.topics:
+            for topic in forum.latest_topics:
                 topic.mark_read(user)
             forums.extend(forum.children)
 
@@ -493,14 +554,14 @@ class Post(object):
         pt, tt = post_table, topic_table
         if self.id == self.topic.last_post_id:
             try:
-                self.topic.last_post = dbsession.query(Post).filter(and_(
+                self.topic.last_post = Post.query.filter(and_(
                     pt.c.topic_id==self.topic.id,
                     not_(pt.c.id==self.id)
                 )).order_by(pt.c.id)[0]
             except IndexError:
                 self.topic.last_post = None
         if self.id == self.topic.forum.last_post_id:
-            last_post = dbsession.query(Post).filter(and_(
+            last_post = Post.query.filter(and_(
                 pt.c.topic_id==tt.c.id,
                 tt.c.forum_id==self.topic.forum.id,
                 pt.c.id!=self.id
@@ -513,6 +574,95 @@ class Post(object):
         dbsession.commit()
         for idx in xrange(1, 5):
             cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
+
+    @staticmethod
+    def split(posts, forum_id=None, title=None, topic_slug=None):
+        posts = list(posts)
+        old_topic = posts[0].topic
+
+        if len(posts) == old_topic.post_count:
+            # The user selected to split all posts out of the topic --> delete
+            # the topic.
+            remove_topic = True
+        else:
+            remove_topic = False
+
+        if forum_id and title:
+            action = 'new'
+        elif topic_slug:
+            action = 'add'
+        else:
+            return None
+
+        if action == 'new':
+            t = Topic(
+                title=title,
+                author=posts[0].author,
+                last_post=posts[-1],
+                forum_id=forum_id,
+                slug=None,
+                post_count=len(posts)
+            )
+            dbsession.flush()
+            t.forum.topic_count += 1
+        else:
+            t = Topic.query.filter_by(slug=topic_slug).first()
+            t.post_count += len(posts)
+            if posts[-1].id > t.last_post.id:
+                t.last_post = posts[-1]
+            if posts[0].id < t.first_post.id:
+                t.first_post = posts[0]
+                t.author = posts[0].author
+
+        dbsession.flush()
+        ids = [p.id for p in posts]
+        dbsession.execute(post_table.update(
+            post_table.c.id.in_(ids), values={
+                'topic_id': t.id
+        }))
+        dbsession.commit()
+
+        if old_topic.forum.id != t.forum.id:
+            # update post count of the forums
+            old_topic.forum.post_count -= len(posts)
+            t.forum.post_count += len(posts)
+            # update last post of the forums
+            if not t.forum.last_post or posts[-1].id > t.forum.last_post.id:
+                t.forum.last_post = posts[-1]
+            if posts[-1].id == old_topic.forum.last_post.id:
+                last_post = Post.query.filter(and_(
+                    post_table.c.topic_id==topic_table.c.id,
+                    topic_table.c.forum_id==old_topic.forum_id
+                )).first()
+
+                old_topic.forum.last_post_id = last_post and last_post.id \
+                                               or None
+
+        dbsession.commit()
+
+        if not remove_topic:
+            old_topic.post_count -= len(posts)
+            if old_topic.last_post.id == posts[-1].id:
+                post = Post.query.filter(
+                    topic_table.c.id==old_topic.id
+                ).order_by(topic_table.c.id.desc()).first()
+                old_topic.last_post = post
+            if old_topic.first_post.id == posts[0].id:
+                post = Post.query.filter(
+                    topic_table.c.id==old_topic.id
+                ).order_by(topic_table.c.id.asc()).first()
+                old_topic.first_post = post
+        else:
+            dbsession.delete(old_topic)
+
+        dbsession.commit()
+
+        # update the search index which has the post --> topic mapping indexed
+        for post in posts:
+            post.topic = t
+            post.update_search()
+
+        return t
 
     def __unicode__(self):
         return '%s - %s' % (
@@ -527,9 +677,6 @@ class Post(object):
             self.author
         )
 
-    class Meta:
-        ordering = ('id',)
-        get_latest_by = 'id'
 
 
 class PostRevision(object):
@@ -726,10 +873,9 @@ dbsession.mapper(SAUser, user_table)
 dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })
-
 dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic),
-    'children': relation(Forum, backref=backref('parent',
+    '_children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
     'last_post': relation(Post)},
     extension=ForumMapperExtension()
@@ -768,33 +914,3 @@ dbsession.mapper(PollOption, poll_option_table, properties={
 dbsession.mapper(PollVote, poll_vote_table, properties={
     'poll': relation(Poll)
 })
-"""
-dbsession.mapper(SAAttachment, attachment_table)
-dbsession.mapper(SAForum, forum_table, properties={
-    'last_post': relation(SAPost,
-        primaryjoin=forum_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[forum_table.c.last_post_id]),
-    'parent': relation(SAForum,
-        primaryjoin=forum_table.c.id==forum_table.c.parent_id,
-        foreign_keys=[forum_table.c.parent_id])
-})
-dbsession.mapper(SATopic, topic_table, properties={
-    'forum': relation(SAForum,
-        primaryjoin=topic_table.c.forum_id==forum_table.c.id,
-        foreign_keys=[topic_table.c.forum_id]),
-    'author': relation(SAUser,
-        primaryjoin=topic_table.c.author_id==user_table.c.id,
-        foreign_keys=[topic_table.c.author_id]),
-    'last_post': relation(SAPost,
-        primaryjoin=topic_table.c.last_post_id==post_table.c.id,
-        foreign_keys=[topic_table.c.last_post_id])
-})
-dbsession.mapper(SAPost, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id==user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(SAAttachment, backref=backref('post')),
-    pass
-    pass
-})
-"""
