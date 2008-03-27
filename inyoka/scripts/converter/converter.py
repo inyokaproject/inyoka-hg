@@ -39,6 +39,19 @@ from inyoka.portal.user import User
 from datetime import datetime
 users = {}
 
+#: These pages got duplicates because we use a case insensitiva collation
+#: now.
+#: It's in the format deprecated --> new
+PAGE_REPLACEMENTS = {
+    'Audioplayer': 'AudioPlayer',
+    'Centerim': 'CenterIM',
+    'Gnome': 'GNOME',
+    'Grub': 'GRUB',
+    'XGL': 'Xgl',
+    'YaKuake': 'Yakuake',
+    'Gedit': 'gedit',
+    'StartSeite': 'Startseite',
+}
 
 def select_blocks(query, block_size=1000, start_with=0):
     """Execute a query blockwise to prevent lack of ram"""
@@ -96,9 +109,8 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Syntax/Tabellen']):
-        if moin_name in ['Audioplayer', 'Centerim', 'Gnome', 'Grub',
-                         'XGL', 'YaKuake', 'Gedit', 'root', 'StartSeite']:
+    for i, moin_name in enumerate(['ATI-Grafikkarten', 'ATI-Grafikkarten/fglrx', 'fglrx']):
+        if moin_name in PAGE_REPLACEMENTS:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)
             continue
