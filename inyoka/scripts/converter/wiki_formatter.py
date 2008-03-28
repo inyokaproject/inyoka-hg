@@ -16,9 +16,10 @@ from inyoka.scripts.converter.create_templates import templates
 from inyoka.wiki.utils import normalize_pagename
 from MoinMoin.parser.wiki import Parser
 from inyoka.forum.models import Topic
+from inyoka.pastebin.forms import LANGUAGES
 
 addslashes = lambda x: x.replace('"', '\\"')
-
+HIGHLIGHT_LANGUAGES = dict(LANGUAGES).keys()
 
 # Hack to disable camel case
 class InyokaParser(Parser):
@@ -190,13 +191,16 @@ class InyokaFormatter(FormatterBase):
                 content.append(self._format(line))
             code = u'{{{#!vorlage Wissen\n%s\n}}}' % u'\n'.join(content)
             self._paragraph_breaks(True)
+        elif processor_name.lower() in HIGHLIGHT_LANGUAGES:
+            code = u'\n'.join(lines)
+            code = u'{{{#!code %s\n%s\n}}}' % (processor_name.lower(), code)
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
             code = u'\n'.join(lines)
             if processor_name != 'Befehl':
                 code = self._format(code)
-            code = u'{{{#!vorlage %s\n%s\n}}}\n' % (processor_name, code)
+            code = u'{{{#!vorlage %s\n%s\n}}}' % (processor_name, code)
         return code
 
     def pagelink(self, on, pagename=u'', page=None, **kw):

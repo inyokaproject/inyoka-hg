@@ -112,7 +112,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Textbausteine']):
+    for i, moin_name in enumerate(['Python']):
         if moin_name in PAGE_REPLACEMENTS:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)

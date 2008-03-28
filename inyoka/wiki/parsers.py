@@ -24,6 +24,7 @@ from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr, \
      pagename_join, normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.utils.highlight import highlight_code
+from pygments.util import ClassNotFound
 
 
 def get_parser(name, args, kwargs, data):
@@ -103,7 +104,10 @@ class PygmentsParser(Parser):
         self.syntax = syntax
 
     def build_node(self):
-        rv = highlight_code(self.data, self.syntax)
+        try:
+            rv = highlight_code(self.data, self.syntax)
+        except ClassNotFound:
+            rv = None
         if rv is None:
             return nodes.Preformatted([nodes.Text(self.data)])
         return nodes.HTML(rv)
