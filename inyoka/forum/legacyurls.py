@@ -137,17 +137,17 @@ def whoisonline(args, match):
 
 @legacy.url(r'^/privmsg(:?\.php)/?$')
 def privmsg(args, match):
-    print '/privmsg'
-    print repr(args)
+    #print '/privmsg'
+    #print repr(args)
     if 'mode' in args and args['mode'] == 'post':
         try:
             user = User.query.get(id=args['u'])
             if user is None:
-                print 'no such user'
+                #print 'no such user'
                 return
             return href('portal', 'privmsg', 'new', user.username)
         except KeyError:
-            print 'keyerror'
+            #print 'keyerror'
             return
     else:
         return href('portal', 'privmsg')
