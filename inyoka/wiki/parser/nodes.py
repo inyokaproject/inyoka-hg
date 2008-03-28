@@ -972,7 +972,7 @@ class Highlighted(Strong):
         classes = ['highlighted']
         if self.class_:
             classes.append(self._class)
-        yield build_htlm_tag(u'strong', id=self.id, style=self.style,
+        yield build_html_tag(u'strong', id=self.id, style=self.style,
                              classes=classes)
         for item in Element.prepare_html(self):
             yield item
