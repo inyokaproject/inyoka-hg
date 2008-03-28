@@ -332,7 +332,7 @@ def convert_forum():
         }
         old_id = row.cat_id
         cat = Forum(**data)
-        session.flush([cat.id])
+        session.flush([cat])
         new_id = cat.id
         # assign forums to the correct new category ids...
         for forum in forum_cat_map.get(old_id, []):
