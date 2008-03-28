@@ -51,6 +51,8 @@ PAGE_REPLACEMENTS = {
     'YaKuake': 'Yakuake',
     'Gedit': 'gedit',
     'StartSeite': 'Startseite',
+    'XFCE': 'Xfce',
+    'Gimp': 'GIMP',
 }
 ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
 
@@ -110,7 +112,7 @@ def convert_wiki():
     transaction.managed(True)
     #for i, moin_name in enumerate(l):
     #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Wiki/Textbausteine']):
+    for i, moin_name in enumerate(['Python']):
         if moin_name in PAGE_REPLACEMENTS:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)

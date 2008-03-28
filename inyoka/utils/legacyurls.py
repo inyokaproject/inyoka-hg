@@ -20,7 +20,8 @@ def test_legacy_url(request, test_func):
     """
     old_url = test_func(request.path, request.GET)
     if old_url is not None:
-        return HttpResponsePermanentRedirect(old_url)
+        #return HttpResponsePermanentRedirect(old_url)
+        return HttpResponseRedirect(old_url)
 
 
 def make_tester(f):
