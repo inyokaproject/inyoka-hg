@@ -64,12 +64,12 @@ class FancyPrinter(object):
         return result
 
     def __call__(self, text):
-        if not self._stream.isatty():
+        if isinstance(text, unicode):
+            encoding = getattr(self._stream, 'encoding', None) or 'latin1'
+            text = text.encode(encoding, 'ignore')
+        if not (hasattr(self._stream, 'isatty') and self._stream.isatty()):
             self._stream.write(text)
         else:
-            if isinstance(text, unicode):
-                encoding = getattr(self._stream, 'encoding', None) or 'latin1'
-                text = text.encode(encoding, 'ignore')
             codes = []
             if self._color is not None:
                 codes.append(_colors[self._color])

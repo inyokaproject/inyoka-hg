@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 import re
-from inyoka.utils.http import HttpResponsePermanentRedirect
+from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseRedirect
 
 
 def test_legacy_url(request, test_func):

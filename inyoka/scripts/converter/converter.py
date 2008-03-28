@@ -226,7 +226,8 @@ def convert_users():
         signature = ''
         if row.user_sig_bbcode_uid:
             signature = bbcode.parse(row.user_sig.replace(
-                    ':%s' % row.user_sig_bbcode_uid,'')
+                    ':%s' % row.user_sig_bbcode_uid,''),
+                    transformers=False
                 ).to_markup()
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
@@ -393,8 +394,11 @@ def convert_forum():
                use_labels=True)
     i = 0
     for row in select_blocks(s):
-        text = bbcode.parse(row[post_text_table.c.post_text].replace(':%s' % \
-            row[post_text_table.c.bbcode_uid], '')).to_markup()
+        text = bbcode.parse(
+            row[post_text_table.c.post_text].replace(
+                ':%s' % row[post_text_table.c.bbcode_uid], ''
+            ), transformers=False
+        ).to_markup()
         cur = connection.cursor()
         cur.execute('''
             insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
@@ -715,8 +719,11 @@ def convert_privmsgs():
         m.author_id = msg.privmsgs_from_userid;
         m.subject = msg.privmsgs_subject
         m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = bbcode.parse(msg_text.privmsgs_text.replace(':%s' % \
-            msg_text.privmsgs_bbcode_uid, '')).to_markup()
+        m.text = bbcode.parse(
+            msg_text.privmsgs_text.replace(
+                ':%s' % msg_text.privmsgs_bbcode_uid, ''
+            ), transformers=False
+        ).to_markup()
         m.save()
 
         # If the status is sent, the first user is the sender.
