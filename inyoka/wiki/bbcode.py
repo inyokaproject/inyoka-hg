@@ -25,9 +25,7 @@ from inyoka.wiki.parser import nodes
 _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
 _newline_re = re.compile(r'(?<!\n)(\n)(?!\s*\n)')
-_free_link_re = re.compile(r'(?<!\[url\=|\[url\])(%s[^\s/]+(\[^\s.,:;?]*'
-                           r'([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
-
+_free_link_re = re.compile('(?<!\[url\=|\[url\])(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
 def parse(text, transformers=True):
     """BBCode-Parse a text."""
     return Parser(text).parse(apply_transformers=transformers)
@@ -231,7 +229,7 @@ class Parser(object):
         if token.attr:
             return nodes.InternalLink(token.attr, self.parse_until('/wiki'))
         target = self.parse_until('/wiki', raw=True)
-        return nodes.Link(target, [nodes.Text(target)])
+        return nodes.InternalLink(target, [nodes.Text(target)])
 
     def parse_mod(self):
         """parse [mod]-tags."""
