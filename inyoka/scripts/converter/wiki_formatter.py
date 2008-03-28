@@ -92,8 +92,8 @@ class InyokaFormatter(FormatterBase):
             }
             for s, r in replacements.iteritems():
                 args[0] = args[0].replace(s, r)
-            return u'[mailto:%s%s]' % (args[0],
-                                       args[1] and u' ' + args[1] or u'')
+            return u'[mailto:%s%s]' % (args[0], len(args) > 1 and
+                                       (u' %s' % args[1]) or u'')
         elif name in templates.keys() or name == 'Ausbaufaehig':
             if name in ('Pakete', 'Getestet', 'InArbeit'):
                 args = [a.strip() for a in args.split(',')]
@@ -175,8 +175,8 @@ class InyokaFormatter(FormatterBase):
                 result.append(line + u'\n')
             result.append(self.preformatted(0))
             return u''.join(result)
-        self._paragraph_breaks(False)
         if processor_name == 'Wissen':
+            self._paragraph_breaks(False)
             content = []
             content_re = re.compile('\s+\*\s+\[\d+\]:(.+)')
             for line in lines:
@@ -186,12 +186,14 @@ class InyokaFormatter(FormatterBase):
                 line = match.groups()[0].strip()
                 content.append(self._format(line))
             code = u'{{{#!vorlage Wissen\n%s\n}}}' % u'\n'.join(content)
+            self._paragraph_breaks(True)
         else:
             # most processors are page templates in inyoka
             # but you can embed them via macros and parsers.
-            code = u'{{{#!vorlage %s\n%s\n}}}\n' % (processor_name,
-                                      self._format(u'\n'.join(lines)))
-        self._paragraph_breaks(True)
+            code = u'\n'.join(lines)
+            if processor_name != 'Befehl':
+                code = self._format(code)
+            code = u'{{{#!vorlage %s\n%s\n}}}\n' % (processor_name, code)
         return code
 
     def pagelink(self, on, pagename=u'', page=None, **kw):
