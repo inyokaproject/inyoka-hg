@@ -48,15 +48,14 @@ def get_privileges(user, forums):
     cur = connection.cursor()
     cur.execute('''
         select p.forum_id, %s
-          from forum_privilege p, portal_user u
-         where p.forum_id in (%s) and (p.user_id = %%s or p.group_id in
-               (select g.id from portal_group g, portal_user u,
-                                 portal_user_groups ug
-                 where u.id = ug.user_id and g.id = ug.group_id)
-               %s)
-    ''' % (fields, ', '.join(['%s'] * len(forum_ids)),
-        user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''),
-        (tuple(forum_ids) + (user.id,)))
+          from forum_privilege p
+         where p.forum_id in (%s)
+           and p.user_id = %d
+            or p.group_id in (select ug.group_id from portal_user_groups ug
+                where ug.user_id = %d)
+            %s
+    ''' % (fields, ', '.join(map(str, forum_ids)), user.id, user.id,
+           user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
     result = {}
     for forum_id in forum_ids:
         result[forum_id] = dict.fromkeys(PRIVILEGES, False)
