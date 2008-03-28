@@ -52,7 +52,10 @@ class InyokaFormatter(FormatterBase):
 
     def macro(self, macro_obj, name, args):
         if name in ['Diskussion']:
-            topic_id = int(args.split(',')[0].strip())
+            try:
+                topic_id = int(args.split(',')[0].strip())
+            except (ValueError, IndexError):
+                return u''
             if Topic.query.get(topic_id):
                 self.inyoka_page.topic_id = topic_id
             return u''
