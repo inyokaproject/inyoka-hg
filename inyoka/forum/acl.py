@@ -42,7 +42,6 @@ def get_forum_privileges(user, forum):
 def get_privileges(user, forums):
     """Return all privileges of the applied forums for the `user`"""
     forum_ids = [x.id for x in forums]
-    print '\nFORUM_IDs: %s' % forum_ids
     if not forum_ids:
         return dict.fromkeys(PRIVILEGES, False)
     fields = ', '.join('p.can_' + x for x in PRIVILEGES)
@@ -51,17 +50,16 @@ def get_privileges(user, forums):
         select p.forum_id, %s
           from forum_privilege p
          where p.forum_id in (%s)
-           and (p.user_id = %d
+           and p.user_id = %d
             or p.group_id in (select ug.group_id from portal_user_groups ug
                 where ug.user_id = %d)
-            %s)
+            %s
     ''' % (fields, ', '.join(map(str, forum_ids)), user.id, user.id,
            user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
     result = {}
     for forum_id in forum_ids:
         result[forum_id] = dict.fromkeys(PRIVILEGES, False)
     for row in cur.fetchall():
-        print row
         for key, item in izip(PRIVILEGES, row[1:]):
             if item:
                 result[row[0]][key] = True
