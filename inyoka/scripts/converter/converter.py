@@ -23,7 +23,7 @@ AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 try:
     # optional converter config to modify the settings
-    from inyoka.scripts.converter_config import a
+    from inyoka.scripts.converter_config import *
 except:
     pass
 sys.path.append(WIKI_PATH)
@@ -296,7 +296,7 @@ def convert_users():
 
 def convert_forum():
     from inyoka.forum.models import Forum, Topic, Post, \
-        forum_table as sa_forum_table, topic_table as sa_topic_table
+        topic_table as sa_topic_table
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
