@@ -846,9 +846,11 @@ class Quote(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
+        w.break_()
         w.quote()
         Element.generate_markup(self, w)
         w.unquote()
+        w.break_()
 
     def prepare_html(self):
         yield build_html_tag(u'blockquote', id=self.id, style=self.style,
