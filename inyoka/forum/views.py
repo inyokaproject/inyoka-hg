@@ -619,7 +619,7 @@ def edit(request, post_id):
     attach_form = AddAttachmentForm()
     if is_first_post:
         poll_form = AddPollForm()
-        polls = list(Poll.objects.filter(topic=post.topic))
+        polls = list(Poll.query.filter_by(topic_id=post.topic_id))
         options = request.POST.getlist('options')
     attachments = [] # list(Attachment.objects.filter(post=post))
     if request.method == 'POST':
@@ -705,7 +705,7 @@ def edit(request, post_id):
             if is_first_post:
                 for k in topic_values:
                     setattr(post.topic, k, data[k])
-                post.topic.save()
+                session.commit()
             flash(u'Der Beitrag wurde erfolgreich bearbeitet')
             return HttpResponseRedirect(href('forum', 'post', post.id))
     else:

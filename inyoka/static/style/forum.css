@@ -114,6 +114,12 @@ table.topic tr.deleted {
     font-style: italic;
 }
 
+table.forum a.pageselect {
+    font-size: .8em;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 table.forum tr.deleted {
     background-color: #eee;
     color: #444;
