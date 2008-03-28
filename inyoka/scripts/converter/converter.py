@@ -380,7 +380,7 @@ def convert_forum():
         }
         data['slug'] = slugify(data['title'])
         if Topic.query.filter_by(slug=data['slug']).first():
-            slugs = connection.execute(select([sa_topic_table.c.slug],
+            slugs = session.execute(select([sa_topic_table.c.slug],
                 sa_topic_table.c.slug.like('%s-%%' % data['slug'])))
             start = len(data['slug']) + 1
             try:
