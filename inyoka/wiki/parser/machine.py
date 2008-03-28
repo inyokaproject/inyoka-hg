@@ -299,6 +299,9 @@ class MarkupWriter(object):
         else:
             self._newline = self._indent = True
 
+    def break_(self):
+        self._paragraph.append(u'\n')
+
     def paragraph(self):
         if not self.is_oneline:
             self._paragraph = p = []

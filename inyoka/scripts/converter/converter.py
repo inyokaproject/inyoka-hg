@@ -56,6 +56,12 @@ PAGE_REPLACEMENTS = {
 }
 ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
 
+
+def dump_bb_uid(text, uid):
+    """Remove the bbcode uid of the text"""
+    return text.replace(':1:%s' % uid, '').replace(':%s' % uid, '')
+
+
 def select_blocks(query, block_size=1000, start_with=0):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
@@ -225,10 +231,10 @@ def convert_users():
                 co_long = co_lat = None
         signature = ''
         if row.user_sig_bbcode_uid:
-            signature = bbcode.parse(row.user_sig.replace(
-                    ':%s' % row.user_sig_bbcode_uid,''),
-                    transformers=False
-                ).to_markup()
+            signature = bbcode.parse(
+                dump_bb_uid(row.user_sig, row.user_sig_bbcode_uid),
+                transformers=False
+            ).to_markup()
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
@@ -394,9 +400,9 @@ def convert_forum():
                use_labels=True)
     i = 0
     for row in select_blocks(s):
-        text = bbcode.parse(
-            row[post_text_table.c.post_text].replace(
-                ':%s' % row[post_text_table.c.bbcode_uid], ''
+        text = bbcode.parse(dump_bb_uid(
+                row[post_text_table.c.post_text],
+                row[post_text_table.c.bbcode_uid]
             ), transformers=False
         ).to_markup()
         cur = connection.cursor()
@@ -719,9 +725,8 @@ def convert_privmsgs():
         m.author_id = msg.privmsgs_from_userid;
         m.subject = msg.privmsgs_subject
         m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = bbcode.parse(
-            msg_text.privmsgs_text.replace(
-                ':%s' % msg_text.privmsgs_bbcode_uid, ''
+        m.text = bbcode.parse(dump_bb_uid(
+                msg_text.privmsgs_text, msg_text.privmsgs_bbcode_uid
             ), transformers=False
         ).to_markup()
         m.save()
