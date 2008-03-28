@@ -50,9 +50,9 @@ def get_privileges(user, forums):
         select p.forum_id, %s
           from forum_privilege p
          where p.forum_id in (%s)
-           and p.user_id = %d
+           and (p.user_id = %d
             or p.group_id in (select ug.group_id from portal_user_groups ug
-                where ug.user_id = %d
+                where ug.user_id = %d)
             %s)
     ''' % (fields, ', '.join(map(str, forum_ids)), user.id, user.id,
            user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
