@@ -601,7 +601,7 @@ def edit_user(request, username):
                     if privilege is None:
                         privilege = Privilege(
                             user=user,
-                            forum=Forum.query.get(forum_id)
+                            forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
 
