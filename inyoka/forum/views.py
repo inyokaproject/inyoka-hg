@@ -5,7 +5,7 @@
 
     The views for the forum.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs.
+    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs, Christoph Hack.
     :license: GNU GPL.
 """
 import re
@@ -1253,15 +1253,20 @@ def markread(request, slug=None):
     if user.is_anonymous:
         return
     if slug:
-        forum = Forum.objects.get(slug=slug)
+        forum = Forum.query.get(slug)
+        if not forum:
+            raise PageNotFound()
         forum.mark_read(user)
+        user.save()
         flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name)
         return HttpResponseRedirect(url_for(forum))
     else:
-        flash(u'Allen Foren wurden als gelesen markiert.')
-        user.forum_last_read = Post.objects.get_max_id()
-        user.forum_read_status = ''
+        category_ids = session.execute(select([forum_table.c.id],
+            forum_table.c.parent_id == None)).fetchall()
+        for row in category_ids:
+            Forum.query.get(row[0]).mark_read(user)
         user.save()
+        flash(u'Allen Foren wurden als gelesen markiert.')
     return HttpResponseRedirect(href('forum'))
 
 

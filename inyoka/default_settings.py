@@ -90,7 +90,7 @@ XAPIAN_DATABASE = ''
 IMAGEMAGICK_PATH = ''
 
 # forum settings
-FORUM_LIMIT_UNREAD = 10000
+FORUM_LIMIT_UNREAD = 100
 FORUM_TOPIC_CACHE = 100
 
 # the id of the ikhaya team group

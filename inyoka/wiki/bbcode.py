@@ -19,17 +19,18 @@
 import re
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
 from inyoka.wiki.parser.constants import HTML_COLORS
+from inyoka.wiki.parser.lexer import Lexer
 from inyoka.wiki.parser import nodes
-
 
 _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
 _newline_re = re.compile(r'(?<!\n)(\n)(?!\s*\n)')
+_free_link_re = re.compile(r'(?<!\[url\=|\[url\])(%s[^\s/]+(\[^\s.,:;?]*'
+                           r'([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
 
-
-def parse(text):
+def parse(text, transformers=True):
     """BBCode-Parse a text."""
-    return Parser(text).parse()
+    return Parser(text).parse(apply_transformers=transformers)
 
 
 class Token(object):
@@ -76,7 +77,18 @@ class Parser(object):
     def __init__(self, text, transformers=None):
         self.tokens = []
         self.pos = self.depth = 0
-        text = text.replace('\r\n', '\n')
+        text = u'\n'.join(text.replace('\r\n', '\n').splitlines())
+        # replace free links with [url] links
+        pos = 0
+        result = []
+        for match in _free_link_re.finditer(text):
+            result.append(text[pos:match.start()])
+            result.append(u'[url]%s[/url]' % text[match.start():match.end()])
+            pos = match.end()
+        else:
+            result.append(text[pos:])
+        text = u''.join(result)
+
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS
         self.transformers = transformers
@@ -107,7 +119,7 @@ class Parser(object):
 
         pos = 0
         add = self.tokens.append
-        for match in _block_re.finditer(u'\n'.join(text.splitlines())):
+        for match in _block_re.finditer(text):
             start = match.start()
             if start > pos:
                 add_text(text[pos:start])
@@ -397,12 +409,17 @@ class Parser(object):
         src = self.parse_until('/img', raw=True)
         return nodes.Image(src, t.attr or '')
 
-    def parse(self):
-        """Parse everything and apply transformers."""
+    def parse(self, apply_transformers=True):
+        """
+        Parse everything and apply transformers if `apply_transformers` is
+        True. Deactivating this is senseful if you want to create code out
+        of the node tree using the `to_markup()` function.
+        """
         children = []
         while not self.eos:
             children.append(self.parse_node())
         result = nodes.Document(children)
-        for transformer in self.transformers:
-            result = transformer.transform(result)
+        if apply_transformers:
+            for transformer in self.transformers:
+                result = transformer.transform(result)
         return result

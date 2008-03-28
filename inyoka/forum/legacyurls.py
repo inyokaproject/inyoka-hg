@@ -78,7 +78,7 @@ def index(args, match):
 
 @legacy.url(r'^/forum/(\d+)/(newtopic|watch|unwatch|mark_read)/?$')
 def forum_actions(args, match, forum_id, action):
-    forum = Forum.query.get(id=forum_id)
+    forum = Forum.query.get(forum_id)
     if not forum:
         return
     ACTIONS = {
@@ -95,7 +95,7 @@ def forum_actions(args, match, forum_id, action):
 
 @legacy.url(r'^/topic/(\d+)/(report|reply|watch|unwatch|solved|unsolved)/?$')
 def topic_actions(args, match, topic_id, action):
-    topic = Topic.query.get(id=topic_id)
+    topic = Topic.query.get(topic_id)
     if not topic:
         return
     ACTIONS = {
@@ -113,7 +113,10 @@ def topic_actions(args, match, topic_id, action):
 
 @legacy.url(r'^/topic/\d+/quote/(\d+)/?$')
 def quote(args, match, post_id):
-    return href('forum', 'post', 'quote', post_id)
+    try:
+        return href('forum', 'post', 'quote', int(post_id))
+    except ValueError:
+        return
 
 
 @legacy.url(r'^/go(:?to)?(:?\.php)?/?$')
