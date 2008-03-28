@@ -25,10 +25,12 @@ from inyoka.wiki.parser import nodes
 _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
 _newline_re = re.compile(r'(?<!\n)(\n)(?!\s*\n)')
-_free_link_re = re.compile('(?<!\[url\=|\[url\])(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
-def parse(text, transformers=True):
+_free_link_re = re.compile('(?<!\[url\=|\[url\])(%s[^\s/]+(/[^\s.,:;?]*'
+                           '([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
+
+def parse(text):
     """BBCode-Parse a text."""
-    return Parser(text).parse(apply_transformers=transformers)
+    return Parser(text).parse()
 
 
 class Token(object):
@@ -409,15 +411,12 @@ class Parser(object):
 
     def parse(self, apply_transformers=True):
         """
-        Parse everything and apply transformers if `apply_transformers` is
-        True. Deactivating this is senseful if you want to create code out
-        of the node tree using the `to_markup()` function.
+        Parse everything and apply transformers.
         """
         children = []
         while not self.eos:
             children.append(self.parse_node())
         result = nodes.Document(children)
-        if apply_transformers:
-            for transformer in self.transformers:
-                result = transformer.transform(result)
+        for transformer in self.transformers:
+            result = transformer.transform(result)
         return result

@@ -23,7 +23,7 @@ AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
 try:
     # optional converter config to modify the settings
-    from inyoka.scripts.converter_config import *
+    from inyoka.scripts.converter_config import a
 except:
     pass
 sys.path.append(WIKI_PATH)
@@ -36,8 +36,10 @@ from sqlalchemy.sql import select, func, update
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.wiki import bbcode
 from inyoka.portal.user import User
+from inyoka.wiki.parser.transformers import AutomaticParagraphs
+from inyoka.utils.database import session
+from inyoka.utils.text import slugify
 from datetime import datetime
-users = {}
 
 #: These pages got duplicates because we use a case insensitiva collation
 #: now.
@@ -55,11 +57,14 @@ PAGE_REPLACEMENTS = {
     'Gimp': 'GIMP',
 }
 ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
+users = {}
 
 
-def dump_bb_uid(text, uid):
-    """Remove the bbcode uid of the text"""
-    return text.replace(':1:%s' % uid, '').replace(':%s' % uid, '')
+def convert_bbcode(text, uid):
+    """Parse bbcode, remove the bbcode uid and return inyoka wiki markup"""
+    text = text.replace(':1:%s' % uid, '').replace(':%s' % uid, '')
+    tree = bbcode.Parser(text, transformers=[AutomaticParagraphs()]).parse()
+    return tree.to_markup()
 
 
 def select_blocks(query, block_size=1000, start_with=0):
@@ -208,7 +213,6 @@ def convert_wiki():
 
 def convert_users():
     from _mysql_exceptions import IntegrityError
-    from inyoka.wiki import bbcode
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
@@ -231,10 +235,7 @@ def convert_users():
                 co_long = co_lat = None
         signature = ''
         if row.user_sig_bbcode_uid:
-            signature = bbcode.parse(
-                dump_bb_uid(row.user_sig, row.user_sig_bbcode_uid),
-                transformers=False
-            ).to_markup()
+            signature = convert_bbcode(row.user_sig, row.user_sig_bbcode_uid)
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
@@ -292,8 +293,10 @@ def convert_users():
         cursor = connection.cursor()
         cursor.execute("UPDATE portal_user SET is_active=0 WHERE id=%i" % ban[1])
 
+
 def convert_forum():
-    from inyoka.forum.models import Forum, Topic, Post
+    from inyoka.forum.models import Forum, Topic, Post, \
+        forum_table as sa_forum_table, topic_table as sa_topic_table
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
@@ -313,13 +316,11 @@ def convert_forum():
             'name': row.forum_name,
             'description': row.forum_desc,
             'position': row.forum_order,
-            #TODO
-            #'last_post': ,
             'post_count': row.forum_posts,
             'topic_count': row.forum_topics,
         }
         f = Forum(**data)
-        f.save()
+        session.flush([f])
         forum_cat_map.setdefault(row.cat_id, []).append(f)
 
     s = select([categories_table])
@@ -331,12 +332,12 @@ def convert_forum():
         }
         old_id = row.cat_id
         cat = Forum(**data)
-        cat.save()
+        session.flush([cat.id])
         new_id = cat.id
         # assign forums to the correct new category ids...
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
-            forum.save()
+            session.flush([forum])
 
     print 'Converting topics'
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
@@ -363,9 +364,8 @@ def convert_forum():
     transaction.enter_transaction_management()
     transaction.managed(True)
     for row in result:
-
         data = {
-            'pk': row.topic_id,
+            'id': row.topic_id,
             'forum_id': row.forum_id,
             'title': row.topic_title,
             'view_count': row.topic_views,
@@ -377,18 +377,18 @@ def convert_forum():
             'ubuntu_version': ubuntu_version_map.get(row.topic_version),
             'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
             'author_id': row.topic_poster,
-            #'first_post_id': row.topic_first_post_id,
-            #'last_post_id': row.topic_last_post_id,
         }
-        # To work around the overwritten objects.create method...
-        t = Topic(**data)
-        t.save()
-        connection.queries = []
-        if i == 500:
-            transaction.commit()
-            i = 0
-        else:
-            i += 1
+        data['slug'] = slugify(data['title'])
+        if Topic.query.filter_by(slug=data['slug']).first():
+            slugs = connection.execute(select([sa_topic_table.c.slug],
+                sa_topic_table.c.slug.like('%s-%%' % data['slug'])))
+            start = len(data['slug']) + 1
+            try:
+                data['slug'] += '-%d' % (max(int(s[0][start:]) for s in slugs \
+                    if s[0][start:].isdigit()) + 1)
+            except ValueError:
+                data['slug'] += '-1'
+        session.execute(sa_topic_table.insert(values=data))
 
 
     print 'Converting posts'
@@ -400,11 +400,8 @@ def convert_forum():
                use_labels=True)
     i = 0
     for row in select_blocks(s):
-        text = bbcode.parse(dump_bb_uid(
-                row[post_text_table.c.post_text],
-                row[post_text_table.c.bbcode_uid]
-            ), transformers=False
-        ).to_markup()
+        text = convert_bbcode(row[post_text_table.c.post_text],
+                              row[post_text_table.c.bbcode_uid])
         cur = connection.cursor()
         cur.execute('''
             insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
@@ -448,6 +445,7 @@ def convert_forum():
     cur.execute("UPDATE forum_topic SET author_id = 1 WHERE author_id = -1;")
     cur.execute("UPDATE forum_post SET author_id = 1 WHERE author_id = -1;")
     connection._commit()
+
 
 def convert_groups():
     from inyoka.portal.user import Group
@@ -725,10 +723,8 @@ def convert_privmsgs():
         m.author_id = msg.privmsgs_from_userid;
         m.subject = msg.privmsgs_subject
         m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = bbcode.parse(dump_bb_uid(
-                msg_text.privmsgs_text, msg_text.privmsgs_bbcode_uid
-            ), transformers=False
-        ).to_markup()
+        m.text = convert_bbcode(msg_text.privmsgs_text,
+                                msg_text.privmsgs_bbcode_uid)
         m.save()
 
         # If the status is sent, the first user is the sender.
