@@ -64,7 +64,7 @@ class FancyPrinter(object):
         return result
 
     def __call__(self, text):
-        if not self._stream.isatty():
+        if not (hasattr(self._stream, 'isatty') and self._stream.isatty()):
             self._stream.write(text)
         else:
             if isinstance(text, unicode):
