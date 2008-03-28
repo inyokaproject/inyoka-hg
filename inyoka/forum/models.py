@@ -784,7 +784,7 @@ class Privilege(object):
         gid = group and group.id or None
         self.group_id = gid
         self.user_id = uid
-        self.forum_id = forum.id
+        self.forum_id = forum and forum.id or None
         for permission, value in kwargs.iteritems():
             setattr(self, permission, value)
 
