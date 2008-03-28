@@ -177,7 +177,7 @@ class TopicMapperExtension(MapperExtension):
 class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
-        instance.rendered_text = instance.render_text()
+        instance._rendered_text = instance.render_text()
         if not instance.pub_date:
             instance.pub_date = datetime.utcnow()
 
@@ -474,6 +474,12 @@ class Post(object):
     """
     Represents a post in a topic.
     """
+
+    @property
+    def rendered_text(self):
+        if not self._rendered_text:
+            self._rendered_text = self.render_text()
+        return self._rendered_text
 
     def render_text(self, request=None, format='html', nocache=False,
                     force_existing=False):
@@ -953,10 +959,12 @@ dbsession.mapper(Topic, topic_table, properties={
     }, extension=TopicMapperExtension()
 )
 dbsession.mapper(Post, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id == user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(Attachment)},
+        'author': relation(SAUser,
+            primaryjoin=post_table.c.author_id == user_table.c.id,
+            foreign_keys=[post_table.c.author_id]),
+        'attachments': relation(Attachment),
+        '_rendered_text': post_table.c.rendered_text,
+    },
     extension=PostMapperExtension()
 )
 dbsession.mapper(Attachment, attachment_table)
