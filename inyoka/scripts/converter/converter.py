@@ -51,6 +51,8 @@ PAGE_REPLACEMENTS = {
     'YaKuake': 'Yakuake',
     'Gedit': 'gedit',
     'StartSeite': 'Startseite',
+    'XFCE': 'Xfce',
+    'Gimp': 'GIMP',
 }
 ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
 
