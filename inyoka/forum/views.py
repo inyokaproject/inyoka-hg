@@ -170,7 +170,6 @@ def viewtopic(request, topic_slug, page=1):
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(Poll.c.topic_id==t.id).all()
-        print "POLLS", polls, t.id
 
         if request.method == 'POST':
             # the user participated in a poll
@@ -496,7 +495,6 @@ def newtopic(request, slug=None, article=None):
                 poll = Poll(question=d['question'], options=d['options'],
                              multiple_votes=d['multiple'])
                 session.commit()
-                print "POLL_ID", poll.id
                 polls.append(poll)
                 poll_ids.append(poll.id)
                 flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
@@ -542,7 +540,6 @@ def newtopic(request, slug=None, article=None):
             #                                   topic.first_post_id)
             # bind all new polls to the new topic
             session.flush([topic])
-            print "POLL_BIND", poll_ids, topic.id
             Poll.bind(poll_ids, topic.id)
 
             if article:

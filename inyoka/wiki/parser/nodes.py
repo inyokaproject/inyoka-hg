@@ -625,7 +625,7 @@ class InterWikiLink(Element):
     def generate_markup(self, w):
         target = self.page
         if self.anchor:
-            target += '#' + anchor
+            target += '#' + self.anchor
         w.markup(u'[%s:%s:' % (self.wiki, target.replace(':', '::')))
         Element.generate_markup(self, w)
         w.markup(u']')
