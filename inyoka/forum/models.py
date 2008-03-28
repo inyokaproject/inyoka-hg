@@ -286,27 +286,23 @@ class Forum(object):
         Determine the read status of the whole forum for a specific
         user.
         """
-        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
+        if user.is_anonymous:
             return True
-        for forum in self.children:
-            if not forum.get_read_status(user):
-                return False
-        for topic in self.latest_topics:
-            if not topic.get_read_status(user):
-                return False
-        return True
+        if not hasattr(user, '_readstatus'):
+            user._readstatus = ReadStatus(user.forum_read_status)
+        return user._readstatus(self)
 
     def mark_read(self, user):
         """
         Mark all topics in this forum and all related subforums as
         read for the specificed user.
         """
-        forums = [self]
-        while forums:
-            forum = forums.pop()
-            for topic in forum.latest_topics:
-                topic.mark_read(user)
-            forums.extend(forum.children)
+        if user.is_anonymous:
+            return
+        if not hasattr(user, '_readstatus'):
+            user._readstatus = ReadStatus(user.forum_read_status)
+        if user._readstatus.mark(self):
+            user.forum_read_status = user._readstatus.serialize()
 
     def find_welcome(self, user):
         """
@@ -446,33 +442,22 @@ class Topic(object):
         return u' '.join(out)
 
     def get_read_status(self, user):
-        if user.is_anonymous or self.last_post_id <= user.forum_last_read:
-            return  user.is_anonymous or self.last_post_id <= user.forum_last_read
-        try:
-            read_status = cPickle.loads(str(user.forum_read_status))
-        except:
-            read_status = set()
-        if self.last_post_id in read_status:
+        if user.is_anonymous:
             return True
-        else:
-            return False
+        if not hasattr(user, '_readstatus'):
+            user._readstatus = ReadStatus(user.forum_read_status)
+        return user._readstatus(self)
 
     def mark_read(self, user):
         """
         Mark the current topic as read for a given user.
         """
-        try:
-            read_status = cPickle.loads(str(user.forum_read_status))
-        except:
-            read_status = set()
-        if self.last_post_id and not self.last_post_id in read_status:
-            read_status.add(self.last_post.id)
-            maxid = Post.get_max_id()
-            if user.forum_last_read < maxid - settings.FORUM_LIMIT_UNREAD:
-                user.forum_last_read = maxid - settings.FORUM_LIMIT_UNREAD//2
-                read_status = set([x for x in read_status if x >
-                                            user.forum_last_read])
-            user.forum_read_status = cPickle.dumps(read_status)
+        if user.is_anonymous:
+            return
+        if not hasattr(user, '_readstatus'):
+            user._readstatus = ReadStatus(user.forum_read_status)
+        if user._readstatus.mark(self):
+            user.forum_read_status = user._readstatus.serialize()
 
     def __unicode__(self):
         return self.title
@@ -866,6 +851,78 @@ class SAUser(object):
 
     def __unicode__(self):
         return self.username
+
+
+class ReadStatus(object):
+    """
+    Manages the read status of forums and topics for a specific user.
+    """
+
+    def __init__(self, serialized_data):
+        self.data = serialized_data and cPickle.loads(str(serialized_data)) or {}
+
+    def __call__(self, item):
+        """
+        Determine the read status for a forum or topic. If the topic
+        was allready read by the user, True is returned.
+        """
+        forum_id, post_id = None, None
+        is_forum = isinstance(item, Forum)
+        if is_forum:
+            forum_id, post_id = item.id, item.last_post_id
+        elif isinstance(item, Topic):
+            forum_id, post_id = item.forum_id, item.last_post_id
+        else:
+            raise ValueError('Can\'t determine read status of an unknown type')
+        row = self.data.get(forum_id, (None, []))
+        if row[0] >= post_id:
+            return True
+        elif is_forum:
+            return False
+        return post_id in row[1]
+
+    def mark(self, item):
+        """
+        Mark a forum or topic as read. Note that you must save the database
+        changes explicitely!
+        """
+        if self(item):
+            return False
+        forum_id = isinstance(item, Forum) and item.id or item.forum_id
+        post_id = item.last_post_id
+        if isinstance(item, Forum):
+            self.data[forum_id] = (post_id, set())
+            for child in item.children:
+                self.mark(child)
+            all = True
+            if item.parent_id:
+                for child in item.parent.children:
+                    all = all and self(child)
+            if all and item.parent_id:
+                self.mark(item.parent)
+            return True
+        row = self.data.get(forum_id, (None, set()))
+        row[1].add(post_id)
+        all = True
+        for child in item.forum.children:
+            all = all and self(child)
+        all = all and not dbsession.execute(select([forum_table.c.id],
+            and_(forum_table.c.id == forum_id,
+            forum_table.c.last_post_id > (row[0] or -1),
+            ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone()
+        if all:
+            self.mark(item.forum)
+            return True
+        elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
+            r = list(row[1])
+            r.sort()
+            row[1] = set(r[settings.FORUM_LIMIT_UNREAD//2:])
+            row[0] = r[settings.FORUM_LIMIT_UNREAD//2]
+        self.data[forum_id] = row
+        return True
+
+    def serialize(self):
+        return cPickle.dumps(self.data)
 
 
 dbsession.mapper(SAUser, user_table)
