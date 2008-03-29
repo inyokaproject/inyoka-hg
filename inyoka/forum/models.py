@@ -10,15 +10,12 @@
 """
 from __future__ import division
 import re
-import random
 import cPickle
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
-        EXT_CONTINUE
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_, exists
 from inyoka.conf import settings
-from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify
 from inyoka.utils.html import escape
@@ -31,7 +28,6 @@ from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table
-from inyoka.portal.user import User, Group
 
 
 POSTS_PER_PAGE = 15
@@ -117,7 +113,9 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(instance.forum_id)
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        instance.slug = slugify(instance.title)
+        # shorten slug to 45 chars (max length is 50) because else problems
+        # when appending id can occur
+        instance.slug = slugify(instance.title)[:45]
         if Topic.query.filter_by(slug=instance.slug).first():
             slugs = connection.execute(select([topic_table.c.slug],
                 topic_table.c.slug.like('%s-%%' % instance.slug)))
@@ -366,7 +364,7 @@ class Topic(object):
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
-        topic.forum = forum
+        self.forum = forum
         dbsession.flush(self)
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
