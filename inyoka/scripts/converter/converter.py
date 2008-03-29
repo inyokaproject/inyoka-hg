@@ -569,9 +569,13 @@ def convert_privileges():
             group = Group.objects.get(pk=row.group_id)
         except Group.DoesNotExist:
             continue
-        Privilege(**{
+
+        forum = Forum.query.get(int(row.forum_id))
+        if forum is None:
+            continue
+
+        Privilege(forum, **{
             'group':           group,
-            'forum_id':        row.forum_id,
             'can_read':        bool(row.auth_read),
             'can_reply':       bool(row.auth_reply),
             'can_create':      bool(row.auth_post),
