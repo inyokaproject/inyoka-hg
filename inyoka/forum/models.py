@@ -117,7 +117,9 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(instance.forum_id)
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        instance.slug = slugify(instance.title)
+        # shorten slug to 45 chars (max length is 50) because else problems
+        # when appending id can occur
+        instance.slug = slugify(instance.title)[:45]
         if Topic.query.filter_by(slug=instance.slug).first():
             slugs = connection.execute(select([topic_table.c.slug],
                 topic_table.c.slug.like('%s-%%' % instance.slug)))

@@ -320,7 +320,7 @@ def convert_forum():
             'topic_count': row.forum_topics,
         }
         f = Forum(**data)
-        session.flush([f])
+        session.commit()
         forum_cat_map.setdefault(row.cat_id, []).append(f)
 
     s = select([categories_table])
@@ -332,12 +332,12 @@ def convert_forum():
         }
         old_id = row.cat_id
         cat = Forum(**data)
-        session.flush([cat])
+        session.commit()
         new_id = cat.id
         # assign forums to the correct new category ids...
         for forum in forum_cat_map.get(old_id, []):
             forum.parent_id = new_id
-            session.flush([forum])
+            session.commit()
 
     print 'Converting topics'
     topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
@@ -378,17 +378,8 @@ def convert_forum():
             'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
             'author_id': row.topic_poster,
         }
-        data['slug'] = slugify(data['title'])
-        if Topic.query.filter_by(slug=data['slug']).first():
-            slugs = session.execute(select([sa_topic_table.c.slug],
-                sa_topic_table.c.slug.like('%s-%%' % data['slug'])))
-            start = len(data['slug']) + 1
-            try:
-                data['slug'] += '-%d' % (max(int(s[0][start:]) for s in slugs \
-                    if s[0][start:].isdigit()) + 1)
-            except ValueError:
-                data['slug'] += '-1'
-        session.execute(sa_topic_table.insert(values=data))
+        t = Topic(**data)
+        session.commit()
 
 
     print 'Converting posts'
