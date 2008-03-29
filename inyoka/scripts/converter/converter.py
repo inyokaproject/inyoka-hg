@@ -38,7 +38,6 @@ from inyoka.wiki import bbcode
 from inyoka.portal.user import User
 from inyoka.wiki.parser.transformers import AutomaticParagraphs
 from inyoka.utils.database import session
-from inyoka.utils.text import slugify
 from datetime import datetime
 
 #: These pages got duplicates because we use a case insensitiva collation
@@ -295,141 +294,140 @@ def convert_users():
 
 
 def convert_forum():
-    from inyoka.forum.models import Forum, Topic, Post, \
-        topic_table as sa_topic_table
+    from inyoka.forum.models import Forum, Topic, \
+            topic_table as sa_topic_table, forum_table as sa_forum_table, \
+            post_table as sa_post_table
 
     engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     conn = engine.connect()
 
-    print 'Converting forum structue'
+    categories_table = Table('%scategories' % FORUM_PREFIX, meta,
+                             autoload=True)
     forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
-    categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
-    s = select([forums_table])
-    result = conn.execute(s)
+    topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
+    post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
+    post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
+                            autoload=True)
+
+    print 'Converting forum structue'
+
     forum_cat_map = {}
 
-    for row in result:
-        data = {
-            'id': row.forum_id,
-            'name': row.forum_name,
+    for row in conn.execute(select([forums_table])):
+        f = Forum(**{
+            'id':          row.forum_id,
+            'name':        row.forum_name,
             'description': row.forum_desc,
-            'position': row.forum_order,
-            'post_count': row.forum_posts,
+            'position':    row.forum_order,
+            'post_count':  row.forum_posts,
             'topic_count': row.forum_topics,
-        }
-        f = Forum(**data)
+        })
         session.commit()
         forum_cat_map.setdefault(row.cat_id, []).append(f)
 
-    s = select([categories_table])
-    result = conn.execute(s)
-    for row in result:
-        data = {
+    for row in conn.execute(select([categories_table])):
+        cat = Forum(**{
             'name': row.cat_title,
             'position': row.cat_order,
-        }
-        old_id = row.cat_id
-        cat = Forum(**data)
+        })
         session.commit()
-        new_id = cat.id
+
         # assign forums to the correct new category ids...
-        for forum in forum_cat_map.get(old_id, []):
-            forum.parent_id = new_id
+        for forum in forum_cat_map.get(row.cat_id, []):
+            forum.parent_id = cat.id
             session.commit()
 
     print 'Converting topics'
-    topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
-    s = select([topic_table])
 
     # maybe make it dynamic, but not now ;)
     ubuntu_version_map = {
         0: None,
-        1:'4.10', 2:'5.04',
-        3:'5.10', 4:'6.04',
-        7:'6.10', 8:'7.04',
-        10:'7.10', 11:'8.04',
+        1:'4.10',
+        2:'5.04',
+        3:'5.10',
+        4:'6.04',
+        7:'6.10',
+        8:'7.04',
+        10:'7.10',
+        11:'8.04',
     }
     ubuntu_distro_map = {
         0: None,
-        1: 'ubuntu', 2: 'kubuntu',
-        3: 'xubuntu', 4: 'edubuntu',
+        1: 'ubuntu',
+        2: 'kubuntu',
+        3: 'xubuntu',
+        4: 'edubuntu',
         6: 'kubuntu' # KDE(4) is still kubuntu ;)
     }
 
-    result = conn.execute(s)
+    forums = {}
+    for f in Forum.query.all():
+        forums[f.id] = f
 
-    i = 0
-    transaction.enter_transaction_management()
-    transaction.managed(True)
-    for row in result:
-        data = {
-            'id': row.topic_id,
-            'forum_id': row.forum_id,
-            'title': row.topic_title,
-            'view_count': row.topic_views,
-            'post_count': row.topic_replies + 1,
+    for row in conn.execute(select([topic_table])):
+        t = Topic(**{
+            'id':             row.topic_id,
+            'forum':          row.forum_id in forums and \
+                              forums[row.forum_id] or forums[1],
+            'title':          row.topic_title,
+            'view_count':     row.topic_views,
+            'post_count':     row.topic_replies + 1,
             # sticky and announce are sticky in inyoka
-            'sticky': bool(row.topic_type),
-            'solved': bool(row.topic_fixed),
-            'locked': row.topic_status == 1,
+            'sticky':         bool(row.topic_type),
+            'solved':         bool(row.topic_fixed),
+            'locked':         row.topic_status == 1,
             'ubuntu_version': ubuntu_version_map.get(row.topic_version),
-            'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
-            'author_id': row.topic_poster,
-        }
-        t = Topic(**data)
+            'ubuntu_distro':  ubuntu_distro_map.get(row.topic_desktop),
+            'author_id':      row.topic_poster,
+        })
         session.commit()
 
+    del forums
 
     print 'Converting posts'
-    post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
-    post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
-                            autoload=True)
+
     s = select([post_table, post_text_table],
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
-    i = 0
+
     for row in select_blocks(s):
         text = convert_bbcode(row[post_text_table.c.post_text],
                               row[post_text_table.c.bbcode_uid])
-        cur = connection.cursor()
-        cur.execute('''
-            insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
-                values (%s,%s,%s,%s,%s,'',False);
+        session.execute(sa_post_table.insert(values={
+            'id':            row[post_table.c.post_id],
+            'topic_id':      row[post_table.c.topic_id],
+            'text':          text,
+            'author_id':     row[post_table.c.poster_id],
+            'pub_date':      datetime.fromtimestamp(row[post_table.c.post_time]),
+            'rendered_text': '',
+            'hidden':        False
+        }))
+        session.commit()
 
-        ''', (row[post_table.c.post_id], row[post_table.c.topic_id],
-              text, row[post_table.c.poster_id],
-              datetime.fromtimestamp(row[post_table.c.post_time])))
-        if i == 500:
-            connection._commit()
-            connection.queries = []
-            i = 0
-        else:
-            i += 1
     print 'fixing forum references'
 
-    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-        settings.DATABASE_HOST, settings.DATABASE_NAME)
-    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
-    dmeta = MetaData()
-    dmeta.bind = dengine
-    dconn = dengine.connect()
-    dtopic = Table('forum_topic', dmeta, autoload=True)
-    dpost = Table('forum_post', dmeta, autoload=True)
-    dforum = Table('forum_forum', dmeta, autoload=True)
-
-    subselect_max = select([func.max(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
-    subselect_min = select([func.min(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
-    dconn.execute(dtopic.update(values={dtopic.c.last_post_id: subselect_max,
-                                        dtopic.c.first_post_id: subselect_min}))
-    subselect = select([func.max(dtopic.c.last_post_id)],
-                       dtopic.c.forum_id == dforum.c.id)
-    dconn.execute(dforum.update(values={dforum.c.last_post_id: subselect}))
-    dconn.close()
-
-    conn.close()
+    subselect_max = select(
+        [func.max(sa_post_table.c.id)],
+        sa_topic_table.c.id == sa_post_table.c.topic_id
+    )
+    subselect_min = select(
+        [func.min(sa_post_table.c.id)],
+        sa_topic_table.c.id == sa_post_table.c.topic_id
+    )
+    session.execute(sa_topic_table.update(values={
+        sa_topic_table.c.last_post_id: subselect_max,
+        sa_topic_table.c.first_post_id: subselect_min
+    }))
+    subselect = select(
+        [func.max(sa_topic_table.c.last_post_id)],
+        sa_topic_table.c.forum_id == sa_forum_table.c.id
+    )
+    session.execute(sa_forum_table.update(values={
+        sa_forum_table.c.last_post_id: subselect
+    }))
+    session.commit()
 
     # Fix anon user:
     cur = connection.cursor()
