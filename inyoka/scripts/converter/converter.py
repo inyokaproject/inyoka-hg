@@ -24,7 +24,7 @@ from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.wiki.parser.transformers import AutomaticParagraphs
-from inyoka.forum.models import Privilege, Attachment, Post, Voter, Topic, \
+from inyoka.forum.models import Privilege, Attachment, Post, Topic, \
     Poll, PollOption, Forum, topic_table as sa_topic_table, forum_table as \
     sa_forum_table, post_table as sa_post_table
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
@@ -34,10 +34,8 @@ from inyoka.pastebin.models import Entry
 from inyoka.utils.database import session
 from inyoka.portal.user import User, Group
 from inyoka.scripts.converter.create_templates import create
-from inyoka.scripts.converter.wiki_formatter import InyokaFormatter, \
-        InyokaParser
 
-_account = '%s:%s@%s' (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+_account = '%s:%s@%s' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
                        settings.DATABASE_HOST)
 FORUM_URI = 'mysql://%s/ubuntu_de?charset=utf8' % _account
 OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal?charset=utf8' % _account
@@ -117,7 +115,9 @@ def convert_wiki():
     from MoinMoin.request import RequestCLI
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
-
+    # circular import
+    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter, \
+        InyokaParser
     try:
         create()
     except IntegrityError:
