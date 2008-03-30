@@ -902,9 +902,6 @@ class ReadStatus(object):
             return True
         row = self.data.get(forum_id, (None, set()))
         row[1].add(post_id)
-        all = True
-        for child in item.forum.children:
-            all = all and self(child)
         if reduce(lambda a, b: a and b,
             [self(c) for c in item.forum.children]) and not \
             dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
