@@ -122,7 +122,11 @@
         }, function(data) {
           output.html(data);
           preview.slideDown('fast');
-          document.location.href += '#preview';
+          if document.location.href.match(/#preview/) {
+            document.location.href = document.location.href;
+          } else {
+            document.location.href += '#preview';
+          }
         });
         return false;
       }).parent().parent().parent().append(preview);

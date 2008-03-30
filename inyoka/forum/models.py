@@ -10,15 +10,12 @@
 """
 from __future__ import division
 import re
-import random
 import cPickle
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
-        EXT_CONTINUE
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_, exists
 from inyoka.conf import settings
-from inyoka.ikhaya.models import Article
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify
 from inyoka.utils.html import escape
@@ -31,7 +28,6 @@ from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table
-from inyoka.portal.user import User, Group
 
 
 POSTS_PER_PAGE = 15
@@ -117,7 +113,9 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(instance.forum_id)
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        instance.slug = slugify(instance.title)
+        # shorten slug to 45 chars (max length is 50) because else problems
+        # when appending id can occur
+        instance.slug = slugify(instance.title)[:45]
         if Topic.query.filter_by(slug=instance.slug).first():
             slugs = connection.execute(select([topic_table.c.slug],
                 topic_table.c.slug.like('%s-%%' % instance.slug)))
@@ -366,7 +364,7 @@ class Topic(object):
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
-        topic.forum = forum
+        self.forum = forum
         dbsession.flush(self)
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
@@ -696,11 +694,6 @@ class Attachment(object):
         The post the attachment belongs to.  It may be NULL if the attachment
         belongs to a post that is not yet created.
     """
-    #objects = AttachmentManager()
-    #file = models.FileField(upload_to='forum/attachments/%S/%W')
-    #name = models.CharField(max_length=255)
-    #comment = models.TextField()
-    #post = models.ForeignKey(Post, null=True)
 
     @property
     def size(self):
@@ -775,15 +768,6 @@ class Privilege(object):
 
 
 class Poll(object):
-
-    def __init__(self, question, options, multiple_votes):
-        self.start_time = datetime.utcnow()
-        self.question = question
-        for option in options:
-            if not isinstance(option, PollOption):
-                option = PollOption(name=option)
-            self.options.append(option)
-        self.multiple_votes = multiple_votes
 
     @staticmethod
     def bind(poll_ids, topic_id):
@@ -888,7 +872,7 @@ class ReadStatus(object):
         """
         if self(item):
             return False
-        print 'MARK', item, self.data
+        # print 'MARK', item, self.data
         forum_id = isinstance(item, Forum) and item.id or item.forum_id
         post_id = item.last_post_id
         if isinstance(item, Forum):
@@ -896,28 +880,28 @@ class ReadStatus(object):
             for child in item.children:
                 self.mark(child)
             if item.parent_id and reduce(lambda a, b: a and b, \
-                [self(c) for c in item.parent.children]):
+                [self(c) for c in item.parent.children], True):
                 self.mark(item.parent)
-            print ' FORUM', self.data
+            # print ' FORUM', self.data
             return True
         row = self.data.get(forum_id, (None, set()))
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,
-            [self(c) for c in item.forum.children]) and not \
+            [self(c) for c in item.forum.children], True) and not \
             dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
             forum_table.c.last_post_id > (row[0] or -1),
             ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
-            print ' ALL', self.data
+            # print ' ALL', self.data
             return True
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
             r = list(row[1])
             r.sort()
             row[1] = set(r[settings.FORUM_LIMIT_UNREAD//2:])
             row[0] = r[settings.FORUM_LIMIT_UNREAD//2]
-            print ' TRUNCATED'
+            # print ' TRUNCATED'
         self.data[forum_id] = row
-        print ' RESULT', self.data
+        # print ' RESULT', self.data
         return True
 
     def serialize(self):
