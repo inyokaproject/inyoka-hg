@@ -694,11 +694,6 @@ class Attachment(object):
         The post the attachment belongs to.  It may be NULL if the attachment
         belongs to a post that is not yet created.
     """
-    #objects = AttachmentManager()
-    #file = models.FileField(upload_to='forum/attachments/%S/%W')
-    #name = models.CharField(max_length=255)
-    #comment = models.TextField()
-    #post = models.ForeignKey(Post, null=True)
 
     @property
     def size(self):
