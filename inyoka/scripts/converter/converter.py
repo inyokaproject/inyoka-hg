@@ -10,54 +10,67 @@
     :copyright: Copyright 2007-2008 by Benjamin Wiegand, Florian Apolloner.
     :license: GNU GPL.
 """
-import re
 import sys
+import cPickle
+from os import path
+from datetime import datetime
+from werkzeug.utils import url_unquote
+from _mysql_exceptions import IntegrityError
+from django.db import connection, transaction
+from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy.sql import select, func, and_
+from sqlalchemy.exceptions import OperationalError
 from inyoka.conf import settings
+from inyoka.wiki import bbcode
+from inyoka.wiki.utils import normalize_pagename
+from inyoka.wiki.models import Page as InyokaPage
+from inyoka.wiki.parser.transformers import AutomaticParagraphs
+from inyoka.forum.models import Privilege, Attachment, Post, Topic, \
+    Poll, PollOption, Forum, topic_table as sa_topic_table, forum_table as \
+    sa_forum_table, post_table as sa_post_table, poll_vote_table as \
+    sa_poll_vote_table, PollVote
+from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
+    Subscription
+from inyoka.ikhaya.models import Article, Category
+from inyoka.pastebin.models import Entry
+from inyoka.utils.database import session
+from inyoka.portal.user import User, Group
+from inyoka.scripts.converter.create_templates import create
 
-WIKI_PATH = '/srv/www/de/wiki'
-FORUM_URI = 'mysql://%s:%s@%s/ubuntu_de?charset=utf8' % (settings.DATABASE_USER,
-    settings.DATABASE_PASSWORD, settings.DATABASE_HOST)
-OLD_PORTAL_URI = 'mysql://root@localhost/ubuntu_de_portal?charset=utf8'
+_account = '%s:%s@%s' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+                       settings.DATABASE_HOST)
+FORUM_URI = 'mysql://%s/ubuntu_de?charset=utf8' % _account
+OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal?charset=utf8' % _account
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
+WIKI_PATH = '/srv/www/de/wiki'
+DJANGO_URI = '%s://%s/%s' % (settings.DATABASE_ENGINE, _account,
+                             settings.DATABASE_NAME)
+
 try:
     # optional converter config to modify the settings
     from inyoka.scripts.converter_config import *
-except:
+except ImportError:
     pass
-sys.path.append(WIKI_PATH)
 
-from os import path
-from werkzeug.utils import url_unquote
-from django.db import connection, transaction
-from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.sql import select, func, update
-from inyoka.wiki.models import Page as InyokaPage
-from inyoka.wiki import bbcode
-from inyoka.portal.user import User
-from inyoka.wiki.parser.transformers import AutomaticParagraphs
-from inyoka.utils.database import session
-from inyoka.utils.text import slugify
-from datetime import datetime
+sys.path.append(WIKI_PATH)
 
 #: These pages got duplicates because we use a case insensitiva collation
 #: now.
 #: It's in the format deprecated --> new
 PAGE_REPLACEMENTS = {
     'Audioplayer': 'AudioPlayer',
-    'Centerim': 'CenterIM',
-    'Gnome': 'GNOME',
-    'Grub': 'GRUB',
-    'XGL': 'Xgl',
-    'YaKuake': 'Yakuake',
-    'Gedit': 'gedit',
-    'StartSeite': 'Startseite',
-    'XFCE': 'Xfce',
-    'Gimp': 'GIMP',
+    'Centerim':     'CenterIM',
+    'Gnome':        'GNOME',
+    'Grub':         'GRUB',
+    'XGL':          'Xgl',
+    'YaKuake':      'Yakuake',
+    'Gedit':        'gedit',
+    'StartSeite':   'Startseite',
+    'XFCE':         'Xfce',
+    'Gimp':         'GIMP',
 }
-ESCAPE_RE = re.compile('%([a-fA-F0-9]{2})')
-users = {}
 
 
 def convert_bbcode(text, uid):
@@ -91,39 +104,50 @@ def select_blocks(query, block_size=1000, start_with=0):
         range = range[1] + 1, range[1] + block_size
 
 
+def forum_db():
+    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
+    meta = MetaData()
+    meta.bind = engine
+    conn = engine.connect()
+    return engine, meta, conn
+
+
 def convert_wiki():
     from MoinMoin.Page import Page
     from MoinMoin.request import RequestCLI
     from MoinMoin.logfile import editlog
     from MoinMoin.wikiutil import version2timestamp
-    from inyoka.scripts.converter.create_templates import create
-    from _mysql_exceptions import IntegrityError
+    # circular import
+    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter, \
+        InyokaParser
     try:
         create()
     except IntegrityError:
         print 'wiki templates are already created'
 
-    from inyoka.scripts.converter.wiki_formatter import InyokaFormatter, \
-            InyokaParser
-    from inyoka.wiki.utils import normalize_pagename
     request = RequestCLI()
     formatter = InyokaFormatter(request)
     request.formatter = formatter
     new_page = None
-    #us = User.objects.all()
-    #for u in us:
-    #    users[u.username] = u
-    #del us
-    import cPickle
-    f = file('pagelist', 'r')
-    l = cPickle.load(f)
-    f.close()
-    #start = False
+
+    users = {}
+    for u in User.objects.all():
+        users[u.username] = u
+
+    try:
+        f = file('pagelist', 'r')
+    except IOError:
+        page_list = list(request.rootpage.getPageList())
+        f = file('pagelist', 'w+')
+        cPickle.write(page_list, f)
+        f.close()
+    else:
+        page_list = cPickle.load(f)
+        f.close()
+
     transaction.enter_transaction_management()
     transaction.managed(True)
-    #for i, moin_name in enumerate(l):
-    #for i, moin_name in enumerate(request.rootpage.getPageList()):
-    for i, moin_name in enumerate(['Python']):
+    for i, moin_name in enumerate(page_list):
         if moin_name in PAGE_REPLACEMENTS:
             # ignore these pages (since gedit equals Gedit in inyoka these
             # pages are duplicates)
@@ -160,7 +184,6 @@ def convert_wiki():
                         new_page = InyokaPage.objects.create(name, text=text,
                                                              **kwargs)
                     except IntegrityError, e:
-                        # TODO
                         name = u'DuplicatePages/%s' % name
                         new_page = InyokaPage.objects.create(name, text=text,
                                                              **kwargs)
@@ -212,20 +235,19 @@ def convert_wiki():
 
 
 def convert_users():
-    from _mysql_exceptions import IntegrityError
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
+    engine, meta, conn = forum_db()
     users_table = Table('%susers' % FORUM_PREFIX, meta, autoload=True)
+    ban_table = Table('%sbanlist' % FORUM_PREFIX, meta, autoload=True)
+
     odd_coordinates = []
     mail_error = []
+
     for row in select_blocks(users_table.select()):
         avatar = ''
         co_long = co_lat = None
-        if row.user_avatar != '':
+        if row.user_avatar:
             avatar = "%s/%s" % (AVATAR_PREFIX.rstrip('/'), row.user_avatar)
-        if row.user_coordinates != '':
+        if row.user_coordinates:
             co = row.user_coordinates.split(',')
             try:
                 co_long = float(co[1])
@@ -233,40 +255,36 @@ def convert_users():
             except (IndexError, ValueError):
                 odd_coordinates.append(row.user_id)
                 co_long = co_lat = None
+
         signature = ''
         if row.user_sig_bbcode_uid:
             signature = convert_bbcode(row.user_sig, row.user_sig_bbcode_uid)
+
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
-            'pk': row.user_id,
-            'username': row.username[:30],
-            'email': row.user_email[:50] or '',
-            'password': 'md5$%s' % row.user_password,
-            'is_active': row.user_active,
-            'last_login': datetime.fromtimestamp(row.user_lastvisit),
-            'date_joined': datetime.fromtimestamp(row.user_regdate),
-            #'new_password_key': None,
-            'post_count': row.user_posts,
+            'pk':               row.user_id,
+            'username':         row.username[:30],
+            'email':            row.user_email[:50] or '',
+            'password':         'md5$%s' % row.user_password,
+            'is_active':        row.user_active,
+            'last_login':       datetime.fromtimestamp(row.user_lastvisit),
+            'date_joined':      datetime.fromtimestamp(row.user_regdate),
+            'post_count':       row.user_posts,
             # TODO: assure correct location
-            'avatar': avatar[:100],
-            'icq': row.user_icq[:16],
-            'msn': row.user_msnm[:200],
-            'aim': row.user_aim[:200],
-            'yim': row.user_yim[:200],
-            'jabber': row.user_jabber[:200],
-            'signature': signature,
+            'avatar':           avatar[:100],
+            'icq':              row.user_icq[:16],
+            'msn':              row.user_msnm[:200],
+            'aim':              row.user_aim[:200],
+            'yim':              row.user_yim[:200],
+            'jabber':           row.user_jabber[:200],
+            'signature':        signature,
             'coordinates_long': co_long,
-            'coordinates_lat': co_lat,
-            'location': row.user_from[:200],
-            #'gpgkey': '',
-            'occupation': row.user_occ[:200],
-            'interests': row.user_interests[:200],
-            'website': row.user_website[:200],
-            #TODO:
-            #'forum_last_read'
-            #'forum_read_status'
-            #'forum_welcome'
+            'coordinates_lat':  co_lat,
+            'location':         row.user_from[:200],
+            'occupation':       row.user_occ[:200],
+            'interests':        row.user_interests[:200],
+            'website':          row.user_website[:200],
         }
         # make Anonymous id 1, luckily Sascha is 2 ;)
         # CAUTION: take care if mapping -1 to 1 in posts/topics too
@@ -283,162 +301,145 @@ def convert_users():
             else:
                 print e
                 sys.exit(1)
-        users[u.username] = u
         connection.queries = []
-    #print odd_coordinates, mail_error
+
+    print 'Odd coordinates:', odd_coordinates
+    print 'Duplicate use of mail adress:', mail_error
 
     # ban users ;) Really q&d
-    ban_table = Table('%sbanlist' % FORUM_PREFIX, meta, autoload=True)
     for ban in conn.execute(ban_table.select(ban_table.c.ban_userid != 0)):
         cursor = connection.cursor()
         cursor.execute("UPDATE portal_user SET is_active=0 WHERE id=%i" % ban[1])
 
 
 def convert_forum():
-    from inyoka.forum.models import Forum, Topic, Post, \
-        topic_table as sa_topic_table
+    engine, meta, conn = forum_db()
 
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
+    categories_table = Table('%scategories' % FORUM_PREFIX, meta,
+                             autoload=True)
+    forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
+    topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
+    post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
+    post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
+                            autoload=True)
 
     print 'Converting forum structue'
-    forums_table = Table('%sforums' % FORUM_PREFIX, meta, autoload=True)
-    categories_table = Table('%scategories' % FORUM_PREFIX, meta, autoload=True)
-    s = select([forums_table])
-    result = conn.execute(s)
+
     forum_cat_map = {}
 
-    for row in result:
-        data = {
-            'id': row.forum_id,
-            'name': row.forum_name,
+    for row in conn.execute(select([forums_table])):
+        f = Forum(**{
+            'id':          row.forum_id,
+            'name':        row.forum_name,
             'description': row.forum_desc,
-            'position': row.forum_order,
-            'post_count': row.forum_posts,
+            'position':    row.forum_order,
+            'post_count':  row.forum_posts,
             'topic_count': row.forum_topics,
-        }
-        f = Forum(**data)
-        session.flush([f])
+        })
+        session.commit()
         forum_cat_map.setdefault(row.cat_id, []).append(f)
 
-    s = select([categories_table])
-    result = conn.execute(s)
-    for row in result:
-        data = {
+    for row in conn.execute(select([categories_table])):
+        cat = Forum(**{
             'name': row.cat_title,
             'position': row.cat_order,
-        }
-        old_id = row.cat_id
-        cat = Forum(**data)
-        session.flush([cat])
-        new_id = cat.id
+        })
+        session.commit()
+
         # assign forums to the correct new category ids...
-        for forum in forum_cat_map.get(old_id, []):
-            forum.parent_id = new_id
-            session.flush([forum])
+        for forum in forum_cat_map.get(row.cat_id, []):
+            forum.parent_id = cat.id
+            session.commit()
 
     print 'Converting topics'
-    topic_table = Table('%stopics' % FORUM_PREFIX, meta, autoload=True)
-    s = select([topic_table])
 
     # maybe make it dynamic, but not now ;)
     ubuntu_version_map = {
         0: None,
-        1:'4.10', 2:'5.04',
-        3:'5.10', 4:'6.04',
-        7:'6.10', 8:'7.04',
-        10:'7.10', 11:'8.04',
+        1:'4.10',
+        2:'5.04',
+        3:'5.10',
+        4:'6.06',
+        7:'6.10',
+        8:'7.04',
+        10:'7.10',
+        11:'8.04',
     }
     ubuntu_distro_map = {
         0: None,
-        1: 'ubuntu', 2: 'kubuntu',
-        3: 'xubuntu', 4: 'edubuntu',
+        1: 'ubuntu',
+        2: 'kubuntu',
+        3: 'xubuntu',
+        4: 'edubuntu',
         6: 'kubuntu' # KDE(4) is still kubuntu ;)
     }
 
-    result = conn.execute(s)
+    forums = {}
+    for f in Forum.query.all():
+        forums[f.id] = f
 
-    i = 0
-    transaction.enter_transaction_management()
-    transaction.managed(True)
-    for row in result:
-        data = {
-            'id': row.topic_id,
-            'forum_id': row.forum_id,
-            'title': row.topic_title,
-            'view_count': row.topic_views,
-            'post_count': row.topic_replies + 1,
+    for row in conn.execute(select([topic_table])):
+        t = Topic(**{
+            'id':             row.topic_id,
+            'forum':          row.forum_id in forums and \
+                              forums[row.forum_id] or forums[1],
+            'title':          row.topic_title,
+            'view_count':     row.topic_views,
+            'post_count':     row.topic_replies + 1,
             # sticky and announce are sticky in inyoka
-            'sticky': bool(row.topic_type),
-            'solved': bool(row.topic_fixed),
-            'locked': row.topic_status == 1,
+            'sticky':         bool(row.topic_type),
+            'solved':         bool(row.topic_fixed),
+            'locked':         row.topic_status == 1,
             'ubuntu_version': ubuntu_version_map.get(row.topic_version),
-            'ubuntu_distro': ubuntu_distro_map.get(row.topic_desktop),
-            'author_id': row.topic_poster,
-        }
-        data['slug'] = slugify(data['title'])
-        if Topic.query.filter_by(slug=data['slug']).first():
-            slugs = session.execute(select([sa_topic_table.c.slug],
-                sa_topic_table.c.slug.like('%s-%%' % data['slug'])))
-            start = len(data['slug']) + 1
-            try:
-                data['slug'] += '-%d' % (max(int(s[0][start:]) for s in slugs \
-                    if s[0][start:].isdigit()) + 1)
-            except ValueError:
-                data['slug'] += '-1'
-        session.execute(sa_topic_table.insert(values=data))
+            'ubuntu_distro':  ubuntu_distro_map.get(row.topic_desktop),
+            'author_id':      row.topic_poster,
+        })
+        session.commit()
 
+    del forums
 
     print 'Converting posts'
-    post_table = Table('%sposts' % FORUM_PREFIX, meta, autoload=True)
-    post_text_table = Table('%sposts_text' % FORUM_PREFIX, meta,
-                            autoload=True)
+
     s = select([post_table, post_text_table],
                (post_table.c.post_id == post_text_table.c.post_id),
                use_labels=True)
-    i = 0
+
     for row in select_blocks(s):
         text = convert_bbcode(row[post_text_table.c.post_text],
                               row[post_text_table.c.bbcode_uid])
-        cur = connection.cursor()
-        cur.execute('''
-            insert into forum_post (id, topic_id, text, author_id, pub_date,rendered_text,hidden)
-                values (%s,%s,%s,%s,%s,'',False);
+        session.execute(sa_post_table.insert(values={
+            'id':            row[post_table.c.post_id],
+            'topic_id':      row[post_table.c.topic_id],
+            'text':          text,
+            'author_id':     row[post_table.c.poster_id],
+            'pub_date':      datetime.fromtimestamp(row[post_table.c.post_time]),
+            'rendered_text': '',
+            'hidden':        False
+        }))
+        session.commit()
 
-        ''', (row[post_table.c.post_id], row[post_table.c.topic_id],
-              text, row[post_table.c.poster_id],
-              datetime.fromtimestamp(row[post_table.c.post_time])))
-        if i == 500:
-            connection._commit()
-            connection.queries = []
-            i = 0
-        else:
-            i += 1
     print 'fixing forum references'
 
-    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-        settings.DATABASE_HOST, settings.DATABASE_NAME)
-    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
-    dmeta = MetaData()
-    dmeta.bind = dengine
-    dconn = dengine.connect()
-    dtopic = Table('forum_topic', dmeta, autoload=True)
-    dpost = Table('forum_post', dmeta, autoload=True)
-    dforum = Table('forum_forum', dmeta, autoload=True)
-
-    subselect_max = select([func.max(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
-    subselect_min = select([func.min(dpost.c.id)], dtopic.c.id == dpost.c.topic_id)
-    dconn.execute(dtopic.update(values={dtopic.c.last_post_id: subselect_max,
-                                        dtopic.c.first_post_id: subselect_min}))
-    subselect = select([func.max(dtopic.c.last_post_id)],
-                       dtopic.c.forum_id == dforum.c.id)
-    dconn.execute(dforum.update(values={dforum.c.last_post_id: subselect}))
-    dconn.close()
-
-    conn.close()
+    subselect_max = select(
+        [func.max(sa_post_table.c.id)],
+        sa_topic_table.c.id == sa_post_table.c.topic_id
+    )
+    subselect_min = select(
+        [func.min(sa_post_table.c.id)],
+        sa_topic_table.c.id == sa_post_table.c.topic_id
+    )
+    session.execute(sa_topic_table.update(values={
+        sa_topic_table.c.last_post_id: subselect_max,
+        sa_topic_table.c.first_post_id: subselect_min
+    }))
+    subselect = select(
+        [func.max(sa_topic_table.c.last_post_id)],
+        sa_topic_table.c.forum_id == sa_forum_table.c.id
+    )
+    session.execute(sa_forum_table.update(values={
+        sa_forum_table.c.last_post_id: subselect
+    }))
+    session.commit()
 
     # Fix anon user:
     cur = connection.cursor()
@@ -448,31 +449,26 @@ def convert_forum():
 
 
 def convert_groups():
-    from inyoka.portal.user import Group
-
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
+    engine, meta, conn = forum_db()
 
     group_table = Table('%sgroups' % FORUM_PREFIX, meta, autoload=True)
-
-    sel = select([group_table], group_table.c.group_description != "Personal User")
-    for group in conn.execute(sel):
-        Group.objects.create(**{
-                'pk': group.group_id,
-                'name': group.group_name,
-                'is_public': True
-            })
-
     relation_table = Table('%suser_group' % FORUM_PREFIX, meta, autoload=True)
 
-    subselect = select([group_table.c.group_id], group_table.c.group_description != "Personal User")
-    sel_relation = select([relation_table], relation_table.c.group_id.in_(subselect))
+    sel = select([group_table],
+                 group_table.c.group_description != "Personal User")
 
-    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-        settings.DATABASE_HOST, settings.DATABASE_NAME)
+    for group in conn.execute(sel):
+        Group.objects.create(**{
+                'pk':        group.group_id,
+                'name':      group.group_name,
+                'is_public': True
+        })
+
+    subselect = select([group_table.c.group_id],
+                       group_table.c.group_description != "Personal User")
+    sel_relation = select([relation_table],
+                          relation_table.c.group_id.in_(subselect))
+
     dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
     dmeta = MetaData()
     dmeta.bind = dengine
@@ -480,7 +476,10 @@ def convert_groups():
     django_user_group_rel = Table('portal_user_groups', dmeta, autoload=True)
 
     for erg in conn.execute(sel_relation):
-        ins = django_user_group_rel.insert(values={'user_id': erg.user_id, 'group_id': erg.group_id})
+        ins = django_user_group_rel.insert(values={
+            'user_id':  erg.user_id,
+            'group_id': erg.group_id
+        })
         dconn.execute(ins)
 
     dconn.close()
@@ -488,141 +487,113 @@ def convert_groups():
 
 
 def convert_polls():
-    from inyoka.forum.models import Poll, PollOption, Voter, Topic
-
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
+    engine, meta, conn = forum_db()
 
     poll_table = Table('%svote_desc' % FORUM_PREFIX, meta, autoload=True)
-    poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta, autoload=True)
+    poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta,
+                           autoload=True)
     voter_table = Table('%svote_voters' % FORUM_PREFIX, meta, autoload=True)
 
     topics_with_poll = []
 
-    # Only < 10000 Polls, one transaction...
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(poll_table.select()):
-        data = {
-            'pk': row.vote_id,
-            'question': row.vote_text,
-            'start_time': datetime.fromtimestamp(row.vote_start),
-            'topic_id': row.topic_id,
-        }
         if row.vote_length == 0:
-            data['end_time'] = None
+            end_time = None
         else:
-            data['end_time'] = datetime.fromtimestamp(row.vote_start + row.vote_length)
-        poll = Poll(**data)
-        try:
-            poll.save()
-        except Topic.DoesNotExist:
-            poll.topic_id = None
-            poll.save()
+            end_time = datetime.fromtimestamp(
+                row.vote_start + row.vote_length
+            )
+
+        poll = Poll(**{
+            'id':         row.vote_id,
+            'question':   row.vote_text,
+            'start_time': datetime.fromtimestamp(row.vote_start),
+            'topic_id':   row.topic_id,
+            'end_time':   end_time,
+        })
+        session.commit()
+
         topics_with_poll.append(row.topic_id)
-    transaction.commit()
 
-    # Only < 10000 Options, one transaction...
-    # Can't use select_blocks, no primary key :/
     for row in conn.execute(poll_opt_table.select()):
-        data = {
+        PollOption(**{
             'poll_id': row.vote_id,
-            'name': row.vote_option_text,
-            'votes': row.vote_result
-        }
-        PollOption.objects.create(**data)
-        connection.queries = []
-    transaction.commit()
+            'name':    row.vote_option_text,
+            'votes':   row.vote_result
+        })
+        session.commit()
 
-    i = 0
     for row in conn.execute(voter_table.select()):
-        data = {
-            'voter_id': row.vote_user_id,
-            'poll_id': row.vote_id,
-        }
         try:
-            Voter.objects.create(**data)
-        # Some votes are missing polls...
-        except:
-            pass
-        connection.queries = []
-        if i == 1000:
-            transaction.commit()
-            i = 0
-        else:
-            i += 1
+            PollVote(**{
+                'voter_id': row.vote_user_id,
+                'poll_id':  row.vote_id,
+            })
+            session.commit()
+        except OperationalError:
+            # unfortunately we have corrupt data :/
+            continue
 
     # Fixing Topic.has_poll
-    DJANGO_URI = '%s://%s:%s@%s/%s' % (settings.DATABASE_ENGINE,
-        settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-        settings.DATABASE_HOST, settings.DATABASE_NAME)
-    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
-    dmeta = MetaData()
-    dmeta.bind = dengine
-    dconn = dengine.connect()
-
-    topic_table = Table('forum_topic', dmeta, autoload=True)
-    dconn.execute(topic_table.update(topic_table.c.id.in_(topics_with_poll)),
-            has_poll=True)
+    session.execute(sa_topic_table.update(
+            sa_topic_table.c.id.in_(topics_with_poll)
+        ), has_poll=True
+    )
 
     # Fix anon user:
-    connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
+    session.execute(sa_poll_vote_table.update(
+            sa_poll_vote_table.c.voter_id == -1
+        ), voter_id = 1
+    )
+    session.commit()
 
 
 def convert_privileges():
-    from inyoka.forum.models import Privilege, Group
-
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
-
-    transaction.enter_transaction_management()
-    transaction.managed(True)
-
+    engine, meta, conn = forum_db()
     auth_table = Table('%sauth_access' % FORUM_PREFIX, meta, autoload=True)
+
     for row in conn.execute(auth_table.select()):
-        data = {
-            'group_id': row.group_id,
-            'forum_id': row.forum_id,
-            'can_read': bool(row.auth_read),
-            'can_reply': bool(row.auth_reply),
-            'can_create': bool(row.auth_post),
-            'can_edit': bool(row.auth_edit),
-            'can_revert': bool(row.auth_mod),
-            'can_delete': bool(row.auth_delete),
-            'can_sticky': bool(row.auth_sticky) or bool(row.auth_announce),
-            'can_vote': bool(row.auth_vote),
-            'can_create_poll': bool(row.auth_pollcreate),
-            'can_upload': bool(row.auth_attachments),
-            'can_moderate': bool(row.auth_mod)
-        }
         try:
-            Group.objects.get(pk=row.group_id)
-        except: continue
-        Privilege.objects.create(**data)
-    transaction.commit()
+            group = Group.objects.get(pk=row.group_id)
+        except Group.DoesNotExist:
+            continue
+
+        forum = Forum.query.get(int(row.forum_id))
+        if forum is None:
+            continue
+
+        Privilege(forum, **{
+            'group':           group,
+            'can_read':        bool(row.auth_read),
+            'can_reply':       bool(row.auth_reply),
+            'can_create':      bool(row.auth_post),
+            'can_edit':        bool(row.auth_edit),
+            'can_revert':      bool(row.auth_mod),
+            'can_delete':      bool(row.auth_delete),
+            'can_sticky':      bool(row.auth_sticky) or \
+                               bool(row.auth_announce),
+            'can_vote':        bool(row.auth_vote),
+            'can_create_poll': bool(row.auth_pollcreate),
+            'can_upload':      bool(row.auth_attachments),
+            'can_moderate':    bool(row.auth_mod)
+        })
+        session.commit()
 
 
 def convert_subscriptions():
-    from inyoka.portal.models import Subscription
-
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
-
-    subscription_table = Table('%stopics_watch' % FORUM_PREFIX, meta, autoload=True)
+    engine, meta, conn = forum_db()
+    subscription_table = Table('%stopics_watch' % FORUM_PREFIX, meta,
+                               autoload=True)
 
     transaction.enter_transaction_management()
     transaction.managed(True)
+
     # According to http://www.phpbbdoctor.com/doc_columns.php?id=22
     # we need to add both notify_status = 1|0 to out watch_list.
     for row in conn.execute(subscription_table.select()):
         try:
-            Subscription.objects.create(user_id=row.user_id, topic_id=row.topic_id)
+            Subscription.objects.create(user_id=row.user_id,
+                                        topic_id=row.topic_id)
         # Ignore missing topics...
         except:
             pass
@@ -630,17 +601,11 @@ def convert_subscriptions():
 
 
 def convert_attachments():
-    from inyoka.forum.models import Attachment, Post
-    from sqlalchemy.sql import and_
-
-
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
-
-    attachment_desc_table = Table('%sattachments_desc' % FORUM_PREFIX, meta, autoload=True)
-    attachment_table = Table('%sattachments' % FORUM_PREFIX, meta, autoload=True)
+    engine, meta, conn = forum_db()
+    attachment_desc_table = Table('%sattachments_desc' % FORUM_PREFIX, meta,
+                                  autoload=True)
+    attachment_table = Table('%sattachments' % FORUM_PREFIX, meta,
+                             autoload=True)
 
     sel = select([attachment_desc_table, attachment_table.c.post_id], \
           and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
@@ -648,34 +613,22 @@ def convert_attachments():
 
     path = OLD_ATTACHMENTS.rstrip('/') + '/'
 
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(sel):
-        data = {
-            'pk': row.attach_id,
-            'name': row.real_filename,
+        att = Attachment(**{
+            'id':      row.attach_id,
+            'name':    row.real_filename,
             'comment': row.comment,
             'post_id': row.post_id,
-        }
-        att = Attachment(**data)
+        })
         file_ = open(path + row.physical_filename,'rb')
         att.save_file_file(row.real_filename, file_.read())
         file_.close()
-        try:
-            att.save()
-        except Post.DoesNotExist:
-            pass
-    transaction.commit()
+        session.commit()
 
 
 def convert_privmsgs():
-    from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
-    from sqlalchemy.sql import and_
+    engine, meta, conn = forum_db()
 
-    engine = create_engine(FORUM_URI, echo=False, convert_unicode=True)
-    meta = MetaData()
-    meta.bind = engine
-    conn = engine.connect()
     try:
         conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
     except:
@@ -772,12 +725,12 @@ def convert_privmsgs():
             i += 1
     transaction.commit()
 
+
 def convert_ikhaya():
     import re
     from textile import textile
     from markdown import markdown
     from xml.sax import saxutils
-    from inyoka.ikhaya.models import Article, Category
 
     def linebreaks(value):
         """
@@ -852,7 +805,6 @@ def convert_ikhaya():
 
 
 def convert_pastes():
-    from inyoka.pastebin.models import Entry
     from pygments.lexers import get_all_lexers
     engine = create_engine(OLD_PORTAL_URI)
     meta = MetaData()
@@ -883,23 +835,22 @@ def convert_pastes():
         connection.queries = []
 
 
-
 MODE_MAPPING = {
-        'users': convert_users,
-        'wiki': convert_wiki,
-        'ikhaya': convert_ikhaya,
-        'pastes': convert_pastes,
-        'groups': convert_groups,
-        'forum': convert_forum,
+        'users':         convert_users,
+        'wiki':          convert_wiki,
+        'ikhaya':        convert_ikhaya,
+        'pastes':        convert_pastes,
+        'groups':        convert_groups,
+        'forum':         convert_forum,
         'subscriptions': convert_subscriptions,
-        'privileges': convert_privileges,
-        'polls': convert_polls,
-        'attachments': convert_attachments,
-        'privmsgs': convert_privmsgs,
+        'privileges':    convert_privileges,
+        'polls':         convert_polls,
+        'attachments':   convert_attachments,
+        'privmsgs':      convert_privmsgs,
 }
 
+
 if __name__ == '__main__':
-    import sys
     if len(sys.argv) > 1:
         for mode in sys.argv[1:]:
             if mode in MODE_MAPPING:
@@ -911,23 +862,23 @@ if __name__ == '__main__':
             sys.exit(0)
     print 'Converting users'
     convert_users()
+    print 'Converting groups'
+    convert_groups()
+    print 'Converting forum data'
+    convert_forum()
+    print 'Converting polls'
+    convert_polls()
+    print 'Converting attachments'
+    convert_attachments()
+    print 'Converting subscriptions'
+    convert_subscriptions()
+    print 'Converting privileges'
+    convert_privileges()
     print 'Converting wiki data'
     convert_wiki()
     print 'Converting ikhaya data'
     convert_ikhaya()
     print 'Converting pastes'
     convert_pastes()
-    print 'Converting groups'
-    convert_groups()
-    print 'Converting forum data'
-    convert_forum()
-    print 'Converting subscriptions'
-    convert_subscriptions()
-    print 'Converting privileges'
-    convert_privileges()
-    print 'Converting polls'
-    convert_polls()
-    print 'Converting attachments'
-    convert_attachments()
     print 'Converting private messages'
     convert_privmsgs()

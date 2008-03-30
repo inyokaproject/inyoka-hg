@@ -44,7 +44,10 @@ div.article-top-right {
   background-repeat:no-repeat;
 }
 h3.title {
-  margin-bottom: 1.0em;
+  margin-bottom: 1.2em;
+}
+h3.title a {
+  color: #673B1A;
 }
 
 p {
