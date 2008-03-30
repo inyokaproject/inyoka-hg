@@ -169,9 +169,11 @@ def viewtopic(request, topic_slug, page=1):
     )
 
     if t.has_poll:
-        polls = Poll.query.options(eagerload('options')).filter(Poll.c.topic_id==t.id).all()
+        polls = Poll.query.options(eagerload('options')).filter(
+            Poll.c.topic_id==t.id
+        ).all()
 
-        if request.method == 'POST':
+        if request.method == 'POST' and request.user.is_authenticated:
             # the user participated in a poll
             votings = []
             poll_ids = []

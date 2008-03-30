@@ -17,7 +17,7 @@ from datetime import datetime
 from werkzeug.utils import url_unquote
 from _mysql_exceptions import IntegrityError
 from django.db import connection, transaction
-from sqlalchemy.sql import select, func, update, and_
+from sqlalchemy.sql import select, func, and_
 from sqlalchemy import create_engine, MetaData, Table
 from inyoka.conf import settings
 from inyoka.wiki import bbcode
@@ -26,7 +26,8 @@ from inyoka.wiki.models import Page as InyokaPage
 from inyoka.wiki.parser.transformers import AutomaticParagraphs
 from inyoka.forum.models import Privilege, Attachment, Post, Topic, \
     Poll, PollOption, Forum, topic_table as sa_topic_table, forum_table as \
-    sa_forum_table, post_table as sa_post_table
+    sa_forum_table, post_table as sa_post_table, poll_vote_table as \
+    sa_poll_vote_table, PollVote
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
     Subscription
 from inyoka.ikhaya.models import Article, Category
@@ -357,7 +358,7 @@ def convert_forum():
         1:'4.10',
         2:'5.04',
         3:'5.10',
-        4:'6.04',
+        4:'6.06',
         7:'6.10',
         8:'7.04',
         10:'7.10',
@@ -488,76 +489,58 @@ def convert_polls():
     engine, meta, conn = forum_db()
 
     poll_table = Table('%svote_desc' % FORUM_PREFIX, meta, autoload=True)
-    poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta, autoload=True)
+    poll_opt_table = Table('%svote_results' % FORUM_PREFIX, meta,
+                           autoload=True)
     voter_table = Table('%svote_voters' % FORUM_PREFIX, meta, autoload=True)
 
     topics_with_poll = []
 
-    # Only < 10000 Polls, one transaction...
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(poll_table.select()):
-        data = {
-            'pk': row.vote_id,
-            'question': row.vote_text,
-            'start_time': datetime.fromtimestamp(row.vote_start),
-            'topic_id': row.topic_id,
-        }
         if row.vote_length == 0:
-            data['end_time'] = None
+            end_time = None
         else:
-            data['end_time'] = datetime.fromtimestamp(row.vote_start + row.vote_length)
-        poll = Poll(**data)
-        try:
-            poll.save()
-        except Topic.DoesNotExist:
-            poll.topic_id = None
-            poll.save()
+            end_time = datetime.fromtimestamp(
+                row.vote_start + row.vote_length
+            )
+
+        poll = Poll(**{
+            'id':         row.vote_id,
+            'question':   row.vote_text,
+            'start_time': datetime.fromtimestamp(row.vote_start),
+            'topic_id':   row.topic_id,
+            'end_time':   end_time,
+        })
+        session.commit()
+
         topics_with_poll.append(row.topic_id)
-    transaction.commit()
 
-    # Only < 10000 Options, one transaction...
-    # Can't use select_blocks, no primary key :/
     for row in conn.execute(poll_opt_table.select()):
-        data = {
+        PollOption(**{
             'poll_id': row.vote_id,
-            'name': row.vote_option_text,
-            'votes': row.vote_result
-        }
-        PollOption.objects.create(**data)
-        connection.queries = []
-    transaction.commit()
+            'name':    row.vote_option_text,
+            'votes':   row.vote_result
+        })
+        session.commit()
 
-    i = 0
     for row in conn.execute(voter_table.select()):
-        data = {
+        PollVote(**{
             'voter_id': row.vote_user_id,
-            'poll_id': row.vote_id,
-        }
-        try:
-            Voter.objects.create(**data)
-        # Some votes are missing polls...
-        except:
-            pass
-        connection.queries = []
-        if i == 1000:
-            transaction.commit()
-            i = 0
-        else:
-            i += 1
+            'poll_id':  row.vote_id,
+        })
+        session.commit()
 
     # Fixing Topic.has_poll
-    dengine = create_engine(DJANGO_URI, echo=False, convert_unicode=True)
-    dmeta = MetaData()
-    dmeta.bind = dengine
-    dconn = dengine.connect()
-
-    topic_table = Table('forum_topic', dmeta, autoload=True)
-    dconn.execute(topic_table.update(topic_table.c.id.in_(topics_with_poll)),
-            has_poll=True)
+    session.execute(sa_topic_table.update(
+            sa_topic_table.c.id.in_(topics_with_poll)
+        ), has_poll=True
+    )
 
     # Fix anon user:
-    connection.execute("UPDATE forum_voter SET voter_id=1 WHERE voter_id=-1;")
+    session.execute(sa_poll_vote_table.update(
+            sa_poll_vote_table.c.voter_id == -1
+        ), voter_id = 1
+    )
+    session.commit()
 
 
 def convert_privileges():
