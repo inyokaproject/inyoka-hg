@@ -17,8 +17,9 @@ from datetime import datetime
 from werkzeug.utils import url_unquote
 from _mysql_exceptions import IntegrityError
 from django.db import connection, transaction
-from sqlalchemy.sql import select, func, and_
 from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy.sql import select, func, and_
+from sqlalchemy.exceptions import OperationalError
 from inyoka.conf import settings
 from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
@@ -523,11 +524,15 @@ def convert_polls():
         session.commit()
 
     for row in conn.execute(voter_table.select()):
-        PollVote(**{
-            'voter_id': row.vote_user_id,
-            'poll_id':  row.vote_id,
-        })
-        session.commit()
+        try:
+            PollVote(**{
+                'voter_id': row.vote_user_id,
+                'poll_id':  row.vote_id,
+            })
+            session.commit()
+        except OperationalError:
+            # unfortunately we have corrupt data :/
+            continue
 
     # Fixing Topic.has_poll
     session.execute(sa_topic_table.update(
@@ -608,24 +613,17 @@ def convert_attachments():
 
     path = OLD_ATTACHMENTS.rstrip('/') + '/'
 
-    transaction.enter_transaction_management()
-    transaction.managed(True)
     for row in select_blocks(sel):
-        data = {
-            'pk': row.attach_id,
-            'name': row.real_filename,
+        att = Attachment(**{
+            'id':      row.attach_id,
+            'name':    row.real_filename,
             'comment': row.comment,
             'post_id': row.post_id,
-        }
-        att = Attachment(**data)
+        })
         file_ = open(path + row.physical_filename,'rb')
         att.save_file_file(row.real_filename, file_.read())
         file_.close()
-        try:
-            att.save()
-        except Post.DoesNotExist:
-            pass
-    transaction.commit()
+        session.commit()
 
 
 def convert_privmsgs():
