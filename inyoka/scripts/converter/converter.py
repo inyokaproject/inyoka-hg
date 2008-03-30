@@ -515,14 +515,13 @@ def convert_polls():
         topics_with_poll.append(row.topic_id)
 
     for row in conn.execute(poll_opt_table.select()):
-        PollOption.objects.create(**{
+        PollOption(**{
             'poll_id': row.vote_id,
             'name':    row.vote_option_text,
             'votes':   row.vote_result
         })
         session.commit()
 
-    i = 0
     for row in conn.execute(voter_table.select()):
         PollVote(**{
             'voter_id': row.vote_user_id,
