@@ -747,7 +747,7 @@ def groups_edit(request, name=None):
                     if not privilege:
                         privilege = Privilege(
                             group=group,
-                            forum=Forum.query.get(forum_id)
+                            forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
 

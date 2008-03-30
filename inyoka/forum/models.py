@@ -888,7 +888,7 @@ class ReadStatus(object):
         """
         if self(item):
             return False
-        print 'MARK', item, self.data
+        # print 'MARK', item, self.data
         forum_id = isinstance(item, Forum) and item.id or item.forum_id
         post_id = item.last_post_id
         if isinstance(item, Forum):
@@ -896,9 +896,9 @@ class ReadStatus(object):
             for child in item.children:
                 self.mark(child)
             if item.parent_id and reduce(lambda a, b: a and b, \
-                [self(c) for c in item.parent.children]):
+                [self(c) for c in item.parent.children], True):
                 self.mark(item.parent)
-            print ' FORUM', self.data
+            # print ' FORUM', self.data
             return True
         row = self.data.get(forum_id, (None, set()))
         row[1].add(post_id)
@@ -906,21 +906,21 @@ class ReadStatus(object):
         for child in item.forum.children:
             all = all and self(child)
         if reduce(lambda a, b: a and b,
-            [self(c) for c in item.forum.children]) and not \
+            [self(c) for c in item.forum.children], True) and not \
             dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
             forum_table.c.last_post_id > (row[0] or -1),
             ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
-            print ' ALL', self.data
+            # print ' ALL', self.data
             return True
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
             r = list(row[1])
             r.sort()
             row[1] = set(r[settings.FORUM_LIMIT_UNREAD//2:])
             row[0] = r[settings.FORUM_LIMIT_UNREAD//2]
-            print ' TRUNCATED'
+            # print ' TRUNCATED'
         self.data[forum_id] = row
-        print ' RESULT', self.data
+        # print ' RESULT', self.data
         return True
 
     def serialize(self):
