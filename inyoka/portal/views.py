@@ -79,7 +79,7 @@ def index(request):
 def markup_styles(request):
     """
     This function returns a CSS file that's used for formatting wiki markup.
-    It's content is editable in the admin panel.
+    Its content is editable in the admin panel.
     """
     from django.utils.cache import patch_response_headers
     response = HttpResponse(storage['markup_styles'], mimetype='text/css')
