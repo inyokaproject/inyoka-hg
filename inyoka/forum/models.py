@@ -774,15 +774,6 @@ class Privilege(object):
 
 class Poll(object):
 
-    def __init__(self, question, options, multiple_votes):
-        self.start_time = datetime.utcnow()
-        self.question = question
-        for option in options:
-            if not isinstance(option, PollOption):
-                option = PollOption(name=option)
-            self.options.append(option)
-        self.multiple_votes = multiple_votes
-
     @staticmethod
     def bind(poll_ids, topic_id):
         """Bind the polls given in poll_ids to the given topic id."""
