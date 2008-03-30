@@ -141,18 +141,16 @@ class InyokaEnvironment(Environment):
         if use_memcache is None:
             use_memcache = not settings.DEBUG
         loader = None
-        if settings.MEMCACHE_SERVERS:
+        if settings.MEMCACHE_SERVERS and False:
             loader = MemcachedFileSystemLoader(os.path.join(
-                os.path.dirname(__file), os.pardir, 'templates'),
-                memcache_hosts=settings.MEMCACHE_SERVERS)
+                os.path.dirname(__file__), os.pardir, 'templates'),
+                memcache_host=settings.MEMCACHE_SERVERS,
+                use_memcache=use_memcache, memcache_size=200)
         else:
             loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
-                                    os.pardir, 'templates'),
-        Environment.__init__(self,
-            loader=loader,
-            use_memcache=use_memcache,
-            memcache_size=200
-        ))
+                os.pardir, 'templates'),
+                use_memcache=use_memcache, memcache_size=200)
+        Environment.__init__(self, loader=loader)
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
