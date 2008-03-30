@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 import os
-from jinja import Environment, FileSystemLoader
+from jinja import Environment, FileSystemLoader, MemcachedFileSystemLoader
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
@@ -140,10 +140,16 @@ class InyokaEnvironment(Environment):
         use_memcache = settings.TEMPLATE_CACHING
         if use_memcache is None:
             use_memcache = not settings.DEBUG
-        Environment.__init__(self,
-            # XXX: write a loader that uses the current active cache system
-            loader=FileSystemLoader(os.path.join(os.path.dirname(__file__),
+        loader = None
+        if settings.MEMCACHE_SERVERS:
+            loader = MemcachedFileSystemLoader(os.path.join(
+                os.path.dirname(__file), os.pardir, 'templates'),
+                memcache_hosts=settings.MEMCACHE_SERVERS)
+        else:
+            loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
                                     os.pardir, 'templates'),
+        Environment.__init__(self,
+            loader=loader,
             use_memcache=use_memcache,
             memcache_size=200
         ))
