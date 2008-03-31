@@ -35,13 +35,14 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage
+     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage, PollVote
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
                              have_privilege, get_privileges
-from inyoka.forum.database import post_table, topic_table, forum_table
+from inyoka.forum.database import post_table, topic_table, forum_table, \
+                            poll_option_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -185,34 +186,25 @@ def viewtopic(request, topic_slug, page=1):
             for poll in polls:
                 # get the votes for every poll in this topic
                 if poll.multiple_votes:
-                    v = request.POST.getlist('poll_%s' % poll.id)
+                    votes = request.POST.getlist('poll_%s' % poll.id)
                 else:
-                    v = request.POST.get('poll_%s' % poll.id)
-                if v:
+                    votes = [request.POST.get('poll_%s' % poll.id)]
+                if votes:
                     if not privileges['vote']:
                         return abort_access_denied(request)
                     elif poll.participated:
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
-                    def _vote(id):
-                        # check whether the option selected is inside the
-                        # right polls to prevent voting of other polls
-                        if id in poll['options'] and id not in votings:
-                            votings.append(id)
-                            poll['options'][id]['votes'] += 1
-                    if poll.multiple_votes:
-                        for id in v:
-                            _vote(int(id))
-                    else:
-                        _vote(int(v))
-                    poll_ids.append(poll['id'])
-                    poll['participated'] = True
+                    votings.append(PollVote(voter_id=request.user.id,
+                             poll_id=poll.id))
+                    session.execute(poll_option_table.update(
+                        poll_option_table.c.id.in_(votes) &
+                        (poll_option_table.c.poll_id == poll.id), values={
+                            'votes': poll_option_table.c.votes + 1
+                    }))
                     flash(u'Deine Stimme wurde gespeichert.', True)
-
-            if votings:
-                # write the votes into the database
-                Poll.objects.do_vote(request.user.id, votings, poll_ids)
+            session.commit()
     else:
         polls = None
 
