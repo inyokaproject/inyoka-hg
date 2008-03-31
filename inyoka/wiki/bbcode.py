@@ -379,13 +379,13 @@ class Parser(object):
         # of that...
         crippled = []
         is_indeed_crippled = False
+
         for node in self.parse_until(('*', '/list'), push_back=True):
             if not node.is_text_node or node.text.strip():
                 is_indeed_crippled = True
             crippled.append(node)
         if is_indeed_crippled:
             children.append(nodes.ListItem(crippled))
-
         # b0rked markup, no end tags
         if self.eos:
             return finish()
@@ -403,7 +403,9 @@ class Parser(object):
         # now parse the normal list items
         self.next()
         while 1:
-            item = self.parse_until(('*', '/list'), push_back=True)
+            # is there a better way to solve this problem?
+            item = filter(lambda i: not isinstance(i, nodes.Newline),
+                          self.parse_until(('*', '/list'), push_back=True))
             children.append(nodes.ListItem(item))
             if self.eos:
                 break
