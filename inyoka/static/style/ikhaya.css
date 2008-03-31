@@ -71,6 +71,7 @@ img.icon {
   float: right;
   max-width: 200px;
   max-height: 120px;
+  margin:0px 0px 10px 10px;
 }
 
 ul.comments > li.comment {

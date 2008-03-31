@@ -240,6 +240,7 @@ class MarkupWriter(object):
         self._lists = []
         self._indent = True
         self._newline = False
+        self._new_paragraph = False
 
     @property
     def is_oneline(self):
@@ -264,23 +265,23 @@ class MarkupWriter(object):
         return u'\n\n'.join(buffer)
 
     def flush(self):
-        if self._newline:
+        if self._newline or self._new_paragraph:
             self._paragraph.append(u'\n')
-            self._newline = False
-        if self._indent:
-            indentation = []
-            for t, depth in self._indentation:
-                if t == 'raw':
-                    del indentation[:]
-                elif t == 'quote':
-                    if indentation and indentation[-1] == '> ':
-                        indentation[:-1] = ('>', '> ')
-                    else:
-                        indentation.append('> ')
-                elif t == 'indent':
-                    indentation.append(u' ' * depth)
-            self._paragraph.append(u''.join(indentation))
-            self._ident = False
+            self._newline = self._new_paragraph = False
+            if self._indent:
+                indentation = []
+                for t, depth in self._indentation:
+                    if t == 'raw':
+                        del indentation[:]
+                    elif t == 'quote':
+                        if indentation and indentation[-1] == '> ':
+                            indentation[-1:] = ('>', '> ')
+                        else:
+                            indentation.append('> ')
+                    elif t == 'indent':
+                        indentation.append(u' ' * depth)
+                self._paragraph.append(u''.join(indentation))
+                self._ident = False
 
     def text(self, text):
         self.flush()
@@ -299,11 +300,9 @@ class MarkupWriter(object):
         else:
             self._newline = self._indent = True
 
-    def break_(self):
-        self._paragraph.append(u'\n')
-
     def paragraph(self):
         if not self.is_oneline:
+            self._new_paragraph = True
             self._paragraph = p = []
             self._paragraphs.append(p)
         else:

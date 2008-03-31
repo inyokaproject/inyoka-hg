@@ -846,7 +846,7 @@ class Quote(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.break_()
+        w.newline()
         w.quote()
         Element.generate_markup(self, w)
         w.unquote()
