@@ -90,7 +90,8 @@ def index(request, category=None):
     hidden_categories = []
     if request.user.is_authenticated:
         hidden_categories.extend(request.user.settings.get(
-            'hidden_forum_categories', ()))
+            'hidden_forum_categories', ())
+        )
 
     return {
         'categories':           filter_invisible(request.user, categories),

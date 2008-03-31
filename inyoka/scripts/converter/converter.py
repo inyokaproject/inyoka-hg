@@ -14,6 +14,7 @@ import sys
 import cPickle
 from os import path
 from datetime import datetime
+from werkzeug import unescape
 from werkzeug.utils import url_unquote
 from _mysql_exceptions import IntegrityError
 from django.db import connection, transaction
@@ -258,13 +259,14 @@ def convert_users():
 
         signature = ''
         if row.user_sig_bbcode_uid:
-            signature = convert_bbcode(row.user_sig, row.user_sig_bbcode_uid)
+            signature = convert_bbcode(unescape(row.user_sig),
+                                       row.user_sig_bbcode_uid)
 
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
             'pk':               row.user_id,
-            'username':         row.username[:30],
+            'username':         unescape(row.username[:30]),
             'email':            row.user_email[:50] or '',
             'password':         'md5$%s' % row.user_password,
             'is_active':        row.user_active,
@@ -274,17 +276,17 @@ def convert_users():
             # TODO: assure correct location
             'avatar':           avatar[:100],
             'icq':              row.user_icq[:16],
-            'msn':              row.user_msnm[:200],
-            'aim':              row.user_aim[:200],
-            'yim':              row.user_yim[:200],
-            'jabber':           row.user_jabber[:200],
+            'msn':              unescape(row.user_msnm[:200]),
+            'aim':              unescape(row.user_aim[:200]),
+            'yim':              unescape(row.user_yim[:200]),
+            'jabber':           unescape(row.user_jabber[:200]),
             'signature':        signature,
             'coordinates_long': co_long,
             'coordinates_lat':  co_lat,
-            'location':         row.user_from[:200],
-            'occupation':       row.user_occ[:200],
-            'interests':        row.user_interests[:200],
-            'website':          row.user_website[:200],
+            'location':         unescape(row.user_from[:200]),
+            'occupation':       unescape(row.user_occ[:200]),
+            'interests':        unescape(row.user_interests[:200]),
+            'website':          unescape(row.user_website[:200]),
         }
         # make Anonymous id 1, luckily Sascha is 2 ;)
         # CAUTION: take care if mapping -1 to 1 in posts/topics too
@@ -383,7 +385,7 @@ def convert_forum():
             'id':             row.topic_id,
             'forum':          row.forum_id in forums and \
                               forums[row.forum_id] or forums[1],
-            'title':          row.topic_title,
+            'title':          unescape(row.topic_title),
             'view_count':     row.topic_views,
             'post_count':     row.topic_replies + 1,
             # sticky and announce are sticky in inyoka
@@ -405,7 +407,7 @@ def convert_forum():
                use_labels=True)
 
     for row in select_blocks(s):
-        text = convert_bbcode(row[post_text_table.c.post_text],
+        text = convert_bbcode(unescape(row[post_text_table.c.post_text]),
                               row[post_text_table.c.bbcode_uid])
         session.execute(sa_post_table.insert(values={
             'id':            row[post_table.c.post_id],
@@ -506,7 +508,7 @@ def convert_polls():
 
         poll = Poll(**{
             'id':         row.vote_id,
-            'question':   row.vote_text,
+            'question':   unescape(row.vote_text),
             'start_time': datetime.fromtimestamp(row.vote_start),
             'topic_id':   row.topic_id,
             'end_time':   end_time,
@@ -518,7 +520,7 @@ def convert_polls():
     for row in conn.execute(poll_opt_table.select()):
         PollOption(**{
             'poll_id': row.vote_id,
-            'name':    row.vote_option_text,
+            'name':    unescape(row.vote_option_text),
             'votes':   row.vote_result
         })
         session.commit()
@@ -617,7 +619,7 @@ def convert_attachments():
         att = Attachment(**{
             'id':      row.attach_id,
             'name':    row.real_filename,
-            'comment': row.comment,
+            'comment': unescape(row.comment),
             'post_id': row.post_id,
         })
         file_ = open(path + row.physical_filename,'rb')
@@ -674,9 +676,9 @@ def convert_privmsgs():
 
         m = PrivateMessage()
         m.author_id = msg.privmsgs_from_userid;
-        m.subject = msg.privmsgs_subject
+        m.subject = unescape(msg.privmsgs_subject)
         m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = convert_bbcode(msg_text.privmsgs_text,
+        m.text = convert_bbcode(escape(msg_text.privmsgs_text),
                                 msg_text.privmsgs_bbcode_uid)
         m.save()
 
