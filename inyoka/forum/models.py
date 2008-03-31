@@ -786,9 +786,9 @@ class Poll(object):
 
     def has_participated(self, user=None):
         user = user or current_request.user
-        return dbsession.execute(select([exists([PollVote.c.id],
-            and_(PollVote.c.id == self.id,
-            PollVote.c.voter_id == user.id))])).fetchone()[0]
+        return bool(dbsession.execute(select([1],
+            (poll_vote_table.c.poll_id == self.id) &
+            (poll_vote_table.c.voter_id == user.id))).fetchone())
 
     participated = property(has_participated)
 

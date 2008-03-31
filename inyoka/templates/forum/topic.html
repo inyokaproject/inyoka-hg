@@ -77,8 +77,8 @@
           {%- endif %}
         </td>
         {%- if poll.participated or show_vote_results %}
-        <td class="vote_bar"><div style="width: {{ option.percent * 2 }}px;"></div></td>
-        <td>{{ option.percent }}%</td>
+        <td class="vote_bar"><div style="width: {{ option.percentage * 2 }}px;"></div></td>
+        <td>{{ option.percentage }}%</td>
         <td>[ {{ option.votes }} ]</td>
         {%- endif %}
       </tr>
