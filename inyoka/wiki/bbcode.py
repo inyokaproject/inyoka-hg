@@ -26,7 +26,8 @@ _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
 _newline_re = re.compile(r'(?<!\n)(\n)(?!\s*\n)')
 _free_link_re = re.compile('(?<!\[url\=|\[url\])(%s[^\s/]+(/[^\s.,:;?]*'
-                           '([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern)
+                           '([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern,
+                           re.IGNORECASE)
 
 def parse(text):
     """BBCode-Parse a text."""
@@ -107,7 +108,8 @@ class Parser(object):
             'quote':        self.parse_quote,
             'code':         self.parse_code,
             'list':         self.parse_list,
-            'img':          self.parse_img
+            'img':          self.parse_img,
+            'user':         self.parse_user,
         }
 
         def add_text(value):
@@ -224,6 +226,15 @@ class Parser(object):
             return nodes.Link(token.attr, self.parse_until('/url'))
         target = self.parse_until('/url', raw=True)
         return nodes.Link(target, [nodes.Text(target)])
+
+    def parse_user(self):
+        """parse [user]-tags."""
+        t = self.expect_tag('user')
+        if t.attr:
+            return nodes.InterWikiLink('user', t.attr,
+                             self.parse_until('/user'))
+        user = self.parse_until('/user', raw=True)
+        return nodes.InterWikiLink('user', user)
 
     def parse_wiki(self):
         """parse [wiki]-tags."""
@@ -409,7 +420,7 @@ class Parser(object):
         src = self.parse_until('/img', raw=True)
         return nodes.Image(src, t.attr or '')
 
-    def parse(self, apply_transformers=True):
+    def parse(self):
         """
         Parse everything and apply transformers.
         """
