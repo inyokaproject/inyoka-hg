@@ -111,7 +111,7 @@ def forum(request, slug, page=1):
     # their own url at /category.
     if not f or f.parent_id is None:
         raise PageNotFound()
-    privs = get_forum_privileges(request.user, f)
+    privs = get_forum_privileges(request.user, f.id)
     if not privs['read']:
         return abort_access_denied(request)
     fmsg = f.find_welcome(request.user)
@@ -155,7 +155,7 @@ def viewtopic(request, topic_slug, page=1):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    privileges = get_forum_privileges(request.user, t.forum)
+    privileges = get_forum_privileges(request.user, t.forum_id)
     if not privileges['read']:
         return abort_access_denied(request)
     if t.hidden:
@@ -276,7 +276,7 @@ def newpost(request, topic_slug=None, quote_id=None):
         if not t:
             raise PageNotFound
 
-    privileges = get_forum_privileges(request.user, t.forum)
+    privileges = get_forum_privileges(request.user, t.forum_id)
     if t.locked and not privileges['moderate']:
         flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
                u'von einem Moderator geschlossen wurde.'))
@@ -426,7 +426,7 @@ def newtopic(request, slug=None, article=None):
         # we don't allow posting in categories
         return HttpResponseRedirect(href('forum'))
 
-    privileges = get_forum_privileges(request.user, f)
+    privileges = get_forum_privileges(request.user, f.id)
     if not privileges['create']:
         return abort_access_denied(request)
 
@@ -611,7 +611,7 @@ def edit(request, post_id):
     #: the properties of the topic the user can edit when editing the topic's
     #: root post.
     topic_values = ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']
-    privileges = get_forum_privileges(request.user, post.topic.forum)
+    privileges = get_forum_privileges(request.user, post.topic.forum_id)
     if not privileges['edit']:
         return abort_access_denied(request)
     is_first_post = post.topic.first_post_id == post.id

@@ -9,6 +9,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from sqlalchemy.orm import eagerload
 from inyoka.forum.models import Topic, Post
 from inyoka.forum.acl import get_forum_privileges
 from inyoka.utils.services import SimpleDispatcher
@@ -25,7 +26,7 @@ def on_get_topic_autocompletion(request):
 def on_get_post(request):
     try:
         post = Post.query.options(eagerload('topic'), eagerload('author')) \
-                         .get(id=int(request.GET['post_id']))
+                         .get(int(request.GET['post_id']))
     except (KeyError, ValueError):
         return None
     if not post:

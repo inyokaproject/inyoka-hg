@@ -39,10 +39,8 @@ def get_forum_privileges(user, forum_id):
     return get_privileges(user, forum_ids=[forum_id])[forum_id]
 
 
-def get_privileges(user, forums=None, forum_ids=None):
+def get_privileges(user, forum_ids):
     """Return all privileges of the applied forums for the `user`"""
-    if forums:
-        forum_ids = [x.id for x in forums]
     if not forum_ids:
         return dict.fromkeys(PRIVILEGES, False)
     fields = ', '.join('p.can_' + x for x in PRIVILEGES)
@@ -74,7 +72,7 @@ def have_privilege(user, forum, privilege):
 
 def filter_invisible(user, forums, priv='read'):
     """Filter all forums where the user has a privilege on it."""
-    privileges = get_privileges(user, forums)
+    privileges = get_privileges(user, [f.id for f in forums])
     result = []
     for forum in forums:
         if privileges.get(forum.id, {priv: False})[priv]:
