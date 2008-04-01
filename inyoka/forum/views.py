@@ -862,7 +862,8 @@ def reportlist(request):
     def _add_field_choices():
         """Add dynamic field choices to the reported topic formular"""
         form.fields['selected'].choices = [(t.id, u'') for t in topics]
-
+    if not request.user.is_manager:
+        return abort_access_denied(request)
     topics = Topic.query.filter(Topic.c.reported != None)
     if request.method == 'POST':
         form = ReportListForm(request.POST)
