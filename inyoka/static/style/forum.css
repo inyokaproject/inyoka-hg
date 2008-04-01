@@ -309,6 +309,11 @@ table.poll td.vote_bar div {
   height: 0.8em;
 }
 
+table.poll td.sum {
+  text-align: center;
+  font-weight: bold;
+}
+
 div.forum_offset_pagination {
     float: none;
     margin: 0;

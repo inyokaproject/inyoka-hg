@@ -83,6 +83,9 @@
         {%- endif %}
       </tr>
       {%- endfor %}
+      <tr>
+        <td colspan="4" class="sum">Stimmen insgesamt: {{ poll.votes }}</td>
+      </tr>
     </table>
     {%- endfor %}
     {%- if can_vote %}
