@@ -34,14 +34,15 @@ PRIVILEGES_DETAILS = [
 PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
 
 
-def get_forum_privileges(user, forum):
+def get_forum_privileges(user, forum_id):
     """Get a dict of all the privileges for a user."""
-    return get_privileges(user, [forum])[forum.id]
+    return get_privileges(user, forum_ids=[forum_id])[forum_id]
 
 
-def get_privileges(user, forums):
+def get_privileges(user, forums=None, forum_ids=None):
     """Return all privileges of the applied forums for the `user`"""
-    forum_ids = [x.id for x in forums]
+    if forums:
+        forum_ids = [x.id for x in forums]
     if not forum_ids:
         return dict.fromkeys(PRIVILEGES, False)
     fields = ', '.join('p.can_' + x for x in PRIVILEGES)
