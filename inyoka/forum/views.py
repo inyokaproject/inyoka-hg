@@ -289,6 +289,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         newtopic = post.id == topic.first_post_id
     form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
 
+    # check privileges
+    privileges = get_forum_privileges(request.user, forum.id)
+    if post and not privileges['edit']:
+        return abort_access_denied(request)
+    elif topic and not privileges['reply']:
+        return abort_access_denied(request)
+    elif not privileges['create']:
+        return abort_access_denied(request)
+
     # the user has canceled the action
     if request.method == 'POST' and request.POST.get('cancel'):
         flash(u'Der Bearbeitungsvorgang wurde abgebrochen')
@@ -303,7 +312,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
 
     #  handle polls
     poll_ids = map(int, filter(bool, request.POST.get('polls', '').split(',')))
-    if newtopic:
+    if newtopic and privileges['create_poll']:
         poll_form = AddPollForm(('add_poll' in request.POST or
             'add_option' in request.POST) and request.POST or None)
         poll_options = request.POST.getlist('options') or ['', '']
@@ -345,9 +354,9 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             topic.ubuntu_distro = d['ubuntu_distro']
             topic.ubuntu_version = d['ubuntu_version']
             topic.sticky = d['sticky']
-            topic.polls = polls
-            topic.has_poll = bool(polls)
-            print '\n\n\nPOLLS\n', polls
+            if privileges['create_poll']:
+                topic.polls = polls
+                topic.has_poll = bool(polls)
             session.flush([topic])
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
@@ -373,9 +382,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             'text': post.text
         })
 
-    privileges = get_forum_privileges(request.user, forum.id)
-    if not privileges['create']:
-        return abort_access_denied(request)
 
     return {
         'form': form,
