@@ -91,8 +91,8 @@ class ForumMapperExtension(MapperExtension):
         cache_key = 'forum/forum/%d' % int(key[1][0])
         forum = cache.get(cache_key)
         if not forum:
-            forum = query.options(eagerload('last_post'), \
-                eagerload('last_post.author'))._get(key, ident, **kwargs)
+            forum = query.options(eagerload('last_post.author'))._get(
+                key, ident, **kwargs)
             cache.set(cache_key, forum)
         else:
             forum = query.session.merge(forum, dont_load=True)
@@ -483,6 +483,7 @@ class Post(object):
                 request = current_request._get_current_object()
             except RuntimeError:
                 request = None
+        nocache = True # XXX doesn't work
         context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
             node = parse(self.text, wiki_force_existing=force_existing)
@@ -916,7 +917,7 @@ dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic),
     '_children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
-    'last_post': relation(Post)},
+    'last_post': relation(Post, post_update=True)},
     extension=ForumMapperExtension()
 )
 dbsession.mapper(Topic, topic_table, properties={
@@ -926,11 +927,12 @@ dbsession.mapper(Topic, topic_table, properties={
     'reporter': relation(SAUser,
         primaryjoin=topic_table.c.reporter_id == user_table.c.id,
         foreign_keys=[topic_table.c.reporter_id]),
-    'last_post': relation(Post,
+    'last_post': relation(Post, post_update=True,
         primaryjoin=topic_table.c.last_post_id == post_table.c.id),
-    'first_post': relation(Post,
+    'first_post': relation(Post, post_update=True,
         primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
+    'polls': relation(Poll, backref='topic', cascade='save-update'),
     'posts': relation(Post, backref='topic',
         primaryjoin=topic_table.c.id == post_table.c.topic_id)
     }, extension=TopicMapperExtension()
@@ -944,12 +946,9 @@ dbsession.mapper(Post, post_table, properties={
 )
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={
-    'topic': relation(Topic, backref='polls'),
-    'options': relation(PollOption)
+    'options': relation(PollOption, backref='poll',
+        cascade='all, delete-orphan'),
+    'votings': relation(PollVote, backref='poll', cascade='all, delete-orphan')
 })
-dbsession.mapper(PollOption, poll_option_table, properties={
-    'poll': relation(Poll)
-})
-dbsession.mapper(PollVote, poll_vote_table, properties={
-    'poll': relation(Poll)
-})
+dbsession.mapper(PollOption, poll_option_table)
+dbsession.mapper(PollVote, poll_vote_table)

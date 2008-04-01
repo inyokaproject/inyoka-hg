@@ -68,7 +68,7 @@
       <tr>
         <td>
           {%- if not poll.participated and not show_vote_results %}
-          <input type="{{ poll.multiple and 'checkbox' or 'radio' }}"
+          <input type="{{ poll.multiple_votes and 'checkbox' or 'radio' }}"
                  name="poll_{{ poll.id }}" id="poll_{{ poll.id }}"
                  value="{{ option.id }}" />
           <label for="poll_{{ option.id }}">{{ option.name|e }}</label>

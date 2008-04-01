@@ -12,20 +12,20 @@
 #}
 
 {% extends 'forum/page.html' %}
-{% if isnewtopic %}
+{% if not topic %}
   {% set title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
   {% set navigation_trace =  [
     (forum|url, forum.name),
     (forum|url('newtopic'), 'Neues Thema')
     ] %}
-{% elif isnewpost %}
+{% elif topic and not post %}
   {% set title_trace = ['Neue Antwort in „%s“'|format(topic.title|e)] %}
   {% set navigation_trace =  [
     (forum|url, forum.name),
     (topic|url, topic.title),
     (topic|url('reply'), 'Neue Antwort')
     ] %}
-{% elif isedit %}
+{% else %}
   {% set title_trace = ['Posting bearbeiten']%}
 {% endif %}
 {% set scripts = ['WikiEditor.js', 'NewTopic.js'] %}
@@ -87,7 +87,9 @@
     </dl>
     <p>
       {{ form.att_ids }}
-      {{ form.polls }}
+      <input type="hidden" name="polls" id="id_polls" value="
+      {%- for poll in polls %}{% if not loop.first %},{% endif %}{{ poll.id }}
+      {%- endfor %}">
       {{ h.field_errors(form.errors.__all__) }}
       {%- if isnewpost -%}
       <input type="hidden" name="start_time" value="{{ start_time }}" />
