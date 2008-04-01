@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import re
+from datetime import datetime
 from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
@@ -35,7 +36,8 @@ from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage, PollVote
+     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage, \
+     PollVote, PollOption
 from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
@@ -111,7 +113,7 @@ def forum(request, slug, page=1):
     # their own url at /category.
     if not f or f.parent_id is None:
         raise PageNotFound()
-    privs = get_forum_privileges(request.user, f)
+    privs = get_forum_privileges(request.user, f.id)
     if not privs['read']:
         return abort_access_denied(request)
     fmsg = f.find_welcome(request.user)
@@ -155,7 +157,7 @@ def viewtopic(request, topic_slug, page=1):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    privileges = get_forum_privileges(request.user, t.forum)
+    privileges = get_forum_privileges(request.user, t.forum.id)
     if not privileges['read']:
         return abort_access_denied(request)
     if t.hidden:
@@ -176,13 +178,10 @@ def viewtopic(request, topic_slug, page=1):
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
-            Poll.c.topic_id==t.id
-        ).all()
+            Poll.topic_id==t.id).all()
 
         if request.method == 'POST' and request.user.is_authenticated:
             # the user participated in a poll
-            votings = []
-            poll_ids = []
             for poll in polls:
                 # get the votes for every poll in this topic
                 if poll.multiple_votes:
@@ -196,8 +195,7 @@ def viewtopic(request, topic_slug, page=1):
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
-                    votings.append(PollVote(voter_id=request.user.id,
-                             poll_id=poll.id))
+                    poll.votings.append(PollVote(voter_id=request.user.id))
                     session.execute(poll_option_table.update(
                         poll_option_table.c.id.in_(votes) &
                         (poll_option_table.c.poll_id == poll.id), values={
@@ -205,6 +203,9 @@ def viewtopic(request, topic_slug, page=1):
                     }))
                     flash(u'Deine Stimme wurde gespeichert.', True)
             session.commit()
+            for poll in polls:
+                for option in poll.options:
+                    session.refresh(option)
     else:
         polls = None
 
@@ -254,139 +255,7 @@ def viewtopic(request, topic_slug, page=1):
 
 
 @templated('forum/edit.html')
-def newpost(request, topic_slug=None, quote_id=None):
-    """
-    If a user requests the page the first time, there is no POST-data and an
-    empty form is displayed.  The action of the form is the view itself.
-    If `quote_id` is an integer, the standard text is set to a quoted version
-    of the post with id = `quote_id`.
-    If a user submits the form, POST-data is set, and the form is validated.
-    If validation fails, the form is displayed again with added error
-    messages, else the post is saved and the user is forwarded to topic-view.
-    """
-    preview = quote = None
-
-    if quote_id:
-        quote = Post.query.get(quote_id)
-        if not quote:
-            raise PageNotFound
-        t = quote.topic
-    else:
-        t = Topic.query.filter_by(slug=topic_slug).first()
-        if not t:
-            raise PageNotFound
-
-    privileges = get_forum_privileges(request.user, t.forum)
-    if t.locked and not privileges['moderate']:
-        flash((u'Du kannst keinen Beitrag in diesem Thema erstellen, da es '
-               u'von einem Moderator geschlossen wurde.'))
-        return HttpResponseRedirect(t.get_absolute_url())
-    elif not privileges['reply']:
-        return abort_access_denied(request)
-    posts = Post.query.filter(and_(Post.c.topic_id == t.id, Post.c.text != '',
-        Post.c.hidden == False)).order_by('-pub_date')[:10]
-    attach_form = AddAttachmentForm()
-
-    if request.method == 'POST':
-        if 'cancel' in request.POST:
-            flash('Antworten wurde abgebrochen.')
-            return HttpResponseRedirect(t.get_absolute_url())
-
-        form = NewPostForm(request.POST)
-        att_ids = [int(id) for id in request.POST['att_ids'].split(',') if id]
-        # check for post = None to be sure that the user can't "hijack"
-        # other attachments.
-        attachments = Attachment.query.filter(Attachment.c.id.in_(att_ids) \
-            and Attachment.c.post_id==None).all()
-        if 'attach' in request.POST:
-            if not privileges['upload']:
-                return abort_access_denied(request)
-            # the user uploaded a new attachment
-            attach_form = AddAttachmentForm(request.POST, request.FILES)
-            if attach_form.is_valid():
-                d = attach_form.cleaned_data
-                att_name = d.get('filename') or d['attachment'].filename
-                att = Attachment.objects.create(
-                    att_name, d['attachment'].content,
-                    attachments, override=d['override']
-                )
-                if not att:
-                    flash(u'Ein Anhang „%s“ existiert bereits' % att_name)
-                else:
-                    attachments.append(att)
-                    att_ids.append(att.id)
-                    flash(u'Der Anhang „%s“ wurde erfolgreich hinzugefügt'
-                          % att_name)
-
-        elif 'delete_attachment' in request.POST:
-            if not (privileges['upload'] and privileges['delete']):
-                return abort_access_denied(request)
-            id = int(request.POST['delete_attachment'])
-            att_ids.remove(id)
-            att = filter(lambda a: a.id == id, attachments)[0]
-            att.delete()
-            attachments.remove(att)
-            flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
-
-        elif 'preview' in request.POST:
-            ctx = RenderContext(request)
-            preview = parse(request.POST.get('text', '')).render(ctx, 'html')
-
-        elif form.is_valid():
-            data = form.cleaned_data
-            post = Post(text=data['text'], author_id=request.user.id, topic=t)
-            #Attachment.objects.update_post_ids(att_ids, post.id)
-            session.commit()
-            # update cache
-            for page in range(1, 5):
-                cache.delete('forum/topics/%d/%d' % (t.forum_id, page))
-                cache.delete('forum/topics/%dm/%d' % (t.forum_id, page))
-            # send notifications
-            for s in []: # Subscription.objects.filter(topic=t):
-                text = render_template('mails/new_post.txt', {
-                    'username': s.user.username,
-                    'post':     post,
-                    'topic':    t
-                })
-                send_notification(s.user, u'Neuer Beitrag im Thema „%s“'
-                                  % t.title, text)
-            try:
-                if request.user.settings['autosubscribe']:
-                    subscription = Subscription(
-                        user = request.user,
-                        topic_id = t.id,
-                    )
-                    subscription.save()
-            except KeyError:
-                pass
-            resp = HttpResponseRedirect(post.get_absolute_url())
-            return resp
-        form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
-    else:
-        if quote:
-            text = quote_text(quote.text, quote.author)
-            form = NewPostForm(initial={'text': text})
-        else:
-            form = NewPostForm()
-        attachments = []
-
-    set_session_info(request, u'schreibt einen neuen Beitrag in „<a href="'
-                     u'%s">%s</a>“' % (escape(url_for(t)), escape(t.title)))
-    return {
-        'topic':       t,
-        'forum':       t.forum,
-        'posts':       list(posts),
-        'form':        form,
-        'attach_form': attach_form,
-        'attachments': list(attachments),
-        'can_attach':  privileges['upload'],
-        'isnewpost' :  True,
-        'preview':     preview
-    }
-
-
-@templated('forum/edit.html')
-def newtopic(request, slug=None, article=None):
+def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     """
     This function allows the user to create a new topic which is created in
     the forum `slug` if `slug` is a string.
@@ -397,338 +266,137 @@ def newtopic(request, slug=None, article=None):
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
+    post = topic = forum = None
+    newtopic = False
+    poll_form = poll_options = polls = None
     preview = None
-    f = None
+    if topic_slug:
+        topic = Topic.query.filter_by(slug=topic_slug).one()
+        if not topic:
+            raise PageNotFound()
+        forum = topic.forum
+    elif forum_slug:
+        forum = Forum.query.get(forum_slug)
+        if forum.parent_id is None:
+            raise PageNotFound()
+        newtopic = True
+    elif post_id:
+        post = Post.query.get(post_id)
+        if not post:
+            raise pageNotFound()
+        topic = post.topic
+        forum = topic.forum
+        newtopic = post.id == topic.first_post_id
+    form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
 
-    if article:
-        # the user wants to create a wiki discussion
-        f = Forum.query.select_by(slug=settings.WIKI_DISCUSSION_FORUM)
-        article = WikiPage.objects.get(name=article)
-        if request.method != 'POST':
-            flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
-                  u'Wenn du willst, kannst du hier eine neue anlegen.' % \
-                                                    (escape(article.name)))
+    # check privileges
+    privileges = get_forum_privileges(request.user, forum.id)
+    if post:
+        if not privileges['edit']:
+            return abort_access_denied(request)
+    elif topic:
+        if not privileges['reply']:
+            return abort_access_denied(request)
     else:
-        f = Forum.query.filter_by(slug=slug).first()
-        if not f:
-            raise PageNotFound
-        if 0:# this is sooo annoying. request.method != 'POST':
-            flash(u'<ul><li>Kennst du unsere <a href="%s">Verhaltensregeln</a'
-                  u'>?</li><li>Kann das <a href="%s">Wiki</a> dir weiterhelfe'
-                  u'n?</li><li>Hast du die <a href="%s">Suche</a> schon benut'
-                  u'zt?</li><li>Benutze für lange Ausgaben und Quelltexte bit'
-                  u'te unseren <a href="%s">NoPaste Service</a>.</li></ul>'
-                  % (href('wiki', 'Verwaltung/Moderatoren-Team/Forenregeln'),
-                     href('wiki'), href('portal', 'search'), href('pastebin'))
-            )
+        if not privileges['create']:
+            return abort_access_denied(request)
 
-    if f.parent_id is None:
-        # we don't allow posting in categories
-        return HttpResponseRedirect(href('forum'))
+    # the user has canceled the action
+    if request.method == 'POST' and request.POST.get('cancel'):
+        flash(u'Der Bearbeitungsvorgang wurde abgebrochen')
+        url = href('forum')
+        if forum_slug:
+            url = href('forum', 'forum', forum.slug)
+        elif topic_slug:
+            url = href('forum', 'topic', topic.slug)
+        elif post_id:
+            url = href('forum', 'post', post.id)
+        return HttpResponseRedirect(url)
 
-    privileges = get_forum_privileges(request.user, f)
-    if not privileges['create']:
-        return abort_access_denied(request)
-
-    attach_form = AddAttachmentForm()
-    poll_form = AddPollForm()
-
-    if request.method == 'POST':
-        form = NewTopicForm(request.POST)
-
-        #: this is a list of the ids of the topic's attachments.
-        att_ids = [int(id) for id in request.POST['att_ids'].split(',') if id]
-        #: this is a list of the ids of the topic's polls
-        poll_ids = [int(id) for id in request.POST['polls'].split(',') if id]
-
-        # check for post / topic is null to be sure that the user can't
-        # "hijack" other attachments / polls that are already bound to
-        # another post / topic.
-        attachments = list(Attachment.query.filter(and_(
-            Attachment.c.id.in_(att_ids), Attachment.c.post_id==None)))
-        polls = list(Poll.query.filter(and_(
-            Poll.c.id.in_(poll_ids), Poll.c.topic_id==None)))
-        options = request.POST.getlist('options')
-
-        if 'cancel' in request.POST:
-            flash('Das Erstellen eines neuen Themas wurde abgebrochen.')
-            return HttpResponseRedirect(f.get_absolute_url())
-
-        elif 'attach' in request.POST:
-            if not privileges['upload']:
-                return abort_access_denied(request)
-            # the user uploaded a new attachment
-            attach_form = AddAttachmentForm(request.POST, request.FILES)
-            if attach_form.is_valid():
-                d = attach_form.cleaned_data
-                att_name = d.get('filename') or d['attachment'].filename
-                att = Attachment.objects.create(
-                    att_name, d['attachment'].content,
-                    attachments, override=d['override']
-                )
-                if not att:
-                    flash(u'Ein Anhang „%s“ existiert bereits' % att_name)
-                else:
-                    attachments.append(att)
-                    att_ids.append(att.id)
-                    flash(u'Der Anhang „%s“ wurde erfolgreich hinzugefügt'
-                          % att_name)
-
-        elif 'delete_attachment' in request.POST:
-            if not (privileges['upload'] and privileges['delete']):
-                return abort_access_denied(request)
-            id = int(request.POST['delete_attachment'])
-            att_ids.remove(id)
-            att = filter(lambda a: a.id == id, attachments)[0]
-            att.delete()
-            attachments.remove(att)
-            flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
-
-        elif 'add_poll' in request.POST:
-            # the user added a new poll
-            if not privileges['create_poll']:
-                return abort_access_denied(request)
-            poll_form = AddPollForm(request.POST)
-            if poll_form.is_valid():
-                d = poll_form.cleaned_data
-                poll = Poll(question=d['question'], options=d['options'],
-                             multiple_votes=d['multiple'])
-                session.commit()
-                polls.append(poll)
-                poll_ids.append(poll.id)
-                flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
-                      escape(poll.question), success=True)
-                # clean the poll formular
-                poll_form = AddPollForm()
-                options = ['', '']
-
+    #  handle polls
+    poll_ids = map(int, filter(bool, request.POST.get('polls', '').split(',')))
+    if newtopic and privileges['create_poll']:
+        poll_form = AddPollForm(('add_poll' in request.POST or
+            'add_option' in request.POST) and request.POST or None)
+        poll_options = request.POST.getlist('options') or ['', '']
+        if 'add_poll' in request.POST and poll_form.is_valid():
+            d = poll_form.cleaned_data
+            options = map(lambda a: PollOption(name=a), poll_options)
+            poll = Poll(topic=topic, question=d['question'],
+                multiple_votes=d['multiple'], options=options,
+                start_time=datetime.utcnow())
+            if topic:
+                topic.has_poll = True
+            poll_form = AddPollForm()
+            poll_options = ['', '']
+            flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question)
+            session.commit()
+            poll_ids.append(poll.id)
         elif 'add_option' in request.POST:
-            if not privileges['create_poll']:
-                return abort_access_denied(request)
-            poll_form = AddPollForm(request.POST)
-            options.append('')
-
+            poll_options.append('')
         elif 'delete_poll' in request.POST:
-            if not (privileges['create_poll'] and privileges['delete']):
-                return abort_access_denied(request)
-            # the user deleted a poll
-            poll_id = int(request.POST['delete_poll'])
-            poll = filter(lambda v: v.id == poll_id, polls)[0]
-            poll.delete()
-            polls.remove(poll)
-            poll_ids.remove(poll_id)
-            flash(u'Die Umfrage „%s“ wurde gelöscht' % escape(poll.question),
-                  success=True)
-
-        if 'preview' in request.POST:
-            # just show the user a preview
-            ctx = RenderContext(request)
-            preview = parse(request.POST.get('text', '')).render(ctx, 'html')
-
-        elif form.is_valid():
-            data = form.cleaned_data
-            # write the topic into the database
-            topic = Topic(title=data['title'], forum=f,
-                        author_id=request.user.id, has_poll=bool(poll_ids),
-                        ubuntu_distro=data['ubuntu_distro'],
-                        ubuntu_version=data['ubuntu_version'],
-                        sticky=data['sticky'])
-            post = Post(topic=topic, text=data['text'], author_id=request.user.id)
-            # bind all uploaded attachments to the new post
-            #Attachment.objects.update_post_ids(att_ids,
-            #                                   topic.first_post_id)
-            # bind all new polls to the new topic
-            session.flush([topic])
-            Poll.bind(poll_ids, topic.id)
-
-            if article:
-                # the topic is a wiki discussion, bind it to the wiki
-                # article and send notifications.
-                article.topic = topic
-                article.save()
-
-                for s in Subscription.objects.filter(wiki_page=article):
-                    text = render_template('mails/new_page_discussion.txt', {
-                        'username': s.user.username,
-                        'page':     article
-                    })
-                    send_notification(s.user, (u'Neue Diskussion für die'
-                        u' Seite „%s“ wurde eröffnet')
-                        % article.title, text)
-
-            session.commit()
-            try:
-                if request.user.settings['autosubscribe']:
-                    subscription = Subscription(
-                        user = request.user,
-                        topic_id = topic.id,
-                    )
-                    subscription.save()
-            except KeyError:
-                pass
-            return HttpResponseRedirect(topic.get_absolute_url())
-
-        form.data['att_ids'] = ','.join([unicode(id) for id in att_ids])
-        form.data['polls'] = ','.join([unicode(id) for id in poll_ids])
-    else:
-        # try to get and preselect the user's ubuntu version
-        ubuntu_version = get_ubuntu_version(request)
-        form = NewTopicForm(initial={
-            'ubuntu_version': ubuntu_version,
-            'title':          article and article.name or ''
-        })
-        attachments = []
-        polls = []
-        options = ['', '']
-
-    set_session_info(request, u'schreibt ein neues Thema in „<a href="%s">'
-                     u'%s</a>“' % (escape(url_for(f)), escape(f.name)))
-    return {
-        'form':        form,
-        'forum':       f,
-        'attach_form': attach_form,
-        'attachments': list(attachments),
-        'can_attach':  privileges['upload'],
-        'poll_form':   poll_form,
-        'polls':       polls,
-        'options':     options,
-        'isnewtopic':  True,
-        'article':     article,
-        'preview':     preview
-    }
-
-
-@templated('forum/edit.html')
-def edit(request, post_id):
-    """
-    The user can edit a post's text or add attachments on this page.
-    If the post is the first post of a topic, the user also can edit the
-    polls and the options (e.g.  sticky) of the topic.
-    """
-    post = Post.query.get(post_id)
-    if not post:
-        raise PageNotFound
-    #: the properties of the topic the user can edit when editing the topic's
-    #: root post.
-    topic_values = ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']
-    privileges = get_forum_privileges(request.user, post.topic.forum)
-    if not privileges['edit']:
-        return abort_access_denied(request)
-    is_first_post = post.topic.first_post_id == post.id
-    attach_form = AddAttachmentForm()
-    if is_first_post:
-        poll_form = AddPollForm()
-        polls = list(Poll.query.filter_by(topic_id=post.topic_id))
-        options = request.POST.getlist('options')
-    attachments = [] # list(Attachment.objects.filter(post=post))
-    if request.method == 'POST':
-        form = EditPostForm(request.POST, is_first_post=is_first_post)
-        if 'attach' in request.POST:
-            if not privileges['upload']:
-                return abort_access_denied(request)
-            attach_form = AddAttachmentForm(request.POST, request.FILES)
-            if attach_form.is_valid():
-                d = attach_form.cleaned_data
-                att_name = d.get('filename') or d['attachment'].filename
-                # check whether another attachment with the same name does
-                # exist already
-                try:
-                    a = Attachment.objects.get(name=att_name, post=post)
-                    if d['override']:
-                        a.delete()
-                        raise Attachment.DoesNotExist()
-                    flash(u'Ein Anhang „%s“ existiert bereits' % att_name)
-                except Attachment.DoesNotExist:
-                    att = Attachment(
-                        name=att_name,
-                        post=post
-                    )
-                    att.save_file_file(att_name, d['attachment'].content)
-                    att.save()
-                    attachments.append(att)
-                    flash(u'Der Anhang „%s“ wurde erfolgreich hinzugefügt'
-                          % att_name)
-
-        elif 'delete_attachment' in request.POST:
-            if not (privileges['upload'] and privileges['delete']):
-                return abort_access_denied(request)
-            id = int(request.POST['delete_attachment'])
-            att = filter(lambda a: a.id == id, attachments)[0]
-            att.delete()
-            attachments.remove(att)
-            flash(u'Der Anhang „%s“ wurde gelöscht.' % att.name)
-
-        elif is_first_post and 'add_poll' in request.POST:
-            if not privileges['create_poll']:
-                return abort_access_denied(request)
-            # the user added a new poll
-            poll_form = AddPollForm(request.POST)
-            if poll_form.is_valid():
-                d = poll_form.cleaned_data
-                poll = Poll.objects.create(d['question'], d['options'],
-                                           multiple=d['multiple'],
-                                           topic_id=post.topic_id)
-                polls.append(poll)
-                if not post.topic.has_poll:
-                    post.topic.has_poll = True
-                    post.topic.save()
-                flash(u'Die Umfrage „%s“ wurde erfolgreich erstellt' %
-                      escape(poll.question), success=True)
-                # clean the poll formular
-                poll_form = AddPollForm()
-                options = ['', '']
-
-        elif is_first_post and 'add_option' in request.POST:
-            if not privileges['create_poll']:
-                return abort_access_denied(request)
-            poll_form = AddPollForm(request.POST)
-            options.append('')
-
-        elif is_first_post and 'delete_poll' in request.POST:
-            if not (privileges['create_poll'] and privileges['delete']):
-                return abort_access_denied(request)
-            # the user deleted a poll
-            poll_id = int(request.POST['delete_poll'])
-            poll = filter(lambda p: p.id == poll_id, polls)[0]
-            poll.delete()
-            polls.remove(poll)
-            if not polls:
-                post.topic.has_poll = False
-                post.topic.save()
-            flash(u'Die Umfrage „%s“ wurde gelöscht' % escape(poll.question),
-                  success=True)
-        elif form.is_valid():
-            data = form.cleaned_data
-            post.text = data['text']
-            session.commit()
-            if is_first_post:
-                for k in topic_values:
-                    setattr(post.topic, k, data[k])
+            poll = Poll.query.filter_by(id=request.POST['delete_poll'],
+                topic=topic).first()
+            if poll:
+                flash(u'Die Umfrage "%s" wurde gelöscht' % poll.question)
+                topic.has_poll = bool(session.execute(select([1],
+                    (Poll.topic_id == topic.id) & (Poll.id != poll.id)) \
+                    .limit(1)).fetchone())
+                session.delete(poll)
                 session.commit()
-            flash(u'Der Beitrag wurde erfolgreich bearbeitet')
-            return HttpResponseRedirect(href('forum', 'post', post.id))
-    else:
-        initial = {'text': post.text}
-        if is_first_post:
-            for k in topic_values:
-                initial[k] = getattr(post.topic, k)
-        form = EditPostForm(initial=initial, is_first_post=is_first_post)
+        polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
+            (topic and topic.id or -1))).all()
 
-    d = {
-        'form': form,
-        'post': post,
-        'attach_form': attach_form,
-        'attachments': attachments,
-        'isedit': True,
-    }
-    if is_first_post:
-        d.update({
-            'isfirstpost': True,
-            'poll_form': poll_form,
-            'options': options or ['', ''],
-            'polls': polls
+    # the user submited a valid form
+    if 'send' in request.POST and form.is_valid():
+        d = form.cleaned_data
+        if not topic:
+            topic = Topic(forum_id=forum.id, author_id=request.user.id)
+        if newtopic:
+            topic.title = d['title']
+            topic.ubuntu_distro = d['ubuntu_distro']
+            topic.ubuntu_version = d['ubuntu_version']
+            topic.sticky = d['sticky']
+            if privileges['create_poll']:
+                topic.polls = polls
+                topic.has_poll = bool(polls)
+            session.flush([topic])
+        if not post:
+            post = Post(topic=topic, author_id=request.user.id)
+        post.text = d['text']
+        post.rendered_text = post.render_text(request, nocache=True)
+        session.flush([post])
+        session.commit()
+        flash(u'Der Beitrag wurde erfolgreich gespeichert')
+        return HttpResponseRedirect(url_for(post))
+
+    # the user wants to see a preview
+    elif 'preview' in request.POST:
+        ctx = RenderContext(request)
+        preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+
+    # the user is going to edit an existing post/topic
+    elif post:
+        form = form.__class__({
+            'title': topic.title,
+            'ubuntu_distro': topic.ubuntu_distro,
+            'ubuntu_version': topic.ubuntu_version,
+            'sticky': topic.sticky,
+            'text': post.text
         })
-    return d
+
+
+    return {
+        'form': form,
+        'poll_form': poll_form,
+        'options': poll_options,
+        'polls': polls,
+        'post': post,
+        'forum': forum,
+        'topic': topic,
+        'preview': preview,
+        'isnewtopic': newtopic
+    }
 
 
 def change_status(request, topic_slug, solved=None, locked=None):

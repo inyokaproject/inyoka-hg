@@ -8,6 +8,7 @@
     :copyright: Copyright 2008 by Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
+from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges
 from inyoka.forum.models import Post, Forum
 from inyoka.utils.urls import url_for
@@ -26,7 +27,7 @@ class ForumSearchAuthDecider(object):
         # the privileges are set on first call and not on init because this
         # would create one useless query if the user e.g. just searched the
         # wiki.
-        privs = get_privileges(self.user, Forum.objects.all())
+        privs = get_privileges(self.user, [f.id for f in Forum.query.all()])
         return dict((key, priv['read']) for key, priv in privs.iteritems())
 
     def __call__(self, auth):
@@ -39,7 +40,8 @@ class ForumSearchAdapter(SearchAdapter):
     auth_decider = ForumSearchAuthDecider
 
     def store(self, post_id):
-        post = Post.objects.select_related(2).get(id=post_id)
+        post = Post.query.options(eagerload('topic'), eagerload('author')) \
+            .get(post_id)
         search.store(
             component='f',
             uid=post.id,
@@ -54,7 +56,8 @@ class ForumSearchAdapter(SearchAdapter):
         )
 
     def recv(self, post_id):
-        post = Post.objects.select_related(2).get(id=post_id)
+        post = Post.query.options(eagerload('topic'), eagerload('author')). \
+            get(post_id)
         return {
             'title': post.topic.title,
             'user': post.author,

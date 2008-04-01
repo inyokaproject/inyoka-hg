@@ -9,6 +9,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from sqlalchemy.orm import eagerload
 from inyoka.forum.models import Topic, Post
 from inyoka.forum.acl import get_forum_privileges
 from inyoka.utils.services import SimpleDispatcher
@@ -24,10 +25,13 @@ def on_get_topic_autocompletion(request):
 
 def on_get_post(request):
     try:
-        post = Post.objects.get(id=int(request.GET['post_id']))
-    except (KeyError, ValueError, Post.DoesNotExist):
+        post = Post.query.options(eagerload('topic'), eagerload('author')) \
+                         .get(int(request.GET['post_id']))
+    except (KeyError, ValueError):
         return None
-    privileges = get_forum_privileges(request.user, post.topic.forum)
+    if not post:
+        return None
+    privileges = get_forum_privileges(request.user, post.topic.forum_id)
     if not privileges['read'] or (not privileges['moderate'] and
        post.topic.hidden or post.hidden):
         return None
