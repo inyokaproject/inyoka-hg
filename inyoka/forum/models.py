@@ -771,6 +771,18 @@ class Privilege(object):
 class Poll(object):
 
     @staticmethod
+    def create(question, options, multiple_votes, topic_id=None,
+            time=None):
+        now = datetime.utcnow()
+        poll = Poll(question=question, multiple_votes=multiple_votes,
+                    topic_id=topic_id, start_time=now,
+                    end_time=time and now + time or None)
+        for option in options:
+            option = PollOption(name=option)
+            poll.options.append(option)
+        return poll
+
+    @staticmethod
     def bind(poll_ids, topic_id):
         """Bind the polls given in poll_ids to the given topic id."""
         if not poll_ids:
@@ -799,7 +811,9 @@ class PollOption(object):
     @property
     def percentage(self):
         """Calculate the percentage of votes for this poll option."""
-        return int(round(self.votes / self.poll.votes * 100))
+        if self.poll.votes:
+            return int(round(self.votes / self.poll.votes * 100))
+        return 0
 
 
 class PollVote(object):

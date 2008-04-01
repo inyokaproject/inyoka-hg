@@ -34,17 +34,16 @@ PRIVILEGES_DETAILS = [
 PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
 
 
-def get_forum_privileges(user, forum):
+def get_forum_privileges(user, forum_id):
     """Get a dict of all the privileges for a user."""
-    return get_privileges(user, [forum])[forum.id]
+    return get_privileges(user, forum_ids=[forum_id])[forum_id]
 
 
-def get_privileges(user, forums):
+def get_privileges(user, forum_ids):
     """Return all privileges of the applied forums for the `user`"""
-    forum_ids = [x.id for x in forums]
     if not forum_ids:
         return dict.fromkeys(PRIVILEGES, False)
-    fields = ', '.join('p.can_' + x for x in PRIVILEGES)
+    fields = ', '.join('p.can_%s' % x for x in PRIVILEGES)
     cur = connection.cursor()
     cur.execute('''
         select p.forum_id, %s
@@ -68,12 +67,12 @@ def get_privileges(user, forums):
 
 def have_privilege(user, forum, privilege):
     """Check if a user has a privilege on a resource."""
-    return bool(get_forum_privileges(user, forum).get(privilege, False))
+    return bool(get_forum_privileges(user, forum.id).get(privilege, False))
 
 
 def filter_invisible(user, forums, priv='read'):
     """Filter all forums where the user has a privilege on it."""
-    privileges = get_privileges(user, forums)
+    privileges = get_privileges(user, [f.id for f in forums])
     result = []
     for forum in forums:
         if privileges.get(forum.id, {priv: False})[priv]:

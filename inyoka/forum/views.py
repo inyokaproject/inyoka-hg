@@ -113,7 +113,7 @@ def forum(request, slug, page=1):
     # their own url at /category.
     if not f or f.parent_id is None:
         raise PageNotFound()
-    privs = get_forum_privileges(request.user, f)
+    privs = get_forum_privileges(request.user, f.id)
     if not privs['read']:
         return abort_access_denied(request)
     fmsg = f.find_welcome(request.user)
@@ -157,7 +157,7 @@ def viewtopic(request, topic_slug, page=1):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    privileges = get_forum_privileges(request.user, t.forum)
+    privileges = get_forum_privileges(request.user, t.forum.id)
     if not privileges['read']:
         return abort_access_denied(request)
     if t.hidden:
@@ -373,7 +373,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             'text': post.text
         })
 
-    privileges = get_forum_privileges(request.user, forum)
+    privileges = get_forum_privileges(request.user, forum.id)
     if not privileges['create']:
         return abort_access_denied(request)
 
