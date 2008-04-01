@@ -181,7 +181,6 @@ def viewtopic(request, topic_slug, page=1):
 
         if request.method == 'POST' and request.user.is_authenticated:
             # the user participated in a poll
-            votings = []
             poll_ids = []
             for poll in polls:
                 # get the votes for every poll in this topic
@@ -189,15 +188,14 @@ def viewtopic(request, topic_slug, page=1):
                     votes = request.POST.getlist('poll_%s' % poll.id)
                 else:
                     votes = [request.POST.get('poll_%s' % poll.id)]
-                if votes:
+                if filter(lambda v: bool(v), votes):
                     if not privileges['vote']:
                         return abort_access_denied(request)
                     elif poll.participated:
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
-                    votings.append(PollVote(voter_id=request.user.id,
-                             poll_id=poll.id))
+                    PollVote(voter_id=request.user.id, poll_id=poll.id)
                     session.execute(poll_option_table.update(
                         poll_option_table.c.id.in_(votes) &
                         (poll_option_table.c.poll_id == poll.id), values={
@@ -205,6 +203,7 @@ def viewtopic(request, topic_slug, page=1):
                     }))
                     flash(u'Deine Stimme wurde gespeichert.', True)
             session.commit()
+            return HttpResponseRedirect(t.get_absolute_url())
     else:
         polls = None
 
@@ -491,8 +490,7 @@ def newtopic(request, slug=None, article=None):
             poll_form = AddPollForm(request.POST)
             if poll_form.is_valid():
                 d = poll_form.cleaned_data
-                poll = Poll(question=d['question'], options=d['options'],
-                             multiple_votes=d['multiple'])
+                poll = Poll.create(d['question'], d['options'], d['multiple'])
                 session.commit()
                 polls.append(poll)
                 poll_ids.append(poll.id)
@@ -665,9 +663,8 @@ def edit(request, post_id):
             poll_form = AddPollForm(request.POST)
             if poll_form.is_valid():
                 d = poll_form.cleaned_data
-                poll = Poll.objects.create(d['question'], d['options'],
-                                           multiple=d['multiple'],
-                                           topic_id=post.topic_id)
+                poll = Poll.create(d['question'], d['options'], d['multiple'],
+                                   topic_id=post.topic_id)
                 polls.append(poll)
                 if not post.topic.has_poll:
                     post.topic.has_poll = True
