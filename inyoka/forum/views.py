@@ -291,12 +291,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
 
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
-    if post and not privileges['edit']:
-        return abort_access_denied(request)
-    elif topic and not privileges['reply']:
-        return abort_access_denied(request)
-    elif not privileges['create']:
-        return abort_access_denied(request)
+    if post:
+        if not privileges['edit']:
+            return abort_access_denied(request)
+    elif topic:
+        if not privileges['reply']:
+            return abort_access_denied(request)
+    else:
+        if not privileges['create']:
+            return abort_access_denied(request)
 
     # the user has canceled the action
     if request.method == 'POST' and request.POST.get('cancel'):
