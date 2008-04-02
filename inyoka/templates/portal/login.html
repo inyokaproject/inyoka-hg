@@ -32,7 +32,7 @@
     Hier kannst du dich mit deinem Benutzer anmelden, wenn du dich schon 
     <a href="{{ href('portal', 'register') }}">registriert hast</a>.
     Falls du dein Passwort vergessen hast, kannst du dir <a href="
-    {{- href('portal', 'lost_password') }}">hier</a> ein neues zuschicken lassen.
+    {{- href('portal', 'lost_password') }}">ein Neues zuschicken lassen</a>.
   </p>
   {%- if failed %}
   {%- if not inactive and not banned %}
@@ -61,27 +61,6 @@
   </div>
   {%- endif %}
   {%- endif %}
-  <form action="" method="post" class="loginform">
-    <dl>
-      {{ h.render_form(form, 'username', 'password', inline=true) }}
-      <dd>
-        {{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label>
-        <div class="help_text">Wähle dies nicht aus, wenn du dich von einem öffentlichen
-          Computer aus anmeldest, da sonst andere Zugriff auf deinen Benutzer erhalten
-          können.</div>
-      </dd>
-    </dl>
-    <div class="actions">
-      <input type="hidden" name="redirect" value="" />
-      <input type="submit" id="login" value="Login" />
-    </div>
-
-  </form>
-  <script type="text/javascript">
-    if ( $('#id_username')[0].value )
-        $('#id_password').focus();
-    else 
-        $('#id_username').focus();
-  </script>
+  {%- include 'portal/_login_form.html' %}
   {%- endif %}
 {% endblock %}
