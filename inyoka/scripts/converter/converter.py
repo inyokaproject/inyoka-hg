@@ -582,7 +582,7 @@ def convert_privileges():
         session.commit()
 
 
-def convert_subscriptions():
+def convert_topic_subscriptions():
     engine, meta, conn = forum_db()
     subscription_table = Table('%stopics_watch' % FORUM_PREFIX, meta,
                                autoload=True)
@@ -595,11 +595,29 @@ def convert_subscriptions():
     for row in conn.execute(subscription_table.select()):
         try:
             Subscription.objects.create(user_id=row.user_id,
-                                        topic_id=row.topic_id)
+                                        topic_id=row.topic_id,
+                                        notified=row.notify_status)
         # Ignore missing topics...
         except:
             pass
     transaction.commit()
+
+
+def convert_forum_subscriptions():
+    engine, meta, conn = forum_db()
+    subscription_table = Table('%sforums_watch' % FORUM_PREFIX, meta,
+                               autoload=True)
+
+    transaction.enter_transaction_management()
+    transaction.managed(True)
+    for row in conn.execute(subscription_table.select()):
+        try:
+            Subscription.objects.create(user_id=row.user_id,
+                                        forum_id=row.forum_id)
+        except:
+            pass
+    transaction.commit()
+
 
 
 def convert_attachments():
@@ -844,7 +862,8 @@ MODE_MAPPING = {
         'pastes':        convert_pastes,
         'groups':        convert_groups,
         'forum':         convert_forum,
-        'subscriptions': convert_subscriptions,
+        'topic_subscriptions': convert_topic_subscriptions,
+        'forum_subscriptions': convert_forum_subscriptions,
         'privileges':    convert_privileges,
         'polls':         convert_polls,
         'attachments':   convert_attachments,
@@ -873,7 +892,8 @@ if __name__ == '__main__':
     print 'Converting attachments'
     convert_attachments()
     print 'Converting subscriptions'
-    convert_subscriptions()
+    convert_topic_subscriptions()
+    convert_forum_subscriptions()
     print 'Converting privileges'
     convert_privileges()
     print 'Converting wiki data'
