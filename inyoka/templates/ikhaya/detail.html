@@ -23,9 +23,11 @@
     {{ article.rendered_intro }}
   </div>
   
-  {{ article.rendered_text }}
+  <div class="text">
+    {{ article.rendered_text }}
+  </div>
   
-  <p class="meta">
+  <p class="meta_detail">
     geschrieben von <a href="{{ article.author|url }}">
     {{ article.author.username|e}}</a> {{ article.pub_date|specificdatetimeformat(true) }} 
     in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 

@@ -30,7 +30,7 @@ ul.articles {
 }
 
 li.article {
-//  border: solid 1px #ccc;
+  border: solid 1px #ccc;
   margin: 0.0em;
   margin-bottom: 1.0em;
   background-image:url(../img/ikhaya/article.jpg);
@@ -61,10 +61,17 @@ div.intro {
   margin-bottom: 1.0em;
 }
 
-p.meta {
+
+p.meta,
+p.meta_detail {
   color: #777;
   font-size: 0.9em;
-  margin-bottom:0.1em;
+  margin-bottom: 0.1em;
+  padding: 5px;
+}
+
+p.meta_detail {
+  background-image: url('../img/ikhaya/metabg.png');
 }
 
 img.icon {
