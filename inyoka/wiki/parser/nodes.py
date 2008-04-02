@@ -1594,4 +1594,4 @@ class TableBodySection(Element):
                              id=self.id, class_=self.class_)
         for item in Element.prepare_html(self):
             yield item
-        yield u'</theadr'
+        yield u'</theadr>'
