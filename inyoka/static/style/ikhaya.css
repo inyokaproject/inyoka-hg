@@ -30,7 +30,7 @@ ul.articles {
 }
 
 li.article {
-//  border: solid 1px #ccc;
+  border: solid 1px #ccc;
   margin: 0.0em;
   margin-bottom: 1.0em;
   background-image:url(../img/ikhaya/article.jpg);
@@ -58,13 +58,25 @@ div.intro {
   font-size: 0.95em;
   color: #777;
   font-weight: bold;
-  margin-bottom: 1.0em;
 }
 
-p.meta {
+hr.intro_text_splitter {
+  color: #fff;
+  background-color: #fff;
+  border-bottom: 1px dotted #ccc;
+  margin: 0 30px 1.0em 30px;
+}
+
+p.meta,
+p.meta_detail {
   color: #777;
   font-size: 0.9em;
-  margin-bottom:0.1em;
+  margin-bottom: 0.1em;
+  padding: 5px;
+}
+
+p.meta_detail {
+  background-image: url('../img/ikhaya/metabg.png');
 }
 
 img.icon {

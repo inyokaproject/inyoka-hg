@@ -3,35 +3,43 @@ h3 {
     color: #444;
 }
 
-table.admin_control {
+div.admin_control ul {
+  list-style: none;
   text-align: center;
-  border:none;
+  border: none;
 }
 
-table.admin_control td {
+div.admin_control ul li {
+  display: inline;
+}
+
+div.admin_control ul li span {
+  text-align: center;
+  display: table-cell;
   border: 1px dotted #E3D6C4;
   padding: 0;
-  width: 25%;
 }
 
-table.admin_control td :link, table.admin_control td :visited {
+div.admin_control ul li span a {
+  width: 250px;
+  height: 150px;
+  padding: 5px 10px 0 10px;
+  display: block;
   text-decoration: none;
   color: #888;
-  display: block;
-  padding: 10px;
 }
 
-table.admin_control td:hover :link, table.admin_control td:hover :visited {
+div.admin_control ul li a:hover {
   color: #444;
 }
 
-/* Some additional features for non ie users */
-table.admin_control a img {
+div.admin_control ul li a img {
   opacity: 0.6;
 }
-table.admin_control a:hover img {
+div.admin_control ul li a:hover img {
   opacity: 1;
 }
+
 
 /* Styles for the static pages overview */
 table.static_pages .key,
