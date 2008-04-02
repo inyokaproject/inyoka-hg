@@ -20,12 +20,12 @@
 {% endfor %}
 
 {% macro admin_button(link, icon, name) %}
-  <td>
-    <a href="{{ link }}">
-      <img src="{{ href('static', 'img', 'admin', 'category_%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+  <li>
+    <span><a href="{{ link }}">
+      <img src="{{ href('static', 'img/admin/category_%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
       {{ name }}
-    </a>
-  </td>
+    </a></span>
+  </li>
 {% endmacro %}
 
 {% block appheader %}
