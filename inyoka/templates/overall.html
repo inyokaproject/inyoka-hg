@@ -95,7 +95,7 @@
             {%- endif -%}
           </li>
           {%- else %}
-          <li><a href="{{ href('portal', 'login', next=CURRENT_URL) }}">Login</a></li>
+          <li><a href="{{ href('portal', 'login', next=CURRENT_URL) }}" id="login_link">Login</a></li>
           <li><a href="{{ href('portal', 'register') }}">Registrieren</a></li>
           {%- endif %}
         </ul>{# .navi_global #}
@@ -182,7 +182,8 @@
         </li>
       </ul>
     </div>{# .footer #}
-    <div id="user_error_report">
+   </div></div></div></div></div>
+   <div id="user_error_report">
       <p>Hier kannst du Fehler in der Software melden. Bitte verwende diese Formular nur für Fehler die offensichtlich welche sind, nicht für Fragen o.ä., dafür gibts ein <a href="http://forum.ubuntuusers.de/forum/56/" title="Rund um Inyoka">eigenes Forum</a>.</p>
       <form method="post" action="{{ href('portal', 'error_report') }}">
         <p><label for="id_title">Ganz kurz, worum gehts:</label> <input id="id_title" size="50" name="title"/></p>
@@ -195,6 +196,17 @@
         </p>
       </form>
     </div>
-   </div></div></div></div></div>
+    <form action="{{ href('portal', 'login') }}" method="post" id="js_login_form">
+      <div>
+        <label for="js_login_username">Benutzername:</label>
+        <input name="username" id="js_login_username" class="right" />
+        <label for="js_login_password">Passwort:</label></dt>
+        <input type="password" name="password" id="js_login_password" class="right" /></dd>
+        <input type="checkbox" name="permanent" id="js_login_permanent" />
+        <label for="js_login_permanent" class="right">Eingeloggt bleiben</label>
+        <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
+        <input type="submit" value="Einloggen" class="submit" />
+      </div>
+    </form>
   </body>
 </html>

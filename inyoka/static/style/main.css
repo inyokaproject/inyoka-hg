@@ -1063,3 +1063,22 @@ div.not_found img {
     color: #956205;
 }
 
+#js_login_form {
+    display: none;
+    position: absolute; /* IE */
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: .5em;
+    text-align: center;
+    border-bottom: 1px solid #888;
+    background-color: #F9F9F9;
+}
+
+#js_login_form .right {
+    margin-right: 1.5em;
+}
+
+#js_login_form label {
+    font-weight: bold;
+}
