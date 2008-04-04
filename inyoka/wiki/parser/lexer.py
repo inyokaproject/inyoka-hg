@@ -397,6 +397,8 @@ class Lexer(object):
                             stack.pop()
                             open_blocks.pop()
                             yield 'quote_end', None
+                else:
+                    line = re.sub('^' + '> ?' * (len(open_blocks) - 1), '', line)
                 buffer.append(line)
 
             for item in tokenize_buffer():
