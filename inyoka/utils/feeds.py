@@ -200,6 +200,9 @@ class FeedBuilder(object):
         content_type='application/atom+xml; charset=utf-8'
         return HttpResponse(self.to_atom(), content_type=content_type)
 
+    def truncate(self, count):
+        """truncate the number of entries to `count`"""
+        self.entries = self.entries[:count]
 
 class FeedEntry(object):
     """

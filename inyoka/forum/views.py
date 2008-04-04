@@ -796,7 +796,12 @@ def delete_topic(request, topic_slug):
 
 @does_not_exist_is_404
 def feed(request, component='forum', slug=None, mode='short', count=25):
-    """show the feeds for the forum"""
+    """
+    Show the feeds for the forum.
+
+    For every combination of component, slug and mode a cache item with 100
+    entries generated, and it then truncated to `count` entries.
+    """
 
     if component not in ('forum', 'topic'):
         raise PageNotFound
@@ -805,14 +810,14 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
         raise PageNotFound
 
     count = int(count)
-    if count not in (5, 10, 15, 20, 25, 50, 75, 100):
+    if count not in (10, 20, 30, 50, 75, 100):
         raise PageNotFound
 
-    key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
-    content = cache.get(key)
-    if content is not None:
-        content_type='application/atom+xml; charset=utf-8'
-        return HttpResponse(content, content_type=content_type)
+    # key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
+    # content = cache.get(key)
+    # if content is not None:
+    #     content_type='application/atom+xml; charset=utf-8'
+    #     return HttpResponse(content, content_type=content_type)
 
     if component == 'topic':
         topic = Topic.query.filter_by(slug=slug).one()
@@ -820,93 +825,122 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             raise PageNotFound
         if not have_privilege(request.user, topic.forum, 'read'):
             return abort_access_denied()
+        if topic.hidden:
+            raise PageNotFound
 
-        posts = topic.posts.order_by(Post.pub_date.desc())[:count]
-        feed = FeedBuilder(
-            title=u'ubuntuusers Thema – „%s“' % topic.title,
-            url=url_for(topic),
-            feed_url=request.build_absolute_uri(),
-            rights=href('portal', 'lizenz'),
-        )
+        cache_key = 'forum/feeds/topic/%s/%s' % (slug, mode)
+        feed = cache.get(cache_key)
+        if feed is None:
+            #posts = topic.posts.order_by(Post.pub_date.desc())[:count]
+            posts = Post.query.filter_by(topic=topic) \
+                        .order_by(Post.pub_date.desc())[:100]
 
-        for post in posts:
-            kwargs = {}
-            if mode == 'full':
-                kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s%s</div>' % post.rendered_text
-                kwargs['content_type'] = 'xhtml'
-            if mode == 'short':
-                summary = truncate_html_words(post.rendered_text, 100)
-                kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s</div>' % summary
-                kwargs['summary_type'] = 'xhtml'
-
-            feed.add(
-                title='%s (%s)' % (
-                    post.author.username,
-                    format_datetime(post.pub_date)
-                ),
-                url=url_for(post),
-                author=post.author,
-                published=post.pub_date,
-                updated=post.pub_date,
-                **kwargs
+            feed = FeedBuilder(
+                title=u'ubuntuusers Thema – „%s“' % topic.title,
+                url=url_for(topic),
+                feed_url=request.build_absolute_uri(),
+                rights=href('portal', 'lizenz'),
             )
+
+            for post in posts:
+                kwargs = {}
+                if mode == 'full':
+                    kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
+                                        u'xhtml">%s%s</div>' % post.rendered_text
+                    kwargs['content_type'] = 'xhtml'
+                if mode == 'short':
+                    summary = truncate_html_words(post.rendered_text, 100)
+                    kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
+                                        u'xhtml">%s</div>' % summary
+                    kwargs['summary_type'] = 'xhtml'
+
+                feed.add(
+                    title='%s (%s)' % (
+                        post.author.username,
+                        format_datetime(post.pub_date)
+                    ),
+                    url=url_for(post),
+                    author=post.author,
+                    published=post.pub_date,
+                    updated=post.pub_date,
+                    **kwargs
+                )
 
     else:
+        must_create = False
         if slug:
-            forum = Forum.query.filter_by(slug=slug).one()
+            forum = Forum.query.get(slug)
             if forum is None:
                 raise PageNotFound
-            topics = forum.get_latest_topics(count)
-            feed = FeedBuilder(
-                title=u'ubuntuusers Forum – „%s“' % forum.name,
-                url=url_for(forum),
-                feed_url=request.build_absolute_uri(),
-                rights=href('portal', 'lizenz'),
-            )
-
             if not have_privilege(request.user, forum, 'read'):
                 return abort_access_denied()
+
+            cache_key = 'forum/feeds/forum/%s/%s' % (slug, mode)
+            feed = cache.get(cache_key)
+            if feed is None:
+                topics = forum.get_latest_topics()
+                feed = FeedBuilder(
+                    title=u'ubuntuusers Forum – „%s“' % forum.name,
+                    url=url_for(forum),
+                    feed_url=request.build_absolute_uri(),
+                    rights=href('portal', 'lizenz'),
+                )
+                must_create = True
+
         else:
-            topics = Topic.query.order_by(Topic.id.desc())[:count]
-            feed = FeedBuilder(
-                title=u'ubuntuusers Forum',
-                url=href('forum'),
-                feed_url=request.build_absolute_uri(),
-                rights=href('portal', 'lizenz'),
-            )
+            cache_key = 'forum/feeds/forum/*/%s' % (mode)
+            feed = cache.get(cache_key)
+            if feed is None:
+                topics = Topic.query.order_by(Topic.id.desc())[:count]
+                feed = FeedBuilder(
+                    title=u'ubuntuusers Forum',
+                    url=href('forum'),
+                    feed_url=request.build_absolute_uri(),
+                    rights=href('portal', 'lizenz'),
+                )
+                must_create = True
 
-        for topic in topics:
-            kwargs = {}
-            post = topic.first_post
+        if must_create:
+            for topic in topics:
+                kwargs = {}
+                post = topic.first_post
 
-            if not have_privilege(request.user, topic.forum, 'read'):
-                continue
                 #XXX: this way there might be less than `count` items
+                if not have_privilege(request.user, topic.forum, 'read'):
+                    continue
+                if topic.hidden:
+                    continue
 
-            if mode == 'full':
-                kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s</div>' % post.rendered_text
-                kwargs['content_type'] = 'xhtml'
-            if mode == 'short':
-                summary = truncate_html_words(post.rendered_text, 100)
-                kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                    u'xhtml">%s</div>' % summary
-                kwargs['content_type'] = 'xhtml'
+                if post.rendered_text is None:
+                    post.render_text()
+                rendered_text = post.rendered_text
+                if mode == 'full':
+                    kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
+                                        u'xhtml">%s</div>' % rendered_text
+                    kwargs['content_type'] = 'xhtml'
+                if mode == 'short':
+                    summary = truncate_html_words(rendered_text, 100)
+                    kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
+                                        u'xhtml">%s</div>' % summary
+                    kwargs['summary_type'] = 'xhtml'
 
-            feed.add(
-                title=topic.title,
-                url=url_for(topic),
-                author=topic.author,
-                published=post.pub_date,
-                updated=post.pub_date,
-                **kwargs
-            )
+                feed.add(
+                    title=topic.title,
+                    url=url_for(topic),
+                    author=topic.author,
+                    published=post.pub_date,
+                    updated=post.pub_date,
+                    **kwargs
+                )
 
-    response = feed.get_atom_response()
-    cache.set(key, response.content, 600)
-    return response
+    feed.truncate(count)
+    cache.set(cache_key, feed, 600)
+    return feed.get_atom_response()
+
+
+    # response = feed.get_atom_response()
+    # cache.set(key, response.content, 600)
+    # return response
 
 
 def markread(request, slug=None):
