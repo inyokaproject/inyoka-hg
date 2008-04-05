@@ -135,7 +135,7 @@ def new_forum_acl_system(m):
     ''' % ', '.join(['can_'+x for x in OLD_FORUM_PRIVILEGES])))
 
     old_rows = tuple(izip(old_rows.keys(), [
-        dict(filter(lambda x x[1]!=0, izip(PRIVILEGES, r))) \
+        dict(filter(lambda x: x[1]!=0, izip(PRIVILEGES, r)))
         for x, r in old_rows.iteritems()]))
 
     # add the new `bits` column
@@ -150,13 +150,13 @@ def new_forum_acl_system(m):
             update forum_privilege
                set bits = %d
              where id = %d
-        ''' % (join_flags(privileges.keys()), id)
+        ''' % (join_flags(privileges.keys()), id))
 
     # and delete the old columns
     m.engine.execute('''
         alter table forum_privilege
             %s;
-    ''' % ', '.join(['drop column ' + x for x in OLD_FORUM_PRIVILEGES])
+    ''' % ', '.join(['drop column ' + x for x in OLD_FORUM_PRIVILEGES]))
 
 
 
@@ -164,5 +164,5 @@ MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
-    new_forum_acl_system
+    new_forum_acl_system,
 ]
