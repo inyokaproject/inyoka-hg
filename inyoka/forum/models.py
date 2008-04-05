@@ -756,7 +756,7 @@ class Attachment(object):
 
 class Privilege(object):
 
-    def __init__(self, forum, group=None, user=None, **kwargs):
+    def __init__(self, forum, group=None, user=None, bits=None):
         if group is None and user is None:
             raise ValueError('Privilege needs at least one group or user')
         uid = user and user.id or None
@@ -764,8 +764,7 @@ class Privilege(object):
         self.group_id = gid
         self.user_id = uid
         self.forum_id = forum.id
-        for permission, value in kwargs.iteritems():
-            setattr(self, permission, value)
+        self.bits = bits
 
 
 class Poll(object):

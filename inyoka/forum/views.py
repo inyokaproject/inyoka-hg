@@ -42,7 +42,7 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
-                             have_privilege, get_privileges
+    have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE
 from inyoka.forum.database import post_table, topic_table, forum_table, \
                             poll_option_table
 from inyoka.forum.legacyurls import test_legacy_url
@@ -404,7 +404,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    if not have_privilege(request.user, t.forum, 'read'):
+    if not have_privilege(request.user, t.forum, CAN_READ):
         abort_access_denied(request)
     if solved is not None:
         t.solved = solved
@@ -432,7 +432,7 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
         """ % obj_slug
         slug = kwargs[obj_slug]
         x = obj.query.filter(obj.slug==slug).one()
-        if not have_privilege(request.user, x, 'read'):
+        if not have_privilege(request.user, x, CAN_READ):
             return abort_access_denied(request)
         try:
             s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
@@ -456,7 +456,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         """ % obj_slug
         slug = kwargs[obj_slug]
         x = obj.query.filter(obj.slug==slug).one()
-        if not have_privilege(request.user, x, 'read'):
+        if not have_privilege(request.user, x, CAN_READ):
             return abort_access_denied(request)
         try:
             s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
@@ -498,7 +498,7 @@ def report(request, topic_slug):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    if not have_privilege(request.user, t.forum, 'read'):
+    if not have_privilege(request.user, t.forum, CAN_READ):
         return abort_access_denied(request)
     if t.reported:
         flash(u'Dieses Thema wurde bereits gemeldet; die Moderatoren werden '
@@ -552,10 +552,11 @@ def reportlist(request):
         _add_field_choices()
 
     privileges = get_privileges(request.user, [x.forum for x in topics])
-    visible_topics = []
-    for topic in topics:
-        if have_privilege(request.user, topic.forum, 'moderate'):
-            visible_topics.append(topic)
+    visible_topics = filter(lambda t: have_privilege(request.user, t.forum,
+                            CAN_READ), topics)
+#    for topic in topics:
+#        if have_privilege(request.user, topic.forum, CAN_MODERATE):
+#            visible_topics.append(topic)
 
     return {
         'topics':   visible_topics,
@@ -582,11 +583,11 @@ def movetopic(request, topic_slug):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
-    if not have_privilege(request.user, t.forum, 'moderate'):
+    if not have_privilege(request.user, t.forum, CAN_MODERATE):
         return abort_access_denied()
 
     forums = filter_invisible(request.user, Forum.query.filter(and_(
-        Forum.c.parent_id != None, Forum.c.id != t.forum_id)), 'read')
+        Forum.c.parent_id != None, Forum.c.id != t.forum_id)))
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
@@ -636,7 +637,7 @@ def splittopic(request, topic_slug):
     if not t:
         raise PageNotFound
     posts = t.posts
-    if not have_privilege(request.user, t.forum, 'moderate'):
+    if not have_privilege(request.user, t.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
     if request.method == 'POST':
@@ -675,7 +676,7 @@ def hide_post(request, post_id):
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, 'moderate'):
+    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     if post.id == post.topic.first_post_id:
         flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
@@ -697,7 +698,7 @@ def restore_post(request, post_id):
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, 'moderate'):
+    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     post.hidden = False
     session.commit()
@@ -715,7 +716,7 @@ def delete_post(request, post_id):
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, 'delete'):
+    if not have_privilege(request.user, post.topic.forum, CAN_DELETE):
         return abort_access_denied(request)
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht gelöscht werden.',
@@ -743,7 +744,7 @@ def hide_topic(request, topic_slug):
     topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
-    if not have_privilege(request.user, topic.forum, 'moderate'):
+    if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     topic.hidden = True
     session.commit()
@@ -760,7 +761,7 @@ def restore_topic(request, topic_slug):
     topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
-    if not have_privilege(request.user, topic.forum, 'moderate'):
+    if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     topic.hidden = False
     session.commit()
@@ -778,7 +779,7 @@ def delete_topic(request, topic_slug):
     topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
         raise PageNotFound
-    if not have_privilege(request.user, topic.forum, 'moderate'):
+    if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
     if request.method == 'POST':
@@ -823,7 +824,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
         topic = Topic.query.filter_by(slug=slug).one()
         if topic is None:
             raise PageNotFound
-        if not have_privilege(request.user, topic.forum, 'read'):
+        if not have_privilege(request.user, topic.forum, CAN_READ):
             return abort_access_denied()
         if topic.hidden:
             raise PageNotFound
@@ -872,7 +873,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
             forum = Forum.query.get(slug)
             if forum is None:
                 raise PageNotFound
-            if not have_privilege(request.user, forum, 'read'):
+            if not have_privilege(request.user, forum, CAN_READ):
                 return abort_access_denied()
 
             cache_key = 'forum/feeds/forum/%s/%s' % (slug, mode)
@@ -906,7 +907,7 @@ def feed(request, component='forum', slug=None, mode='short', count=25):
                 post = topic.first_post
 
                 #XXX: this way there might be less than `count` items
-                if not have_privilege(request.user, topic.forum, 'read'):
+                if not have_privilege(request.user, topic.forum, CAN_READ):
                     continue
                 if topic.hidden:
                     continue
