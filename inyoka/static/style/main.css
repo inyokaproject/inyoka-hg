@@ -1072,7 +1072,9 @@ div.not_found img {
     padding: .5em;
     text-align: center;
     border-bottom: 1px solid #888;
-    background-color: #F9F9F9;
+//    background-color: #F9F9F9;
+    background-image:url(../img/jslogin.png);
+    background-repeat:no-repeat;
 }
 
 #js_login_form .right {
