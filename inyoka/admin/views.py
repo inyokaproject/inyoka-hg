@@ -630,14 +630,12 @@ def edit_user(request, username):
             privilege_table.c.forum_id==forum.id,
             privilege_table.c.user_id==user.id
         )).first()
-        if privilege:
-            forum_privileges.append((
-                forum.id,
-                forum.name,
-                list(split_flags(privilege.bits))
-            ))
-        else:
-            forum_privileges.append((forum.id, forum.name, []))
+
+        forum_privileges.append((
+            forum.id,
+            forum.name,
+            list(split_flags(privilege and privilege.bits or None))
+        ))
 
     groups_joined = groups_joined or user.groups.all()
     groups_not_joined = groups_not_joined or \
@@ -702,13 +700,6 @@ def groups(request):
 @require_manager
 @templated('admin/groups_edit.html')
 def groups_edit(request, name=None):
-    def _set_privileges():
-        for v in value:
-            setattr(privilege, 'can_' + v, True)
-            for v in PRIVILEGES:
-                if not v in value:
-                    setattr(privilege, 'can_' + v, False)
-
     new = name is None
     if new:
         group = Group()
@@ -743,7 +734,7 @@ def groups_edit(request, name=None):
                         )
                         dbsession.save(privilege)
 
-                    _set_privileges()
+                    privilege.bits = join_flags(*value)
                     dbsession.flush()
 
             # save changes to the database
@@ -766,14 +757,11 @@ def groups_edit(request, name=None):
             privilege_table.c.group_id==group.id,
         )).first()
 
-        if privilege:
-            forum_privileges.append((
-                forum.id, forum.name,
-                filter(lambda p: getattr(privilege, 'can_' + p, False),
-                       [p[0] for p in PRIVILEGES_DETAILS])
-            ))
-        else:
-            forum_privileges.append((forum.id, forum.name, []))
+        forum_privileges.append((
+            forum.id,
+            forum.name,
+            list(split_flags(privilege and privilege.bits or None))
+        ))
 
     return {
         'group_forum_privileges': forum_privileges,

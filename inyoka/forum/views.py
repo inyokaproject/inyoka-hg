@@ -553,10 +553,7 @@ def reportlist(request):
 
     privileges = get_privileges(request.user, [x.forum for x in topics])
     visible_topics = filter(lambda t: have_privilege(request.user, t.forum,
-                            CAN_READ), topics)
-#    for topic in topics:
-#        if have_privilege(request.user, topic.forum, CAN_MODERATE):
-#            visible_topics.append(topic)
+                            CAN_MODERATE), topics)
 
     return {
         'topics':   visible_topics,
