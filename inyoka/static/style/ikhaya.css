@@ -35,11 +35,12 @@ li.article {
   margin-bottom: 1.0em;
   background-image:url(../img/ikhaya/article.jpg);
   background-repeat:no-repeat;
+  background-position:-8px 0px;;
 }
 
 div.article-top-right {
   padding: 5px 10px 10px 10px;
-  background-image:url(../img/ikhaya/article-top-right.png);
+//  background-image:url(../img/ikhaya/article-top-right.png);
   background-position:top right;
   background-repeat:no-repeat;
 }
