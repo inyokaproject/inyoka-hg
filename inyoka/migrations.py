@@ -146,7 +146,6 @@ def new_forum_acl_system(m):
 
     # migrate the values
     for id, privileges in old_rows:
-        print id, privileges
         m.engine.execute('''
             update forum_privilege
                set bits = %d
