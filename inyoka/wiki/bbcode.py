@@ -249,8 +249,9 @@ class Parser(object):
     def parse_mod(self):
         """parse [mod]-tags."""
         token = self.expect_tag('mod')
-        children = self.parse_until('/mod')
-        return nodes.Text('XXX load macro here')
+        if not token.attr:
+            return nodes.Text(unicode(token))
+        return nodes.Moderated(token.attr, self.parse_until('/mod'))
 
     def parse_mark(self):
         """

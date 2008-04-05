@@ -387,6 +387,7 @@ class Parser(object):
             'color_begin':          self.parse_color,
             'size_begin':           self.parse_size,
             'font_begin':           self.parse_font,
+            'mod_begin':            self.parse_mod,
             'quote_begin':          self.parse_quote,
             'list_item_begin':      self.parse_list,
             'definition_begin':     self.parse_definition,
@@ -699,6 +700,20 @@ class Parser(object):
             children.append(self.parse_node(stream))
         stream.expect('font_end')
         return nodes.Font([face], children)
+
+    def parse_mod(self, stream):
+        """
+        Parse a mod tag.
+
+        Returns a `Moderated` node.
+        """
+        stream.expect('mod_begin')
+        username = stream.expect('username').value.strip()
+        children = []
+        while stream.current.type != 'mod_end':
+            children.append(self.parse_node(stream))
+        stream.expect('mod_end')
+        return nodes.Moderated(username, children)
 
     def parse_quote(self, stream):
         """

@@ -15,7 +15,8 @@
     a required by the `DeferredNode`.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack,
+                                       Benjamin Wiegand.
     :license: GNU GPL.
 """
 from urlparse import urlparse, urlunparse
@@ -863,6 +864,32 @@ class Quote(Element):
         for item in Element.prepare_html(self):
             yield item
         yield u'</blockquote>'
+
+
+class Moderated(Element):
+    """
+    Text that describes a moderation action.
+    """
+    is_block_tag = True
+    allows_paragraphs = True
+    allowed_in_signatures = False
+
+    def __init__(self, username, children=None, id=None, style=None,
+                 class_=None):
+        Element.__init__(self, children, id, style, class_)
+        self.username = username
+
+    def generate_markup(self, w):
+        w.markup(u'[mod=%s]' % self.username)
+        Element.generate_markup(self, w)
+        w.markup(u'[/mod]')
+
+    def prepare_html(self):
+        yield Strong([Text(u'Moderiert von '), Link(href('portal', 'users',
+                        self.username), [Text(self.username)], class_='user'),
+                      Text(u': ')])
+        for item in Element.prepare_html(self):
+            yield item
 
 
 class Preformatted(Element):

@@ -7,7 +7,7 @@
     scanner with an internal stack.  Inspired by pygments.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
 import re
@@ -146,6 +146,8 @@ class Lexer(object):
                  enter='size'),
             rule(r'\[font\s*=\s*(.*?)\s*\]', bygroups('font_face'),
                  enter='font'),
+            rule(r'\[mod\s*=\s*(.*?)\s*\]', bygroups('username'),
+                 enter='mod'),
             rule(r'\[raw\](.*?)\[/raw\]', bygroups('raw')),
             rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl'),
             include('highlightable')
@@ -248,6 +250,10 @@ class Lexer(object):
         'font': ruleset(
             rule(r'\[/font\]', leave=1),
             include('inline_with_links')
+        ),
+        'mod': ruleset(
+            rule(r'\[/mod\]', leave=1),
+            include('everything')
         ),
         # links
         'wiki_link': ruleset(
