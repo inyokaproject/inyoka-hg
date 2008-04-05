@@ -33,7 +33,8 @@ from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
-from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES
+from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
+    join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege
 from inyoka.forum.database import forum_table, privilege_table
 
@@ -449,7 +450,7 @@ def ikhaya_date_edit(request, date=None):
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.query, request.GET, '-name',
-        sqlalchemy=True, sao_column=forum_table.c.name)
+        sqlalchemy=True, sa_column=forum_table.c.name)
     return {
         'table': sortable
     }
@@ -551,13 +552,6 @@ def users(request):
 @require_manager
 @templated('admin/edit_user.html')
 def edit_user(request, username):
-    def _set_privileges():
-        for v in value:
-            setattr(privilege, 'can_' + v, True)
-            for v in PRIVILEGES:
-                if not v in value:
-                    setattr(privilege, 'can_' + v, False)
-
     #: check if the user exists
     try:
         user = User.objects.get(username=username)
@@ -604,8 +598,7 @@ def edit_user(request, username):
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
-
-                    _set_privileges()
+                    privilege.bits = join_flags(*value)
                     dbsession.flush()
 
             # group editing
@@ -641,8 +634,7 @@ def edit_user(request, username):
             forum_privileges.append((
                 forum.id,
                 forum.name,
-                filter(lambda p: getattr(privilege, 'can_' + p, False),
-                       [p[0] for p in PRIVILEGES_DETAILS])
+                list(split_flags(privilege.bits))
             ))
         else:
             forum_privileges.append((forum.id, forum.name, []))

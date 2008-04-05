@@ -62,7 +62,12 @@
           (...)
         {% endfor %}
 
-    :copyright: 2007 by Benjamin Wiegand.
+    Hint: Because Django and SQLAlchemy query objects are somewhat different
+    there is a small workaround for our forum.
+    Use `sqlalchemy=True` along with `sa_column=my_sa.c.column`
+    to tell the `Sortable` that it should shift into sqlalchemy-mode.
+
+    :copyright: 2007-2008 by Benjamin Wiegand, Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.urls import href
@@ -71,12 +76,12 @@ from inyoka.utils.urls import href
 class Sortable(object):
 
     def __init__(self, objects, args, default, sqlalchemy=False,
-                 sao_column=None):
+                 sa_column=None):
         self.objects = objects
         self.order = args.get('order') or default
         self.order_column = self.order.startswith('-') and self.order[1:] or \
                             self.order
-        self.sao_column = sao_column
+        self.sa_column = sa_column
         self.related = args.get('related') or False
         self.default = default
         self.is_sqlalchemy = sqlalchemy
@@ -101,8 +106,8 @@ class Sortable(object):
     def get_objects(self):
         order = self.order
         if self.is_sqlalchemy:
-            order = self.order.startswith('-') and self.sao_column.desc() or \
-                    self.sao_column.asc()
+            order = self.order.startswith('-') and self.sa_column.desc() or \
+                    self.sa_column.asc()
         if self.related:
             if self.is_sqlalchemy:
                 return self.objects.order_by(order)

@@ -6,7 +6,7 @@
     Our database migrations.
 
     This module must never import application code so that migrations
-    can work properly for bootstrapping and upgrading.  If may suck but
+    can work properly for bootstrapping and upgrading.  It may suck but
     you have to use raw sql here or use the tables (which you *must not*
     import but fetch from the m object using the getitem syntax).
 
@@ -19,11 +19,28 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from itertools import izip
 from os.path import dirname, join
 from inyoka.conf import settings
 
 
 SQL_FILES = join(dirname(__file__), 'sql')
+
+
+OLD_FORUM_PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
+ 'sticky', 'vote', 'create_poll', 'upload', 'moderate']
+NEW_FORUM_PRIVILEGES = dict((OLD_FORUM_PRIVILEGES[i-1], i) for i in range(1, 12))
+NEW_FORUM_PRIVILEGES['void'] = -1
+
+def join_flags(*flags):
+    if not flags:
+        return 0
+    result = 0
+    for flag in flags:
+        result |= isinstance(flag, basestring) and \
+                  OLD_FORUM_PRIVILEGES[flag] or flag
+    return result
+
 
 def execute_script(con, name):
     """Execute a script on a connectable."""
@@ -104,9 +121,48 @@ def fix_sqlalchemy_forum(m):
     ''')
 
 
+def new_forum_acl_system(m):
+    """
+    This migration deletes old columns for the first version
+    of our forum-acl-system. The new one just uses some
+    bit-magic so we just need one column for all privileges.
+    """
+    # Collect the old privilege-rows
+    items = ', '.join(OLD_FORUM_PRIVILEGES)
+    old_rows = dict((r[0], r[1:]) for r in engine.execute('''
+        select p.id, %s
+          from forum_privilege p
+    ''' % ', '.join(['can_'+x for x in OLD_FORUM_PRIVILEGES])))
+
+    old_rows = tuple(izip(old_rows.keys(), [
+        dict(filter(lambda x x[1]!=0, izip(PRIVILEGES, r))) \
+        for x, r in old_rows.iteritems()]))
+
+    # add the new `bits` column
+    m.engine.execute('''
+        alter table forum_privilege
+            add column bits integer after forum_id;
+    ''')
+
+    # migrate the values
+    for id, privileges in old_rows.iteritems():
+        m.engine.execute('''
+            update forum_privilege
+               set bits = %d
+             where id = %d
+        ''' % (join_flags(privileges.keys()), id)
+
+    # and delete the old columns
+    m.engine.execute('''
+        alter table forum_privilege
+            %s;
+    ''' % ', '.join(['drop column ' + x for x in OLD_FORUM_PRIVILEGES])
+
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
-    add_wiki_revision_change_date_index, fix_sqlalchemy_forum
+    add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
+    new_forum_acl_system
 ]
