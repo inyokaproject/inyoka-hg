@@ -25,8 +25,10 @@ from inyoka.wiki.parser import nodes
 _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
 _newline_re = re.compile(r'(?<!\n)(\n)(?!\s*\n)')
-_free_link_re = re.compile('(?<!\[url\=|\[url\])(%s[^\s/]+(/[^\s.,:;?]*'
-                           '([.,:;?][^\s.,:;?]+)*)?)' % Lexer._url_pattern,
+_url_tags = ('url', 'img')
+_url_tag_re = '|'.join('\[%s\=|\[%s\]' % (tag, tag) for tag in _url_tags)
+_free_link_re = re.compile('(?<!%s)(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]'
+                           '+)*)?)' % (_url_tag_re, Lexer._url_pattern),
                            re.IGNORECASE)
 
 def parse(text):
