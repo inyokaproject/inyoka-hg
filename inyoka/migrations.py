@@ -32,13 +32,13 @@ OLD_FORUM_PRIVILEGES = ['read', 'reply', 'create', 'edit', 'revert', 'delete',
 NEW_FORUM_PRIVILEGES = dict((OLD_FORUM_PRIVILEGES[i-1], i) for i in range(1, 12))
 NEW_FORUM_PRIVILEGES['void'] = -1
 
-def join_flags(*flags):
+def join_flags(flags):
     if not flags:
         return 0
     result = 0
     for flag in flags:
         result |= isinstance(flag, basestring) and \
-                  OLD_FORUM_PRIVILEGES[flag] or flag
+                  NEW_FORUM_PRIVILEGES[flag] or flag
     return result
 
 
@@ -129,13 +129,13 @@ def new_forum_acl_system(m):
     """
     # Collect the old privilege-rows
     items = ', '.join(OLD_FORUM_PRIVILEGES)
-    old_rows = dict((r[0], r[1:]) for r in engine.execute('''
+    old_rows = dict((r[0], r[1:]) for r in m.engine.execute('''
         select p.id, %s
           from forum_privilege p
     ''' % ', '.join(['can_'+x for x in OLD_FORUM_PRIVILEGES])))
 
     old_rows = tuple(izip(old_rows.keys(), [
-        dict(filter(lambda x: x[1]!=0, izip(PRIVILEGES, r)))
+        dict(filter(lambda x: x[1]!=0, izip(OLD_FORUM_PRIVILEGES, r)))
         for x, r in old_rows.iteritems()]))
 
     # add the new `bits` column
@@ -145,7 +145,8 @@ def new_forum_acl_system(m):
     ''')
 
     # migrate the values
-    for id, privileges in old_rows.iteritems():
+    for id, privileges in old_rows:
+        print id, privileges
         m.engine.execute('''
             update forum_privilege
                set bits = %d
@@ -156,7 +157,7 @@ def new_forum_acl_system(m):
     m.engine.execute('''
         alter table forum_privilege
             %s;
-    ''' % ', '.join(['drop column ' + x for x in OLD_FORUM_PRIVILEGES]))
+    ''' % ', '.join(['drop column can_' + x for x in OLD_FORUM_PRIVILEGES]))
 
 
 
