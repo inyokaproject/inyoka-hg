@@ -17,6 +17,7 @@ from sqlalchemy.sql import and_, select
 from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
+from inyoka.portal.user import User
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
@@ -812,6 +813,8 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     if count not in (10, 20, 30, 50, 75, 100):
         raise PageNotFound
 
+    anonymous = User.get_anonymous_user()
+
     # key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
     # content = cache.get(key)
     # if content is not None:
@@ -822,7 +825,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         topic = Topic.query.filter_by(slug=slug).one()
         if topic is None:
             raise PageNotFound
-        if not have_privilege(request.user, topic.forum, CAN_READ):
+        if not have_privilege(anonymous, topic.forum, CAN_READ):
             return abort_access_denied()
         if topic.hidden:
             raise PageNotFound
@@ -871,7 +874,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
             forum = Forum.query.get(slug)
             if forum is None:
                 raise PageNotFound
-            if not have_privilege(request.user, forum, CAN_READ):
+            if not have_privilege(anonymous, forum, CAN_READ):
                 return abort_access_denied()
 
             cache_key = 'forum/feeds/forum/%s/%s' % (slug, mode)
@@ -905,7 +908,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 post = topic.first_post
 
                 #XXX: this way there might be less than `count` items
-                if not have_privilege(request.user, topic.forum, CAN_READ):
+                if not have_privilege(anonymous, topic.forum, CAN_READ):
                     continue
                 if topic.hidden:
                     continue
