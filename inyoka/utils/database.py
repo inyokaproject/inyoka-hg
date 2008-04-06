@@ -20,14 +20,14 @@ from inyoka.conf import settings
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
-), pool_recycle=300, convert_unicode=False, echo=settings.DEBUG or True)
+), pool_recycle=300, convert_unicode=False, echo=settings.DEBUG)
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
     autoflush=True, transactional=True))
 dispatcher.connect(session.remove, request_finished)
 
-if settings.DEBUG and False:
+if settings.DEBUG:
     import logging
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)

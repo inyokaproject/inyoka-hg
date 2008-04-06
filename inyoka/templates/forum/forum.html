@@ -53,7 +53,7 @@
       <th class="last_post" colspan="2">Antworten</th>
     </tr>
     {%- for topic in topics %}
-      {%- if topic.hidden and not privileges.moderate %}
+      {%- if topic.hidden and not check_privilege(privileges, 'moderate') %}
       <tr class="deleted">
         <td class="icon">
           <img src="{{ href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />

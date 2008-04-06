@@ -10,10 +10,7 @@
 """
 from itertools import izip
 from django.db import connection
-from inyoka.portal.user import User, Group, DEFAULT_GROUP_ID
-from inyoka.forum.models import Forum
-from inyoka.utils.decorators import patch_wrapper
-from inyoka.utils.search import search
+from inyoka.portal.user import DEFAULT_GROUP_ID
 
 
 PRIVILEGES_DETAILS = [
@@ -51,8 +48,6 @@ def join_flags(*flags):
         return DISALLOW_ALL
     result = DISALLOW_ALL
     for flag in flags:
-        print flag
-        print PRIVILEGES_BITS
         result |= isinstance(flag, basestring) and \
                   PRIVILEGES_BITS[flag] or flag
     return result
@@ -68,7 +63,6 @@ def split_flags(mask=None):
     if mask is None:
         return
     for desc, bits in PRIVILEGES_BITS.iteritems():
-        print mask, bits
         if mask & bits != 0:
             yield desc
 
@@ -81,27 +75,35 @@ def get_forum_privileges(user, forum_id):
 def get_privileges(user, forum_ids):
     """Return all privileges of the applied forums for the `user`"""
     if not forum_ids:
-        return DISALLOW_ALL
-    fields = ', '.join('p.can_%s' % x for x in PRIVILEGES)
+        return {}
     cur = connection.cursor()
     cur.execute('''
         select p.forum_id, p.bits
-          from forum_privilege p
-         where p.forum_id in (%s)
-           and (p.user_id = %d
-            or p.group_id in (select ug.group_id from portal_user_groups ug
-                where ug.user_id = %d)
+          from forum_privilege p, portal_user u
+         where p.forum_id in (%s) and (p.user_id = %d or p.group_id in
+               (select g.id from portal_group g, portal_user u,
+                                 portal_user_groups ug
+                where u.id = ug.user_id and g.id = ug.group_id)
             %s)
-    ''' % (', '.join(map(str, forum_ids)), user.id, user.id,
+    ''' % (', '.join(map(str, forum_ids)), user.id,
            user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
 
-    result = dict((x[0], x[1] or DISALLOW_ALL) for x in cur.fetchall())
+    r = cur.fetchall()
+    result = dict.fromkeys(forum_ids, DISALLOW_ALL)
+    for row in r:
+        result[row[0]] = row[1]
     return result
 
 
 def have_privilege(user, forum, privilege):
     """Check if a user has a privilege on a resource."""
     return get_forum_privileges(user, forum.id) & privilege != 0
+
+
+def check_privilege(mask, privilege):
+    if isinstance(privilege, basestring):
+        return mask & PRIVILEGES_BITS[privilege]
+    return mask & privilege
 
 
 def filter_invisible(user, forums, priv=CAN_READ):

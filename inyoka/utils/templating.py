@@ -253,3 +253,6 @@ from inyoka.portal.models import PrivateMessageEntry
 from inyoka.forum.models import Topic
 from inyoka.ikhaya.models import Suggestion
 from inyoka.utils.storage import storage
+from inyoka.forum.acl import check_privilege
+# set a new helper function for the templates
+jinja_env.globals['check_privilege'] = check_privilege
