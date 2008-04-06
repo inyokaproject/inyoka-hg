@@ -96,7 +96,7 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ elseif ['pos1','pos 1','home'] contains $key as lowercase @>Pos 1
 <@ elseif ['ende','end'] contains $key as lowercase @>Ende
 <@ elseif ['return','enter','eingabe'] contains $key as lowercase @>⏎
-<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>     
+<@ elseif ['space','leerschritt','leerzeichen','leer','leertaste'] contains $key as lowercase @>
 <@ elseif ['up','hoch','rauf','pfeil hoch','pfeil-hoch','auf'] contains $key as lowercase @>↑
 <@ elseif ['backspace','löschen','rückschritt'] contains $key as lowercase @>⌫
 <@ elseif ['down','runter','pfeil runter','pfeil-ab','ab'] contains $key as lowercase @>↓

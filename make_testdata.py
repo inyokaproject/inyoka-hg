@@ -16,7 +16,7 @@ from jinja.constants import LOREM_IPSUM_WORDS
 from inyoka.conf import settings
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum, Topic, Post, Privilege
-from inyoka.forum.acl import PRIVILEGES
+from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.ikhaya.models import Category, Article, Comment
 from inyoka.wiki.models import Page
 from inyoka.utils.database import session
@@ -142,7 +142,7 @@ def make_forum():
         f = Forum(name=name, parent=parent)
         session.flush()
         if admin is not None:
-            Privilege(user=admin, forum=f, **dict.fromkeys(['can_' + x for x in PRIVILEGES], True))
+            Privilege(user=admin, forum=f, bits=join_flags(*PRIVILEGES))
         forums.append(f)
         session.commit()
         if parent:
