@@ -9,8 +9,10 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from itertools import izip
+from sqlalchemy.sql import select
 from django.db import connection
 from inyoka.portal.user import DEFAULT_GROUP_ID
+from inyoka.forum.database import session, user_group_table, privilege_table
 
 
 PRIVILEGES_DETAILS = [
@@ -76,21 +78,14 @@ def get_privileges(user, forum_ids):
     """Return all privileges of the applied forums for the `user`"""
     if not forum_ids:
         return {}
-    cur = connection.cursor()
-    cur.execute('''
-        select p.forum_id, p.bits
-          from forum_privilege p, portal_user u
-         where p.forum_id in (%s) and (p.user_id = %d or p.group_id in
-               (select g.id from portal_group g, portal_user u,
-                                 portal_user_groups ug
-                where u.id = ug.user_id and g.id = ug.group_id)
-            %s)
-    ''' % (', '.join(map(str, forum_ids)), user.id,
-           user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
-
-    result = dict.fromkeys(forum_ids, DISALLOW_ALL)
-    for row in cur.fetchall():
-        result[row[0]] = row[1]
+    p, ug = privilege_table.c, user_group_table.c
+    cur = session.execute(select([p.forum_id, p.bits],
+        p.forum_id.in_(forum_ids) & ((p.user_id == user.id) |
+        p.group_id.in_(select([ug.group_id], ug.user_id == user.id)) |
+        (p.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID)))))
+    result = dict(map(lambda a: (a, 0), forum_ids))
+    for forum_id, bits in cur:
+        result[forum_id] |= bits
     return result
 
 
