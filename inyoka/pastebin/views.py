@@ -17,6 +17,7 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.flashing import flash
 
 
 @simple_check_login
@@ -31,6 +32,10 @@ def index(request):
                           lang=data['language'], code=data['code'],
                           pub_date=datetime.utcnow())
             entry.save()
+            flash(u'Dein Eintrag wurde erfolgreich gespeichert. Du kannst '
+                  u'folgenden Code verwenden, um ihn einzubinden: '
+                  u'<code>[paste:%s:%s]</code>' % (entry.id, entry.title),
+                  True)
             return HttpResponseRedirect(href('pastebin', entry.id))
     else:
         form = AddPasteForm()
@@ -46,8 +51,8 @@ def display(request, entry_id):
     try:
         entry = Entry.objects.get(id=entry_id)
     except Entry.DoesNotExist:
-        return not_found(request, 'Paste Nummer %s konnte nicht gefunden werden'
-                         % entry_id)
+        return not_found(request, u'Paste Nummer %s konnte nicht gefunden '
+                                  u'werden' % entry_id)
     referrer = request.META.get('HTTP_REFERER')
     if referrer and entry.add_referrer(referrer):
         entry.save()
@@ -55,7 +60,7 @@ def display(request, entry_id):
         u'schaut sich Paste-Eintrag <a href="%s">%s</a> an.' % (
             url_for(entry),
             entry.title or entry.id),
-        'besuche den Eintrag'
+        u'besuche den Eintrag'
     )
     return {
         'entry': entry,
