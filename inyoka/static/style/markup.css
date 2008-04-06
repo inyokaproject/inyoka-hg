@@ -12,16 +12,41 @@ a.missing {
   color: #999;
 }
 
-a.user {
-  background-image: url(../img/user.png);
+a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu {
   background-repeat: no-repeat;
   padding-left: 16px;
 }
 
+a.user {
+  background-image: url(../img/interwiki/user.png);
+}
+
 a.team {
   background-image: url(../img/team.png);
+}
+
+a.search {
+  background-image: url(../img/interwiki/search.png);
+}
+
+a.interwiki-wikipedia {
+  background-image: url(../img/interwiki/wikipedia.png);
+  padding-left: 20px;
   background-repeat: no-repeat;
-  padding-left: 16px;
+}
+
+a.interwiki-wikipedia_en {
+  background-image: url(../img/interwiki/wikipedia_en.png);
+  padding-left: 20px;
+  background-repeat: no-repeat;
+}
+
+a.interwiki-isbn {
+  background-image: url(../img/interwiki/isbn.png);
+}
+
+a.interwiki-ubuntu {
+  background-image: url(../img/interwiki/ubuntu.png);
 }
 
 #page table {

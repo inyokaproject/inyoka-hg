@@ -20,6 +20,18 @@ from inyoka.pastebin.forms import LANGUAGES
 
 addslashes = lambda x: x.replace('"', '\\"')
 HIGHLIGHT_LANGUAGES = dict(LANGUAGES).keys()
+INTERWIKI_MAP = {
+    'ISBN':               'isbn',
+    'Ubuntu':             'ubuntu',
+    'Google':             'google',
+    'GoogleLinux':        'googlelinux',
+    'Wikipedia':          'wikipedia',
+    'WikipediaEn':        'wikipedia_en',
+    'MoinMoin':           'moinmoin',
+    'UserUbuntuusers':    'user',
+    'TopicIDUbuntuusers': 'topic',
+    'PasteUbuntuusers':   'paste'
+}
 
 # Hack to disable camel case
 class InyokaParser(Parser):
@@ -216,6 +228,10 @@ class InyokaFormatter(FormatterBase):
         return u']'
 
     def interwikilink(self, on, interwiki, pagename, **kw):
+        try:
+            interwiki = INTERWIKI_MAP[interwiki]
+        except KeyError:
+            pass
         if on:
             return u'[%s:%s:' % (interwiki, pagename)
         return u']'

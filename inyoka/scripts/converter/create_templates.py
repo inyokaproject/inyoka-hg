@@ -131,6 +131,19 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
     u'Experten': simple_box(u'Experten-Info:', 'experts'),
 }
 
+interwikis = u'''
+# X-Behave: Interwiki-Map
+{{{
+isbn = http://bookzilla.de/shop/action/advancedSearch?action=search&isbn=
+ubuntu = https://wiki.ubuntu.com/
+google = http://www.google.de/search?q=
+googlelinux = http://www.google.de/linux?q=
+wikipedia = http://de.wikipedia.org/wiki/
+wikipedia_en = http://en.wikipedia.org/wiki/
+moinmoin = http://moinmoin.wikiwikiweb.de/
+}}}
+'''
+
 def create_page_templates():
     for name, content in templates.iteritems():
         Page.objects.create(u'Wiki/Vorlagen/%s' % name, content,
@@ -327,10 +340,15 @@ def create_smilies():
                         note=u'Flaggen automatisch erstellt')
 
 
+def create_interwiki_map():
+    Page.objects.create(u'Wiki/InterwikiMap', interwikis,
+                        note=u'Interwikimap automatisch erstellt')
+
 def create():
     create_page_templates()
     create_markup_stylesheet()
     create_smilies()
+    create_interwiki_map()
 
 
 if __name__ == '__main__':

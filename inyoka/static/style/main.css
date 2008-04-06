@@ -706,40 +706,40 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   padding: 4px 0 2px 0;
 }
 
-.search {
+form.search {
   float: right;
 }
 
-.search p {
+form.search p {
   margin: 0;
   padding: 0;
 }
 
-.search .search_query {
+form.search .search_query {
   border: solid 1px #888;
   background-color: #fefefe;
   padding: 1px;
   width: 10.0em;
 }
 
-.search .search_query_js {
+form.search .search_query_js {
   background-image: url(../img/icons/small/portal.png);
   background-repeat: no-repeat;
   background-position: 1px 1px;
   padding: 1px 1px 1px 22px;
 }
 
-.search .search_query_js.default_value {
+form.search .search_query_js.default_value {
   color: #AAA;
 }
 
-.search select.search_area {
+form.search select.search_area {
   border: solid 1px #888;
   background-color: #fefefe;
   width: 6.0em;
 }
 
-.search .search_submit {
+form.search .search_submit {
   background: url(../img/search.png);
   background-color: #eee;
   background-repeat: no-repeat;
@@ -748,7 +748,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   padding-left: 18px;
 }
 
-.search .search_expander {
+form.search .search_expander {
   cursor: pointer;
   margin-top: -20px;
   position: absolute;
@@ -759,7 +759,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   height: 18px;
 }
 
-.search ul.search_area {
+form.search ul.search_area {
   position: absolute;
   margin-top: 19px;
   line-height: 1em;
@@ -770,34 +770,34 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   padding: 0;
 }
 
-.search ul.search_area li {
+form.search ul.search_area li {
   padding: 0.3em 0.4em 0.3em 18px;
   cursor: pointer;
   color: black;
   background: transparent url(../img/icons/small/portal.png) left no-repeat;
 }
 
-.search ul.search_area li.active {
+form.search ul.search_area li.active {
   font-weight: bold;
 }
 
-.search ul.search_area li:hover {
+form.search ul.search_area li:hover {
   background-color: #eee;
 }
 
-.search ul.search_area li.area_wiki, .search .area_wiki {
+form.search ul.search_area li.area_wiki, .search .area_wiki {
     background-image: url(../img/icons/small/wiki.png);
 }
 
-.search ul.search_area li.area_forum, .search .area_forum {
+form.search ul.search_area li.area_forum, .search .area_forum {
     background-image: url(../img/icons/small/forum.png);
 }
 
-.search ul.search_area li.area_planet, .search .area_planet {
+form.search ul.search_area li.area_planet, .search .area_planet {
     background-image: url(../img/icons/small/planet.png);
 }
 
-.search ul.search_area li.area_ikhaya, .search .area_ikhaya {
+form.search ul.search_area li.area_ikhaya, .search .area_ikhaya {
     background-image: url(../img/icons/small/ikhaya.png);
 }
 

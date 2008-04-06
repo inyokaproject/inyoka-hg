@@ -149,6 +149,15 @@ __all__ = ['parse', 'render', 'stream', 'escape']
 # the maximum depth of stack-protected nodes
 MAXIMUM_DEPTH = 200
 
+# the default inter-"wiki"s
+STANDARD_WIKI_MAP = {
+    'user':   lambda x: href('portal', 'users', x),
+    'paste':  lambda x: href('pastebin', x),
+    'topic':  lambda x: href('forum', 'topic', x),
+    'ikhaya': lambda x: href('ikhaya', x),
+    'search': lambda x: href('portal', 'search', query=x),
+}
+
 _hex_color_re = re.compile(r'#([a-f0-9]{3}){1,2}$')
 
 _table_align_re = re.compile(r'''(?x)
@@ -814,11 +823,11 @@ class Parser(object):
         if not wiki:
             return nodes.InternalLink(page, children, anchor=anchor,
                                       force_existing=self.wiki_force_existing)
-        elif wiki == 'user':
+        elif wiki in STANDARD_WIKI_MAP:
             if not children:
                 children = [nodes.Text(page)]
-            return nodes.Link(href('portal', 'users', page), children,
-                              class_='user')
+            return nodes.Link(STANDARD_WIKI_MAP[wiki](page), children,
+                              class_=wiki)
         return nodes.InterWikiLink(wiki, page, children, anchor=anchor)
 
     def parse_external_link(self, stream):

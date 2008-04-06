@@ -31,6 +31,7 @@ _free_link_re = re.compile('(?<!%s)(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]'
                            '+)*)?)' % (_url_tag_re, Lexer._url_pattern),
                            re.IGNORECASE)
 
+
 def parse(text):
     """BBCode-Parse a text."""
     return Parser(text).parse()
@@ -70,6 +71,22 @@ class NewlineToken(Token):
 
     def __unicode__(self):
         return '\n'
+
+
+def _make_interwiki_link(old, new=None):
+    """
+    Returns a parser function that converts the phpbb tag [old]page[/old]
+    to an inyoka interwiki link [new:page:].
+    """
+    new = new and new or old
+    def do(self):
+        t = self.expect_tag(old)
+        if t.attr:
+            return nodes.InterWikiLink(new, t.attr,
+                             self.parse_until('/%s' % old))
+        page = self.parse_until('/%s' % old, raw=True)
+        return nodes.InterWikiLink(new, page)
+    return do
 
 
 class Parser(object):
@@ -112,6 +129,13 @@ class Parser(object):
             'list':         self.parse_list,
             'img':          self.parse_img,
             'user':         self.parse_user,
+            'search':       self.parse_search,
+            'ikhaya':       self.parse_ikhaya,
+            'wikipedia':    self.parse_wikipedia,
+            'ikhaya':       self.parse_ikhaya,
+            'wikipedia-en': self.parse_wikipedia_en,
+            'bookzilla':    self.parse_bookzilla,
+            'ubuntuwiki':   self.parse_ubuntuwiki,
         }
 
         def add_text(value):
@@ -228,15 +252,6 @@ class Parser(object):
             return nodes.Link(token.attr, self.parse_until('/url'))
         target = self.parse_until('/url', raw=True)
         return nodes.Link(target, [nodes.Text(target)])
-
-    def parse_user(self):
-        """parse [user]-tags."""
-        t = self.expect_tag('user')
-        if t.attr:
-            return nodes.InterWikiLink('user', t.attr,
-                             self.parse_until('/user'))
-        user = self.parse_until('/user', raw=True)
-        return nodes.InterWikiLink('user', user)
 
     def parse_wiki(self):
         """parse [wiki]-tags."""
@@ -436,3 +451,13 @@ class Parser(object):
         for transformer in self.transformers:
             result = transformer.transform(result)
         return result
+
+    parse_user = _make_interwiki_link('user')
+    parse_search = _make_interwiki_link('search')
+    parse_paste = _make_interwiki_link('paste')
+    parse_wikipedia = _make_interwiki_link('wikipedia')
+    parse_ikhaya = _make_interwiki_link('ikhaya')
+    parse_wikipedia_en = _make_interwiki_link('wikipedia-en',
+                                              'wikipedia_en')
+    parse_bookzilla = _make_interwiki_link('bookzilla', 'isbn')
+    parse_ubuntuwiki = _make_interwiki_link('ubuntuwiki', 'ubuntu')
