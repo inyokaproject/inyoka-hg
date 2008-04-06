@@ -13,9 +13,9 @@
 {% set title_trace = [forum.name|e] %}
 {% set name = 'Forum „%s“ - ' % forum.name|e %}
 {% set feeds = [
-  (name ~ 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/25')),
-  (name ~ 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/25')),
-  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/25'))
+  (name ~ 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
+  (name ~ 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
+  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
 {% for parent in forum.parents %}
   {% set navigation_trace = navigation_trace + [(parent|url, parent.name)] ! %}

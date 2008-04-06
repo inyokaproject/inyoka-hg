@@ -794,7 +794,7 @@ def delete_topic(request, topic_slug):
 
 
 @does_not_exist_is_404
-def feed(request, component='forum', slug=None, mode='short', count=25):
+def feed(request, component='forum', slug=None, mode='short', count=20):
     """
     Show the feeds for the forum.
 
