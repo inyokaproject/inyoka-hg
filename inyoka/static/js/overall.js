@@ -181,14 +181,8 @@ $(document).ready(function() {
   $('#login_link').click(function() {
       $('#js_login_form').fadeIn('slow');
       $('#js_login_username')[0].focus();
-      $('#js_login_username')[0].select();
-      $('body').click(function() {
-        $('#js_login_form').fadeOut('slow')
-      });
-      $('#js_login_form').click(function() {
-        return false;
-      });
-      $('#js_login_form').click(function() {
+      $('#js_login_form').submit(function() {
+        $('#js_login_form').fadeOut('slow');
         $('#js_login_form')[0].submit();
       });
       return false;

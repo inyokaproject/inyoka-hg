@@ -42,7 +42,8 @@ from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
      AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
      ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
-    have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE
+    have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE, \
+    check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
                             poll_option_table
 from inyoka.forum.legacyurls import test_legacy_url
@@ -114,7 +115,7 @@ def forum(request, slug, page=1):
     if not f or f.parent_id is None:
         raise PageNotFound()
     privs = get_forum_privileges(request.user, f.id)
-    if not privs['read']:
+    if not check_privilege(privs, 'read'):
         return abort_access_denied(request)
     fmsg = f.find_welcome(request.user)
     if fmsg is not None:
@@ -158,10 +159,10 @@ def viewtopic(request, topic_slug, page=1):
     if not t:
         raise PageNotFound
     privileges = get_forum_privileges(request.user, t.forum.id)
-    if not privileges['read']:
+    if not check_privilege(privileges, 'read'):
         return abort_access_denied(request)
     if t.hidden:
-        if not privileges['moderate']:
+        if not check_privilege(privileges, 'moderate'):
             # XXX: don't show the topic if the user isn't a moderator
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
@@ -189,7 +190,7 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     votes = [request.POST.get('poll_%s' % poll.id)]
                 if votes:
-                    if not privileges['vote']:
+                    if not check_privilege(privileges, 'vote'):
                         return abort_access_denied(request)
                     elif poll.participated:
                         flash(u'Du hast bereits an dieser Abstimmung '
@@ -292,13 +293,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
     if post:
-        if not privileges['edit']:
+        if not check_privilege(privileges, 'edit'):
             return abort_access_denied(request)
     elif topic:
-        if not privileges['reply']:
+        if not check_privilege(privileges, 'reply'):
             return abort_access_denied(request)
     else:
-        if not privileges['create']:
+        if not check_privilege(privileges, 'create'):
             return abort_access_denied(request)
 
     # the user has canceled the action
@@ -315,7 +316,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
 
     #  handle polls
     poll_ids = map(int, filter(bool, request.POST.get('polls', '').split(',')))
-    if newtopic and privileges['create_poll']:
+    if newtopic and check_privilege(privileges, 'create_poll'):
         poll_form = AddPollForm(('add_poll' in request.POST or
             'add_option' in request.POST) and request.POST or None)
         poll_options = request.POST.getlist('options') or ['', '']
@@ -357,7 +358,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             topic.ubuntu_distro = d['ubuntu_distro']
             topic.ubuntu_version = d['ubuntu_version']
             topic.sticky = d['sticky']
-            if privileges['create_poll']:
+            if check_privilege(privileges, 'create_poll'):
                 topic.polls = polls
                 topic.has_poll = bool(polls)
             session.flush([topic])
