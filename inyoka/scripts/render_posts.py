@@ -13,7 +13,7 @@ from inyoka.utils.database import session
 
 
 def render_posts():
-    query = Post.query.filter(Post.c.rendered_text != '') \
+    query = Post.query.filter(Post.c.rendered_text == '') \
                       .order_by(desc(Post.c.id)) \
                       .limit(100)
     result = query.all()
@@ -23,3 +23,7 @@ def render_posts():
                                                   force_existing=True)
             session.commit()
         result = query.all()
+
+
+if __name__ == '__main__':
+    render_posts()
