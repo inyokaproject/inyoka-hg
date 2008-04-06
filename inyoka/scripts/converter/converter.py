@@ -83,7 +83,7 @@ def convert_bbcode(text, uid):
     return tree.to_markup()
 
 
-def select_blocks(query, block_size=1000, start_with=0):
+def select_blocks(query, block_size=1000, start_with=0, max_fails=10):
     """Execute a query blockwise to prevent lack of ram"""
     # get the table
     table = list(query._table_iterator())[0]
@@ -100,7 +100,7 @@ def select_blocks(query, block_size=1000, start_with=0):
             yield row
         if i == 0:
             failed += 1
-            if failed == 10:
+            if failed == max_fails:
                 break
         else:
             failed = 0
