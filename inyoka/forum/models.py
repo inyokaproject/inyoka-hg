@@ -14,7 +14,7 @@ import cPickle
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
-from sqlalchemy.sql import select, func, and_, not_, exists
+from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify

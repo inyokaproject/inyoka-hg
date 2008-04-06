@@ -8,9 +8,10 @@
     :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler.
     :license: GNU GPL.
 """
-from inyoka.forum.models import Forum, Topic
+from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
+from inyoka.portal.user import User
 
 
 legacy = LegacyDispatcher()

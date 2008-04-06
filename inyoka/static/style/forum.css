@@ -4,7 +4,7 @@
  *
  * The styles for the forum.
  *
- * :copyright: 2008 by Armin Ronacher.
+ * :copyright: 2008 by Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
 
@@ -301,12 +301,12 @@ table.poll td {
 }
 
 table.poll td.vote_bar {
-  width: 200px;
+  min-width: 100px;
 }
 
 table.poll td.vote_bar div {
   background-color: #EAD1A2;
-  height: 0.8em;
+  height: 0.7em;
 }
 
 table.poll td.sum {
