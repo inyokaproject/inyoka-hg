@@ -813,7 +813,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     if count not in (10, 20, 30, 50, 75, 100):
         raise PageNotFound
 
-    anonymous = User.get_anonymous_user()
+    anonymous = User.objects.get_anonymous_user()
 
     # key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
     # content = cache.get(key)
