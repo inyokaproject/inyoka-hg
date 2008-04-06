@@ -39,4 +39,3 @@ def category(args, match, category_id)
     except Category.DoesNotExist:
         return
     return href('ikhaya', category.slug)
-

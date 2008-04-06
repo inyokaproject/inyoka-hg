@@ -102,12 +102,12 @@ def do_show(request, name):
     if page.rev.deleted:
         return do_missing_page(request, name, page)
 
-    try: 
+    try:
         s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
         s.notified = False
         s.save()
     except Subscription.DoesNotExist:
-        pass 
+        pass
 
     set_session_info(request, u'betrachtet Wiki Artikel „<a '
                      u'href="%s">%s</a>“' % (

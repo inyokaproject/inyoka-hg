@@ -11,7 +11,7 @@
 """
 from sqlalchemy.orm import eagerload
 from inyoka.forum.models import Topic, Post
-from inyoka.forum.acl import get_forum_privileges
+from inyoka.forum.acl import get_forum_privileges, check_privilege
 from inyoka.utils.services import SimpleDispatcher
 
 
@@ -32,7 +32,7 @@ def on_get_post(request):
     if not post:
         return None
     privileges = get_forum_privileges(request.user, post.topic.forum_id)
-    if not privileges['read'] or (not privileges['moderate'] and
+    if not check_privilege('read') or (not check_privilege('moderate') and
        post.topic.hidden or post.hidden):
         return None
     return {

@@ -98,17 +98,6 @@ privilege_table = Table('forum_privilege', metadata,
     Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=True),
     Column('forum_id', Integer, ForeignKey('forum_forum.id'), nullable=False),
     Column('bits', Integer, nullable=True),
-    Column('can_read', Boolean, default=False, nullable=False),
-    Column('can_reply', Boolean, default=False, nullable=False),
-    Column('can_create', Boolean, default=False, nullable=False),
-    Column('can_edit', Boolean, default=False, nullable=False),
-    Column('can_revert', Boolean, default=False, nullable=False),
-    Column('can_delete', Boolean, default=False, nullable=False),
-    Column('can_sticky', Boolean, default=False, nullable=False),
-    Column('can_vote', Boolean, default=False, nullable=False),
-    Column('can_create_poll', Boolean, default=False, nullable=False),
-    Column('can_upload', Boolean, default=False, nullable=False),
-    Column('can_moderate', Boolean, default=False, nullable=False)
 )
 
 user_table = Table('portal_user', metadata, autoload=True)

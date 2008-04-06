@@ -70,4 +70,3 @@ def v1_profile(args, match):
 @legacy.url(r'^/wiki/(.+)$')
 def v1_wiki(args, match, page):
     return href('wiki', page)
-

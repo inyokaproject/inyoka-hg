@@ -88,9 +88,8 @@ def get_privileges(user, forum_ids):
     ''' % (', '.join(map(str, forum_ids)), user.id,
            user.is_authenticated and 'or p.group_id = %d' % DEFAULT_GROUP_ID or ''))
 
-    r = cur.fetchall()
     result = dict.fromkeys(forum_ids, DISALLOW_ALL)
-    for row in r:
+    for row in cur.fetchall():
         result[row[0]] = row[1]
     return result
 
@@ -101,9 +100,20 @@ def have_privilege(user, forum, privilege):
 
 
 def check_privilege(mask, privilege):
+    """
+    Check for an privilege on an existing mask.
+    Note: This does not touch the database so use
+    this as much as possible instead of many
+    `have_privilege` statements.
+
+    `mask`
+        The Bit-mask representing all forum-privileges
+    `privilege`
+        A string or Bit-mask representing one privilege
+    """
     if isinstance(privilege, basestring):
-        return mask & PRIVILEGES_BITS[privilege]
-    return mask & privilege
+        privilege = PRIVILEGES_BITS[privilege]
+    return mask & privilege != 0
 
 
 def filter_invisible(user, forums, priv=CAN_READ):

@@ -233,4 +233,3 @@ def login(args, match):
 @legacy.url('^/logout/?$')
 def logout(args, match):
     return href('portal', 'logout')
-

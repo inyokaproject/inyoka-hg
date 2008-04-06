@@ -37,7 +37,7 @@ class Blog(models.Model):
         """
         This updates the xapian search index.
         """
-        PlanetSearchAdapter.queue(self.id) 
+        PlanetSearchAdapter.queue(self.id)
 
     def delete(self):
         for entry in self.entry_set.all():
@@ -114,7 +114,7 @@ class Entry(models.Model):
         """
         This updates the xapian search index.
         """
-        PlanetSearchAdapter.queue(self.id) 
+        PlanetSearchAdapter.queue(self.id)
 
     def save(self):
         super(Entry, self).save()
