@@ -76,7 +76,9 @@ PAGE_REPLACEMENTS = {
 
 def convert_bbcode(text, uid):
     """Parse bbcode, remove the bbcode uid and return inyoka wiki markup"""
-    text = text.replace(':1:%s' % uid, '').replace(':%s' % uid, '')
+    remove = (':1:%s', ':u:%s', ':o:%s', ':%s',)
+    for i in remove:
+        text = text.replace(i % uid, '')
     tree = bbcode.Parser(text, transformers=[AutomaticParagraphs()]).parse()
     return tree.to_markup()
 
