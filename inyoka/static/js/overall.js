@@ -181,9 +181,11 @@ $(document).ready(function() {
   $('#login_link').click(function() {
       $('#js_login_form').fadeIn('slow');
       $('#js_login_username')[0].focus();
+      $('.wrap').click(function() {
+        $('#js_login_form').fadeOut('slow');
+      });
       $('#js_login_form').submit(function() {
         $('#js_login_form').fadeOut('slow');
-        $('#js_login_form')[0].submit();
       });
       return false;
   });
