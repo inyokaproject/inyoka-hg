@@ -5,7 +5,8 @@
 
     The views for the forum.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs, Christoph Hack.
+    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
+                                  Christoph Hack.
     :license: GNU GPL.
 """
 import re
@@ -14,16 +15,18 @@ from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
-from inyoka.conf import settings
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
+<<<<<<< local
 from inyoka.portal.user import User
 from inyoka.utils.text import slugify
+=======
+>>>>>>> other
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, does_not_exist_is_404, \
-     PageNotFound, HttpResponse, HttpResponseRedirect
+     PageNotFound, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -32,16 +35,12 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
-from inyoka.wiki.utils import quote_text
-from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
-from inyoka.forum.models import Forum, Topic, Attachment, POSTS_PER_PAGE, \
-     TOPICS_PER_PAGE, Post, get_ubuntu_version, Poll, WelcomeMessage, \
-     PollVote, PollOption
-from inyoka.forum.forms import NewPostForm, NewTopicForm, SplitTopicForm, \
-     AddAttachmentForm, EditPostForm, AddPollForm, MoveTopicForm, \
-     ReportTopicForm, ReportListForm
+from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
+     TOPICS_PER_PAGE, PollVote, PollOption
+from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
+        AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE, \
     check_privilege
@@ -285,7 +284,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     elif post_id:
         post = Post.query.get(post_id)
         if not post:
-            raise pageNotFound()
+            raise PageNotFound()
         topic = post.topic
         forum = topic.forum
         newtopic = post.id == topic.first_post_id
