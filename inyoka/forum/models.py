@@ -797,6 +797,8 @@ class Poll(object):
         return sum(o.votes for o in self.options)
 
     def has_participated(self, user=None):
+        if not user.is_authenticated:
+            return True
         user = user or current_request.user
         return bool(dbsession.execute(select([1],
             (poll_vote_table.c.poll_id == self.id) &
