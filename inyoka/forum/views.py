@@ -17,6 +17,7 @@ from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
+from inyoka.portal.user import User
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
