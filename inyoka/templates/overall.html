@@ -196,6 +196,7 @@
         </p>
       </form>
     </div>
+    {%- if not USER.is_authenticated %}
     <form action="{{ href('portal', 'login') }}" method="post" id="js_login_form">
       <div>
         <label for="js_login_username">Benutzername:</label>
@@ -209,5 +210,6 @@
         <a href="javascript:$('#js_login_form').fadeOut('slow');">Abbrechen</a>
       </div>
     </form>
+    {%- endif %}
   </body>
 </html>
