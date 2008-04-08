@@ -801,6 +801,8 @@ def delete_topic(request, topic_slug):
             return HttpResponseRedirect(url_for(topic.forum))
     else:
         flash(render_template('forum/delete_topic.html', {'topic': topic}))
+    for page in range(5):
+        del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
     return HttpResponseRedirect(url_for(topic))
 
 
@@ -810,7 +812,9 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     Show the feeds for the forum.
 
     For every combination of component, slug and mode a cache item with 100
-    entries generated, and it then truncated to `count` entries.
+    entries generated, and it then truncated to `count` entries.  This cache
+    is only invalidated after some time, not everytime something changes, so
+    the feeds are always ~5 minutes delayed.
     """
 
     if component not in ('forum', 'topic'):
