@@ -90,6 +90,7 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
     u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
 <@ if $loop.first @><@ else @> + <@ endif @>
 {{|<class="key"><@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @><@ $key as uppercase @>
+<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @><@ $key as uppercase @>
 <@ elseif ['hash','#'] contains $key as lowercase @>#
 <@ elseif ['^', '.', '<', ',', 'alt', 'fn'] contains $key as lowercase @><@ $key as title @>
 <@ elseif $key == 'plus' @>+
@@ -118,7 +119,6 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ elseif ['einfg','ins'] contains $key as lowercase @>Einfg
 <@ elseif ['ß','ss'] contains $key as lowercase @>ß
 <@ elseif ["`","'"] contains $key @>\`
-<@ elseif $key as lowercase matches_regex "^f[0-9]{1,2}$" @><@ $key as uppercase @>
 <@ endif @>|}}
 <@ endfor @>""",
     u'Wissen': u"""{{|<title="Diese Anleitung setzt die Kenntnis folgender Seiten voraus:" class="box knowledge">
