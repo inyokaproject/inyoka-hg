@@ -373,6 +373,9 @@ class Topic(object):
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
+        for page in range(5):
+            del cache['forum/topics/%d/%d' % (forum.id, page)]
+            del cache['forum/topics/%d/%d' % (self.forum.id, page)]
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
@@ -644,6 +647,10 @@ class Post(object):
         for post in posts:
             post.topic = t
             post.update_search()
+
+        for page in range(5):
+            del cache['forum/topics/%d/%d' % (t.forum.id, page)]
+            del cache['forum/topics/%d/%d' % (old_topic.forum.id, page)]
 
         return t
 

@@ -133,7 +133,8 @@ def forum(request, slug, page=1):
             'pagination':   pagination
         }
         # if you alter this value, change it in Post.delete and change_status
-        # and hide_topic and edit (3 times) too
+        # and hide_topic and edit (3 times) and forum.models.Post.split and 
+        # forum.models.Topic.move, too
         if page < 5:
             cache.set(key, data)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
