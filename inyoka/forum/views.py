@@ -132,9 +132,8 @@ def forum(request, slug, page=1):
             'topics':       pagination.objects,
             'pagination':   pagination
         }
-        # if you alter this value, change it in Post.delete and change_status
-        # and hide_topic and edit (3 times) and forum.models.Post.split and 
-        # forum.models.Topic.move, too
+        # if you alter this value, change it in 
+        # forum.models.Forum.invalidate_topic_cache, too.
         if page < 5:
             cache.set(key, data)
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
@@ -326,8 +325,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
                 start_time=datetime.utcnow())
             if topic:
                 topic.has_poll = True
-                for page in range(5):
-                    del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
+                topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
             flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question)
@@ -345,8 +343,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
                     .limit(1)).fetchone())
                 session.delete(poll)
                 session.commit()
-                for page in range(5):
-                    del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
+                topic.forum.invalidate_topic_cache()
         polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
             (topic and topic.id or -1))).all()
 
@@ -365,8 +362,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
                 topic.has_poll = bool(polls)
             session.flush([topic])
 
-            for page in range(5):
-                del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
+            topic.forum.invalidate_topic_cache()
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
@@ -421,8 +417,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
         t.locked = locked
         flash(u'Das Thema wurde %s' % (locked and u'gesperrt' or
                                                     u'entsperrt'))
-    for page in range(5):
-        del cache['forum/topics/%d/%d' % (t.forum.id, page)]
+    t.forum.invalidate_topic_cache()
 
     session.commit()
     return HttpResponseRedirect(t.get_absolute_url())
@@ -757,8 +752,7 @@ def hide_topic(request, topic_slug):
     session.commit()
     flash(u'Das Thema „%s“ wurde unsichtbar gemacht.' % topic.title,
           success=True)
-    for page in range(5):
-        del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
+    topic.forum.invalidate_topic_cache()
     return HttpResponseRedirect(url_for(topic))
 
 
@@ -801,8 +795,7 @@ def delete_topic(request, topic_slug):
             return HttpResponseRedirect(url_for(topic.forum))
     else:
         flash(render_template('forum/delete_topic.html', {'topic': topic}))
-    for page in range(5):
-        del cache['forum/topics/%d/%d' % (topic.forum.id, page)]
+    topic.forum.invalidate_topic_cache()
     return HttpResponseRedirect(url_for(topic))
 
 

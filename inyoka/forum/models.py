@@ -332,6 +332,12 @@ class Forum(object):
         user.forum_welcome = ','.join(str(i) for i in status)
         dbsession.flush(user)
 
+
+    def invalidate_topic_cache(self):
+        for page in range(5):
+            cache.delete('forum/topics/%d/%d' % (self.id, page))
+
+
     def __unicode__(self):
         return self.name
 
@@ -373,9 +379,8 @@ class Topic(object):
             'post_count': topic_table.select([func.count(topic_table.c.id)],
                     topic_table.c.id == self.id) - 1,
         }))
-        for page in range(5):
-            del cache['forum/topics/%d/%d' % (forum.id, page)]
-            del cache['forum/topics/%d/%d' % (self.forum.id, page)]
+        forum.invalidate_topic_cache()
+        self.forum.invalidate_topic_cache()
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
@@ -648,9 +653,8 @@ class Post(object):
             post.topic = t
             post.update_search()
 
-        for page in range(5):
-            del cache['forum/topics/%d/%d' % (t.forum.id, page)]
-            del cache['forum/topics/%d/%d' % (old_topic.forum.id, page)]
+        t.forum.invalidate_topic_cache()
+        old_topic.forum.invalidate_topic_cache()
 
         return t
 
