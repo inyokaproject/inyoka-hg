@@ -23,7 +23,7 @@ $(function() {
 });
 
 $(document).click(function() {
-  $('table.datetime').hide();
+  $('table.datetime.auto_show').hide();
 });
 
 /* create a closure for all of our stuff so that we don't export the
@@ -71,7 +71,7 @@ $(document).click(function() {
     this.container = $('<table class="datetime"></table>').click(function() {
         return false;
     });
-    auto_show ? this.container.hide() : this.input.hide();
+    auto_show ? this.container.hide().addClass('auto_show') : this.input.hide();
     var row = $('<tr></tr>').appendTo(this.container);
     this.calendar = $('<td></td>').appendTo(row);
     this.timetable = $('<td></td>').appendTo(row);
