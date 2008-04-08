@@ -341,7 +341,7 @@ class Parser(object):
                 flush()
                 markbuf = []
                 while not (self.token.type == 'tag' and
-                           self.token.name == '/mark' and
+                           self.token.name in ('/mark', '/code') and
                            not self.token.attr):
                     markbuf.append(unicode(self.token))
                     self.next()
