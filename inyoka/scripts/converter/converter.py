@@ -22,6 +22,7 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, and_
 from sqlalchemy.exceptions import OperationalError
 from inyoka.conf import settings
+from inyoka.forum.acl import join_flags
 from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
