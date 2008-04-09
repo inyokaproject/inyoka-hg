@@ -932,6 +932,30 @@ class SAUser(object):
     def get_absolute_url(self):
         return href('portal', 'users', self.username)
 
+    @property
+    def avatar_url(self):
+        if not self.avatar:
+            return href('static', 'img', 'portal', 'no_avatar.png')
+        return href('media', self.avatar)
+
+    @property
+    def rendered_signature(self):
+        return self.render_signature()
+
+    def render_signature(self, request=None, format='html', nocache=False):
+        """Render the user signature and cache it if `nocache` is `False`."""
+        if request is None:
+            request = current_request._get_current_object()
+        context = RenderContext(request)
+        if nocache or self.id is None or format != 'html':
+            return parse(self.signature).render(context, format)
+        key = 'portal/user/%d/signature' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.signature).compile(format)
+            cache.set(key, instructions)
+        return render(instructions, context)
+
     def __unicode__(self):
         return self.username
 
