@@ -701,7 +701,7 @@ class Attachment(object):
     """
 
     @staticmethod
-    def create(name, content, mime, attachments, override=False):
+    def create(name, content, mime, attachments, override=False, **kwargs):
         """
         This method writes a new attachment bound to a post that is
         not written into the database yet.
@@ -734,18 +734,16 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            attachment = Attachment(name=name, mimetype=mime)
-            attachment.save_file(name, content)
+            fn = 'forum/attachments/' + md5(str(time()) + name).hexdigest()
+            attachment = Attachment(name=name, file=fn, mimetype=mime,
+                                    **kwargs)
+            f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
+            try:
+                f.write(content)
+            finally:
+                f.close()
             dbsession.save(attachment)
             return attachment
-
-    def save_file(self, name, content):
-        fn = 'forum/attachments/' + md5(str(time()) + name).hexdigest()
-        f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
-        try:
-            f.write(content)
-        finally:
-            f.close()
 
     def delete(self):
         """

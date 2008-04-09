@@ -644,14 +644,9 @@ def convert_attachments():
           attachment_table.c.post_id != 0))
 
     for row in select_blocks(sel):
-        att = Attachment(**{
-            'id':      row.attach_id,
-            'name':    row.real_filename,
-            'comment': unescape(row.comment),
-            'post_id': row.post_id,
-        })
         file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
-        att.save_file(row.real_filename, file_.read())
+        att = Attachment.create(row.real_filename, file_.read(), None, [],
+                              id=row.attach_id, comment=unescape(row.comment))
         file_.close()
         session.commit()
 
