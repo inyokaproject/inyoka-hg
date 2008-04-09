@@ -253,7 +253,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     post = topic = forum = attachment = None
     newtopic = False
     poll_form = poll_options = polls = None
-    attach_form = attachments = None
+    attach_form = None
+    attachments = []
     preview = None
     if topic_slug:
         topic = Topic.query.filter_by(slug=topic_slug).one()

@@ -495,8 +495,7 @@ class Post(object):
                 request = current_request._get_current_object()
             except RuntimeError:
                 request = None
-        nocache = True # XXX doesn't work
-        context = RenderContext(request, simplified=True)
+        context = RenderContext(request)
         if nocache or self.id is None or format != 'html':
             node = parse(self.text, wiki_force_existing=force_existing)
             return node.render(context, format)
