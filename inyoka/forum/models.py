@@ -734,15 +734,18 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            fn = 'forum/attachments/'+md5(str(time()) + name).hexdigest()
-            attachment = Attachment(name=name, file=fn, mimetype=mime)
-            f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
-            try:
-                f.write(content)
-            finally:
-                f.close()
+            attachment = Attachment(name=name, mimetype=mime)
+            attachment.save_file(name, content)
             dbsession.save(attachment)
             return attachment
+
+    def save_file(name, content):
+        fn = 'forum/attachments/' + md5(str(time()) + name).hexdigest()
+        f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
+        try:
+            f.write(content)
+        finally:
+            f.close()
 
     def delete(self):
         """

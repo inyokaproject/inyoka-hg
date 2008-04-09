@@ -643,8 +643,6 @@ def convert_attachments():
           and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
           attachment_table.c.post_id != 0))
 
-    path = OLD_ATTACHMENTS.rstrip('/') + '/'
-
     for row in select_blocks(sel):
         att = Attachment(**{
             'id':      row.attach_id,
@@ -652,8 +650,8 @@ def convert_attachments():
             'comment': unescape(row.comment),
             'post_id': row.post_id,
         })
-        file_ = open(path + row.physical_filename,'rb')
-        att.save_file_file(row.real_filename, file_.read())
+        file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+        att.save_file(row.real_filename, file_.read())
         file_.close()
         session.commit()
 
