@@ -393,7 +393,7 @@ def convert_forum():
             'post_count':     row.topic_replies + 1,
             # sticky and announce are sticky in inyoka
             'sticky':         bool(row.topic_type),
-            'solved':         bool(row.topic_fixed),
+            'solved':         row.topic_fixed == 2,
             'locked':         row.topic_status == 1,
             'ubuntu_version': ubuntu_version_map.get(row.topic_version),
             'ubuntu_distro':  ubuntu_distro_map.get(row.topic_desktop),
