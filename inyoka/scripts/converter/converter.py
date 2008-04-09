@@ -566,20 +566,25 @@ def convert_privileges():
         if forum is None:
             continue
 
-        Privilege(forum, **{
-            'group':           group,
-            'can_read':        bool(row.auth_read),
-            'can_reply':       bool(row.auth_reply),
-            'can_create':      bool(row.auth_post),
-            'can_edit':        bool(row.auth_edit),
-            'can_revert':      bool(row.auth_mod),
-            'can_delete':      bool(row.auth_delete),
-            'can_sticky':      bool(row.auth_sticky) or \
+        flags = {
+            'read':        bool(row.auth_read),
+            'reply':       bool(row.auth_reply),
+            'create':      bool(row.auth_post),
+            'edit':        bool(row.auth_edit),
+            'revert':      bool(row.auth_mod),
+            'delete':      bool(row.auth_delete),
+            'sticky':      bool(row.auth_sticky) or \
                                bool(row.auth_announce),
-            'can_vote':        bool(row.auth_vote),
-            'can_create_poll': bool(row.auth_pollcreate),
-            'can_upload':      bool(row.auth_attachments),
-            'can_moderate':    bool(row.auth_mod)
+            'vote':        bool(row.auth_vote),
+            'create_poll': bool(row.auth_pollcreate),
+            'upload':      bool(row.auth_attachments),
+            'moderate':    bool(row.auth_mod)
+        }
+        flags = [name for name in flags.keys() if flags[name]]
+
+        Privilege(forum, **{
+            'group': group,
+            'bits':  join_flags(*flags),
         })
         session.commit()
 
