@@ -50,7 +50,7 @@ def join_flags(*flags):
         return DISALLOW_ALL
     result = DISALLOW_ALL
     for flag in flags:
-        flag = isinstance(flag, basestring) or PRIVILEGE_BITS[flag]
+        flag = isinstance(flag, basestring) and PRIVILEGES_BITS[flag] or flag
         if flag == 0:
             return 0
         result |= flag

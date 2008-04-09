@@ -31,7 +31,6 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
     It's generally used together with `AddAttachmentForm`.
     """
     text = forms.CharField(widget=forms.Textarea)
-    att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
 
     def clean_text(self):
         text = self.cleaned_data.get('text', '')
@@ -76,8 +75,6 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
         The title of the topic.
     `text`
         The text of the first post inside the topic.
-    `att_ids`
-        A list of new attachments attached to this post.
     `polls`
         A list of new polls bound to this topic.
     `ubuntu_version`
@@ -89,8 +86,6 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
     title = forms.CharField(widget=forms.TextInput(attrs={'size':60}),
                             max_length=100)
     text = forms.CharField(widget=forms.Textarea)
-    att_ids = forms.CharField(widget=forms.HiddenInput, required=False)
-    polls = forms.CharField(widget=forms.HiddenInput, required=False)
     ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
                                                 required=False)
     ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
@@ -171,7 +166,7 @@ class AddAttachmentForm(forms.Form):
     attachment = forms.FileField(required=True)
     filename = forms.CharField(max_length=512, required=False)
     override = forms.BooleanField(required=False)
-    description = forms.CharField(label='Description', required=False,
+    comment = forms.CharField(label='Beschreibung', required=False,
                   widget=forms.TextInput(attrs={'size':'60'}))
 
 

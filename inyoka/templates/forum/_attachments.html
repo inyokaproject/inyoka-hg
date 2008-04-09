@@ -19,10 +19,10 @@
   <tr>
     <th colspan="3">{{ att.name|e }}</th>
   </tr>
-  {%- if att.description %}
+  {%- if att.comment %}
   <tr>
-    <td colspan="3" class="description">
-      {{ att.description|e }}
+    <td colspan="3" class="comment">
+      {{ att.comment|e }}
     </td>
   </tr>
   {%- endif %}
@@ -30,7 +30,7 @@
     <td>Dateigröße:</td>
     <td>{{ att.size|filesizeformat }}</td>
     <td>
-      <a href="{{ att|url }}">Download</a>
+      {{ att.html_representation }}
     </td>
   </tr>
   {%- endfor %}

@@ -30,7 +30,7 @@
 <p><label for="id_filename">Umbenennen auf:</label>
   {{ form.filename }}{{ h.field_errors(form.errors.filename) }}</p>
 <p><label for="id_text">Beschreibung:</label>
-  {{ form.description }}{{ h.field_errors(form.errors.description) }}</p>
+  {{ form.comment }}{{ h.field_errors(form.errors.comment) }}</p>
 <p>{{ form.override }} <label for="id_override">Bestehenden Anhang
   gleichen Namens überschreiben</label></p>
 <p><input type="submit" value="Anhang hochladen" name="attach" /></p>

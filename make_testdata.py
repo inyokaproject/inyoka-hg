@@ -142,7 +142,9 @@ def make_forum():
         f = Forum(name=name, parent=parent)
         session.flush()
         if admin is not None:
-            Privilege(user=admin, forum=f, bits=join_flags(*PRIVILEGES))
+            session.save(Privilege(
+                user=admin, forum=f, bits=join_flags(*PRIVILEGES)
+            ))
         forums.append(f)
         session.commit()
         if parent:

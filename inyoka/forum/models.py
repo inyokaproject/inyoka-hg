@@ -10,7 +10,11 @@
 """
 from __future__ import division
 import re
+import os
 import cPickle
+from os import path
+from md5 import md5
+from time import time
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
@@ -693,34 +697,95 @@ class PostRevision(object):
 
 class Attachment(object):
     """
-    Posts can have uploaded data associated, this table holds the  mapping
-    to the uploaded file on the file system.
-    It has these fields:
-    `file`
-        The path to the attachment itself.
-    `name`
-        The name of the attachment.
-    `comment`
-        The comment of the attachment.
-    `post`
-        The post the attachment belongs to.  It may be NULL if the attachment
-        belongs to a post that is not yet created.
+    Represents an attachment associated to a post.
     """
+
+    @staticmethod
+    def create(name, content, mime, attachments, override=False):
+        """
+        This method writes a new attachment bound to a post that is
+        not written into the database yet.
+        It either returns the new created attachment or None if another
+        attachment with that name already exists (and `override` is False).
+
+        :Parameters:
+            name
+                The file name of the attachment.
+            content
+                The content of the attachment.
+            mime
+                The mimetype of the attachment (guess_file is implemented
+                as fallback)
+            attachments
+                A list that includes attachments that are
+                already attached to this (not-yet-existing) post.
+            override
+                Specifies whether other attachments for the same post should
+                be overwritten if they have the same name.
+        """
+        # check whether an attachment with the same name already exists
+        existing = filter(lambda a: a.name==name, attachments)
+        exists = bool(existing)
+        if exists: existing = existing[0]
+
+        if exists and override:
+            attachments.remove(existing)
+            dbsession.delete(existing)
+            exists = False
+
+        if not exists:
+            fn = 'forum/attachments/'+md5(str(time()) + name).hexdigest()
+            attachment = Attachment(name=name, file=fn, mimetype=mime)
+            f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
+            try:
+                f.write(content)
+            finally:
+                f.close()
+            dbsession.save(attachment)
+            return attachment
+
+    def delete(self):
+        """
+        Delete the attachment from the filesystem and
+        also mark the database-object for deleting.
+        """
+        if path.exists(self.filename):
+            os.remove(self.filename)
+        dbsession.delete(self)
+
+    @staticmethod
+    def update_post_ids(att_ids, post_id):
+        """
+        Update the post_id of a few unbound attachments.
+        :Parameters:
+
+            att_ids
+                A list of the attachment's ids.
+            post_id
+                The new post id.
+        """
+        if not att_ids:
+            return False
+        dbsession.execute(attachment_table.update(and_(
+            attachment_table.c.id.in_(att_ids),
+            attachment_table.c.post_id == None
+        ), values={'post_id': post_id}))
 
     @property
     def size(self):
         """The size of the attachment in bytes."""
-        return self.get_file_size()
+        stat = os.stat(self.filename)
+        return stat.st_size
 
     @property
     def filename(self):
         """The filename of the attachment on the filesystem."""
-        return self.get_file_filename()
+        return path.join(settings.MEDIA_ROOT, self.file)
 
     @property
     def mimetype(self):
         """The mimetype of the attachment."""
-        return guess_type(self.get_file_filename())[0] or \
+        return self.mimetype or guess_type(self.filename)[0] or \
                'application/octet-stream'
 
     @property
@@ -746,23 +811,28 @@ class Attachment(object):
         link to the raw attachment.
         """
         url = escape(self.get_absolute_url())
+        #TODO: check for too big images and find a better text/*
+        #      check for the preview...
+        #TODO #2: we need a better way to send the attachment-mimetype
+        #         to the browser. `<a type="">` is not bulky supported
         if self.mimetype.startswith('image/'):
             return u'<a href="%s"><img class="attachment" src="%s" ' \
                    u'alt="%s"></a>' % ((url,) * 3)
-        elif self.mimetype.startswith('text/'):
-            return highlight_code(self.contents, filename=self.filename)
+        elif self.mimetype.startswith('text/') and len(self.contents)<200:
+            return highlight_code(self.contents, mimetype=self.mimetype)
         else:
-            return u'<a href="%s">Anhang herunterladen</a>' % url
+            return u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
+                url, self.mimetype)
 
     def open(self, mode='rb'):
         """
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return file(self.get_file_filename(), mode)
+        return file(self.filename, mode)
 
     def get_absolute_url(self):
-        return self.get_file_url()
+        return href('media', self.file)
 
 
 class Privilege(object):
