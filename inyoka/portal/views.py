@@ -499,6 +499,7 @@ def usercp_settings(request):
 @templated('portal/usercp/change_password.html')
 def usercp_password(request):
     """User control panel view for changing the password."""
+    random_pw = None
     if request.method == 'POST':
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
@@ -520,7 +521,6 @@ def usercp_password(request):
                                         'new_password_confirm': random_pw})
         else:
             form = ChangePasswordForm()
-            random_pw = None
 
     return {
         'form': form,
