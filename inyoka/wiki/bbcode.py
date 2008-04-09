@@ -89,6 +89,13 @@ def _make_interwiki_link(old, new=None):
     return do
 
 
+def _add_default_scheme(url):
+    """This adds 'http://' to a string if it has no scheme"""
+    if '://' not in url:
+        url = u'http://%s' % url
+    return url
+
+
 class Parser(object):
     """
     Parse BBCode into `nodes`.
@@ -249,9 +256,10 @@ class Parser(object):
         """parse [url]-tags."""
         token = self.expect_tag('url')
         if token.attr:
-            return nodes.Link(token.attr, self.parse_until('/url'))
+            return nodes.Link(_add_default_scheme(token.attr),
+                              self.parse_until('/url'))
         target = self.parse_until('/url', raw=True)
-        return nodes.Link(target, [nodes.Text(target)])
+        return nodes.Link(_add_default_scheme(target), [nodes.Text(target)])
 
     def parse_wiki(self):
         """parse [wiki]-tags."""
