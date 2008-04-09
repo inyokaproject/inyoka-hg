@@ -739,7 +739,7 @@ class Attachment(object):
             dbsession.save(attachment)
             return attachment
 
-    def save_file(name, content):
+    def save_file(self, name, content):
         fn = 'forum/attachments/' + md5(str(time()) + name).hexdigest()
         f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
         try:
