@@ -27,10 +27,10 @@ from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.wiki.parser.transformers import AutomaticParagraphs
-from inyoka.forum.models import Privilege, Attachment, Post, Topic, \
-    Poll, PollOption, Forum, topic_table as sa_topic_table, forum_table as \
+from inyoka.forum.models import Privilege, Attachment, Topic, \
+    Poll, Forum, topic_table as sa_topic_table, forum_table as \
     sa_forum_table, post_table as sa_post_table, poll_vote_table as \
-    sa_poll_vote_table, PollVote
+    sa_poll_vote_table, poll_option_table as sa_poll_option_table
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
     Subscription
 from inyoka.ikhaya.models import Article, Category
@@ -521,7 +521,7 @@ def convert_polls():
         topics_with_poll.append(row.topic_id)
 
     for row in conn.execute(poll_opt_table.select()):
-        session.execute(poll_option_table.insert(values={{
+        session.execute(sa_poll_option_table.insert(values={
             'poll_id': row.vote_id,
             'name':    unescape(row.vote_option_text),
             'votes':   row.vote_result
@@ -530,7 +530,7 @@ def convert_polls():
 
     for row in conn.execute(voter_table.select()):
         try:
-            session.execute(poll_vote_table.insert(values={
+            session.execute(sa_poll_vote_table.insert(values={
                 'voter_id': row.vote_user_id,
                 'poll_id':  row.vote_id,
             }))
@@ -704,7 +704,7 @@ def convert_privmsgs():
         m.author_id = msg.privmsgs_from_userid;
         m.subject = unescape(msg.privmsgs_subject)
         m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = convert_bbcode(escape(msg_text.privmsgs_text),
+        m.text = convert_bbcode(unescape(msg_text.privmsgs_text),
                                 msg_text.privmsgs_bbcode_uid)
         m.save()
 
