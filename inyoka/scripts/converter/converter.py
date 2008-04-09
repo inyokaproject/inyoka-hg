@@ -521,19 +521,19 @@ def convert_polls():
         topics_with_poll.append(row.topic_id)
 
     for row in conn.execute(poll_opt_table.select()):
-        PollOption(**{
+        session.execute(poll_option_table.insert(values={{
             'poll_id': row.vote_id,
             'name':    unescape(row.vote_option_text),
             'votes':   row.vote_result
-        })
+        }))
         session.commit()
 
     for row in conn.execute(voter_table.select()):
         try:
-            PollVote(**{
+            session.execute(poll_vote_table.insert(values={
                 'voter_id': row.vote_user_id,
                 'poll_id':  row.vote_id,
-            })
+            }))
             session.commit()
         except OperationalError:
             # unfortunately we have corrupt data :/
