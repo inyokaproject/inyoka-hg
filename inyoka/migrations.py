@@ -159,10 +159,17 @@ def new_forum_acl_system(m):
     ''' % ', '.join(['drop column can_' + x for x in OLD_FORUM_PRIVILEGES]))
 
 
+def add_attachment_mimetype(m):
+    """Add a new mimetype column to forum_attachment"""
+    m.engine.execute('''
+        alter table forum_attachment
+         add column mimetype varchar(100) after post_id;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
-    new_forum_acl_system,
+    new_forum_acl_system, add_attachment_mimetype
 ]

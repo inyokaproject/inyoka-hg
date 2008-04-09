@@ -9,7 +9,8 @@
     :license: GNU GPL.
 """
 from pygments import highlight
-from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+from pygments.lexers import get_lexer_by_name, get_lexer_for_filename, \
+    get_lexer_for_mimetype
 from pygments.formatters import HtmlFormatter
 from pygments.styles.friendly import FriendlyStyle
 
@@ -18,13 +19,15 @@ _pygments_formatter = HtmlFormatter(style='colorful', cssclass='syntax',
                                     linenos='table')
 
 
-def highlight_code(code, lang=None, filename=None):
+def highlight_code(code, lang=None, filename=None, mimetype=None):
     """Highlight a block using pygments to HTML."""
     try:
         if lang is not None:
             lexer = get_lexer_by_name(lang, stripnl=False)
         elif filename is not None:
             lexer = get_lexer_for_filename(filename, stripnl=False)
+        elif mimetype is not None:
+            lexer = get_lexer_for_mimetype(mimetype, stripnl=False)
         else:
             return
     except LookupError:

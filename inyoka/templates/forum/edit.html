@@ -86,7 +86,9 @@
       {%- endif %}
     </dl>
     <p>
-      {{ form.att_ids }}
+      <input type="hidden" name="attachments" id="id_attachments" value="
+      {%- for att in attachments %}{% if not loop.first %},{% endif %}{{ att.id }}
+      {% endfor %}">
       <input type="hidden" name="polls" id="id_polls" value="
       {%- for poll in polls %}{% if not loop.first %},{% endif %}{{ poll.id }}
       {%- endfor %}">

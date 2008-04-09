@@ -22,7 +22,7 @@ from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, does_not_exist_is_404, \
-     PageNotFound, HttpResponseRedirect
+    PageNotFound, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -34,14 +34,15 @@ from inyoka.utils.database import session
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-     TOPICS_PER_PAGE, PollVote, PollOption
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
-        AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm
+    AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
+    AddAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE, \
     check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
-                            poll_option_table
+    poll_option_table, attachment_table
 from inyoka.forum.legacyurls import test_legacy_url
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
@@ -263,9 +264,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
-    post = topic = forum = None
+    post = topic = forum = attachment = None
     newtopic = False
     poll_form = poll_options = polls = None
+    attach_form = attachments = None
     preview = None
     if topic_slug:
         topic = Topic.query.filter_by(slug=topic_slug).one()
@@ -316,6 +318,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         poll_form = AddPollForm(('add_poll' in request.POST or
             'add_option' in request.POST) and request.POST or None)
         poll_options = request.POST.getlist('options') or ['', '']
+
         if 'add_poll' in request.POST and poll_form.is_valid():
             d = poll_form.cleaned_data
             options = map(lambda a: PollOption(name=a), poll_options)
@@ -331,6 +334,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             poll_ids.append(poll.id)
         elif 'add_option' in request.POST:
             poll_options.append('')
+
         elif 'delete_poll' in request.POST:
             poll = Poll.query.filter_by(id=request.POST['delete_poll'],
                 topic=topic).first()
@@ -343,6 +347,51 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
                 session.commit()
         polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
             (topic and topic.id or -1))).all()
+
+    att_ids = map(int, filter(bool,
+        request.POST.get('attachments', '').split(',')
+    ))
+    # handle attachments
+    if check_privilege(privileges, 'upload'):
+        # check for post = None to be sure that the user can't "hijack"
+        # other attachments.
+        attachments = Attachment.query.filter(and_(
+            attachment_table.c.id.in_(att_ids),
+            attachment_table.c.post_id == bool(post)==True and post.id or None
+        )).all()
+        if 'attach' in request.POST:
+            attach_form = AddAttachmentForm(request.POST, request.FILES)
+        else:
+            attach_form = AddAttachmentForm()
+
+        if 'attach' in request.POST:
+            # the user uploaded a new attachment
+            if attach_form.is_valid():
+                d = attach_form.cleaned_data
+                att_name = d.get('filename') or d['attachment'].filename
+                attachment = Attachment.create(
+                    att_name, d['attachment'].content,
+                    request.FILES['attachment']['content-type'],
+                    attachments, override=d['override']
+                )
+                if not attachment:
+                    flash(u'Ein Anhang „%s“ existiert bereits' % att_name, False)
+                else:
+                    attachment.comment = d['comment']
+                    session.commit()
+                    attachments.append(attachment)
+                    att_ids.append(attachment.id)
+                    flash(u'Der Anhang „%s“ wurde erfolgreich hinzugefügt'
+                          % att_name, True)
+
+        elif 'delete_attachment' in request.POST:
+            id = int(request.POST['delete_attachment'])
+            attachment = filter(lambda a: a.id==id, attachments)[0]
+            attachment.delete()
+            attachments.remove(attachment)
+            att_ids.remove(attachment.id)
+            session.commit()
+            flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
     # the user submited a valid form
     if 'send' in request.POST and form.is_valid():
@@ -363,6 +412,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         post.text = d['text']
         post.rendered_text = post.render_text(request, nocache=True)
         session.flush([post])
+        if attachments:
+            Attachment.update_post_ids(att_ids, post.id)
         session.commit()
         flash(u'Der Beitrag wurde erfolgreich gespeichert')
         return HttpResponseRedirect(url_for(post))
@@ -379,8 +430,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             'ubuntu_distro': topic.ubuntu_distro,
             'ubuntu_version': topic.ubuntu_version,
             'sticky': topic.sticky,
-            'text': post.text
+            'text': post.text,
         })
+        if not attachments:
+            attachments = Attachment.query.filter_by(post_id=post.id)
 
 
     return {
@@ -392,7 +445,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         'forum': forum,
         'topic': topic,
         'preview': preview,
-        'isnewtopic': newtopic
+        'isnewtopic': newtopic,
+        'can_attach': check_privilege(privileges, 'upload'),
+        'attach_form': attach_form,
+        'attachments': list(attachments),
     }
 
 
