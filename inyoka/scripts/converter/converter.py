@@ -22,7 +22,7 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, and_
 from sqlalchemy.exceptions import OperationalError
 from inyoka.conf import settings
-from inyoka.forum.acl import join_flags
+from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
@@ -582,6 +582,10 @@ def convert_privileges():
             'moderate':    bool(row.auth_mod)
         }
         flags = [name for name in flags.keys() if flags[name]]
+        if 'moderate' in flags:
+            # moderate means for phpbb that the user can do everything but
+            # for inyoka it doesn't
+            flags = PRIVILEGES
 
         Privilege(forum, **{
             'group': group,
