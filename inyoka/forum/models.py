@@ -734,7 +734,8 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            fn = 'forum/attachments/' + md5(str(time()) + name).hexdigest()
+            fn = 'forum/attachments/' + md5((str(time()) + name).encode(
+                                                    'utf-8')).hexdigest()
             attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
             f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
