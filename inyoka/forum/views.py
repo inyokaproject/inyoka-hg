@@ -218,26 +218,11 @@ def viewtopic(request, topic_slug, page=1):
         subscribed = Subscription.objects.user_subscribed(request.user,
                                                           topic=t)
     post_objects = pagination.objects
-    to_save = []
+
     for post in post_objects:
         if not post.rendered_text:
             post.rendered_text = post.render_text(force_existing=True)
-            to_save.append(post)
-    if to_save:
-        def _():
-            for post in to_save:
-                yield post.id
-                yield post.rendered_text
-
-        cur = connection.cursor()
-        cur.execute(u'''
-            update forum_post
-                set rendered_text = case id
-                    %s
-                    else rendered_text
-                end
-        ''' % u'\n'.join(('when %s then %s',) * len(to_save)), tuple(_()))
-        connection._commit()
+            session.commit()
 
     return {
         'topic':        t,

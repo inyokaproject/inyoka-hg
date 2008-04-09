@@ -644,7 +644,10 @@ def convert_attachments():
           attachment_table.c.post_id != 0))
 
     for row in select_blocks(sel):
-        file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+        try:
+            file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+        except IOError:
+            continue
         att = Attachment.create(row.real_filename, file_.read(), None, [],
                               id=row.attach_id, comment=unescape(row.comment))
         file_.close()
