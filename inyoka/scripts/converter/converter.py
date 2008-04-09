@@ -585,7 +585,7 @@ def convert_privileges():
         if 'moderate' in flags:
             # moderate means for phpbb that the user can do everything but
             # for inyoka it doesn't
-            flags = PRIVILEGES[1:]
+            flags = PRIVILEGES
 
         Privilege(forum, **{
             'group': group,

@@ -660,9 +660,15 @@ class Link(Element):
 
     def __init__(self, url, children=None, title=None, id=None,
                  style=None, class_=None, shorten=False):
+        self.scheme, self.netloc, self.path, self.params, self.querystring, \
+            self.anchor = urlparse(url)
+        if not self.scheme and not url.startswith('#'):
+            self.scheme = 'http'
+            url = u'http://%s' % url
+
         if not children:
             if shorten and len(url) > 40:
-                if url.startswith('http://'):
+                if self.scheme == 'http':
                     children = [
                         Span([Text('http://')], class_='longlinkcollapse'),
                         Text(url[7:22]),
@@ -679,9 +685,6 @@ class Link(Element):
                 title = url
         Element.__init__(self, children, id, style, class_)
         self.title = title
-        self.scheme, self.netloc, self.path, self.params, self.querystring, \
-            self.anchor = urlparse(url)
-
 
     @property
     def href(self):
@@ -704,7 +707,7 @@ class Link(Element):
                 request = current_request._get_current_object()
                 if not request.user.is_authenticated:
                     href = escape(self.href[7:])
-                    yield href
+                    yield Text(href)
                     return
             except RuntimeError:
                 pass
