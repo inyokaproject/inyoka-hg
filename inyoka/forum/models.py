@@ -336,11 +336,9 @@ class Forum(object):
         user.forum_welcome = ','.join(str(i) for i in status)
         dbsession.flush(user)
 
-
     def invalidate_topic_cache(self):
         for page in range(5):
             cache.delete('forum/topics/%d/%d' % (self.id, page))
-
 
     def __unicode__(self):
         return self.name

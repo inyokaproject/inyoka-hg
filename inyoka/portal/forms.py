@@ -220,10 +220,12 @@ class SetNewPasswordForm(forms.Form):
 class ChangePasswordForm(forms.Form):
     """Simple form for changing the password."""
     old_password = forms.CharField(label='Altes Passwort',
-                                   widget=forms.PasswordInput,
-                                   required=False)
-    new_password = forms.CharField(label='Neues Passwort')
-                                   #widget=forms.PasswordInput)
+                                   widget=forms.PasswordInput)
+    new_password = forms.CharField(label='Neues Passwort',
+                                   widget=forms.PasswordInput)
+    new_password_confirm = forms.CharField(
+                                   label=u'Neues Passwort (Bestätigung)',
+                                   widget=forms.PasswordInput)
 
 
 class UserCPSettingsForm(forms.Form):

@@ -515,12 +515,16 @@ def usercp_password(request):
                                     u'stimmt nicht mit deinem Alten überein']
     else:
         if 'random' in request.GET:
-            form = ChangePasswordForm({'new_password': get_random_password()})
+            random_pw = get_random_password()
+            form = ChangePasswordForm(initial={'new_password': random_pw,
+                                        'new_password_confirm': random_pw})
         else:
             form = ChangePasswordForm()
+            random_pw = None
 
     return {
-        'form': form
+        'form': form,
+        'random_pw': random_pw,
     }
 
 
