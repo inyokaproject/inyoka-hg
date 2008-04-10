@@ -88,10 +88,8 @@ def populate_context_defaults(context):
     else:
         reported = pms = suggestions = 0
 
-    global_message = cache.get('utils/global_message')
-    if global_message is None:
-        global_message = storage['global_message'] or False
-        cache.set('utils/global_message', global_message)
+    # we don't have to use cache here because storage does this for us
+    global_message = storage['global_message']
 
     if request:
         context.update(
