@@ -33,8 +33,8 @@ def update(limit=None):
     Update the next items from the queue.  You should call this
     function regularly (e.g. as cron).
     """
-    for i, comp, doc_id in enumerate(SearchQueue.objects.select_blocks()):
-        search.index(comp, doc_id)
+    for i, doc in enumerate(SearchQueue.objects.select_blocks()):
+        search.index(doc[0], doc[1])
         if not i % 1000:
             search.flush()
 

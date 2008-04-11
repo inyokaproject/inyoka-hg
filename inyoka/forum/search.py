@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy.orm import eagerload
-from inyoka.forum.acl import get_privileges
+from inyoka.forum.acl import get_privileges, check_privilege
 from inyoka.forum.models import Post, Forum
 from inyoka.utils.urls import url_for
 from inyoka.utils.search import search, SearchAdapter
@@ -17,7 +17,7 @@ from inyoka.utils.decorators import deferred
 
 
 class ForumSearchAuthDecider(object):
-    """Decides whetever a user can display a search result or not."""
+    """Decides whether a user can display a search result or not."""
 
     def __init__(self, user):
         self.user = user
