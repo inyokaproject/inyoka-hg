@@ -33,9 +33,10 @@ def update(limit=None):
     Update the next items from the queue.  You should call this
     function regularly (e.g. as cron).
     """
-    for component, doc_id in SearchQueue.objects.select_blocks():
-        search.index(component, doc_id)
-    search.flush()
+    for i, comp, doc_id in enumerate(SearchQueue.objects.select_blocks()):
+        search.index(comp, doc_id)
+        if not i % 1000:
+            search.flush()
 
 
 def reindex(app=None):
