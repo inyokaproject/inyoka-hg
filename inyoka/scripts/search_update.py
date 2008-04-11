@@ -31,14 +31,11 @@ import inyoka.ikhaya.models
 def update(limit=None):
     """
     Update the next items from the queue.  You should call this
-    function regularly (e.g.  as cron).
+    function regularly (e.g. as cron).
     """
-    last_id = 0
-    for id, component, doc_id in SearchQueue.objects.next():
+    for component, doc_id in SearchQueue.objects.select_blocks():
         search.index(component, doc_id)
-        last_id = id
     search.flush()
-    SearchQueue.objects.remove(last_id)
 
 
 def reindex(app=None):

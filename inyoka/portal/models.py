@@ -377,11 +377,20 @@ class SearchQueueManager(models.Manager):
         item.doc_id = doc_id
         item.save()
 
-    def next(self, limit=None):
-        """Fetch the next elements from the queue"""
-        items = limit and self.all() or self.all()[:limit]
-        for item in items:
-            yield (item.id, item.component, item.doc_id)
+    def select_blocks(self, block_size=1000):
+        """
+        Fetch all elements in blocks from the search queue.
+        Note that the elements automatically get deleted.
+        """
+        fetch = lambda: self.all()[:block_size]
+        items = fetch()
+        while items:
+            last_id = 0
+            for item in items:
+                last_id = item.id
+                yield (item.component, item.doc_id)
+            SearchQueue.objects.remove(last_id)
+            items = fetch()
 
     def remove(self, last_id):
         """
