@@ -28,7 +28,7 @@ class ForumSearchAuthDecider(object):
         # would create one useless query if the user e.g. just searched the
         # wiki.
         privs = get_privileges(self.user, [f.id for f in Forum.query.all()])
-        return dict((id, check_privilege(privs, 'read'))
+        return dict((id, check_privilege(priv, 'read'))
             for id, priv in privs.iteritems())
 
     def __call__(self, auth):
