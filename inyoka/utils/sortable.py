@@ -71,6 +71,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.urls import href
+from inyoka.utils.templating import render_template
 
 
 class Sortable(object):
@@ -116,6 +117,62 @@ class Sortable(object):
         return self.objects.order_by(order)
 
 
+ACTIONS = {
+    'str': {
+        'is':           u'ist gleich',
+        'contains':     u'enthält',
+        'startswith':   u'beginnt mit',
+    },
+    'int': {
+        'is':           u'ist gleich',
+        'greater':      u'ist größer als',
+        'lower':        u'ist kleiner als',
+    },
+    'date': {
+        'is':           u'ist gleich',
+        'greater':      u'ist später als',
+        'lower':        u'ist früher als',
+    },
+}
+ACTIONS_MAP = {
+    'is':         lambda f, v: f == v,
+    'contains':   lambda f, v: f.contains(v),
+    'startswith': lambda f, v: f.startswith(v),
+    'greater':    lambda f, v: f > v,
+    'lower':      lambda f, v: f < v,
+}
+
+
 class Filterable(object):
-    def __init__(self, objects):
-        pass
+    def __init__(self, model, objects, fields, args):
+        self.model = model
+        self.fields = fields
+        self.objects = objects
+        self.args = args
+        self.filters = {}
+        for field in fields:
+            action = args.get('%s_action' % field)
+            value = args.get('%s_value' % field)
+            if action and value and action in ACTIONS_MAP \
+               and not field == args.get('remove_filter'):
+                self.filters[field] = action, value
+        new_filter = args.get('new_filter')
+        if 'add_filter' in args and new_filter and new_filter in fields:
+            self.filters[new_filter] = 'is', ''
+
+
+    def get_html(self):
+        return render_template('utils/filterable.html', {
+            'filters': self.filters,
+            'fields':   self.fields,
+            'actions': ACTIONS,
+        })
+
+    def get_objects(self):
+        for field, filter in self.filters.iteritems():
+            action, value = filter
+            if value:
+                self.objects = self.objects.filter(
+                    ACTIONS_MAP[action](getattr(self.model, field), value)
+                )
+        return self.objects

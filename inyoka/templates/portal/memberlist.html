@@ -10,6 +10,8 @@
 
 {% extends 'portal/overall.html' %}
 {% set title_trace = ['Mitglieder'] %}
+{% set scripts = scripts + ['DateTime.js'] %}
+{% set styles = styles + ['datetimefield.css'] %}
 {% block appheader %}
   <h1>Portal</h1>
   <h2>Mitgliederliste</h2>
@@ -21,6 +23,7 @@
     Die Benutzer, die im Moment online sind, kannst du auf
     <a href="{{ href('portal', 'whoisonline') }}">dieser Seite</a> sehen.
   </p> 
+  {{ filterable.get_html() }}
   <table>
     <tr>
       <th>{{ table.get_html('id', '#') }}</th>
