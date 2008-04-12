@@ -31,7 +31,7 @@ from inyoka.utils.local import current_request
 from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table
+        poll_option_table, poll_vote_table, group_table
 
 
 POSTS_PER_PAGE = 15
@@ -958,6 +958,18 @@ class SAUser(object):
         return self.username
 
 
+class SAGroup(object):
+
+    def get_absolute_url(self):
+        return href('portal', 'groups', self.name)
+
+    def __unicode__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+
 class ReadStatus(object):
     """
     Manages the read status of forums and topics for a specific user.
@@ -1030,6 +1042,7 @@ class ReadStatus(object):
 
 
 dbsession.mapper(SAUser, user_table)
+dbsession.mapper(SAGroup, group_table)
 dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })

@@ -62,7 +62,7 @@ sys.path.append(WIKI_PATH)
 #: now.
 #: It's in the format deprecated --> new
 PAGE_REPLACEMENTS = {
-    'Audioplayer': 'AudioPlayer',
+    'Audioplayer':  'AudioPlayer',
     'Centerim':     'CenterIM',
     'Gnome':        'GNOME',
     'Grub':         'GRUB',

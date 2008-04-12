@@ -14,7 +14,7 @@ from dns.exception import DNSException
 from django.core.mail import send_mail
 
 
-_mail_re = re.compile(r'''(?x)
+_mail_re = re.compile(r'''(?xi)
     (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+
         (?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|
         "(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|
