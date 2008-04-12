@@ -102,6 +102,7 @@ privilege_table = Table('forum_privilege', metadata,
 
 user_table = Table('portal_user', metadata, autoload=True)
 user_group_table = Table('portal_user_groups', metadata, autoload=True)
+group_table = Table('portal_group', metadata, autoload=True)
 ikhaya_article = Table('ikhaya_article', metadata, autoload=True)
 forum_welcomemessage_table = Table('forum_welcomemessage', metadata,
                                    autoload=True)

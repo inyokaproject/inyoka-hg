@@ -260,6 +260,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     attach_form = None
     attachments = []
     preview = None
+    article = None
     if article_name:
         article = Page.objects.get(name=normalize_pagename(article_name))
         forum_slug = settings.WIKI_DISCUSSION_FORUM
@@ -422,7 +423,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if article:
             # the topic is a wiki discussion, bind it to the wiki
             # article and send notifications.
-            article.topic = topic
+            article.topic_id = topic.id
             article.save()
             for s in Subscription.objects.filter(wiki_page=article):
                 text = render_template('mails/new_page_discussion.txt', {
@@ -446,13 +447,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         ctx = RenderContext(request)
         preview = parse(request.POST.get('text', '')).render(ctx, 'html')
 
-    elif newtopic:
-        form = form.__class__(initial={
-            'title': article and article.name or '',
-            # try to get and preselect the user's ubuntu version
-            'ubuntu_version': get_ubuntu_version(request)
-        })
-
     # the user is going to edit an existing post/topic
     elif post:
         form = form.__class__({
@@ -469,6 +463,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif quote:
         form = form.__class__(initial={'text': quote_text(quote.text,
                                                          quote.author)})
+
+    elif newtopic:
+        form = form.__class__(initial={
+            'title': article and article.name or '',
+            # try to get and preselect the user's ubuntu version
+            'ubuntu_version': get_ubuntu_version(request)
+        })
 
     return {
         'form': form,
