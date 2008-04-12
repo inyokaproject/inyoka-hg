@@ -232,14 +232,13 @@ def lost_password(request):
                   u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
-            return HttpResponseRedirect(href('portal'))
+            return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = LostPasswordForm()
 
     return {
         'form': form
     }
-    #TODO: maybe we should limit that to some days
 
 
 @templated('portal/set_new_password.html')
@@ -722,7 +721,7 @@ def memberlist(request, page=1):
         'date_joined':  (u'Anmeldungsdatum', 'date'),
         'post_count':   (u'Beiträge', 'int'),
         'location':     (u'Wohnort', 'str'),
-    }, request.POST)
+    }, request.GET)
     pagination = Pagination(request, filterable.get_objects(), page, 15,
         href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',

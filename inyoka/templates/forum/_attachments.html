@@ -9,30 +9,19 @@
             This has to be a list of the attachments that belong to the current
             post.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007-2008 by Benjamin Wiegand, Christopher Grebs.
     :license GNU GPL
     
 #}
 {%- if attachments %}
-<table class="attachments">
+<hr />
+<dl class="attachments">
   {%- for att in attachments %}
-  <tr>
-    <th colspan="3">{{ att.name|e }}</th>
-  </tr>
-  {%- if att.comment %}
-  <tr>
-    <td colspan="3" class="comment">
-      {{ att.comment|e }}
-    </td>
-  </tr>
-  {%- endif %}
-  <tr>
-    <td>Dateigröße:</td>
-    <td>{{ att.size|filesizeformat }}</td>
-    <td>
-      {{ att.html_representation }}
-    </td>
-  </tr>
-  {%- endfor %}
-</table>
+  <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+  {% if att.comment %}
+  <dd class="comment">{{ att.comment|e }}</dd>
+  {% endif %}
+  <dd>{{ att.html_representation }}</dd>
+  {% endfor %}
+</dl>
 {%- endif %}

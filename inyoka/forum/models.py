@@ -815,10 +815,11 @@ class Attachment(object):
         #TODO #2: we need a better way to send the attachment-mimetype
         #         to the browser. `<a type="">` is not bulky supported
         if self.mimetype.startswith('image/'):
-            return u'<a href="%s"><img class="attachment" src="%s" ' \
+            return u'<a href="%s"><img class="preview" src="%s" ' \
                    u'alt="%s"></a>' % ((url,) * 3)
-        elif self.mimetype.startswith('text/') and len(self.contents)<200:
-            return highlight_code(self.contents, mimetype=self.mimetype)
+        elif self.mimetype.startswith('text/') and len(self.contents)<400:
+            return highlight_code(self.contents.decode('utf-8'),
+                mimetype=self.mimetype)
         else:
             return u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
                 url, self.mimetype)

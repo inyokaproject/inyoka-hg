@@ -10,8 +10,8 @@
     :license: GNU GPL.
 """
 import re
+from django.conf import settings
 from datetime import datetime
-from django.db import connection
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
@@ -31,10 +31,12 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
+from inyoka.wiki.utils import quote_text, normalize_pagename
 from inyoka.wiki.parser import parse, RenderContext
+from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, get_ubuntu_version
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -171,9 +173,10 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = Post.query.options(eagerload('attachments')).filter(
-        (Post.c.topic_id == t.id)
-    )
+    posts = Post.query.options(eagerload('attachments'), eagerload('author')) \
+        .filter(
+            (Post.c.topic_id == t.id)
+        )
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -239,7 +242,8 @@ def viewtopic(request, topic_slug, page=1):
 
 
 @templated('forum/edit.html')
-def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
+def edit(request, forum_slug=None, topic_slug=None, post_id=None,
+         quote_id=None, article_name=None):
     """
     This function allows the user to create a new topic which is created in
     the forum `slug` if `slug` is a string.
@@ -256,6 +260,12 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     attach_form = None
     attachments = []
     preview = None
+    if article_name:
+        article = Page.objects.get(name=normalize_pagename(article_name))
+        forum_slug = settings.WIKI_DISCUSSION_FORUM
+        flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
+              u'Wenn du willst, kannst du hier eine neue anlegen.' %
+                                                (escape(article_name)))
     if topic_slug:
         topic = Topic.query.filter_by(slug=topic_slug).one()
         if not topic:
@@ -273,6 +283,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         topic = post.topic
         forum = topic.forum
         newtopic = post.id == topic.first_post_id
+    elif quote_id:
+        quote = Post.query.options(eagerload('topic'), eagerload('author')) \
+                          .get(quote_id)
+        topic = quote.topic
+        forum = topic.forum
     form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
 
     # check privileges
@@ -403,6 +418,22 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
             post = Post(topic=topic, author_id=request.user.id)
         post.text = d['text']
         post.rendered_text = post.render_text(request, nocache=True)
+
+        if article:
+            # the topic is a wiki discussion, bind it to the wiki
+            # article and send notifications.
+            article.topic = topic
+            article.save()
+            for s in Subscription.objects.filter(wiki_page=article):
+                text = render_template('mails/new_page_discussion.txt', {
+                    'username': s.user.username,
+                    'page':     article
+                })
+                send_notification(s.user, (u'Neue Diskussion für die '
+                    u'Seite „%s“ wurde eröffnet' % article.title), text)
+                s.notified = True
+                s.save()
+
         session.flush([post])
         if attachments:
             Attachment.update_post_ids(att_ids, post.id)
@@ -414,6 +445,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
     elif 'preview' in request.POST:
         ctx = RenderContext(request)
         preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+
+    elif newtopic:
+        form = form.__class__(initial={
+            'title': article and article.name or '',
+            # try to get and preselect the user's ubuntu version
+            'ubuntu_version': get_ubuntu_version(request)
+        })
 
     # the user is going to edit an existing post/topic
     elif post:
@@ -427,6 +465,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
 
+    # the user is going to quote an existing post
+    elif quote:
+        form = form.__class__(initial={'text': quote_text(quote.text,
+                                                         quote.author)})
 
     return {
         'form': form,
