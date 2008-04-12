@@ -254,7 +254,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
-    post = topic = forum = attachment = None
+    post = topic = forum = attachment = quote = None
     newtopic = False
     poll_form = poll_options = polls = None
     attach_form = None
