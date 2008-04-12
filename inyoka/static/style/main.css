@@ -27,11 +27,11 @@ html, body {
 }
 
 div.wrap {
-  margin:10px;
-  background-image:url(../img/float-left.jpg);
-  background-repeat:repeat-y;
-  background-color:#FFFFFF;
-  border-bottom:#aba393 1px solid;
+  margin: 10px;
+  background-image: url(../img/float-left.jpg);
+  background-repeat: repeat-y;
+  background-color: #FFFFFF;
+  border-bottom: #aba393 1px solid;
 }
 
 div.wrap2 {
@@ -68,6 +68,11 @@ a, :link, :visited {
 
 a img, :link img, :visited img {
   border: none;
+}
+
+a.strong {
+  color: #191919;
+  font-weight: bold;
 }
 
 input {
@@ -1078,9 +1083,8 @@ div.not_found img {
     padding: .5em;
     text-align: center;
     border-bottom: 1px solid #888;
-//    background-color: #F9F9F9;
-    background-image:url(../img/jslogin.png);
-    background-repeat:no-repeat;
+    background-image: url(../img/jslogin.png);
+    background-repeat: no-repeat;
 }
 
 #js_login_form .right {

@@ -232,14 +232,13 @@ def lost_password(request):
                   u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
-            return HttpResponseRedirect(href('portal'))
+            return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = LostPasswordForm()
 
     return {
         'form': form
     }
-    #TODO: maybe we should limit that to some days
 
 
 @templated('portal/set_new_password.html')
