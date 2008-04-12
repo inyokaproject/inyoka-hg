@@ -31,7 +31,7 @@
           <input type="checkbox" name="selected" value="{{ topic.id }}" />
         </td>
         <td>
-          <a href="{{ topic|url }}">{{ topic.title|e }}</a> ({{ topic.forum.title|e}})
+          <a href="{{ topic|url }}">{{ topic.title|e }}</a> ({{ topic.forum.name|e}})
         </td>
         <td>
           <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a>
