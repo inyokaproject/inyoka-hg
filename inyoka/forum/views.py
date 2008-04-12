@@ -31,6 +31,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
+from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
@@ -171,9 +172,10 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = Post.query.options(eagerload('attachments')).filter(
-        (Post.c.topic_id == t.id)
-    )
+    posts = Post.query.options(eagerload('attachments'), eagerload('author')) \
+        .filter(
+            (Post.c.topic_id == t.id)
+        )
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -239,7 +241,8 @@ def viewtopic(request, topic_slug, page=1):
 
 
 @templated('forum/edit.html')
-def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
+def edit(request, forum_slug=None, topic_slug=None, post_id=None,
+         quote_id=None, article=None):
     """
     This function allows the user to create a new topic which is created in
     the forum `slug` if `slug` is a string.
@@ -273,6 +276,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         topic = post.topic
         forum = topic.forum
         newtopic = post.id == topic.first_post_id
+    elif quote_id:
+        quote = Post.query.options(eagerload('topic'), eagerload('author')) \
+                          .get(quote_id)
+        topic = quote.topic
+        forum = topic.forum
     form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
 
     # check privileges
@@ -427,6 +435,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None, article=None):
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
 
+    # the user is going to quote an existing post
+    elif quote:
+        form = form.__class__(initial={'text': quote_text(quote.text,
+                                                         quote.author)})
 
     return {
         'form': form,
