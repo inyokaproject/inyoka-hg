@@ -95,7 +95,7 @@ class Pagination(object):
 
         if show_next_link:
             if self.page < pages:
-                link = escape(self.generate_link(self.page + 1, params))
+                link = self.generate_link(self.page + 1, params)
                 tmpl = u'<a href="%s" class="next"> Weiter » </a>'
                 add(tmpl % escape(link))
             else:

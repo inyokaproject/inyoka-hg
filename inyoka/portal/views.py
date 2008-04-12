@@ -722,7 +722,7 @@ def memberlist(request, page=1):
         'date_joined':  (u'Anmeldungsdatum', 'date'),
         'post_count':   (u'Beiträge', 'int'),
         'location':     (u'Wohnort', 'str'),
-    }, request.POST)
+    }, request.GET)
     pagination = Pagination(request, filterable.get_objects(), page, 15,
         href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
