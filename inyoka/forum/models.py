@@ -53,21 +53,6 @@ UBUNTU_DISTROS = {
     'edubuntu': 'Edubuntu',
     'server': 'Server',
 }
-REGEX = '(.+)Ubuntu\/%s \(%s\)(.+)'
-VERSION_REGEXES = [
-    (i, re.compile(REGEX % (i, name.split(' ')[0].lower())))
-    for i, name in UBUNTU_VERSIONS.iteritems()
-]
-
-
-def get_ubuntu_version(request):
-    """
-    Try to find out which ubuntu version the user is using by matching the
-    HTTP_USER_AGGENT against some regexes.
-    """
-    for i, regex in VERSION_REGEXES:
-        if regex.match(request.META.get('HTTP_USER_AGENT', '')):
-            return i
 
 
 class SearchMapperExtension(MapperExtension):
