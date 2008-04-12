@@ -22,24 +22,23 @@
       <tr>
         <th colspan="2">Thema</th>
         <th>Gemeldet von</th>
-        <th>Begründung</th>
       </tr>
     </thead>
     <tbody>
       {%- for topic in topics %}
-      <tr>
+      <tr class="reportlist_head">
         <td>
           <input type="checkbox" name="selected" value="{{ topic.id }}" />
         </td>
         <td>
-          <a href="{{ topic|url }}">{{ topic.title|e }}</a>
+          <a href="{{ topic|url }}">{{ topic.title|e }}</a> ({{ topic.forum.title|e}})
         </td>
         <td>
           <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a>
         </td>
-        <td>
-          {{ topic.reported|e }}
-        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="white-space: pre-wrap">{{ topic.reported|e }}</td>
       </tr>
       {%- else %}
       <tr>

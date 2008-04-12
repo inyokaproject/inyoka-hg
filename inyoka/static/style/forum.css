@@ -406,3 +406,8 @@ span.pagination .pageselect:hover {
     background: #555;
     color: white;
 }
+
+.reportlist_head {
+background-color: #EEE;
+}
+
