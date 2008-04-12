@@ -21,6 +21,7 @@ MONTHS = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni',
 WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag',
             'Samstag', 'Sonntag']
 TIMEZONES = pytz.common_timezones
+DEFAULT_TIMEZONE = pytz.timezone('Europe/Berlin')
 
 
 _iso8601_re = re.compile(
@@ -74,7 +75,7 @@ def get_user_timezone():
     try:
         return pytz.timezone(user.settings.get('timezone', ''))
     except:
-        return pytz.UTC
+        return DEFAULT_TIMEZONE
 
 
 def datetime_to_timezone(dt, enforce_utc=False):
