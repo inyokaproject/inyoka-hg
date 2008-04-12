@@ -276,6 +276,9 @@ class User(models.Model):
         salt = get_hexdigest(str(random.random()), str(random.random()))[:5]
         hsh = get_hexdigest(salt, raw_password)
         self.password = '%s$%s' % (salt, hsh)
+        # invalidate the new_password_key
+        if self.new_password_key:
+            self.new_password_key = None
 
     def check_password(self, raw_password, auto_convert=False):
         """
@@ -369,6 +372,9 @@ class User(models.Model):
         request.session['uid'] = self.id
         request.session.pop('_sk', None)
         request.user = self
+        # invalidate the new_password_key
+        if self.new_password_key:
+            self.new_password_key = None
 
 
 def deactivate_user(user):
