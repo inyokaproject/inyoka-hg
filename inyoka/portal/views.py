@@ -484,7 +484,8 @@ def usercp_settings(request):
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False),
-            'hide_profile': settings.get('hide_profile', False)
+            'hide_profile': settings.get('hide_profile', False),
+            'autosubscribe': settings.get('autosubscribe', False),
         }
         form = UserCPSettingsForm(values)
     return {

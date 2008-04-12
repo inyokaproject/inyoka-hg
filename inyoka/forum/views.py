@@ -439,6 +439,18 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if attachments:
             Attachment.update_post_ids(att_ids, post.id)
         session.commit()
+
+        try:
+            if request.user.settings['autosubscribe']:
+                subscription = Subscription(
+                    user = request.user,
+                    topic_id = topic.id,
+                )
+                subscription.save()
+        except KeyError:
+            pass
+
+
         flash(u'Der Beitrag wurde erfolgreich gespeichert')
         return HttpResponseRedirect(url_for(post))
 
