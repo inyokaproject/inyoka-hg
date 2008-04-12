@@ -157,7 +157,7 @@ class Filterable(object):
                and not field == args.get('remove_filter'):
                 self.filters[field] = action, value
         new_filter = args.get('new_filter')
-        if 'add_filter' in args and new_filter and new_filter in ACTIONS:
+        if 'add_filter' in args and new_filter and new_filter in fields:
             self.filters[new_filter] = 'is', ''
 
 
