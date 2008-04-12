@@ -50,7 +50,7 @@ urlpatterns = patterns('inyoka.forum.views',
     (r'^feeds/(?P<component>forum|topic)/(?P<slug>[^/]+)/'
      r'(?P<mode>[a-z]+)/(?P<count>\d+)/$', 'feed'),
     (r'^category/(?P<category>[^/]+)/$', 'index'),
-    (r'^new_discussion/(?P<article>.+)/$', 'newtopic'),
+    (r'^new_discussion/(?P<article>.+)/$', 'edit'),
     (r'^markread/$', 'markread'),
     (r'^category/(?P<slug>[^/]+)/markread/$', 'markread'),
     (r'^forum/(?P<slug>[^/]+)/markread/$', 'markread'),
