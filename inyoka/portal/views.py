@@ -764,7 +764,7 @@ def group(request, name, page=1):
     pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (
-        href('portal', 'groups', escape(name)),
+        href('portal', 'group', escape(name)),
         escape(name)
     ))
     return {

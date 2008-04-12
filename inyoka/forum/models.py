@@ -928,7 +928,7 @@ class WelcomeMessage(object):
 class SAUser(object):
 
     def get_absolute_url(self):
-        return href('portal', 'users', self.username)
+        return href('portal', 'user', self.username)
 
     @property
     def avatar_url(self):

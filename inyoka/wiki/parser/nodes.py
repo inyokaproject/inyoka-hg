@@ -885,7 +885,7 @@ class Moderated(Element):
         w.markup(u'[/mod]')
 
     def prepare_html(self):
-        yield Strong([Text(u'Moderiert von '), Link(href('portal', 'users',
+        yield Strong([Text(u'Moderiert von '), Link(href('portal', 'user',
                         self.username), [Text(self.username)], class_='user'),
                       Text(u': ')])
         for item in Element.prepare_html(self):

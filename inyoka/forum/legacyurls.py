@@ -131,7 +131,7 @@ def goto(args, match):
 
 @legacy.url(r'^/groups(:?/(.+))/?$')
 def groups(args, match, group=None):
-    return href('portal', 'groups', group)
+    return href('portal', 'group', group)
 
 
 @legacy.url(r'^/viewonline/?$')
@@ -208,7 +208,7 @@ def profile(args, match):
             user = User.query.get(id=int(args['u']))
             if user is None:
                 return
-            return href('portal', 'users', user.username)
+            return href('portal', 'user', user.username)
         except (KeyError, ValueError):
             return
     elif args['mode'] == 'email':
@@ -216,7 +216,7 @@ def profile(args, match):
             user = User.query.get(id=int(args['u']))
             if user is None:
                 return
-            return href('portal', 'users', user.username)
+            return href('portal', 'user', user.username)
         except (KeyError, ValueError):
             return
 

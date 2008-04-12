@@ -74,7 +74,7 @@ class Group(models.Model):
     _default_group = None
 
     def get_absolute_url(self):
-        return href('portal', 'groups', self.name)
+        return href('portal', 'group', self.name)
 
     def __unicode__(self):
         return self.name
@@ -362,7 +362,7 @@ class User(models.Model):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('portal', 'users', self.username),
+            'show': ('portal', 'user', self.username),
             'privmsg': ('portal', 'privmsg', 'new', self.username)
         }[action])
 
