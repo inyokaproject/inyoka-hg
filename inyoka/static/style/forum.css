@@ -411,3 +411,27 @@ span.pagination .pageselect:hover {
 background-color: #EEE;
 }
 
+/* Attachment styles */
+dl.attachments {
+  margin: 10px 0 10px 0;
+  border: 1px solid #ccc;
+}
+
+dl.attachments dt {
+  text-align: left;
+  background: #f2f2f2 url('../img/table-header-alternative.png');
+  color: #673B1A
+  vertical-align: middle;
+  border: 1px solid #ccc;
+}
+
+dl.attachments dd {
+  padding-bottom: 0.3em;
+  padding-right: 0.3em;
+  vertical-align: middle;
+}
+
+dl.attachments dd a img.preview {
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
