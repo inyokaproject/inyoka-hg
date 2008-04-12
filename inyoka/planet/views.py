@@ -69,7 +69,6 @@ def suggest(request):
     administrators.
     """
     if 'abort' in request.POST:
-        flash('Vorschlagen abgebrochen')
         return HttpResponseRedirect(href('planet'))
 
     if request.method == 'POST':
