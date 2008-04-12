@@ -51,7 +51,7 @@ def join_flags(*flags):
     result = DISALLOW_ALL
     for flag in flags:
         if isinstance(flag, basestring):
-            flag =PRIVILEGES_BITS[flag]
+            flag = PRIVILEGES_BITS[flag]
         if flag == 0:
             return 0
         result |= flag
@@ -86,7 +86,7 @@ def get_privileges(user, forum_ids):
         p.forum_id.in_(forum_ids) & ((p.user_id == user.id) |
         p.group_id.in_(select([ug.group_id], ug.user_id == user.id)) |
         (p.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID)))))
-    result = dict(map(lambda a: (a, 0), forum_ids))
+    result = dict(map(lambda a: (a, DISALLOW_ALL), forum_ids))
     for forum_id, bits in cur:
         result[forum_id] |= bits
     return result
