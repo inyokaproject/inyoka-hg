@@ -1084,3 +1084,13 @@ div.not_found img {
 #js_login_form label {
     font-weight: bold;
 }
+
+/*** Filterable ***************************************************************/
+
+table.filterable td.value {
+  width: 100%;
+}
+
+table.filterable div.add {
+  float: right;
+}

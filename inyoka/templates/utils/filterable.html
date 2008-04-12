@@ -1,0 +1,53 @@
+{#
+    utils/filterable
+    ~~~~~~~~~~~~~~~~
+
+    This is the template for a `Filterable` object.
+    It gives the user the possiblity to filter a database query.
+
+    :copyright: 2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+<form action="" method="post">
+  <table class="filterable">
+    {%- for field, x in filters.iteritems() %}
+    <tr>
+      <td class="field">{{ fields[field][0] }}</td>
+      <td class="filter">
+        <select name="{{ field }}_action">
+          {%- for k, v in actions[fields[field][1]].iteritems() %}:
+          <option value="{{ k }}"{% if k == x[0] %} selected="selected"{% endif %}>
+            {{- v|e -}}
+          </option>
+          {%- endfor %}
+        </select>
+      </td>
+      <td class="value">
+        <input type="{{ fields[field][1] == 'date' and 'date' or 'text' }}"
+               name="{{ field }}_value" value="{{ x[1]|e(true) }}" />
+      </td>
+      <td class="action">
+        <button type="submit" name="remove_filter" value="{{ field }}">-</button>
+      </td>
+    </tr>
+    {%- endfor %}
+    <tr>
+      <td colspan="4">
+        <div class="add">
+          Filter hinzufügen: <select name="new_filter">
+            <option></option>
+            {%- for k, v in fields.iteritems() %}
+            {%- if k not in filters %}
+            <option value="{{ k }}">{{ v[0]|e }}</option>
+            {%- endif %}
+            {%- endfor %}
+          </select>
+          <input type="submit" name="add_filter" value="OK" />
+        </div>
+        {%- if filters %}
+        <input type="submit" value="aktualisieren">
+        {%- endif %}
+      </td>
+    </tr>
+  </table>
+</form>

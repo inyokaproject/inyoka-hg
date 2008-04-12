@@ -27,7 +27,7 @@ from inyoka.utils.urls import href, url_for, is_safe_domain
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
-from inyoka.utils.sortable import Sortable
+from inyoka.utils.sortable import Sortable, Filterable
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
@@ -38,7 +38,7 @@ from inyoka.portal.utils import check_activation_key, send_activation_mail, \
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category
-from inyoka.forum.models import Forum
+from inyoka.forum.models import Forum, SAUser
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
@@ -714,15 +714,24 @@ def memberlist(request, page=1):
 
     `page` represents the current page in the pagination.
     """
-    table = Sortable(User.objects.all(), request.GET, 'id')
-    pagination = Pagination(request, table.get_objects(), page, 15,
+    sortable = Sortable(SAUser.query, request.GET, 'id', sqlalchemy=True,
+                        sa_column=SAUser.id)
+    filterable = Filterable(SAUser, sortable.get_objects(), {
+        'id':           (u'Nummer', 'int'),
+        'username':     (u'Benutzername', 'str'),
+        'date_joined':  (u'Anmeldungsdatum', 'date'),
+        'post_count':   (u'Beiträge', 'int'),
+        'location':     (u'Wohnort', 'str'),
+    }, request.POST)
+    pagination = Pagination(request, filterable.get_objects(), page, 15,
         href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {
         'users':        pagination.objects,
         'pagination':   pagination,
-        'table':        table
+        'table':        sortable,
+        'filterable':   filterable,
     }
 
 
