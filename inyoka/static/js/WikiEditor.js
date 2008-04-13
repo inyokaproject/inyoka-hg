@@ -41,7 +41,29 @@
     '#888888',
     '#C5C5C5'
   ];
-
+  var CODES = {
+    'text': 'Code ohne Highlighting',
+    'bash': 'Bash',
+    'c': 'C',
+    'csharp': 'C#',
+    'cpp': 'C++',
+    'css': 'CSS',
+    'd': 'D',
+    'html+django': 'Django / Jinja Templates',
+    'html': 'HTML',
+    'irc': 'IRC Logs',
+    'java': 'Java',
+    'js': 'JavaScript',
+    'perl': 'Perl',
+    'html+php': 'PHP',
+    'python': 'Python',
+    'pycon': 'Python Console Sessions',
+    'pytb': 'Python Tracebacks',
+    'ruby': 'Ruby',
+    'sourceslist': 'sources.list',
+    'sql': 'SQL',
+    'xml': 'XML'
+  }
   /**
    * Helper function that creates a button object.
    */
@@ -140,8 +162,8 @@
            ['wiki', 'forum', 'small']),
     button('stroke', 'Durchgeschtrichener Text', insert('--(%s)--'),
            ['wiki', 'forum']),
-    button('code', 'Code', insert("``%s``"),
-           ['wiki', 'forum', 'small']),
+    //button('code', 'Code', insert("``%s``"),
+    //       ['wiki', 'forum', 'small']),
     button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
            ['wiki', 'forum']),
     button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
@@ -155,6 +177,33 @@
     }, ['wiki', 'forum']),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum']),
+    (function(editor) {
+      var result = $('<div />');
+      button('code', 'Code', function(evt) {
+        codebox.slideToggle('fast');
+        return false;
+      })(editor).appendTo(result);
+      var codebox = $('<table class="codebox" />').appendTo(result).hide();
+      var tds = [$('<td>Rohtext</td>').click(function() {
+        editor.insertTag('{{{\n%s\n}}}', 'Code')
+      })];
+      $.each(CODES, function(k, v) {
+        tds.push($('<td>' + v + '</td>')
+          .click(function() {
+            editor.insertTag('{{{#!code ' + k + '\n%s\n}}}', 'Code');
+          }))
+      });
+      for (var i = 0; i < tds.length / 2; i++) {
+        $('<tr />')
+          .appendTo(codebox)        
+          .append(tds[i], tds[i + tds.length / 2]);
+      }
+      $(document).click(function() {
+        if (codebox.is(':visible'))
+          codebox.slideUp('fast');
+      });
+      return result;
+    }),
     (function(editor) {
       if (editor.profile != 'forum')
         return;
