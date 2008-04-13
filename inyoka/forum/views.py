@@ -36,7 +36,7 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, get_ubuntu_version
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -420,6 +420,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         post.text = d['text']
         post.rendered_text = post.render_text(request, nocache=True)
 
+        session.flush([post])
+        if attachments:
+            Attachment.update_post_ids(att_ids, post.id)
+        session.commit()
+
         if article:
             # the topic is a wiki discussion, bind it to the wiki
             # article and send notifications.
@@ -435,21 +440,12 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 s.notified = True
                 s.save()
 
-        session.flush([post])
-        if attachments:
-            Attachment.update_post_ids(att_ids, post.id)
-        session.commit()
-
-        try:
-            if request.user.settings['autosubscribe']:
-                subscription = Subscription(
-                    user = request.user,
-                    topic_id = topic.id,
-                )
-                subscription.save()
-        except KeyError:
-            pass
-
+        if request.user.settings.get('autosubscribe'):
+            subscription = Subscription(
+                user=request.user,
+                topic_id=topic.id,
+            )
+            subscription.save()
 
         flash(u'Der Beitrag wurde erfolgreich gespeichert')
         return HttpResponseRedirect(url_for(post))
@@ -479,8 +475,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif newtopic:
         form = form.__class__(initial={
             'title': article and article.name or '',
-            # try to get and preselect the user's ubuntu version
-            'ubuntu_version': get_ubuntu_version(request)
         })
 
     return {
@@ -952,7 +946,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 kwargs = {}
                 if mode == 'full':
                     kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                        u'xhtml">%s%s</div>' % post.rendered_text
+                                        u'xhtml">%s</div>' % post.rendered_text
                     kwargs['content_type'] = 'xhtml'
                 if mode == 'short':
                     summary = truncate_html_words(post.rendered_text, 100)
