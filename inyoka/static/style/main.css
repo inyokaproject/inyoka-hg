@@ -712,6 +712,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   padding: 5px 5px 5px 8px;
   font-size: 0.85em;
   margin: 0 20px 10px 20px;
+  position:relative;
 }
 
 .content_tabbar div.pathbar {
@@ -724,7 +725,8 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 form.search {
-  float: right;
+  position: absolute;
+  right: 5px;
 }
 
 form.search p {
