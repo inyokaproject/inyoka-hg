@@ -36,7 +36,7 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, get_ubuntu_version
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -939,7 +939,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 kwargs = {}
                 if mode == 'full':
                     kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                        u'xhtml">%s%s</div>' % post.rendered_text
+                                        u'xhtml">%s</div>' % post.rendered_text
                     kwargs['content_type'] = 'xhtml'
                 if mode == 'short':
                     summary = truncate_html_words(post.rendered_text, 100)
