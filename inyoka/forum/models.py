@@ -814,16 +814,9 @@ class Attachment(object):
             if not path.exists(path.abspath(thumb_path)):
                 # create a new thumbnail
                 thumbnail = Image.open(StringIO(self.contents))
-                ext = thumbnail.format
-                if thumbnail.size > settings.FORUM_THUMBNAIL_SIZE:
-                    thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
-                    thumbnail.save(thumb_path, ext)
-                else:
-                    f = open(thumb_path, 'wb')
-                    try:
-                        f.write(thumbnail.content)
-                    finally:
-                        f.close()
+                format = thumbnail.format
+                thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
+                thumbnail.save(thumb_path, format)
             thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
