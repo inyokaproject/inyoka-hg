@@ -415,23 +415,3 @@ class SearchQueue(models.Model):
 
     class Meta:
         ordering = ['id']
-
-
-class UserErrorReport(models.Model):
-    title = models.CharField('Titel', max_length=50)
-    text = models.TextField('Text')
-    reporter = models.ForeignKey(User, null=True, blank=True,
-                                 related_name='reporter')
-    date = models.DateTimeField('Datum')
-    url = models.URLField('URL')
-    assigned_to = models.ForeignKey(User, null=True, blank=True)
-    done = models.BooleanField('erledigt', default=False)
-
-    def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('admin', 'bugs', 'usererrors'),
-            'done': ('admin', 'bugs', 'usererrors', self.id, 'done'),
-            'not_done': ('admin', 'bugs', 'usererrors', self.id, 'not_done'),
-            'assigntome': ('admin', 'bugs', 'usererrors', self.id, 'assigntome'),
-            'assigntonobody': ('admin', 'bugs', 'usererrors', self.id, 'assigntonobody'),
-        }[action])

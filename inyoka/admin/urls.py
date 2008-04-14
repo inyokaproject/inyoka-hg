@@ -52,10 +52,6 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^groups/edit/(?P<name>.*)/$', 'groups_edit'),
     (r'^groups/new/$', 'groups_edit'),
     (r'^styles/$', 'styles'),
-    (r'^bugs/usererrors/$', 'usererrors'),
-    (r'^bugs/usererrors/all/$', 'usererrors', {'all': True}),
-    (r'^bugs/usererrors/(?P<id>\d+)/(?P<mode>assigntome|assigntonobody|done|not_done)/$', 'usererrors_change'),
-
 )
 
 handler404 = 'inyoka.portal.views.not_found'

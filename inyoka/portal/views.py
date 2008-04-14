@@ -45,7 +45,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
      NOTIFICATION_CHOICES
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
-     PrivateMessageEntry, PRIVMSG_FOLDERS, Event, UserErrorReport
+     PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
@@ -988,14 +988,6 @@ def user_error_report(request):
                 reporter = reporter,
             )
 
-#             uer = UserErrorReport()
-#             uer.title = data['title']
-#             uer.text = data['text']
-#             uer.url = data['url']
-#             uer.date = datetime.utcnow()
-#             if request.user.username != 'anonymous':
-#                 uer.reporter = request.user
-#             uer.save()
             flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)

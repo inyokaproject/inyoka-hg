@@ -28,7 +28,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditIconForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm
-from inyoka.portal.models import StaticPage, Event, UserErrorReport
+from inyoka.portal.models import StaticPage, Event
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
@@ -876,42 +876,3 @@ def styles(request):
         'form': form
     }
 
-
-@require_manager
-@templated('admin/usererrors.html')
-def usererrors(request, all=False):
-    if all:
-        errors = UserErrorReport.objects.order_by('-date')
-    else:
-        errors = UserErrorReport.objects.filter(done=False).order_by('-date')
-    return {
-        'errors': errors,
-        'show_all': all,
-    }
-
-def usererrors_change(request, id, mode):
-    try:
-        error = UserErrorReport.objects.get(id=id)
-    except UserErrorReport.DoesNotExist:
-        raise PageNotFound
-    if mode == 'assigntome':
-        error.assigned_to = request.user
-        error.save()
-        flash(u'Der Fehler „%s“ wurde dir zugewiesen!' % error.title, True)
-    elif mode == 'assigntonobody':
-        error.assigned_to = None
-        error.save()
-        flash(u'Der Fehler „%s“ wurde niemandem zugewiesen!' % error.title, True)
-    elif mode == 'done':
-        error.done = True
-        error.save()
-        flash(u'Der Fehler „%s“ wurde als erledigt markiert.'
-              % error.title, True)
-    elif mode == 'not_done':
-        error.done = False
-        error.save()
-        flash(u'Der Fehler „%s“ wurde als nicht erledigt markiert'
-              % error.title, True)
-    else:
-        raise PageNotFound
-    return HttpResponseRedirect(href('admin', 'bugs', 'usererrors'))
