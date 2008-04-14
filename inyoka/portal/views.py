@@ -978,6 +978,10 @@ def user_error_report(request):
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
                 ))
+            try:
+                text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
+            except KeyError:
+                pass
             reporter = request.user.id == 1 and '' or request.user.username
             text += u'\n\n%s' % data['text']
             trac = Trac()
