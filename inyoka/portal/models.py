@@ -377,7 +377,7 @@ class SearchQueueManager(models.Manager):
         item.doc_id = doc_id
         item.save()
 
-    def select_blocks(self, block_size=1000):
+    def select_blocks(self, block_size=100):
         """
         Fetch all elements in blocks from the search queue.
         Note that the elements automatically get deleted.

@@ -35,8 +35,7 @@ def update(limit=None):
     """
     for i, doc in enumerate(SearchQueue.objects.select_blocks()):
         search.index(doc[0], doc[1])
-        if not i % 1000:
-            search.flush()
+        search.flush()
 
 
 def reindex(app=None):
