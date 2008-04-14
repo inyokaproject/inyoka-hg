@@ -20,6 +20,7 @@
 from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
+from inyoka.utils.database import session
 
 # import required adapters
 import inyoka.forum.search
@@ -35,7 +36,11 @@ def update(limit=None):
     """
     for i, doc in enumerate(SearchQueue.objects.select_blocks()):
         search.index(doc[0], doc[1])
-        search.flush()
+        if i % 100 == 0:
+            search.flush()
+            session.remove()
+    search.flush()
+    session.remove()
 
 
 def reindex(app=None):
