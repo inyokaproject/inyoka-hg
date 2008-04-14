@@ -486,6 +486,8 @@ def usercp_settings(request):
             'hide_signatures': settings.get('hide_signatures', False),
             'hide_profile': settings.get('hide_profile', False),
             'autosubscribe': settings.get('autosubscribe', False),
+            'show_preview': settings.get('show_preview', False),
+            'show_thumbnails': settings.get('show_thumbnails', False)
         }
         form = UserCPSettingsForm(values)
     return {

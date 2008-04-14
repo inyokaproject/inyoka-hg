@@ -30,6 +30,11 @@
         {{ h.field_errors(form.errors.hide_profile) }}</dd>
     <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
         {{ h.field_errors(form.errors.autosubscribe) }}</dd>
+    <dd>{{ form.show_preview }} <label for="id_show_preview">{{ form.show_preview.label }}</label>
+        {{ h.field_errors(form.errors.show_preview) }}</dd>
+    <dd>{{ form.show_thumbnails }} <label for="id_show_thumbnails">{{ form.show_thumbnails.label }}</label><br />
+        <span class="note"> {{ form.show_thumbnails.help_text }}</span>
+        {{ h.field_errors(form.errors.show_thumbnails) }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

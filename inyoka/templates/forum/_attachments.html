@@ -16,12 +16,23 @@
 {%- if attachments %}
 <hr />
 <dl class="attachments">
-  {%- for att in attachments %}
-  <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
-  {% if att.comment %}
-  <dd class="comment">{{ att.comment|e }}</dd>
+  {%- for group in attachments|groupby('mimetype') %}
+  {% if group.grouper[:5] == 'image' and USER.settings.show_thumbnails %}
+    <dt>Bilder (Vorschau)</dt>
+    <dd><ul class="image_list">
+    {% for att in group.list %}
+    <li>{{ att.html_representation }}</li>
+    {% endfor %}
+    </ul></dd>
+  {% else %}
+    {% for att in group.list %}
+    <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+    {% if att.comment %}
+    <dd class="comment">{{ att.comment|e }}</dd>
+    {% endif %}
+    <dd>{{ att.html_representation }}</dd>
+    {% endfor %}
   {% endif %}
-  <dd>{{ att.html_representation }}</dd>
   {% endfor %}
 </dl>
 {%- endif %}

@@ -92,6 +92,7 @@ IMAGEMAGICK_PATH = ''
 # forum settings
 FORUM_LIMIT_UNREAD = 100
 FORUM_TOPIC_CACHE = 100
+FORUM_THUMBNAIL_SIZE = (128, 128)
 
 # the id of the ikhaya team group
 IKHAYA_GROUP_ID = 1

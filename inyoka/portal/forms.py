@@ -248,6 +248,12 @@ class UserCPSettingsForm(forms.Form):
     hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
     autosubscribe = forms.BooleanField(required=False,
                         label='Thema bei Antwort automatisch abonnieren')
+    show_preview = forms.BooleanField(required=False,
+        label='Anhang-Vorschau im Forum aktivieren')
+    show_thumbnails = forms.BooleanField(required=False,
+        label='Bilder-Vorschau im Forum aktivieren',
+        help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
+
 
 
 class UserCPProfileForm(forms.Form):

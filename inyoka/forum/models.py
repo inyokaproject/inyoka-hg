@@ -14,7 +14,9 @@ import os
 import cPickle
 from os import path
 from md5 import md5
+from PIL import Image
 from time import time
+from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
@@ -716,8 +718,8 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            fn = 'forum/attachments/' + md5((str(time()) + name).encode(
-                                                    'utf-8')).hexdigest()
+            fn = path.join('forum', 'attachments',
+                md5((str(time()) + name).encode('utf-8')).hexdigest())
             attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
             f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
@@ -795,19 +797,45 @@ class Attachment(object):
         link to the raw attachment.
         """
         url = escape(self.get_absolute_url())
-        #TODO: check for too big images and find a better text/*
-        #      check for the preview...
-        #TODO #2: we need a better way to send the attachment-mimetype
-        #         to the browser. `<a type="">` is not bulky supported
-        if self.mimetype.startswith('image/'):
+        show_thumbnails = current_request.user.settings.get(
+            'show_thumbnails', False)
+        show_preview = current_request.user.settings.get(
+            'show_preview', False)
+        fallback = u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
+            url, self.mimetype)
+
+        if not show_preview:
+            return fallback
+
+        if self.mimetype.startswith('image/') and show_thumbnails:
+            # handle and cache thumbnails
+            thumb_path = path.join(settings.MEDIA_ROOT,
+                'forum/thumbnails/%s.thumbnail' % self.file.split('/')[-1])
+            if not path.exists(path.abspath(thumb_path)):
+                # create a new thumbnail
+                thumbnail = Image.open(StringIO(self.contents))
+                ext = thumbnail.format
+                if thumbnail.size > settings.FORUM_THUMBNAIL_SIZE:
+                    thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
+                    thumbnail.save(thumb_path, ext)
+                else:
+                    f = open(thumb_path, 'wb')
+                    try:
+                        f.write(thumbnail.content)
+                    finally:
+                        f.close()
+            thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
+                             % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
-                   u'alt="%s"></a>' % ((url,) * 3)
-        elif self.mimetype.startswith('text/') and len(self.contents)<400:
+                   u'alt="%s" height="%s" width="%s"></a>' % (url, thumb_url,
+                    self.comment, settings.FORUM_THUMBNAIL_SIZE[0],
+                    settings.FORUM_THUMBNAIL_SIZE[1])
+
+        elif self.mimetype.startswith('text/') and len(self.contents)<250:
             return highlight_code(self.contents.decode('utf-8'),
                 mimetype=self.mimetype)
         else:
-            return u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
-                url, self.mimetype)
+            return fallback
 
     def open(self, mode='rb'):
         """
