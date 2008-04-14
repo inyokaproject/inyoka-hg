@@ -815,8 +815,15 @@ class Attachment(object):
                 # create a new thumbnail
                 thumbnail = Image.open(StringIO(self.contents))
                 format = thumbnail.format
-                thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
-                thumbnail.save(thumb_path, format)
+                if thumbnail.size > settings.FORUM_THUMBNAIL_SIZE:
+                    thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
+                    thumbnail.save(thumb_path, format)
+                else:
+                    f = open(thumb_path, 'wb')
+                    try:
+                        f.write(thumbnail.content)
+                    finally:
+                        f.close()
             thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
