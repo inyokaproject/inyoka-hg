@@ -68,8 +68,8 @@ class RegisterForm(forms.Form):
     email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
-        u'garantiert</a>, dass sie nicht weitergegeben wird.' % href('portal',
-                                                               'datenschutz'))
+        u'garantiert</a>, dass sie nicht weitergegeben wird.'
+        % href('portal', 'datenschutz'))
     password = forms.CharField(label='Passwort',
         widget=forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Passwortbestätigung',
@@ -248,6 +248,12 @@ class UserCPSettingsForm(forms.Form):
     hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
     autosubscribe = forms.BooleanField(required=False,
                         label='Thema bei Antwort automatisch abonnieren')
+    show_preview = forms.BooleanField(required=False,
+        label='Anhang-Vorschau im Forum aktivieren')
+    show_thumbnails = forms.BooleanField(required=False,
+        label='Bilder-Vorschau im Forum aktivieren',
+        help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
+
 
 
 class UserCPProfileForm(forms.Form):

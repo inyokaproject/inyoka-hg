@@ -232,14 +232,13 @@ def lost_password(request):
                   u'E-Mail-Adresse gesendet!', True)
 
             # clean up request.session
-            return HttpResponseRedirect(href('portal'))
+            return HttpResponseRedirect(href('portal', 'login'))
     else:
         form = LostPasswordForm()
 
     return {
         'form': form
     }
-    #TODO: maybe we should limit that to some days
 
 
 @templated('portal/set_new_password.html')
@@ -485,7 +484,10 @@ def usercp_settings(request):
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False),
-            'hide_profile': settings.get('hide_profile', False)
+            'hide_profile': settings.get('hide_profile', False),
+            'autosubscribe': settings.get('autosubscribe', False),
+            'show_preview': settings.get('show_preview', False),
+            'show_thumbnails': settings.get('show_thumbnails', False)
         }
         form = UserCPSettingsForm(values)
     return {
@@ -722,7 +724,7 @@ def memberlist(request, page=1):
         'date_joined':  (u'Anmeldungsdatum', 'date'),
         'post_count':   (u'Beiträge', 'int'),
         'location':     (u'Wohnort', 'str'),
-    }, request.POST)
+    }, request.GET)
     pagination = Pagination(request, filterable.get_objects(), page, 15,
         href('portal', 'users'))
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
@@ -765,7 +767,7 @@ def group(request, name, page=1):
     pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (
-        href('portal', 'groups', escape(name)),
+        href('portal', 'group', escape(name)),
         escape(name)
     ))
     return {

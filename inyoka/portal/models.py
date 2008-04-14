@@ -21,7 +21,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.portal.user import User
 from inyoka.wiki.models import Page
-from inyoka.forum.models import Topic, Forum
+from inyoka.forum.models import Forum, SAGroup
 from inyoka.wiki.parser import parse, render, RenderContext
 
 

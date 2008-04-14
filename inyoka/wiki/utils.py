@@ -195,7 +195,7 @@ def resolve_interwiki_link(wiki, page):
     will be `None`.
     """
     if wiki == 'user':
-        return href('portal', 'users', page)
+        return href('portal', 'user', page)
     if wiki == 'attachment':
         return href('wiki', '_attachment', target=page)
     rule = storage.interwiki.get(wiki)

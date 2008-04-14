@@ -14,7 +14,9 @@ import os
 import cPickle
 from os import path
 from md5 import md5
+from PIL import Image
 from time import time
+from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
@@ -31,7 +33,7 @@ from inyoka.utils.local import current_request
 from inyoka.utils.database import session as dbsession
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table
+        poll_option_table, poll_vote_table, group_table
 
 
 POSTS_PER_PAGE = 15
@@ -53,21 +55,6 @@ UBUNTU_DISTROS = {
     'edubuntu': 'Edubuntu',
     'server': 'Server',
 }
-REGEX = '(.+)Ubuntu\/%s \(%s\)(.+)'
-VERSION_REGEXES = [
-    (i, re.compile(REGEX % (i, name.split(' ')[0].lower())))
-    for i, name in UBUNTU_VERSIONS.iteritems()
-]
-
-
-def get_ubuntu_version(request):
-    """
-    Try to find out which ubuntu version the user is using by matching the
-    HTTP_USER_AGGENT against some regexes.
-    """
-    for i, regex in VERSION_REGEXES:
-        if regex.match(request.META.get('HTTP_USER_AGENT', '')):
-            return i
 
 
 class SearchMapperExtension(MapperExtension):
@@ -731,8 +718,8 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            fn = 'forum/attachments/' + md5((str(time()) + name).encode(
-                                                    'utf-8')).hexdigest()
+            fn = path.join('forum', 'attachments',
+                md5((str(time()) + name).encode('utf-8')).hexdigest())
             attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
             f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
@@ -810,18 +797,43 @@ class Attachment(object):
         link to the raw attachment.
         """
         url = escape(self.get_absolute_url())
-        #TODO: check for too big images and find a better text/*
-        #      check for the preview...
-        #TODO #2: we need a better way to send the attachment-mimetype
-        #         to the browser. `<a type="">` is not bulky supported
-        if self.mimetype.startswith('image/'):
-            return u'<a href="%s"><img class="attachment" src="%s" ' \
-                   u'alt="%s"></a>' % ((url,) * 3)
-        elif self.mimetype.startswith('text/') and len(self.contents)<200:
-            return highlight_code(self.contents, mimetype=self.mimetype)
+        show_thumbnails = current_request.user.settings.get(
+            'show_thumbnails', False)
+        show_preview = current_request.user.settings.get(
+            'show_preview', False)
+        fallback = u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
+            url, self.mimetype)
+
+        if not show_preview:
+            return fallback
+
+        if self.mimetype.startswith('image/') and show_thumbnails:
+            # handle and cache thumbnails
+            thumb_path = path.join(settings.MEDIA_ROOT,
+                'forum/thumbnails/%s.thumbnail' % self.file.split('/')[-1])
+            if not path.exists(path.abspath(thumb_path)):
+                # create a new thumbnail
+                thumbnail = Image.open(StringIO(self.contents))
+                format = thumbnail.format
+                if thumbnail.size > settings.FORUM_THUMBNAIL_SIZE:
+                    thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
+                    thumbnail.save(thumb_path, format)
+                else:
+                    f = open(thumb_path, 'wb')
+                    try:
+                        f.write(thumbnail.content)
+                    finally:
+                        f.close()
+            thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
+                             % self.file.split('/')[-1])
+            return u'<a href="%s"><img class="preview" src="%s" ' \
+                   u'alt="%s"></a>' % (url, thumb_url, self.comment)
+
+        elif self.mimetype.startswith('text/') and len(self.contents)<250:
+            return highlight_code(self.contents.decode('utf-8'),
+                mimetype=self.mimetype)
         else:
-            return u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
-                url, self.mimetype)
+            return fallback
 
     def open(self, mode='rb'):
         """
@@ -927,7 +939,7 @@ class WelcomeMessage(object):
 class SAUser(object):
 
     def get_absolute_url(self):
-        return href('portal', 'users', self.username)
+        return href('portal', 'user', self.username)
 
     @property
     def avatar_url(self):
@@ -955,6 +967,18 @@ class SAUser(object):
 
     def __unicode__(self):
         return self.username
+
+
+class SAGroup(object):
+
+    def get_absolute_url(self):
+        return href('portal', 'groups', self.name)
+
+    def __unicode__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
 
 
 class ReadStatus(object):
@@ -1029,6 +1053,7 @@ class ReadStatus(object):
 
 
 dbsession.mapper(SAUser, user_table)
+dbsession.mapper(SAGroup, group_table)
 dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })

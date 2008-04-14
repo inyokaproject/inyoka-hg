@@ -19,6 +19,7 @@
 
 body {
   font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
+  color: black;
   font-size: 0.9em;
 }
 
@@ -27,11 +28,11 @@ html, body {
 }
 
 div.wrap {
-  margin:10px;
-  background-image:url(../img/float-left.jpg);
-  background-repeat:repeat-y;
-  background-color:#FFFFFF;
-  border-bottom:#aba393 1px solid;
+  margin: 10px;
+  background-image: url(../img/float-left.jpg);
+  background-repeat: repeat-y;
+  background-color: #FFFFFF;
+  border-bottom: #aba393 1px solid;
 }
 
 div.wrap2 {
@@ -68,6 +69,11 @@ a, :link, :visited {
 
 a img, :link img, :visited img {
   border: none;
+}
+
+a.strong {
+  color: #191919;
+  font-weight: bold;
 }
 
 input {
@@ -365,6 +371,17 @@ span.highlight {
   color: #111;
 }
 
+.extlink:after {
+  content: url(../img/extlink.gif);
+  margin-left:5px;
+}
+
+/* This is used in the UserCP-Subscriptions page */
+h3 .note {
+  font-size: 0.7em;
+  padding-left: 0px;
+}
+
 table.syntaxtable {
   border: 1px solid #DDDDDD;
   border-collapse: collapse;
@@ -399,7 +416,7 @@ table.syntaxtable td.linenos {
 
 .header {
   height: 106px;
-//  background-image: url(../img/header.jpg);
+/*  background-image: url(../img/header.jpg);*/
 }
 
 .header img {
@@ -695,6 +712,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   padding: 5px 5px 5px 8px;
   font-size: 0.85em;
   margin: 0 20px 10px 20px;
+  position:relative;
 }
 
 .content_tabbar div.pathbar {
@@ -707,7 +725,8 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 form.search {
-  float: right;
+  position: absolute;
+  right: 5px;
 }
 
 form.search p {
@@ -1072,9 +1091,8 @@ div.not_found img {
     padding: .5em;
     text-align: center;
     border-bottom: 1px solid #888;
-//    background-color: #F9F9F9;
-    background-image:url(../img/jslogin.png);
-    background-repeat:no-repeat;
+    background-image: url(../img/jslogin.png);
+    background-repeat: no-repeat;
 }
 
 #js_login_form .right {

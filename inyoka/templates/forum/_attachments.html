@@ -9,30 +9,30 @@
             This has to be a list of the attachments that belong to the current
             post.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007-2008 by Benjamin Wiegand, Christopher Grebs.
     :license GNU GPL
     
 #}
 {%- if attachments %}
-<table class="attachments">
-  {%- for att in attachments %}
-  <tr>
-    <th colspan="3">{{ att.name|e }}</th>
-  </tr>
-  {%- if att.comment %}
-  <tr>
-    <td colspan="3" class="comment">
-      {{ att.comment|e }}
-    </td>
-  </tr>
-  {%- endif %}
-  <tr>
-    <td>Dateigröße:</td>
-    <td>{{ att.size|filesizeformat }}</td>
-    <td>
-      {{ att.html_representation }}
-    </td>
-  </tr>
-  {%- endfor %}
-</table>
+<hr />
+<dl class="attachments">
+  {%- for group in attachments|groupby('mimetype') %}
+  {% if group.grouper[:5] == 'image' and USER.settings.show_thumbnails %}
+    <dt>Bilder (Vorschau)</dt>
+    <dd><ul class="image_list">
+    {% for att in group.list %}
+    <li>{{ att.html_representation }}</li>
+    {% endfor %}
+    </ul></dd>
+  {% else %}
+    {% for att in group.list %}
+    <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+    {% if att.comment %}
+    <dd class="comment">{{ att.comment|e }}</dd>
+    {% endif %}
+    <dd>{{ att.html_representation }}</dd>
+    {% endfor %}
+  {% endif %}
+  {% endfor %}
+</dl>
 {%- endif %}

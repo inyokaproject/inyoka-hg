@@ -18,7 +18,9 @@
 <form enctype="multipart/form-data" class="usercp_form" method="post" action="">
   <h3>Benutzereinstellungen</h3>
   <dl>
-    {{ h.render_form(form, 'notify', 'notifications', 'timezone', inline=true) }}
+    {{ h.render_form(form, 'notify', 'notifications', inline=True) }}
+    <p class="note"><a href="{{ href('portal', 'usercp', 'subscriptions') }}">Deine Benachrichtigungen kannst du hier bearbeiten</a></p>
+    {{ h.render_form(form, 'timezone', inline=true) }}
     <dt>Oberfläche</dt>
     <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">{{ form.hide_avatars.label }}</label>
         {{ h.field_errors(form.errors.hide_avatar) }}</dd>
@@ -28,6 +30,11 @@
         {{ h.field_errors(form.errors.hide_profile) }}</dd>
     <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
         {{ h.field_errors(form.errors.autosubscribe) }}</dd>
+    <dd>{{ form.show_preview }} <label for="id_show_preview">{{ form.show_preview.label }}</label>
+        {{ h.field_errors(form.errors.show_preview) }}</dd>
+    <dd>{{ form.show_thumbnails }} <label for="id_show_thumbnails">{{ form.show_thumbnails.label }}</label><br />
+        <span class="note"> {{ form.show_thumbnails.help_text }}</span>
+        {{ h.field_errors(form.errors.show_thumbnails) }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

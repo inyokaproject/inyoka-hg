@@ -206,7 +206,8 @@
         <label for="js_login_permanent" class="right">Eingeloggt bleiben</label>
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
         <input type="submit" value="Einloggen" class="submit" />
-        <a href="javascript:$('#js_login_form').fadeOut('slow');void(0);">Abbrechen</a>
+        <input type="button" onclick="javascript:$('#js_login_form').fadeOut('slow');void(0);" value="Abbrechen" />
+        <a href="{{ href('portal', 'lost_password') }}" class="strong">Passwort vergessen</a>
       </div>
     </form>
     {%- endif %}

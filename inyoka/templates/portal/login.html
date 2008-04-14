@@ -32,7 +32,7 @@
     Hier kannst du dich mit deinem Benutzer anmelden, wenn du dich schon 
     <a href="{{ href('portal', 'register') }}">registriert hast</a>.
     Falls du dein Passwort vergessen hast, kannst du dir <a href="
-    {{- href('portal', 'lost_password') }}">ein Neues zuschicken lassen</a>.
+    {{- href('portal', 'lost_password') }}">ein neues zuschicken lassen</a>.
   </p>
   {%- if failed %}
   {%- if not inactive and not banned %}
@@ -67,7 +67,7 @@
       <dd>
         {{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label>
         <div class="help_text">Wähle dies nicht aus, wenn du dich von einem öffentlichen
-          Computer aus anmeldest, da sonst andere Zugriff auf deinen Benutzer erhalten
+          Computer aus anmeldest, da sonst andere Zugriff auf dein Benutzerkonto erhalten
           können.</div>
       </dd>
     </dl>

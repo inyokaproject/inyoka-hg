@@ -22,7 +22,7 @@ ENABLE_DEBUGGER = False
 # enable logging to trac. Maybe only for development use...
 ENABLE_TRAC_LOGGING = True
 
-# template caching.  If none the templates will be cache if the
+# template caching.  If none the templates will be cached if the
 # debug stuff is disabled
 TEMPLATE_CACHING = None
 
@@ -92,6 +92,7 @@ IMAGEMAGICK_PATH = ''
 # forum settings
 FORUM_LIMIT_UNREAD = 100
 FORUM_TOPIC_CACHE = 100
+FORUM_THUMBNAIL_SIZE = (64, 64)
 
 # the id of the ikhaya team group
 IKHAYA_GROUP_ID = 1

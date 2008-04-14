@@ -29,6 +29,11 @@ def feeds(args, match):
     return href('static', 'feeds_update.xml')
 
 
+@legacy.url(r'^/users/(.+)/?')
+def user_profile(args, match, username):
+    return href('portal', 'user', username)
+
+
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
 @legacy.url(r'^/portal\.php$')

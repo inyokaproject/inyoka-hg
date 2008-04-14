@@ -151,7 +151,7 @@ MAXIMUM_DEPTH = 200
 
 # the default inter-"wiki"s
 STANDARD_WIKI_MAP = {
-    'user':   lambda x: href('portal', 'users', x),
+    'user':   lambda x: href('portal', 'user', x),
     'paste':  lambda x: href('pastebin', x),
     'topic':  lambda x: href('forum', 'topic', x),
     'ikhaya': lambda x: href('ikhaya', x),

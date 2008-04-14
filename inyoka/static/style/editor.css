@@ -4,7 +4,7 @@
  *
  * The style for the javascript-based wiki syntax editor.
  *
- * :copyright: 2007 by Armin Ronacher, Benjamin Wiegand.
+ * :copyright: 2007-2008 by Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
 
@@ -75,7 +75,8 @@ ul.toolbar li #button-shrink        { background-image: url(../img/icons/shrink.
 ul.toolbar li #button-enlarge       { background-image: url(../img/icons/enlarge.png); height: 12px; position: relative; left:-30px; top:15px }
 
 ul.toolbar li ul.colorbox,
-ul.toolbar li ul.smileybox {
+ul.toolbar li ul.smileybox,
+ul.toolbar li table.codebox {
     list-style: none;
     position: absolute;
     border: 1px solid #aaa;
@@ -89,6 +90,17 @@ ul.toolbar li ul.smileybox li {
     padding: 1px;
     width: 24px;
     cursor: pointer;
+}
+
+ul.toolbar li table.codebox td {
+    cursor: pointer;
+    padding: 2px 10px;
+    background-color: #eee;
+    border: 1px solid #aaa;
+}
+
+ul.toolbar li table.codebox td:hover {
+    background-color: #fff;
 }
 
 ul.toolbar li ul.smileybox li {
