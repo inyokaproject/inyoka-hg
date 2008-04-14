@@ -827,9 +827,7 @@ class Attachment(object):
             thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
-                   u'alt="%s"></a>' % (url, thumb_url,
-                    self.comment, settings.FORUM_THUMBNAIL_SIZE[0],
-                    settings.FORUM_THUMBNAIL_SIZE[1])
+                   u'alt="%s"></a>' % (url, thumb_url, self.comment)
 
         elif self.mimetype.startswith('text/') and len(self.contents)<250:
             return highlight_code(self.contents.decode('utf-8'),
