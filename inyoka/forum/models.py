@@ -827,7 +827,7 @@ class Attachment(object):
             thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
-                   u'alt="%s" height="%s" width="%s"></a>' % (url, thumb_url,
+                   u'alt="%s"></a>' % (url, thumb_url,
                     self.comment, settings.FORUM_THUMBNAIL_SIZE[0],
                     settings.FORUM_THUMBNAIL_SIZE[1])
 
