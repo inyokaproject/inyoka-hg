@@ -95,12 +95,12 @@ def get_privileges(user, forum_ids):
 def have_privilege(user, obj, privilege):
     """Check if a user has a privilege on a forum or a topic."""
     if hasattr(obj, 'forum_id'):
-        # obj is a forum
-        forum_id = obj.id
-    else:
         # obj is a topic
         forum_id = obj.forum_id
-    return get_forum_privileges(user, forum.id) & privilege != 0
+    else:
+        # obj is a forum
+        forum_id = obj.id
+    return get_forum_privileges(user, forum_id) & privilege != 0
 
 
 def check_privilege(mask, privilege):
