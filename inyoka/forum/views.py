@@ -677,7 +677,7 @@ def movetopic(request, topic_slug):
     if not t:
         raise PageNotFound
     if not have_privilege(request.user, t.forum, CAN_MODERATE):
-        return abort_access_denied()
+        return abort_access_denied(request)
 
     forums = filter_invisible(request.user, Forum.query.filter(and_(
         Forum.c.parent_id != None, Forum.c.id != t.forum_id)))
@@ -924,7 +924,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         if topic is None:
             raise PageNotFound
         if not have_privilege(anonymous, topic.forum, CAN_READ):
-            return abort_access_denied()
+            return abort_access_denied(request)
         if topic.hidden:
             raise PageNotFound
 
@@ -973,7 +973,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
             if forum is None:
                 raise PageNotFound
             if not have_privilege(anonymous, forum, CAN_READ):
-                return abort_access_denied()
+                return abort_access_denied(request)
 
             cache_key = 'forum/feeds/forum/%s/%s' % (slug, mode)
             feed = cache.get(cache_key)
