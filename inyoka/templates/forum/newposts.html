@@ -25,32 +25,32 @@
         <th class="view_count">Aufrufe</th>
         <th class="last_post">Letzte Antwort</th>
       </tr>
-    {%- for post in posts %}
-      <tr{% if post.topic.hidden or post.topic.reported %} class="{% if post.topic.hidden %}hidden {% endif %}{% if post.topic.reported %}reported{% endif %}"{% endif %}>
+      {%- for topic in topics %}
+      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
-          {{ topic_icon(post.topic) }}
+          {{ topic_icon(topic) }}
         </td>
         <td class="topic">
           <p class="topic_title">
-            {%- if post.topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
-            {%- if post.topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-            {%- if post.topic.hidden %} [Verborgen] {% endif %}
-            {%- if post.topic.reported %} [Gemeldet] {% endif %}
-            <a href="{{ post.topic|url }}">{{ post.topic.title|e }}</a>
+            {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
+            {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
+            {%- if topic.hidden %} [Verborgen] {% endif %}
+            {%- if topic.reported %} [Gemeldet] {% endif %}
+            <a href="{{ topic|url }}">{{ topic.title|e }}</a>
           </p>
           <p class="description">
-            von <a href="{{ post.topic.author|url }}">{{ post.topic.author.username|e }}</a>
-            {%- if post.topic.paginated %} &#160; &#160; [
-              Gehe zu Seite {{post.topic.get_pagination() }}
+            von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
+            {%- if topic.paginated %} &#160; &#160; [
+              Gehe zu Seite {{topic.get_pagination() }}
             ]{% endif -%}
           </p>
         </td>
-        <td class="post_count">{{ post.topic.post_count }}</td>
-        <td class="view_count">{{ post.topic.view_count }}</td>
+        <td class="post_count">{{ topic.post_count }}</td>
+        <td class="view_count">{{ topic.view_count }}</td>
         <td class="last_post">
-          <a href="{{ post|url}}" class="date">{{
-              post.pub_date|datetimeformat }}</a><br />
-          <a href="{{ post.author|url}}">{{ post.author }}</a>
+          <a href="{{ topic.last_post|url}}" class="date">{{
+              topic.last_post.pub_date|datetimeformat }}</a><br />
+          <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
         </td>
       </tr>
     {% else %}

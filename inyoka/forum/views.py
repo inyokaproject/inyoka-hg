@@ -1073,7 +1073,8 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    privs = get_privileges(request.user, Forum.objects.all())
+    forum_ids = [f[0] for f in select([forum_table.c.id]).execute()]
+    privs = get_privileges(request.user, forum_ids)
     all_topics = cache.get('forum/lasttopics')
     if not all_topics:
         all_topics = list(Topic.query.options(eagerload('author'), \
@@ -1084,12 +1085,12 @@ def newposts(request, page=1):
     for topic in all_topics:
         if topic.last_post_id < request.user.forum_last_read:
             break
-        if privs.get(topic.forum_id, {}).get('read', False):
+        if check_privilege(privs.get(topic.forum_id, {}), CAN_READ):
             topics.append(topic)
     pagination = Pagination(request, topics, page, 20,
         href('forum', 'newposts'))
     return {
-        'posts': pagination.objects,
+        'topics':     pagination.objects,
         'pagination': pagination
     }
 
