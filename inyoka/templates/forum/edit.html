@@ -93,9 +93,6 @@
       {%- for poll in polls %}{% if not loop.first %},{% endif %}{{ poll.id }}
       {%- endfor %}">
       {{ h.field_errors(form.errors.__all__) }}
-      {%- if isnewpost -%}
-      <input type="hidden" name="start_time" value="{{ start_time }}" />
-      {%- endif %}
       <input type="submit" value="Speichern" name="send" />
       <input type="submit" value="Vorschau" name="preview" />
       <input type="submit" value="Abbrechen" name="cancel" />
@@ -137,7 +134,7 @@
     })();
     /* ]]> */
   </script>
-  {%- if isnewpost %}
+  {%- if not isnewtopic %}
   <table class="topic">
     <thead>
       <tr><th id="recent_posts" colspan="2">Letzte Einträge</th></tr>

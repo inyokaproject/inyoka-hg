@@ -4,7 +4,7 @@
  *
  * Adds support for inserting quotes into the WikiEditor.
  *
- * :copyright: 2008 by Armin Ronacher.
+ * :copyright: 2008 by Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
 
