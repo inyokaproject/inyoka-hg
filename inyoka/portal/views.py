@@ -971,6 +971,11 @@ def user_error_report(request):
         form = UserErrorReportForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+            spam_test = data['title'].lower() + data['text'].lower()
+            spam_words = ('porn', 'erotik', 'sex', 'casino')
+            for w in spam_words:
+                if w in spam_test:
+                    return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
                 text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
