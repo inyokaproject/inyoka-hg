@@ -972,7 +972,7 @@ def user_error_report(request):
         if form.is_valid():
             data = form.cleaned_data
             spam_test = data['title'].lower() + data['text'].lower()
-            spam_words = ('porn', 'erotik', 'sex', 'casino')
+            spam_words = ('porn', 'erotik', 'sex', 'casino', 'poker')
             for w in spam_words:
                 if w in spam_test:
                     return {'spam': True}
