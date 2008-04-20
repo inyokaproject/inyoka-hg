@@ -1073,6 +1073,7 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
+    # TODO: This shows hidden topics to everyone
     forum_ids = [f[0] for f in select([forum_table.c.id]).execute()]
     privs = get_privileges(request.user, forum_ids)
     all_topics = cache.get('forum/lasttopics')

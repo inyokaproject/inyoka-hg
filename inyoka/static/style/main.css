@@ -178,6 +178,7 @@ pre {
   padding: 0 0.4em;
   margin: 0.5em 1em;
   overflow: auto;
+  font-style: normal;
 }
 
 ol, ul {
