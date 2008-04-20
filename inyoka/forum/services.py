@@ -6,7 +6,7 @@
     Forum specific services.
 
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: Copyright 2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
 from sqlalchemy.orm import eagerload
@@ -31,9 +31,9 @@ def on_get_post(request):
         return None
     if not post:
         return None
-    privileges = get_forum_privileges(request.user, post.topic.forum_id)
-    if not check_privilege('read') or (not check_privilege('moderate') and
-       post.topic.hidden or post.hidden):
+    privs = get_forum_privileges(request.user, post.topic.forum_id)
+    if not check_privilege(privs, 'read') or (not check_privilege(privs,
+                       'moderate') and post.topic.hidden or post.hidden):
         return None
     return {
         'id':       post.id,
