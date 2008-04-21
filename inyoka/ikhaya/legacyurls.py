@@ -33,7 +33,7 @@ def archive(args, match, year, month):
 
 
 @legacy.url('^/category/(\d+)/?$')
-def category(args, match, category_id)
+def category(args, match, category_id):
     try:
         category = Category.objects.get(category_id)
     except Category.DoesNotExist:
