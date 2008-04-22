@@ -524,6 +524,9 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
     which have the slug `slug` and are registered in the subscribtion by
     `subscriptionkw` and have the flashing-test `flasher`
     """
+    if subscriptionkw in ('forum', 'topic'):
+        subscriptionkw = subscriptionkw + '_id'
+    subscriptionkw = subscriptionkw
     @simple_check_login
     def subscriber(request, **kwargs):
         """
@@ -535,10 +538,10 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
         if not have_privilege(request.user, x, CAN_READ):
             return abort_access_denied(request)
         try:
-            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x.id})
         except Subscription.DoesNotExist:
             # there's no such subscription yet, create a new one
-            Subscription(user=request.user,**{subscriptionkw : x}).save()
+            Subscription(user=request.user,**{subscriptionkw : x.id}).save()
             flash(flasher)
         return HttpResponseRedirect(url_for(x))
     return subscriber
@@ -550,6 +553,8 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
     which have the slug `slug` and are registered in the subscribtion by
     `subscriptionkw` and have the flashing-test `flasher`
     """
+    if subscriptionkw in ('forum', 'topic'):
+        subscriptionkw = subscriptionkw + '_id'
     @simple_check_login
     def subscriber(request, **kwargs):
         """ If the user has already subscribed to this %s, this view removes it.
@@ -559,7 +564,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         if not have_privilege(request.user, x, CAN_READ):
             return abort_access_denied(request)
         try:
-            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x})
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x.id})
         except Subscription.DoesNotExist:
             pass
         else:
