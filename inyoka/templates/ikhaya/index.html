@@ -40,7 +40,7 @@
         in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> |
         {%- if article.comment_count == 0 %} Keine <a href="{{ article|url }}#comments">Kommentare</a>
         {%- elif article.comment_count == 1 %} Ein <a href="{{ article|url }}#comments">Kommentar</a>
-        {%- else %} {{ article.comment_count|hnumber }} <a href="{{ article|url }}#comments">Kommentare</a>
+        {%- else %} {{ article.comment_count|hnumber|capitalize }} <a href="{{ article|url }}#comments">Kommentare</a>
         {%- endif %}
         {%- if REQUEST.user.is_manager %} | <a href="{{ article|url('edit') }}">Bearbeiten</a>{% endif %}
 
