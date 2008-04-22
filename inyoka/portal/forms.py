@@ -16,7 +16,7 @@ from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
-                               HiddenCaptchaField, EmailField
+                               HiddenCaptchaField, EmailField, JabberField
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 
@@ -260,7 +260,7 @@ class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
     email = EmailField(label='E-Mail', required=True)
-    jabber = forms.CharField(label='Jabber', required=False)
+    jabber = JabberField(label='Jabber', required=False)
     icq = forms.IntegerField(label='ICQ', required=False,
                              min_value=1, max_value=1000000000)
     msn = forms.CharField(label='MSN Messenger', required=False)

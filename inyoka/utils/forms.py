@@ -19,6 +19,7 @@ from inyoka.portal.user import User
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
 from inyoka.utils.mail import may_accept_mails, may_be_valid_mail
+from inyoka.utils.jabber import may_be_valid_jabber
 
 
 DATETIME_INPUT_FORMATS = (
@@ -150,6 +151,20 @@ class EmailField(forms.CharField):
         elif not may_accept_mails(value):
             raise forms.ValidationError(u'''
                 Die E-Mail Adresse zeigt auf eine ungültige Domain.  Bitte
+                überprüfe die Eingabe.
+            '''.strip())
+        return value
+
+
+class JabberField(forms.CharField):
+
+    def clean(self, value):
+        if not value:
+            return
+        value = value.strip()
+        if not may_be_valid_jabber(value):
+            raise forms.ValidationError(u'''
+                Die von dir angegebene Jabber Adresse ist ungültig.  Bitte
                 überprüfe die Eingabe.
             '''.strip())
         return value
