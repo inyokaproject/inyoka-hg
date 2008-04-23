@@ -9,12 +9,23 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import re
 import socket
 from xmlrpclib import ServerProxy, Fault
 from inyoka.conf import settings
 
 
 _proxy = None
+
+#XXX: according to rfc4622 a nodeid is optional. But we require one
+#     'cause nobody should enter a service-jid in the jabber field.
+#     Should we permit or deny? If we permit we need to validate the
+#     domain and resid!
+_jabber_re = re.compile(r'(?xi)(?:[a-z0-9!$\(\)*+,;=\[\\\]\^`{|}\-._~]+)@')
+
+
+def may_be_valid_jabber(jabber):
+    return _jabber_re.match(jabber) is not None
 
 
 def send(jid, message, xhtml=True):
