@@ -264,6 +264,6 @@ def format_specific_datetime(value, alt=False, enforce_utc=False):
             (u'von gestern ', 'gestern um ')
         )[delta.days + 1][bool(alt)]
     else:
-        string = (alt and u'am %s um' or 'vom %s um ') % \
+        string = (alt and u'am %s um ' or 'vom %s um ') % \
             DateFormat(value).format('j. F Y')
-    return string + format_time(value, enforce_utc)
+    return string + format_time(value, enforce_utc) + ' Uhr'
