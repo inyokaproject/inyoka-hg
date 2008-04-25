@@ -32,7 +32,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
-from inyoka.utils.dates import datetime_to_timezone
+from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
      send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
@@ -124,7 +124,10 @@ def register(request):
 
             # set timezone based on browser language.  This is not the
             # best way to do that, but good enough for the moment.
-            timezone = 'UTC'
+
+            # Why don't we just use the DEFAULT_TIMEZONE and let the user
+            # choose some more details. -- entequak
+            timezone = DEFAULT_TIMEZONE
             language_header = request.META.get('HTTP_ACCEPT_LANGUAGES')
             if language_header:
                 languages = parse_accept_header(language_header)
@@ -138,7 +141,7 @@ def register(request):
                     timezone = timezones[0]
 
             # utc is default, no need for another update statement
-            if timezone != 'UTC':
+            if timezone != DEFAULT_TIMEZONE:
                 user.settings['timezone'] = timezone
                 user.save()
 
