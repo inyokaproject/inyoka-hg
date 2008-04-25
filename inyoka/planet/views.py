@@ -91,14 +91,14 @@ def suggest(request):
     }
 
 
-def feed(request, mode='short', count=25):
+def feed(request, mode='short', count=20):
     """show the feeds for the planet"""
 
     if not mode in ('full', 'short', 'title'):
         raise PageNotFound
 
     count = int(count)
-    if count not in (5, 10, 15, 20, 25, 50, 75, 100):
+    if count not in (10, 20, 30, 50, 75, 100):
         raise PageNotFound
 
     key = 'planet/feeds/%s/%d' % (mode, count)

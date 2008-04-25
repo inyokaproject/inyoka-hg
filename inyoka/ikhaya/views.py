@@ -176,7 +176,7 @@ def suggestionlist(request):
     }
 
 
-def feed(request, category_slug=None, mode='short', count=25):
+def feed(request, category_slug=None, mode='short', count=20):
     """
     Shows the ikhaya entries that match the given criteria in an atom feed.
     """
@@ -185,7 +185,7 @@ def feed(request, category_slug=None, mode='short', count=25):
         raise PageNotFound()
 
     count = int(count)
-    if count not in (5, 10, 15, 20, 25, 50, 75, 100):
+    if count not in (10, 20, 30, 50, 75, 100):
         raise PageNotFound()
 
     key = 'ikhaya/feeds/%s/%s/%s' % (category_slug, mode, count)

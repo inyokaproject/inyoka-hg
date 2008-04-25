@@ -78,7 +78,7 @@
       </ul>
       <p>
         <label for="id_forum_count">Anzahl der Einträge im Feed:</label>
-        <input type="text" name="count" id="id_forum_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        <input type="text" name="count" id="id_forum_count" size="2" maxlength="3" value="{{ form.count or '20' }}" class="feed_count" />
         {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
         <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
       </p>
@@ -122,7 +122,7 @@
       </ul>
       <p>
         <label for="id_ikhaya_count">Anzahl der Einträge im Feed:</label>
-        <input type="text" name="count" id="id_ikhaya_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        <input type="text" name="count" id="id_ikhaya_count" size="2" maxlength="3" value="{{ form.count or '20' }}" class="feed_count" />
         {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
         <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
       </p>
@@ -148,7 +148,7 @@
       </ul>
       <p>
         <label for="id_planet_count">Anzahl der Einträge im Feed:</label>
-        <input type="text" name="count" id="id_planet_count" size="2" maxlength="3" value="{{ form.count or '25' }}" class="feed_count" />
+        <input type="text" name="count" id="id_planet_count" size="2" maxlength="3" value="{{ form.count or '20' }}" class="feed_count" />
         {%- if errors.count %} <span class="error">{{ errors.count }}</span>{% endif %}
         <span class="help_text">Die Anzahl wird gerundet, um die Serverlast gering zu halten.</span>
       </p>

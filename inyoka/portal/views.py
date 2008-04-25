@@ -882,7 +882,7 @@ def feedselector(request, app=None):
 
 
 def _feed_count_cleanup(n):
-    COUNTS = (5, 10, 15, 20, 25, 50, 75, 100)
+    COUNTS = (10, 20, 30, 50, 75, 100)
     if n in COUNTS:
         return n
     if n < COUNTS[0]:
