@@ -386,7 +386,7 @@ h3 .note {
 table.syntaxtable {
   border: 1px solid #DDDDDD;
   border-collapse: collapse;
-  margin: 1em 0 0 0;
+  margin: /*1em 0 0*/ 0;
   width: 100%;
 }
 

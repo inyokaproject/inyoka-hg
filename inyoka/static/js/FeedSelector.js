@@ -180,7 +180,7 @@
       errors.mode = 'Bitte eine Art auswählen!';
       
     if (isNaN(form.count.value) || form.count.value.length < 1) {
-      errors.count = 'Bitte eine Zahl zwischen 5 und 100 eingeben!';
+      errors.count = 'Bitte eine Zahl zwischen 10 und 100 eingeben!';
       form.count.value = data.count || '20';
     }
     else

@@ -1145,7 +1145,8 @@ class Attachment(models.Model):
             return u'<a href="%s"><img class="attachment" src="%s" ' \
                    u'alt="%s"></a>' % ((url,) * 3)
         elif self.mimetype.startswith('text/'):
-            return highlight_code(self.contents, filename=self.filename)
+            return highlight_code(self.contents, filename=self.filename) + \
+                   u'<a href="%s">Anhang herunterladen</a>' % url
         else:
             return u'<a href="%s">Anhang herunterladen</a>' % url
 

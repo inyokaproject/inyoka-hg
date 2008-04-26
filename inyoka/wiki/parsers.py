@@ -105,7 +105,8 @@ class PygmentsParser(Parser):
 
     def build_node(self):
         try:
-            rv = highlight_code(self.data, self.syntax)
+            rv = '<div class="codeblock">' + \
+                 highlight_code(self.data, self.syntax) + '</div>'
         except ClassNotFound:
             rv = None
         if rv is None:

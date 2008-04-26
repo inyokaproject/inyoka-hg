@@ -911,7 +911,8 @@ class Preformatted(Element):
 
     def prepare_html(self):
         yield build_html_tag(u'pre', id=self.id, style=self.style,
-                             class_=self.class_)
+                             class_= self.class_ and (self.class_ + ' codeblock') 
+                                                 or 'codeblock')
         for item in Element.prepare_html(self):
             yield item
         yield u'</pre>'

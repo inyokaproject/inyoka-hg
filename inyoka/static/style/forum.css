@@ -458,3 +458,18 @@ ul.image_list a:hover img {
   background-color: #e5d0a7;
   opacity: 0.9;
 }
+
+.codeblock {
+    max-height: 15em;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+}
+
+.codeblock .syntaxtable {
+    margin: 0 -1px;
+}
+
+.codeblock .syntaxtable tbody {
+    margin: -2px 0;
+}
