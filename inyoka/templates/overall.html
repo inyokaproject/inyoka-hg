@@ -107,12 +107,18 @@
         <form action="{{ href('portal', 'search') }}" method="get" class="search">
           <p>
             <input type="text" name="q" class="search_query" />
+            {%- if topic %}
+            <input type="hidden" name="topic_id" value="{{ topic.id }}" />
+            {%- elif forum %}
+            <input type="hidden" name="forum_id" value="{{ forum.id }}" />
+            {%- endif %}
             <select name="area" class="search_area">
               <option value="all"{% if active_app == 'portal' %} selected="selected"{% endif %}>Überall</option>
               <option value="forum"{% if active_app == 'forum' %} selected="selected"{% endif %}>Forum</option>
               <option value="wiki"{% if active_app == 'wiki' %} selected="selected"{% endif %}>Wiki</option>
               <option value="ikhaya"{% if active_app == 'ikhaya' %} selected="selected"{% endif %}>Ikhaya</option>
               <option value="planet"{% if active_app == 'planet' %} selected="selected"{% endif %}>Planet</option>
+              {%- block search_areas %}{% endblock -%}
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
           </p>

@@ -27,6 +27,10 @@
     (topic|url, topic.title)
   ] %}
 
+{% block search_areas %}
+  <option value="topic" selected="selected">Dieses Thema</option>
+{% endblock %}
+
 {% macro topic_actions %}
   <span class="linklist">
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
