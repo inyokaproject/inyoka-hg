@@ -22,6 +22,10 @@
 {% endfor %}
 {% set navigation_trace = navigation_trace + [(forum|url, forum.name)] %}
 
+{% block search_areas %}
+  <option value="current_forum" selected="selected">Dieses Forum</option>
+{% endblock %}
+
 {% block forum_content %}
   <table class="forum">
     <thead>
@@ -46,7 +50,7 @@
     <tbody>
     {%- for subforum in subforums %}
       {{ render_forum(subforum) }}
-    {% endfor %}
+    {%- endfor %}
     <tr>
       <th class="topic" colspan="2">Thema</th>
       <th class="view_count">Aufrufe</th>
