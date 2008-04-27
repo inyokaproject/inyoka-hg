@@ -174,6 +174,7 @@ class AddPollForm(forms.Form):
     question = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'size':'60'}))
     multiple = forms.BooleanField()
     options = MultiField((forms.CharField(max_length=100),))
+    duration = forms.IntegerField(min_value=1)
 
 
 class ReportTopicForm(forms.Form):

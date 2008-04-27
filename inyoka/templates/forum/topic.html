@@ -66,12 +66,13 @@
   {%- if polls %}
   <form action="" method="post" class="poll">
     {%- for poll in polls %}
+    {% set can_vote = can_vote or poll.can_vote ! %}
     <div><strong>{{ poll.question|e }}</strong></div>
     <table class="poll">
       {%- for option in poll.options %}
       <tr>
         <td>
-          {%- if not poll.participated and not show_vote_results %}
+          {%- if poll.can_vote and not show_vote_results %}
           <input type="{{ poll.multiple_votes and 'checkbox' or 'radio' }}"
                  name="poll_{{ poll.id }}" id="option_{{ option.id }}"
                  value="{{ option.id }}" />
@@ -80,7 +81,7 @@
           {{ option.name|e }}
           {%- endif %}
         </td>
-        {%- if poll.participated or show_vote_results %}
+        {%- if not poll.can_vote or show_vote_results %}
         <td class="vote_bar"><div style="width: {{ (option.percentage * 3) or 2 }}px;"></div></td>
         <td>{{ option.percentage }}%</td>
         <td>[ {{ option.votes }} ]</td>
@@ -88,6 +89,10 @@
       </tr>
       {%- endfor %}
     </table>
+    <div>Die Umfrage wurde {{ poll.start_time|dateformat(true) }} gestartet und
+      {%- if poll.ended %} endete {{ poll.end_time|dateformat(true) }}
+      {%- else %} wird {{ poll.end_time|dateformat(true) }} enden.{% endif -%}
+    </div>
     {%- endfor %}
     {%- if can_vote %}
     <p>

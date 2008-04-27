@@ -74,6 +74,7 @@
         {%- endif -%}
       </dd>
       {%- endfor %}
+      <dd>Dauer der Umfrage: {{ poll_form.duration }} Tage {{ h.field_errors(poll_form.errors.duration) }}</dd>
       <dd><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
       {%- endif %}
       {%- if can_attach %}

@@ -31,6 +31,7 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.database import session as dbsession
+from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table
@@ -897,6 +898,18 @@ class Poll(object):
             (poll_vote_table.c.voter_id == user.id))).fetchone())
 
     participated = property(has_participated)
+
+    @property
+    def ended(self):
+        """Returns a boolean whether the poll ended already"""
+        return datetime.utcnow() > self.end_time
+
+    @deferred
+    def can_vote(self):
+        """
+        Returns a boolean whether the current user can vote in this poll.
+        """
+        return not self.ended and not self.participated
 
 
 class PollOption(object):
