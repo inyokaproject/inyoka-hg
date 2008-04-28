@@ -12,9 +12,9 @@
 {% if category %}
   {% name = 'Kategorie %s - '|format(category.name) %}
   {% feeds = [
-    (name ~ 'Nur Überschrift', href('ikhaya', 'feeds', category.slug, 'title/20')),
-    (name ~ 'Nur Einleitung', href('ikhaya', 'feeds', category.slug, 'short/20')),
-    (name ~ 'Ganzer Beitrag', href('ikhaya', 'feeds', category.slug, 'full/20')),
+    (name + 'Nur Überschrift', href('ikhaya', 'feeds', category.slug, 'title/20')),
+    (name + 'Nur Einleitung', href('ikhaya', 'feeds', category.slug, 'short/20')),
+    (name + 'Ganzer Beitrag', href('ikhaya', 'feeds', category.slug, 'full/20')),
   ] %}
 {% else %}
   {% feeds = [
