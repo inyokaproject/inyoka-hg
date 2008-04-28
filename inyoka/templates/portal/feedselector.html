@@ -9,9 +9,9 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = ['Feed auswählen'] %}
-{% set styles = styles + ['feedselector.css'] %}
-{% set scripts = scripts + ['FeedSelector.js'] %}
+{% title_trace = ['Feed auswählen'] %}
+{% styles = styles|default([]) + ['feedselector.css'] %}
+{% scripts = scripts|default([]) + ['FeedSelector.js'] %}
 
 {% block appheader %}
   <h1>Portal</h1>

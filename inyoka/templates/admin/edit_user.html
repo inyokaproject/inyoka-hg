@@ -8,10 +8,10 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = styles + ['editor.css', 'datetimefield.css'] %}
-{% set scripts = scripts + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}
+{% styles = styles|default([]) + ['editor.css', 'datetimefield.css'] %}
+{% scripts = scripts|default([]) + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
     (href('admin', 'users', 'edit', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
 ] %}

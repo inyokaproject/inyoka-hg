@@ -8,23 +8,23 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+{% styles = ['editor.css', 'datetimefield.css'] %}
+{% scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
 {% if not date %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (href('admin', 'ikhaya', 'dates', 'new'), 'Veranstaltung eintragen')
     ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (date|url('edit'), 'Veranstaltung „%s“ bearbeiten'|format(date.title|e))
     ] %}
 {% endif %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'events'), 'Veranstaltungen'),
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>

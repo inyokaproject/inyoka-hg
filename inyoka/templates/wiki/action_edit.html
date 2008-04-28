@@ -10,11 +10,11 @@
 
 
 {% extends 'wiki/page.html' %}
-{% set title = page.title if page else name %}
-{% set title_trace = [title|e, 'Bearbeiten'] %}
-{% set scripts = ['WikiEditor.js'] %}
-{% set styles = ['editor.css'] %}
-{% set action = 'edit' %}
+{% title = page.title if page else name %}
+{% title_trace = [title|e, 'Bearbeiten'] %}
+{% scripts = ['WikiEditor.js'] %}
+{% styles = ['editor.css'] %}
+{% action = 'edit' %}
 {% block wiki_content %}
   <form enctype="multipart/form-data" action="?action=edit" method="post">
     <div class="editor">{{ form.text }}</div>

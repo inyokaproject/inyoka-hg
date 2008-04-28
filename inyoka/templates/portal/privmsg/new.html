@@ -8,10 +8,10 @@
     :license: GNU GPL.
 #}
 {% extends 'portal/privmsg/overall.html' %}
-{% set styles = styles + ['portal.css', 'editor.css'] %}
-{% set title_trace = ['Neue Nachricht'] %}
-{% set scripts = ['WikiEditor.js'] %}
-{% set selected = 'new' %}
+{% styles = styles|default([]) + ['portal.css', 'editor.css'] %}
+{% title_trace = ['Neue Nachricht'] %}
+{% scripts = ['WikiEditor.js'] %}
+{% selected = 'new' %}
 
 {% block portal_content %}
   <form action="{{ href('portal', 'privmsg', 'new') }}" method="post">

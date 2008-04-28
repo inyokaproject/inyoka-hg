@@ -8,22 +8,22 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+{% styles = ['editor.css', 'datetimefield.css'] %}
+{% scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
 
 {% if new %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (href('forum', 'add'), 'Forum erstellen')
     ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (forum|url('edit'), 'Forum „%s“ bearbeiten'|format(forum_name|e))
     ] %}
 {% endif %}
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'forum'), 'Foren'),
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 
 {% block admin_content %}
 <h3>{{ title_trace[0] }}</h3>

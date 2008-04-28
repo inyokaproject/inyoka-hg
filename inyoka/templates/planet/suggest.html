@@ -9,7 +9,7 @@
 #}
 {% extends 'planet/page.html' %}
 
-{% set title_trace = ['Blog vorschlagen'] %}
+{% title_trace = ['Blog vorschlagen'] %}
 
 {% block planet_content %}
   <form action="{{ href('planet', 'suggest') }}" method="post">

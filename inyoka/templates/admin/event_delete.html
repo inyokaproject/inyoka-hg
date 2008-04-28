@@ -8,13 +8,13 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
-{% set styles = ['editor.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
+{% styles = ['editor.css', 'datetimefield.css'] %}
+{% scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'events'), 'Veranstaltungen'),
     (href('admin', 'events', 'delete'), 'Veranstaltung löschen'),
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>
