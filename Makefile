@@ -42,6 +42,9 @@ server_cherrypy:
 server:
 	@(python manage-inyoka.py runserver)
 
+server2.4:
+	@(python2.4 manage-inyoka.py runserver)
+
 profiled:
 	@(python manage-inyoka.py profiled)
 
