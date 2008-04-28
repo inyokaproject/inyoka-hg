@@ -231,14 +231,15 @@ def viewtopic(request, topic_slug, page=1):
             session.commit()
 
     return {
-        'topic':        t,
-        'forum':        t.forum,
-        'posts':        post_objects,
-        'privileges':   privileges,
-        'is_subscribed':subscribed,
-        'pagination':   pagination,
-        'polls':        polls,
+        'topic':             t,
+        'forum':             t.forum,
+        'posts':             post_objects,
+        'privileges':        privileges,
+        'is_subscribed':     subscribed,
+        'pagination':        pagination,
+        'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
+        'can_vote':          polls and bool([True for p in polls if p.can_vote])
     }
 
 
