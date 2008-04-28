@@ -45,7 +45,7 @@
         {{ form.ubuntu_version }}{{ h.field_errors(form.errors.ubuntu_version) }}
       </dd>
       {%- else %}
-      <dd><input type="hidden" name="title" value="{{ article.name|e(true) }}" /></dd>
+      <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>
       {%- endif %}
       {%- endif %}
       <dt class="text">Text:</dt>

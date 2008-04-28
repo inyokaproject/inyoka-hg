@@ -24,7 +24,7 @@
       </td>
       <td class="value">
         <input type="{{ fields[field][1] == 'date' and 'date' or 'text' }}"
-               name="{{ field }}_value" value="{{ x[1]|e(true) }}" />
+               name="{{ field }}_value" value="{{ x[1]|e }}" />
       </td>
       <td class="action">
         <button type="submit" name="remove_filter" value="{{ field }}">-</button>

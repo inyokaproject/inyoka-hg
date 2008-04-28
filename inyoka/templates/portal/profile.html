@@ -43,7 +43,7 @@
       <th>Website</th>
       <td>
         {%- if user.website -%}
-          <a href="{{ user.website|e(True) }}">{{ user.website|e }}</a>
+          <a href="{{ user.website|e }}">{{ user.website|e }}</a>
         {%- else -%}
           –
         {%- endif -%}
