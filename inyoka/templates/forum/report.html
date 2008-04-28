@@ -11,12 +11,12 @@
 #}
 
 {% extends 'forum/page.html' %}
-{% set title_trace = ['Thema „%s“ melden'|format(topic.title|e)] %}
-{% set navigation_trace =  [
+{% title_trace = ['Thema „%s“ melden'|format(topic.title|e)] %}
+{% navigation_trace =  [
   (topic.forum|url, topic.forum.name),
   (topic|url, topic.title),
   (topic|url('report'), 'Thema melden')
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="new_topic">

@@ -12,17 +12,17 @@
 #}
 {% extends 'forum/page.html' %}
 
-{% set title_trace = [topic.title|e] %}
-{% set name = 'Thema „%s“ - ' % topic.title|e %}
-{% set feeds = [
+{% title_trace = [topic.title|e] %}
+{% name = 'Thema „%s“ - ' % topic.title|e %}
+{% feeds = [
   (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
   (name ~ 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
   (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
 ] %}
 {% for parent in forum.parents %}
-  {% set navigation_trace = navigation_trace + [(parent|url, parent.name)] ! %}
+  {% navigation_trace.append((parent|url, parent.name)) %}
 {% endfor %}
-{% set navigation_trace = navigation_trace + [
+{% navigation_trace = navigation_trace|default([]) + [
     (forum|url, forum.name),
     (topic|url, topic.title)
   ] %}
@@ -31,7 +31,7 @@
   <option value="topic" selected="selected">Dieses Thema</option>
 {% endblock %}
 
-{% macro topic_actions %}
+{% macro topic_actions() %}
   <span class="linklist">
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
     {%- if is_subscribed %}
@@ -66,7 +66,7 @@
   {%- if polls %}
   <form action="" method="post" class="poll">
     {%- for poll in polls %}
-    {% set can_vote = can_vote or poll.can_vote ! %}
+    {% can_vote = can_vote or poll.can_vote ! %}
     <div><strong>{{ poll.question|e }}</strong></div>
     <table class="poll">
       {%- for option in poll.options %}
@@ -115,7 +115,7 @@
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
-      {%- set attachments = post.attachments %}      
+      {%- attachments = post.attachments %}      
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>

@@ -10,10 +10,10 @@
 #}
 {% extends 'pastebin/page.html' %}
 
-{% set title_trace = [entry.title|e] %}
-{% set navigation_trace = [(entry|url, entry.title|e)] %}
-{% set styles = ['highlight.css'] %}
-{% set scripts = ['jQuery.js', 'Pastebin.js'] %}
+{% title_trace = [entry.title|e] %}
+{% navigation_trace = [(entry|url, entry.title|e)] %}
+{% styles = ['highlight.css'] %}
+{% scripts = ['jQuery.js', 'Pastebin.js'] %}
 
 {% block navigation %}
   {{ tab_navigation('browse') }}

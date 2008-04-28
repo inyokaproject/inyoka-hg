@@ -10,7 +10,7 @@
 
 {% extends 'portal/overall.html' %}
 
-{% set title_trace = title_trace + ['Seite existiert nicht'] %}
+{% title_trace = title_trace|default([]) + ['Seite existiert nicht'] %}
 {% block appheader %}
   <h1>Fehler</h1>
   <h2>404 Seite Nicht Gefunden</h2>

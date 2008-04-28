@@ -11,20 +11,20 @@
 {% extends 'admin/overall.html' %}
 
 {% if is_new %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
     (href('admin', 'groups', 'new'), 'neue Gruppe'),
   ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
     (href('admin', 'groups', 'edit', group_name), 'Gruppe „%s“ editieren'|format(group_name)),
   ] %}
 {% endif %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'groups'), 'Gruppen')
-] + navigation_trace %}
+] + navigation_trace|default([]) %}
 
-{% set scripts = ['PrivilegeBox.js'] %}
+{% scripts = ['PrivilegeBox.js'] %}
 
 {% block appheader %}
 <h1>Administration</h1>

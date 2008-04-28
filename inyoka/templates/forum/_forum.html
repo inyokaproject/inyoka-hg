@@ -31,8 +31,8 @@
   </tr>
 {% endmacro %}
 
-{% macro topic_icon topic -%}
-  {% set is_read = topic.get_read_status(USER) -%}
+{% macro topic_icon(topic) -%}
+  {% is_read = topic.get_read_status(USER) -%}
   <img src="
   {{- href('static', 'img', 'forum', 'topic' ) -}}
   {%- if not is_read %}-new{% endif -%}

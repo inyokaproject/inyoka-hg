@@ -9,9 +9,9 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = ['Mitglieder'] %}
-{% set scripts = scripts + ['DateTime.js'] %}
-{% set styles = styles + ['datetimefield.css'] %}
+{% title_trace = ['Mitglieder'] %}
+{% scripts = scripts|default([]) + ['DateTime.js'] %}
+{% styles = styles|default([]) + ['datetimefield.css'] %}
 {% block appheader %}
   <h1>Portal</h1>
   <h2>Mitgliederliste</h2>

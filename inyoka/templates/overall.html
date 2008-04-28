@@ -15,10 +15,10 @@
       xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="de" lang="de" dir="ltr">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>{{ (title_trace + ['ubuntuusers.de'])|join(' › ') }}</title>
+    <title>{{ (title_trace|default([]) + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- set styles = ['main.css', 'markup.css'] + styles -%}
+    {%- styles = ['main.css', 'markup.css'] + styles|default([]) -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}
@@ -46,7 +46,7 @@
     /*]]>*/
     </script>
     {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
-                       'overall.js'] + scripts %}
+                       'overall.js'] + scripts|default([]) %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
     <!--[if lt IE 7.]><script defer type="text/javascript" src="{{ href('static', 'js/ie7.js') }}"></script><![endif]-->
@@ -125,7 +125,7 @@
         </form>{# .search #}
 
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
-          navigation_trace %}
+          navigation_trace|default([]) %}
           <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
             %} »{% endif %}
         {%- endfor %}</p>
@@ -143,8 +143,8 @@
       {%- endfor %}
 
       <div class="page_content">
-        {% set tabbar = navi_type in ['tabbar', 'both'] %}
-        {% set sidebar = navi_type in ['sidebar', 'both'] %}
+        {% tabbar = navi_type in ['tabbar', 'both'] %}
+        {% sidebar = navi_type in ['sidebar', 'both'] %}
         {%- if tabbar %}
         <div class="navi_tabbar navigation">
           {%- block tabbar %}{% endblock -%}

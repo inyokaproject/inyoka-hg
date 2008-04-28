@@ -9,8 +9,8 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = ['Inyoka'] %}
-{% set styles = styles + ['about.css'] %}
+{% title_trace = ['Inyoka'] %}
+{% styles = styles|default([]) + ['about.css'] %}
 {% macro badge(link, alt, img) -%}
   <a href="{{ link|e }}"><img src="{{ href('static',
     'img/badges/' + img)|e }}" alt="{{ alt|e(true) }}" /></a>

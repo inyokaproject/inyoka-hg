@@ -12,8 +12,8 @@
 
 
 {% extends 'wiki/page.html' %}
-{% set title_trace = ['Fehlender Artikel', title|e] %}
-{% set action = 'show' %}
+{% title_trace = ['Fehlender Artikel', title|e] %}
+{% action = 'show' %}
 {% block wiki_content %}
   <h2>Fehlender Artikel</h2>
   {%- if not page %}

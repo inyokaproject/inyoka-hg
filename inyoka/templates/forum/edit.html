@@ -13,23 +13,23 @@
 
 {% extends 'forum/page.html' %}
 {% if not topic %}
-  {% set title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
-  {% set navigation_trace =  [
+  {% title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
+  {% navigation_trace =  [
     (forum|url, forum.name),
     (forum|url('newtopic'), 'Neues Thema')
     ] %}
 {% elif topic and not post %}
-  {% set title_trace = ['Neue Antwort in „%s“'|format(topic.title|e)] %}
-  {% set navigation_trace =  [
+  {% title_trace = ['Neue Antwort in „%s“'|format(topic.title|e)] %}
+  {% navigation_trace =  [
     (forum|url, forum.name),
     (topic|url, topic.title),
     (topic|url('reply'), 'Neue Antwort')
     ] %}
 {% else %}
-  {% set title_trace = ['Posting bearbeiten']%}
+  {% title_trace = ['Posting bearbeiten']%}
 {% endif %}
-{% set scripts = ['WikiEditor.js', 'NewTopic.js'] %}
-{% set styles = ['editor.css'] %}
+{% scripts = ['WikiEditor.js', 'NewTopic.js'] %}
+{% styles = ['editor.css'] %}
 
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
