@@ -15,10 +15,11 @@
 {% title_trace = [topic.title|e] %}
 {% name = 'Thema „%s“ - ' % topic.title|e %}
 {% feeds = [
-  (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
-  (name ~ 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
-  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
+  (name + 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
+  (name + 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
+  (name + 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
 ] %}
+{% navigation_trace = [] %}
 {% for parent in forum.parents %}
   {% navigation_trace.append((parent|url, parent.name)) %}
 {% endfor %}
@@ -66,7 +67,6 @@
   {%- if polls %}
   <form action="" method="post" class="poll">
     {%- for poll in polls %}
-    {% can_vote = can_vote or poll.can_vote ! %}
     <div><strong>{{ poll.question|e }}</strong></div>
     <table class="poll">
       {%- for option in poll.options %}
