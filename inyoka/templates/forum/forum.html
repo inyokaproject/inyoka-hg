@@ -13,12 +13,12 @@
 {% title_trace = [forum.name|e] %}
 {% name = 'Forum „%s“ - ' % forum.name|e %}
 {% feeds = [
-  (name ~ 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
-  (name ~ 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
-  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
+  (name + 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
+  (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
+  (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
 {% for parent in forum.parents %}
-  {% navigation_trace = navigation_trace|default([]) + [(parent|url, parent.name)] ! %}
+  {% navigation_trace = navigation_trace|default([]) + [(parent|url, parent.name)] %}
 {% endfor %}
 {% navigation_trace = navigation_trace|default([]) + [(forum|url, forum.name)] %}
 
