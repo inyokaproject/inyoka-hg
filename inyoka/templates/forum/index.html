@@ -11,7 +11,7 @@
 #}
 {% extends 'forum/page.html' %}
 {% scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
-{% include 'forum/_forum.html' %}
+{% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}
   {% title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% navigation_trace = [

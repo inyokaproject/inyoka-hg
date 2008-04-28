@@ -8,7 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
-{% include 'forum/_forum.html' %}
+{% from 'forum/_forum.html' import render_forum, topic_icon %}
 
 {% title_trace = [forum.name|e] %}
 {% name = 'Forum „%s“ - ' % forum.name|e %}
@@ -17,10 +17,11 @@
   (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
   (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
+{% navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {% navigation_trace = navigation_trace|default([]) + [(parent|url, parent.name)] %}
+  {% navigation_trace.append([parent|url, parent.name]) %}
 {% endfor %}
-{% navigation_trace = navigation_trace|default([]) + [(forum|url, forum.name)] %}
+{% navigation_trace.append([forum|url, forum.name]) %}
 
 {% block search_areas %}
   <option value="current_forum" selected="selected">Dieses Forum</option>
