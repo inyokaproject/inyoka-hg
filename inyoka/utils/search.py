@@ -316,6 +316,7 @@ class SearchSystem(object):
         # collapse key (optional)
         if data.get('collapse'):
             doc.add_value(1, '%s:%s' % (full_id[0], data['collapse']))
+            doc.add_term('R%s:%s' % (full_id[0], data['collapse']))
 
         # title (optional)
         if data.get('title'):
