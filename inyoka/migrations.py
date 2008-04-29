@@ -186,7 +186,10 @@ def new_attachment_structure(m):
         if not exists(new_abs_path):
             os.mkdir(new_abs_path)
 
-        old_fo = open(join(settings.MEDIA_ROOT, old_fn), 'r')
+        try:
+            old_fo = open(join(settings.MEDIA_ROOT, old_fn), 'r')
+        except IOError:
+            continue
         new_fo = open(join(new_abs_path, name), 'w')
         try:
             new_fo.write(old_fo.read())
