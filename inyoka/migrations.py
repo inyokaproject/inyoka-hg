@@ -170,6 +170,9 @@ def add_attachment_mimetype(m):
 
 def new_attachment_structure(m):
     """Moves old attachments to the new filesystem structure"""
+    if not exists(join(settings.MEDIA_ROOT, 'forum', 'attachments', 'temp')):
+        os.mkdir(join(settings.MEDIA_ROOT, 'forum', 'attachments', 'temp'))
+
     attachments = m.engine.execute('''
         select a.id, a.file, a.name, a.post_id
             from forum_attachment a
