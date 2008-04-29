@@ -135,7 +135,7 @@ def forum(request, slug, page=1):
             'topics':       pagination.objects,
             'pagination':   pagination
         }
-        # if you alter this value, change it in 
+        # if you alter this value, change it in
         # forum.models.Forum.invalidate_topic_cache, too.
         if page < 5:
             cache.set(key, data)
@@ -356,10 +356,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
             (topic and topic.id or -1))).all()
 
+    # handle attachments
     att_ids = map(int, filter(bool,
         request.POST.get('attachments', '').split(',')
     ))
-    # handle attachments
     if check_privilege(privileges, 'upload'):
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.

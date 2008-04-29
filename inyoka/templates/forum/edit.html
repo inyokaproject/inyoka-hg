@@ -59,7 +59,7 @@
       {%- if polls %}
       <dd>Bestehende Umfragen:
         <ul>
-          {%- for poll in polls %}
+          {%- for poll in polls or () %}
           <li>{{ poll.question|e }} <button name="delete_poll" value="{{ poll.id }}">Löschen</button></li>
           {%- endfor %}
         </ul>
@@ -88,10 +88,10 @@
     </dl>
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="
-      {%- for att in attachments %}{% if not loop.first %},{% endif %}{{ att.id }}
+      {%- for att in attachments or () %}{% if not loop.first %},{% endif %}{{ att.id }}
       {% endfor %}">
       <input type="hidden" name="polls" id="id_polls" value="
-      {%- for poll in polls %}{% if not loop.first %},{% endif %}{{ poll.id }}
+      {%- for poll in polls or () %}{% if not loop.first %},{% endif %}{{ poll.id }}
       {%- endfor %}">
       {{ h.field_errors(form.errors.__all__) }}
       <input type="submit" value="Speichern" name="send" />
