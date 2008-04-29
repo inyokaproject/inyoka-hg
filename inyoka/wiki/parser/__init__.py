@@ -135,6 +135,7 @@ import re
 import unicodedata
 from inyoka.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.storage import storage
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
@@ -216,13 +217,15 @@ def validate_signature(signature):
     except StackExhaused:
         raise SignatureError(u'Deine Signatur enthält zu viele ver'
                              u'schachtelte Elemente.')
-    if len(text) > settings.SIGNATURE_LENGTH:
+    sig_len = storage['max_signature_length']
+    sig_lines = storage['max_signature_lines']
+    if len(text) > sig_len:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
-                             settings.SIGNATURE_LENGTH - len(text)))
-    elif len(text.splitlines()) > settings.SIGNATURE_LINES:
+                             sig_len - len(text)))
+    elif len(text.splitlines()) > sig_lines:
         raise SignatureError(u'Deine Signatur darf maximal aus %d '
-                             u'Zeilen bestehen' % settings.SIGNATURE_LINES)
+                             u'Zeilen bestehen' % sig_lines)
 
 
 def unescape_string(string):

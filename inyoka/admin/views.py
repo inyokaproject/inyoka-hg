@@ -48,15 +48,21 @@ def index(request):
 @require_manager
 @templated('admin/configuration.html')
 def config(request):
+    keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
+            'max_signature_lines']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST)
         if form.is_valid():
-            html = cleanup_html(form.cleaned_data['global_message'])
+            data = form.cleaned_data
+            html = cleanup_html(data['global_message'])
             storage['global_message'] = html
+            for k in keys:
+                storage[k] = data[k]
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
-        form = ConfigurationForm(initial=storage.get_many(['global_message']))
+        form = ConfigurationForm(initial=storage.get_many(
+                                 ['global_message'] + keys))
     return {
         'form': form
     }

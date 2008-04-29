@@ -103,14 +103,6 @@ JABBER_BOT_SERVER = '127.0.0.1:6203'
 # hours for a user to activate the account
 ACTIVATION_HOURS = 48
 
-# Signature length
-SIGNATURE_LENGTH = 400
-SIGNATURE_LINES = 4
-
-# A tuple that defines the maximum avatar size
-# define it as (width, height)
-AVATAR_SIZE = (80, 100)
-
 # key for google maps
 GOOGLE_MAPS_APIKEY = ''
 

@@ -22,6 +22,13 @@ class ConfigurationForm(forms.Form):
         help_text = u'Diese Nachricht wird auf allen Seiten über dem Inhalt '
                     u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer. '
                     u'Muss valides XHTML sein.')
+    max_avatar_width = forms.IntegerField(min_value=1)
+    max_avatar_height = forms.IntegerField(min_value=1)
+    max_signature_length = forms.IntegerField(min_value=1,
+        label=u'Maximale Signaturlänge')
+    max_signature_lines = forms.IntegerField(min_value=1,
+        label=u'Maximale Zeilenanzahl in Signatur')
+
 
 
 class EditStaticPageForm(forms.Form):

@@ -27,6 +27,7 @@ from inyoka.utils.captcha import generate_word
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
 from inyoka.utils.local import current_request
+from inyoka.utils.storage import storage
 
 
 UNUSABLE_PASSWORD = '!'
@@ -342,8 +343,9 @@ class User(models.Model):
         # clear the filesystem
         self.delete_avatar()
 
-        if avatar.size > settings.AVATAR_SIZE:
-            avatar = avatar.resize(settings.AVATAR_SIZE)
+        max_size = (storage['max_avatar_width'], storage['max_avatar_height'])
+        if avatar.size > max_size:
+            avatar = avatar.resize(max_size)
             avatar.save(avatar_path)
         else:
             f = open(avatar_path, 'wb')
