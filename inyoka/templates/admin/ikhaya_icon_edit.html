@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% if not icon %}
   {% navigation_trace = [
@@ -32,7 +33,7 @@
     <img src="{{ icon|url }}" alt="{{ identifier|e }}" />
   </div>
   {%- endif %}
-  {{ h.render_form(form, 'identifier', 'img') }}
+  {{ render_form(form, ['identifier', 'img']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

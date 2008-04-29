@@ -38,18 +38,18 @@
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
       <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
+      <dd>{{ form.title }}{{ form.errors.title }}</dd>
       <dt>Ubuntu-Version:</dt>
       <dd>
-        {{ form.ubuntu_distro }}{{ h.field_errors(form.errors.ubuntu_distro) }}
-        {{ form.ubuntu_version }}{{ h.field_errors(form.errors.ubuntu_version) }}
+        {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
+        {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
       </dd>
       {%- else %}
       <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>
       {%- endif %}
       {%- endif %}
       <dt class="text">Text:</dt>
-      <dd class="text">{{ form.text }}{{ h.field_errors(form.errors.text) }}</dd>
+      <dd class="text">{{ form.text }}{{ form.errors.text }}</dd>
       {# when enter is pressed the first submit button is used #}
       {# XXX: I'm sure that a better sollution exists for this #}
       {# then put it here :) #}
@@ -65,7 +65,7 @@
         </ul>
       </dd>
       {%- endif %}
-      <dd>Frage: {{ poll_form.question }} {{ h.field_errors(poll_form.errors.question) }}</dd>
+      <dd>Frage: {{ poll_form.question }} {{ poll_form.errors.question }}</dd>
       <dd>{{ poll_form.multiple }} <label for="id_multiple">Mehrfachantworten erlauben</label></dd>
       {%- for option in options %}
       <dd class="newtopic_polls_replies">Antwort {{ loop.index }}: <input type="text" name="options" value="{{ option }}" />
@@ -74,12 +74,32 @@
         {%- endif -%}
       </dd>
       {%- endfor %}
-      <dd>Dauer der Umfrage: {{ poll_form.duration }} Tage {{ h.field_errors(poll_form.errors.duration) }}</dd>
+      <dd>Dauer der Umfrage: {{ poll_form.duration }} Tage {{ poll_form.errors.duration }}</dd>
       <dd><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
       {%- endif %}
       {%- if can_attach %}
       <dt class="collapse">Dateianhänge:</dt>
-      <dd>{{ h.attachment_form(attach_form, attachments) }}</dd>
+      <dd>
+        {%- if attachments %}
+        <ul>
+          {%- for att in attachments %}
+          <li>
+            {{ att.name|e }} - {{ att.size|filesizeformat }}
+            <button type="submit" name="delete_attachment" value="{{ att.id }}">Löschen</button>
+          </li>
+          {%- endfor %}
+        </ul>
+        {%- endif %}
+        <p><label for="id_attachment">Dateianhang:</label>
+          {{ attach_form.attachment }}{{ attach_form.errors.attachment }}</p>
+        <p><label for="id_filename">Umbenennen auf:</label>
+          {{ attach_form.filename }}{{ attach_form.errors.filename }}</p>
+        <p><label for="id_text">Beschreibung:</label>
+          {{ attach_form.comment }}{{ attach_form.errors.comment }}</p>
+        <p>{{ attach_form.override }} <label for="id_override">Bestehenden Anhang
+          gleichen Namens überschreiben</label></p>
+        <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
+      </dd>
       {%- endif %}
       {%- if isnewtopic or isfirstpost %}
       <dt class="collapse">Optionen:</dt>
@@ -93,7 +113,7 @@
       <input type="hidden" name="polls" id="id_polls" value="
       {%- for poll in polls or () %}{% if not loop.first %},{% endif %}{{ poll.id }}
       {%- endfor %}">
-      {{ h.field_errors(form.errors.__all__) }}
+      {{ form.errors.__all__ }}
       <input type="submit" value="Speichern" name="send" />
       <input type="submit" value="Vorschau" name="preview" />
       <input type="submit" value="Abbrechen" name="cancel" />

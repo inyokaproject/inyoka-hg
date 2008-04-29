@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'portal/privmsg/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% styles = styles|default([]) + ['portal.css', 'editor.css'] %}
 {% title_trace = ['Neue Nachricht'] %}
 {% scripts = ['WikiEditor.js'] %}
@@ -15,7 +16,7 @@
 
 {% block portal_content %}
   <form action="{{ href('portal', 'privmsg', 'new') }}" method="post">
-    {{ h.render_form(form, 'recipient', 'subject', 'text') }}
+    {{ render_form(form, ['recipient', 'subject', 'text']) }}
     <script type="text/javascript">
       var editor = new WikiEditor('textarea[@name="text"]', 'forum')
     </script>

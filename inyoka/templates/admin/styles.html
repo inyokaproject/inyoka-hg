@@ -9,6 +9,7 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% navigation_trace = [
     (href('admin', 'styles'), 'Markup-Stylesheet')
@@ -26,7 +27,7 @@
   sonst alle Nutzer ein möglicherweise fehlerhaftes Stylesheet sehen.
 </p>
 <form action="" method="post" class="ikhaya">
-  {{ h.render_form(form, 'styles') }}
+  {{ render_form(form, ['styles']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

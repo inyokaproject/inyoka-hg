@@ -29,11 +29,11 @@
         No Paste Service findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
       </dd>
       <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ h.field_errors(form.errors.title) }}</dd>
+      <dd>{{ form.title }}{{ form.errors.title }}</dd>
       <dt>Sprache:</dt>
-      <dd>{{ form.language }}{{ h.field_errors(form.errors.language) }}</dd>
+      <dd>{{ form.language }}{{ form.errors.language }}</dd>
       <dt>Code:</dt>
-      <dd>{{ form.code }}{{ h.field_errors(form.errors.code) }}</dd>
+      <dd>{{ form.code }}{{ form.errors.code }}</dd>
       <dd>
         <input type="submit" value="Hinzufügen" />
       </dd>

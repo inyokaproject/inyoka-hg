@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% if not category %}
   {% navigation_trace = [
@@ -27,7 +28,7 @@
 <h2>{{ title_trace[0] }}</h2>
 
 <form action="" method="post" class="ikhaya">
-  {{ h.render_form(form, 'name', 'icon') }}
+  {{ render_form(form, ['name', 'icon']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

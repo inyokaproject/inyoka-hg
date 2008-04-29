@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'ikhaya/page.html' %}
+{% from 'macros.html' import render_form %}
 
 {% title_trace = [article.subject|e] %}
 {% styles = ['editor.css']%}
@@ -59,7 +60,7 @@
 
   </p>
   <form action="{{ article|url }}#new_comment" method="post">
-    {{ h.render_form(form, 'title', 'text') }}
+    {{ render_form(form, ['title', 'text']) }}
     <p>
       <input type="submit" name="preview" value="Vorschau" />
       <input type="submit" value="Speichern" />

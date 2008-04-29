@@ -8,12 +8,12 @@
     :license: GNU GPL.
 #}
 {% extends 'planet/page.html' %}
-
+{% from 'macros.html' import render_form %}
 {% title_trace = ['Blog vorschlagen'] %}
 
 {% block planet_content %}
   <form action="{{ href('planet', 'suggest') }}" method="post">
-    {{ h.render_form(form, 'name', 'url', 'description') }}
+    {{ render_form(form, ['name', 'url', 'description']) }}
     <p>
       <input type="submit" value="Abschicken" />
       <input type="submit" name="abort" value="Abbrechen" />

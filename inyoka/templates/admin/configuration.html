@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% navigation_trace = [
     (href('admin', 'config'), 'Konfiguration')
@@ -17,7 +18,7 @@
 <h3>{{ title_trace[0] }}</h3>
 
 <form action="" method="post" class="ikhaya">
-  {{ h.render_form(form, 'global_message') }}
+  {{ render_form(form, ['global_message']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

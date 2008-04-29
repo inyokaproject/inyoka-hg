@@ -146,7 +146,31 @@
             Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
           {{ post.rendered_text }}
-          {{ h.render_attachments(attachments) }}
+          {%- if attachments %}
+          <hr />
+          <dl class="attachments">
+            {%- for group in attachments|groupby('mimetype') %}
+            {%- if group.grouper[:5] == 'image' and USER.settings.show_thumbnails %}
+            <dt>Bilder (Vorschau)</dt>
+            <dd>
+              <ul class="image_list">
+                {%- for att in group.list %}
+                <li>{{ att.html_representation }}</li>
+                {%- endfor %}
+              </ul>
+            </dd>
+            {%- else %}
+            {%- for att in group.list %}
+            <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+            {%- if att.comment %}
+            <dd class="comment">{{ att.comment|e }}</dd>
+            {%- endif %}
+            <dd>{{ att.html_representation }}</dd>
+            {%- endfor %}
+            {%- endif %}
+            {%- endfor %}
+          </dl>
+          {%- endif %}
           {%- if post.author.signature and not USER.settings['hide_signatures'] %}
             <div class="signature">
             {{ post.author.rendered_signature }}

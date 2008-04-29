@@ -1,1 +1,42 @@
+{#
+    macros.html
+    ~~~~~~~~~~~
 
+    This is a file that contains all template parts that are used more than
+    once in macros.
+
+    :copyright: 2007-2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{#
+    render_form
+    ===========
+
+    This macro renders a bunch of form fields automatically.
+    Set the `inline` parameter to `true`, if you want to add a field manually
+    to the <dl> element.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{% macro render_form(form, fields, inline=false) %}
+{%- if not inline %}
+<dl>
+{%- endif %}
+  {%- for field in fields %}
+  {%- if form[field] %}
+  <dt>
+    <label for="{{ form[field].auto_id }}">{{ form[field].label }}:</label>
+  </dt>
+  <dd>
+    {{ form[field] }} {{ form.errors[field] }}
+    {%- if form[field].help_text %}
+    <p class="note">{{ form[field].help_text }}</p>
+    {%- endif %}
+  </dd>
+  {%- endif %}
+  {%- endfor %}
+{%- if not inline %}
+</dl>
+{%- endif %}
+{%- endmacro %}

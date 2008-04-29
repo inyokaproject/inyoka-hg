@@ -9,6 +9,7 @@
 #}
 
 {% extends 'portal/usercp/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% title_trace = ['Benutzereinstellungen'] %}
 {% scripts = ['WikiEditor.js'] %}
 {% styles = ['editor.css'] %}
@@ -18,23 +19,23 @@
 <form enctype="multipart/form-data" class="usercp_form" method="post" action="">
   <h3>Benutzereinstellungen</h3>
   <dl>
-    {{ h.render_form(form, 'notify', 'notifications', inline=True) }}
+    {{ render_form(form, ['notify', 'notifications'], inline=True) }}
     <p class="note"><a href="{{ href('portal', 'usercp', 'subscriptions') }}">Deine Benachrichtigungen kannst du hier bearbeiten</a></p>
-    {{ h.render_form(form, 'timezone', inline=true) }}
+    {{ render_form(form, ['timezone'], inline=true) }}
     <dt>Oberfläche</dt>
     <dd>{{ form.hide_avatars }} <label for="id_hide_avatars">{{ form.hide_avatars.label }}</label>
-        {{ h.field_errors(form.errors.hide_avatar) }}</dd>
+        {{ form.errors.hide_avatar }}</dd>
     <dd>{{ form.hide_signatures }} <label for="id_hide_signatures">{{ form.hide_signatures.label }}</label>
-        {{ h.field_errors(form.errors.hide_signatures) }}</dd>
+        {{ form.errors.hide_signatures }}</dd>
     <dd>{{ form.hide_profile }} <label for="id_hide_profile">{{ form.hide_profile.label }}</label>
-        {{ h.field_errors(form.errors.hide_profile) }}</dd>
+        {{ form.errors.hide_profile }}</dd>
     <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
-        {{ h.field_errors(form.errors.autosubscribe) }}</dd>
+        {{ form.errors.autosubscribe }}</dd>
     <dd>{{ form.show_preview }} <label for="id_show_preview">{{ form.show_preview.label }}</label>
-        {{ h.field_errors(form.errors.show_preview) }}</dd>
+        {{ form.errors.show_preview }}</dd>
     <dd>{{ form.show_thumbnails }} <label for="id_show_thumbnails">{{ form.show_thumbnails.label }}</label><br />
         <span class="note"> {{ form.show_thumbnails.help_text }}</span>
-        {{ h.field_errors(form.errors.show_thumbnails) }}</dd>
+        {{ form.errors.show_thumbnails }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

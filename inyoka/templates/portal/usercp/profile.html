@@ -9,6 +9,7 @@
 #}
 
 {% extends 'portal/usercp/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% title_trace = ['Benutzereinstellungen'] %}
 {% scripts = ['WikiEditor.js'] %}
 {% styles = ['editor.css'] %}
@@ -34,7 +35,7 @@
       {%- if user.avatar %}
       <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
       {%- endif %}
-      {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
+      {%- if form.errors[avatar] %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
     </dl>
     <h3>Kontakt-Adressen</h3>
     <dl>
@@ -54,10 +55,10 @@
       {% endfor %}
     </dl>
     <h3>Sonstige Einstellungen</h3>
-    {{ h.render_form(form, 'occupation', 'interests', 'website',
-                           'gpgkey') }}
+    {{ render_form(form, ['occupation', 'interests', 'website',
+                          'gpgkey']) }}
     <h4>Geographische Lage</h4>
-    {{ h.render_form(form, 'location', 'coordinates') }}
+    {{ render_form(form, ['location', 'coordinates']) }}
     <h3>Signatur</h3>
     <p class="note">
       Dieser Text wird an jeden Beitrag von dir angehängt.<br />
@@ -69,7 +70,7 @@
         var editor = new WikiEditor('textarea[@name="signature"]')
       </script>
     </p>
-    {{ h.field_errors(form.errors.signature) }}
+    {{ form.errors.signature }}
     <p>
       <input type="submit" value="Speichern" />
       <a href="{{ href('portal', 'user', user.username ) }}">Eigenes Profil anzeigen</a>

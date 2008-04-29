@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% styles = ['editor.css', 'datetimefield.css'] %}
 {% scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
@@ -37,8 +38,8 @@
   {%- if article.icon %}
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
-  {{ h.render_form(form, 'subject', 'intro', 'text', 'author', 'category_id',
-                         'icon_id', 'pub_date', 'slug', 'public') }}
+  {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id',
+                        'icon_id', 'pub_date', 'slug', 'public']) }}
   <p>
     <input type="submit" value="Speichern" />
     {%- if article %}

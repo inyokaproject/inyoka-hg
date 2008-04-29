@@ -28,7 +28,7 @@
     <p>
       {{ form.password_confirmation }}
       <input type="submit" value="Benutzer „{{ USER.username|e }}“ deaktivieren" />
-      {{- h.field_errors(form.errors.password_confirmation) }}
+      {{- form.errors.password_confirmation }}
     </p>
   </form>
 {% endblock %}

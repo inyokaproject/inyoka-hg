@@ -8,6 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'ikhaya/page.html' %}
+{% from 'macros.html' import render_form %}
 {% navigation_trace =  [
   (href('ikhaya', 'suggest'), 'Artikel vorschlagen')
   ] %}
@@ -25,7 +26,7 @@
     Dann schreibe Deinen Beitrag hier!
   </p>
   <form action="" method="post">
-    {{ h.render_form(form, 'title', 'intro', 'text') }}
+    {{ render_form(form, ['title', 'intro', 'text']) }}
     <p>
       <input type="submit" value="Abschicken" />
     </p>

@@ -116,19 +116,6 @@ def render_template(template_name, context):
     return tmpl.render(context)
 
 
-def partial_renderable(template_name, macro_name=None):
-    """Helper function for partial templates."""
-    def decorate(f=lambda **kw: kw):
-        def oncall(*args, **kwargs):
-            return render_template(template_name, f(*args, **kwargs) or {})
-        oncall.__name__ = name = macro_name or f.__name__
-        oncall.__doc__ = f.__doc__
-        oncall.__module__ = f.__module__
-        jinja_env.globals['h'][name] = oncall
-        return oncall
-    return decorate
-
-
 class InyokaEnvironment(Environment):
     """
     Beefed up version of the jinja environment but without security features
@@ -147,8 +134,7 @@ class InyokaEnvironment(Environment):
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
-            href=href,
-            h={}
+            href=href
         )
         self.filters.update(
             timedeltaformat=
