@@ -24,14 +24,16 @@ _formats = {
 
 
 def get_dimensions():
-    """Return the current terminal dimensions."""
-    if not hasattr(sys.stdout, 'fileno'):
+    """Return the current terminal dimensions or fall back to (80, 24)."""
+    try:
+        from struct import pack, unpack
+        from fcntl import ioctl
+        from termios import TIOCGWINSZ
+        s = pack('HHHH', 0, 0, 0, 0)
+        return unpack('HHHH', ioctl(sys.stdout.fileno(),
+                                    TIOCGWINSZ, s))[1::-1]
+    except:
         return (80, 24)
-    from struct import pack, unpack
-    from fcntl import ioctl
-    from termios import TIOCGWINSZ
-    s = pack('HHHH', 0, 0, 0, 0)
-    return unpack('HHHH', ioctl(sys.stdout.fileno(), TIOCGWINSZ, s))[1::-1]
 
 
 class FancyPrinter(object):
