@@ -12,22 +12,27 @@
 #}
 {% extends 'forum/page.html' %}
 
-{% set title_trace = [topic.title|e] %}
-{% set name = 'Thema „%s“ - ' % topic.title|e %}
-{% set feeds = [
-  (name ~ 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
-  (name ~ 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
-  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
+{% title_trace = [topic.title|e] %}
+{% name = 'Thema „%s“ - ' % topic.title|e %}
+{% feeds = [
+  (name + 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
+  (name + 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
+  (name + 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
 ] %}
+{% navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {% set navigation_trace = navigation_trace + [(parent|url, parent.name)] ! %}
+  {% navigation_trace.append((parent|url, parent.name)) %}
 {% endfor %}
-{% set navigation_trace = navigation_trace + [
+{% navigation_trace = navigation_trace|default([]) + [
     (forum|url, forum.name),
     (topic|url, topic.title)
   ] %}
 
-{% macro topic_actions %}
+{% block search_areas %}
+  <option value="topic" selected="selected">Dieses Thema</option>
+{% endblock %}
+
+{% macro topic_actions() %}
   <span class="linklist">
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
     {%- if is_subscribed %}
@@ -67,7 +72,7 @@
       {%- for option in poll.options %}
       <tr>
         <td>
-          {%- if not poll.participated and not show_vote_results %}
+          {%- if poll.can_vote and not show_vote_results %}
           <input type="{{ poll.multiple_votes and 'checkbox' or 'radio' }}"
                  name="poll_{{ poll.id }}" id="option_{{ option.id }}"
                  value="{{ option.id }}" />
@@ -76,7 +81,7 @@
           {{ option.name|e }}
           {%- endif %}
         </td>
-        {%- if poll.participated or show_vote_results %}
+        {%- if not poll.can_vote or show_vote_results %}
         <td class="vote_bar"><div style="width: {{ (option.percentage * 3) or 2 }}px;"></div></td>
         <td>{{ option.percentage }}%</td>
         <td>[ {{ option.votes }} ]</td>
@@ -84,6 +89,10 @@
       </tr>
       {%- endfor %}
     </table>
+    <div>Die Umfrage wurde {{ poll.start_time|dateformat(true) }} gestartet und
+      {%- if poll.ended %} endete {{ poll.end_time|dateformat(true) }}
+      {%- else %} wird {{ poll.end_time|dateformat(true) }} enden.{% endif -%}
+    </div>
     {%- endfor %}
     {%- if can_vote %}
     <p>
@@ -106,7 +115,7 @@
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
-      {%- set attachments = post.attachments %}      
+      {%- attachments = post.attachments %}      
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>
@@ -137,7 +146,31 @@
             Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
           {{ post.rendered_text }}
-          {{ h.render_attachments(attachments) }}
+          {%- if attachments %}
+          <hr />
+          <dl class="attachments">
+            {%- for group in attachments|groupby('mimetype') %}
+            {%- if group.grouper[:5] == 'image' and USER.settings.show_thumbnails %}
+            <dt>Bilder (Vorschau)</dt>
+            <dd>
+              <ul class="image_list">
+                {%- for att in group.list %}
+                <li>{{ att.html_representation }}</li>
+                {%- endfor %}
+              </ul>
+            </dd>
+            {%- else %}
+            {%- for att in group.list %}
+            <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+            {%- if att.comment %}
+            <dd class="comment">{{ att.comment|e }}</dd>
+            {%- endif %}
+            <dd>{{ att.html_representation }}</dd>
+            {%- endfor %}
+            {%- endif %}
+            {%- endfor %}
+          </dl>
+          {%- endif %}
           {%- if post.author.signature and not USER.settings['hide_signatures'] %}
             <div class="signature">
             {{ post.author.rendered_signature }}

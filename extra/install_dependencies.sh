@@ -15,8 +15,11 @@ svn co http://code.djangoproject.com/svn/django/trunk/ django
 ln -s /opt/django/django /usr/lib/python2.5/site-packages/
 ln -s /opt/django/django/bin/django-admin.py /usr/bin/
 
-hg clone http://dev.pocoo.org/hg/jinja-main jinja
-ln -s /opt/jinja/jinja /usr/lib/python2.5/site-packages/
+#hg clone http://dev.pocoo.org/hg/jinja-main jinja
+#ln -s /opt/jinja/jinja /usr/lib/python2.5/site-packages/
+
+hg clone http://dev.pocoo.org/hg/jinja2-main jinja2
+ln -s /opt/jinja2/jinja2 /usr/lib/python2.5/site-packages/
 
 wget http://html5lib.googlecode.com/files/html5lib-0.10.zip
 unzip html5lib-0.10.zip 

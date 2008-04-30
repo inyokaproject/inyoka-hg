@@ -9,7 +9,8 @@
     :license: GNU GPL.
 """
 import os
-from jinja import Environment, FileSystemLoader, MemcachedFileSystemLoader
+import simplejson
+from jinja2 import Environment, FileSystemLoader, FileSystemLoader
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
@@ -115,19 +116,6 @@ def render_template(template_name, context):
     return tmpl.render(context)
 
 
-def partial_renderable(template_name, macro_name=None):
-    """Helper function for partial templates."""
-    def decorate(f=lambda **kw: kw):
-        def oncall(*args, **kwargs):
-            return render_template(template_name, f(*args, **kwargs) or {})
-        oncall.__name__ = name = macro_name or f.__name__
-        oncall.__doc__ = f.__doc__
-        oncall.__module__ = f.__module__
-        jinja_env.globals['h'][name] = oncall
-        return oncall
-    return decorate
-
-
 class InyokaEnvironment(Environment):
     """
     Beefed up version of the jinja environment but without security features
@@ -138,108 +126,57 @@ class InyokaEnvironment(Environment):
         use_memcache = settings.TEMPLATE_CACHING
         if use_memcache is None:
             use_memcache = not settings.DEBUG
-        loader = None
-        if settings.MEMCACHE_SERVERS:
-            loader = MemcachedFileSystemLoader(os.path.join(
-                os.path.dirname(__file__), os.pardir, 'templates'),
-                memcache_host=settings.MEMCACHE_SERVERS,
-                use_memcache=use_memcache)
-        else:
-            loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
-                os.pardir, 'templates'),
-                use_memcache=use_memcache, memcache_size=200)
-        Environment.__init__(self, loader=loader)
+        loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
+                                               os.pardir, 'templates'),
+                                  cache_size=use_memcache and 200 or 0)
+        Environment.__init__(self, loader=loader,
+                             extensions=['jinja2.ext.TransExtension'])
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
-            href=href,
-            h={}
+            href=href
         )
         self.filters.update(
             timedeltaformat=
-                lambda use_since=False:
-                    lambda env, context, value:
-                        format_timedelta(value, use_since=use_since),
+                lambda value, use_since=False:
+                    format_timedelta(value, use_since=use_since),
             utctimedeltaformat=
-                lambda use_since=False:
-                    lambda env, context, value:
-                        format_timedelta(value, use_since=use_since,
-                                         enforce_utc=True),
+                lambda value, use_since=False:
+                    format_timedelta(value, use_since=use_since,
+                                     enforce_utc=True),
             datetimeformat=
-                lambda:
-                    lambda env, context, value:
-                        format_datetime(value),
+                lambda value:
+                    format_datetime(value),
             utcdatetimeformat=
-                lambda:
-                    lambda env, context, value:
-                        format_datetime(value, enforce_utc=True),
+                lambda value:
+                    format_datetime(value, enforce_utc=True),
             dateformat=
-                lambda prefix=False:
-                    lambda env, context, value:
-                        natural_date(value, prefix),
+                lambda value, prefix=False:
+                    natural_date(value, prefix),
             utcdateformat=
-                lambda prefix=False:
-                    lambda env, context, value:
-                        natural_date(value, prefix, enforce_utc=True),
+                lambda value, prefix=False:
+                    natural_date(value, prefix, enforce_utc=True),
             timeformat=
-                lambda:
-                    lambda env, context, value:
-                        format_time(value),
+                lambda value:
+                    format_time(value),
             utctimeformat=
-                lambda:
-                    lambda env, context, value:
-                        format_time(value, enforce_utc=True),
+                lambda value:
+                    format_time(value, enforce_utc=True),
             specificdatetimeformat=
-                lambda alt=False:
-                    lambda env, context, value:
-                        format_specific_datetime(value, alt),
+                lambda value, alt=False:
+                    format_specific_datetime(value, alt),
             utcspecificdatetimeformat=
-                lambda alt=False:
-                    lambda env, context, value:
-                        format_specific_datetime(value, alt,
-                                                 enforce_utc=True),
+                lambda value, alt=False:
+                    format_specific_datetime(value, alt,
+                                             enforce_utc=True),
             hnumber=
-                lambda genus=None:
-                    lambda env, context, value:
-                        human_number(value, genus),
+                lambda value, genus=None:
+                    human_number(value, genus),
             url=
-                lambda action=None:
-                    lambda env, context, value:
-                        url_for(value, action=action)
+                lambda value, action=None:
+                    url_for(value, action=action),
+            jsonencode=simplejson.dumps
         )
-
-    def finish_var(self, value, ctx, unicode=unicode):
-        """disable fancy jinja finalization."""
-        return unicode(value)
-
-    def get_attribute(self, obj, name, getattr=getattr):
-        """Faster attribute lookup without sanity cehcks."""
-        try:
-            return obj[name]
-        except (TypeError, KeyError, IndexError, AttributeError):
-            try:
-                return getattr(obj, name)
-            except (AttributeError, TypeError):
-                # TypeError is needed because getattr(obj, integer) isn't
-                # allowed
-                pass
-        return self.undefined_singleton
-
-    def call_function_simple(self, f, context, getattr=getattr):
-        """No sanity checks"""
-        if getattr(f, 'jinja_context_callable', False):
-            return f(self, context)
-        return f()
-
-    def call_function(self, f, context, args, kwargs, dyn_args, dyn_kwargs):
-        """No sanity checks."""
-        if dyn_args is not None:
-            args += tuple(dyn_args)
-        if dyn_kwargs is not None:
-            kwargs.update(dyn_kwargs)
-        if getattr(f, 'jinja_context_callable', False):
-            args = (self, context) + args
-        return f(*args, **kwargs)
 
 
 # setup the template environment

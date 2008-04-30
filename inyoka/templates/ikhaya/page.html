@@ -8,13 +8,13 @@
     :license: GNU GPL.
 #}
 {% extends 'overall.html' %}
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('ikhaya'), 'Ikhaya')
-  ] + navigation_trace %}
-{% set title_trace = title_trace + ['Ikhaya'] %}
-{% set styles = styles + ['ikhaya.css'] %}
-{% set active_app = 'ikhaya' %}
-{% set navi_type  = 'sidebar' %}
+  ] + navigation_trace|default([]) %}
+{% title_trace = title_trace|default([]) + ['Ikhaya'] %}
+{% styles = styles|default([]) + ['ikhaya.css'] %}
+{% active_app = 'ikhaya' %}
+{% navi_type  = 'sidebar' %}
 
 {% block appheader %}
   <h1>Ikhaya</h1>

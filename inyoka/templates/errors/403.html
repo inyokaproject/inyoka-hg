@@ -12,7 +12,7 @@
 
 {% extends 'portal/overall.html' %}
 
-{% set title_trace = title_trace + ['Zugriff verweigert'] %}
+{% title_trace = title_trace|default([]) + ['Zugriff verweigert'] %}
 {% block appheader %}
   <h1>Fehler</h1>
   <h2>Zugriff verweigert</h2>
@@ -22,7 +22,7 @@
     <p>
       Du bist nicht berechtigt, diese Seite aufzurufen.
     </p>
-    {% if not user.is_authenticated %}
+    {% if not USER.is_authenticated %}
       <p>
         Das liegt möglicherweise daran, dass du nicht eingeloggt bist.
       </p>

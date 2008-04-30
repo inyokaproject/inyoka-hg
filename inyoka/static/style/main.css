@@ -386,7 +386,7 @@ h3 .note {
 table.syntaxtable {
   border: 1px solid #DDDDDD;
   border-collapse: collapse;
-  margin: 1em 0 0 0;
+  margin: /*1em 0 0*/ 0;
   width: 100%;
 }
 
@@ -756,7 +756,6 @@ form.search .search_query_js.default_value {
 form.search select.search_area {
   border: solid 1px #888;
   background-color: #fefefe;
-  width: 6.0em;
 }
 
 form.search .search_submit {
@@ -786,7 +785,6 @@ form.search ul.search_area {
   list-style: none;
   border: solid 1px #888;
   background-color: #fefefe;
-  width: 7.0em;
   padding: 0;
 }
 

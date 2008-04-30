@@ -9,7 +9,8 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = ['Registrieren'] %}
+{% from 'macros.html' import render_form %}
+{% title_trace = ['Registrieren'] %}
 {% block appheader %}
   <h1>Portal</h1>
   <h2>Registrieren</h2>
@@ -29,16 +30,16 @@
   {%- else %}
   <form action="" method="post">
     <dl>
-      {{ h.render_form(form, 'username', 'password', 'confirm_password',
-                             'email', inline=true)}}
+      {{ render_form(form, ['username', 'password', 'confirm_password',
+                            'email'], inline=true)}}
       <dt>Nutzungshinweise:</dt>
       {# include the agreement letter #}
       <dd>{{ form.terms_of_usage }} Ich bestätige den <a href="{{ href('portal', 'lizenz') }}">Lizenztext</a> gelesen zu haben und erkläre mich mit der Veröffentlichung unter dieser Lizenz einverstanden.<br />Durch das Abschließen der Registrierung stimme ich den <a href="{{ href('portal', 'nutzungsbedingungen') }}">Nutzungsbedingungen</a> ebenfalls zu.<br />
-      {{ h.field_errors(form.errors.terms_of_usage) }}</dd>
+      {{ form.errors.terms_of_usage }}</dd>
       <dd>{{ form.hidden_captcha }}</dd>
-      <dd>{{ h.field_errors(form.errors.hidden_captcha) }}</dd>
+      <dd>{{ form.errors.hidden_captcha }}</dd>
       <dd style="display: none"><input type="submit" /></dd><!-- at enter the first submit button is used -->
-      {{ h.render_form(form, 'captcha', inline=true) }}
+      {{ render_form(form, ['captcha'], inline=true) }}
     </dl>
     <p>
       <input type="submit" value="Registrieren" />

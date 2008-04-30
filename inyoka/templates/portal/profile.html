@@ -9,8 +9,8 @@
 #}
 {% extends 'portal/overall.html' %}
 
-{% set title_trace = [user.username|e, 'Mitglieder'] %}
-{% set styles = styles + ['portal.css', 'highlight.css'] %}
+{% title_trace = [user.username|e, 'Mitglieder'] %}
+{% styles = styles|default([]) + ['portal.css', 'highlight.css'] %}
 
 {% block appheader %}
   <h1>Mitglieder</h1>
@@ -43,7 +43,7 @@
       <th>Website</th>
       <td>
         {%- if user.website -%}
-          <a href="{{ user.website|e(True) }}">{{ user.website|e }}</a>
+          <a href="{{ user.website|e }}">{{ user.website|e }}</a>
         {%- else -%}
           –
         {%- endif -%}

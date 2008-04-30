@@ -10,13 +10,13 @@
 #}
 {% extends 'overall.html' %}
 
-{% set title_trace = title_trace + ['Planet'] %}
-{% set navigation_trace = [
+{% title_trace = title_trace|default([]) + ['Planet'] %}
+{% navigation_trace = [
   (href('planet'), 'Planet')
-  ] + navigation_trace %}
-{% set active_app = 'planet' %}
-{% set navi_type  = 'sidebar' %}
-{% set styles = styles + ['planet.css'] %}
+  ] + navigation_trace|default([]) %}
+{% active_app = 'planet' %}
+{% navi_type  = 'sidebar' %}
+{% styles = styles|default([]) + ['planet.css'] %}
 
 {% block appheader %}
   <h1>Planet</h1>

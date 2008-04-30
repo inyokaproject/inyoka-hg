@@ -350,8 +350,13 @@ def search(request):
             'ikhaya': 'i',
             'planet': 'p'
         }.get(d['area'])
+        query = d['query']
+        if d['area'] == 'topic':
+            query += ' topic:"%s"' % request.GET['topic_id']
+        elif d['area'] == 'current_forum':
+            query += ' forum:"%s"' % request.GET['forum_id']
         results = search_system.query(request.user,
-            d['query'],
+            query,
             page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
@@ -395,7 +400,7 @@ def profile(request, username):
     return {
         'user':     user,
         'groups':   user.groups.all(),
-        'wikipage': content
+        'wikipage': content,
     }
 
 
@@ -454,10 +459,16 @@ def usercp_profile(request):
              if k.startswith('show_'))
         ))
         form = UserCPProfileForm(values)
+
+    storage_keys = storage.get_many(('max_avatar_width',
+        'max_avatar_height'))
+
     return {
-        'form':         form,
-        'user':         request.user,
-        'gmaps_apikey': settings.GOOGLE_MAPS_APIKEY
+        'form':                 form,
+        'user':                 request.user,
+        'gmaps_apikey':         settings.GOOGLE_MAPS_APIKEY,
+        'max_avatar_width':     storage_keys['max_avatar_width'],
+        'max_avatar_height':    storage_keys['max_avatar_height'],
     }
 
 
@@ -495,7 +506,7 @@ def usercp_settings(request):
         form = UserCPSettingsForm(values)
     return {
         'form': form,
-        'user': request.user
+        'user': request.user,
     }
 
 
@@ -652,10 +663,11 @@ def privmsg_new(request, username=None):
                 for recipient in recipient_names:
                     user = User.objects.get(username__exact=recipient)
                     if user.id == request.user.id:
+                        recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
                               u'schicken.', False)
-                        recipient_names = []
-                    recipients.append(user)
+                    else:
+                        recipients.append(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'

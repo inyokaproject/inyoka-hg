@@ -8,9 +8,9 @@
     :license: GNU GPL.
 #}
 {% extends 'portal/privmsg/overall.html' %}
-{% set styles = styles + ['portal.css'] %}
-{% set selected=folder.id %}
-{% set title_trace = [folder.name] %}
+{% styles = styles|default([]) + ['portal.css'] %}
+{% selected=folder.id %}
+{% title_trace = [folder.name] %}
 
 {% block portal_content %}
   <table>

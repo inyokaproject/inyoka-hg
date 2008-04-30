@@ -5,7 +5,8 @@
 
     Database models for the forum.
 
-    :copyright: 2007 by Benjamin Wiegand, Armin Ronacher, Christoph Hack.
+    :copyright: 2007-2008 by Benjamin Wiegand, Armin Ronacher, Christoph Hack,
+                             Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
@@ -31,6 +32,7 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.database import session as dbsession
+from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table
@@ -660,7 +662,6 @@ class Post(object):
         )
 
 
-
 class PostRevision(object):
     """
     This saves old revisions of posts. It can be used to restore posts if
@@ -718,7 +719,9 @@ class Attachment(object):
             exists = False
 
         if not exists:
-            fn = path.join('forum', 'attachments',
+            # create a temporary filename so we can identify the attachment
+            # on binding to the posts
+            fn = path.join('forum', 'attachments', 'temp',
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
             attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
@@ -752,10 +755,35 @@ class Attachment(object):
         """
         if not att_ids:
             return False
-        dbsession.execute(attachment_table.update(and_(
+        new_path = path.join('forum', 'attachments', str(post_id))
+        new_abs_path = path.join(settings.MEDIA_ROOT, new_path)
+
+        if not path.exists(new_abs_path):
+            os.mkdir(new_abs_path)
+
+        attachments = dbsession.execute(attachment_table.select(and_(
             attachment_table.c.id.in_(att_ids),
             attachment_table.c.post_id == None
-        ), values={'post_id': post_id}))
+        ))).fetchall()
+
+        for row in attachments:
+            id, old_fn, name, comment, pid, mime = row
+            old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
+            new_fo = open(path.join(new_abs_path, name), 'w')
+            try:
+                new_fo.write(old_fo.read())
+            finally:
+                new_fo.close()
+                old_fo.close()
+            # delete the temp-file
+            os.remove(path.join(settings.MEDIA_ROOT, old_fn))
+        at = attachment_table
+        dbsession.execute(at.update(and_(
+            at.c.id.in_(att_ids),
+            at.c.post_id == None
+        ), values={'post_id': post_id,
+                   at.c.file: '%s/'%new_path + at.c.name}
+        ))
 
     @property
     def size(self):
@@ -819,11 +847,7 @@ class Attachment(object):
                     thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
                     thumbnail.save(thumb_path, format)
                 else:
-                    f = open(thumb_path, 'wb')
-                    try:
-                        f.write(thumbnail.content)
-                    finally:
-                        f.close()
+                    thumbnail.save(thumb_path, format)
             thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
@@ -897,6 +921,18 @@ class Poll(object):
             (poll_vote_table.c.voter_id == user.id))).fetchone())
 
     participated = property(has_participated)
+
+    @property
+    def ended(self):
+        """Returns a boolean whether the poll ended already"""
+        return datetime.utcnow() > self.end_time
+
+    @deferred
+    def can_vote(self):
+        """
+        Returns a boolean whether the current user can vote in this poll.
+        """
+        return not self.ended and not self.participated
 
 
 class PollOption(object):
@@ -1016,7 +1052,6 @@ class ReadStatus(object):
         """
         if self(item):
             return False
-        # print 'MARK', item, self.data
         forum_id = isinstance(item, Forum) and item.id or item.forum_id
         post_id = item.last_post_id
         if isinstance(item, Forum):
@@ -1026,26 +1061,22 @@ class ReadStatus(object):
             if item.parent_id and reduce(lambda a, b: a and b, \
                 [self(c) for c in item.parent.children], True):
                 self.mark(item.parent)
-            # print ' FORUM', self.data
             return True
         row = self.data.get(forum_id, (None, set()))
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,
             [self(c) for c in item.forum.children], True) and not \
             dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
-            forum_table.c.last_post_id > (row[0] or -1),
-            ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
+                forum_table.c.last_post_id > (row[0] or -1),
+                ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
-            # print ' ALL', self.data
             return True
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
             r = list(row[1])
             r.sort()
             row[1] = set(r[settings.FORUM_LIMIT_UNREAD//2:])
             row[0] = r[settings.FORUM_LIMIT_UNREAD//2]
-            # print ' TRUNCATED'
         self.data[forum_id] = row
-        # print ' RESULT', self.data
         return True
 
     def serialize(self):

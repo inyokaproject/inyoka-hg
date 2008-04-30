@@ -11,7 +11,7 @@
 """
 import re
 from django.conf import settings
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
@@ -135,7 +135,7 @@ def forum(request, slug, page=1):
             'topics':       pagination.objects,
             'pagination':   pagination
         }
-        # if you alter this value, change it in 
+        # if you alter this value, change it in
         # forum.models.Forum.invalidate_topic_cache, too.
         if page < 5:
             cache.set(key, data)
@@ -197,6 +197,9 @@ def viewtopic(request, topic_slug, page=1):
                         flash(u'Du hast bereits an dieser Abstimmung '
                               u'teilgenommen.', False)
                         continue
+                    elif poll.ended:
+                        flash(u'Die Abstimmung ist bereits zu Ende.', False)
+                        continue
                     poll.votings.append(PollVote(voter_id=request.user.id))
                     session.execute(poll_option_table.update(
                         poll_option_table.c.id.in_(votes) &
@@ -228,16 +231,15 @@ def viewtopic(request, topic_slug, page=1):
             session.commit()
 
     return {
-        'topic':        t,
-        'forum':        t.forum,
-        'posts':        post_objects,
-        'privileges':   privileges,
-        'is_subscribed':subscribed,
-        'pagination':   pagination,
-        'polls':        polls,
+        'topic':             t,
+        'forum':             t.forum,
+        'posts':             post_objects,
+        'privileges':        privileges,
+        'is_subscribed':     subscribed,
+        'pagination':        pagination,
+        'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
-        'can_vote':     polls and (False in [p.participated for p in
-                                             polls]) or False
+        'can_vote':          polls and bool([True for p in polls if p.can_vote])
     }
 
 
@@ -325,9 +327,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if 'add_poll' in request.POST and poll_form.is_valid():
             d = poll_form.cleaned_data
             options = map(lambda a: PollOption(name=a), poll_options)
+            now = datetime.utcnow()
             poll = Poll(topic=topic, question=d['question'],
                 multiple_votes=d['multiple'], options=options,
-                start_time=datetime.utcnow())
+                start_time=now, end_time=now + timedelta(days=d['duration']))
             if topic:
                 topic.has_poll = True
                 topic.forum.invalidate_topic_cache()
@@ -353,10 +356,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
             (topic and topic.id or -1))).all()
 
+    # handle attachments
     att_ids = map(int, filter(bool,
         request.POST.get('attachments', '').split(',')
     ))
-    # handle attachments
     if check_privilege(privileges, 'upload'):
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.

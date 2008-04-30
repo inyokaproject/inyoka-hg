@@ -9,8 +9,27 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from inyoka.portal.models import Storage
 from inyoka.utils.cache import cache
+from django.db import models
+
+
+
+class Storage(models.Model):
+    """
+    Table for storing simple key --> value relations.
+    Use the `storage` object for accessing it (it behaves like a dict).
+    """
+    key = models.CharField(u'Schlüssel', max_length=200)
+    value = models.TextField(u'Wert')
+
+    def __unicode__(self):
+        return self.key
+
+    class Meta:
+        # since this model was stored in the portal module
+        # some time ago it's table is known as portal_storage
+        # instead of utils_storage as django says.
+        db_table = 'portal_storage'
 
 
 class CachedStorage(object):

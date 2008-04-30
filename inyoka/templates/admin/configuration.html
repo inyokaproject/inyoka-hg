@@ -8,8 +8,9 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'config'), 'Konfiguration')
   ] %}
 
@@ -17,7 +18,12 @@
 <h3>{{ title_trace[0] }}</h3>
 
 <form action="" method="post" class="ikhaya">
-  {{ h.render_form(form, 'global_message') }}
+  <dl>
+    {{ render_form(form, ['global_message', 'max_signature_length', 'max_signature_lines'], inline=true) }}
+    <dt>Maximale Avatargröße</dt>
+    <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel
+        {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
+  </dl>
   <p>
     <input type="submit" value="Speichern" />
   </p>

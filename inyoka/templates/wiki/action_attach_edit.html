@@ -11,10 +11,10 @@
 
 {% extends 'wiki/page.html' %}
 
-{% set title_trace = [page.title|e] %}
-{% set action = 'manage' %}
-{% set styles = ['editor.css'] + styles %}
-{% set scripts = ['WikiEditor.js'] + scripts %}
+{% title_trace = [page.title|e] %}
+{% action = 'manage' %}
+{% styles = ['editor.css'] + styles|default([]) %}
+{% scripts = ['WikiEditor.js'] + scripts|default([]) %}
 
 {% block wiki_content %}
   <h1 class="pagetitle">Dateianhang bearbeiten</h1>

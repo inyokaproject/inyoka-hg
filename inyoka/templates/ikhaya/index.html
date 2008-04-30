@@ -10,14 +10,14 @@
 {% extends 'ikhaya/page.html' %}
 
 {% if category %}
-  {% set name = 'Kategorie %s - '|format(category.name) %}
-  {% set feeds = [
-    (name ~ 'Nur Überschrift', href('ikhaya', 'feeds', category.slug, 'title/20')),
-    (name ~ 'Nur Einleitung', href('ikhaya', 'feeds', category.slug, 'short/20')),
-    (name ~ 'Ganzer Beitrag', href('ikhaya', 'feeds', category.slug, 'full/20')),
+  {% name = 'Kategorie %s - '|format(category.name) %}
+  {% feeds = [
+    (name + 'Nur Überschrift', href('ikhaya', 'feeds', category.slug, 'title/20')),
+    (name + 'Nur Einleitung', href('ikhaya', 'feeds', category.slug, 'short/20')),
+    (name + 'Ganzer Beitrag', href('ikhaya', 'feeds', category.slug, 'full/20')),
   ] %}
 {% else %}
-  {% set feeds = [
+  {% feeds = [
     ('Ikhaya - Nur Überschrift', href('ikhaya', 'feeds/title/20')),
     ('Ikhaya - Nur Einleitung', href('ikhaya', 'feeds/short/20')),
     ('Ikhaya - Ganzer Beitrag', href('ikhaya', 'feeds/full/20'))

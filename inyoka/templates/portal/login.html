@@ -9,8 +9,9 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{%- set styles = styles + ['login.css'] -%}
-{% set title_trace = ['Login'] %}
+{% from 'macros.html' import render_form %}
+{% styles = styles|default([]) + ['login.css'] %}
+{% title_trace = ['Login'] %}
 {% block appheader %}
   <h1>Portal</h1>
   <h2>Login</h2>
@@ -63,7 +64,7 @@
   {%- endif %}
   <form action="" method="post" class="loginform">
     <dl>
-      {{ h.render_form(form, 'username', 'password', inline=true) }}
+      {{ render_form(form, ['username', 'password'], inline=true) }}
       <dd>
         {{ form.permanent }} <label for="id_permanent">{{ form.permanent.label }}</label>
         <div class="help_text">Wähle dies nicht aus, wenn du dich von einem öffentlichen

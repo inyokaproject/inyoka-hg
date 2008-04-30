@@ -48,15 +48,21 @@ def index(request):
 @require_manager
 @templated('admin/configuration.html')
 def config(request):
+    keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
+            'max_signature_lines']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST)
         if form.is_valid():
-            html = cleanup_html(form.cleaned_data['global_message'])
+            data = form.cleaned_data
+            html = cleanup_html(data['global_message'])
             storage['global_message'] = html
+            for k in keys:
+                storage[k] = data[k]
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
-        form = ConfigurationForm(initial=storage.get_many(['global_message']))
+        form = ConfigurationForm(initial=storage.get_many(
+                                 ['global_message'] + keys))
     return {
         'form': form
     }
@@ -213,7 +219,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Category.objects.all()]
         icons = [(i.id, i.identifier) for i in Icon.objects.all()]
-        form.fields['icon_id'].choices = icons
+        form.fields['icon_id'].choices = [(u'', u'Kein Icon')] + icons
         form.fields['category_id'].choices = categories
 
     if article:
@@ -225,6 +231,9 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         if form.is_valid():
             data = form.cleaned_data
             data['author'] = data['author'] or request.user
+            if not data.get('icon_id'):
+                data['icon_id'] = None
+                data['icon'] = None
             if not article:
                 article = Article(**data)
                 article.save()
@@ -875,4 +884,3 @@ def styles(request):
     return {
         'form': form
     }
-

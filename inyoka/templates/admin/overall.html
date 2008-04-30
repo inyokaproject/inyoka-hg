@@ -9,14 +9,15 @@
 #}
 {% extends 'overall.html' %}
 
-{% set active_app = 'portal' %}
-{% set navi_type  = 'both' %}
-{% set styles = ['admin.css'] + styles %}
-{% set navigation_trace = [
+{% active_app = 'portal' %}
+{% navi_type  = 'both' %}
+{% styles = ['admin.css'] + styles|default([]) %}
+{% navigation_trace = [
     (href('admin'), 'Adminbereich')
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
+{% title_trace = [] %}
 {% for i in navigation_trace %}
-  {% set title_trace = [i[1]] + title_trace! %}
+  {% title_trace.insert(0, i[1]) %}
 {% endfor %}
 
 {% macro admin_button(link, icon, name) %}

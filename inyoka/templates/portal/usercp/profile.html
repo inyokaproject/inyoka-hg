@@ -9,12 +9,13 @@
 #}
 
 {% extends 'portal/usercp/overall.html' %}
-{% set title_trace = ['Benutzereinstellungen'] %}
-{% set scripts = ['WikiEditor.js'] %}
-{% set styles = ['editor.css'] %}
-{% set selected = 'profile' %}
+{% from 'macros.html' import render_form %}
+{% title_trace = ['Benutzereinstellungen'] %}
+{% scripts = ['WikiEditor.js'] %}
+{% styles = ['editor.css'] %}
+{% selected = 'profile' %}
 {% block html_head %}
-  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ gmaps_apikey|e(true)
+  <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ gmaps_apikey|e
     }}" type="text/javascript"></script>
   {{ super() }}
 {% endblock %}
@@ -27,14 +28,14 @@
       <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
       <dd>{{ form.avatar }}</dd>
       <dd class="note">
-        Beachte, dass der Avatar maximal <strong>{{ SETTINGS.AVATAR_SIZE[0] }} x {{ SETTINGS.AVATAR_SIZE[1] }}</strong> Pixel groß sein darf.<br />
+        Beachte, dass der Avatar maximal <strong>{{ max_avatar_height }} x {{ max_avatar_width }}</strong> Pixel groß sein darf.<br />
         Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
         Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
       </dd>
       {%- if user.avatar %}
       <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
       {%- endif %}
-      {%- if form.errors[avatar] %}<dd>{{ h.field_errors(form.errors.avatar) }}{{ h.field_errors(form.errors.delete_avatar) }}</dd>{% endif %}
+      {%- if form.errors[avatar] %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
     </dl>
     <h3>Kontakt-Adressen</h3>
     <dl>
@@ -54,10 +55,10 @@
       {% endfor %}
     </dl>
     <h3>Sonstige Einstellungen</h3>
-    {{ h.render_form(form, 'occupation', 'interests', 'website',
-                           'gpgkey') }}
+    {{ render_form(form, ['occupation', 'interests', 'website',
+                          'gpgkey']) }}
     <h4>Geographische Lage</h4>
-    {{ h.render_form(form, 'location', 'coordinates') }}
+    {{ render_form(form, ['location', 'coordinates']) }}
     <h3>Signatur</h3>
     <p class="note">
       Dieser Text wird an jeden Beitrag von dir angehängt.<br />
@@ -69,7 +70,7 @@
         var editor = new WikiEditor('textarea[@name="signature"]')
       </script>
     </p>
-    {{ h.field_errors(form.errors.signature) }}
+    {{ form.errors.signature }}
     <p>
       <input type="submit" value="Speichern" />
       <a href="{{ href('portal', 'user', user.username ) }}">Eigenes Profil anzeigen</a>

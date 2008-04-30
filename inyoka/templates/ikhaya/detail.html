@@ -8,10 +8,11 @@
     :license: GNU GPL.
 #}
 {% extends 'ikhaya/page.html' %}
+{% from 'macros.html' import render_form %}
 
-{% set title_trace = [article.subject|e] %}
-{% set styles = ['editor.css']%}
-{% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
+{% title_trace = [article.subject|e] %}
+{% styles = ['editor.css']%}
+{% scripts = ['ikhaya.js', 'WikiEditor.js'] %}
 
 {% block ikhaya_content %}
   <ul class="articles"><li class="article">
@@ -59,7 +60,7 @@
 
   </p>
   <form action="{{ article|url }}#new_comment" method="post">
-    {{ h.render_form(form, 'title', 'text') }}
+    {{ render_form(form, ['title', 'text']) }}
     <p>
       <input type="submit" name="preview" value="Vorschau" />
       <input type="submit" value="Speichern" />

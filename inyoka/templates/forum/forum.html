@@ -8,19 +8,24 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
-{% include 'forum/_forum.html' %}
+{% from 'forum/_forum.html' import render_forum, topic_icon %}
 
-{% set title_trace = [forum.name|e] %}
-{% set name = 'Forum „%s“ - ' % forum.name|e %}
-{% set feeds = [
-  (name ~ 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
-  (name ~ 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
-  (name ~ 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
+{% title_trace = [forum.name|e] %}
+{% name = 'Forum „%s“ - ' % forum.name|e %}
+{% feeds = [
+  (name + 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
+  (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
+  (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
+{% navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {% set navigation_trace = navigation_trace + [(parent|url, parent.name)] ! %}
+  {% navigation_trace.append([parent|url, parent.name]) %}
 {% endfor %}
-{% set navigation_trace = navigation_trace + [(forum|url, forum.name)] %}
+{% navigation_trace.append([forum|url, forum.name]) %}
+
+{% block search_areas %}
+  <option value="current_forum" selected="selected">Dieses Forum</option>
+{% endblock %}
 
 {% block forum_content %}
   <table class="forum">
@@ -46,7 +51,7 @@
     <tbody>
     {%- for subforum in subforums %}
       {{ render_forum(subforum) }}
-    {% endfor %}
+    {%- endfor %}
     <tr>
       <th class="topic" colspan="2">Thema</th>
       <th class="view_count">Aufrufe</th>

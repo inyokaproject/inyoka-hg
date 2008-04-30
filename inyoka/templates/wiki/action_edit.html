@@ -10,17 +10,17 @@
 
 
 {% extends 'wiki/page.html' %}
-{% set title = page.title if page else name %}
-{% set title_trace = [title|e, 'Bearbeiten'] %}
-{% set scripts = ['WikiEditor.js'] %}
-{% set styles = ['editor.css'] %}
-{% set action = 'edit' %}
+{% title = page.title if page else name %}
+{% title_trace = [title|e, 'Bearbeiten'] %}
+{% scripts = ['WikiEditor.js'] %}
+{% styles = ['editor.css'] %}
+{% action = 'edit' %}
 {% block wiki_content %}
   <form enctype="multipart/form-data" action="?action=edit" method="post">
     <div class="editor">{{ form.text }}</div>
     <p>Änderungsnotiz: {{ form.note }}</p>
-    {{ h.field_errors(form.errors.text) }}
-    {{ h.field_errors(form.errors.__all__) }}
+    {{ form.errors.text }}
+    {{ form.errors.__all__ }}
     <div class="actions">
       <input type="hidden" name="edit_time" value="{{ edit_time }}" />
       <input type="hidden" name="rev" value="{{ rev }}" />

@@ -8,22 +8,23 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% if page %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.title))
     ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (href('admin', 'pages', 'new'), 'Neue Seite erstellen')
     ] %}
 {% endif %}
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'pages'), 'Statische Seiten')
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 {% block admin_content %}
   <h3>{{ title_trace[0] }}</h3>
   <form action="" method="post">
-    {{ h.render_form(form, 'title', 'key', 'content') }}
+    {{ render_form(form, 'title', 'key', 'content') }}
     <p>
       <input type="submit" value="Speichern" />
     </p>

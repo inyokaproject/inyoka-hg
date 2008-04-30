@@ -9,7 +9,7 @@
 #}
 
 {% extends 'portal/overall.html' %}
-{% set title_trace = title_trace + ['Verwaltungscenter'] %}
+{% title_trace = title_trace|default([]) + ['Verwaltungscenter'] %}
 {% block appheader %}
   <h1>Verwaltung</h1>
   <h2>{{ title_trace[:-1]|join(' » ') or 'Übersicht' }}</h2>

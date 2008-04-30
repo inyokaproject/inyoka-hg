@@ -36,7 +36,7 @@ SEARCH_AREA_CHOICES = (
     ('wiki', 'Wiki'),
     ('forum', 'Forum'),
     ('ikhaya', 'Ikhaya'),
-    ('planet', 'Planet')
+    ('planet', 'Planet'),
 )
 
 SEARCH_SORT_CHOICES = (

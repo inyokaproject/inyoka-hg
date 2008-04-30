@@ -8,12 +8,13 @@
     :license: GNU GPL.
 #}
 {% extends 'ikhaya/page.html' %}
-{% set navigation_trace =  [
+{% from 'macros.html' import render_form %}
+{% navigation_trace =  [
   (href('ikhaya', 'suggest'), 'Artikel vorschlagen')
   ] %}
-{% set title_trace = ['Artikel vorschlagen'] %}
-{% set scripts = ['WikiEditor.js'] %}
-{% set styles = ['editor.css'] %}
+{% title_trace = ['Artikel vorschlagen'] %}
+{% scripts = ['WikiEditor.js'] %}
+{% styles = ['editor.css'] %}
 {% block ikhaya_content %}
   <div class="content_sidebar_bk">
   <h2>Artikel vorschlagen</h2>
@@ -25,7 +26,7 @@
     Dann schreibe Deinen Beitrag hier!
   </p>
   <form action="" method="post">
-    {{ h.render_form(form, 'title', 'intro', 'text') }}
+    {{ render_form(form, ['title', 'intro', 'text']) }}
     <p>
       <input type="submit" value="Abschicken" />
     </p>

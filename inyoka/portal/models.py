@@ -19,10 +19,11 @@ from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
-from inyoka.portal.user import User
 from inyoka.wiki.models import Page
 from inyoka.forum.models import Forum, SAGroup
 from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.portal.user import User
+
 
 
 class SubscriptionManager(models.Manager):
@@ -73,16 +74,6 @@ class SessionInfo(models.Model):
     category = models.CharField(max_length=200, null=True)
 
 
-class Storage(models.Model):
-    """
-    Table for storing simple key --> value relations.
-    Use the `storage` object for accessing it (it behaves like a dict).
-    """
-    key = models.CharField(u'Schlüssel', max_length=200)
-    value = models.TextField(u'Wert')
-
-    def __unicode__(self):
-        return self.key
 
 
 PRIVMSG_FOLDERS_DATA = (

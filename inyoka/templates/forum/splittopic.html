@@ -10,13 +10,13 @@
     
 #}
 {% extends 'forum/page.html' %}
-{% set title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
-{% set navigation_trace =  [
+{% title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
+{% navigation_trace =  [
     (topic.forum|url, topic.forum.name),
     (topic|url, topic.title),
     (topic|url('split'), 'Thema aufteilen')
-  ] + navigation_trace %}
-{% set scripts = scripts + ['jQuery.autocomplete.js'] %}
+  ] + navigation_trace|default([]) %}
+{% scripts = scripts|default([]) + ['jQuery.autocomplete.js'] %}
 
 {% block forum_content %}
   <form action="" method="post" class="new_topic">
@@ -30,20 +30,20 @@
         <label for="id_new">Neues Topic erstellen</label>
       </dt>
       <dd>
-        Forum des neuen Topics: {{ form.forum }}{{ h.field_errors(form.errors.forum) }}
+        Forum des neuen Topics: {{ form.forum }}{{ form.errors.forum }}
       </dd>
       <dd>
-        Titel des neuen Topics: {{ form.title }}{{ h.field_errors(form.errors.title) }}
+        Titel des neuen Topics: {{ form.title }}{{ form.errors.title }}
       </dd>
       <dt>
         <input type="radio" name="action" value="add" id="id_add" />
         <label for="id_add">An altes Topic anfügen</label>
       </dt>
       <dd>
-        Slug des Topics: {{ form.topic_slug }}{{ h.field_errors(form.errors.topic_slug) }}
+        Slug des Topics: {{ form.topic_slug }}{{ form.errors.topic_slug }}
       </dd>
     </dl>
-    {{ h.field_errors(form.errors.action) }}
+    {{ form.errors.action }}
     <table class="topic">
       <thead>
       <tr>

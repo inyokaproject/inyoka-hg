@@ -10,8 +10,8 @@
 
 
 {% extends 'wiki/page.html' %}
-{% set title_trace = [page.title|e, 'Backlinks'] %}
-{% set action = 'backlinks' %}
+{% title_trace = [page.title|e, 'Backlinks'] %}
+{% action = 'backlinks' %}
 {% block wiki_content %}
   {%- if page.backlinks %}
     <p>

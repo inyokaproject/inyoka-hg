@@ -8,20 +8,21 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% if not icon %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (href('admin', 'ikhaya', 'icons', 'new'), 'Icon erstellen')
     ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
       (icon|url('edit'), 'Icon „%s“ bearbeiten'|format(icon.identifier|e))
     ] %}
 {% endif %}
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'icons'), 'Icons')
-  ] + navigation_trace %}
+  ] + navigation_trace|default([]) %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>
@@ -32,7 +33,7 @@
     <img src="{{ icon|url }}" alt="{{ identifier|e }}" />
   </div>
   {%- endif %}
-  {{ h.render_form(form, 'identifier', 'img') }}
+  {{ render_form(form, ['identifier', 'img']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

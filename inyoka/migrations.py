@@ -16,11 +16,13 @@
 
     Keep that in mind!
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: Copyright 2008 by Armin Ronacher, Christopher Grebs,
+                                  Benjamin Wiegand.
     :license: GNU GPL.
 """
+import os
 from itertools import izip
-from os.path import dirname, join
+from os.path import dirname, join, exists
 from inyoka.conf import settings
 
 
@@ -167,9 +169,65 @@ def add_attachment_mimetype(m):
     ''')
 
 
+def new_attachment_structure(m):
+    """Moves old attachments to the new filesystem structure"""
+    if not exists(join(settings.MEDIA_ROOT, 'forum', 'attachments', 'temp')):
+        os.mkdir(join(settings.MEDIA_ROOT, 'forum', 'attachments', 'temp'))
+
+    attachments = m.engine.execute('''
+        select a.id, a.file, a.name, a.post_id
+            from forum_attachment a
+    ''')
+    for row in attachments:
+        id, old_fn, name, pid = row
+        new_path = join('forum', 'attachments', str(pid))
+        new_abs_path = join(settings.MEDIA_ROOT, new_path)
+
+        if not exists(new_abs_path):
+            os.mkdir(new_abs_path)
+
+        try:
+            old_fo = open(join(settings.MEDIA_ROOT, old_fn), 'r')
+        except IOError:
+            continue
+        new_fo = open(join(new_abs_path, name), 'w')
+        try:
+            new_fo.write(old_fo.read())
+        finally:
+            new_fo.close()
+            old_fo.close()
+        os.remove(join(settings.MEDIA_ROOT, old_fn))
+
+        m.engine.execute('''
+            update forum_attachment
+                set file = %s
+            where id = %s
+        ''', (join(new_path, name), id))
+
+
+def add_default_storage_values(m):
+    values = {
+        'global_message':       '',
+        'max_avatar_width':     80,
+        'max_avatar_height':    100,
+        'max_signature_length': 400,
+        'max_signature_lines':  4,
+    }
+    for k, v in values.iteritems():
+        r = m.engine.execute('''
+            select 1 from portal_storage where `key` = %s
+        ''', (k,))
+        if not r.fetchone():
+            m.engine.execute('''
+                insert ignore into portal_storage (`key`, value)
+                                           values (%s, %s)
+            ''', (k, v))
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
-    new_forum_acl_system, add_attachment_mimetype
+    new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
+    add_default_storage_values
 ]

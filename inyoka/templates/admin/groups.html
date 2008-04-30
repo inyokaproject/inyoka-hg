@@ -9,11 +9,11 @@
 #}
 {% extends 'admin/overall.html' %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'groups'), 'Gruppen'),
 ] %}
 
-{% set scripts = scripts + ['jQuery.autocomplete.js'] %}
+{% scripts = scripts|default([]) + ['jQuery.autocomplete.js'] %}
 {% block appheader %}
 <h1>Administration</h1>
 <h2>Gruppen</h2>

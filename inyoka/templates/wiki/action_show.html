@@ -11,8 +11,8 @@
 
 
 {% extends 'wiki/page.html' %}
-{% set title_trace = [page.title|e] %}
-{% set action = 'show' %}
+{% title_trace = [page.title|e] %}
+{% action = 'show' %}
 {% block wiki_content %}
   <h1 class="pagetitle"><a href="{{ href('wiki', page.name, action='backlinks')|e }}">{{ page.short_title|e }}</a></h1>
 

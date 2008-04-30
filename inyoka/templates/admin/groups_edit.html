@@ -9,22 +9,23 @@
     :license: GNU GPL.
 #}
 {% extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
 
 {% if is_new %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
     (href('admin', 'groups', 'new'), 'neue Gruppe'),
   ] %}
 {% else %}
-  {% set navigation_trace = [
+  {% navigation_trace = [
     (href('admin', 'groups', 'edit', group_name), 'Gruppe „%s“ editieren'|format(group_name)),
   ] %}
 {% endif %}
 
-{% set navigation_trace = [
+{% navigation_trace = [
     (href('admin', 'groups'), 'Gruppen')
-] + navigation_trace %}
+] + navigation_trace|default([]) %}
 
-{% set scripts = ['PrivilegeBox.js'] %}
+{% scripts = ['PrivilegeBox.js'] %}
 
 {% block appheader %}
 <h1>Administration</h1>
@@ -35,7 +36,7 @@
 <h3>Gruppenkonfiguration</h3>
 <form action="" method="post">
   <dl>
-    {{ h.render_form(form, 'name', 'is_public', inline=true) }}
+    {{ render_form(form, ['name', 'is_public'], inline=true) }}
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   </dl>

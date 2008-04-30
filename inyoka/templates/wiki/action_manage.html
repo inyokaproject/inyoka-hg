@@ -9,8 +9,8 @@
 #}
 
 {% extends 'wiki/page.html' %}
-{% set title_trace = [page.title|e] %}
-{% set action = 'manage' %}
+{% title_trace = [page.title|e] %}
+{% action = 'manage' %}
 {% block wiki_content %}
   <p>Die folgenden Funktionen stehen für diese Seite zur Verfügung:</p>
   <ul>
