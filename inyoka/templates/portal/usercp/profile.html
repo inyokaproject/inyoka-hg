@@ -28,7 +28,7 @@
       <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
       <dd>{{ form.avatar }}</dd>
       <dd class="note">
-        Beachte, dass der Avatar maximal <strong>{{ SETTINGS.AVATAR_SIZE[0] }} x {{ SETTINGS.AVATAR_SIZE[1] }}</strong> Pixel groß sein darf.<br />
+        Beachte, dass der Avatar maximal <strong>{{ max_avatar_height }} x {{ max_avatar_width }}</strong> Pixel groß sein darf.<br />
         Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
         Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
       </dd>

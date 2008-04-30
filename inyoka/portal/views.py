@@ -400,7 +400,7 @@ def profile(request, username):
     return {
         'user':     user,
         'groups':   user.groups.all(),
-        'wikipage': content
+        'wikipage': content,
     }
 
 
@@ -459,10 +459,16 @@ def usercp_profile(request):
              if k.startswith('show_'))
         ))
         form = UserCPProfileForm(values)
+
+    storage_keys = storage.get_many(('max_avatar_width',
+        'max_avatar_height'))
+
     return {
-        'form':         form,
-        'user':         request.user,
-        'gmaps_apikey': settings.GOOGLE_MAPS_APIKEY
+        'form':                 form,
+        'user':                 request.user,
+        'gmaps_apikey':         settings.GOOGLE_MAPS_APIKEY,
+        'max_avatar_width':     storage_keys['max_avatar_width'],
+        'max_avatar_height':    storage_keys['max_avatar_height'],
     }
 
 
@@ -500,7 +506,7 @@ def usercp_settings(request):
         form = UserCPSettingsForm(values)
     return {
         'form': form,
-        'user': request.user
+        'user': request.user,
     }
 
 
