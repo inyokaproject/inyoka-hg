@@ -23,10 +23,10 @@ from django.core import validators
 from inyoka.conf import settings
 from inyoka.utils.decorators import deferred
 from inyoka.utils.urls import href
-from inyoka.utils.captcha import generate_word
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
 from inyoka.utils.local import current_request
+from inyoka.utils.storage import storage
 
 
 UNUSABLE_PASSWORD = '!'
@@ -404,4 +404,4 @@ def deactivate_user(user):
 
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.utils import send_activation_mail
-from inyoka.utils.storage import storage
+from inyoka.utils.captcha import generate_word

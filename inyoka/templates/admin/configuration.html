@@ -24,6 +24,9 @@
     <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel
         {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
   </dl>
+  <h3>Get Ubuntu-Link</h3>
+  {{ render_form(form, ['get_ubuntu_link', 'get_ubuntu_description']) }}
+  <br />
   <p>
     <input type="submit" value="Speichern" />
   </p>

@@ -20,9 +20,9 @@
 
 {% block pre_navigation %}
   <div class="container get_ubuntu">
-    <a href="{# XXX: #}">
+    <a href="{{ get_ubuntu_link }}">
       <h3>Hol dir Ubuntu!</h3>
-      <span>8.04 „Hardy Heron“</span>
+      <span>{{ get_ubuntu_description }}</span>
     </a>
   </div>
 {% endblock %}

@@ -68,11 +68,15 @@ def index(request):
     ikhaya_latest = Article.published.all()[:10]
     set_session_info(request, u'ist am Portal', 'Portal')
     record, record_time = get_user_record()
+    storage_keys = storage.get_many(('get_ubuntu_link',
+        'get_ubuntu_description'))
     return {
-        'ikhaya_latest':    list(ikhaya_latest),
-        'sessions':         get_sessions(order_by='subject_text'),
-        'record':           record,
-        'record_time':      record_time
+        'ikhaya_latest':            list(ikhaya_latest),
+        'sessions':                 get_sessions(order_by='subject_text'),
+        'record':                   record,
+        'record_time':              record_time,
+        'get_ubuntu_link':          storage_keys['get_ubuntu_link'],
+        'get_ubuntu_description':   storage_keys['get_ubuntu_description'],
     }
 
 

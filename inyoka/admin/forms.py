@@ -28,7 +28,9 @@ class ConfigurationForm(forms.Form):
         label=u'Maximale Signaturlänge')
     max_signature_lines = forms.IntegerField(min_value=1,
         label=u'Maximale Zeilenanzahl in Signatur')
-
+    get_ubuntu_link = forms.URLField(required=False,
+        label=u'Der Downloadlink für die Startseite')
+    get_ubuntu_description = forms.CharField(label=u'Beschreibung des Links')
 
 
 class EditStaticPageForm(forms.Form):

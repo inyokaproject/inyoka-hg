@@ -49,7 +49,8 @@ def index(request):
 @templated('admin/configuration.html')
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
-            'max_signature_lines']
+            'max_signature_lines', 'get_ubuntu_link',
+            'get_ubuntu_description']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST)
         if form.is_valid():

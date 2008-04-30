@@ -207,11 +207,13 @@ def new_attachment_structure(m):
 
 def add_default_storage_values(m):
     values = {
-        'global_message':       '',
-        'max_avatar_width':     80,
-        'max_avatar_height':    100,
-        'max_signature_length': 400,
-        'max_signature_lines':  4,
+        'global_message':           '',
+        'max_avatar_width':         80,
+        'max_avatar_height':        100,
+        'max_signature_length':     400,
+        'max_signature_lines':      4,
+        'get_ubuntu_link':          '',
+        'get_ubuntu_description':   '8.04 „Hardy Heron“',
     }
     for k, v in values.iteritems():
         r = m.engine.execute('''
