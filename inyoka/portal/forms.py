@@ -204,7 +204,8 @@ class SetNewPasswordForm(forms.Form):
 
     def clean(self):
         data = super(self.__class__, self).clean()
-        if data['password'] != data['password_confirm']:
+        if 'password' not in data or 'password_confirm' not in data or \
+           data['password'] != data['password_confirm']:
             raise forms.ValidationError(u'Die Passwörter stimmen nicht '
                                         u'überein!')
         try:
