@@ -95,7 +95,6 @@ def populate_context_defaults(context):
     if request:
         context.update(
             XHTML_DTD=get_dtd(),
-            REQUEST=request,
             CURRENT_URL=request.build_absolute_uri(),
             USER=request.user,
             MESSAGES=get_flashed_messages()
@@ -134,6 +133,7 @@ class InyokaEnvironment(Environment):
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
+            REQUEST=current_request,
             href=href
         )
         self.filters.update(
@@ -184,10 +184,10 @@ jinja_env = InyokaEnvironment()
 
 
 # circular imports
+from inyoka.forum.acl import check_privilege
 from inyoka.portal.models import PrivateMessageEntry
 from inyoka.forum.models import Topic
 from inyoka.ikhaya.models import Suggestion
 from inyoka.utils.storage import storage
-from inyoka.forum.acl import check_privilege
 # set a new helper function for the templates
 jinja_env.globals['check_privilege'] = check_privilege

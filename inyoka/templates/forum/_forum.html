@@ -1,7 +1,7 @@
 {% macro render_forum(forum) %}
   <tr class="entry category-{{ forum.parent_id }}">
     <td class="icon">
-      {% if forum.get_read_status(USER) %}
+      {% if forum.get_read_status(REQUEST.user) %}
         <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
       {% else %}
         <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
