@@ -66,25 +66,25 @@ $(function () {
 
 
   $('.codeblock').each(function () {
-    var codeblock = this;
-    if (codeblock.clientHeight < codeblock.scrollHeight)
+    if (this.clientHeight < this.scrollHeight)
     {
-      $(codeblock).after('<div class="codeblock_resizer"></div>');
+      $(this)
+        .after('<div class="codeblock_resizer"></div>')
+        .css('height', '15em').css('max-height', 'none')
+        .data('original_height', this.clientHeight);
     }
   });
   $('.codeblock_resizer').click(function () {
     $codeblock = $(this).prev();
-    if (! $codeblock.hasClass('codeblock_expanded')) // expand
+    if (! $codeblock.hasClass('codeblock_expanded'))
     {
       $codeblock.addClass('codeblock_expanded');
-      $codeblock.css('height', '15em').css('max-height', 'none').animate({'height': $codeblock[0].scrollHeight}, 3000);
-//          $codeblock.css('height', '15em').css('max-height', 'none').css('height', 'auto');
+      $codeblock.animate({'height': $codeblock[0].scrollHeight}, 1000);
     }
-    else // collapse
+    else
     {
       $codeblock.removeClass('codeblock_expanded');
-      $codeblock.animate({'height': '15em'}, 3000);//, {'complete': function () { $codeblock.css('max-height', '15em') }});
-      //$codeblock.css('height', '15em').css('max-height', '15em')
+      $codeblock.animate({'height': $codeblock.data('original_height')}, 1000);
     }
   });
 
