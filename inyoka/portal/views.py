@@ -20,7 +20,7 @@ from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
-     PageNotFound, does_not_exist_is_404, HttpResponseRedirect
+     PageNotFound, does_not_exist_is_404, HttpResponseRedirect, PageNotFound
 from inyoka.utils.sessions import get_sessions, set_session_info, \
      make_permanent, get_user_record, test_session_cookie
 from inyoka.utils.urls import href, url_for, is_safe_domain
@@ -607,8 +607,18 @@ def usercp_deactivate(request):
                      u'Nachrichten anzusehen')
 def privmsg(request, folder=None, entry_id=None):
     if folder is None:
-        return HttpResponseRedirect(href('portal', 'privmsg',
-                                         PRIVMSG_FOLDERS['inbox'][1]))
+        if entry_id is None:
+            return HttpResponseRedirect(href('portal', 'privmsg',
+                                             PRIVMSG_FOLDERS['inbox'][1]))
+        else:
+            entry = PrivateMessageEntry.objects.get(user=request.user,
+                                                    id=entry_id)
+            try:
+                return HttpResponseRedirect(href('portal', 'privmsg', 
+                                                 PRIVMSG_FOLDERS[entry.folder][1],
+                                                 entry.id))
+            except KeyError:
+                raise PageNotFound
     message = None
     if entry_id is not None:
         entry = PrivateMessageEntry.objects.get(user=request.user,
@@ -631,8 +641,8 @@ def privmsg(request, folder=None, entry_id=None):
             if entry.archive():
                 flash(u'Die Nachricht wurde in dein Archiv verschoben.', True)
                 message = None
-        elif action == 'revert':
-            if entry.revert():
+        elif action == 'restore':
+            if entry.restore():
                 flash(u'Die Nachricht wurde wiederhergestellt.', True)
                 message = None
     else:

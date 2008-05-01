@@ -126,6 +126,14 @@ class PrivateMessage(models.Model):
     def rendered_text(self):
         return parse(self.text).render(current_request, 'html')
 
+    def get_absolute_url(self, action='show'):
+        if action == 'show':
+            return href('portal', 'privmsg', self.id)
+        if action == 'reply':
+            return href('portal', 'privmsg', 'new', reply_to=self.id)
+        if action == 'forward':
+            return href('portal', 'privmsg', 'new', forward=self.id)
+
 
 class PrivateMessageEntry(models.Model):
     """
@@ -165,6 +173,7 @@ class PrivateMessageEntry(models.Model):
             self.folder = None
         else:
             self.folder = PRIVMSG_FOLDERS['trash'][0]
+            #XXX: if every user deleted it the pn must be deleted completely
         self.save()
         return True
 
@@ -175,7 +184,7 @@ class PrivateMessageEntry(models.Model):
             return True
         return False
 
-    def revert(self):
+    def restore(self):
         if self.folder != PRIVMSG_FOLDERS['trash'][0]:
             return False
         f = self.user == self.message.author and 'sent' or 'inbox'

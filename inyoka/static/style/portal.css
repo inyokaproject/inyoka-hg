@@ -279,6 +279,22 @@ div.prvmsg div.prvmsg_body {
   background-color: #F8F6F1;
 }
 
+.pn_actions {
+  margin-top: .2em;
+}
+
+.pn_delete, .pn_restore, .pn_archive, .pn_reply, .pn_forward {
+    padding-left: 20px;
+    background: no-repeat left center;
+}
+
+.pn_delete { background-image: url(../img/icons/small/delete.png); }
+.pn_restore { background-image: url(../img/icons/small/msg-restore.png); }
+.pn_archive { background-image: url(../img/icons/small/archive.png); }
+.pn_reply { background-image: url(../img/icons/small/msg-reply.png); }
+.pn_forward { background-image: url(../img/icons/small/msg-forward.png); }
+
+
 /* User Control Panel *******************************************************/
 table.calendar td {
   border: 0px solid #CCC;
