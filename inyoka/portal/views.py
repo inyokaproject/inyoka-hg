@@ -75,8 +75,8 @@ def index(request):
         'sessions':                 get_sessions(order_by='subject_text'),
         'record':                   record,
         'record_time':              record_time,
-        'get_ubuntu_link':          storage_keys['get_ubuntu_link'],
-        'get_ubuntu_description':   storage_keys['get_ubuntu_description'],
+        'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
+        'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
     }
 
 
@@ -261,6 +261,14 @@ def set_new_password(request, username, new_password_key):
                   u'einloggen.', True)
             return HttpResponseRedirect(href('portal', 'login'))
     else:
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            flash('Diesen Benutzer gibt es nicht', False)
+            return HttpResponseRedirect(href())
+        if user.new_password_key != new_password_key:
+            flash(u'Ungültiger Bestätigungskey!', False)
+            return HttpResponseRedirect(href())
         form = SetNewPasswordForm(initial={
             'username': username,
             'new_password_key': new_password_key,
