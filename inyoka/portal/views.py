@@ -43,7 +43,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
-     NOTIFICATION_CHOICES
+     NOTIFICATION_CHOICES, FeedSelectorForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
@@ -827,107 +827,44 @@ def usermap(request):
 
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
-    r = {'app': app}
+    form = request.POST and FeedSelectorForm(request.POST) or \
+            FeedSelectorForm()
+    form.app = app
 
-    if app == 'forum':
-        if request.method == 'POST':
-            errors = {}
-            data = dict(request.POST.items()) # request.POST.* is a list
+    if not request.POST or app == 'forum':
+        form.fields['forum'].choices = [(f.slug, f.name)
+                                        for f in Forum.query.all()]
+    if not request.POST or app == 'ikhaya':
+        form.fields['category'].choices = [('*', u'Alle')] + \
+            [(c.slug, c.name) for c in Category.objects.all()]
 
-            if not data.get('count', '').isdigit():
-                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
-                data['count'] = None
-            else:
-                data['count'] = _feed_count_cleanup(int(data['count']))
-            if data.get('component') not in ('*', 'forum', 'topic'):
-                errors['component'] = u'Ungültige Auswahl!'
-                data['component'] = None
-            if data.get('component') == 'forum':
-                try:
-                    Forum.objects.get(slug=data.get('forum'))
-                except:
-                    errors['forum'] = u'Bitte ein Forum auswählen!'
-                    data['forum'] = None
-            if data.get('mode') not in ('full', 'short', 'title'):
-                errors['mode'] = u'Bitte eine Art auswählen!'
-                data['mode'] = None
-
-            if not errors:
-                if data.get('component') == '*':
+    if request.method == 'POST':
+        if form.is_valid():
+            data = form.cleaned_data
+            if app == 'forum':
+                if data['component'] == '*':
                     return HttpResponseRedirect(href('forum', 'feeds',
                            data['mode'], data['count']))
-                if data.get('component') == 'forum':
+                if data['component'] == 'forum':
                     return HttpResponseRedirect(href('forum', 'feeds', 'forum',
                            data['forum'], data['mode'], data['count']))
 
-            r['form'] = data
-            r['errors'] = errors
-
-    if app == 'ikhaya':
-        if request.method == 'POST':
-            errors = {}
-            data = dict(request.POST.items()) # request.POST uses lists
-            data.setdefault('category', '*')
-            if not data.get('count', '').isdigit():
-                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
-                data['count'] = None
-            else:
-                data['count'] = _feed_count_cleanup(int(data['count']))
-            if data.get('mode') not in ('full', 'short', 'title'):
-                errors['mode'] = u'Bitte eine Art auswählen!'
-                data['mode'] = None
-            if data.get('category') != '*':
-                try:
-                    Category.objects.get(slug=data.get('category'))
-                except:
-                    errors['category'] = u'Bitte eine Kategorie auswählen!'
-                    data['category'] = None
-
-            if not errors:
+            elif app == 'ikhaya':
                 if data['category'] == '*':
                     return HttpResponseRedirect(href('ikhaya', 'feeds',
                            data['mode'], data['count']))
                 else:
                     return HttpResponseRedirect(href('ikhaya', 'feeds',
                            data['category'], data['mode'], data['count']))
-            r['form'] = data
-            r['errors'] = errors
 
-    if app == 'planet':
-        if request.method == 'POST':
-            errors = {}
-            data = dict(request.POST.items()) # request.POST uses lists
-            if not data.get('count', '').isdigit():
-                errors['count'] ='Bitte eine Zahl zwischen 5 und 100 eingeben!'
-                data['count'] = None
-            else:
-                data['count'] = _feed_count_cleanup(int(data['count']))
-            if data.get('mode') not in ('full', 'short', 'title'):
-                errors['mode'] = u'Bitte eine Art auswählen!'
-                data['mode'] = None
-
-            if not errors:
+            elif app == 'planet':
                 return HttpResponseRedirect(href('planet', 'feeds',
                        data['mode'], data['count']))
-            r['form'] = data
-            r['errors'] = errors
 
-
-    r['forums'] = Forum.query.all()
-    r['ikhaya_categories'] = Category.objects.all()
-    return r
-
-
-def _feed_count_cleanup(n):
-    COUNTS = (10, 20, 30, 50, 75, 100)
-    if n in COUNTS:
-        return n
-    if n < COUNTS[0]:
-        return COUNTS[0]
-    for i in range(len(COUNTS)):
-        if n < COUNTS[i]:
-            return n - COUNTS[i-1] < COUNTS[i] - n and COUNTS[i-1] or COUNTS[i]
-    return COUNTS[-1]
+    return {
+        'app':        app,
+        'form':       form,
+    }
 
 
 @templated('portal/static_page.html')
