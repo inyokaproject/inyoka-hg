@@ -63,27 +63,28 @@ $(function () {
       });
     };
   })();
+
+
   $('.codeblock').each(function () {
     var codeblock = this;
-    var $codeblock = $(codeblock);
     if (codeblock.clientHeight < codeblock.scrollHeight)
     {
-      $codeblock.after('<div class="codeblock_resizer"></div>');
-      $('.codeblock_resizer').click(function () {
-        $codeblock = $(this).prev();
-        if (! $codeblock.hasClass('codeblock_expanded')) // expand
-        {
-          $codeblock.addClass('codeblock_expanded');
-          $codeblock.css('height', '15em').css('max-height', 'none').animate({'height': codeblock.scrollHeight});
+      $(codeblock).after('<div class="codeblock_resizer"></div>');
+    }
+  });
+  $('.codeblock_resizer').click(function () {
+    $codeblock = $(this).prev();
+    if (! $codeblock.hasClass('codeblock_expanded')) // expand
+    {
+      $codeblock.addClass('codeblock_expanded');
+      $codeblock.css('height', '15em').css('max-height', 'none').animate({'height': $codeblock[0].scrollHeight}, 3000);
 //          $codeblock.css('height', '15em').css('max-height', 'none').css('height', 'auto');
-        }
-        else // collapse
-        {
-          $codeblock.removeClass('codeblock_expanded');
-          $codeblock.animate({'height': '15em'}, 1500);//, {'complete': function () { $codeblock.css('max-height', '15em') }});
-          //$codeblock.css('height', '15em').css('max-height', '15em')
-        }
-      });
+    }
+    else // collapse
+    {
+      $codeblock.removeClass('codeblock_expanded');
+      $codeblock.animate({'height': '15em'}, 3000);//, {'complete': function () { $codeblock.css('max-height', '15em') }});
+      //$codeblock.css('height', '15em').css('max-height', '15em')
     }
   });
 
