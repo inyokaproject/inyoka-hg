@@ -472,3 +472,9 @@ ul.image_list a:hover img {
 .codeblock .syntaxtable tbody {
     margin: -2px 0;
 }
+
+.codeblock_resizer {
+    height: 6px;
+    background: url(../img/expand-bar.png);
+    margin-bottom: -6px;
+}
