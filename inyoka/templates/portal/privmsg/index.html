@@ -23,7 +23,7 @@
         <th class="actions">Aktionen</th>
       </tr>
       {% for entry in entries %}
-      <tr>
+      <tr{% if message == entry.message %} class="active_pn"{% endif %}>
         <td>{% if not entry.read %}<strong>{% endif -%}
         <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
         {% if not entry.read %}</strong>{% endif %}</td>

@@ -250,7 +250,7 @@ table.usercp_subscriptions td.second, th.second {
 div.prvmsg {
   border: 1px solid #ccc;
   padding: .5em;
-  background: #f2f2f2;
+  background-color: #f2f2f2;
   margin-top: 1em;
 }
 
@@ -269,10 +269,14 @@ div.prvmsg dl.prvmsg_header dd {
 }
 
 div.prvmsg div.prvmsg_body {
-  background: #fff;
+  background-color: #fff;
   border: 1px solid #ccc;
   padding: .2em;
   clear: right;
+}
+
+.active_pn {
+  background-color: #F8F6F1;
 }
 
 /* User Control Panel *******************************************************/
