@@ -214,7 +214,8 @@ class Trac(object):
                 'keywords': '~' + keyword,
                 'order_by': 'id',
                 'desc':     '1',
-                'format':   'csv'
+                'format':   'csv',
+                'resolution': '!seemstowork',
             }, 'GET', False).read().splitlines()):
             if line and line[0].isdigit():
                 return int(line[0])

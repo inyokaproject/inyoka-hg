@@ -162,7 +162,7 @@ class LostPasswordForm(forms.Form):
     hidden_captcha = HiddenCaptchaField(required=False)
 
     def clean(self):
-        data = super(self.__class__, self).clean()
+        data = super(LostPasswordForm, self).clean()
         if 'username' in data and 'email' in data \
             and data['username'] and data['email']:
             try:
@@ -203,7 +203,7 @@ class SetNewPasswordForm(forms.Form):
                                        widget=forms.PasswordInput)
 
     def clean(self):
-        data = super(self.__class__, self).clean()
+        data = super(SetNewPasswordForm, self).clean()
         if 'password' not in data or 'password_confirm' not in data or \
            data['password'] != data['password_confirm']:
             raise forms.ValidationError(u'Die Passwörter stimmen nicht '
@@ -368,3 +368,43 @@ class UserErrorReportForm(forms.Form):
         if not is_safe_domain(self.cleaned_data['url']):
             raise forms.ValidationError(u'Ungültige URL')
         return self.cleaned_data['url']
+
+
+def _feed_count_cleanup(n):
+    COUNTS = (10, 20, 30, 50, 75, 100)
+    if n in COUNTS:
+        return n
+    if n < COUNTS[0]:
+        return COUNTS[0]
+    for i in range(len(COUNTS)):
+        if n < COUNTS[i]:
+            return n - COUNTS[i-1] < COUNTS[i] - n and COUNTS[i-1] or COUNTS[i]
+    return COUNTS[-1]
+
+
+class FeedSelectorForm(forms.Form):
+    count = forms.IntegerField(initial=20,
+                widget=forms.TextInput(attrs={'size': 2, 'maxlength': 3,
+                                              'class': 'feed_count'}),
+                label=u'Anzahl der Einträge im Feed',
+                help_text=u'Die Anzahl wird gerundet, um die Serverlast '
+                          u'gering zu halten')
+    mode = forms.ChoiceField(choices=(('full',  u'Ganzer Beitrag'),
+                                      ('short', u'Nur Einleitung'),
+                                      ('title', u'Nur Titel')),
+                                      widget=forms.RadioSelect)
+    component = forms.ChoiceField(required=False,
+                    choices=(('*', u''), ('forum', u''), ('topic', u'')))
+    forum = forms.ChoiceField(required=False)
+    category = forms.ChoiceField(required=False, label=u'Kategorie')
+
+    def clean(self):
+        data = self.cleaned_data
+        data['count'] = _feed_count_cleanup(data.get('count', 20))
+        return data
+
+    def clean_component(self):
+        data = self.cleaned_data
+        if self.app == 'forum' and not data.get('component'):
+            raise forms.ValidationError(u'Bitte auswählen')
+        return data['component']
