@@ -25,6 +25,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import random
 from datetime import datetime, date
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
@@ -807,6 +808,44 @@ class Anchor(Macro):
                           children=[nodes.Text(u'')])
 
 
+class RandomPageList(Macro):
+    """
+    Return random a list of pages.
+    """
+
+    is_block_tag = True
+    arguments = (
+        ('pages', int, 10),
+        ('shorten_title', bool, False)
+    )
+
+    def __init__(self, pages, shorten_title):
+        self.pages = pages
+        self.shorten_title = shorten_title
+
+    def build_node(self, context, format):
+        result = nodes.List('unordered')
+        redirect_pages = Page.objects.find_by_metadata('weiterleitung')
+        pagelist = filter(lambda p: not p in redirect_pages,
+                          Page.objects.get_page_list())
+
+        pages = []
+        found = 0
+        while found < self.pages and pagelist:
+            pagename = random.choice(pagelist)
+            pagelist.remove(pagename)
+            pages.append(pagename)
+            found += 1
+
+        for page in pages:
+            title = [nodes.Text(get_title(page, not self.shorten_title))]
+            link = nodes.InternalLink(page, title, force_existing=True)
+            result.children.append(nodes.ListItem([link]))
+
+        return result
+
+
+
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -829,7 +868,8 @@ ALL_MACROS = {
     u'NeueSeiten':          NewPages,
     u'BR':                  Newline,
     u'Anker':               Anchor,
-    u'NeueSeite':           NewPage
+    u'NeueSeite':           NewPage,
+    u'Zufallsseite':        RandomPageList,
 }
 
 

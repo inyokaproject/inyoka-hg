@@ -622,7 +622,7 @@ def privmsg(request, folder=None, entry_id=None):
             entry = PrivateMessageEntry.objects.get(user=request.user,
                                                     id=entry_id)
             try:
-                return HttpResponseRedirect(href('portal', 'privmsg', 
+                return HttpResponseRedirect(href('portal', 'privmsg',
                                                  PRIVMSG_FOLDERS[entry.folder][1],
                                                  entry.id))
             except KeyError:
