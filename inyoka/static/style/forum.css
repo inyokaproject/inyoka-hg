@@ -477,4 +477,5 @@ ul.image_list a:hover img {
     height: 6px;
     background: url(../img/expand-bar.png);
     margin-bottom: -6px;
+    cursor: s-resize;
 }

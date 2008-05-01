@@ -69,7 +69,7 @@ $(function () {
     if (this.clientHeight < this.scrollHeight)
     {
       $(this)
-        .after('<div class="codeblock_resizer"></div>')
+        .after('<div class="codeblock_resizer" title="vergrößern"></div>')
         .css('height', '15em').css('max-height', 'none')
         .data('original_height', this.clientHeight);
     }
@@ -80,11 +80,13 @@ $(function () {
     {
       $codeblock.addClass('codeblock_expanded');
       $codeblock.animate({'height': $codeblock[0].scrollHeight}, 1000);
+      this.title = 'verkleinern';
     }
     else
     {
       $codeblock.removeClass('codeblock_expanded');
       $codeblock.animate({'height': $codeblock.data('original_height')}, 1000);
+      this.title = 'vergrößern';
     }
   });
 
