@@ -77,7 +77,7 @@
                    data.mode + '/' + data.count + '/';
       if (!$.browser.opera) {
         if ($('#forum_feed_url').length == 0) {
-          $('#forum_submit_p input').addClass('hidden');
+          $('#forum_submit_p input').hide();
           $('#forum_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
             '<a id="forum_feed_url" href="about:blank>-</a></span> ');
         }
@@ -109,7 +109,7 @@
         feed_url = IKHAYA_URL + 'feeds/' + data.category + '/' + data.mode + '/' + data.count + '/';
       if (!$.browser.opera) {
         if (!$('#ikhaya_feed_url').length) {
-          $('#ikhaya_submit_p input').addClass('hidden');
+          $('#ikhaya_submit_p input').hide();
           $('#ikhaya_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
             '<a id="ikhaya_feed_url" href="about:blank>-</a></span> ');
         }
@@ -134,7 +134,7 @@
       feed_url = PLANET_URL + 'feeds/' + data.mode + '/' + data.count + '/';
       if (navigator.userAgent.substring(0,5).toLowerCase() != 'opera') {
         if ($('#planet_feed_url').length == 0) {
-          $('#planet_submit_p input').addClass('hidden');
+          $('#planet_submit_p input').hide()
           $('#planet_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
             '<a id="planet_feed_url" href="about:blank>-</a></span> ');
         }

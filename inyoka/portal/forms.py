@@ -392,19 +392,31 @@ class FeedSelectorForm(forms.Form):
     mode = forms.ChoiceField(choices=(('full',  u'Ganzer Beitrag'),
                                       ('short', u'Nur Einleitung'),
                                       ('title', u'Nur Titel')),
-                                      widget=forms.RadioSelect)
-    component = forms.ChoiceField(required=False,
-                    choices=(('*', u''), ('forum', u''), ('topic', u'')))
-    forum = forms.ChoiceField(required=False)
-    category = forms.ChoiceField(required=False, label=u'Kategorie')
+                             widget=forms.RadioSelect(attrs={'class':'radioul'}))
 
     def clean(self):
         data = self.cleaned_data
         data['count'] = _feed_count_cleanup(data.get('count', 20))
         return data
 
-    def clean_component(self):
+
+class ForumFeedSelectorForm(FeedSelectorForm):
+    component = forms.ChoiceField(choices=(('*', u''), ('forum', u''),
+                                           ('topic', u'')))
+    forum = forms.ChoiceField(required=False)
+
+    def clean_forum(self):
         data = self.cleaned_data
-        if self.app == 'forum' and not data.get('component'):
+        if data['component'] == 'forum' and not data.get('forum'):
             raise forms.ValidationError(u'Bitte auswählen')
-        return data['component']
+        return data['forum']
+
+
+class IkhayaFeedSelectorForm(FeedSelectorForm):
+    category = forms.ChoiceField(label=u'Kategorie')
+
+
+class PlanetFeedSelectorForm(FeedSelectorForm):
+    pass
+
+

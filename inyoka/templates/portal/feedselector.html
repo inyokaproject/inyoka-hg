@@ -27,7 +27,7 @@
   </ul>
   {%- endif %}
   
-  {%- if not app or app == 'forum' %}
+  {%- if forum_form %}
   <form action="/feeds/forum/" method="post" id="forum">
   <h4>Forum</h4>
   
@@ -36,13 +36,13 @@
     <dd>
       <ul class="radio">
         <li>
-          <input type="radio" name="component" value="*" id="id_forum_component_all"{% if form.component == '*' %} checked="checked"{% endif %} />
+          <input type="radio" name="component" value="*" id="id_forum_component_all"{% if forum_form.component == '*' %} checked="checked"{% endif %} />
           <label for="id_forum_component_all">Alles</label>
         </li>
         <li>
-          <input type="radio" name="component" value="forum" id="id_forum_component_forum"{% if form.component == 'forum' %} checked="checked"{% endif %} />
+          <input type="radio" name="component" value="forum" id="id_forum_component_forum"{% if forum_form.component == 'forum' %} checked="checked"{% endif %} />
           <label for="id_forum_component_forum">Für folgendes Forum: </label>
-          {{ form.forum }}{{ form.errors.forum }}
+          {{ forum_form.forum }}{{ forum_form.errors.forum }}
         </li>
         <li> {#- TODO: allow a topic to be passed by url #}
           <input type="radio" name="component" value="topic" id="id_forum_component_topic" disabled="disabled" />
@@ -50,14 +50,14 @@
           <span class="help_text">Bitte im Thema auf den Link klicken, es gibt zu viele Themen um sie alle hier aufzulisten.</span>
         </li>
       </ul>
-      {{ form.errors.component }}
+      {{ forum_form.errors.component }}
     </dd>
     <dt>Wie</dt>
-    <dd>
-      {{ form.mode }}{{ form.errors.mode }}
+    <dd class="radiolist">
+      {{ forum_form.mode }}{{ forum_form.errors.mode }}
       <p>
-        {{ form.count.label_tag() }}: {{ form.count }}{{ form.errors.count }}
-        <span class="help_text">{{ form.count.help_text }}</span>
+        {{ forum_form.count.label_tag() }}: {{ forum_form.count }}{{ forum_form.errors.count }}
+        <span class="help_text">{{ forum_form.count.help_text }}</span>
       </p>
     </dd>
   </dl>
@@ -65,35 +65,35 @@
   <p id="forum_submit_p"><input type="submit" value="Feed anzeigen" /></p>
   </form>
   {%- endif %}
-  {%- if not app or app == 'ikhaya' %}
+  {%- if ikhaya_form %}
   <form action="/feeds/ikhaya/" method="post" id="ikhaya">
   <h4>Ikhaya</h4>
   
   <dl>
     <dt>Was</dt>
-    <dd>{{ form.category.label_tag() }}: {{ form.category }}</dd>
+    <dd>{{ ikhaya_form.category.label_tag() }}: {{ ikhaya_form.category }}</dd>
     <dt>Wie</dt>
-    <dd>
-      {{ form.mode }}{{ form.errors.mode }}
+    <dd class="radiolist">
+      {{ ikhaya_form.mode }}{{ ikhaya_form.errors.mode }}
       <p>
-        {{ form.count.label_tag() }}: {{ form.count }}{{ form.errors.count }}
-        <span class="help_text">{{ form.count.help_text }}</span>
+        {{ ikhaya_form.count.label_tag() }}: {{ ikhaya_form.count }}{{ ikhaya_form.errors.count }}
+        <span class="help_text">{{ ikhaya_form.count.help_text }}</span>
       </p>
     </dd>
   </dl>
   <p id="ikhaya_submit_p"><input type="submit" value="Feed anzeigen" /></p>
   </form>
   {%- endif %}
-  {%- if not app or app == 'planet' %}
+  {%- if planet_form %}
   <form action="/feeds/planet/" method="post" id="planet">
   <h4>Planet</h4>
   <dl>
     <dt>Wie</dt>
-    <dd>
-      {{ form.mode }}{{ form.errors.mode }}
+    <dd class="radiolist">
+      {{ planet_form.mode }}{{ planet_form.errors.mode }}
       <p>
-        {{ form.count.label_tag() }}: {{ form.count }}{{ form.errors.count }}
-        <span class="help_text">{{ form.count.help_text }}</span>
+        {{ planet_form.count.label_tag() }}: {{ planet_form.count }}{{ planet_form.errors.count }}
+        <span class="help_text">{{ planet_form.count.help_text }}</span>
       </p>
     </dd>
   </dl>

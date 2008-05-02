@@ -1,11 +1,11 @@
-ul.radio {
+ul.radio, .radiolist ul {
   list-style: none;
   padding-left: 0;
 }
-ul.radio li {
+ul.radio li, .radiolist ul li {
   margin-left: 0.66em;
 }
-ul.radio li:first-line {
+ul.radio li:first-line, .radiolist ul li:first-line {
   margin-left: 0;
 }
 

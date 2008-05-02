@@ -43,7 +43,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
-     NOTIFICATION_CHOICES, FeedSelectorForm
+     NOTIFICATION_CHOICES, ForumFeedSelectorForm, IkhayaFeedSelectorForm, \
+     PlanetFeedSelectorForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
@@ -735,7 +736,7 @@ def privmsg_new(request, username=None):
                                   msg.subject or u'Re: %s' % msg.subject
                 if reply_to:
                     data['recipient'] = msg.author.username
-                data['text'] = quote_text(msg.text, msg.author)
+                data['text'] = quote_text(msg.text, msg.author) + '\n'
                 form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist):
                 pass
@@ -827,18 +828,26 @@ def usermap(request):
 
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
-    form = request.POST and FeedSelectorForm(request.POST) or \
-            FeedSelectorForm()
-    form.app = app
+    for fapp in ('forum', 'ikhaya', 'planet'):
+        if app in (fapp, None):
+            globals()['%s_form' % fapp] = request.POST \
+                and globals()['%sFeedSelectorForm' % fapp.capitalize()] \
+                    (request.POST, auto_id='id_%s_%%s' % fapp)\
+                or globals()['%sFeedSelectorForm' % fapp.capitalize()] \
+                    (auto_id='id_%s_%%s' % fapp)
+        else:
+            globals()['%s_form' % fapp] = None
 
-    if not request.POST or app == 'forum':
-        form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
+    if forum_form:
+        #TODO: filter those readable by anonymous
+        forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
             [(f.slug, f.name) for f in Forum.query.all()]
-    if not request.POST or app == 'ikhaya':
-        form.fields['category'].choices = [('*', u'Alle')] + \
+    if ikhaya_form:
+        ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
 
     if request.method == 'POST':
+        form = globals()['%s_form' % app]
         if form.is_valid():
             data = form.cleaned_data
             if app == 'forum':
@@ -862,8 +871,10 @@ def feedselector(request, app=None):
                        data['mode'], data['count']))
 
     return {
-        'app':        app,
-        'form':       form,
+        'app':         app,
+        'forum_form':  forum_form,
+        'ikhaya_form': ikhaya_form,
+        'planet_form': planet_form,
     }
 
 
