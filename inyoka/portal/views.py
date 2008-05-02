@@ -832,8 +832,8 @@ def feedselector(request, app=None):
     form.app = app
 
     if not request.POST or app == 'forum':
-        form.fields['forum'].choices = [(f.slug, f.name)
-                                        for f in Forum.query.all()]
+        form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
+            [(f.slug, f.name) for f in Forum.query.all()]
     if not request.POST or app == 'ikhaya':
         form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
