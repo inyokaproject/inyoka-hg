@@ -8,8 +8,7 @@
     :license: GNU GPL.
 #}
 {% extends 'forum/page.html' %}
-{% include 'forum/_forum.html' %}
-
+{% from 'forum/_forum.html' import topic_icon with context %}
 {% title_trace = ['Neue Beiträge'] %}
 {% name = 'Neue Beiträge' %}
 
