@@ -234,7 +234,6 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             data['author'] = data['author'] or request.user
             if not data.get('icon_id'):
                 data['icon_id'] = None
-                data['icon'] = None
             if not article:
                 article = Article(**data)
                 article.save()
