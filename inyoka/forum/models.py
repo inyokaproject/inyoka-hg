@@ -925,7 +925,7 @@ class Poll(object):
     @property
     def ended(self):
         """Returns a boolean whether the poll ended already"""
-        return datetime.utcnow() > self.end_time
+        return self.end_time and datetime.utcnow() > self.end_time
 
     @deferred
     def can_vote(self):
