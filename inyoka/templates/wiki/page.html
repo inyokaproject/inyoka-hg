@@ -13,7 +13,7 @@
 {% title_trace = title_trace|default([]) + ['Wiki'] %}
 {% page_trace = [] %}
 {% if page and not page.is_main_page %}
-  {% for part in page.name.split %}
+  {% for part in page.name.split('/') %}
     {% page_trace.append(('%s/%s'|format(page_trace[-1][0], part), part)) %}
   {% endfor %}
 {% endif %}
@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block tabbar %}
-  {% if can.read %}
+  {% if can and can.read %}
   <ul>
     <li><a href="?action=show"{{ action == 'show' and ' class="active"' or '' }}>Artikel</a></li>
     {%- if can.edit %}
