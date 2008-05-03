@@ -10,7 +10,7 @@
 """
 import os
 import simplejson
-from jinja2 import Environment, FileSystemLoader, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
@@ -122,14 +122,12 @@ class InyokaEnvironment(Environment):
     """
 
     def __init__(self):
-        use_memcache = settings.TEMPLATE_CACHING
-        if use_memcache is None:
-            use_memcache = not settings.DEBUG
         loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
                                                os.pardir, 'templates'))
         Environment.__init__(self, loader=loader,
                              extensions=['jinja2.ext.TransExtension'],
-                             cache_size=use_memcache and 200 or 0)
+                             auto_reload=settings.DEBUG,
+                             cache_size=-1)
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
