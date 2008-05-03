@@ -23,7 +23,7 @@ from inyoka.utils.local import current_request
 SESSION_DELTA = 300
 
 
-@transaction.commit_manually
+@transaction.commit_on_success
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -43,31 +43,18 @@ def set_session_info(request, action, category=None):
         args = (None, 'anonymous', None)
     args += (datetime.utcnow(), action, request.build_absolute_uri(),
              category, key)
-
-    try:
-        cursor = connection.cursor()
-        # try to update first
-        cursor.execute('''
-            update portal_sessioninfo set
-                subject_text = %s, subject_type = %s, subject_link = %s,
-                last_change = %s, action = %s, action_link = %s,
-                category = %s where `key` = %s;
-        ''', args)
-        # if there wasn't an entry insert a new one
-        if not cursor.rowcount:
-            cursor.execute('''
-                insert into portal_sessioninfo (subject_text, subject_type,
-                       subject_link, last_change, action, action_link,
-                       category, `key`)
-                values (%s, %s, %s, %s, %s, %s, %s, %s);
-            ''', args)
-        cursor.close()
-    except:
-        # don't raise the exception here.  We give a shit about broken
-        # session infos as it's unimportant information anyways.
-        transaction.rollback()
-    else:
-        transaction.commit()
+    cursor = connection.cursor()
+    cursor.execute('''
+        insert into portal_sessioninfo (subject_text, subject_type,
+               subject_link, last_change, action, action_link,
+               category, `key`)
+        values (%s, %s, %s, %s, %s, %s, %s, %s)
+            on duplicate key
+        update subject_text = %s, subject_type = %s, subject_link = %s,
+               last_change = %s, action = %s, action_link = %s,
+               category = %s;
+    ''', args + args[:-1])
+    cursor.close()
 
 
 class SurgeProtectionMixin(object):
