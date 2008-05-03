@@ -5,7 +5,7 @@
 
     Formulars for the forum.
 
-    :copyright: 2007 by Maximilian Trescher, Benjamin Wiegand.
+    :copyright: 2007-2008 by Maximilian Trescher, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
 from django import newforms as forms
@@ -174,7 +174,7 @@ class AddPollForm(forms.Form):
     question = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'size':'60'}))
     multiple = forms.BooleanField()
     options = MultiField((forms.CharField(max_length=100),))
-    duration = forms.IntegerField(min_value=1)
+    duration = forms.IntegerField(min_value=1, required=False)
 
 
 class ReportTopicForm(forms.Form):

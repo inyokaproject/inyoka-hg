@@ -328,9 +328,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             d = poll_form.cleaned_data
             options = map(lambda a: PollOption(name=a), poll_options)
             now = datetime.utcnow()
+            end_time = (d['duration'] and now + timedelta(days=d['duration'])
+                        or None)
             poll = Poll(topic=topic, question=d['question'],
                 multiple_votes=d['multiple'], options=options,
-                start_time=now, end_time=now + timedelta(days=d['duration']))
+                start_time=now, end_time=end_time)
             if topic:
                 topic.has_poll = True
                 topic.forum.invalidate_topic_cache()
@@ -494,6 +496,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'preview':      preview,
         'isnewtopic':   newtopic,
         'can_attach':   check_privilege(privileges, 'upload'),
+        'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'attach_form':  attach_form,
         'attachments':  list(attachments),
         'posts':        posts,

@@ -90,7 +90,8 @@
       {%- endfor %}
     </table>
     <div>Die Umfrage wurde {{ poll.start_time|dateformat(true) }} gestartet und
-      {%- if poll.ended %} endete {{ poll.end_time|dateformat(true) }}
+      {%- if poll.ended %} endete {{ poll.end_time|dateformat(true) }}.
+      {%- elif not poll.end_time %} wird nie enden.
       {%- else %} wird {{ poll.end_time|dateformat(true) }} enden.{% endif -%}
     </div>
     {%- endfor %}
