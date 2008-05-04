@@ -215,7 +215,7 @@ class Trac(object):
                 'order_by': 'id',
                 'desc':     '1',
                 'format':   'csv',
-                'resolution': '!seemstowork',
+                'resolution': ['!seemstowork', '!fixed', '!worksforme'],
             }, 'GET', False).read().splitlines()):
             if line and line[0].isdigit():
                 return int(line[0])
