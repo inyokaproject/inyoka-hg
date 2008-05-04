@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
+from sqlalchemy.exceptions import InvalidRequestError
 from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.portal.user import User
@@ -270,13 +271,16 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
               u'Wenn du willst, kannst du hier eine neue anlegen.' %
                                                 (escape(article_name)))
     if topic_slug:
-        topic = Topic.query.filter_by(slug=topic_slug).one()
+        try:
+            topic = Topic.query.filter_by(slug=topic_slug).one()
+        except InvalidRequestError:
+            raise PageNotFound()
         if not topic:
             raise PageNotFound()
         forum = topic.forum
     elif forum_slug:
         forum = Forum.query.get(forum_slug)
-        if forum.parent_id is None:
+        if not forum or not forum.parent_id:
             raise PageNotFound()
         newtopic = True
     elif post_id:
@@ -289,6 +293,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif quote_id:
         quote = Post.query.options(eagerload('topic'), eagerload('author')) \
                           .get(quote_id)
+        if not quote:
+            raise PageNotFound()
         topic = quote.topic
         forum = topic.forum
     form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
