@@ -457,7 +457,7 @@ def usercp_profile(request):
             return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
         else:
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
-                  u'auf. Bitte behebe sie.')
+                  u'auf. Bitte behebe sie.', False)
     else:
         values = model_to_dict(user)
         lat = values.pop('coordinates_lat')

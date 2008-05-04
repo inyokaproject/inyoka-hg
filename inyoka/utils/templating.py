@@ -126,10 +126,10 @@ class InyokaEnvironment(Environment):
         if use_memcache is None:
             use_memcache = not settings.DEBUG
         loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
-                                               os.pardir, 'templates'),
-                                  cache_size=use_memcache and 200 or 0)
+                                               os.pardir, 'templates'))
         Environment.__init__(self, loader=loader,
-                             extensions=['jinja2.ext.TransExtension'])
+                             extensions=['jinja2.ext.TransExtension'],
+                             cache_size=use_memcache and 200 or 0)
         self.globals.update(
             INYOKA_REVISION=INYOKA_REVISION,
             SETTINGS=settings,
