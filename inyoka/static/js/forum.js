@@ -79,13 +79,13 @@ $(function () {
     if (! $codeblock.hasClass('codeblock_expanded'))
     {
       $codeblock.addClass('codeblock_expanded');
-      $codeblock.animate({'height': $codeblock[0].scrollHeight}, 1000);
+      $codeblock.animate({'height': $codeblock[0].scrollHeight}, 500);
       this.title = 'verkleinern';
     }
     else
     {
       $codeblock.removeClass('codeblock_expanded');
-      $codeblock.animate({'height': $codeblock.data('original_height')}, 1000);
+      $codeblock.animate({'height': $codeblock.data('original_height')}, 500);
       this.title = 'vergrößern';
     }
   });
