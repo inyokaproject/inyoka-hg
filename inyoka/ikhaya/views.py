@@ -183,6 +183,7 @@ def suggestionlist(request):
                     })
                     send_notification(s.author, u'Ikhaya-Vorschlag abgelehnt',
                                       text)
+                cache.delete('ikhaya/suggestion_count')
                 s.delete()
                 flash(u'Der Vorschlag wurde gelöscht.', True)
             else:

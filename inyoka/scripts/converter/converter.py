@@ -226,10 +226,17 @@ def convert_wiki():
                 raise NotImplementedError(line.action)
 
         # edit the wiki page for syntax converting
-        formatter.setPage(page)
-        formatter.inyoka_page = new_page
-        parser = InyokaParser(text, request)
-        text = request.redirectedOutput(parser.format, formatter)
+        if page_name.startswith('Kategorie/'):
+            n = page_name[10:]
+            text = (u'# tag: Kategorie\nSeiten in der Kategorie „%s“:\n'
+                   u'[[TagListe(%s)]]') % (n, n)
+        elif page_name == 'Kategorien':
+            text = u'Kategorien sind eine Form der Markierung. Es sind keine exklusiven Schubladen, in denen man Artikel verstauen kann, so wie im alten Wiki in einem Namensraum - eher sind es frei kombinierbare Etiketten.\n[[TagListe(Kategorie)]]'
+        else:
+            formatter.setPage(page)
+            formatter.inyoka_page = new_page
+            parser = InyokaParser(text, request)
+            text = request.redirectedOutput(parser.format, formatter)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
