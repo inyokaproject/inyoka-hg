@@ -115,7 +115,8 @@ def do_show(request, name):
                         escape(url_for(page)),
                         escape(page.title)))
     return {
-        'page':     page
+        'page':     page,
+        'tags':     page.metadata['tag'],
     }
 
 
