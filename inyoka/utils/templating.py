@@ -16,7 +16,7 @@ from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
      format_datetime, format_specific_datetime, format_time
 from inyoka.utils.text import human_number
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href, url_for, url_encode, url_quote
 from inyoka.utils.flashing import get_flashed_messages
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
@@ -115,6 +115,13 @@ def render_template(template_name, context):
     return tmpl.render(context)
 
 
+def urlencode_filter(value):
+    """URL encode a string or dict."""
+    if isinstance(value, dict):
+        return url_encode(value)
+    return url_quote(value)
+
+
 class InyokaEnvironment(Environment):
     """
     Beefed up version of the jinja environment but without security features
@@ -173,6 +180,7 @@ class InyokaEnvironment(Environment):
             url=
                 lambda value, action=None:
                     url_for(value, action=action),
+            urlencode=urlencode_filter,
             jsonencode=simplejson.dumps
         )
 
