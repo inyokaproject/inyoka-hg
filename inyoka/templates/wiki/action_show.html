@@ -30,5 +30,12 @@
     {%- else -%}
       {{ page.rev.remote_addr|e }}
     {%- endif %} erstellt.
+    {%- if tags %}
+    <br />Dieser Seite wurden folgende Begriffe zugeordnet:
+    {% for tag in tags -%}
+    <a href="{{ href('wiki', 'Wiki/Tags', tag=tag|e) }}">{{ tag|e }}</a>
+    {%- if not loop.last %}, {% endif %}
+    {%- endfor %}
+    {%- endif %}
   </p>
 {% endblock %}

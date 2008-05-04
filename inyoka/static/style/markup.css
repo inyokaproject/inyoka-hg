@@ -231,3 +231,7 @@ h1:hover *, h2:hover *, h3:hover *, h4:hover *, h5:hover *, h6:hover * {
   height: 16px;
   background-image: url(../img/anchor.png);
 }
+
+div.knowledge .anchor {
+  background-image: none;
+}

@@ -13,13 +13,13 @@
 {% scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
 
-{% if new %}
+{% if not forum %}
   {% navigation_trace = [
       (href('forum', 'add'), 'Forum erstellen')
     ] %}
 {% else %}
   {% navigation_trace = [
-      (forum|url('edit'), 'Forum „%s“ bearbeiten'|format(forum_name|e))
+      (forum|url('edit'), 'Forum „%s“ bearbeiten'|format(forum.name|e))
     ] %}
 {% endif %}
 {% navigation_trace = [

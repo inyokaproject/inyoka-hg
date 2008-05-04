@@ -96,7 +96,7 @@ class InyokaFormatter(FormatterBase):
             return u'((%s))' % u''.join(args)
 
         elif name == 'Tags':
-            return u'# X-Tags: ' + args
+            return u'# tag: ' + args
 
         elif name == 'MailTo':
             args = [a.strip() for a in (args or '').split(',')]
@@ -218,6 +218,8 @@ class InyokaFormatter(FormatterBase):
     def pagelink(self, on, pagename=u'', page=None, **kw):
         if pagename in PAGE_REPLACEMENTS:
             pagename = PAGE_REPLACEMENTS[pagename]
+        if pagename.startswith('Kategorie/'):
+            return u'# tag:%s' % pagename[10:]
         pagename = normalize_pagename(pagename)
         if on:
             self.in_link = True

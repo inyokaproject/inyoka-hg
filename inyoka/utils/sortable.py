@@ -106,9 +106,6 @@ class Sortable(object):
 
     def get_objects(self):
         order = self.order
-        if self.is_sqlalchemy:
-            order = self.order.startswith('-') and self.sa_column.desc() or \
-                    self.sa_column.asc()
         if self.related:
             if self.is_sqlalchemy:
                 return self.objects.order_by(order)

@@ -19,6 +19,8 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import MONTHS
+from inyoka.utils.templating import render_template
+from inyoka.utils.notification import send_notification
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
@@ -176,7 +178,25 @@ def suggestionlist(request):
     """Get a list of all reported topics"""
     suggestions = Suggestion.objects.all()
     if 'delete' in request.GET:
-        Suggestion.objects.delete(request.GET['delete'])
+        if request.method == 'POST':
+            if not 'cancel' in request.POST:
+                s = Suggestion.objects.get(id=request.GET['delete'])
+                if request.POST.get('note'):
+                    text = render_template('mails/suggestion_rejected.html', {
+                        'title':    s.title,
+                        'username': request.user.username,
+                        'note':     request.POST['note']
+                    })
+                    send_notification(s.author, u'Ikhaya-Vorschlag abgelehnt',
+                                      text)
+                cache.delete('ikhaya/suggestion_count')
+                s.delete()
+                flash(u'Der Vorschlag wurde gelöscht.', True)
+            else:
+                flash(u'Der Vorschlag wurde nicht gelöscht.')
+        else:
+            flash(render_template('ikhaya/delete_suggestion.html',
+                  {'s': Suggestion.objects.get(id=request.GET['delete'])}))
     return {
         'suggestions': list(suggestions)
     }
