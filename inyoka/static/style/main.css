@@ -33,6 +33,7 @@ div.wrap {
   background-repeat: repeat-y;
   background-color: #FFFFFF;
   border-bottom: #aba393 1px solid;
+  min-width: 700px;
 }
 
 div.wrap2 {
