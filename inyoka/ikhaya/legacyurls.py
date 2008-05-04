@@ -18,15 +18,6 @@ legacy = LegacyDispatcher()
 test_legacy_url = legacy.tester
 
 
-@legacy.url('^/(\d{,3})/?$') # /\d{4} is reserved for year indexes
-def article(args, match, article_id):
-    try:
-        article = Article.objects.get(article_id)
-    except Article.DoesNotExist:
-        return
-    return href('ikhaya', article.slug)
-
-
 @legacy.url('^/archive/(\d+)/(\d+)/?$')
 def archive(args, match, year, month):
     return href('ikhaya', year, month)

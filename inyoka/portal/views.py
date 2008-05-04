@@ -51,13 +51,18 @@ from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
+from inyoka.utils.urls import global_not_found
 
 
-@templated('errors/404.html')
 def not_found(request, err_message=None):
-    return {
-        'err_message': err_message,
-    }
+    """
+    This is called if no URL matches or a view returned a `PageNotFound`.
+    """
+    from inyoka.portal.legacyurls import test_legacy_url
+    response = test_legacy_url(request)
+    if response is not None:
+        return response
+    return global_not_found(request, err_message)
 
 
 @templated('portal/index.html')

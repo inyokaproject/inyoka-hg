@@ -16,7 +16,7 @@ from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
-from inyoka.portal.views import not_found as global_not_found
+from inyoka.utils.urls import global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
 from inyoka.portal.user import User
 from inyoka.utils.urls import href, url_for
@@ -46,7 +46,6 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
     poll_option_table, attachment_table
-from inyoka.forum.legacyurls import test_legacy_url
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -55,6 +54,7 @@ def not_found(request, err_message=None):
     """
     This is called if no URL matches or a view returned a `PageNotFound`.
     """
+    from inyoka.forum.legacyurls import test_legacy_url
     response = test_legacy_url(request)
     if response is not None:
         return response

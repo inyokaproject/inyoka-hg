@@ -16,6 +16,7 @@ from django.core.urlresolvers import RegexURLResolver
 from inyoka.conf import settings
 from werkzeug import import_string, url_encode, url_decode, url_quote, \
      url_quote_plus, url_fix
+from inyoka.utils.http import templated
 
 
 # extended at runtime with module introspection information
@@ -97,3 +98,10 @@ def get_resolver(host):
                 resolver = _resolvers[name]
             return subdomain, resolver
     return None, None
+
+
+@templated('errors/404.html')
+def global_not_found(request, err_message=None):
+    return {
+        'err_message': err_message,
+    }

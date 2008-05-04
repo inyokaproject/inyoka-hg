@@ -54,4 +54,4 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^styles/$', 'styles'),
 )
 
-handler404 = 'inyoka.portal.views.not_found'
+handler404 = 'inyoka.admin.views.not_found'

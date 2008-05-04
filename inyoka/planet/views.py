@@ -10,7 +10,6 @@
 """
 from django.utils.text import truncate_html_words
 from inyoka.conf import settings
-from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.user import Group
 from inyoka.portal.utils import check_login
 from inyoka.utils.urls import href
@@ -24,17 +23,18 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.mail import send_mail
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import group_by_day
+from inyoka.utils.urls import global_not_found
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
 from inyoka.utils.feeds import FeedBuilder
 
 
-def not_found(request, err_message=None):
+def not_found(*args, **kwargs):
     """
     Displayed if a url does not match or a view tries to display a not
     exising resource.
     """
-    return global_not_found(request, err_message=None)
+    return global_not_found(*args, **kwargs)
 
 
 def context_modifier(request, context):

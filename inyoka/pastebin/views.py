@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from inyoka.portal.views import not_found
+from inyoka.utils.urls import global_not_found
 from inyoka.portal.utils import simple_check_login
 from inyoka.pastebin.forms import AddPasteForm
 from inyoka.pastebin.models import Entry
@@ -18,6 +18,14 @@ from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.flashing import flash
+
+
+def not_found(*args, **kwargs):
+    """
+    Displayed if a url does not match or a view tries to display a not
+    exising resource.
+    """
+    return global_not_found(*args, **kwargs)
 
 
 @simple_check_login

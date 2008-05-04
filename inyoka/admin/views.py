@@ -14,7 +14,7 @@ from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
-from inyoka.utils.urls import url_for, href
+from inyoka.utils.urls import url_for, href, global_not_found
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape, cleanup_html
@@ -37,6 +37,14 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
     join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege
 from inyoka.forum.database import forum_table, privilege_table
+
+
+def not_found(*args, **kwargs):
+    """
+    Displayed if a url does not match or a view tries to display a not
+    exising resource.
+    """
+    return global_not_found(*args, **kwargs)
 
 
 @require_manager

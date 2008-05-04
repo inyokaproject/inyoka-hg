@@ -9,9 +9,8 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from inyoka.portal.views import not_found as global_not_found
 from inyoka.portal.utils import check_login
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, HttpResponse, PageNotFound
 from inyoka.utils.html import escape
@@ -26,6 +25,13 @@ from inyoka.wiki.parser import parse, RenderContext
 
 
 def not_found(request, err_message=None):
+    """
+    This is called if no URL matches or a view returned a `PageNotFound`.
+    """
+    from inyoka.ikhaya.legacyurls import test_legacy_url
+    response = test_legacy_url(request)
+    if response is not None:
+        return response
     return global_not_found(request, err_message)
 
 

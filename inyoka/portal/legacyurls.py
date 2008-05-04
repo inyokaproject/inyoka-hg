@@ -11,11 +11,22 @@
 #from inyoka.forum.models import Forum, Topic
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
+from inyoka.ikhaya.models import Article
 
 
 legacy = LegacyDispatcher()
 test_legacy_url = legacy.tester
 
+
+@legacy.url(r'^/ikhaya/(\d+)/?')
+def ikhaya_article(args, match, article_id):
+    # we cannot do that on the ikhaya subdomain, 
+    # because there /\d+/ is for the pagination.
+    try:
+        article = Article.objects.get(article_id)
+    except Article.DoesNotExist:
+        return
+    return href('ikhaya', article.slug)
 
 @legacy.url(r'^/ikhaya/(.*)$')
 def ikhaya(args, match, url):
