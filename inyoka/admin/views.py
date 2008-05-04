@@ -537,9 +537,8 @@ def forums_edit(request, id=None):
             })
         _add_field_choices()
     return {
-        'form': form,
-        'new': bool(id),
-        'forum_name': id and forum.name or 'Neues Forum'
+        'form':  form,
+        'forum': forum
     }
 
 
