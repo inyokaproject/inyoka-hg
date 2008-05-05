@@ -38,6 +38,10 @@ def get_old_forum_url(args, match, forum_id=None, offset=None):
         page = 1
     else:
         page = (offset / POSTS_PER_PAGE) + 1
+    if forum.parent_id is None:
+        if page <= 1:
+            return href('forum', 'category', forum.slug)
+        return href('forum', 'category', forum.slug, page)
     if page <= 1:
         return href('forum', 'forum', forum.slug)
     return href('forum', 'forum', forum.slug, page)
