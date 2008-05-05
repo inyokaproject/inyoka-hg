@@ -26,7 +26,8 @@ from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
-from inyoka.wiki.parser.transformers import AutomaticParagraphs
+from inyoka.wiki.parser import nodes
+from inyoka.wiki.parser.transformers import AutomaticParagraphs, Transformer
 from inyoka.forum.models import Privilege, Attachment, Topic, \
     Poll, Forum, topic_table as sa_topic_table, forum_table as \
     sa_forum_table, post_table as sa_post_table, poll_vote_table as \
@@ -75,12 +76,38 @@ PAGE_REPLACEMENTS = {
 }
 
 
+class Unescape(Transformer):
+    """
+    Unescapes free links.
+    """
+    def transform(self, parent):
+        new_children = []
+        for i, node in enumerate(parent.children):
+            if node.is_text_node:
+                pos = 0
+                for match in bbcode._free_link_re.finditer(node.text):
+                    new_children.extend([
+                        nodes.Text(node.text[pos:match.start()]),
+                        nodes.Link(node.text[match.start():match.end()])
+                    ])
+                    pos = match.end()
+                else:
+                    new_children.append(nodes.Text(node.text[pos:]))
+            elif node.is_container and not node.is_raw:
+                new_children.append(self.transform(node))
+            else:
+                new_children.append(node)
+        parent.children = new_children
+        return parent
+
+
 def convert_bbcode(text, uid):
     """Parse bbcode, remove the bbcode uid and return inyoka wiki markup"""
     remove = (':1:%s', ':u:%s', ':o:%s', ':%s',)
     for i in remove:
         text = text.replace(i % uid, '')
-    tree = bbcode.Parser(text, transformers=[AutomaticParagraphs()]).parse()
+    transformers = [AutomaticParagraphs(), Unescape()]
+    tree = bbcode.Parser(text, transformers=transformers).parse()
     return tree.to_markup()
 
 
