@@ -105,16 +105,6 @@ class Parser(object):
         self.tokens = []
         self.pos = self.depth = 0
         text = u'\n'.join(text.replace('\r\n', '\n').splitlines())
-        # replace free links with [url] links
-        pos = 0
-        result = []
-        for match in _free_link_re.finditer(text):
-            result.append(text[pos:match.start()])
-            result.append(u'[url]%s[/url]' % text[match.start():match.end()])
-            pos = match.end()
-        else:
-            result.append(text[pos:])
-        text = u''.join(result)
 
         if transformers is None:
             transformers = DEFAULT_TRANSFORMERS
