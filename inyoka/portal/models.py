@@ -20,9 +20,10 @@ from inyoka.utils.dates import format_specific_datetime, \
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page
-from inyoka.forum.models import Forum, SAGroup
+from inyoka.forum.models import Forum, SAGroup, Topic
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.user import User
+from werkzeug import cached_property
 
 
 
@@ -236,14 +237,23 @@ class StaticPage(models.Model):
 class Subscription(models.Model):
     objects = SubscriptionManager()
     user = models.ForeignKey(User)
-    topic_id = models.IntegerField(null=True)
-    # XXX fix it!
     #topic = models.ForeignKey(Topic, null=True)
     #forum = models.ForeignKey(Forum, null=True)
+    topic_id = models.IntegerField(null=True)
     forum_id = models.IntegerField(null=True)
     wiki_page = models.ForeignKey(Page, null=True)
     notified = models.BooleanField('User was already notified',
                                    default=False)
+
+    @cached_property
+    def topic(self):
+        if self.topic_id:
+            return Topic.query.get(self.topic_id)
+
+    @cached_property
+    def forum(self):
+        if self.forum_id:
+            return Forum.query.get(self.forum_id)
 
     def __unicode__(self):
         if self.topic:
@@ -255,10 +265,12 @@ class Subscription(models.Model):
         elif self.forum:
             type = u'forum'
             title = self.forum.title
-        return u'Subscription(%s, %s, "%s")' % (
+        return u'Subscription(%s, %s:"%s")' % (
             self.user.username,
             type, title
         )
+
+
 
 
 class Event(models.Model):
