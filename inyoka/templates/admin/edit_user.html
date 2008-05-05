@@ -7,7 +7,7 @@
     :copyright: 2008 by Christopher Grebs.
     :license: GNU GPL.
 #}
-{% extends 'admin/overall.html' %}
+{%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 {% styles = styles|default([]) + ['editor.css', 'datetimefield.css'] %}
 {% scripts = scripts|default([]) + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}

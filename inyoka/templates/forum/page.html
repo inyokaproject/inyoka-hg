@@ -8,7 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 #}
-{% extends 'overall.html' %}
+{%- extends 'overall.html' %}
 
 {% title_trace = title_trace|default([]) + ['Forum'] %}
 {% navigation_trace = [(href('forum'), 'Forum')] + navigation_trace|default([]) %}

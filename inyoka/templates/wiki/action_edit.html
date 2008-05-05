@@ -9,7 +9,7 @@
 #}
 
 
-{% extends 'wiki/page.html' %}
+{%- extends 'wiki/page.html' %}
 {% title = page.title if page else name %}
 {% title_trace = [title|e, 'Bearbeiten'] %}
 {% scripts = ['WikiEditor.js'] %}

@@ -9,7 +9,7 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 #}
-{% extends 'forum/page.html' %}
+{%- extends 'forum/page.html' %}
 {% scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
 {% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}

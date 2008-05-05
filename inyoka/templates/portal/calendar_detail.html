@@ -8,7 +8,7 @@
     :license: GNU GPL.
 #}
 
-{% extends 'portal/overall.html' %}
+{%- extends 'portal/overall.html' %}
 {% title_trace = [event.name|e, 'Kalender'] %}
 {% styles = styles|default([]) + ['calendar.css'] %}
 {% navigation_trace =  [

@@ -10,7 +10,7 @@
     
 #}
 
-{% extends 'forum/page.html' %}
+{%- extends 'forum/page.html' %}
 {% title_trace = ['Thema „%s“ melden'|format(topic.title|e)] %}
 {% navigation_trace =  [
   (topic.forum|url, topic.forum.name),

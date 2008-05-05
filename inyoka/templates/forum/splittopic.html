@@ -9,7 +9,7 @@
     :license GNU GPL
     
 #}
-{% extends 'forum/page.html' %}
+{%- extends 'forum/page.html' %}
 {% title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
 {% navigation_trace =  [
     (topic.forum|url, topic.forum.name),

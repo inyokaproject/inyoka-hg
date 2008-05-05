@@ -11,7 +11,7 @@
     
 #}
 
-{% extends 'forum/page.html' %}
+{%- extends 'forum/page.html' %}
 {% if not topic %}
   {% title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
   {% navigation_trace =  [
