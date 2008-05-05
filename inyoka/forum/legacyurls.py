@@ -24,9 +24,13 @@ test_legacy_url = legacy.tester
 def get_old_forum_url(args, match, forum_id=None, offset=None):
     if forum_id is None:
         try:
-            forum_id = int(args['f'])
-        except (KeyError, ValueError):
+            forum_id = args['f']
+        except KeyError:
             return
+    try:
+        forum_id = int(forum_id)
+    except ValueError:
+        return
     forum = Forum.query.get(forum_id)
     if not forum:
         return
