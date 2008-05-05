@@ -39,12 +39,12 @@ from inyoka.forum.models import Forum, Privilege
 from inyoka.forum.database import forum_table, privilege_table
 
 
-def not_found(*args, **kwargs):
+def not_found(request, err_message=None):
     """
     Displayed if a url does not match or a view tries to display a not
     exising resource.
     """
-    return global_not_found(*args, **kwargs)
+    return global_not_found(request, 'admin', err_message)
 
 
 @require_manager

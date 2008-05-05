@@ -62,7 +62,7 @@ def not_found(request, err_message=None):
     response = test_legacy_url(request)
     if response is not None:
         return response
-    return global_not_found(request, err_message)
+    return global_not_found(request, 'portal', err_message)
 
 
 @templated('portal/index.html')

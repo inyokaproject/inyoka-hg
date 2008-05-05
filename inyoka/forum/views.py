@@ -58,7 +58,7 @@ def not_found(request, err_message=None):
     response = test_legacy_url(request)
     if response is not None:
         return response
-    return global_not_found(request, err_message)
+    return global_not_found(request, 'forum', err_message)
 
 
 @templated('forum/index.html')
@@ -158,7 +158,7 @@ def viewtopic(request, topic_slug, page=1):
     """
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
-        raise PageNotFound
+        raise PageNotFound('no such topic')
     privileges = get_forum_privileges(request.user, t.forum.id)
     if not check_privilege(privileges, 'read'):
         return abort_access_denied(request)

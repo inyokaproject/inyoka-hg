@@ -29,12 +29,12 @@ from inyoka.planet.forms import SuggestBlogForm
 from inyoka.utils.feeds import FeedBuilder
 
 
-def not_found(*args, **kwargs):
+def not_found(request, err_message=None):
     """
     Displayed if a url does not match or a view tries to display a not
     exising resource.
     """
-    return global_not_found(*args, **kwargs)
+    return global_not_found(request, 'planet', err_message)
 
 
 def context_modifier(request, context):

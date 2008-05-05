@@ -8,20 +8,47 @@
     :license: GNU GPL.
 #}
 
-{%- extends 'portal/overall.html' %}
+{% if app == 'forum' %}
+{% extends 'forum/page.html' %}
+{% forum_content = self.error404_content() %}
+
+{% elif app == 'ikhaya' %}
+{% extends 'ikhaya/page.html' %}
+{% ikhaya_content = self.error404_content() %}
+
+{% elif app == 'pastebin' %}
+{% extends 'pastebin/page.html' %}
+{% paste_content = self.error404_content() %}
+
+{% elif app == 'planet' %}
+{% extends 'planet/page.html' %}
+{% planet_content = self.error404_content() %}
+
+{% elif app == 'admin' %}
+{% extends 'admin/overall.html' %}
+{% admin_content = self.error404_content() %}
+
+{% else %}
+{% extends 'portal/overall.html' %}
+{% styles = styles|default([]) + ['portal.css'] %}
+{% portal_content = self.error404_content() %}
+
+
+{% endif %}
+
 
 {% title_trace = title_trace|default([]) + ['Seite existiert nicht'] %}
 {% block appheader %}
-  <h1>Fehler</h1>
-  <h2>404 Seite Nicht Gefunden</h2>
+  <h1>Fehler 404</h1>
+  <h2>Seite nicht gefunden</h2>
 {% endblock %}
-{% block portal_content %}
+{% block error404_content %}
   <div class="not_found">
     <p>
     {% if err_message %}
       <strong>{{ err_message }}</strong>
     {% else %}
-      <strong>Die Seite konnte nicht gefunden werden.</strong>
+      <strong>Die angeforderte Seite konnte nicht gefunden werden.</strong>
     {% endif %}
     </p>
     <img src="{{ href('static', 'img/not_found.png') }}" />

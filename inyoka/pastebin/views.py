@@ -20,12 +20,12 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.flashing import flash
 
 
-def not_found(*args, **kwargs):
+def not_found(request, err_message=None):
     """
     Displayed if a url does not match or a view tries to display a not
     exising resource.
     """
-    return global_not_found(*args, **kwargs)
+    return global_not_found(request, 'pastebin', err_message)
 
 
 @simple_check_login

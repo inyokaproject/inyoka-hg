@@ -101,7 +101,8 @@ def get_resolver(host):
 
 
 @templated('errors/404.html')
-def global_not_found(request, err_message=None):
+def global_not_found(request, app, err_message=None):
     return {
         'err_message': err_message,
+        'app': app,
     }
