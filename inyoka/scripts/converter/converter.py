@@ -77,10 +77,11 @@ PAGE_REPLACEMENTS = {
 
 
 class Unescape(Transformer):
-    """"""
+    """
+    Unescapes free links.
+    """
     def transform(self, parent):
         new_children = []
-        print parent
         for i, node in enumerate(parent.children):
             if node.is_text_node:
                 pos = 0
@@ -97,7 +98,6 @@ class Unescape(Transformer):
             else:
                 new_children.append(node)
         parent.children = new_children
-        print parent
         return parent
 
 
