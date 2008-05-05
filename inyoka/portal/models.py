@@ -32,7 +32,7 @@ class SubscriptionManager(models.Manager):
     Manager class for the `Subscription` model.
     """
 
-    def user_subscribed(self, user, topic=None, wiki_page=None):
+    def user_subscribed(self, user, topic=None, forum=None, wiki_page=None):
         if topic is not None:
             column = 'topic_id'
             if isinstance(topic, int):
