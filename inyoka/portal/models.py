@@ -35,7 +35,16 @@ class SubscriptionManager(models.Manager):
     def user_subscribed(self, user, topic=None, wiki_page=None):
         if topic is not None:
             column = 'topic_id'
-            ident = topic.id
+            if isinstance(topic, int):
+                ident = topic
+            else:
+                ident = topic.id
+        elif forum is not None:
+            column = 'forum_id'
+            if isinstance(forum, int):
+                ident = forum
+            else:
+                ident = forum.id
         elif wiki_page is not None:
             column = 'wiki_page_id'
             ident = wiki_page.id
@@ -270,7 +279,12 @@ class Subscription(models.Model):
             type, title
         )
 
-
+    class Meta:
+        unique_together = (
+            ('topic_id', 'user'),
+            ('forum_id', 'user'),
+            ('wiki_page', 'user'),
+        )
 
 
 class Event(models.Model):
