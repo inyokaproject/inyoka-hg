@@ -302,7 +302,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
     if post:
-        if not check_privilege(privileges, 'edit'):
+        if (not check_privilege(privileges, 'edit')) \
+           and post.author_id != request.user.id:
             return abort_access_denied(request)
     elif topic:
         if not check_privilege(privileges, 'reply'):

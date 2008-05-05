@@ -132,7 +132,9 @@
         <td class="post">
           <div class="postinfo">
             <div class="linklist floatright">
+              {%- if check_privilege(privileges, 'edit') or post.author_id == USER.id %}
               <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
+              {%- endif %}
               <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
               {%- if check_privilege(privileges, 'moderate') %} |
                 {%- if post.hidden %}
