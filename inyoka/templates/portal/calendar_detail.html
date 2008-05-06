@@ -21,7 +21,19 @@
   <h2>{{ event.name|e }}</h2>
 {% endblock %}
 {% block portal_content %}
-
 <h3>Veranstaltung „{{ event.name|e }}“</h3>
-{{ rendertemplate("portal/_calendar_detail.html") }}
+<table>
+  <tr><th>Zeitpunkt</th><td>{{ event.natural_datetime }}</td></tr>
+  {%- if event.location_town %}
+  <tr>
+    <th>Ort</th>
+    <td>
+      {% if event.location %}{{ event.location|e }} in {% endif %}{{ event.location_town|e }}
+      {% if event.location_lat and event.location_long %}(<a href="{{ event.coordinates_url|e }}">{{ event.natural_coordinates|e }}</a>){% endif %}
+    </td>
+  </tr>
+  {%- endif %}
+  <tr><th colspan="2">Details</th></tr>
+  <tr><td colspan="2">{{ event.rendered_description or '–' }}</td></tr>
+</table>
 {% endblock %}

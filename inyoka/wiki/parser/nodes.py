@@ -689,11 +689,14 @@ class Link(Element):
                            self.querystring, self.anchor))
 
     def generate_markup(self, w):
-        w.markup(u'[%s' % self.href)
-        if self.text != self.href:
+        if self.text == self.href:
+            # generate a free link
+            return w.markup(self.href)
+        else:
+            w.markup(u'[%s' % self.href)
             w.markup(' ')
             Element.generate_markup(self, w)
-        w.markup(u']')
+            w.markup(u']')
 
     def prepare_html(self):
         if self.scheme == 'javascript':
