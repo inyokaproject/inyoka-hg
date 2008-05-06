@@ -37,7 +37,7 @@ from inyoka.portal.utils import check_activation_key, send_activation_mail, \
      send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.utils import normalize_pagename, quote_text
-from inyoka.ikhaya.models import Article, Category
+from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.models import Forum, SAUser
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
@@ -731,7 +731,21 @@ def privmsg_new(request, username=None):
         try:
             int(reply_to or forward)
         except ValueError:
-            pass
+            x = reply_to or forward
+            if x.startswith('suggestion:'):
+                try:
+                    suggestion = Suggestion.objects.get(id=int(x[11:]))
+                except (Suggestion.DoesNotExist, ValueError):
+                    pass
+                else:
+                    data['subject'] = suggestion.title
+                    if suggestion.title.lower().startswith(u're: '):
+                        data['subject'] = u'Re: %s' % suggestion.title
+                    if reply_to:
+                        data['recipient'] = suggestion.author
+                    text = u'%s\n\n%s' % (suggestion.intro, suggestion.text)
+                    data['text'] = quote_text(text, suggestion.author) + '\n'
+                    form = PrivateMessageForm(initial=data)
         else:
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,

@@ -40,11 +40,12 @@
         </td>
         <td class="post">
           <div class="postinfo">
-            <span class="postactions">
-              <a href="?delete={{ suggestion.id }}">Löschen</a>
-              <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a>
-            </span>
             Verfasst: {{ suggestion.pub_date.strftime('%d.%m.%Y %H:%M') }}
+            <span class="linklist"> |
+              <a href="?delete={{ suggestion.id }}">Löschen</a> |
+              <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a> |
+              <a href="{{ href('portal', 'privmsg', 'new', reply_to='suggestion:%d' % suggestion.id) }}">PN schreiben</a>
+            </span>
           </div>
           <h3 class="title">{{ suggestion.title|e }}</h3>
           <div class="intro">{{ suggestion.rendered_intro }}</div>
