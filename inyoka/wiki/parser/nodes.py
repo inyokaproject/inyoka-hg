@@ -181,6 +181,9 @@ class BaseNode(object):
     #: the value of the node as text
     text = u''
 
+    #: whether the node is just for creating line breaks
+    is_linebreak_node = False
+
     def __eq__(self, other):
         return self.__class__ is other.__class__ and \
                self.__dict__ == other.__dict__
@@ -326,8 +329,8 @@ class Newline(Node):
     A newline in a paragraph.  Never use multiple of those.
     """
 
-    text = u'\n'
     allowed_in_signatures = True
+    is_linebreak_node = True
 
     def generate_markup(self, w):
         w._break()
@@ -770,6 +773,7 @@ class Paragraph(Element):
     """
     is_block_tag = True
     allowed_in_signatures = True
+    is_linebreak_node = True
 
     @property
     def text(self):
