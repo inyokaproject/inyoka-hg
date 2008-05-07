@@ -400,6 +400,10 @@ class Parser(object):
         def finish():
             return nodes.List(list_type, children)
 
+        def is_empty_node(node):
+            return node.is_linebreak_node or \
+                    (node.is_text_node and not node.text.strip())
+
         children = []
 
         # because of phpBB's crappy syntax we treat text before the
@@ -410,9 +414,10 @@ class Parser(object):
         is_indeed_crippled = False
 
         for node in self.parse_until(('*', '/list'), push_back=True):
-            if not node.is_text_node or node.text.strip():
+            if not is_empty_node(node):
                 is_indeed_crippled = True
             crippled.append(node)
+
         if is_indeed_crippled:
             children.append(nodes.ListItem(crippled))
         # b0rked markup, no end tags
@@ -432,10 +437,11 @@ class Parser(object):
         # now parse the normal list items
         self.next()
         while 1:
-            # is there a better way to solve this problem?
-            item = filter(lambda i: not isinstance(i, nodes.Newline),
-                          self.parse_until(('*', '/list'), push_back=True))
-            children.append(nodes.ListItem(item))
+            items = self.parse_until(('*', '/list'), push_back=True)
+            if not filter(lambda n: not is_empty_node(n), items):
+                # empty list item
+                continue
+            children.append(nodes.ListItem(items))
             if self.eos:
                 break
             elif is_list_end():

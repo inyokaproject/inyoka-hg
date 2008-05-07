@@ -73,7 +73,7 @@ class NodeRenderer(object):
         if writer is None:
             writer = MarkupWriter()
         self.generate_markup(writer)
-        return writer.finish().strip('\n')
+        return writer.finish().strip('\n').strip('\\\\')
 
 
 class NodeQueryInterface(object):
@@ -255,7 +255,7 @@ class MarkupWriter(object):
         self.text(' ')
 
     def finish(self):
-        return u''.join(self._result).strip('\n').strip('\\\\')
+        return u''.join(self._result)
 
     def flush(self):
         def _indent():
@@ -342,6 +342,7 @@ class MarkupWriter(object):
         self._blocks.pop()
 
     def list(self, type):
+        self._newline = True
         self._lists.append(type)
         self.indent(2)
 
@@ -363,7 +364,7 @@ class MarkupWriter(object):
 
     def enditem(self):
         self.endblock()
-        self.newline()
+        self._newline = True
 
     def outdent(self):
         self._indentation.pop()
