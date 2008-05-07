@@ -27,14 +27,15 @@
     <tbody>
       {%- for topic in topics %}
       <tr class="reportlist_head">
-        <td>
+        <td style="width: 1em;">
           <input type="checkbox" name="selected" value="{{ topic.id }}" />
         </td>
         <td>
           <a href="{{ topic|url }}">{{ topic.title|e }}</a> ({{ topic.forum.name|e}})
         </td>
-        <td>
-          <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a>
+        <td class="linklist">
+          <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a> |
+          <a href="{{ href('portal', 'privmsg', 'new', reply_to='reportedtopic:%s' % topic.slug) }}">PN schreiben</a>
         </td>
       </tr>
       <tr>
