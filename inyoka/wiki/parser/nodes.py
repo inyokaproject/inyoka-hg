@@ -330,8 +330,7 @@ class Newline(Node):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.markup('\\\\')
-        w.newline()
+        w._break()
 
     def prepare_html(self):
         yield u'<br />'
@@ -906,9 +905,10 @@ class Preformatted(Element):
     def generate_markup(self, w):
         w.raw()
         w.markup(u'{{{')
-        w.newline()
         Element.generate_markup(self, w)
-        w.newline()
+        if w._result[-1][-1] == u'}':
+            # prevent four }s
+            w.touch_whitespace()
         w.markup(u'}}}')
         w.endraw()
 
