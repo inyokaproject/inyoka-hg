@@ -13,7 +13,7 @@
     >>> doc = bbcode.parse('...')
 
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
 import re
@@ -21,6 +21,7 @@ from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
 from inyoka.wiki.parser.constants import HTML_COLORS
 from inyoka.wiki.parser.lexer import Lexer
 from inyoka.wiki.parser import nodes
+from inyoka.wiki.parser.machine import MarkupWriter
 
 _color_re = re.compile(r'#?([a-f0-9]{3}){1,2}$')
 _block_re = re.compile(r'\[(.*?)(?:\s*=\s*(".*?"|.*?))?\]')
@@ -30,6 +31,11 @@ _url_tag_re = '|'.join('\[%s\=|\[%s\]' % (tag, tag) for tag in _url_tags)
 _free_link_re = re.compile('(?<!%s)(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]'
                            '+)*)?)' % (_url_tag_re, Lexer._url_pattern),
                            re.IGNORECASE)
+
+
+class BBMarkupWriter(MarkupWriter):
+    def escape(self, text):
+        return text
 
 
 def parse(text):
@@ -133,6 +139,7 @@ class Parser(object):
             'wikipedia-en': self.parse_wikipedia_en,
             'bookzilla':    self.parse_bookzilla,
             'ubuntuwiki':   self.parse_ubuntuwiki,
+            'flag':         self.parse_flag,
         }
 
         def add_text(value):
@@ -226,6 +233,12 @@ class Parser(object):
                 return nodes.Text(val)
         finally:
             self.depth -= 1
+
+    def parse_flag(self):
+        """parse [flag]-tags"""
+        self.expect_tag('flag')
+        return nodes.Element(children=[nodes.Text(u'{')] +
+                self.parse_until('/flag') + [nodes.Text(u'}')])
 
     def parse_strong(self):
         """parse [b]-tags"""

@@ -76,39 +76,13 @@ PAGE_REPLACEMENTS = {
 }
 
 
-class Unescape(Transformer):
-    """
-    Unescapes free links.
-    """
-    def transform(self, parent):
-        new_children = []
-        for i, node in enumerate(parent.children):
-            if node.is_text_node:
-                pos = 0
-                for match in bbcode._free_link_re.finditer(node.text):
-                    new_children.extend([
-                        nodes.Text(node.text[pos:match.start()]),
-                        nodes.Link(node.text[match.start():match.end()])
-                    ])
-                    pos = match.end()
-                else:
-                    new_children.append(nodes.Text(node.text[pos:]))
-            elif node.is_container and not node.is_raw:
-                new_children.append(self.transform(node))
-            else:
-                new_children.append(node)
-        parent.children = new_children
-        return parent
-
-
 def convert_bbcode(text, uid):
     """Parse bbcode, remove the bbcode uid and return inyoka wiki markup"""
     remove = (':1:%s', ':u:%s', ':o:%s', ':%s',)
     for i in remove:
         text = text.replace(i % uid, '')
-    transformers = [AutomaticParagraphs(), Unescape()]
-    tree = bbcode.Parser(text, transformers=transformers).parse()
-    return tree.to_markup()
+    tree = bbcode.Parser(text, transformers=[AutomaticParagraphs()]).parse()
+    return tree.to_markup(writer=bbcode.BBMarkupWriter())
 
 
 def select_blocks(query, block_size=1000, start_with=0, max_fails=10):
