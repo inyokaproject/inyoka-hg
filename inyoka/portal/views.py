@@ -38,7 +38,7 @@ from inyoka.portal.utils import check_activation_key, send_activation_mail, \
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.wiki.utils import normalize_pagename, quote_text
 from inyoka.ikhaya.models import Article, Category, Suggestion
-from inyoka.forum.models import Forum, SAUser
+from inyoka.forum.models import Forum, SAUser, Topic, Post
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
@@ -731,20 +731,42 @@ def privmsg_new(request, username=None):
         try:
             int(reply_to or forward)
         except ValueError:
-            x = reply_to or forward
-            if x.startswith('suggestion:'):
-                try:
-                    suggestion = Suggestion.objects.get(id=int(x[11:]))
-                except (Suggestion.DoesNotExist, ValueError):
-                    pass
-                else:
-                    data['subject'] = suggestion.title
-                    if suggestion.title.lower().startswith(u're: '):
-                        data['subject'] = u'Re: %s' % suggestion.title
+            if ':' in (reply_to or forward):
+                x = reply_to or forward
+                REPLIABLES = {
+                    'suggestion': (
+                        lambda id: Suggestion.objects.get(id=int(id)),
+                        lambda x: x.title,
+                        lambda x: x.author,
+                        lambda x: u'\n\n'.join((x.intro, x.text)),
+                    ),
+                    'reportedtopic': (
+                        lambda id: Topic.query.filter_by(slug=id).one(),
+                        lambda x: x.title,
+                        lambda x: User.objects.get(id=x.reporter_id),
+                        lambda x: x.reported,
+                    ),
+                    'post': (
+                        lambda id: Post.query.filter_by(id=int(id)).one(),
+                        lambda x: x.topic.title,
+                        lambda x: User.objects.get(id=x.author_id),
+                        lambda x: x.text,
+                    ),
+                }
+                for repliable, params in REPLIABLES.items():
+                    if x[:len(repliable) + 1] != repliable + ':':
+                        continue
+                    try:
+                        obj = params[0](x[len(repliable) + 1:])
+                    except:
+                        break
+                    data['subject'] = params[1](obj)
+                    if data['subject'].lower().startswith(u're: '):
+                        data['subject'] = u'Re: %s' % data['subject']
+                    author = params[2](obj)
                     if reply_to:
-                        data['recipient'] = suggestion.author
-                    text = u'%s\n\n%s' % (suggestion.intro, suggestion.text)
-                    data['text'] = quote_text(text, suggestion.author) + '\n'
+                        data['recipient'] = author
+                    data['text'] = quote_text(params[3](obj), author) + '\n'
                     form = PrivateMessageForm(initial=data)
         else:
             try:

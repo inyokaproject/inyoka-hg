@@ -29,6 +29,7 @@ from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href
 from inyoka.utils.html import escape
+from inyoka.portal.user import User
 
 
 _path_crop = re.compile(r'^(..?/)+')
@@ -415,10 +416,12 @@ def clean_thumbnail_cache():
 def quote_text(text, author=None):
     """
     Returns the wiki syntax quoted version of `text`.
-    If the optional argument `author` is given, a written-by info is
-    prepended.
+    If the optional argument `author` (username as string or User object) is 
+    given, a written-by info is prepended.
     """
-    by = author and (u"[user:%s:] schrieb:\n" % author.username) or u''
+    if isinstance(author, User):
+        author = author.username
+    by = author and (u"[user:%s:] schrieb:\n" % author) or u''
     return by + u'\n'.join(
         '>' + (not line.startswith('>') and ' ' or '') + line
         for line in text.split('\n')
