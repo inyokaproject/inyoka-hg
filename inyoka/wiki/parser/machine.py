@@ -8,7 +8,7 @@
     the renderer for compiled instructions is importable from the normal
     parser package.
 
-    :copyright: Copyright 2007 by Armin Ronacher
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
 import re
@@ -68,9 +68,10 @@ class NodeRenderer(object):
         """Constructs a renderer for this nodes and renders it."""
         return Renderer(self).render(context, format)
 
-    def to_markup(self):
+    def to_markup(self, writer=None):
         """Convert the node to markup."""
-        writer = MarkupWriter()
+        if writer is None:
+            writer = MarkupWriter()
         self.generate_markup(writer)
         return writer.finish().strip('\n')
 
@@ -233,14 +234,13 @@ class MarkupWriter(object):
     """
 
     def __init__(self):
-        self._paragraphs = [[]]
-        self._paragraph = self._paragraphs[0]
+        self._result = []
         self._indentation = []
         self._blocks = []
         self._lists = []
-        self._indent = True
         self._newline = False
         self._new_paragraph = False
+        self._new_break = False
 
     @property
     def is_oneline(self):
@@ -252,59 +252,74 @@ class MarkupWriter(object):
         return self._indentation and self._indentation[-1][0] == 'raw'
 
     def touch_whitespace(self):
-        if self._paragraph and len(self._paragraph[-1]) > \
-           len(self._paragraph[-1].rstrip()):
-            self.text(' ')
+        self.text(' ')
 
     def finish(self):
-        buffer = []
-        for paragraph in self._paragraphs:
-            data = u''.join(paragraph)
-            if data.strip():
-                buffer.append(data)
-        return u'\n\n'.join(buffer)
+        return u''.join(self._result).strip('\n').strip('\\\\')
 
     def flush(self):
-        if self._newline or self._new_paragraph:
-            self._paragraph.append(u'\n')
-            self._newline = self._new_paragraph = False
-            if self._indent:
-                indentation = []
-                for t, depth in self._indentation:
-                    if t == 'raw':
-                        del indentation[:]
-                    elif t == 'quote':
-                        if indentation and indentation[-1] == '> ':
-                            indentation[-1:] = ('>', '> ')
-                        else:
-                            indentation.append('> ')
-                    elif t == 'indent':
-                        indentation.append(u' ' * depth)
-                self._paragraph.append(u''.join(indentation))
-                self._ident = False
+        def _indent():
+            indentation = []
+            for t, depth in self._indentation:
+                if t == 'raw':
+                    del indentation[:]
+                elif t == 'quote':
+                    if indentation and indentation[-1] == '> ':
+                        indentation[-1:] = ('>', '> ')
+                    else:
+                        indentation.append('> ')
+                elif t == 'indent':
+                    indentation.append(u' ' * depth)
+            self._result.append(u''.join(indentation))
+
+        if self._newline or self._new_paragraph or self._new_break:
+            if self._new_break:
+                self._result.append(u'\\\\\n')
+                _indent()
+            elif self._new_paragraph:
+                self._result.append(u'\n')
+                _indent()
+                self._result.append(u'\n')
+                _indent()
+            elif self._newline:
+                self._result.append(u'\n')
+                _indent()
+            self._newline = self._new_paragraph = self._new_break = False
+
+
+    def escape(self, text):
+        return escape(text)
 
     def text(self, text):
         self.flush()
-        text = escape(text)
         if not self.is_raw:
+            text = self.escape(text)
             text = _whitespace_re.sub(u' ', text)
-        self._paragraph.append(text)
+        self._result.append(text)
 
     def markup(self, text):
         self.flush()
-        self._paragraph.append(text)
+        self._result.append(text)
 
     def newline(self):
         if self.is_oneline:
             self.touch_whitespace()
         else:
-            self._newline = self._indent = True
+            self._newline = True
+
+    def _break(self):
+        if self.is_oneline:
+            self.touch_whitespace()
+        else:
+            if not self._new_break:
+                self._new_break = True
+            else:
+                self._new_break = False
+                self._new_paragraph = True
 
     def paragraph(self):
         if not self.is_oneline:
             self._new_paragraph = True
-            self._paragraph = p = []
-            self._paragraphs.append(p)
         else:
             self.touch_whitespace()
 
