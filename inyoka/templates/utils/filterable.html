@@ -9,6 +9,11 @@
     :license: GNU GPL.
 #}
 <form action="" method="get">
+  {%- for k, v in args.iteritems() %}
+  {%- if v %}
+  <input type="hidden" name="{{ k|e }}" value="{{ v|e }}" />
+  {%- endif %}
+  {%- endfor %}
   <table class="filterable">
     {%- for field, x in filters.iteritems() %}
     <tr>
