@@ -182,7 +182,7 @@ def suggestionlist(request):
             if not 'cancel' in request.POST:
                 s = Suggestion.objects.get(id=request.GET['delete'])
                 if request.POST.get('note'):
-                    text = render_template('mails/suggestion_rejected.html', {
+                    text = render_template('mails/suggestion_rejected.txt', {
                         'title':    s.title,
                         'username': request.user.username,
                         'note':     request.POST['note']
