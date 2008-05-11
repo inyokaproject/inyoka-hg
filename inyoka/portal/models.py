@@ -48,6 +48,8 @@ class SubscriptionManager(models.Manager):
         elif wiki_page is not None:
             column = 'wiki_page_id'
             ident = wiki_page.id
+        else:
+            raise TypeError('user_subscribed takes exactly 3 arguments (2 given)')
         cursor = connection.cursor()
         cursor.execute('''
             select 1 from portal_subscription
