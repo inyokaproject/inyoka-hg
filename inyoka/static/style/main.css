@@ -804,19 +804,19 @@ form.search ul.search_area li:hover {
   background-color: #eee;
 }
 
-form.search ul.search_area li.area_wiki, .search .area_wiki {
+form.search ul.search_area li.area_wiki, .search input.area_wiki {
     background-image: url(../img/icons/small/wiki.png);
 }
 
-form.search ul.search_area li.area_forum, .search .area_forum {
+form.search ul.search_area li.area_forum, .search input.area_forum {
     background-image: url(../img/icons/small/forum.png);
 }
 
-form.search ul.search_area li.area_planet, .search .area_planet {
+form.search ul.search_area li.area_planet, .search input.area_planet {
     background-image: url(../img/icons/small/planet.png);
 }
 
-form.search ul.search_area li.area_ikhaya, .search .area_ikhaya {
+form.search ul.search_area li.area_ikhaya, .search input.area_ikhaya {
     background-image: url(../img/icons/small/ikhaya.png);
 }
 

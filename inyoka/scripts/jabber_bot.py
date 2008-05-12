@@ -45,8 +45,8 @@ class Bot(object):
         self.client = xmpp.Client(jid.getDomain(), debug=[])
         try:
             self.client.connect()
-            self.client.auth(jid.getNode(), password)
-            self.client.sendInitPresence()
+            self.client.auth(jid.getNode(), password, jid.resource)
+            self.client.sendInitPresence(requestRoster=False)
         except Exception, e:
             msg = 'Could not connect: %s' % e
             if self.debug:

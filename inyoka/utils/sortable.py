@@ -161,8 +161,9 @@ class Filterable(object):
     def get_html(self):
         return render_template('utils/filterable.html', {
             'filters': self.filters,
-            'fields':   self.fields,
+            'fields':  self.fields,
             'actions': ACTIONS,
+            'args':    {'order': self.args.get('order')}
         })
 
     def get_objects(self):

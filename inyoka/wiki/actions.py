@@ -779,6 +779,7 @@ def do_attach_edit(request, name):
         'page': page
     }
 
+@does_not_exist_is_404
 def do_prune(request, name):
     """Clear the page cache."""
     page = Page.objects.get_by_name(name)
@@ -803,8 +804,7 @@ def do_manage(request, name):
 @simple_check_login
 def do_subscribe(request, page_name):
     """
-    Subscribe the user to the page with `page_name` or remove him if he is already
-    subscribed.
+    Subscribe the user to the page with `page_name`
     """
     p = Page.objects.get(name=page_name)
     try:
@@ -812,12 +812,27 @@ def do_subscribe(request, page_name):
     except Subscription.DoesNotExist:
         # there's no such subscription yet, create a new one
         Subscription(user=request.user, wiki_page=p).save()
-        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite benachrichtigt.')
+        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite'
+              u'benachrichtigt.', True)
     else:
-        # there's already a subscription for this page, remove it
-        s.delete()
-        flash(u'Du wirst ab nun bei keiner Veränderung mehr benachrichtigt.')
+        flash(u'Du wirst bereits benachrichtigt')
     return HttpResponseRedirect(url_for(p))
+
+
+@simple_check_login
+def do_unsubscribe(request, page_name):
+    """
+    Unsubscribe the user from the page with `page_name`
+    """
+    p = Page.objects.get(name=page_name)
+    try:
+        s = Subscription.objects.get(user=request.user, wiki_page=p)
+    except Subscription.DoesNotExist:
+        flash(u'Du wirst über diese Seite gar nicht benachrichtigt!')
+    else:
+        s.delete()
+        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite'
+              u'nicht mehr benachrichtigt.', True)
 
 
 PAGE_ACTIONS = {
@@ -835,5 +850,6 @@ PAGE_ACTIONS = {
     'attach':       do_attach,
     'prune':        do_prune,
     'manage':       do_manage,
-    'subscribe':    do_subscribe
+    'subscribe':    do_subscribe,
+    'unsubscribe':  do_unsubscribe
 }
