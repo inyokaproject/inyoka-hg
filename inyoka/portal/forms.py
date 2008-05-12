@@ -407,7 +407,7 @@ class ForumFeedSelectorForm(FeedSelectorForm):
 
     def clean_forum(self):
         data = self.cleaned_data
-        if data['component'] == 'forum' and not data.get('forum'):
+        if data.get('component') == 'forum' and not data.get('forum'):
             raise forms.ValidationError(u'Bitte auswählen')
         return data['forum']
 
