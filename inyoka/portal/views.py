@@ -386,8 +386,6 @@ def search(request):
             active = u'<span class="pageselect active">%(page)d</span>'
             ellipsis = u'<span class="ellipsis"> … </span>'
             pagination = [u'<div class="pagination">']
-            results.page = 5
-            results.page_count = 6
             show = [1, 2, results.page - 1, results.page]
             last_page = 0
             add = pagination.append
