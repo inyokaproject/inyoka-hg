@@ -386,11 +386,14 @@ def search(request):
             active = u'<span class="pageselect active">%(page)d</span>'
             ellipsis = u'<span class="ellipsis"> … </span>'
             pagination = [u'<div class="pagination">']
+            results.page = 5
+            results.page_count = 6
             show = [1, 2, results.page - 1, results.page]
             last_page = 0
             add = pagination.append
-            _link = lambda page: href('portal', 'search', page=page, query=query,
-                                      area=area, per_page=results.per_page)
+            def _link(page):
+                return href('portal', 'search', page=page, query=d['query'],
+                            area=d['area'], per_page=results.per_page)
             for page in show:
                 if page - last_page > 1:
                     add(ellipsis)
