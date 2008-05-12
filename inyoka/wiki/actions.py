@@ -779,6 +779,7 @@ def do_attach_edit(request, name):
         'page': page
     }
 
+@does_not_exist_is_404
 def do_prune(request, name):
     """Clear the page cache."""
     page = Page.objects.get_by_name(name)
@@ -849,6 +850,6 @@ PAGE_ACTIONS = {
     'attach':       do_attach,
     'prune':        do_prune,
     'manage':       do_manage,
-    'subscribe':    do_subscribe
+    'subscribe':    do_subscribe,
     'unsubscribe':  do_unsubscribe
 }
