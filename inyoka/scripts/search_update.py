@@ -17,6 +17,7 @@
     :copyright: 2007 by Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
+from inyoka import application
 from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
