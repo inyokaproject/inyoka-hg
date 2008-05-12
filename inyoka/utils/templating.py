@@ -184,6 +184,8 @@ class InyokaEnvironment(Environment):
             jsonencode=simplejson.dumps
         )
 
+        self.install_null_translations()
+
 
 # setup the template environment
 jinja_env = InyokaEnvironment()
