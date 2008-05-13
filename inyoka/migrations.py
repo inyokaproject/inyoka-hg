@@ -234,7 +234,7 @@ def add_default_storage_values(m):
 
 def add_blocked_hosts_storage(m):
     _set_storage(m, {
-        'blocked_hosts': []
+        'blocked_hosts': ''
     })
 
 
