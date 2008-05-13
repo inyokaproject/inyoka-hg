@@ -9,10 +9,10 @@
 #}
 
 {%- extends 'portal/overall.html' %}
-{% styles = styles|default([]) + ['datetimefield.css'] %}
-{% scripts = scripts|default([]) + ['DateTime.js'] %}
-{% title_trace = ['Suche'] %}
-{% title = 'Suche' %}
+{% set styles = styles|default([]) + ['datetimefield.css'] %}
+{% set scripts = scripts|default([]) + ['DateTime.js'] %}
+{% set title_trace = ['Suche'] %}
+{% set title = 'Suche' %}
 
 {% block appheader %}
   <h1>Suche</h1>

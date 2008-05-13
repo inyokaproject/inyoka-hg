@@ -9,19 +9,19 @@
 #}
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% styles = ['editor.css', 'datetimefield.css'] %}
-{% scripts = ['WikiEditor.js', 'DateTime.js'] %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
 {% if not article %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (href('ikhaya', 'add'), 'Artikel erstellen')
     ] %}
 {% else %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (article|url('edit'), 'Artikel „%s“ bearbeiten'|format(article.subject|e))
     ] %}
 {% endif %}
-{% navigation_trace = [
+{% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'articles'), 'Artikel')
   ] + navigation_trace|default([]) %}

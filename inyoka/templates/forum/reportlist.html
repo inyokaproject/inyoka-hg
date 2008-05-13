@@ -10,8 +10,8 @@
 #}
 
 {%- extends 'forum/page.html' %}
-{% title_trace = ['Gemeldete Themen'] %}
-{% navigation_trace =  [
+{% set title_trace = ['Gemeldete Themen'] %}
+{% set navigation_trace =  [
   (href('forum', 'reported_topics'), 'Gemeldete Themen')
   ] + navigation_trace|default([]) %}
 

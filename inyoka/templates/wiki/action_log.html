@@ -11,13 +11,13 @@
 
 
 {%- extends 'wiki/page.html' %}
-{% title_trace = [page.title|e, 'Versionen'] %}
-{% action = 'log' %}
-{% feeds = [
+{% set title_trace = [page.title|e, 'Versionen'] %}
+{% set action = 'log' %}
+{% set feeds = [
   ('Seitenrevisionen', '?action=log&format=atom')
 ] %}
 {% block wiki_content %}
-  {% latest_rev = revisions[0] -%}
+  {% set latest_rev = revisions[0] -%}
   <p>
     Der Artikel „<a href="{{ page|url|e }}">{{ page.title|e }}</a>“ hat
     bislang {% trans count=revisions|count, h_count=revisions|count|

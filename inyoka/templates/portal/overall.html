@@ -9,9 +9,9 @@
 #}
 {%- extends 'overall.html' %}
 
-{% active_app = 'portal' %}
-{% navi_type  = 'both' %}
-{% styles = ['portal.css'] + styles|default([])|default([]) %}
+{% set active_app = 'portal' %}
+{% set navi_type  = 'both' %}
+{% set styles = ['portal.css'] + styles|default([])|default([]) %}
 
 {% macro feed_button(link) -%}
   <a href="{{ link }}" class="feed_icon"><img src="{{ href('static', 'img', 'feed.png') }}" alt="Newsfeed" /></a>

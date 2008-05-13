@@ -10,10 +10,10 @@
 
 {%- extends 'portal/usercp/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% title_trace = ['Benutzereinstellungen'] %}
-{% scripts = ['WikiEditor.js'] %}
-{% styles = ['editor.css'] %}
-{% selected = 'profile' %}
+{% set title_trace = ['Benutzereinstellungen'] %}
+{% set scripts = ['WikiEditor.js'] %}
+{% set styles = ['editor.css'] %}
+{% set selected = 'profile' %}
 {% block html_head %}
   <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ gmaps_apikey|e
     }}" type="text/javascript"></script>
@@ -27,11 +27,13 @@
       <dt>Avatar:</dt>
       <dd><img class="usercp_avatar" src="{{ user.avatar_url }}" alt="Avatar" /></dd>
       <dd>{{ form.avatar }}</dd>
+      {%- if max_avatar_height >= 0 and max_avatar_width >= 0 %}
       <dd class="note">
         Beachte, dass der Avatar maximal <strong>{{ max_avatar_height }} x {{ max_avatar_width }}</strong> Pixel groß sein darf.<br />
         Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
         Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
       </dd>
+      {%- endif %}
       {%- if user.avatar %}
       <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
       {%- endif %}

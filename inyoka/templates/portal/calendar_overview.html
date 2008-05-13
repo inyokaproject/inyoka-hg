@@ -9,8 +9,8 @@
 #}
 
 {%- extends 'portal/overall.html' %}
-{% title_trace = ['Kalender'] %}
-{% styles = styles|default([]) + ['calendar.css'] %}
+{% set title_trace = ['Kalender'] %}
+{% set styles = styles|default([]) + ['calendar.css'] %}
 {% block appheader %}
   <h1>Kalender</h1>
   <h2>Übersicht</h2>

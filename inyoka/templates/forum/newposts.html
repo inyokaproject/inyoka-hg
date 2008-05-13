@@ -9,7 +9,7 @@
 #}
 {%- extends 'forum/page.html' %}
 {% from 'forum/_forum.html' import topic_icon with context %}
-{% title_trace = ['Neue Beiträge'] %}
+{% set title_trace = ['Neue Beiträge'] %}
 {% name = 'Neue Beiträge' %}
 
 {% block forum_content %}

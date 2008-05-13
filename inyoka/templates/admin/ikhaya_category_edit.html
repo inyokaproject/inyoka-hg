@@ -11,15 +11,15 @@
 {% from 'macros.html' import render_form %}
 
 {% if not category %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (href('admin', 'ikhaya', 'categories', 'new'), 'Kategorie erstellen')
     ] %}
 {% else %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (category|url('edit'), 'Kategorie „%s“ bearbeiten'|format(category.name|e))
     ] %}
 {% endif %}
-{% navigation_trace = [
+{% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'categories'), 'Kategorien')
   ] + navigation_trace|default([]) %}

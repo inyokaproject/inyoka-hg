@@ -39,7 +39,7 @@ class EditStaticPageForm(forms.Form):
                                     u'Adresse die Seite abrufbar ist.')
     title = forms.CharField(label=u'Titel', max_length=200)
     content = forms.CharField(widget=forms.Textarea, label=u'Inhalt',
-                              help_text=u'HTML ist erlaubt')
+                              help_text=u'Muss gültiges XHTML sein.')
 
 
 class EditBlogForm(forms.Form):

@@ -9,10 +9,10 @@
 #}
 {%- extends 'portal/privmsg/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% styles = styles|default([]) + ['portal.css', 'editor.css'] %}
-{% title_trace = ['Neue Nachricht'] %}
-{% scripts = ['WikiEditor.js'] %}
-{% selected = 'new' %}
+{% set styles = styles|default([]) + ['portal.css', 'editor.css'] %}
+{% set title_trace = ['Neue Nachricht'] %}
+{% set scripts = ['WikiEditor.js'] %}
+{% set selected = 'new' %}
 
 {% block portal_content %}
   <form action="{{ href('portal', 'privmsg', 'new') }}" method="post">

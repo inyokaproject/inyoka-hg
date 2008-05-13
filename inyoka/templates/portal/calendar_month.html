@@ -9,9 +9,9 @@
 #}
 
 {%- extends 'portal/overall.html' %}
-{% title_trace = ['%s %d' % (MONTHS[month]|e, year), 'Kalender'] %}
-{% styles = styles|default([]) + ['calendar.css'] %}
-{% navigation_trace =  [
+{% set title_trace = ['%s %d' % (MONTHS[month]|e, year), 'Kalender'] %}
+{% set styles = styles|default([]) + ['calendar.css'] %}
+{% set navigation_trace =  [
     (href('portal', 'calendar'), 'Kalender'),
     (href('portal', 'calendar', year, '%02d' % month), '%s %d' % (MONTHS[month], year)),
   ] + navigation_trace|default([]) %}

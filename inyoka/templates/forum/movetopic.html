@@ -9,8 +9,8 @@
     
 #}
 {%- extends 'forum/page.html' %}
-{% title_trace = ['„%s“ verschieben'|format(topic.title|e)]%}
-{% navigation_trace =  [
+{% set title_trace = ['„%s“ verschieben'|format(topic.title|e)]%}
+{% set navigation_trace =  [
     (topic.forum|url, topic.forum.name),
     (topic|url, topic.title)
   ] + navigation_trace|default([]) %}

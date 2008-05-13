@@ -11,15 +11,15 @@
 {% from 'macros.html' import render_form %}
 
 {% if not icon %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (href('admin', 'ikhaya', 'icons', 'new'), 'Icon erstellen')
     ] %}
 {% else %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
       (icon|url('edit'), 'Icon „%s“ bearbeiten'|format(icon.identifier|e))
     ] %}
 {% endif %}
-{% navigation_trace = [
+{% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'icons'), 'Icons')
   ] + navigation_trace|default([]) %}

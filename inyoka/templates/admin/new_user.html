@@ -9,7 +9,7 @@
 #}
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% navigation_trace = [
+{% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
     (href('admin', 'users', 'new'), 'Benutzer erstellen')
 ] %}

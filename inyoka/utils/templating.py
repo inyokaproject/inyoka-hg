@@ -79,7 +79,7 @@ def populate_context_defaults(context):
             key = 'forum/reported_topic_count'
             reported = cache.get(key)
             if reported is None:
-                reported = Topic.query.filter(Topic.c.reported != None).count()
+                reported = Topic.query.filter(Topic.reported != None).count()
                 cache.set(key, reported)
             key = 'ikhaya/suggestion_count'
             suggestions = cache.get(key)

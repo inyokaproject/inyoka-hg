@@ -12,20 +12,20 @@
 {% from 'macros.html' import render_form %}
 
 {% if is_new %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
     (href('admin', 'groups', 'new'), 'neue Gruppe'),
   ] %}
 {% else %}
-  {% navigation_trace = [
+  {% set navigation_trace = [
     (href('admin', 'groups', 'edit', group_name), 'Gruppe „%s“ editieren'|format(group_name)),
   ] %}
 {% endif %}
 
-{% navigation_trace = [
+{% set navigation_trace = [
     (href('admin', 'groups'), 'Gruppen')
 ] + navigation_trace|default([]) %}
 
-{% scripts = ['PrivilegeBox.js'] %}
+{% set scripts = ['PrivilegeBox.js'] %}
 
 {% block appheader %}
 <h1>Administration</h1>

@@ -13,8 +13,8 @@
 
 
 {%- extends 'wiki/page.html' %}
-{% title_trace = [diff.page.title|e, 'Änderungen anzeigen'] %}
-{% action = 'log' %}
+{% set title_trace = [diff.page.title|e, 'Änderungen anzeigen'] %}
+{% set action = 'log' %}
 {% block wiki_content %}
   {%- if diff.old_rev == diff.new_rev %}
   <p>

@@ -10,11 +10,11 @@
 #}
 {%- extends 'overall.html' %}
 
-{% title_trace = title_trace|default([]) + ['NoPaste'] %}
-{% navigation_trace = [('/', 'NoPaste')] + navigation_trace|default([]) %}
-{% styles = styles|default([]) + ['pastebin.css'] %}
-{% active_app = 'paste' %}
-{% navi_type  = 'tabbar' %}
+{% set title_trace = title_trace|default([]) + ['NoPaste'] %}
+{% set navigation_trace = [('/', 'NoPaste')] + navigation_trace|default([]) %}
+{% set styles = styles|default([]) + ['pastebin.css'] %}
+{% set active_app = 'paste' %}
+{% set navi_type  = 'tabbar' %}
 
 {% block appheader %}
   <h1>NoPaste</h1>

@@ -217,13 +217,13 @@ def validate_signature(signature):
     except StackExhaused:
         raise SignatureError(u'Deine Signatur enthält zu viele ver'
                              u'schachtelte Elemente.')
-    sig_len = storage['max_signature_length']
-    sig_lines = storage['max_signature_lines']
-    if len(text) > sig_len:
+    sig_len = storage.get('max_signature_length', -1)
+    sig_lines = storage.get('max_signature_lines', -1)
+    if sig_len >= 0 and len(text) > sig_len:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
                              sig_len - len(text)))
-    elif len(text.splitlines()) > sig_lines:
+    if sig_lines >= 0 and len(text.splitlines()) > sig_lines:
         raise SignatureError(u'Deine Signatur darf maximal aus %d '
                              u'Zeilen bestehen' % sig_lines)
 

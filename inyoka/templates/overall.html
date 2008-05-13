@@ -18,7 +18,7 @@
     <title>{{ (title_trace|default([]) + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- styles = ['main.css', 'markup.css'] + styles|default([]) -%}
+    {%- set styles = ['main.css', 'markup.css'] + styles|default([]) -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}
@@ -143,8 +143,8 @@
       {%- endfor %}
 
       <div class="page_content">
-        {% tabbar = navi_type in ['tabbar', 'both'] %}
-        {% sidebar = navi_type in ['sidebar', 'both'] %}
+        {% set tabbar = navi_type in ['tabbar', 'both'] %}
+        {% set sidebar = navi_type in ['sidebar', 'both'] %}
         {%- if tabbar %}
         <div class="navi_tabbar navigation">
           {%- block tabbar %}{% endblock -%}

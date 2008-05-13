@@ -9,7 +9,7 @@
 #}
 {%- extends 'planet/page.html' %}
 
-{% feeds = [
+{% set feeds = [
   ('Planet - Nur Überschrift', href('planet', 'feeds/title/20')),
   ('Planet - Nur Einleitung', href('planet', 'feeds/short/20')),
   ('Planet - Ganzer Beitrag', href('planet', 'feeds/full/20'))

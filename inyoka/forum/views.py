@@ -649,7 +649,7 @@ def reportlist(request):
         """Add dynamic field choices to the reported topic formular"""
         form.fields['selected'].choices = [(t.id, u'') for t in topics]
 
-    topics = Topic.query.filter(Topic.c.reported != None)
+    topics = Topic.query.filter(Topic.reported != None)
     if request.method == 'POST':
         form = ReportListForm(request.POST)
         _add_field_choices()

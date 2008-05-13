@@ -10,11 +10,11 @@
 #}
 
 {%- extends 'ikhaya/page.html' %}
-{% title_trace = ['Artikelvorschläge'] %}
-{% navigation_trace = [
+{% set title_trace = ['Artikelvorschläge'] %}
+{% set navigation_trace = [
     (href('ikhaya', 'suggestions'), 'Artikelvorschläge')
     ] %}
-{% styles = ['forum.css'] %}
+{% set styles = ['forum.css'] %}
 
 {% block ikhaya_content %}
 <h3>Artikelvorschläge</h3>

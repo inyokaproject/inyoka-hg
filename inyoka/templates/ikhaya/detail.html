@@ -10,9 +10,9 @@
 {%- extends 'ikhaya/page.html' %}
 {% from 'macros.html' import render_form %}
 
-{% title_trace = [article.subject|e] %}
-{% styles = ['editor.css']%}
-{% scripts = ['ikhaya.js', 'WikiEditor.js'] %}
+{% set title_trace = [article.subject|e] %}
+{% set styles = ['editor.css']%}
+{% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
 
 {% block ikhaya_content %}
   <ul class="articles"><li class="article">

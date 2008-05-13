@@ -10,16 +10,16 @@
     :license: GNU GPL.
 #}
 {%- extends 'forum/page.html' %}
-{% scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
+{% set scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
 {% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}
-  {% title_trace = ['Kategorie „%s“'|format(categories[0])] %}
-  {% navigation_trace = [
+  {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
+  {% set navigation_trace = [
       (categories[0]|url, categories[0].name|capitalize|e),
     ] + navigation_trace|default([]) %}
 {% else %}
-{% title_trace = ['Index'] %}
-  {% feeds = [
+{% set title_trace = ['Index'] %}
+  {% set feeds = [
     ('Forum - Nur Überschrift', href('forum', 'feeds/title/20')),
     ('Forum - Nur Einleitung', href('forum', 'feeds/short/20')),
     ('Forum - Ganzer Beitrag', href('forum', 'feeds/full/20'))

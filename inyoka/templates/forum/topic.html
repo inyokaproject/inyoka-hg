@@ -12,18 +12,18 @@
 #}
 {%- extends 'forum/page.html' %}
 
-{% title_trace = [topic.title|e] %}
+{% set title_trace = [topic.title|e] %}
 {% name = 'Thema „%s“ - ' % topic.title|e %}
-{% feeds = [
+{% set feeds = [
   (name + 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
   (name + 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
   (name + 'Ganzer Beitrag', href('forum', 'feeds/topic', topic.slug, 'full/20'))
 ] %}
-{% navigation_trace = [] %}
+{% set navigation_trace = [] %}
 {% for parent in forum.parents %}
   {% navigation_trace.append((parent|url, parent.name)) %}
 {% endfor %}
-{% navigation_trace = navigation_trace|default([]) + [
+{% set navigation_trace = navigation_trace|default([]) + [
     (forum|url, forum.name),
     (topic|url, topic.title)
   ] %}

@@ -10,13 +10,13 @@
     
 #}
 {%- extends 'forum/page.html' %}
-{% title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
-{% navigation_trace =  [
+{% set title_trace = ['„%s“ teilen'|format(topic.title|e)]%}
+{% set navigation_trace =  [
     (topic.forum|url, topic.forum.name),
     (topic|url, topic.title),
     (topic|url('split'), 'Thema aufteilen')
   ] + navigation_trace|default([]) %}
-{% scripts = scripts|default([]) + ['jQuery.autocomplete.js'] %}
+{% set scripts = scripts|default([]) + ['jQuery.autocomplete.js'] %}
 
 {% block forum_content %}
   <form action="" method="post" class="new_topic">
