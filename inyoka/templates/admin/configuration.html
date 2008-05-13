@@ -19,7 +19,8 @@
 
 <form action="" method="post" class="ikhaya">
   <dl>
-    {{ render_form(form, ['global_message', 'max_signature_length', 'max_signature_lines'], inline=true) }}
+    {{ render_form(form, ['global_message', 'blocked_hosts', 'max_signature_length',
+                          'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
     <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel
         {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
