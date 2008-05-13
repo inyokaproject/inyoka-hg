@@ -15,13 +15,24 @@
   {%- endif %}
   {%- endfor %}
   <table class="filterable">
-    {%- for field, x in filters.iteritems() %}
+    {%- for field, _ in filters.iteritems() %}
+    {%- set action, value = _ %}
+    {%- set label, type = fields[field] %}
     <tr>
-      <td class="field">{{ fields[field][0] }}</td>
+      {%- if type == 'bool' %}
+      <td class="field value" colspan="3">
+        <input type="hidden" name="{{ field }}_action" value="bool" />
+        <select name="{{ field }}_value">
+          <option {% if value == 'true' %}selected="selected" {% endif %}value="true">Ist</option>
+          <option {% if value == 'false' %}selected="selected" {% endif %}value="false">Ist nicht</option>
+        </select> {{ label|e }}
+      </td>
+      {%- else %}
+      <td class="field">{{ label|e }}</td>
       <td class="filter">
         <select name="{{ field }}_action">
-          {%- for k, v in actions[fields[field][1]].iteritems() %}:
-          <option value="{{ k }}"{% if k == x[0] %} selected="selected"{% endif %}>
+          {%- for k, v in actions[type].iteritems() %}:
+          <option value="{{ k }}"{% if k == action %} selected="selected"{% endif %}>
             {{- v|e -}}
           </option>
           {%- endfor %}
@@ -29,8 +40,9 @@
       </td>
       <td class="value">
         <input type="{{ fields[field][1] == 'date' and 'date' or 'text' }}"
-               name="{{ field }}_value" value="{{ x[1]|e }}" />
+               name="{{ field }}_value" value="{{ value|e }}" />
       </td>
+      {%- endif %}
       <td class="action">
         <button type="submit" name="remove_filter" value="{{ field }}">-</button>
       </td>

@@ -129,7 +129,7 @@ ACTIONS = {
         'is':           u'ist gleich',
         'greater':      u'ist später als',
         'lower':        u'ist früher als',
-    },
+    }
 }
 ACTIONS_MAP = {
     'is':         lambda f, v: f == v,
@@ -137,6 +137,7 @@ ACTIONS_MAP = {
     'startswith': lambda f, v: f.startswith(v),
     'greater':    lambda f, v: f > v,
     'lower':      lambda f, v: f < v,
+    'bool':       lambda f, v: f == (v == 'true'),
 }
 
 

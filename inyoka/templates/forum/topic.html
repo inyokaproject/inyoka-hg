@@ -21,7 +21,11 @@
 ] %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
+<<<<<<< local
 {{ void(navigation_trace.append((parent|url, parent.name))) }}
+=======
+  {{ void(navigation_trace.append((parent|url, parent.name))) }}
+>>>>>>> other
 {% endfor %}
 {% set navigation_trace = navigation_trace|default([]) + [
     (forum|url, forum.name),
