@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block tabbar %}
-  {% if can and can.read %}
+  {%- if can and can.read %}
   <ul>
     <li><a href="?action=show"{{ action == 'show' and ' class="active"' or '' }}>Artikel</a></li>
     {%- if can.edit %}
@@ -43,7 +43,7 @@
     <li><a href="?action={% if is_subscribed %}un{% endif %}subscribe">{% if is_subscribed %}Abbestellen{% else %}Abonnieren{% endif %}</a></li>
     <li><a href="?action=manage"{{ action == 'manage' and ' class="active"' or '' }}>Weitere Aktionen</a></li>
   </ul>
-  {% endif %}
+  {%- endif %}
 {% endblock %}
 
 {% block content %}

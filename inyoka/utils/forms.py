@@ -18,7 +18,8 @@ from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
-from inyoka.utils.mail import may_accept_mails, may_be_valid_mail
+from inyoka.utils.mail import may_accept_mails, may_be_valid_mail, \
+    is_blocked_host
 from inyoka.utils.jabber import may_be_valid_jabber
 
 
@@ -143,7 +144,13 @@ class EmailField(forms.CharField):
         if not value:
             return
         value = value.strip()
-        if not may_be_valid_mail(value):
+        if is_blocked_host(value):
+            raise forms.ValidationError(u'''
+                Die von dir angegebene E-Mail Adresse gehört zu einem
+                Anbieter, den wir wegen Spamproblemen sperren mussten.
+                Bitte gebe eine andere Adresse an.
+            '''.strip())
+        elif not may_be_valid_mail(value):
             raise forms.ValidationError(u'''
                 Die von dir angebene E-Mail Adresse ist ungültig.  Bitte
                 überpfüfe die Eingabe.

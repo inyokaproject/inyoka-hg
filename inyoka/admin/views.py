@@ -17,7 +17,7 @@ from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href, global_not_found
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
-from inyoka.utils.html import escape, cleanup_html
+from inyoka.utils.html import escape
 from inyoka.utils.http import HttpResponse, HttpResponseRedirect, \
      PageNotFound
 from inyoka.utils.sortable import Sortable
@@ -57,21 +57,18 @@ def index(request):
 @templated('admin/configuration.html')
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
-            'max_signature_lines', 'get_ubuntu_link',
-            'get_ubuntu_description']
+            'max_signature_lines', 'get_ubuntu_link', 'global_message',
+            'get_ubuntu_description', 'blocked_hosts']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            html = cleanup_html(data['global_message'])
-            storage['global_message'] = html
             for k in keys:
                 storage[k] = data[k]
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
-        form = ConfigurationForm(initial=storage.get_many(
-                                 ['global_message'] + keys))
+        form = ConfigurationForm(initial=storage.get_many(keys))
     return {
         'form': form
     }

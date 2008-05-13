@@ -12,6 +12,7 @@ import re
 from dns.resolver import query as dns_query
 from dns.exception import DNSException
 from django.core.mail import send_mail
+from inyoka.utils.storage import storage
 
 
 _mail_re = re.compile(r'''(?xi)
@@ -45,3 +46,12 @@ def may_accept_mails(email_or_host, timeout=2):
     except DNSException:
         return False
     return bool(answer)
+
+
+def is_blocked_host(email_or_host):
+    """
+    This function checks the email or host against a blacklist of hosts that
+    is configurable in the admin panel.
+    """
+    host = email_or_host.rsplit('@', 1)[-1]
+    return host in storage['blocked_hosts'].split('\n')

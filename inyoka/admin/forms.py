@@ -13,6 +13,7 @@ from django import newforms as forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
                                DateTimeWidget
+from inyoka.utils.html import cleanup_html
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 
 
@@ -22,6 +23,10 @@ class ConfigurationForm(forms.Form):
         help_text = u'Diese Nachricht wird auf allen Seiten über dem Inhalt '
                     u'angezeigt. Um sie zu deaktivieren, lasse das Feld leer. '
                     u'Muss valides XHTML sein.')
+    blocked_hosts = forms.CharField(label=u'Verbotene Hosts für E-Mail-Adressen',
+        widget=forms.Textarea(attrs={'rows': 3}), required=False,
+        help_text = u'Benutzer können keine E-Mail-Adressen von diesen Hosts '
+                    u'zum Registrieren verwenden.')
     max_avatar_width = forms.IntegerField(min_value=1)
     max_avatar_height = forms.IntegerField(min_value=1)
     max_signature_length = forms.IntegerField(min_value=1,
@@ -31,6 +36,9 @@ class ConfigurationForm(forms.Form):
     get_ubuntu_link = forms.URLField(required=False,
         label=u'Der Downloadlink für die Startseite')
     get_ubuntu_description = forms.CharField(label=u'Beschreibung des Links')
+
+    def clean_global_message(self):
+        return cleanup_html(self.cleaned_data.get('global_message', ''))
 
 
 class EditStaticPageForm(forms.Form):
