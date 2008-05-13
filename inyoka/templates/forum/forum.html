@@ -11,7 +11,7 @@
 {% from 'forum/_forum.html' import render_forum, topic_icon with context %}
 
 {% set title_trace = [forum.name|e] %}
-{% name = 'Forum „%s“ - ' % forum.name|e %}
+{% set name = 'Forum „%s“ - ' % forum.name|e %}
 {% set feeds = [
   (name + 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
   (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
@@ -19,9 +19,9 @@
 ] %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {% navigation_trace.append([parent|url, parent.name]) %}
+  {{ void(navigation_trace.append([parent|url, parent.name])) }}
 {% endfor %}
-{% navigation_trace.append([forum|url, forum.name]) %}
+{{ void(navigation_trace.append([forum|url, forum.name])) }}
 
 {% block search_areas %}
   <option value="current_forum" selected="selected">Dieses Forum</option>

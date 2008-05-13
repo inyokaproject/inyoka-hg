@@ -13,7 +13,7 @@
 {%- extends 'forum/page.html' %}
 
 {% set title_trace = [topic.title|e] %}
-{% name = 'Thema „%s“ - ' % topic.title|e %}
+{% set name = 'Thema „%s“ - ' % topic.title|e %}
 {% set feeds = [
   (name + 'Nur Überschrift', href('forum', 'feeds/topic', topic.slug, 'title/20')),
   (name + 'Nur Einleitung', href('forum', 'feeds/topic', topic.slug, 'short/20')),
@@ -21,7 +21,7 @@
 ] %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {% navigation_trace.append((parent|url, parent.name)) %}
+  {{ void(navigation_trace.append((parent|url, parent.name))) }}
 {% endfor %}
 {% set navigation_trace = navigation_trace|default([]) + [
     (forum|url, forum.name),
@@ -116,7 +116,7 @@
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
-      {%- attachments = post.attachments %}      
+      {%- set attachments = post.attachments %}      
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>
