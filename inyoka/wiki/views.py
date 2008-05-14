@@ -51,6 +51,7 @@ def show_page(request, name):
         if args:
             url += '?' + args.urlencode()
         return HttpResponseRedirect(url)
+        #XXX: for redirect pages ?action=show should prevent redirect
     if action and action not in PAGE_ACTIONS:
         return missing_resource(request)
     return PAGE_ACTIONS[action or 'show'](request, normalized_name)

@@ -1,0 +1,1 @@
+Neues Thema „{{ topic.title }}“ von {{ post.author.username }} im Forum „{{ topic.forum.name }}“: {{ topic|url }}

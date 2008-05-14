@@ -83,6 +83,9 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + '/_admin/'
 INYOKA_SYSTEM_USER = u'ubuntuusers.de'
 INYOKA_SYSTEM_USER_EMAIL = 'system@' + BASE_DOMAIN_NAME
 
+# prefix for the system mails
+EMAIL_SUBJECT_PREFIX = u'ubuntuusers: '
+
 # path to the xapian database
 XAPIAN_DATABASE = ''
 

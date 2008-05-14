@@ -20,7 +20,7 @@ from inyoka.utils.dates import format_specific_datetime, \
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page
-from inyoka.forum.models import Forum, SAGroup, Topic
+from inyoka.forum.models import Forum, Topic
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.user import User
 from werkzeug import cached_property
@@ -272,10 +272,10 @@ class Subscription(models.Model):
             title = self.topic.title
         elif self.wiki_page:
             type = u'wiki_page'
-            title = self.wiki_page.title
+            title = self.wiki_page.name
         elif self.forum:
             type = u'forum'
-            title = self.forum.title
+            title = self.forum.name
         return u'Subscription(%s, %s:"%s")' % (
             self.user.username,
             type, title

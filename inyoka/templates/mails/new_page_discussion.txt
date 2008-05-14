@@ -1,7 +1,8 @@
 Hallo {{ username }},
 
-Der Benutzer „{{ page.user.username }}“ hat eine neue Diskussion über die Wiki-Seite „{{ page.title }}“ angelegt.
-Wenn du auch dort über neue Beiträge benachrichtigt werden möchtest so
-abboniere das Foren-Thema hier: {{ page.topic|url }}
+Der Benutzer {{ page.user.username }} hat eine neue Diskussion über die Wiki-Seite „{{ page.title }}“ angelegt:
+{{ page.topic|url }}
 
-Falls du bei Beiträgen in diesem Thema in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ href('wiki', page.name, action='subscribe') }}
+Wenn du auch über neue Beiträge in der Diskussion benachrichtigt werden möchtest, so abonniere das Foren-Thema hier: {{ page.topic|url('subscribe') }}
+
+Falls du bei Änderungen dieser Wiki-Seite in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ page|url('unsubscribe') }}

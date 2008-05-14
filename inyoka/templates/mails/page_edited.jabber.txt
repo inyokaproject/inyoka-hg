@@ -1,0 +1,5 @@
+Der Benutzer „{{ rev.user.username }}“ hat die Wiki-Seite „{{ rev.page.title|e }}“ bearbeitet.
+{%- if rev.note %}
+Änderungsnotiz: „{{ rev.note|e }}“
+{%- endif %}
+Unterschiede: {{ href('wiki', rev.page.name, action='diff', new_rev=rev.id, rev=old_rev.id) }}

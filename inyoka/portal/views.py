@@ -748,8 +748,15 @@ def privmsg_new(request, username=None):
                             'subject':  d['subject'],
                             'entry':    entry,
                        })
-                        send_notification(recipient, u'Neue private Nachricht'
-                                   u' von %s' % (request.user.username), text)
+                        send_notification(recipient, 'new_pm', u'Neue private '
+                                          u'Nachricht von %s: %s' %
+                                          (request.user.username, subject), {
+                                              'user':     recipient,
+                                              'sender':   request.user,
+                                              'subject':  d['subject'],
+                                              'entry':    entry,
+                                          })
+
                 flash(u'Die persönliche Nachricht wurde erfolgreich '
                       u'versandt.', True)
                 return HttpResponseRedirect(href('portal', 'privmsg'))

@@ -113,7 +113,7 @@ def send_activation_mail(user):
         'email':            user.email,
         'activation_key':   gen_activation_key(user)
     })
-    send_mail('ubuntuusers.de - Aktivierung des Benutzers %s'
+    send_mail('Aktivierung des Benutzers %s'
               % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
 

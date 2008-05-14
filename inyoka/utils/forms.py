@@ -146,18 +146,18 @@ class EmailField(forms.CharField):
         value = value.strip()
         if is_blocked_host(value):
             raise forms.ValidationError(u'''
-                Die von dir angegebene E-Mail Adresse gehört zu einem
+                Die von dir angegebene E-Mail-Adresse gehört zu einem
                 Anbieter, den wir wegen Spamproblemen sperren mussten.
                 Bitte gebe eine andere Adresse an.
             '''.strip())
         elif not may_be_valid_mail(value):
             raise forms.ValidationError(u'''
-                Die von dir angebene E-Mail Adresse ist ungültig.  Bitte
+                Die von dir angebene E-Mail-Adresse ist ungültig.  Bitte
                 überpfüfe die Eingabe.
             '''.strip())
         elif not may_accept_mails(value):
             raise forms.ValidationError(u'''
-                Die E-Mail Adresse zeigt auf eine ungültige Domain.  Bitte
+                Die E-Mail-Adresse zeigt auf eine ungültige Domain.  Bitte
                 überprüfe die Eingabe.
             '''.strip())
         return value
@@ -171,7 +171,7 @@ class JabberField(forms.CharField):
         value = value.strip()
         if not may_be_valid_jabber(value):
             raise forms.ValidationError(u'''
-                Die von dir angegebene Jabber Adresse ist ungültig.  Bitte
+                Die von dir angegebene Jabber-Adresse ist ungültig.  Bitte
                 überprüfe die Eingabe.
             '''.strip())
         return value

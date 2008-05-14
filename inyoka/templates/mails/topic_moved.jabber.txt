@@ -1,0 +1,1 @@
+Dein Thema „{{ topic.title }}“ ({{ topic|url }}) wurde von {{ mod }} in das Forum „{{ forum_name }}“ verschoben

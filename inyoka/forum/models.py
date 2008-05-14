@@ -374,9 +374,12 @@ class Topic(object):
         self.forum.invalidate_topic_cache()
 
     def get_absolute_url(self, action='show'):
-        if action == 'show':
+        if action in ('show', None):
             return href('forum', 'topic', self.slug)
-        return href('forum', 'topic', self.slug, action)
+        if action in ('reply', 'delete', 'hide', 'restore', 'split', 'move',
+                      'solve', 'unsolve', 'lock', 'unlock', 'report',
+                      'report_done', 'subscribe', 'unsubscribe'):
+            return href('forum', 'topic', self.slug, action)
 
     def get_pagination(self, threshold=3):
         pages = max(0, self.post_count - 1) // POSTS_PER_PAGE + 1

@@ -145,6 +145,8 @@ def forum(request, slug, page=1):
                      'besuche das Forum')
     data['subforums'] = filter_invisible(request.user, data['subforums'])
     data['privileges'] = privs
+    data['is_subscribed'] = Subscription.objects.user_subscribed(request.user,
+                                                                 forum=f)
     return data
 
 
@@ -437,22 +439,49 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             Attachment.update_post_ids(att_ids, post.id)
         session.commit()
 
+        if forum:
+            for s in Subscription.objects.filter(forum_id=forum.id,
+                                                 notified=False):
+                send_notification(s.user, 'new_topic', u'Neues Thema im Forum %s: „%s“' %
+                                          (forum.name, topic.title), {
+                                              'username':   s.user.username,
+                                              'post':       post,
+                                              'topic':      topic,
+                                              'forum':      forum,
+                                          })
+                s.notified = True
+                s.save()
+        if topic:
+            for s in Subscription.objects.filter(topic_id=topic.id,
+                                                 notified=False):
+                send_notification(s.user, 'new_post', u'Neue Antwort im Thema „%s“' %
+                                          topic.title, {
+                                              'username':   s.user.username,
+                                              'post':       post,
+                                              'topic':      topic,
+                                          })
+                s.notified = True
+                s.save()
+
         if article:
             # the topic is a wiki discussion, bind it to the wiki
             # article and send notifications.
             article.topic_id = topic.id
             article.save()
             for s in Subscription.objects.filter(wiki_page=article):
-                text = render_template('mails/new_page_discussion.txt', {
-                    'username': s.user.username,
-                    'page':     article
-                })
-                send_notification(s.user, (u'Neue Diskussion für die '
-                    u'Seite „%s“ wurde eröffnet' % article.title), text)
+                # also notify if the user has not yet visited the page, 
+                # since otherwise he would never know about the topic
+                send_notification(s.user, 'new_page_discussion', u'Neue Diskussion für die '
+                    u'Seite „%s“ wurde eröffnet' % article.title, {
+                        'username': s.user.username,
+                        'page':     article,
+                    })
                 s.notified = True
                 s.save()
 
-        if request.user.settings.get('autosubscribe'):
+        if request.user.settings.get('autosubscribe') and \
+           not Subscription.objects.user_subscribed(request.user,
+                                                    topic=topic):
             subscription = Subscription(
                 user=request.user,
                 topic_id=topic.id,
