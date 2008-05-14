@@ -1131,14 +1131,17 @@ def topiclist(request, page=1, action='newposts', hours=24):
             post_table.c.pub_date > datetime.now() - timedelta(hours=hours)
         ))
         title = u'Beiträge der letzten %d Stunden' % hours
+        url = href('forum', 'last%d' % hours)
     elif action == 'unanswered':
         topics = topics.filter(Topic.post_count == 1)
         title = u'Unbeantwortete Themen'
+        url = href('forum', 'unanswered')
     elif action == 'unsolved':
         topics = topics.filter(Topic.solved == False)
         title = u'Ungelöste Themen'
+        url = href('forum', 'unsolved')
 
-    pagination = Pagination(request, topics, page, TOPICS_PER_PAGE)
+    pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
 
     return {
         'topics':       list(pagination.objects),
