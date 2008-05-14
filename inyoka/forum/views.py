@@ -1118,6 +1118,35 @@ def newposts(request, page=1):
     }
 
 
+@templated('forum/topiclist.html')
+def topiclist(request, page=1, action='newposts', hours=24):
+    hours = int(hours)
+    topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
+                                 eagerload('last_post.author')) \
+                        .order_by((topic_table.c.last_post_id.desc()))
+
+    if action == 'last':
+        topics = topics.filter(and_(
+            topic_table.c.last_post_id == post_table.c.id,
+            post_table.c.pub_date > datetime.now() - timedelta(hours=hours)
+        ))
+        title = u'Beiträge der letzten %d Stunden' % hours
+    elif action == 'unanswered':
+        topics = topics.filter(Topic.post_count == 1)
+        title = u'Unbeantwortete Themen'
+    elif action == 'unsolved':
+        topics = topics.filter(Topic.solved == False)
+        title = u'Ungelöste Themen'
+
+    pagination = Pagination(request, topics, page, TOPICS_PER_PAGE)
+
+    return {
+        'topics':       list(pagination.objects),
+        'pagination':   pagination.generate(),
+        'title':        title
+    }
+
+
 @templated('forum/welcome.html')
 def welcome(request, slug, path=None):
     """

@@ -1,0 +1,68 @@
+{#
+    forum/newposts.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    Show a list of all recent posts.
+
+    :copyright: 2007 by Christoph Hack.
+    :license: GNU GPL.
+#}
+{%- extends 'forum/page.html' %}
+{% from 'forum/_forum.html' import topic_icon with context %}
+{% set title_trace = [title] %}
+
+{% block forum_content %}
+  <table class="forum">
+    <thead>
+      <tr><th colspan="5" class="category">{{ title }}</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th class="topic" colspan="2">Thema</th>
+        <th class="post_count">Antworten</th>
+        <th class="view_count">Aufrufe</th>
+        <th class="last_post">Letzte Antwort</th>
+      </tr>
+      {%- for topic in topics %}
+      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+        <td class="icon">
+          {{ topic_icon(topic) }}
+        </td>
+        <td class="topic">
+          <p class="topic_title">
+            {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
+            {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
+            {%- if topic.hidden %} [Verborgen] {% endif %}
+            {%- if topic.reported %} [Gemeldet] {% endif %}
+            <a href="{{ topic|url }}">{{ topic.title|e }}</a>
+          </p>
+          <p class="description">
+            von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
+            {%- if topic.paginated %} &#160; &#160; [
+              Gehe zu Seite {{topic.get_pagination() }}
+            ]{% endif -%}
+          </p>
+        </td>
+        <td class="post_count">{{ topic.post_count }}</td>
+        <td class="view_count">{{ topic.view_count }}</td>
+        <td class="last_post">
+          <a href="{{ topic.last_post|url}}" class="date">{{
+              topic.last_post.pub_date|datetimeformat }}</a><br />
+          <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
+        </td>
+      </tr>
+    {%- else %}
+      <tr>
+        <td colspan="5">
+          Es wurden keine entsprechenden Beiträge gefunden.
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+  <div class="forum_offset_pagination">
+    <div class="pagination left_pagination">
+      {{ pagination }}
+      <div style="clear: both"></div>
+    </div>
+  </div>
+{% endblock %}
