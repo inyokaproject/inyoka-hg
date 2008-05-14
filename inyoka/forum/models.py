@@ -378,29 +378,6 @@ class Topic(object):
             return href('forum', 'topic', self.slug)
         return href('forum', 'topic', self.slug, action)
 
-
-    def register(self):
-        self.forum.post_count += self.post_count
-        self.forum.topic_count += 1
-
-        if not self.forum.last_post or self.last_post.id > \
-                                        self.forum.last_post.id:
-            self.forum.last_post = self.last_post
-        self.forum.save()
-
-    def deregister(self):
-        self.forum.post_count -= self.post_count
-        self.forum.topic_count -= 1
-        if self.last_post_id == self.forum.last_post.id:
-            try:
-                last_topic = self.forum.topic_set.exclude(id=self.id) \
-                                                 .order_by('-last_post_id')[0]
-                self.forum.last_post = last_topic.last_post
-            except IndexError:
-                self.forum.last_post = None
-
-        self.forum.save()
-
     def get_pagination(self, threshold=3):
         pages = max(0, self.post_count - 1) // POSTS_PER_PAGE + 1
         if pages == 1:
