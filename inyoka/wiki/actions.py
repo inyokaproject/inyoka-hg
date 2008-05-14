@@ -833,6 +833,7 @@ def do_unsubscribe(request, page_name):
         s.delete()
         flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite'
               u'nicht mehr benachrichtigt.', True)
+    return HttpResponseRedirect(url_for(p))
 
 
 PAGE_ACTIONS = {
