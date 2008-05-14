@@ -88,9 +88,14 @@ img.cat {
   border: 1px solid #E6A66B;
 }
 
-.article .date {
+.article .meta {
   float: right;
   font-weight: bold;
+  text-align: right;
+}
+
+.article .meta .comments {
+  color: #666;
 }
 
 .article a {
