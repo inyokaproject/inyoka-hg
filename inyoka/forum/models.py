@@ -103,7 +103,7 @@ class TopicMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
         if not instance.forum and instance.forum_id:
-            instance.forum = Forum.query.get(instance.forum_id)
+            instance.forum = Forum.query.get(int(instance.forum_id))
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
         # shorten slug to 45 chars (max length is 50) because else problems
@@ -579,6 +579,7 @@ class Post(object):
             t = Topic(
                 title=title,
                 author=posts[0].author,
+                first_post=posts[0],
                 last_post=posts[-1],
                 forum_id=forum_id,
                 slug=None,
