@@ -845,7 +845,7 @@ def memberlist(request, page=1):
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {
-        'users':        pagination.objects,
+        'users':        list(pagination.objects),
         'pagination':   pagination,
         'table':        sortable,
         'filterable':   filterable,
@@ -864,7 +864,7 @@ def grouplist(request, page=1):
     set_session_info(request, u'schaut sich die Gruppenliste an.',
                      'Gruppenliste')
     return {
-        'groups':      pagination.objects,
+        'groups':      list(pagination.objects),
         'group_count': Group.objects.count(),
         'user_groups': request.user.groups.count(),
         'pagination':  pagination,
@@ -887,7 +887,7 @@ def group(request, name, page=1):
     ))
     return {
         'group':      group,
-        'users':      pagination.objects,
+        'users':      list(pagination.objects),
         'user_count': group.user_set.count(),
         'pagination': pagination,
         'table':      table,
