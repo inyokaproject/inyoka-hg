@@ -134,7 +134,7 @@ def forum(request, slug, page=1):
             'forum':        f,
             'subforums':    subforums,
             'topics':       list(pagination.objects),
-            'pagination':   pagination
+            'pagination':   pagination.generate('right')
         }
         # if you alter this value, change it in
         # forum.models.Forum.invalidate_topic_cache, too.
