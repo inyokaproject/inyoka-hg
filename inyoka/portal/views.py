@@ -20,7 +20,7 @@ from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
-     PageNotFound, does_not_exist_is_404, HttpResponseRedirect, PageNotFound
+     PageNotFound, does_not_exist_is_404, HttpResponseRedirect 
 from inyoka.utils.sessions import get_sessions, set_session_info, \
      make_permanent, get_user_record, test_session_cookie
 from inyoka.utils.urls import href, url_for, is_safe_domain
@@ -52,6 +52,7 @@ from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
 from inyoka.utils.urls import global_not_found
+from inyoka.wiki.parser import parse, RenderContext
 
 
 def not_found(request, err_message=None):
@@ -708,10 +709,14 @@ def privmsg(request, folder=None, entry_id=None):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg_new(request, username=None):
+    preview = None
     form = PrivateMessageForm()
     if request.method == 'POST':
         form = PrivateMessageForm(request.POST)
-        if form.is_valid():
+        if 'preview' in request.POST:
+            ctx = RenderContext(request)
+            preview = parse(request.POST.get('text','')).render(ctx, 'html')
+        elif form.is_valid():
             d = form.cleaned_data
             try:
                 recipient_names = set(r.strip() for r in \
@@ -750,7 +755,7 @@ def privmsg_new(request, username=None):
                        })
                         send_notification(recipient, 'new_pm', u'Neue private '
                                           u'Nachricht von %s: %s' %
-                                          (request.user.username, subject), {
+                                          (request.user.username, d['subject']), {
                                               'user':     recipient,
                                               'sender':   request.user,
                                               'subject':  d['subject'],
@@ -820,7 +825,8 @@ def privmsg_new(request, username=None):
         if username:
             form = PrivateMessageForm(initial={'recipient': username})
     return {
-        'form': form
+        'form': form,
+        'preview': preview
     }
 
 
@@ -1040,10 +1046,11 @@ def user_error_report(request):
                     return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
-                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN] | [%s PN(old)])" % (
                     request.user.get_absolute_url(),
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
+                    escape('http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id)
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']

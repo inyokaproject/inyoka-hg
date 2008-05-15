@@ -131,10 +131,11 @@ def forum(request, slug, page=1):
                 eagerload('last_post.author')).filter_by(parent_id=f.id).all()
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
         data = {
-            'forum':        f,
-            'subforums':    subforums,
-            'topics':       list(pagination.objects),
-            'pagination':   pagination
+            'forum':            f,
+            'subforums':        subforums,
+            'topics':           list(pagination.objects),
+            'pagination_left':  pagination.generate(),
+            'pagination_right': pagination.generate('right')
         }
         # if you alter this value, change it in
         # forum.models.Forum.invalidate_topic_cache, too.
@@ -221,8 +222,16 @@ def viewtopic(request, topic_slug, page=1):
     if request.user.is_authenticated:
         t.mark_read(request.user)
         request.user.save()
-        subscribed = Subscription.objects.user_subscribed(request.user,
-                                                          topic=t)
+
+        try:
+            s = Subscription.objects.get(user=request.user,
+                                     topic_id=t.id)
+            subscribed = True
+            s.notified = False
+            s.save()
+        except Subscription.DoesNotExist:
+            subscribed = False
+
     post_objects = pagination.objects.options(eagerload('attachments'),
                                               eagerload('author')).all()
 
@@ -439,7 +448,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if forum:
             for s in Subscription.objects.filter(forum_id=forum.id,
-                                                 notified=False):
+                                                 notified=False) \
+                                         .exclude(user=request.user):
                 send_notification(s.user, 'new_topic', u'Neues Thema im Forum %s: „%s“' %
                                           (forum.name, topic.title), {
                                               'username':   s.user.username,
@@ -447,11 +457,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                               'topic':      topic,
                                               'forum':      forum,
                                           })
-                s.notified = True
-                s.save()
+                # we always notify about new topics, even if the forum was 
+                # not visited, because unlike the posts you won't see 
+                # other new topics
         if topic:
             for s in Subscription.objects.filter(topic_id=topic.id,
-                                                 notified=False):
+                                                 notified=False) \
+                                         .exclude(user=request.user):
                 send_notification(s.user, 'new_post', u'Neue Antwort im Thema „%s“' %
                                           topic.title, {
                                               'username':   s.user.username,
@@ -517,7 +529,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
 
     if not newtopic:
-        posts = topic.posts.order_by('-id')[:15]
+        posts = list(topic.posts.order_by(post_table.c.id.desc())[:15])
 
     return {
         'form':         form,
@@ -533,7 +545,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'attach_form':  attach_form,
         'attachments':  list(attachments),
-        'posts':        list(posts),
+        'posts':        posts,
     }
 
 

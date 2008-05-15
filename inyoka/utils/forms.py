@@ -117,7 +117,13 @@ class DateWidget(Input):
 class CaptchaField(forms.Field):
     widget = CaptchaWidget
 
+    def __init__(self, only_anonymous=False, *args, **kwargs):
+        self.only_anonymous = only_anonymous
+        forms.Field.__init__(self, *args, **kwargs)
+
     def clean(self, value):
+        if current_request.user.is_authenticated and self.only_anonymous:
+            return True
         solution = current_request.session.get('captcha_solution')
         h = md5.new(settings.SECRET_KEY)
         h.update(value)

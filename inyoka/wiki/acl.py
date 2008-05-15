@@ -25,7 +25,6 @@
     :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
     :license: GNU GPL.
 """
-from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
 from inyoka.utils.search import search
@@ -255,3 +254,4 @@ def test_changes_allowed(user, page_name, old_text, new_text):
 
 
 from inyoka.portal.user import User
+from inyoka.utils.urls import href

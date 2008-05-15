@@ -17,11 +17,40 @@
 {% block portal_content %}
   <form action="{{ href('portal', 'privmsg', 'new') }}" method="post">
     {{ render_form(form, ['recipient', 'subject', 'text']) }}
-    <script type="text/javascript">
-      var editor = new WikiEditor('textarea[@name="text"]', 'forum')
-    </script>
     <p>
+      <input type="submit" name="preview" value="Vorschau" />
       <input type="submit" value="Nachricht absenden" />
     </p>
   </form>
+  {%- if preview %}
+  <div class="preview_wrapper">
+    <h2 class="title">Vorschau</h2>
+    <div id="preview" class="preview">{{ preview }}</div>
+  </div>
+  {%- endif %}
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    var text = new WikiEditor('textarea[@name="text"]', 'forum');
+    (function() {
+      var
+        editor = $('textarea[@name="text"]'),
+        output = $('<div class="preview" />')
+      var preview = $('<div class="preview_wrapper" />')
+        .hide()
+        .append('<h2 class="title">Vorschau<\/h2>')
+        .append(output);
+
+      $('form input[@name="preview"]').click(function() {
+        preview.hide();
+        $.post('/?__service__=wiki.render_preview', {
+          text: editor.val()
+        }, function(data) {
+          output.html(data);
+          preview.slideDown('fast');
+        });
+        return false;
+      }).parent().parent().parent().append(preview);
+    })();
+    /* ]]> */
+  </script>
 {% endblock %}

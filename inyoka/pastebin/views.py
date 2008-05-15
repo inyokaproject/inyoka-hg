@@ -28,7 +28,6 @@ def not_found(request, err_message=None):
     return global_not_found(request, 'pastebin', err_message)
 
 
-@simple_check_login
 @templated('pastebin/add.html')
 def index(request):
     if request.method == 'POST':
@@ -50,7 +49,8 @@ def index(request):
     set_session_info(request, u'erstellt gerade ein neues Paste.',
                      'Paste')
     return {
-        'form': form
+        'form': form,
+        'page': 'add'
     }
 
 
@@ -72,6 +72,7 @@ def display(request, entry_id):
     )
     return {
         'entry': entry,
+        'page':  'browse'
     }
 
 
@@ -82,10 +83,12 @@ def raw(request, entry_id):
 
 @templated('pastebin/browse.html')
 def browse(request, page=1):
-    pagination = Pagination(request, Entry.objects.all(), page)
+    pagination = Pagination(request, Entry.objects.all(), page,
+                            link=href('pastebin', 'browse'))
     set_session_info(request, u'schaut sich die Paste-Liste an.',
                      'Paste-Liste')
     return {
         'entries':      list(pagination.objects),
-        'pagination':   pagination
+        'pagination':   pagination,
+        'page':         'browse'
     }

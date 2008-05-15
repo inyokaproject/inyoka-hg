@@ -60,13 +60,17 @@ topic_table = Table('forum_topic', metadata,
 
 post_table = Table('forum_post', metadata,
     Column('id', Integer, primary_key=True),
-    Column('text', Text(), nullable=False),
-    Column('rendered_text', Text(), nullable=False),
     Column('author_id', Integer, ForeignKey('portal_user.id'),
            nullable=False),
     Column('pub_date', DateTime, nullable=False),
     Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=False),
     Column('hidden', Boolean, default=False, nullable=False)
+)
+
+post_text_table = Table('forum_post_text', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('text', Text(), nullable=False),
+    Column('rendered_text', Text(), nullable=False),
 )
 
 poll_table = Table('forum_poll', metadata,
