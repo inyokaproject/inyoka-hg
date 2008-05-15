@@ -123,6 +123,7 @@ class Parser(object):
             'url':          self.parse_url,
             'wiki':         self.parse_wiki,
             'mod':          self.parse_mod,
+            'edit':         self.parse_edit,
             'color':        self.parse_color,
             'font':         self.parse_font,
             'size':         self.parse_size,
@@ -278,6 +279,13 @@ class Parser(object):
         if not token.attr:
             return nodes.Text(unicode(token))
         return nodes.Moderated(token.attr, self.parse_until('/mod'))
+
+    def parse_edit(self):
+        """parse [edit]-tags."""
+        token = self.expect_tag('edit')
+        if not token.attr:
+            return nodes.Text(unicode(token))
+        return nodes.Edited(token.attr, self.parse_until('/edit'))
 
     def parse_mark(self):
         """
