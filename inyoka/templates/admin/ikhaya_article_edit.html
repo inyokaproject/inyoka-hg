@@ -39,7 +39,7 @@
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
   {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id',
-                        'icon_id', 'pub_date', 'slug', 'public']) }}
+                        'icon_id', 'pub_date', 'slug', 'public', 'comments_enabled']) }}
   <p>
     <input type="submit" value="Speichern" />
     {%- if article %}

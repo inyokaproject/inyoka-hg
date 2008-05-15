@@ -35,7 +35,9 @@
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-    </p><a name="comments"></a>
+    </p>
+    {%- if article.comments_enabled %}
+    <a name="comments"></a>
     <ul class="comments">
       {%- for comment in comments %}
       <li class="comment" id="comment_{{ loop.index }}">
@@ -54,51 +56,52 @@
       </li>  
       {%- endfor %}
     </ul>
-  {%- if USER.is_authenticated %}
-  <h4><a name="new_comment">Kommentar schreiben</a></h4>
-  <p class="note">
+    {%- if USER.is_authenticated %}
+    <h4><a name="new_comment">Kommentar schreiben</a></h4>
+    <p class="note">
 
-  </p>
-  <form action="{{ article|url }}#new_comment" method="post">
-    {{ render_form(form, ['title', 'text']) }}
-    <p>
-      <input type="submit" name="preview" value="Vorschau" />
-      <input type="submit" value="Speichern" />
     </p>
-    {%- if preview %}
-    <div class="preview_wrapper">
-      <h2 class="title">Vorschau</h2>
-      <div id="preview" class="preview">{{ preview }}</div>
-    </div>
+    <form action="{{ article|url }}#new_comment" method="post">
+      {{ render_form(form, ['title', 'text']) }}
+      <p>
+        <input type="submit" name="preview" value="Vorschau" />
+        <input type="submit" value="Speichern" />
+      </p>
+      {%- if preview %}
+      <div class="preview_wrapper">
+        <h2 class="title">Vorschau</h2>
+        <div id="preview" class="preview">{{ preview }}</div>
+      </div>
+      {%- endif %}
+    </form>
+    <script type="text/javascript">
+      /* <![CDATA[ */
+      var text = new WikiEditor('textarea[@name="text"]', 'forum');
+      (function() {
+        var
+          editor = $('textarea[@name="text"]'),
+          output = $('<div class="preview" />')
+        var preview = $('<div class="preview_wrapper" />')
+          .hide()
+          .append('<h2 class="title">Vorschau<\/h2>')
+          .append(output);
+
+        $('form input[@name="preview"]').click(function() {
+          preview.hide();
+          $.post('/?__service__=wiki.render_preview', {
+            text: editor.val()
+          }, function(data) {
+            output.html(data);
+            makeCommentLinks(output);
+            preview.slideDown('fast');
+          });
+          return false;
+        }).parent().parent().parent().append(preview);
+      })();
+
+      /* ]]> */
+    </script>
     {%- endif %}
-  </form>
-  <script type="text/javascript">
-    /* <![CDATA[ */
-    var text = new WikiEditor('textarea[@name="text"]', 'forum');
-    (function() {
-      var
-        editor = $('textarea[@name="text"]'),
-        output = $('<div class="preview" />')
-      var preview = $('<div class="preview_wrapper" />')
-        .hide()
-        .append('<h2 class="title">Vorschau<\/h2>')
-        .append(output);
-
-      $('form input[@name="preview"]').click(function() {
-        preview.hide();
-        $.post('/?__service__=wiki.render_preview', {
-          text: editor.val()
-        }, function(data) {
-          output.html(data);
-          makeCommentLinks(output);
-          preview.slideDown('fast');
-        });
-        return false;
-      }).parent().parent().parent().append(preview);
-    })();
-
-    /* ]]> */
-  </script>
-  {%- endif %}
-</div>
+    {%- endif %}
+  </div>
 {% endblock %}
