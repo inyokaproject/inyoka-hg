@@ -114,7 +114,7 @@ def detail(request, slug):
         if not request.user.is_ikhaya_writer:
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
-    if request.method == 'POST':
+    if article.comments_enabled and request.method == 'POST':
         form = EditCommentForm(request.POST)
         if 'preview' in request.POST:
             ctx = RenderContext(request)

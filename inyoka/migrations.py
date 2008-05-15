@@ -281,8 +281,16 @@ def split_post_table(m):
         }))
 
     m.engine.execute('''
-        ALTER TABLE `ubuntuusers`.`forum_post` DROP COLUMN `text`,
-                                               DROP COLUMN `rendered_text`;
+        ALTER TABLE `forum_post` DROP COLUMN `text`,
+                                 DROP COLUMN `rendered_text`;
+    ''')
+
+
+def add_ikhaya_discussion_disabler(m):
+    m.engine.execute('''
+       ALTER TABLE `ikhaya_article` ADD COLUMN `comments_enabled` TINYINT(1)
+                                                NOT NULL DEFAULT 1
+                                                AFTER `comment_count`;
     ''')
 
 
@@ -291,5 +299,6 @@ MIGRATIONS = [
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
-    add_default_storage_values, add_blocked_hosts_storage, split_post_table
+    add_default_storage_values, add_blocked_hosts_storage, split_post_table,
+    add_ikhaya_discussion_disabler
 ]

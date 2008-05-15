@@ -81,6 +81,7 @@ class EditArticleForm(forms.Form):
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
                   u'Feld frei, um ihn automatisch generieren zu lassen '
                   u'(empfohlen).')
+    comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt')
 
 
 class EditCategoryForm(forms.Form):
