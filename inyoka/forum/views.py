@@ -518,7 +518,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
 
     if not newtopic:
-        posts = topic.posts.order_by('-id')[:15]
+        posts = list(topic.posts.order_by('-id')[:15])
 
     return {
         'form':         form,
@@ -534,7 +534,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'attach_form':  attach_form,
         'attachments':  list(attachments),
-        'posts':        list(posts),
+        'posts':        posts,
     }
 
 
