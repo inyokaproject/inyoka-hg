@@ -30,9 +30,9 @@
   </div>
 {%- endblock %}
 
-{% macro tab_navigation(page) %}
+{% block tabbar %}
   <ul>
     <li><a href="{{ href('pastebin') }}"{{ page == 'add' and ' class="active"' or '' }}>Neuer Paste</a></li>
     <li><a href="{{ href('pastebin', 'browse') }}"{{ page == 'browse' and ' class="active"' or '' }}>Pastes Durchstöbern</a></li>
   </ul>
-{% endmacro %}
+{% endblock %}

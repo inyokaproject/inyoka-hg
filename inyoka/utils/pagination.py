@@ -39,6 +39,7 @@ class Pagination(object):
         self.per_page = per_page
 
         idx = (self.page - 1) * self.per_page
+        print idx, idx + self.per_page
         result = query[idx:idx + self.per_page]
         if not result and self.page != 1:
             raise PageNotFound()
