@@ -20,8 +20,8 @@
   {% set latest_rev = revisions[0] -%}
   <p>
     Der Artikel „<a href="{{ page|url|e }}">{{ page.title|e }}</a>“ hat
-    bislang {% trans count=revisions|count, h_count=revisions|count|
-    hnumber('feminine')%}{{ h_count }} Revision{% pluralize %}{{ h_count
+    bislang {% trans count=pagination.total, h_count=pagination.total|hnumber('feminine')
+    %}{{ h_count }} Revision{% pluralize %}{{ h_count
     }} Revisionen{% endtrans %}.
     Die <a href="{{ latest_rev|url|e }}">jüngste Revision</a> ist {{
     latest_rev.change_date|specificdatetimeformat|e }} und wurde von
