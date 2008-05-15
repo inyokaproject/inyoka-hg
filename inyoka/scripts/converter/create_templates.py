@@ -187,7 +187,7 @@ tr.highlight {
 tr.verlauf {
     font-weight: bold;
     color: #000000;
-    background-image: url(../img/wiki/heading.png);
+    background-image: url(http://static.ubuntuusers.de/img/wiki/heading.png);
     text-align: center;
 }
 

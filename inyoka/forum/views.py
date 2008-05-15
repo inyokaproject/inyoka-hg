@@ -176,10 +176,7 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = Post.query.options(eagerload('attachments'), eagerload('author')) \
-        .filter(
-            (Post.c.topic_id == t.id)
-        )
+    posts = t.posts.options(eagerload('attachments'), eagerload('author'))
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -519,7 +516,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
 
     if not newtopic:
-        posts = Post.query.order_by('-id').filter_by(topic_id=topic.id)[:15]
+        posts = topic.posts.order_by('-id')[:15]
 
     return {
         'form':         form,
@@ -535,7 +532,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'attach_form':  attach_form,
         'attachments':  list(attachments),
-        'posts':        posts,
+        'posts':        list(posts),
     }
 
 
@@ -982,9 +979,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         cache_key = 'forum/feeds/topic/%s/%s' % (slug, mode)
         feed = cache.get(cache_key)
         if feed is None:
-            #posts = topic.posts.order_by(Post.pub_date.desc())[:count]
-            posts = Post.query.filter_by(topic=topic) \
-                        .order_by(Post.pub_date.desc())[:100]
+            posts = topic.posts.order_by(Post.pub_date.desc())[:count]
 
             feed = FeedBuilder(
                 title=u'ubuntuusers Thema – „%s“' % topic.title,
@@ -1173,7 +1168,7 @@ def topiclist(request, page=1, action='newposts', hours=24):
     pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
 
     return {
-        'topics':       list(pagination.objects),
+        'topics':       pagination.objects,
         'pagination':   pagination.generate(),
         'title':        title
     }

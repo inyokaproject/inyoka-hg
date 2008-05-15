@@ -400,6 +400,7 @@ class Parser(object):
             'size_begin':           self.parse_size,
             'font_begin':           self.parse_font,
             'mod_begin':            self.parse_mod,
+            'edit_begin':           self.parse_edit,
             'quote_begin':          self.parse_quote,
             'list_item_begin':      self.parse_list,
             'definition_begin':     self.parse_definition,
@@ -726,6 +727,20 @@ class Parser(object):
             children.append(self.parse_node(stream))
         stream.expect('mod_end')
         return nodes.Moderated(username, children)
+
+    def parse_edit(self, stream):
+        """
+        Parse an edit tag.
+
+        Returns an `Edited` node.
+        """
+        stream.expect('edit_begin')
+        username = stream.expect('username').value.strip()
+        children = []
+        while stream.current.type != 'edit_end':
+            children.append(self.parse_node(stream))
+        stream.expect('edit_end')
+        return nodes.Edited(username, children)
 
     def parse_quote(self, stream):
         """

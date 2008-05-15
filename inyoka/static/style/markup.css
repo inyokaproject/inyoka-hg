@@ -239,3 +239,15 @@ div.knowledge .anchor {
 .highlighted {
   background-color: #ffee33;
 }
+
+div.edited {
+  background-color: #eee;
+  border: 1px solid #aaa;
+  padding: 0 1em;
+}
+
+div.moderated {
+  background-color: #eadada;
+  border: 1px solid #aaa;
+  padding: 0 1em;
+}
