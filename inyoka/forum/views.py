@@ -131,10 +131,11 @@ def forum(request, slug, page=1):
                 eagerload('last_post.author')).filter_by(parent_id=f.id).all()
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
         data = {
-            'forum':        f,
-            'subforums':    subforums,
-            'topics':       list(pagination.objects),
-            'pagination':   pagination.generate('right')
+            'forum':            f,
+            'subforums':        subforums,
+            'topics':           list(pagination.objects),
+            'pagination_left':  pagination.generate(),
+            'pagination_right': pagination.generate('right')
         }
         # if you alter this value, change it in
         # forum.models.Forum.invalidate_topic_cache, too.

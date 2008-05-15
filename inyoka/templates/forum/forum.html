@@ -36,7 +36,7 @@
           {%- if forum.description %}
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
-          {{ pagination }}
+          {{ pagination_right }}
           <p class="actions">
             <a href="{{ forum|url('newtopic') }}">Neues Thema</a> | 
             {%- if is_subscribed %}
@@ -105,6 +105,6 @@
     </tbody>
   </table>
   <div class="forum_offset_pagination">
-    {{ pagination.generate() }}
+    {{ pagination_left }}
   </div>
 {% endblock %}
