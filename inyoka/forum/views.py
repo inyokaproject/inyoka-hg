@@ -222,8 +222,16 @@ def viewtopic(request, topic_slug, page=1):
     if request.user.is_authenticated:
         t.mark_read(request.user)
         request.user.save()
-        subscribed = Subscription.objects.user_subscribed(request.user,
-                                                          topic=t)
+
+        try:
+            s = Subscription.objects.get(user=request.user,
+                                     topic_id=t.id)
+            subscribed = True
+            s.notified = False
+            s.save()
+        except Subscription.DoesNotExist:
+            subscribed = False
+
     post_objects = pagination.objects.options(eagerload('attachments'),
                                               eagerload('author')).all()
 
@@ -440,7 +448,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if forum:
             for s in Subscription.objects.filter(forum_id=forum.id,
-                                                 notified=False):
+                                                 notified=False) \
+                                         .exclude(user=request.user):
                 send_notification(s.user, 'new_topic', u'Neues Thema im Forum %s: „%s“' %
                                           (forum.name, topic.title), {
                                               'username':   s.user.username,
@@ -448,11 +457,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                               'topic':      topic,
                                               'forum':      forum,
                                           })
-                s.notified = True
-                s.save()
+                # we always notify about new topics, even if the forum was 
+                # not visited, because unlike the posts you won't see 
+                # other new topics
         if topic:
             for s in Subscription.objects.filter(topic_id=topic.id,
-                                                 notified=False):
+                                                 notified=False) \
+                                         .exclude(user=request.user):
                 send_notification(s.user, 'new_post', u'Neue Antwort im Thema „%s“' %
                                           topic.title, {
                                               'username':   s.user.username,

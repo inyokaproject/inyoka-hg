@@ -415,15 +415,15 @@ def do_edit(request, name):
 
                 # send notifications
                 for s in Subscription.objects.filter(wiki_page=page,
-                    notified=False).exclude(user=request.user):
+                                                     notified=False) \
+                                             .exclude(user=request.user):
                     rev, old_rev = page.revisions.all()[:2]
-                    text = render_template('mails/page_edited.txt', {
-                        'username': s.user.username,
-                        'rev':      rev,
-                        'old_rev':  old_rev
-                    })
-                    send_notification(s.user, u'Die Seite „%s“ wurde bearbeitet'
-                                    % page.title, text)
+                    send_notification(s.user, 'page_edited', u'Die Seite „%s“ wurde geändert'
+                                      % page.title, {
+                                          'username': s.user.username,
+                                          'rev':      rev,
+                                          'old_rev':  old_rev,
+                                      })
                     s.notified = True
                     s.save()
 
@@ -812,7 +812,7 @@ def do_subscribe(request, page_name):
     except Subscription.DoesNotExist:
         # there's no such subscription yet, create a new one
         Subscription(user=request.user, wiki_page=p).save()
-        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite'
+        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite '
               u'benachrichtigt.', True)
     else:
         flash(u'Du wirst bereits benachrichtigt')
@@ -831,7 +831,7 @@ def do_unsubscribe(request, page_name):
         flash(u'Du wirst über diese Seite gar nicht benachrichtigt!')
     else:
         s.delete()
-        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite'
+        flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite '
               u'nicht mehr benachrichtigt.', True)
     return HttpResponseRedirect(url_for(p))
 
