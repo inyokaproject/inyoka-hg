@@ -132,7 +132,7 @@ class InyokaEnvironment(Environment):
         loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
                                                os.pardir, 'templates'))
         Environment.__init__(self, loader=loader,
-                             extensions=['jinja2.ext.i18n'],
+                             extensions=['jinja2.ext.i18n', 'jinja2.ext.do'],
                              auto_reload=settings.DEBUG,
                              cache_size=-1)
         self.globals.update(

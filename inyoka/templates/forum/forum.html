@@ -19,9 +19,9 @@
 ] %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {{ void(navigation_trace.append([parent|url, parent.name])) }}
+  {% do navigation_trace.append([parent|url, parent.name]) %}
 {% endfor %}
-{{ void(navigation_trace.append([forum|url, forum.name])) }}
+{% do navigation_trace.append([forum|url, forum.name]) %}
 
 {% block search_areas %}
   <option value="current_forum" selected="selected">Dieses Forum</option>
