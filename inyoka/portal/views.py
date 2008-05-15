@@ -1044,7 +1044,7 @@ def user_error_report(request):
                     request.user.get_absolute_url(),
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
-                    escape('http://forum.ubuntuusers.de/privmsg/?mode=post&u=' % request.user.id)
+                    escape('http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id)
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
