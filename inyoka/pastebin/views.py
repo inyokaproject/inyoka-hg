@@ -86,6 +86,6 @@ def browse(request, page=1):
     set_session_info(request, u'schaut sich die Paste-Liste an.',
                      'Paste-Liste')
     return {
-        'entries':      pagination.objects,
+        'entries':      list(pagination.objects),
         'pagination':   pagination
     }

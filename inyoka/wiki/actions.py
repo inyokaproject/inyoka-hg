@@ -545,7 +545,7 @@ def do_log(request, name):
 
     return {
         'page':         page,
-        'revisions':    pagination.objects,
+        'revisions':    list(pagination.objects),
         'pagination':   pagination
     }
 

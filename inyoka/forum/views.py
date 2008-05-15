@@ -133,7 +133,7 @@ def forum(request, slug, page=1):
         data = {
             'forum':        f,
             'subforums':    subforums,
-            'topics':       pagination.objects,
+            'topics':       list(pagination.objects),
             'pagination':   pagination
         }
         # if you alter this value, change it in
@@ -176,7 +176,7 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = t.posts.options(eagerload('attachments'), eagerload('author'))
+    posts = t.posts
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -223,7 +223,8 @@ def viewtopic(request, topic_slug, page=1):
         request.user.save()
         subscribed = Subscription.objects.user_subscribed(request.user,
                                                           topic=t)
-    post_objects = pagination.objects
+    post_objects = pagination.objects.options(eagerload('attachments'),
+                                              eagerload('author')).all()
 
     for post in post_objects:
         if not post.rendered_text:
@@ -1137,7 +1138,7 @@ def newposts(request, page=1):
     pagination = Pagination(request, topics, page, 20,
         href('forum', 'newposts'))
     return {
-        'topics':     pagination.objects,
+        'topics':     list(pagination.objects),
         'pagination': pagination
     }
 
@@ -1168,7 +1169,7 @@ def topiclist(request, page=1, action='newposts', hours=24):
     pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
 
     return {
-        'topics':       pagination.objects,
+        'topics':       list(pagination.objects),
         'pagination':   pagination.generate(),
         'title':        title
     }
