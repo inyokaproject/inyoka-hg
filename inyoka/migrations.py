@@ -294,11 +294,18 @@ def add_ikhaya_discussion_disabler(m):
     ''')
 
 
+def fix_forum_text_table(m):
+    m.engine.execute('''
+        ALTER TABLE `forum_post_text` MODIFY COLUMN `text` LONGTEXT,
+                                      MODIFY COLUMN `rendered_text` LONGTEXT;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
     add_default_storage_values, add_blocked_hosts_storage, split_post_table,
-    add_ikhaya_discussion_disabler
+    add_ikhaya_discussion_disabler, fix_forum_text_table
 ]
