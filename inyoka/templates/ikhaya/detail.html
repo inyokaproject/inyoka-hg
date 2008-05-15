@@ -15,45 +15,45 @@
 {% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
 
 {% block ikhaya_content %}
-  <ul class="articles"><li class="article">
-  <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
-  {%- if article.icon -%}
-  <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
-  {%- endif -%}
-  <div class="intro">
-    {{ article.rendered_intro }}
-  </div>
-  <hr class="intro_text_splitter" />
-  <div class="text">
-    {{ article.rendered_text }}
-  </div>
+  <div class="article">
+    <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
+    {%- if article.icon -%}
+    <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
+    {%- endif -%}
+    <div class="intro">
+      {{ article.rendered_intro }}
+    </div>
+    <hr class="intro_text_splitter" />
+    <div class="text">
+      {{ article.rendered_text }}
+    </div>
   
-  <p class="meta_detail">
-    geschrieben von <a href="{{ article.author|url }}">
-    {{ article.author.username|e}}</a> {{ article.pub_date|specificdatetimeformat(true) }} 
-    in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 
-    {%- if article.edit_count %}
-    — {{ article.edit_count }} Mal bearbeitet
-    {%- endif %} |
-    <a href="{{ article|url('edit') }}">Bearbeiten</a>
-  </p>
-
-  <h4><a name="comments">Kommentare</a></h4>
-  <ul class="comments">
-    {%- for comment in comments %}
-    <li class="comment" id="comment_{{ loop.index }}">
-      <strong>„{{ comment.title|e }}“</strong> —
-      von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
-      {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
+    <p class="meta_detail">
+      geschrieben von <a href="{{ article.author|url }}">
+      {{ article.author.username|e}}</a> {{ article.pub_date|specificdatetimeformat(true) }} 
+      in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 
+      {%- if article.edit_count %}
+      — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-      {{ comment.rendered_text }}
-    </li>
-    {%- else %}
-    <li>
-      Es wurde noch kein Kommentar geschrieben.
-    </li>  
-    {%- endfor %}
-  </ul>
+    </p><a name="comments"></a>
+    <ul class="comments">
+      {%- for comment in comments %}
+      <li class="comment" id="comment_{{ loop.index }}">
+        <div class="counter">{{ loop.index }}</div>
+        <div class="comment">
+          <strong>„{{ comment.title|e }}“</strong> —
+          von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
+          {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
+          {%- endif %}
+          {{ comment.rendered_text }}
+        </div>
+      </li>
+      {%- else %}
+      <li>
+        Es wurde noch kein Kommentar geschrieben.
+      </li>  
+      {%- endfor %}
+    </ul>
   {%- if USER.is_authenticated %}
   <h4><a name="new_comment">Kommentar schreiben</a></h4>
   <p class="note">
@@ -100,5 +100,5 @@
     /* ]]> */
   </script>
   {%- endif %}
-  </li></ul>
+</div>
 {% endblock %}

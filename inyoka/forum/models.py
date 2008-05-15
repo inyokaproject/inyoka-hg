@@ -1099,7 +1099,8 @@ dbsession.mapper(Post, post_table, properties={
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
     'attachments': relation(Attachment)},
-    extension=PostMapperExtension()
+    extension=PostMapperExtension(),
+    order_by=None
 )
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={

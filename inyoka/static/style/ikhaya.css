@@ -29,11 +29,11 @@ ul.articles {
   margin: 0;
 }
 
-li.article {
+.article {
   border: solid 1px #ccc;
   margin: 0.0em;
   margin-bottom: 1.0em;
-  padding: 0px 10px;
+  padding: 0 1em;
   background-image:url(../img/ikhaya/article.jpg);
   background-repeat:no-repeat;
   background-position:-8px 0px;;
@@ -73,6 +73,7 @@ p.meta_detail {
 
 p.meta_detail {
   background-image: url('../img/ikhaya/metabg.png');
+  margin: 0 -1em !important;
 }
 
 img.icon {
@@ -86,8 +87,19 @@ ul.comments > li.comment {
   border-style: solid;
   border-color: #CCC;
   border-width: 0 0 1px 0;
-  padding: 1em;
+  padding: 1em 0;
   list-style: none;
+}
+
+ul.comments > li.comment div.counter {
+  float: left;
+  font-weight: bold;
+  color: #666;
+  font-size: 2em;
+}
+
+ul.comments li.comment div.comment {
+    margin-left: 2em;
 }
 
 a.comment_link:hover {
