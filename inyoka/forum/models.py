@@ -20,7 +20,8 @@ from time import time
 from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
+        dynamic_loader
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -1070,7 +1071,7 @@ dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })
 dbsession.mapper(Forum, forum_table, properties={
-    'topics': relation(Topic),
+    'topics': dynamic_loader(Topic),
     '_children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
     'last_post': relation(Post, post_update=True)},
@@ -1089,7 +1090,7 @@ dbsession.mapper(Topic, topic_table, properties={
         primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
-    'posts': relation(Post, backref='topic',
+    'posts': dynamic_loader(Post, backref='topic',
         primaryjoin=topic_table.c.id == post_table.c.topic_id)
     }, extension=TopicMapperExtension()
 )
