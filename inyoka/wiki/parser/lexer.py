@@ -148,6 +148,8 @@ class Lexer(object):
                  enter='font'),
             rule(r'\[mod\s*=\s*(.*?)\s*\]', bygroups('username'),
                  enter='mod'),
+            rule(r'\[edit\s*=\s*(.*?)\s*\]', bygroups('username'),
+                 enter='edit'),
             rule(r'\[raw\](.*?)\[/raw\]', bygroups('raw')),
             rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl'),
             include('highlightable')
@@ -253,6 +255,10 @@ class Lexer(object):
         ),
         'mod': ruleset(
             rule(r'\[/mod\]', leave=1),
+            include('everything')
+        ),
+        'edit': ruleset(
+            rule(r'\[/edit\]', leave=1),
             include('everything')
         ),
         # links

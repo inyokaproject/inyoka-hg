@@ -891,11 +891,41 @@ class Moderated(Element):
         w.markup(u'[/mod]')
 
     def prepare_html(self):
-        yield Strong([Text(u'Moderiert von '), Link(href('portal', 'user',
-                        self.username), [Text(self.username)], class_='user'),
-                      Text(u': ')])
+        yield u'<strong>Moderiert von <a class="crosslink user" href="%s">' \
+              u'%s</a>:</strong> ' % (href('portal', 'user', self.username),
+                                    self.username)
+        yield u'<div class="moderated">'
         for item in Element.prepare_html(self):
             yield item
+        yield u'</div>'
+
+
+class Edited(Element):
+    """
+    Text that describes an edit action.
+    """
+    is_block_tag = True
+    allows_paragraphs = True
+    allowed_in_signatures = False
+
+    def __init__(self, username, children=None, id=None, style=None,
+                 class_=None):
+        Element.__init__(self, children, id, style, class_)
+        self.username = username
+
+    def generate_markup(self, w):
+        w.markup(u'[edit=%s]' % self.username)
+        Element.generate_markup(self, w)
+        w.markup(u'[/edit]')
+
+    def prepare_html(self):
+        yield u'<strong>Bearbeitet von <a class="crosslink user" href="%s">' \
+              u'%s</a>:</strong> ' % (href('portal', 'user', self.username),
+                                    self.username)
+        yield u'<div class="edited">'
+        for item in Element.prepare_html(self):
+            yield item
+        yield u'</div>'
 
 
 class Preformatted(Element):
