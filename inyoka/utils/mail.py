@@ -54,4 +54,4 @@ def is_blocked_host(email_or_host):
     is configurable in the admin panel.
     """
     host = email_or_host.rsplit('@', 1)[-1]
-    return host in storage['blocked_hosts'].split('\n')
+    return host in storage.get('blocked_hosts','').split('\n')
