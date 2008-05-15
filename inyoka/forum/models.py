@@ -20,6 +20,7 @@ from time import time
 from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
+from sqlalchemy import join
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
         dynamic_loader
 from sqlalchemy.sql import select, func, and_, not_
@@ -36,7 +37,7 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table, group_table
+        poll_option_table, poll_vote_table, group_table, post_text_table
 
 
 POSTS_PER_PAGE = 15
@@ -1091,10 +1092,10 @@ dbsession.mapper(Topic, topic_table, properties={
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
     'posts': dynamic_loader(Post, backref='topic',
-        primaryjoin=topic_table.c.id == post_table.c.topic_id)
+        primaryjoin=topic_table.c.id == post_table.c.topic_id),
     }, extension=TopicMapperExtension()
 )
-dbsession.mapper(Post, post_table, properties={
+dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),

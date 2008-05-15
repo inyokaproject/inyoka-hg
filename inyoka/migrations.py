@@ -24,6 +24,7 @@ import os
 from itertools import izip
 from os.path import dirname, join, exists
 from inyoka.conf import settings
+from sqlalchemy import Table
 
 
 SQL_FILES = join(dirname(__file__), 'sql')
@@ -51,6 +52,27 @@ def execute_script(con, name):
         con.execute(f.read())
     finally:
         f.close()
+
+
+def select_blocks(query, block_size=1000, start_with=0, max_fails=10):
+    """Execute a query blockwise to prevent lack of ram"""
+    # get the table
+    table = list(query._table_iterator())[0]
+    # get the tables primary key (a little bit hackish)
+    key_name = list(table.primary_key)[0].name
+    key = table.c[key_name]
+    range = (start_with, start_with + block_size)
+    failed = 0
+    while failed < max_fails:
+        result = query.where(key.between(*range)).execute()
+        i = 0
+        for i, row in enumerate(result):
+            yield row
+        if i == 0:
+            failed += 1
+        else:
+            failed = 0
+        range = range[1] + 1, range[1] + block_size
 
 
 def create_initial_revision(m):
@@ -238,10 +260,36 @@ def add_blocked_hosts_storage(m):
     })
 
 
+def split_post_table(m):
+    m.engine.execute('''
+        CREATE TABLE forum_post_text (
+                id INTEGER NOT NULL AUTO_INCREMENT,
+                text TEXT NOT NULL,
+                rendered_text TEXT NOT NULL,
+                PRIMARY KEY (id)
+        )
+    ''')
+
+    post_table = Table('forum_post', m.metadata, autoload=True)
+    post_text_table = Table('forum_post_text', m.metadata, autoload=True)
+
+    for post in select_blocks(post_table.select()):
+        m.engine.execute(post_text_table.insert(values={
+            'id':               post.id,
+            'text':             post.text,
+            'rendered_text':    post.rendered_text
+        }))
+
+    m.engine.execute('''
+        ALTER TABLE `ubuntuusers`.`forum_post` DROP COLUMN `text`,
+                                               DROP COLUMN `rendered_text`;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
-    add_default_storage_values, add_blocked_hosts_storage
+    add_default_storage_values, add_blocked_hosts_storage, split_post_table
 ]
