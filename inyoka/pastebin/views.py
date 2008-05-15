@@ -28,7 +28,6 @@ def not_found(request, err_message=None):
     return global_not_found(request, 'pastebin', err_message)
 
 
-@simple_check_login
 @templated('pastebin/add.html')
 def index(request):
     if request.method == 'POST':

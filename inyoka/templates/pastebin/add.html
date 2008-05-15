@@ -10,7 +10,7 @@
     :license: GNU GPL.
 #}
 {%- extends 'pastebin/page.html' %}
-
+{% from 'macros.html' import render_form %}
 {% set title_trace = ['Neuer Eintrag'] %}
 
 {% block navigation %}
@@ -28,12 +28,10 @@
         Sprache aus. Dann kopierst du die URL in den Thread bzw. Channel. Genaueres zu unserem
         No Paste Service findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
       </dd>
-      <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ form.errors.title }}</dd>
-      <dt>Sprache:</dt>
-      <dd>{{ form.language }}{{ form.errors.language }}</dd>
-      <dt>Code:</dt>
-      <dd>{{ form.code }}{{ form.errors.code }}</dd>
+      {{ render_form(form, ['title', 'language', 'code'], inline=True) }}
+      {%- if not USER.is_authenticated %}
+      {{ render_form(form, ['captcha'], inline=True) }}
+      {%- endif %}
       <dd>
         <input type="submit" value="Hinzufügen" />
       </dd>
