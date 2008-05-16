@@ -1,0 +1,43 @@
+{#
+    templates.admin.file_edit
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Template for editing or creating a static file.
+
+    :copyright: 2007 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{%- extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
+
+{% if not file %}
+  {% set navigation_trace = [
+      (href('admin', 'files', 'new'), 'Statische Datei erstellen')
+    ] %}
+{% else %}
+  {% set navigation_trace = [
+      (file|url('edit'), 'Statische Datei „%s“ bearbeiten'|format(file.identifier|e))
+    ] %}
+{% endif %}
+{% set navigation_trace = [
+    (href('admin', 'files'), 'Statische Dateien')
+  ] + navigation_trace|default([]) %}
+
+{% block admin_content %}
+<h2>{{ title_trace[0] }}</h2>
+
+<form action="" method="post" enctype="multipart/form-data">
+  <dl>
+    {{ render_form(form, ['identifier', 'is_ikhaya_icon'], inline=true) }}
+    {%- if file %}
+    <dt>URL:</dl>
+    <dd><pre>{{ file|url }}</pre></dd>
+    {%- else %}
+    {{ render_form(form, ['file'], inline=true) }}
+    {%- endif %}
+  </dl>
+  <p>
+    <input type="submit" value="Speichern" />
+  </p>
+</form>
+{% endblock %}

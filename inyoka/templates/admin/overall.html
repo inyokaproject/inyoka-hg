@@ -47,11 +47,13 @@
     <ul>
       <li><a href="{{ href('admin', 'config') }}">Allgemein</a></li>
       <li><a href="{{ href('admin', 'users') }}">Benutzerkonfiguration</a></li>
-      <li><a href="{{ href('admin', 'pages') }}">Statische Seiten</a></li>
+      <li><a href="{{ href('admin', 'groups') }}">Gruppenkonfiguration</a></li>
+      <li><a href="{{ href('admin', 'forum') }}">Forum</a></li>
       <li><a href="{{ href('admin', 'ikhaya') }}">Ikhaya</a></li>
       <li><a href="{{ href('admin', 'planet') }}">Planet</a></li>
-      <li><a href="{{ href('admin', 'forum') }}">Forum</a></li>
-      <li><a href="{{ href('admin', 'groups') }}">Gruppenkonfiguration</a></li>
+      <li><a href="{{ href('admin', 'pages') }}">Statische Seiten</a></li>
+      <li><a href="{{ href('admin', 'files') }}">Statische Dateien</a></li>
+      <li><a href="{{ href('admin', 'styles') }}">Markup-Stylesheets</a></li>
     </ul>
     <h3>Planet</h3>
     <ul>
@@ -69,7 +71,6 @@
     <ul>
       <li><a href="{{ href('admin', 'ikhaya', 'articles', 'new') }}">Artikel erstellen</a></li>
       <li><a href="{{ href('admin', 'ikhaya', 'categories', 'new') }}">Kategorie erstellen</a></li>
-      <li><a href="{{ href('admin', 'ikhaya', 'icons', 'new') }}">Icon erstellen</a></li>
       <li><a href="{{ href('admin', 'ikhaya', 'dates', 'new') }}">Termin erstellen</a></li>
     </ul>
     {% endblock %}

@@ -1,0 +1,42 @@
+{#
+    admin/files.html
+    ~~~~~~~~~~~~~~~~
+
+    This is the overview of the ikhaya files.
+
+    :copyright: 2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{%- extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'files'), 'Statische Dateien'),
+  ] %}
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Statische Dateien</h2>
+{% endblock %}
+
+{% block admin_content %}
+<h3>Statische Dateien</h3>
+<table>
+  <thead>
+  <tr>
+    <th>{{ table.get_html('identifier', 'Bezeichner') }}</th>
+    <th>{{ table.get_html('is_ikhaya_icon', 'Ist Ikhaya-Icon') }}</th>
+  </tr>
+  </thead>
+  <tbody>
+  {%- for file in table.get_objects() %}
+  <tr>
+    <td><a href="{{ file|url('edit') }}">{{ file.identifier|e }}</a></td>
+    <td>{{ file.is_ikhaya_icon and 'ja' or 'nein' }}</td>
+  </tr>
+  {%- else %}
+  <tr>
+    <td colspan="3">Es existieren keine statischen Dateien, <a href="{{ href('admin', 'files', 'new') }}">erstelle</a> jetzt das erste!</td>
+  </tr>
+  {%- endfor %}
+  </tbody>
+</table>
+<a href="{{ href('admin', 'files', 'new') }}">Neue statische Datei erstellen</a>
+{% endblock %}
