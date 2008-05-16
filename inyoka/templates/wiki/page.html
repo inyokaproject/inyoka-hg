@@ -14,10 +14,10 @@
 {% set page_trace = [] %}
 {% if page and not page.is_main_page %}
   {% for part in page.name.split('/') %}
-  {{ void(page_trace.append((
+  {% do page_trace.append((
     page_trace and '%s/%s'|format(page_trace[-1][0], part) or href('wiki', part),
     part
-    ))) }}
+    )) %}
   {% endfor %}
 {% endif %}
 {% set navigation_trace = [(href('wiki'), 'Wiki')] + page_trace + navigation_trace|default([]) %}

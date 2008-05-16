@@ -17,7 +17,7 @@
   ] + navigation_trace|default([]) %}
 {% set title_trace = [] %}
 {% for i in navigation_trace %}
-  {{ void(title_trace.insert(0, i[1])) }}
+  {% do title_trace.insert(0, i[1]) %}
 {% endfor %}
 
 {% macro admin_button(link, icon, name) %}

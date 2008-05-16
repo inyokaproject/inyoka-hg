@@ -19,9 +19,9 @@
 ] %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
-  {{ void(navigation_trace.append([parent|url, parent.name])) }}
+  {% do navigation_trace.append([parent|url, parent.name]) %}
 {% endfor %}
-{{ void(navigation_trace.append([forum|url, forum.name])) }}
+{% do navigation_trace.append([forum|url, forum.name]) %}
 
 {% block search_areas %}
   <option value="current_forum" selected="selected">Dieses Forum</option>
@@ -55,7 +55,8 @@
     <tr>
       <th class="topic" colspan="2">Thema</th>
       <th class="view_count">Aufrufe</th>
-      <th class="last_post" colspan="2">Antworten</th>
+      <th class="post_count">Antworten</th>
+      <th class="last_post">Letzter Beitrag</th>
     </tr>
     {%- for topic in topics %}
       {%- if topic.hidden and not check_privilege(privileges, 'moderate') %}

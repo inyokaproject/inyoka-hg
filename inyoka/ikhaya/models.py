@@ -113,6 +113,7 @@ class Article(models.Model):
     slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
     comment_count = models.IntegerField(default=0)
+    comments_enabled = models.BooleanField('Kommentare erlaubt', default=True)
 
     def _simplify(self, text, key):
         """Remove markup of a text that belongs to this Article"""
