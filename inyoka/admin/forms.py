@@ -93,26 +93,28 @@ class EditCategoryForm(forms.Form):
 
 
 class EditFileForm(forms.Form):
-    identifier = forms.CharField(label=u'Bezeichner', max_length=100)
     file = forms.FileField(label=u'Datei', required=False)
-    is_ikhaya_icon = forms.BooleanField(label=u'Ist Ikhaya-Icon')
+    is_ikhaya_icon = forms.BooleanField(label=u'Ist Ikhaya-Icon',
+            help_text=u'Wähle dieses Feld aus, wenn die Datei im Auswahlfeld '
+                      u'für Artikel- und Kategorie-Icons erscheinen soll.')
 
     def __init__(self, file=None, *args, **kwargs):
         self._file = file
         forms.Form.__init__(self, *args, **kwargs)
 
-    def clean_identifier(self):
+    def clean_file(self):
         data = self.cleaned_data.get('identifier')
-        changed = data != (self._file and self._file.identifier or None)
-        if changed and list(StaticFile.objects.filter(identifier=data)):
-            raise forms.ValidationError(u'Eine Datei mit diesem Bezeichner '
-                                        u'existiert bereits.')
         return data
 
     def clean_file(self):
         data = self.cleaned_data.get('file')
+        filename = data.filename
         if not data and not self._file:
             raise forms.ValidationError(u'Bitte eine Datei auswählen')
+        changed = filename != (self._file and self._file.identifier or None)
+        if changed and list(StaticFile.objects.filter(identifier=filename)):
+            raise forms.ValidationError(u'Eine Datei mit diesem Namen '
+                                        u'existiert bereits.')
         return data
 
 

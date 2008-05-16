@@ -28,7 +28,7 @@
 
 <form action="" method="post" enctype="multipart/form-data">
   <dl>
-    {{ render_form(form, ['identifier', 'is_ikhaya_icon'], inline=true) }}
+    {{ render_form(form, ['is_ikhaya_icon'], inline=true) }}
     {%- if file %}
     <dt>URL:</dl>
     <dd><pre>{{ file|url }}</pre></dd>

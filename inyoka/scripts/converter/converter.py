@@ -33,7 +33,7 @@ from inyoka.forum.models import Privilege, Attachment, Topic, \
     sa_forum_table, post_table as sa_post_table, poll_vote_table as \
     sa_poll_vote_table, poll_option_table as sa_poll_option_table
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
-    Subscription
+    Subscription, StaticFile, StaticPage
 from inyoka.ikhaya.models import Article, Category
 from inyoka.pastebin.models import Entry
 from inyoka.utils.database import session
@@ -751,7 +751,6 @@ def convert_privmsgs():
         conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
 
         if i == 500:
-            print msg.privmsgs_id
             transaction.commit()
             i = 0
         else:
@@ -797,7 +796,7 @@ def convert_ikhaya():
     meta.bind = engine
     category_table = Table('ikhaya_categories', meta, autoload=True)
     article_table = Table('ikhaya_entries', meta, autoload=True)
-    icon_table = Table('static_images', meta, autoload=True)
+    image_table = Table('static_images', meta, autoload=True)
     user_table = Table('auth_users', meta, autoload=True)
 
     # contains a mapping of old_user_id -> new_user_id
@@ -815,6 +814,13 @@ def convert_ikhaya():
         except User.DoesNotExist:
             print u'Not able to find user', name, u'using anonymous instead'
             user_mapping[user.id] = 1
+
+    for image in select_blocks(image_table.select()):
+        StaticFile(**{
+            'id':           image.id,
+            'identifier':   path.basename(image.file),
+            'file':         image.file.replace('uploads', 'portal/files')
+        }).save()
 
     category_mapping = {}
     for data in category_table.select().execute():
@@ -868,6 +874,21 @@ def convert_pastes():
         connection.queries = []
 
 
+def convert_static_pages(self):
+    engine = create_engine(OLD_PORTAL_URI)
+    meta = MetaData()
+    meta.bind = engine
+    page_table = Table('static_pages', meta, autoload=True)
+
+    for page in select_blocks(page_table.select()):
+        StaticPage(**{
+            'key':      page.identifier,
+            'title':    page.title,
+            'content':  page.content
+        }).save()
+        connection.queries = []
+
+
 MODE_MAPPING = {
         'users':         convert_users,
         'wiki':          convert_wiki,
@@ -917,3 +938,5 @@ if __name__ == '__main__':
     convert_pastes()
     print 'Converting private messages'
     convert_privmsgs()
+    print 'Converting static pages'
+    convert_static_pages()
