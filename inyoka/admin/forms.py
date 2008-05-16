@@ -15,6 +15,7 @@ from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DateTimeWidget
 from inyoka.utils.html import cleanup_html
 from inyoka.forum.acl import PRIVILEGES_DETAILS
+from inyoka.portal.models import StaticFile
 
 
 class ConfigurationForm(forms.Form):
@@ -71,7 +72,9 @@ class EditArticleForm(forms.Form):
         help_text=u'Wenn du dieses Feld leer lässt, wirst du automatisch '
                   u'als Autor eingetragen.')
     category_id = forms.ChoiceField(label=u'Kategorie')
-    icon_id = forms.ChoiceField(label=u'Icon', required=False)
+    icon_id = forms.ChoiceField(label=u'Icon', required=False,
+            help_text=u'Wenn du dieses Feld leer lässt, wird automatisch '
+                      u'Icon der Kategorie ausgewählt')
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
@@ -89,9 +92,28 @@ class EditCategoryForm(forms.Form):
     icon = forms.ChoiceField(label=u'Standardicon')
 
 
-class EditIconForm(forms.Form):
+class EditFileForm(forms.Form):
     identifier = forms.CharField(label=u'Bezeichner', max_length=100)
-    img = forms.FileField(label=u'Bild')
+    file = forms.FileField(label=u'Datei', required=False)
+    is_ikhaya_icon = forms.BooleanField(label=u'Ist Ikhaya-Icon')
+
+    def __init__(self, file=None, *args, **kwargs):
+        self._file = file
+        forms.Form.__init__(self, *args, **kwargs)
+
+    def clean_identifier(self):
+        data = self.cleaned_data.get('identifier')
+        changed = data != (self._file and self._file.identifier or None)
+        if changed and list(StaticFile.objects.filter(identifier=data)):
+            raise forms.ValidationError(u'Eine Datei mit diesem Bezeichner '
+                                        u'existiert bereits.')
+        return data
+
+    def clean_file(self):
+        data = self.cleaned_data.get('file')
+        if not data and not self._file:
+            raise forms.ValidationError(u'Bitte eine Datei auswählen')
+        return data
 
 
 class CreateUserForm(forms.Form):

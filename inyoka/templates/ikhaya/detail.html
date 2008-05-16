@@ -18,7 +18,7 @@
   <div class="article">
     <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
     {%- if article.icon -%}
-    <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier }}" />
+    <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
     {%- endif -%}
     <div class="intro">
       {{ article.rendered_intro }}

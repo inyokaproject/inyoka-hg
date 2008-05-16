@@ -26,7 +26,6 @@ from inyoka.portal.user import User
 from werkzeug import cached_property
 
 
-
 class SubscriptionManager(models.Manager):
     """
     Manager class for the `Subscription` model.
@@ -242,6 +241,23 @@ class StaticPage(models.Model):
             'show': ('portal', self.key),
             'edit': ('admin', 'pages', 'edit', self.key),
             'delete': ('admin', 'pages', 'delete', self.key)
+        }[action])
+
+
+class StaticFile(models.Model):
+    identifier = models.CharField('Identifier', max_length=100, unique=True)
+    file = models.FileField(upload_to='portal/files')
+    is_ikhaya_icon = models.BooleanField('Ist Ikhaya-Icon', default=False)
+
+    def __unicode__(self):
+        return self.identifier
+
+    def get_absolute_url(self, action='show'):
+        if action == 'show':
+            return self.get_file_url()
+        return href(*{
+            'edit': ('admin', 'files', 'edit', self.identifier),
+            'delete': ('admin', 'files', 'delete', self.identifier)
         }[action])
 
 

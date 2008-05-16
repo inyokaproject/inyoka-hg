@@ -21,10 +21,13 @@
     :license: GNU GPL.
 """
 import os
+import re
+from os import path
 from itertools import izip
 from os.path import dirname, join, exists
 from inyoka.conf import settings
 from sqlalchemy import Table
+from shutil import move
 
 
 SQL_FILES = join(dirname(__file__), 'sql')
@@ -301,11 +304,57 @@ def fix_forum_text_table(m):
     ''')
 
 
+def drop_foreign_key(m, table, column):
+    # we have to do this strange thing here because mysql can't just drop
+    # columns that are a foreign key.
+    # see http://casey.shobe.info/documents/mysql_limitations/ for further
+    # details.
+    r = m.engine.execute('''
+        SHOW CREATE TABLE %s;
+    '''% table).fetchone()[1]
+    constraint = re.findall('%s_[^`]+' % column, r)[0]
+    m.engine.execute('ALTER TABLE `%s` DROP FOREIGN KEY %s;' % \
+                     (table, constraint))
+
+
+def add_foreign_key(m, table, column, target):
+    m.engine.execute('''
+        ALTER TABLE `%s` ADD FOREIGN KEY (%s) REFERENCES %s
+    ''' % (table, column, target))
+
+
+def add_staticfile(m):
+    media_folder = path.join(path.dirname(__file__), 'media')
+    try:
+        move(path.join(media_folder, 'ikhaya', 'icons'),
+             path.join(media_folder, 'portal', 'files'))
+    except IOError:
+        pass
+
+    m.engine.execute('''
+        ALTER TABLE `ikhaya_icon` RENAME TO `portal_staticfile`,
+                     ADD COLUMN `is_ikhaya_icon` TINYINT(1)  NOT NULL,
+                     CHANGE COLUMN `img` `file` VARCHAR(100);
+    ''')
+    drop_foreign_key(m, 'ikhaya_category', 'icon_id')
+    drop_foreign_key(m, 'ikhaya_article', 'icon_id')
+    add_foreign_key(m, 'ikhaya_category', 'icon_id', 'portal_staticfile(id)')
+    add_foreign_key(m, 'ikhaya_article', 'icon_id', 'portal_staticfile(id)')
+
+
+def remove_unused_topic_column(m):
+    drop_foreign_key(m, 'forum_topic', 'ikhaya_article_id')
+    m.engine.execute('''
+        ALTER TABLE `forum_topic` DROP COLUMN `ikhaya_article_id`;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
     add_default_storage_values, add_blocked_hosts_storage, split_post_table,
-    add_ikhaya_discussion_disabler, fix_forum_text_table
+    add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
+    remove_unused_topic_column
 ]

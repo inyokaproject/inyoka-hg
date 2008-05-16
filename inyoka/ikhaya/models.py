@@ -12,6 +12,7 @@ import random
 from datetime import datetime
 from django.db import models, connection
 from inyoka.portal.user import User
+from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils.text import slugify
 from inyoka.utils.html import striptags
@@ -55,26 +56,11 @@ class SuggestionManager(models.Manager):
         cache.delete('ikhaya/suggestion_count')
 
 
-class Icon(models.Model):
-    identifier = models.CharField('Identifier', max_length=100, unique=True)
-    img = models.ImageField(upload_to='ikhaya/icons')
-
-    def __unicode__(self):
-        return self.identifier
-
-    def get_absolute_url(self, action='show'):
-        if action == 'show':
-            return self.get_img_url()
-        return href(*{
-            'edit': ('admin', 'ikhaya', 'icons', 'edit', self.identifier),
-            'delete': ('admin', 'ikhaya', 'icons', 'delete', self.identifier)
-        }[action])
-
-
 class Category(models.Model):
     name = models.CharField(max_length=180)
     slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
-    icon = models.ForeignKey(Icon, blank=True, null=True, verbose_name='Icon')
+    icon = models.ForeignKey(StaticFile, blank=True, null=True,
+                             verbose_name='Icon')
 
     def __unicode__(self):
         return self.name
@@ -106,7 +92,8 @@ class Article(models.Model):
                                verbose_name='Autor')
     subject = models.CharField('Überschrift', max_length=180)
     category = models.ForeignKey(Category, verbose_name='Kategorie')
-    icon = models.ForeignKey(Icon, blank=True, null=True, verbose_name='Icon')
+    icon = models.ForeignKey(StaticFile, blank=True, null=True,
+                             verbose_name='Icon')
     intro = models.TextField('Einleitung')
     text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')

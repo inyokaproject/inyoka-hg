@@ -31,7 +31,7 @@
     <li class="article{{ article.hidden and ' hidden' or '' }}">
       <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
       {%- if article.icon %}
-      <img class="icon" src="{{ article.icon.get_img_url() }}" alt="{{ article.icon.identifier|e }}" />
+      <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
       {%- endif %}
       {{ article.rendered_intro }} 
       <p class="meta">

@@ -25,14 +25,14 @@ from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
-     EditBlogForm, EditCategoryForm, EditIconForm, ConfigurationForm, \
+     EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm
-from inyoka.portal.models import StaticPage, Event
+from inyoka.portal.models import StaticPage, Event, StaticFile
 from inyoka.portal.user import User, Group
 from inyoka.portal.utils import require_manager
 from inyoka.planet.models import Blog
-from inyoka.ikhaya.models import Article, Suggestion, Category, Icon
+from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
     join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege
@@ -144,6 +144,53 @@ def pages_delete(request, page_key):
 
 
 @require_manager
+@templated('admin/files.html')
+def files(request):
+    sortable = Sortable(StaticFile.objects.all(), request.GET, 'identifier')
+    return {
+        'table': sortable
+    }
+
+
+@require_manager
+@templated('admin/file_edit.html')
+def file_edit(request, file=None):
+    """
+    Display an interface to let the user create or edit a static file.
+    """
+    new = not bool(file)
+    if file:
+        file = StaticFile.objects.get(identifier=file)
+
+    if request.method == 'POST':
+        form = EditFileForm(file, request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            if not file:
+                file = StaticFile()
+            if data['file']:
+                file.save_file_file(data['file'].filename, data['file'].content)
+            file.identifier = data['identifier']
+            file.is_ikhaya_icon = data['is_ikhaya_icon']
+            file.save()
+            flash(u'Die statische Datei wurde geändert.', True)
+            if new:
+                return HttpResponseRedirect(file.get_absolute_url('edit'))
+    else:
+        initial = {}
+        if file:
+            initial = {
+                'identifier':       file.identifier,
+                'is_ikhaya_icon':   file.is_ikhaya_icon
+            }
+        form = EditFileForm(initial=initial)
+    return {
+        'form':   form,
+        'file':   file
+    }
+
+
+@require_manager
 @templated('admin/planet.html')
 def planet(request):
     return {
@@ -224,8 +271,9 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     """
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Category.objects.all()]
-        icons = [(i.id, i.identifier) for i in Icon.objects.all()]
-        form.fields['icon_id'].choices = [(u'', u'Kein Icon')] + icons
+        icons = [(i.id, i.identifier)
+                 for i in StaticFile.objects.filter(is_ikhaya_icon=True)]
+        form.fields['icon_id'].choices = [(u'', u'')] + icons
         form.fields['category_id'].choices = categories
 
     if article:
@@ -260,7 +308,6 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 else:
                     flash(u'Der Artikel „%s“ wurde nicht verändert'
                           % escape(article.subject))
-            return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
     else:
         initial = {}
         if article:
@@ -329,7 +376,8 @@ def ikhaya_category_edit(request, category=None):
     Display an interface to let the user create or edit an category.
     """
     def _add_field_choices():
-        icons = [(i.id, i.identifier) for i in Icon.objects.all()]
+        icons = [(i.id, i.identifier)
+                 for i in StaticFile.objects.filter(is_ikhaya_icon=True)]
         form.fields['icon'].choices = icons
 
     if category:
@@ -367,49 +415,6 @@ def ikhaya_category_edit(request, category=None):
     return {
         'form': form,
         'category': category
-    }
-
-
-@require_manager
-@templated('admin/ikhaya_icons.html')
-def ikhaya_icons(request):
-    sortable = Sortable(Icon.objects.all(), request.GET, 'identifier')
-    return {
-        'table': sortable
-    }
-
-
-@require_manager
-@templated('admin/ikhaya_icon_edit.html')
-def ikhaya_icon_edit(request, icon=None):
-    """
-    Display an interface to let the user create or edit an icon.
-    """
-    if icon:
-        icon = Icon.objects.get(identifier=icon)
-
-    if request.method == 'POST':
-        form = EditIconForm(request.POST, request.FILES)
-        if form.is_valid():
-            data = form.cleaned_data
-            if not icon:
-                icon = Icon()
-            icon.identifier  = data['identifier']
-            icon.save_img_file(data['img'].filename, data['img'].content)
-            icon.save()
-            flash(u'Das Icon wurde geändert.', True)
-            return HttpResponseRedirect(href('admin', 'ikhaya', 'icons'))
-    else:
-        initial = {}
-        if icon:
-            initial = {
-                'identifier': icon.identifier
-            }
-        form = EditIconForm(initial=initial)
-
-    return {
-        'form': form,
-        'icon': icon
     }
 
 

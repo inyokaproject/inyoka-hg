@@ -53,8 +53,6 @@ topic_table = Table('forum_topic', metadata,
             use_alter=True, name='forum_topic_firstpost_fk'), nullable=True),
     Column('last_post_id', Integer, ForeignKey('forum_post.id',
             use_alter=True, name='forum_topic_lastpost_fk'), nullable=True),
-    Column('ikhaya_article_id', Integer, ForeignKey('ikhaya_article.id'),
-            nullable=True),
     Column('has_poll', Boolean, default=False, nullable=False)
 )
 
@@ -107,7 +105,6 @@ privilege_table = Table('forum_privilege', metadata,
 user_table = Table('portal_user', metadata, autoload=True)
 user_group_table = Table('portal_user_groups', metadata, autoload=True)
 group_table = Table('portal_group', metadata, autoload=True)
-ikhaya_article = Table('ikhaya_article', metadata, autoload=True)
 forum_welcomemessage_table = Table('forum_welcomemessage', metadata,
                                    autoload=True)
 attachment_table = Table('forum_attachment', metadata,
