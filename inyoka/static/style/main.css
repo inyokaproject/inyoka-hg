@@ -33,7 +33,7 @@ div.wrap {
   background-repeat: repeat-y;
   background-color: #FFFFFF;
   border-bottom: #aba393 1px solid;
-  min-width: 700px;
+  min-width: 780px;
 }
 
 div.wrap2 {
@@ -431,6 +431,8 @@ table.syntaxtable td.linenos {
   background-position: 15px 15px;
   padding: 5px;
   margin: 0;
+  width:320px;
+  float:left
 }
 
 .header h1 a {
@@ -447,10 +449,10 @@ table.syntaxtable td.linenos {
 }
 
 .tabbar {
-  position: absolute;
   margin: 0;
-  top: 12px;
-  right: 20px;
+  position:relative;
+  right: 10px;
+  float:right
 }
 
 .tabbar li {
@@ -1112,3 +1114,4 @@ table.filterable td.value {
 table.filterable div.add {
   float: right;
 }
+
