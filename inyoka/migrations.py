@@ -328,7 +328,7 @@ def add_staticfile(m):
     try:
         move(path.join(media_folder, 'ikhaya', 'icons'),
              path.join(media_folder, 'portal', 'files'))
-    except IOError:
+    except (IOError, OSError):
         pass
 
     m.engine.execute('''
