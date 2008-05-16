@@ -24,7 +24,7 @@
 
 
 {% block admin_content %}
-<form action="" method="post" id="user_edit_form">
+<form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
   <h3>Forum-Einstellungen</h3>
   <p>
     {%- if user_groups %}
@@ -35,7 +35,10 @@
   </p>
 
   <dl>
-    {{ render_form(form, ['username', 'is_active', 'is_manager', 'new_password', 'email', 'banned'], inline=true) }}
+    {{ render_form(form, ['username', 'is_active', 'member_title'], inline=true) }}
+    <dt>{{ form.is_manager.label }}</dt>
+    <dd>{{ form.is_manager }} <span class="note">{{ form.is_manager.help_text }}</span></dd>
+    {{ render_form(form, ['new_password', 'email', 'banned'], inline=true) }}
     <dd class="note_link bann_user_event">
       Benutzer sperren
     </dd>
@@ -69,7 +72,15 @@
   <h3>Benachrichtigungs-Einstellungen</h3>
   {{ render_form(form, ['jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip']) }}
   <h3>Sonstige Einstellungen</h3>
-  {{ render_form(form, ['signature', 'coordinates_long', 'coordinates_lat', 'avatar', 'gpgkey']) }}
+  <dl>
+  {{ render_form(form, ['signature', 'coordinates_long', 'coordinates_lat'], inline=true) }}
+  <dt>{{ form.avatar.label }}</dt>
+  <dd>{{ form.avatar }} <span>{{ form.delete_avatar }} {{ form.delete_avatar.label }}</span>
+    <p class="note">(Wird auf {{ avatar_height }}x{{ avatar_width }} skaliert)</p></dd>
+  <dt>{{ form.member_icon.label }}</dt>
+  <dd>{{ form.member_icon }} <span>{{ form.delete_member_icon }} {{ form.delete_member_icon.label }}</span>
+    <p class="note">(Wird auf {{ memicon_height }}x{{ memicon_width }} skaliert)</p></dd>
+  {{ render_form(form, ['gpgkey']) }}
   <p>
     <input type="submit" value="Speichern" />
   </p>

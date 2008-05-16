@@ -56,7 +56,8 @@ def index(request):
 @require_manager
 @templated('admin/configuration.html')
 def config(request):
-    keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
+    keys = ['max_avatar_width', 'max_avatar_height', 'member_icon_height',
+            'member_icon_width', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
             'get_ubuntu_description', 'blocked_hosts']
     if request.method == 'POST':
@@ -572,8 +573,7 @@ def edit_user(request, username):
         flash(u'Der Benutzer „%s“ existiert nicht.'
               % escape(username))
         return HttpResponseRedirect(href('admin', 'users'))
-    form = EditUserForm(model_to_dict(user))
-    groups = Group.objects.select_related(depth=1)
+    groups = dict((g.name, g) for g in Group.objects.all())
     groups_joined, groups_not_joined = ([], [])
 
     if request.method == 'POST':
@@ -585,10 +585,16 @@ def edit_user(request, username):
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'is_manager'):
+                        'wengophone', 'is_manager', 'member_title'):
                 setattr(user, key, data[key])
+            if data['delete_avatar']:
+                user.delete_avatar()
+            if data['delete_member_icon']:
+                user.delete_member_icon()
             if data['avatar']:
                 user.save_avatar(data['avatar'])
+            if data['member_icon']:
+                user.save_icon(data['member_icon'])
             if data['new_password']:
                 user.set_password(data['new_password'])
 
@@ -615,9 +621,9 @@ def edit_user(request, username):
                     dbsession.flush()
 
             # group editing
-            groups_joined = [groups.get(name=gn) for gn in
+            groups_joined = [groups[gn] for gn in
                              request.POST.getlist('user_groups_joined')]
-            groups_not_joined = [groups.get(name=gn) for gn in
+            groups_not_joined = [groups[gn] for gn in
                                 request.POST.getlist('user_groups_not_joined')]
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
@@ -634,6 +640,8 @@ def edit_user(request, username):
                 return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    else:
+        form = EditUserForm(model_to_dict(user))
 
     # collect forum privileges
     forum_privileges = []
@@ -652,8 +660,10 @@ def edit_user(request, username):
 
     groups_joined = groups_joined or user.groups.all()
     groups_not_joined = groups_not_joined or \
-                        [x for x in groups if not x in groups_joined]
+                        [x for x in groups.itervalues() if not x in groups_joined]
 
+    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width',
+        'member_icon_height', 'member_icon_width'))
     return {
         'user': user,
         'form': form,
@@ -661,7 +671,11 @@ def edit_user(request, username):
         'forum_privileges': PRIVILEGES_DETAILS,
         'user_groups': groups_joined,
         'joined_groups': [g.name for g in groups_joined],
-        'not_joined_groups': [g.name for g in groups_not_joined]
+        'not_joined_groups': [g.name for g in groups_not_joined],
+        'avatar_height': storage_data['max_avatar_height'],
+        'avatar_width': storage_data['max_avatar_width'],
+        'memicon_height': storage_data['member_icon_height'],
+        'memicon_width': storage_data['member_icon_width']
     }
 
 

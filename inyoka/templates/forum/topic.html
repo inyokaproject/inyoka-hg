@@ -116,10 +116,18 @@
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
-      {%- set attachments = post.attachments %}      
+      {%- set attachments = post.attachments %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         <td class="author">
-          <p class="username"><a href="{{ post.author|url }}">{{ post.author.username|e }}</a></p>
+          <p class="username">
+            <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
+            {%- if post.author.member_icon %}
+            <img class="membericon" src="{{ post.author.member_icon_url }}" alt="Gruppenicon" />
+            {% endif %}
+            {% if post.author.member_title %}
+            <p class="member_title">{{ post.author.member_title }}</p>
+            {% endif %}
+          </p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}

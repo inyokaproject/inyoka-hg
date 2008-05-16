@@ -73,42 +73,42 @@ $.autocomplete = function(input, options) {
 	}
 
 	$input
-	.keydown(function(e) {
-		// track last key pressed
-		lastKeyPressCode = e.keyCode;
-		switch(e.keyCode) {
-			case 38: // up
-				e.preventDefault();
-				moveSelect(-1);
-				break;
-			case 40: // down
-				e.preventDefault();
-				moveSelect(1);
-				break;
-			case 9:  // tab
-			case 13: // return
-				if( selectCurrent() ){
-					// make sure to blur off the current field
-					$input.get(0).blur();
-					e.preventDefault();
-				}
-				break;
-			default:
-				active = -1;
-				if (timeout) clearTimeout(timeout);
-				timeout = setTimeout(function(){onChange();}, options.delay);
-				break;
-		}
-	})
-	.focus(function(){
-		// track whether the field has focus, we shouldn't process any results if the field no longer has focus
-		hasFocus = true;
-	})
-	.blur(function() {
-		// track whether the field has focus
-		hasFocus = false;
-		hideResults();
-	});
+    .keydown(function(e) {
+      // track last key pressed
+      lastKeyPressCode = e.keyCode;
+      switch(e.keyCode) {
+        case 38: // up
+          e.preventDefault();
+          moveSelect(-1);
+          break;
+        case 40: // down
+          e.preventDefault();
+          moveSelect(1);
+          break;
+        case 9:  // tab
+        case 13: // return
+          if (selectCurrent()) {
+            // make sure to blur off the current field
+            $input.get(0).blur();
+            e.preventDefault();
+          }
+          break;
+        default:
+          active = -1;
+          if (timeout) clearTimeout(timeout);
+          timeout = setTimeout(function(){onChange();}, options.delay);
+          break;
+      }
+    })
+	  .focus(function(){
+      // track whether the field has focus, we shouldn't process any results if the field no longer has focus
+      hasFocus = true;
+      })
+	  .blur(function() {
+      // track whether the field has focus
+      hasFocus = false;
+      hideResults();
+	  });
 
 	hideResultsNow();
 
