@@ -11,6 +11,7 @@
 {%- extends 'portal/overall.html' %}
 {% set title_trace = ['Fehler melden'] %}
 {% set active_app = 'bugs' %}
+{% from 'macros.html' import render_form %}
 
 {% block appheader %}
   <h1>Inyoka</h1>
@@ -18,29 +19,17 @@
 {% endblock %}
 {% block portal_content %}
   <h3>Fehler in Inyoka melden</h3>
-  {% if spam %}
+  {%- if spam %}
   <div>Dein Eintrag wurde als Spam eingestuft. Wenn es keiner war, schreib ein Anliegen bitte per E-Mail an "webteam", dann das a mit dem lustigen Kringel drumrum, und dann diese Domain (ubuntuusers.de)</div>
-  {% else %}
+  {%- else %}
   <form action="/error_report/" method="post">
-    <dl>
-      <dt><label for="id_title">kurze Beschreibung:</label></dt>
-      {%- if form.title.errors %}<dd>{{ form.title.errors }}</dd>{% endif %}
-      <dd>{{ form.title }}</dd>
-      <dt><label for="id_text">ausführliche Beschreibung:</label></dt>
-      {%- if form.text.errors %}<dd>{{ form.text.errors }}</dd>{% endif %}
-      <dd>{{ form.text }}</dd>
-      {%- if show_url_field %}
-      <dt><label for="id_url">Adresse der Seite, auf der Fehler auftrat:</label></dt>
-      {%- if form.url.errors %}<dd>{{ form.url.errors }}</dd>{% endif %}
-      <dd>{{ form.url }}</dd>
-      {%- endif %}
-    </dl>
+    {{ render_form(form, ['title', 'text', 'url']) }}
     <p>
       {%- if not show_url_field %}
       {{- form.url }}
       {%- endif -%}
       <input type="submit" value="Fehlermeldung abschicken" /></p>
   </form>
-  {% endif %}
+  {%- endif %}
 
 {% endblock %}
