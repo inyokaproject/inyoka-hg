@@ -32,6 +32,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
+from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text, normalize_pagename
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
@@ -239,6 +240,7 @@ def viewtopic(request, topic_slug, page=1):
         if not post.rendered_text:
             post.rendered_text = post.render_text(force_existing=True)
             session.commit()
+    team_icon = storage['team_icon']
 
     return {
         'topic':             t,
@@ -249,7 +251,8 @@ def viewtopic(request, topic_slug, page=1):
         'pagination':        pagination,
         'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
-        'can_vote':          polls and bool([True for p in polls if p.can_vote])
+        'can_vote':          polls and bool([True for p in polls if p.can_vote]),
+        'team_icon_url':     team_icon and href('media', storage['team_icon']) or None
     }
 
 

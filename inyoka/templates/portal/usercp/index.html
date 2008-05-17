@@ -27,7 +27,7 @@
       {{ usercp_button(href('portal', 'usercp', 'password'), 'password', 'Passwort ändern') }}
       {{ usercp_button(href('portal', 'usercp', 'subscriptions'), 'subscriptions', 'Benachrichtigungen') }}
       {{ usercp_button(href('portal', 'usercp', 'deactivate'), 'deactivate', 'Benutzer deaktivieren') }}
-      {{ usercp_button(href('wiki', 'Benutzer', user.username|e, action='edit'), 'wikipage', 'Benutzerseite') }}
+      {{ usercp_button(href('portal', 'usercp', 'userpage'), 'wikipage', 'Benutzerseite') }}
     </ul>
   </div>
 {% endblock %}

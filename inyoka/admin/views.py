@@ -8,10 +8,15 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
+import os
+from os import path
+from PIL import Image
+from StringIO import StringIO
 from sqlalchemy import not_, and_
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
+from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href, global_not_found
@@ -60,11 +65,29 @@ def config(request):
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
             'get_ubuntu_description', 'blocked_hosts']
     if request.method == 'POST':
-        form = ConfigurationForm(request.POST)
+        form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
+            print data
             for k in keys:
                 storage[k] = data[k]
+            if data['team_icon']:
+                icon = Image.open(StringIO(data['team_icon'].content))
+                ext = icon.format
+                fn = 'portal/team_icon.%s' % icon.format.lower()
+                imgp = path.join(settings.MEDIA_ROOT, fn)
+
+                if path.exists(imgp):
+                    os.remove(imgp)
+
+                f = open(imgp, 'wb')
+                try:
+                    f.write(data['team_icon'].content)
+                finally:
+                    f.close()
+
+                storage['team_icon'] = fn
+
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
@@ -577,8 +600,7 @@ def edit_user(request, username):
         flash(u'Der Benutzer „%s“ existiert nicht.'
               % escape(username))
         return HttpResponseRedirect(href('admin', 'users'))
-    form = EditUserForm(model_to_dict(user))
-    groups = Group.objects.select_related(depth=1)
+    groups = dict((g.name, g) for g in Group.objects.all())
     groups_joined, groups_not_joined = ([], [])
 
     if request.method == 'POST':
@@ -590,10 +612,14 @@ def edit_user(request, username):
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'is_manager'):
+                        'wengophone', 'is_manager', 'member_title'):
                 setattr(user, key, data[key])
+            if data['delete_avatar']:
+                user.delete_avatar()
+
             if data['avatar']:
                 user.save_avatar(data['avatar'])
+
             if data['new_password']:
                 user.set_password(data['new_password'])
 
@@ -620,9 +646,9 @@ def edit_user(request, username):
                     dbsession.flush()
 
             # group editing
-            groups_joined = [groups.get(name=gn) for gn in
+            groups_joined = [groups[gn] for gn in
                              request.POST.getlist('user_groups_joined')]
-            groups_not_joined = [groups.get(name=gn) for gn in
+            groups_not_joined = [groups[gn] for gn in
                                 request.POST.getlist('user_groups_not_joined')]
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
@@ -639,6 +665,8 @@ def edit_user(request, username):
                 return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    else:
+        form = EditUserForm(model_to_dict(user))
 
     # collect forum privileges
     forum_privileges = []
@@ -657,16 +685,19 @@ def edit_user(request, username):
 
     groups_joined = groups_joined or user.groups.all()
     groups_not_joined = groups_not_joined or \
-                        [x for x in groups if not x in groups_joined]
+                        [x for x in groups.itervalues() if not x in groups_joined]
 
+    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
     return {
         'user': user,
         'form': form,
         'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
-        'user_groups': groups_joined,
+        'user_groups': sorted(groups_joined, lambda x,y: cmp(x.name, y.name)),
         'joined_groups': [g.name for g in groups_joined],
-        'not_joined_groups': [g.name for g in groups_not_joined]
+        'not_joined_groups': [g.name for g in groups_not_joined],
+        'avatar_height': storage_data['max_avatar_height'],
+        'avatar_width': storage_data['max_avatar_width'],
     }
 
 
@@ -688,7 +719,10 @@ def new_user(request):
             flash(u'Du kannst nun weitere Details bearbeiten')
             return HttpResponseRedirect(href('admin', 'users', 'edit',
                                              escape(data['username'])))
-    form = CreateUserForm()
+        else:
+            flash(u'Es sind Probleme aufgetreten, bitte behebe sie!', False)
+    else:
+        form = CreateUserForm()
     return {
         'form': form
     }
@@ -733,7 +767,6 @@ def groups_edit(request, name=None):
         form = EditGroupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            group.is_public = data['is_public']
             group.name = data['name']
 
             #: forum privileges
@@ -748,8 +781,7 @@ def groups_edit(request, name=None):
                     if not privilege:
                         privilege = Privilege(
                             group=group,
-                            forum=Forum.query.get(int(forum_id))
-                        )
+                            forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
 
                     privilege.bits = join_flags(*value)

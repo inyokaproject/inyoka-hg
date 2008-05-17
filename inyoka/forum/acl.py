@@ -11,7 +11,6 @@
 from itertools import izip
 from sqlalchemy.sql import select
 from django.db import connection
-from inyoka.portal.user import DEFAULT_GROUP_ID
 from inyoka.forum.database import session, user_group_table, privilege_table
 
 
@@ -128,3 +127,6 @@ def filter_invisible(user, forums, priv=CAN_READ):
         if privileges.get(forum.id, DISALLOW_ALL) & priv != 0:
             result.append(forum)
     return result
+
+
+from inyoka.portal.user import DEFAULT_GROUP_ID

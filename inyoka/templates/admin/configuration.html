@@ -16,10 +16,9 @@
 
 {% block admin_content %}
 <h3>{{ title_trace[0] }}</h3>
-
-<form action="" method="post" class="ikhaya">
+<form enctype="multipart/form-data" action="" method="post" id="configuration">
   <dl>
-    {{ render_form(form, ['global_message', 'blocked_hosts', 'max_signature_length',
+    {{ render_form(form, ['global_message', 'blocked_hosts', 'team_icon', 'max_signature_length',
                           'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
     <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel

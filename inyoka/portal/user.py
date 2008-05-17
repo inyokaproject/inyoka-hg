@@ -69,7 +69,6 @@ def check_password(raw_password, enc_password, convert_user=None):
 
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
-    is_public = models.BooleanField('Öffentliches Profil')
     _default_group = None
 
     def get_absolute_url(self):
@@ -239,6 +238,9 @@ class User(models.Model):
     # ikhaya permissions
     is_ikhaya_writer = models.BooleanField('Ikhaya Autor', default=False)
 
+    # member title & icon
+    member_title = models.CharField('Benutzertitel', blank=True, null=True)
+
     def save(self):
         """
         Save method that pickles `self.settings` before and cleanup
@@ -332,21 +334,22 @@ class User(models.Model):
         return self.get_avatar_url()
 
     def save_avatar(self, img):
-        """Save the avater to the file system."""
-        avatar = Image.open(StringIO(img.content))
-        ext = avatar.format
+        """Save `img` to the file system."""
+        image = Image.open(StringIO(img.content))
+        ext = image.format
         fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
-            avatar.format.lower())
-        avatar_path = path.join(settings.MEDIA_ROOT, fn)
-        # clear the filesystem
+             image.format.lower())
+        image_path = path.join(settings.MEDIA_ROOT, fn)
+        #: clear the file system
         self.delete_avatar()
 
-        max_size = (storage['max_avatar_width'], storage['max_avatar_height'])
-        if avatar.size > max_size:
-            avatar = avatar.resize(max_size)
-            avatar.save(avatar_path)
+        std = storage.get_keys(('max_avatar_height', 'max_avatar_width'))
+        max_size = (std['max_avatar_height'], std['max_avatar_width'])
+        if image.size > max_size:
+            image = image.resize(max_size)
+            image.save(image_path)
         else:
-            f = open(avatar_path, 'wb')
+            f = open(image_path, 'wb')
             try:
                 f.write(img.content)
             finally:
