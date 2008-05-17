@@ -263,6 +263,92 @@ def add_blocked_hosts_storage(m):
     })
 
 
+def split_post_table(m):
+    m.engine.execute('''
+        CREATE TABLE forum_post_text (
+                id INTEGER NOT NULL AUTO_INCREMENT,
+                text TEXT NOT NULL,
+                rendered_text TEXT NOT NULL,
+                PRIMARY KEY (id)
+        )
+    ''')
+
+    post_table = Table('forum_post', m.metadata, autoload=True)
+    post_text_table = Table('forum_post_text', m.metadata, autoload=True)
+
+    for post in select_blocks(post_table.select()):
+        m.engine.execute(post_text_table.insert(values={
+            'id':               post.id,
+            'text':             post.text,
+            'rendered_text':    post.rendered_text
+        }))
+
+    m.engine.execute('''
+        ALTER TABLE `forum_post` DROP COLUMN `text`,
+                                 DROP COLUMN `rendered_text`;
+    ''')
+
+
+def add_ikhaya_discussion_disabler(m):
+    m.engine.execute('''
+       ALTER TABLE `ikhaya_article` ADD COLUMN `comments_enabled` TINYINT(1)
+                                                NOT NULL DEFAULT 1
+                                                AFTER `comment_count`;
+    ''')
+
+
+def fix_forum_text_table(m):
+    m.engine.execute('''
+        ALTER TABLE `forum_post_text` MODIFY COLUMN `text` LONGTEXT,
+                                      MODIFY COLUMN `rendered_text` LONGTEXT;
+    ''')
+
+
+def drop_foreign_key(m, table, column):
+    # we have to do this strange thing here because mysql can't just drop
+    # columns that are a foreign key.
+    # see http://casey.shobe.info/documents/mysql_limitations/ for further
+    # details.
+    r = m.engine.execute('''
+        SHOW CREATE TABLE %s;
+    '''% table).fetchone()[1]
+    constraint = re.findall('%s_[^`]+' % column, r)[0]
+    m.engine.execute('ALTER TABLE `%s` DROP FOREIGN KEY %s;' % \
+                     (table, constraint))
+
+
+def add_foreign_key(m, table, column, target):
+    m.engine.execute('''
+        ALTER TABLE `%s` ADD FOREIGN KEY (%s) REFERENCES %s
+    ''' % (table, column, target))
+
+
+def add_staticfile(m):
+    media_folder = path.join(path.dirname(__file__), 'media')
+    try:
+        move(path.join(media_folder, 'ikhaya', 'icons'),
+             path.join(media_folder, 'portal', 'files'))
+    except (IOError, OSError):
+        pass
+
+    m.engine.execute('''
+        ALTER TABLE `ikhaya_icon` RENAME TO `portal_staticfile`,
+                     ADD COLUMN `is_ikhaya_icon` TINYINT(1)  NOT NULL,
+                     CHANGE COLUMN `img` `file` VARCHAR(100);
+    ''')
+    drop_foreign_key(m, 'ikhaya_category', 'icon_id')
+    drop_foreign_key(m, 'ikhaya_article', 'icon_id')
+    add_foreign_key(m, 'ikhaya_category', 'icon_id', 'portal_staticfile(id)')
+    add_foreign_key(m, 'ikhaya_article', 'icon_id', 'portal_staticfile(id)')
+
+
+def remove_unused_topic_column(m):
+    drop_foreign_key(m, 'forum_topic', 'ikhaya_article_id')
+    m.engine.execute('''
+        ALTER TABLE `forum_topic` DROP COLUMN `ikhaya_article_id`;
+    ''')
+
+
 def add_member_title(m):
     """Add the member title"""
     m.engine.execute('''
