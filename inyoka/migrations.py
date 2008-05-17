@@ -256,10 +256,19 @@ def add_member_icon_title(m):
     })
 
 
+def remove_unused_is_public(m):
+    """Remove the unused is_public column from the group model"""
+    m.engine.execute('''
+        alter table portal_group
+            drop column is_public;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
-    add_default_storage_values, add_blocked_hosts_storage, add_member_icon_title
+    add_default_storage_values, add_blocked_hosts_storage, add_member_icon_title,
+    remove_unused_is_public
 ]

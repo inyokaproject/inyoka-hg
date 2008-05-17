@@ -163,7 +163,6 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
-    is_public = forms.BooleanField(label=u'Öffentliches Profil')
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 

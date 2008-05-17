@@ -742,7 +742,6 @@ def groups_edit(request, name=None):
         form = EditGroupForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            group.is_public = data['is_public']
             group.name = data['name']
 
             #: forum privileges

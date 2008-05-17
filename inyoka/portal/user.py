@@ -69,7 +69,6 @@ def check_password(raw_password, enc_password, convert_user=None):
 
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
-    is_public = models.BooleanField('Öffentliches Profil')
     _default_group = None
 
     def get_absolute_url(self):

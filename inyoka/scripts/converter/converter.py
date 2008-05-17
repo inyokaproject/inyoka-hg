@@ -471,7 +471,6 @@ def convert_groups():
         Group.objects.create(**{
                 'pk':        group.group_id,
                 'name':      group.group_name,
-                'is_public': True
         })
 
     subselect = select([group_table.c.group_id],
