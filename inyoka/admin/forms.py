@@ -12,10 +12,9 @@ from datetime import datetime
 from django import newforms as forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
-                               DateTimeWidget, EmailField
+                               DateTimeWidget
 from inyoka.utils.html import cleanup_html
 from inyoka.forum.acl import PRIVILEGES_DETAILS
-
 
 
 class ConfigurationForm(forms.Form):
@@ -99,7 +98,8 @@ class EditIconForm(forms.Form):
 class CreateUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     password = forms.CharField(label=u'Passwort')
-    email = EmailField(label=u'E-Mail')
+    #XXX: use forms.EmailField after testing, see portal.user.User
+    email = forms.CharField(label=u'E-Mail')
     authenticate = forms.BooleanField(label=u'Autentifizieren', required=False,
         help_text=(u'Der Benutzer bekommt eine Bestätigungsmail zugesandt'
                    u' und wird als inaktiv erstellt.'))
@@ -111,7 +111,7 @@ class EditUserForm(forms.Form):
     new_password = forms.CharField(label=u'Neues Passwort',
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
                                    u'Bitte nur angeben, wenn benötigt'))
-    email = EmailField(label=u'E-Mail', required=False)
+    email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     is_manager = forms.BooleanField(label=u'Teammitglied', required=False,
         help_text=u'Der Benutzer kann das Administrationspanel benutzen')
