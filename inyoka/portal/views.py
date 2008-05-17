@@ -645,6 +645,21 @@ def usercp_deactivate(request):
     }
 
 
+@check_login(message=u'Du musst ein geloggt sein, um deine Benutzerseite '
+                     u'zu editieren')
+def usercp_userpage(request):
+    """
+    Redirect page that shows a small flash message that
+    the user was redirected
+    """
+    flash(u'Du wurdest in unser Wiki umgeleitet um deine Benutzerseite zu editieren. '
+          u'Klicke <a href="%s" title="Kontrollzentrum">hier</a> um wieder zurück '
+          u'ins Kontrollzentrum zu gelangen'
+          % escape(href('portal', 'usercp')))
+    return HttpResponseRedirect(href('wiki', 'Benutzer',
+        request.user.username, action='edit'))
+
+
 @templated('portal/privmsg/index.html')
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')

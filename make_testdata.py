@@ -98,7 +98,7 @@ def randtime():
 def make_groups():
     print 'Creating groups'
     for name in create_names(10):
-        groups.append(Group(name=name, is_public=bool(randint(0, 1))))
+        groups.append(Group(name=name))
         groups[-1].save()
 
 
@@ -159,6 +159,13 @@ def make_forum():
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)
     d = Forum(name=u'Diskussionen', slug=settings.WIKI_DISCUSSION_FORUM, parent=f)
+    session.flush()
+    # set privileges for the discussions and all about the wiki forums
+    for forum in (f, d):
+        if admin is not None:
+            session.save(Privilege(
+                user=admin, forum=forum, bits=join_flags(*PRIVILEGES)
+            ))
     forums.append(f)
     forums.append(d)
     session.commit()
