@@ -101,3 +101,17 @@ table.user_groups tr td {
   border: 1px solid #ccc;
 }
 
+div.group_titles {
+  border: 1px solid #ccc;
+  margin: 5px 0px 5px 20px;
+  padding: 5px;
+  width: 350px;
+  font-size: 0.8em;
+  line-height: 1.1em;
+  color: #333;
+}
+
+div.group_titles input {
+  display: inline;
+  margin: 0 0 0 10px;
+}

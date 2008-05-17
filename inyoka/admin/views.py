@@ -688,7 +688,7 @@ def edit_user(request, username):
         'form': form,
         'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
-        'user_groups': groups_joined,
+        'user_groups': sorted(groups_joined, lambda x,y: cmp(x.name, y.name)),
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined],
         'avatar_height': storage_data['max_avatar_height'],
