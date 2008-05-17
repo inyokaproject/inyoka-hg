@@ -353,7 +353,7 @@ def add_member_title(m):
     """Add the member title"""
     m.engine.execute('''
         alter table portal_user
-            add column member_title varchar(100) after is_ikhaya_writer,
+            add column member_title varchar(100) after is_ikhaya_writer;
     ''')
 
 
