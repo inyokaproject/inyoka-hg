@@ -121,8 +121,8 @@
         <td class="author">
           <p class="username">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
-            {%- if post.author.member_icon %}
-            <img class="membericon" src="{{ post.author.member_icon_url }}" alt="Gruppenicon" />
+            {%- if post.author.is_manager and team_icon_url %}
+            <img class="teamicon" src="{{ team_icon_url }}" alt="Teamicon" />
             {% endif %}
             {% if post.author.member_title %}
             <p class="member_title">{{ post.author.member_title }}</p>

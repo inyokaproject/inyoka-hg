@@ -27,10 +27,9 @@ class ConfigurationForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3}), required=False,
         help_text = u'Benutzer können keine E-Mail-Adressen von diesen Hosts '
                     u'zum Registrieren verwenden.')
+    team_icon = forms.ImageField(label=u'Teamicon', required=False)
     max_avatar_width = forms.IntegerField(min_value=1)
     max_avatar_height = forms.IntegerField(min_value=1)
-    member_icon_height = forms.IntegerField(min_value=1)
-    member_icon_width = forms.IntegerField(min_value=1)
     max_signature_length = forms.IntegerField(min_value=1,
         label=u'Maximale Signaturlänge')
     max_signature_lines = forms.IntegerField(min_value=1,
@@ -121,7 +120,6 @@ class EditUserForm(forms.Form):
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
-    member_icon = forms.ImageField(label=u'Benutzer-Icon', required=False)
 
     # ikhaya permission
     is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
@@ -152,7 +150,6 @@ class EditUserForm(forms.Form):
                               label=u'GPG-Schlüssel',  max_length=10)
 
     delete_avatar = forms.BooleanField(label=u'Avatar löschen')
-    delete_member_icon = forms.BooleanField(label=u'Benutzericon löschen')
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()

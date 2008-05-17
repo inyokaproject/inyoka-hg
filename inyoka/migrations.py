@@ -238,22 +238,12 @@ def add_blocked_hosts_storage(m):
     })
 
 
-def add_member_icon_title(m):
-    """Add the member title and icon"""
-    dn = join(settings.MEDIA_ROOT, 'portal', 'member_icons')
-    if not exists(dn):
-        os.mkdir(dn)
-
+def add_member_title(m):
+    """Add the member title"""
     m.engine.execute('''
         alter table portal_user
             add column member_title varchar(100) after is_ikhaya_writer,
-            add column member_icon varchar(100) after member_title;
     ''')
-
-    _set_storage(m, {
-        'member_icon_height': 35,
-        'member_icon_width': 35,
-    })
 
 
 def remove_unused_is_public(m):
@@ -264,11 +254,18 @@ def remove_unused_is_public(m):
     ''')
 
 
+def add_group_icon_cfg(m):
+    """Add the config value for the team icon to the storage"""
+    _set_storage(m, {
+        'team_icon': '',
+    })
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
     add_wiki_revision_change_date_index, fix_sqlalchemy_forum,
     new_forum_acl_system, add_attachment_mimetype, new_attachment_structure,
-    add_default_storage_values, add_blocked_hosts_storage, add_member_icon_title,
-    remove_unused_is_public
+    add_default_storage_values, add_blocked_hosts_storage, add_member_title,
+    remove_unused_is_public, add_group_icon_cfg
 ]

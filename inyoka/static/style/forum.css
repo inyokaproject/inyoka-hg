@@ -261,7 +261,7 @@ table td.author img.avatar {
     background-color: white;
 }
 
-table td.author img.membericon {
+table td.author img.teamicon {
   position: absolute;
   left: 155px;
   float: right;
@@ -270,6 +270,7 @@ table td.author img.membericon {
 table td.author p.member_title {
   line-height: 0.2em;
   font-size: 0.6em;
+  margin-bottom: 10px;
 }
 
 table.forum thead td p.actions {

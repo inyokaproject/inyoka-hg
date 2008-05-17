@@ -8,10 +8,15 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
+import os
+from os import path
+from PIL import Image
+from StringIO import StringIO
 from sqlalchemy import not_, and_
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
+from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
 from inyoka.utils.urls import url_for, href, global_not_found
@@ -56,16 +61,33 @@ def index(request):
 @require_manager
 @templated('admin/configuration.html')
 def config(request):
-    keys = ['max_avatar_width', 'max_avatar_height', 'member_icon_height',
-            'member_icon_width', 'max_signature_length',
+    keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
             'get_ubuntu_description', 'blocked_hosts']
     if request.method == 'POST':
-        form = ConfigurationForm(request.POST)
+        form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
+            print data
             for k in keys:
                 storage[k] = data[k]
+            if data['team_icon']:
+                icon = Image.open(StringIO(data['team_icon'].content))
+                ext = icon.format
+                fn = 'portal/team_icon.%s' % icon.format.lower()
+                imgp = path.join(settings.MEDIA_ROOT, fn)
+
+                if path.exists(imgp):
+                    os.remove(imgp)
+
+                f = open(imgp, 'wb')
+                try:
+                    f.write(data['team_icon'].content)
+                finally:
+                    f.close()
+
+                storage['team_icon'] = fn
+
             flash(u'Die Einstellungen wurden gespeichert.', True)
             return HttpResponseRedirect(href('admin', 'config'))
     else:
@@ -589,12 +611,10 @@ def edit_user(request, username):
                 setattr(user, key, data[key])
             if data['delete_avatar']:
                 user.delete_avatar()
-            if data['delete_member_icon']:
-                user.delete_member_icon()
+
             if data['avatar']:
                 user.save_avatar(data['avatar'])
-            if data['member_icon']:
-                user.save_icon(data['member_icon'])
+
             if data['new_password']:
                 user.set_password(data['new_password'])
 
@@ -662,8 +682,7 @@ def edit_user(request, username):
     groups_not_joined = groups_not_joined or \
                         [x for x in groups.itervalues() if not x in groups_joined]
 
-    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width',
-        'member_icon_height', 'member_icon_width'))
+    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
     return {
         'user': user,
         'form': form,
@@ -674,8 +693,6 @@ def edit_user(request, username):
         'not_joined_groups': [g.name for g in groups_not_joined],
         'avatar_height': storage_data['max_avatar_height'],
         'avatar_width': storage_data['max_avatar_width'],
-        'memicon_height': storage_data['member_icon_height'],
-        'memicon_width': storage_data['member_icon_width']
     }
 
 

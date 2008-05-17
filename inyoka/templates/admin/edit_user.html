@@ -77,9 +77,6 @@
   <dt>{{ form.avatar.label }}</dt>
   <dd>{{ form.avatar }} <span>{{ form.delete_avatar }} {{ form.delete_avatar.label }}</span>
     <p class="note">(Wird auf {{ avatar_height }}x{{ avatar_width }} skaliert)</p></dd>
-  <dt>{{ form.member_icon.label }}</dt>
-  <dd>{{ form.member_icon }} <span>{{ form.delete_member_icon }} {{ form.delete_member_icon.label }}</span>
-    <p class="note">(Wird auf {{ memicon_height }}x{{ memicon_width }} skaliert)</p></dd>
   {{ render_form(form, ['gpgkey']) }}
   <p>
     <input type="submit" value="Speichern" />

@@ -240,9 +240,6 @@ class User(models.Model):
 
     # member title & icon
     member_title = models.CharField('Benutzertitel', blank=True, null=True)
-    member_icon = models.ImageField('Benutzericon', upload_to='portal/member_icons',
-        blank=True, null=True)
-
 
     def save(self):
         """
@@ -336,27 +333,20 @@ class User(models.Model):
             return href('static', 'img', 'portal', 'no_avatar.png')
         return self.get_avatar_url()
 
-    @property
-    def member_icon_url(self):
-        return self.get_member_icon_url()
-
-    def _save_image(self, img, type='', maxs=None, clear_callback=None):
+    def save_avatar(self, img):
         """Save `img` to the file system."""
-        assert type in ('icon', 'avatar')
         image = Image.open(StringIO(img.content))
         ext = image.format
-        if type == 'icon':
-            fn = 'portal/member_icons/icon_user%d.%s' % (self.id,
-                image.format.lower())
-        elif type == 'avatar':
-            fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
-                image.format.lower())
+        fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
+             image.format.lower())
         image_path = path.join(settings.MEDIA_ROOT, fn)
-        if clear_callback is not None:
-            clear_callback()
+        #: clear the file system
+        self.delete_avatar()
 
-        if image.size > maxs:
-            image = image.resize(maxs)
+        std = storage.get_keys(('max_avatar_height', 'max_avatar_width'))
+        max_size = (std['max_avatar_height'], std['max_avatar_width'])
+        if image.size > max_size:
+            image = image.resize(max_size)
             image.save(image_path)
         else:
             f = open(image_path, 'wb')
@@ -364,25 +354,7 @@ class User(models.Model):
                 f.write(img.content)
             finally:
                 f.close()
-
-        if type == 'icon':
-            self.member_icon = fn
-        elif type == 'avatar':
-            self.avatar = fn
-
-    def save_icon(self, img):
-        """Save the member icon to the file system."""
-        self._save_image(img, 'icon',
-            (int(storage['member_icon_height']),
-             int(storage['member_icon_width'])),
-            lambda: self.delete_member_icon())
-
-    def save_avatar(self, img):
-        """Save the avater to the file system."""
-        self._save_image(img, 'avatar',
-            (int(storage['max_avatar_height']),
-             int(storage['max_avatar_width'])),
-            lambda: self.delete_avatar())
+        self.avatar = fn
 
     def delete_avatar(self):
         """Delete the avater from the file system."""
@@ -390,13 +362,6 @@ class User(models.Model):
         if path.exists(fn):
             os.remove(fn)
         self.avatar = None
-
-    def delete_member_icon(self):
-        """Delete the member icon from the file system."""
-        fn = self.get_member_icon_filename()
-        if path.exists(fn):
-            os.remove(fn)
-        self.member_icon = None
 
     def get_absolute_url(self, action='show'):
         return href(*{

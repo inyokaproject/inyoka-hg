@@ -966,10 +966,6 @@ class SAUser(object):
         return href('media', self.avatar)
 
     @property
-    def member_icon_url(self):
-        return href('media', self.member_icon)
-
-    @property
     def rendered_signature(self):
         return self.render_signature()
 
