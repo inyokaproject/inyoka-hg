@@ -714,7 +714,10 @@ def new_user(request):
             flash(u'Du kannst nun weitere Details bearbeiten')
             return HttpResponseRedirect(href('admin', 'users', 'edit',
                                              escape(data['username'])))
-    form = CreateUserForm()
+        else:
+            flash(u'Es sind Probleme aufgetreten, bitte behebe sie!', False)
+    else:
+        form = CreateUserForm()
     return {
         'form': form
     }
@@ -773,8 +776,7 @@ def groups_edit(request, name=None):
                     if not privilege:
                         privilege = Privilege(
                             group=group,
-                            forum=Forum.query.get(int(forum_id))
-                        )
+                            forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
 
                     privilege.bits = join_flags(*value)
