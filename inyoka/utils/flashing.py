@@ -78,8 +78,8 @@ class FlashMessage(object):
         self.success = success
 
     def __repr__(self):
-        return '<%s(%s:%s:%s)>' % (
+        return '<%s(%s:%s)>' % (
             self.__class__.__name__,
             self.text,
-            self.success,
+            self.success
         )
