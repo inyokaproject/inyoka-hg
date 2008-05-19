@@ -182,12 +182,6 @@ pre {
   font-style: normal;
 }
 
-ol, ul {
-  margin: 0.5em 0 0.5em 0;
-  padding: 0 0 0 2em;
-  line-height: 1.5em;
-}
-
 ol ul, ol ol, ul ol, ol ul {
   margin: 0;
 }
@@ -452,6 +446,7 @@ table.syntaxtable td.linenos {
   margin: 0;
   position:relative;
   right: 10px;
+  top:5px;
   float:right
 }
 
@@ -1114,4 +1109,37 @@ table.filterable td.value {
 table.filterable div.add {
   float: right;
 }
+
+/*** dropdown ************************************************************/
+
+ul.dropdown {
+list-style:none;
+float:right;
+position:relative;
+bottom:21px;
+background-color:#f5f5f5;
+border:#f5f5f5 1px solid;
+margin-left:5px;
+padding:1px 5px;
+width:120px;
+}
+
+ul.dropdown li {
+margin-bottom:3px;
+}
+
+ul.dropdown:hover {
+border:#cccccc 1px solid;
+}
+
+ul.dropdown ul {
+display:none;
+list-style:none;
+}
+
+ul.dropdown:hover ul {
+display:block
+}
+
+
 

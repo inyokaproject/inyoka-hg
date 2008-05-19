@@ -105,7 +105,7 @@
 
       <div class="pathbar">
         <form action="{{ href('portal', 'search') }}" method="get" class="search">
-          <p>
+
             <input type="text" name="q" class="search_query" />
             {%- if topic %}
             <input type="hidden" name="topic_id" value="{{ topic.id }}" />
@@ -118,12 +118,18 @@
               <option value="wiki"{% if active_app == 'wiki' %} selected="selected"{% endif %}>Wiki</option>
               <option value="ikhaya"{% if active_app == 'ikhaya' %} selected="selected"{% endif %}>Ikhaya</option>
               <option value="planet"{% if active_app == 'planet' %} selected="selected"{% endif %}>Planet</option>
-              {%- block search_areas %}{% endblock -%}
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
-          </p>
+            {% if active_app == 'forum' %}<ul class="dropdown"><li><a href="#">Erweiterte Suche</a></li><li><ul>
+              <li><a href="/search/egosearch/">Eigene Beiträge</a></li>
+              <li><a href="/search/newposts/">Neue Beiträge</a></li>
+              <li><a href="/search/unanswered/">Unbeantwortete Themen</a></li>
+              <li><a href="/search/unfixed/category/2/">Ungelöste Themen</a></li>
+              <li><a href="/search/last24/">24 Stunden</a></li>
+              <li><a href="/search/last12/">12 Stunden</a></li>
+              <li><a href="/search/last6/">6 Stunden</a></li>
+            </ul></li></ul>{% endif %}
         </form>{# .search #}
-
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace|default([]) %}
           <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
