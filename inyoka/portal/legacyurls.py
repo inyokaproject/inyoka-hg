@@ -28,7 +28,7 @@ def ikhaya_article(args, match, article_id):
         return
     return href('ikhaya', article.slug)
 
-@legacy.url(r'^/ikhaya/(.*)$')
+@legacy.url(r'^/ikhaya/([^0-9].*|)$')
 def ikhaya(args, match, url):
     # further redirects are done in ikhaya.legacyurls
     return href('ikhaya', url, **args)

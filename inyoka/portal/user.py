@@ -56,6 +56,8 @@ def check_password(raw_password, enc_password, convert_user=None):
     Returns a boolean of whether the raw_password was correct.  Handles
     encryption formats behind the scenes.
     """
+    if isinstance(raw_password, unicode):
+        raw_password = raw_password.encode('utf-8')
     salt, hsh = enc_password.split('$')
     # compatibility with old md5 passwords
     if salt == 'md5':
