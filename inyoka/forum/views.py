@@ -995,7 +995,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         cache_key = 'forum/feeds/topic/%s/%s' % (slug, mode)
         feed = cache.get(cache_key)
         if feed is None:
-            posts = topic.posts.order_by(Post.pub_date.desc())[:count]
+            posts = topic.posts.order_by(Post.pub_date.desc())[:100]
 
             feed = FeedBuilder(
                 title=u'ubuntuusers Thema – „%s“' % topic.title,
@@ -1053,7 +1053,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
             cache_key = 'forum/feeds/forum/*/%s' % (mode)
             feed = cache.get(cache_key)
             if feed is None:
-                topics = Topic.query.order_by(Topic.id.desc())[:count]
+                topics = Topic.query.order_by(Topic.id.desc())[:100]
                 feed = FeedBuilder(
                     title=u'ubuntuusers Forum',
                     url=href('forum'),
@@ -1089,7 +1089,10 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 feed.add(
                     title=topic.title,
                     url=url_for(topic),
-                    author=topic.author,
+                    author={
+                        'name': topic.author.username,
+                        'uri': topic.author.get_absolute_url(),
+                    },
                     published=post.pub_date,
                     updated=post.pub_date,
                     **kwargs

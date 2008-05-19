@@ -23,7 +23,7 @@ def ikhaya_article(args, match, article_id):
     # we cannot do that on the ikhaya subdomain, 
     # because there /\d+/ is for the pagination.
     try:
-        article = Article.objects.get(article_id)
+        article = Article.objects.get(id=int(article_id))
     except Article.DoesNotExist:
         return
     return href('ikhaya', article.slug)
