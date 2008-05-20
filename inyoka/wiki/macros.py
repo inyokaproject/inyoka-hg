@@ -849,27 +849,27 @@ class RandomPageList(Macro):
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
-    u'LetzteÄnderungen':    RecentChanges,
-    u'Inhaltsverzeichnis':  TableOfContents,
-    u'Seitenzahl':          PageCount,
-    u'Seitenliste':         PageList,
     u'Anhänge':             AttachmentList,
-    u'VerwaisteSeiten':     OrphanedPages,
-    u'FehlendeSeiten':      MissingPages,
-    u'Weiterleitungen':     RedirectPages,
-    u'Seitenname':          PageName,
-    u'ÄhnlicheSeiten':      SimilarPages,
-    u'TagWolke':            TagCloud,
-    u'TagListe':            TagList,
-    u'Einbinden':           Include,
-    u'Vorlage':             Template,
+    u'Anker':               Anchor,
+    u'BR':                  Newline,
     u'Bild':                Picture,
     u'Datum':               Date,
-    u'NeueSeiten':          NewPages,
-    u'BR':                  Newline,
-    u'Anker':               Anchor,
+    u'Einbinden':           Include,
+    u'FehlendeSeiten':      MissingPages,
+    u'Inhaltsverzeichnis':  TableOfContents,
+    u'LetzteÄnderungen':    RecentChanges,
     u'NeueSeite':           NewPage,
+    u'NeueSeiten':          NewPages,
+    u'Seitenliste':         PageList,
+    u'Seitenname':          PageName,
+    u'Seitenzahl':          PageCount,
+    u'TagListe':            TagList,
+    u'TagWolke':            TagCloud,
+    u'VerwaisteSeiten':     OrphanedPages,
+    u'Vorlage':             Template,
+    u'Weiterleitungen':     RedirectPages,
     u'Zufallsseite':        RandomPageList,
+    u'ÄhnlicheSeiten':      SimilarPages
 }
 
 
