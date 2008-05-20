@@ -22,7 +22,7 @@
 from datetime import datetime
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
-     TemplateResponse, AccessDeniedResponse
+     TemplateResponse, AccessDeniedResponse, PageNotFound
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
@@ -782,7 +782,10 @@ def do_attach_edit(request, name):
 @does_not_exist_is_404
 def do_prune(request, name):
     """Clear the page cache."""
-    page = Page.objects.get_by_name(name)
+    try:
+        page = Page.objects.get_by_name(name)
+    except Page.DoesNotExist:
+        raise PageNotFound
     page.prune()
     flash('Der Seitencache wurde geleert.')
     return HttpResponseRedirect(page.get_absolute_url())
