@@ -56,12 +56,17 @@ urlpatterns = patterns('inyoka.forum.views',
     (r'^forum/(?P<slug>[^/]+)/markread/$', 'markread'),
     (r'^newposts/$', 'newposts'),
     (r'^newposts/(?P<page>\d+)/$', 'newposts'),
+    # special searches
     (r'^last(?P<hours>\d+)/$', 'topiclist', {'action': 'last'}),
     (r'^last(?P<hours>\d+)/(?P<page>\d+)/$', 'topiclist', {'action': 'last'}),
     (r'^unanswered/$', 'topiclist', {'action': 'unanswered'}),
     (r'^unanswered/(?P<page>\d+)/$', 'topiclist', {'action': 'unanswered'}),
     (r'^unsolved/$', 'topiclist', {'action': 'unsolved'}),
     (r'^unsolved/(?P<page>\d+)/$', 'topiclist', {'action': 'unsolved'}),
+    (r'^egosearch/$', 'topiclist', {'action': 'author'}),
+    (r'^egosearch/(?P<page>\d+)/$', 'topiclist', {'action': 'author'}),
+    (r'^author/(?P<user>[^/]+)/$', 'topiclist', {'action': 'author'}),
+    (r'^author/(?P<user>[^/]+)/(?P<page>\d+)/$', 'topiclist', {'action': 'author'}),
     (r'^category/(?P<slug>[^/]+)/welcome/$', 'welcome'),
     (r'^forum/(?P<slug>[^/]+)/welcome/$', 'welcome')
 )
