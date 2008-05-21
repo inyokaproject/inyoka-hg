@@ -800,6 +800,7 @@ def convert_ikhaya():
 
     # contains a mapping of old_user_id -> new_user_id
     user_mapping = {}
+    image_mapping = {}
     force = {
         'tux123': 'tux21b',
     }
@@ -815,6 +816,7 @@ def convert_ikhaya():
             user_mapping[user.id] = 1
 
     for image in select_blocks(image_table.select()):
+        image_mapping[image.identifier] = image.id
         StaticFile(**{
             'id':           image.id,
             'identifier':   path.basename(image.file),
@@ -836,7 +838,8 @@ def convert_ikhaya():
             text=render_article(data.text, data.parser),
             public=data.public,
             category=category_mapping[data.category_id],
-            is_xhtml=1
+            is_xhtml=1,
+            icon=image_mapping.get(article.icon2)
         )
         article.save()
         connection.queries = []
