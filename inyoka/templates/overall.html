@@ -121,13 +121,13 @@
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
             {% if active_app == 'forum' %}<ul class="dropdown"><li><a href="#">Erweiterte Suche</a></li><li><ul>
-              <li><a href="/search/egosearch/">Eigene Beiträge</a></li>
-              <li><a href="/search/newposts/">Neue Beiträge</a></li>
-              <li><a href="/search/unanswered/">Unbeantwortete Themen</a></li>
-              <li><a href="/search/unfixed/category/2/">Ungelöste Themen</a></li>
-              <li><a href="/search/last24/">24 Stunden</a></li>
-              <li><a href="/search/last12/">12 Stunden</a></li>
-              <li><a href="/search/last6/">6 Stunden</a></li>
+              <li><a href="/egosearch/">Eigene Beiträge</a></li>
+              <li><a href="/newposts/">Neue Beiträge</a></li>
+              <li><a href="/unanswered/">Unbeantwortete Themen</a></li>
+              <li><a href="/unfixed/">Ungelöste Themen</a></li>
+              <li><a href="/last24/">24 Stunden</a></li>
+              <li><a href="/last12/">12 Stunden</a></li>
+              <li><a href="/last6/">6 Stunden</a></li>
             </ul></li></ul>{% endif %}
         </form>{# .search #}
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
