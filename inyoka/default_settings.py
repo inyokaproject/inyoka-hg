@@ -106,6 +106,9 @@ JABBER_BOT_SERVER = '127.0.0.1:6203'
 # hours for a user to activate the account
 ACTIVATION_HOURS = 48
 
+# days to describe an inactive user
+USER_INACTIVE_DAYS = 365
+
 # key for google maps
 GOOGLE_MAPS_APIKEY = ''
 
