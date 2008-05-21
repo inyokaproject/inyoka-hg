@@ -1077,7 +1077,7 @@ dbsession.mapper(Forum, forum_table, properties={
     '_children': relation(Forum, backref=backref('parent',
         remote_side=[forum_table.c.id])),
     'last_post': relation(Post, post_update=True)},
-    extension=ForumMapperExtension()
+    extension=ForumMapperExtension(),
 )
 dbsession.mapper(Topic, topic_table, properties={
     'author': relation(SAUser,

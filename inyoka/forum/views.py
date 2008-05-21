@@ -82,13 +82,7 @@ def index(request, category=None):
                          u'Kategorieübersicht')
         categories = [category]
     else:
-        category_ids = cache.get('forum/category_ids')
-        if category_ids is None:
-            category_ids = session.execute(select([forum_table.c.id],
-                forum_table.c.parent_id == None)).fetchall()
-            category_ids = [row[0] for row in category_ids]
-            cache.set('forum/category_ids', category_ids)
-        categories = [Forum.query.get(c) for c in category_ids]
+        categories = Forum.query.filter(forum_table.c.parent_id == None)
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
 
