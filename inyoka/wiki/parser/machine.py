@@ -241,6 +241,7 @@ class MarkupWriter(object):
         self._newline = False
         self._new_paragraph = False
         self._new_break = False
+        self._escapes = []
 
     @property
     def is_oneline(self):
@@ -292,6 +293,8 @@ class MarkupWriter(object):
 
     def text(self, text):
         self.flush()
+        for s in self._escapes:
+            text = text.replace(s, u'\\%s' % s)
         if not self.is_raw:
             text = self.escape(text)
             text = _whitespace_re.sub(u' ', text)
@@ -369,3 +372,9 @@ class MarkupWriter(object):
     def outdent(self):
         self._indentation.pop()
     unquote = endraw = outdent
+
+    def start_escaping(self, chars):
+        self._escapes.append(chars)
+
+    def stop_escaping(self):
+        self._escapes.pop()

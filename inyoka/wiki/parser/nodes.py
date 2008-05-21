@@ -580,7 +580,9 @@ class InternalLink(Element):
         if self.anchor:
             target += '#' + self.anchor
         w.markup(u'[:%s:' % target.replace(':', '::'))
+        w.start_escaping(']')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u']')
 
     def prepare_html(self):
@@ -630,7 +632,9 @@ class InterWikiLink(Element):
         if self.anchor:
             target += '#' + self.anchor
         w.markup(u'[%s:%s:' % (self.wiki, target.replace(':', '::')))
+        w.start_escaping(']')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u']')
 
     def prepare_html(self):
@@ -697,7 +701,9 @@ class Link(Element):
         else:
             w.markup(u'[%s' % self.href)
             w.markup(' ')
+            w.start_escaping(']')
             Element.generate_markup(self, w)
+            w.stop_escaping()
             w.markup(u']')
 
     def prepare_html(self):
@@ -825,7 +831,9 @@ class Footnote(Element):
 
     def generate_markup(self, w):
         w.markup(u"((")
+        w.start_escaping('))')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"))")
 
     def prepare_html(self):
@@ -887,7 +895,9 @@ class Moderated(Element):
 
     def generate_markup(self, w):
         w.markup(u'[mod=%s]' % self.username)
+        w.start_escaping('[/mod]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'[/mod]')
 
     def prepare_html(self):
@@ -915,7 +925,9 @@ class Edited(Element):
 
     def generate_markup(self, w):
         w.markup(u'[edit=%s]' % self.username)
+        w.start_escaping('[/edit]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'[/edit]')
 
     def prepare_html(self):
@@ -939,10 +951,12 @@ class Preformatted(Element):
     def generate_markup(self, w):
         w.raw()
         w.markup(u'{{{')
+        w.start_escaping('}}}')
         Element.generate_markup(self, w)
         if w._result[-1][-1] == u'}':
             # prevent four }s
             w.touch_whitespace()
+        w.stop_escaping()
         w.markup(u'}}}')
         w.endraw()
 
@@ -1007,7 +1021,9 @@ class Strong(Element):
 
     def generate_markup(self, w):
         w.markup(u"'''")
+        w.start_escaping(u"'''")
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"'''")
 
     def prepare_html(self):
@@ -1031,7 +1047,9 @@ class Highlighted(Strong):
 
     def generate_markup(self, w):
         w.markup('[mark]')
+        w.start_escaping('[/mark]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup('[/mark]')
 
     def prepare_html(self):
@@ -1055,7 +1073,9 @@ class Emphasized(Element):
 
     def generate_markup(self, w):
         w.markup(u"''")
+        w.start_escaping("''")
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"''")
 
     def prepare_html(self):
@@ -1112,7 +1132,9 @@ class Code(Element):
 
     def generate_markup(self, w):
         w.markup(u"``")
+        w.start_escaping('``')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"``")
 
     def prepare_html(self):
@@ -1141,7 +1163,9 @@ class Underline(Element):
 
     def generate_markup(self, w):
         w.markup(u"__")
+        w.start_escaping('__')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"__")
 
     def prepare_html(self):
@@ -1170,7 +1194,9 @@ class Stroke(Element):
 
     def generate_markup(self, w):
         w.markup(u"--(")
+        w.start_escaping(')--')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u")--")
 
     def prepare_html(self):
@@ -1191,7 +1217,9 @@ class Small(Element):
 
     def generate_markup(self, w):
         w.markup(u"~-")
+        w.start_escaping('-~')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"-~")
 
     def prepare_html(self):
@@ -1211,7 +1239,9 @@ class Big(Element):
 
     def generate_markup(self, w):
         w.markup(u"~+")
+        w.start_escaping('+~')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u"+~")
 
     def prepare_html(self):
@@ -1231,7 +1261,9 @@ class Sub(Element):
 
     def generate_markup(self, w):
         w.markup(u',,')
+        w.start_escaping(',,')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u',,')
 
     def prepare_html(self):
@@ -1257,7 +1289,9 @@ class Sup(Element):
 
     def generate_markup(self, w):
         w.markup(u'^^')
+        w.start_escaping('^^')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'^^')
 
     def prepare_html(self):
@@ -1289,7 +1323,9 @@ class Color(Element):
 
     def generate_markup(self, w):
         w.markup(u'[color=%s]' % self.value)
+        w.start_escaping('[/color]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'[/color]')
 
     def prepare_html(self):
@@ -1318,7 +1354,9 @@ class Size(Element):
 
     def generate_markup(self, w):
         w.markup(u'[size=%s]' % self.size)
+        w.start_escaping('[/size]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'[/size]')
 
     def prepare_html(self):
@@ -1349,7 +1387,9 @@ class Font(Element):
 
     def generate_markup(self, w):
         w.markup(u'[font=%s]' % self.value)
+        w.start_escaping('[/font]')
         Element.generate_markup(self, w)
+        w.stop_escaping()
         w.markup(u'[/font]')
 
     def prepare_html(self):
