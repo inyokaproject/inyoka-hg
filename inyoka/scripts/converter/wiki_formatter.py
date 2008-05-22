@@ -51,6 +51,14 @@ class InyokaFormatter(FormatterBase):
     #: or not (0 means no, everything bigger than 0 means yes)
     #: Don't set it manually bug use the _paragraph_breaks() function.
     no_paragraph_breaks = 0
+    tags = []
+
+    def endDocument(self):
+        return u'\n# tag: %s' % u', '.join(self.tags)
+
+    def setPage(self, page):
+        self.tags = []
+        FormatterBase.setPage(self, page)
 
     def _paragraph_breaks(self, yes):
         if not yes:
@@ -96,7 +104,7 @@ class InyokaFormatter(FormatterBase):
             return u'((%s))' % u''.join(args)
 
         elif name == 'Tags':
-            return u'# tag: ' + args
+            self.tags.extend(arg.strip() for arg in args.split(','))
 
         elif name == 'MailTo':
             args = [a.strip() for a in (args or '').split(',')]
@@ -219,7 +227,8 @@ class InyokaFormatter(FormatterBase):
         if pagename in PAGE_REPLACEMENTS:
             pagename = PAGE_REPLACEMENTS[pagename]
         if pagename.startswith('Kategorie/'):
-            return u'# tag:%s' % pagename[10:]
+            self.tags.append(pagename[10:])
+            return u''
         pagename = normalize_pagename(pagename)
         if on:
             self.in_link = True

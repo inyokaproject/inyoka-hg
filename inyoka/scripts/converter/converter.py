@@ -879,7 +879,7 @@ def convert_pastes():
         connection.queries = []
 
 
-def convert_static_pages()
+def convert_static_pages():
     engine = create_engine(OLD_PORTAL_URI)
     meta = MetaData()
     meta.bind = engine
