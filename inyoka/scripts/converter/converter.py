@@ -10,6 +10,7 @@
     :copyright: Copyright 2007-2008 by Benjamin Wiegand, Florian Apolloner.
     :license: GNU GPL.
 """
+import re
 import sys
 import cPickle
 from os import path
@@ -74,6 +75,7 @@ PAGE_REPLACEMENTS = {
     'XFCE':         'Xfce',
     'Gimp':         'GIMP',
 }
+CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
 
 
 def convert_bbcode(text, uid):
@@ -239,6 +241,7 @@ def convert_wiki():
             parser = InyokaParser(text, request)
             text = request.redirectedOutput(parser.format, formatter)
             text += formatter.get_tags()
+            text = CATEGORY_RE.sub('', text)
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
