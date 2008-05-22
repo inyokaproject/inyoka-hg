@@ -758,6 +758,7 @@ def convert_privmsgs():
             i = 0
         else:
             i += 1
+        connection.queries = []
     transaction.commit()
 
 
