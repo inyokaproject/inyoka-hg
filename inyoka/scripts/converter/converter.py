@@ -141,7 +141,7 @@ def convert_wiki():
     except IOError:
         page_list = list(request.rootpage.getPageList())
         f = file('pagelist', 'w+')
-        cPickle.write(page_list, f)
+        cPickle.dump(page_list, f)
         f.close()
     else:
         page_list = cPickle.load(f)
@@ -227,11 +227,11 @@ def convert_wiki():
                 raise NotImplementedError(line.action)
 
         # edit the wiki page for syntax converting
-        if page_name.startswith('Kategorie/'):
-            n = page_name[10:]
+        if name.startswith('Kategorie/'):
+            n = name[10:]
             text = (u'# tag: Kategorie\nSeiten in der Kategorie „%s“:\n'
                    u'[[TagListe(%s)]]') % (n, n)
-        elif page_name == 'Kategorien':
+        elif name == 'Kategorien':
             text = u'Kategorien sind eine Form der Markierung. Es sind keine exklusiven Schubladen, in denen man Artikel verstauen kann, so wie im alten Wiki in einem Namensraum - eher sind es frei kombinierbare Etiketten.\n[[TagListe(Kategorie)]]'
         else:
             formatter.setPage(page)
@@ -816,12 +816,15 @@ def convert_ikhaya():
             user_mapping[user.id] = 1
 
     for image in select_blocks(image_table.select()):
-        image_mapping[image.identifier] = image.id
-        StaticFile(**{
-            'id':           image.id,
-            'identifier':   path.basename(image.file),
-            'file':         image.file.replace('uploads', 'portal/files')
-        }).save()
+        image_mapping[image.identifer] = image.id
+        try:
+            StaticFile(**{
+                'id':           image.id,
+                'identifier':   path.basename(image.file),
+                'file':         image.image.replace('uploads', 'portal/files')
+            }).save()
+        except IntegrityError:
+            pass
 
     category_mapping = {}
     for data in category_table.select().execute():
@@ -839,7 +842,7 @@ def convert_ikhaya():
             public=data.public,
             category=category_mapping[data.category_id],
             is_xhtml=1,
-            icon=image_mapping.get(article.icon2)
+            icon=image_mapping.get(data.icon2)
         )
         article.save()
         connection.queries = []
@@ -876,7 +879,7 @@ def convert_pastes():
         connection.queries = []
 
 
-def convert_static_pages(self):
+def convert_static_pages()
     engine = create_engine(OLD_PORTAL_URI)
     meta = MetaData()
     meta.bind = engine
