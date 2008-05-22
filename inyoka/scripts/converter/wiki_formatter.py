@@ -55,10 +55,10 @@ class InyokaFormatter(FormatterBase):
 
     def get_tags(self):
         new_tags = []
-        for tag in tags:
+        for tag in self.tags:
             if tag not in new_tags:
                 new_tags.append(tag)
-        return u'\n# tag: %s' % u', '.join(self.new_tags)
+        return u'\n# tag: %s' % u', '.join(new_tags)
 
     def setPage(self, page):
         self.tags = []
