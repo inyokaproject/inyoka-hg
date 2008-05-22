@@ -904,6 +904,7 @@ MODE_MAPPING = {
         'polls':         convert_polls,
         'attachments':   convert_attachments,
         'privmsgs':      convert_privmsgs,
+        'static_pages':  convert_static_pages,
 }
 
 
