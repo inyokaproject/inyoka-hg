@@ -104,7 +104,7 @@
       </div>{# .appheader #}
 
       <div class="pathbar">
-        
+
         <form action="{{ href('portal', 'search') }}" method="get" class="search">
             <input type="text" name="q" class="search_query" />
             {%- if topic %}
@@ -121,6 +121,7 @@
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
         </form>{# .search #}
+
         {% if active_app == 'forum' %}
           <div class="dropdown">
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
@@ -134,6 +135,7 @@
             </ul></li></ul>
           </div>
         {% endif %}
+
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace|default([]) %}
           <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last

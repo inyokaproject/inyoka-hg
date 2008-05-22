@@ -1144,6 +1144,7 @@ ul.dropdown:hover ul {
 
 div.dropdown {
   float:right;
+  width:120px;
   height:20px;
   margin-right:4px;
 }
