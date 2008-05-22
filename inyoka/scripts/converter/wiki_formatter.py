@@ -109,6 +109,7 @@ class InyokaFormatter(FormatterBase):
 
         elif name == 'Tags':
             self.tags.extend(arg.strip() for arg in args.split(','))
+            return u''
 
         elif name == 'MailTo':
             args = [a.strip() for a in (args or '').split(',')]
