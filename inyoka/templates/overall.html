@@ -104,8 +104,8 @@
       </div>{# .appheader #}
 
       <div class="pathbar">
+        
         <form action="{{ href('portal', 'search') }}" method="get" class="search">
-
             <input type="text" name="q" class="search_query" />
             {%- if topic %}
             <input type="hidden" name="topic_id" value="{{ topic.id }}" />
@@ -120,22 +120,27 @@
               <option value="planet"{% if active_app == 'planet' %} selected="selected"{% endif %}>Planet</option>
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
-            {% if active_app == 'forum' %}<ul class="dropdown"><li><a href="#">Erweiterte Suche</a></li><li><ul>
-              <li><a href="/egosearch/">Eigene Beiträge</a></li>
-              <li><a href="/newposts/">Neue Beiträge</a></li>
-              <li><a href="/unanswered/">Unbeantwortete Themen</a></li>
-              <li><a href="/unsolved/">Ungelöste Themen</a></li>
-              <li><a href="/last24/">24 Stunden</a></li>
-              <li><a href="/last12/">12 Stunden</a></li>
-              <li><a href="/last6/">6 Stunden</a></li>
-            </ul></li></ul>{% endif %}
         </form>{# .search #}
+        {% if active_app == 'forum' %}
+          <div class="dropdown">
+            <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
+              <li><a href="{{ href('portal', 'search') }}">Eigene Beiträge</a></li>
+              <li><a href="{{ href('portal', 'search') }}">Neue Beiträge</a></li>
+              <li><a href="{{ href('portal', 'search') }}">Unbeantwortete Themen</a></li>
+              <li><a href="{{ href('portal', 'search') }}">Ungelöste Themen</a></li>
+              <li><a href="{{ href('portal', 'search') }}">24 Stunden</a></li>
+              <li><a href="{{ href('portal', 'search') }}">12 Stunden</a></li>
+              <li><a href="{{ href('portal', 'search') }}">6 Stunden</a></li>
+            </ul></li></ul>
+          </div>
+        {% endif %}
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace|default([]) %}
           <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
             %} »{% endif %}
-        {%- endfor %}</p>
-        <div style="clear:both;"></div>
+        {%- endfor %}
+        </p>
+
       </div>{# .pathbar #}
 
       {%- if GLOBAL_MESSAGE %}
