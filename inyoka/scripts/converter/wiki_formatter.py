@@ -52,8 +52,9 @@ class InyokaFormatter(FormatterBase):
     #: Don't set it manually bug use the _paragraph_breaks() function.
     no_paragraph_breaks = 0
     tags = []
+    no_text = False
 
-    def endDocument(self):
+    def get_tags(self):
         return u'\n# tag: %s' % u', '.join(self.tags)
 
     def setPage(self, page):
@@ -228,6 +229,7 @@ class InyokaFormatter(FormatterBase):
             pagename = PAGE_REPLACEMENTS[pagename]
         if pagename.startswith('Kategorie/'):
             self.tags.append(pagename[10:])
+            self.no_text = on
             return u''
         pagename = normalize_pagename(pagename)
         if on:
@@ -262,7 +264,8 @@ class InyokaFormatter(FormatterBase):
         return u'__'
 
     def _text(self, text):
-        return text
+        if not self.no_text:
+            return text
 
     def text(self, text):
         if self.in_link and self.link_target == text:

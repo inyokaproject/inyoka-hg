@@ -238,6 +238,7 @@ def convert_wiki():
             formatter.inyoka_page = new_page
             parser = InyokaParser(text, request)
             text = request.redirectedOutput(parser.format, formatter)
+            text += formatter.get_tags()
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
