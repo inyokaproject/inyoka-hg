@@ -38,7 +38,7 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -435,8 +435,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
-        post.text = d['text']
-        post.rendered_text = post.render_text(request, nocache=True)
+        post.edit(request, d['text'])
 
         session.flush([post])
         if attachments:
@@ -885,6 +884,29 @@ def delete_post(request, post_id):
         else:
             flash(render_template('forum/post_delete.html', {'post': post}))
     return HttpResponseRedirect(url_for(post.topic))
+
+
+@templated('forum/revisions.html')
+def revisions(request, post_id):
+    revs = PostRevision.query.options(eagerload('post'),
+            eagerload('post.topic'), eagerload('post.topic.forum')) \
+        .filter(PostRevision.post_id == post_id)
+    if not have_privilege(request.user, revs[0].post.topic.forum, CAN_MODERATE):
+        return abort_access_denied(request)
+    return {
+        'revisions': list(revs)
+    }
+
+
+def restore_revision(request, rev_id):
+    rev = PostRevision.query.options(eagerload('post'),
+        eagerload('post.topic'), eagerload('post.topic.forum')).get(rev_id)
+    if not have_privilege(request.user, rev.post.topic.forum, CAN_MODERATE):
+        return abort_access_denied(request)
+    rev.restore(request)
+    session.commit()
+    flash(u'Eine alte Version des Beitrags wurde wiederhergestellt.', True)
+    return HttpResponseRedirect(href('forum', 'post', rev.post_id))
 
 
 def hide_topic(request, topic_slug):

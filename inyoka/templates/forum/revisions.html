@@ -1,0 +1,39 @@
+{#
+    forum/revisions.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    This page shows all old revisions of a post and gives the moderator the
+    possibility to restore it.
+
+    :copyright: 2008 Benjamin Wiegand.
+    :license GNU GPL
+    
+#}
+
+{%- extends 'forum/page.html' %}
+{% set title_trace = ['Alte Versionen anzeigen'] %}
+
+{% block forum_content %}
+<table>
+  <thead>
+    <tr>
+      <th>Datum</th>
+      <th>Text</th>
+      <th>Aktionen</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%- for rev in revisions %}
+    <tr>
+      <td>{{ rev.store_date|datetimeformat }}</td>
+      <td>{{ rev.rendered_text }}</td>
+      <td><a href="{{ rev|url('restore') }}">Wiederherstellen</a></td>
+    </tr>
+    {%- else %}
+    <tr>
+      <td colspan="3">Von diesen Beitrag sind keine alten Versionen vorhanden.</td>
+    </tr>
+    {%- endfor %}
+  </tbody>
+</table>
+{% endblock %}
