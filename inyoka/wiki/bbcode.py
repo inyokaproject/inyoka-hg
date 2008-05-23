@@ -446,10 +446,8 @@ class Parser(object):
         self.next()
         while 1:
             items = self.parse_until(('*', '/list'), push_back=True)
-            if not filter(lambda n: not is_empty_node(n), items):
-                # empty list item
-                continue
-            children.append(nodes.ListItem(items))
+            if filter(lambda n: not is_empty_node(n), items):
+                children.append(nodes.ListItem(items))
             if self.eos:
                 break
             elif is_list_end():
