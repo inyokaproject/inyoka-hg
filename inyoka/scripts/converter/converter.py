@@ -433,7 +433,7 @@ def convert_forum():
             'id':            row[post_table.c.post_id],
             'text':          text,
             'rendered_text': '',
-        })
+        }))
         session.commit()
 
     print 'fixing forum references'
