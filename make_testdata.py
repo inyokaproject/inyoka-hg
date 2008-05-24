@@ -35,8 +35,8 @@ def create_names(count, func=lambda: choice(NAME_WORDS)):
     """Yields a bunch of unique names"""
     used = []
     for _ in xrange(count):
-        for _ in xrange(100):
-            if _ < 5:
+        for i in xrange(100):
+            if i < 5:
                 name = func()
             else:
                 # put some random into the names
@@ -84,7 +84,7 @@ def sentences(min=5, max=35, markup=True):
 
 
 def title():
-    return words(2, 3, markup=False)
+    return u''.join(w for w in words(2, 3, markup=False) if not '\n' in w)
 
 
 def intro(markup=True):
