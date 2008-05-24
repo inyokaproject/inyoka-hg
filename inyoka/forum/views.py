@@ -236,6 +236,11 @@ def viewtopic(request, topic_slug, page=1):
             session.commit()
     team_icon = storage['team_icon']
 
+    if team_icon:
+        team_icon = href('media', storage['team_icon'])
+    else:
+        team_icon = None
+
     return {
         'topic':             t,
         'forum':             t.forum,
@@ -246,7 +251,7 @@ def viewtopic(request, topic_slug, page=1):
         'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
         'can_vote':          polls and bool([True for p in polls if p.can_vote]),
-        'team_icon_url':     team_icon and href('media', storage['team_icon']) or None
+        'team_icon_url':     team_icon
     }
 
 
@@ -754,16 +759,21 @@ def movetopic(request, topic_slug):
             session.commit()
             # send a notification to the topic author to inform him about
             # the new forum.
-            text = render_template('mails/topic_moved.txt', {
+            nargs = {
                 'username':   t.author.username,
                 'topic':      t,
                 'mod':        request.user.username,
                 'forum_name': f.name
-            })
+            }
             if 'topic_move' in t.author.settings.get('notifications',
                                                      ('topic_move',)):
-                send_notification(t.author, u'Dein Thema „%s“ wurde '
-                                  u'verschoben' % t.title, text)
+                send_notification(t.author, 'topic_moved',
+                    u'Dein Thema „%s“ wurde verschoben' % t.title, nargs)
+
+            subscribers = Subscription.objects.filter(topic=t)
+            for user in subscribers:
+                send_notification(user, 'topic_moved',
+                    u'Das Thema „%s“ wurde verschoben' % t.title, nargs)
             return HttpResponseRedirect(t.get_absolute_url())
     else:
         form = MoveTopicForm()
