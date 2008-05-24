@@ -111,7 +111,7 @@
   <table class="topic">
    <tbody>
     {%- for post in posts %}
-      {% if post.hidden and not check_privilege(privileges, 'moderate') %}
+      {% if post.hidden and not can_moderate %}
       <tr class="deleted">
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
@@ -140,11 +140,12 @@
         <td class="post">
           <div class="postinfo">
             <div class="linklist floatright">
-              {%- if check_privilege(privileges, 'edit') or post.author_id == USER.id %}
+              {%- if can_edit(post), 'edit') %}
               <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
               {%- endif %}
               <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
-              {%- if check_privilege(privileges, 'moderate') %} |
+              {%- if can_moderate %} |
+                <a href="{{ post|url('revisions') }}" class="action action_review">Versionen anzeigen</a> |
                 {%- if post.hidden %}
                 <a href="{{ post|url('restore') }}" class="action action_restore">wiederherstellen</a> |
                 <a href="{{ post|url('delete') }}" class="action action_delete">endgültig löschen</a>
@@ -198,7 +199,7 @@
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
       {{ topic_actions() }}<br />
-      {% if check_privilege(privileges, 'moderate') %}
+      {% if can_moderate %}
       <span class="linklist">
         <a href="{{ topic|url('split') }}" class="action action_split">aufteilen</a> | 
         <a href="{{ topic|url('move') }}" class="action action_move">verschieben</a> | 

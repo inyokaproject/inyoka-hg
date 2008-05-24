@@ -17,20 +17,18 @@ from inyoka.forum.database import session, user_group_table, privilege_table
 PRIVILEGES_DETAILS = [
     ('void', 'darf nix'),
     ('read', 'kann lesen'),
-    ('reply', 'kann antworten'),
-    ('create', 'kann erstellen'),
-    ('edit', 'kann bearbeitenen'),
-    ('revert', 'kann revidieren'),
-    ('delete', u'kann löschen'),
-    ('sticky', 'kann anpinnen'),
     ('vote', 'kann abstimmen'),
+    ('create', 'kann Themen erstellen'),
+    ('reply', 'kann antworten'),
+    ('upload', u'kann Anhänge erstellen'),
     ('create_poll', 'kann Umfragen erstellen'),
-    ('upload', u'kann Anhänge nutzen'),
+    ('sticky', 'kann Themen anpinnen'),
     ('moderate', 'kann moderieren')
 ]
 
 PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
-PRIVILEGES_BITS = dict((PRIVILEGES[i-1], 2**i) for i in xrange(1, 12))
+PRIVILEGES_BITS = dict((PRIVILEGES[i-1], 2**i)
+                       for i in xrange(1, len(PRIVILEGES_DETAILS)))
 REVERSED_PRIVILEGES_BITS = dict((y,x) for x,y in PRIVILEGES_BITS.iteritems())
 
 #: create some constants for easy access

@@ -38,12 +38,12 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
-    have_privilege, get_privileges, CAN_READ, CAN_DELETE, CAN_MODERATE, \
+    have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
     check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
     poll_option_table, attachment_table
@@ -140,9 +140,9 @@ def forum(request, slug, page=1):
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
     data['subforums'] = filter_invisible(request.user, data['subforums'])
-    data['privileges'] = privs
     data['is_subscribed'] = Subscription.objects.user_subscribed(request.user,
                                                                  forum=f)
+    data['can_moderate'] = check_privilege(privs, 'moderate')
     return data
 
 
@@ -235,17 +235,18 @@ def viewtopic(request, topic_slug, page=1):
             post.rendered_text = post.render_text(force_existing=True)
             session.commit()
     team_icon = storage['team_icon']
-
+    can_edit = check_privilege(privileges, 'edit')
     return {
         'topic':             t,
         'forum':             t.forum,
         'posts':             post_objects,
-        'privileges':        privileges,
         'is_subscribed':     subscribed,
         'pagination':        pagination,
         'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
         'can_vote':          polls and bool([True for p in polls if p.can_vote]),
+        'can_moderate':      check_privilege(privileges, 'moderate'),
+        'can_edit':          lambda post: can_edit and post.author.id == request.user.id
         'team_icon_url':     team_icon and href('media', storage['team_icon']) or None
     }
 
@@ -308,8 +309,9 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
     if post:
-        if (not check_privilege(privileges, 'edit')) \
-           and post.author_id != request.user.id:
+        if not (check_privilege(privileges, 'moderate') or
+                (post.author_id == request.user.id and
+                 check_privilege(privileges, 'reply'))):
             return abort_access_denied(request)
     elif topic:
         if not check_privilege(privileges, 'reply'):
@@ -435,8 +437,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
-        post.text = d['text']
-        post.rendered_text = post.render_text(request, nocache=True)
+        post.edit(request, d['text'])
 
         session.flush([post])
         if attachments:
@@ -862,12 +863,12 @@ def restore_post(request, post_id):
 def delete_post(request, post_id):
     """
     In contrast to `hide_post` this function does really remove this post.
-    This action is irrevocable and can only get executed by administrators.
+    This action is irrevocable and can only get executed by moderators.
     """
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, CAN_DELETE):
+    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     if post.id == post.topic.first_post.id:
         flash(u'Der erste Beitrag eines Themas darf nicht gelöscht werden.',
@@ -885,6 +886,29 @@ def delete_post(request, post_id):
         else:
             flash(render_template('forum/post_delete.html', {'post': post}))
     return HttpResponseRedirect(url_for(post.topic))
+
+
+@templated('forum/revisions.html')
+def revisions(request, post_id):
+    revs = PostRevision.query.options(eagerload('post'),
+            eagerload('post.topic'), eagerload('post.topic.forum')) \
+        .filter(PostRevision.post_id == post_id)
+    if not have_privilege(request.user, revs[0].post.topic.forum, CAN_MODERATE):
+        return abort_access_denied(request)
+    return {
+        'revisions': list(revs)
+    }
+
+
+def restore_revision(request, rev_id):
+    rev = PostRevision.query.options(eagerload('post'),
+        eagerload('post.topic'), eagerload('post.topic.forum')).get(rev_id)
+    if not have_privilege(request.user, rev.post.topic.forum, CAN_MODERATE):
+        return abort_access_denied(request)
+    rev.restore(request)
+    session.commit()
+    flash(u'Eine alte Version des Beitrags wurde wiederhergestellt.', True)
+    return HttpResponseRedirect(href('forum', 'post', rev.post_id))
 
 
 def hide_topic(request, topic_slug):

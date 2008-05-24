@@ -37,7 +37,8 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table, group_table, post_text_table
+        poll_option_table, poll_vote_table, group_table, post_text_table, \
+        post_revision_table
 
 
 POSTS_PER_PAGE = 15
@@ -457,14 +458,6 @@ class Post(object):
 
     def render_text(self, request=None, format='html', nocache=False,
                     force_existing=False):
-        if request is None:
-            # we have to do that becaus render_text is called during
-            # save() which might be triggered outside of a HTTP request
-            # eg: converter
-            try:
-                request = current_request._get_current_object()
-            except RuntimeError:
-                request = None
         context = RenderContext(request)
         if nocache or self.id is None or format != 'html':
             node = parse(self.text, wiki_force_existing=force_existing)
@@ -510,6 +503,19 @@ class Post(object):
     @staticmethod
     def get_max_id():
         return dbsession.execute(select([func.max(Post.c.id)])).fetchone()[0]
+
+    def edit(self, request, text):
+        """
+        Changes the text of the post. If the post is already stored in the
+        database, it creates a post revision containing the old text.
+        """
+        if self.id:
+            rev = PostRevision()
+            rev.post = self
+            rev.store_date = datetime.utcnow()
+            rev.text = self.text
+        self.text = text
+        self.rendered_text = self.render_text(request, nocache=True)
 
     def deregister(self):
         """
@@ -651,9 +657,6 @@ class PostRevision(object):
     This saves old revisions of posts. It can be used to restore posts if
     something odd was done to them.
     """
-    #post = models.ForeignKey(Post, verbose_name='zugehöriges Posting')
-    #text = models.TextField('Text')
-    #store_date = models.DateTimeField('Datum der Löschung')
 
     def __repr__(self):
         return '<%s post=%d (%s), stored=%s>' % (
@@ -662,6 +665,23 @@ class PostRevision(object):
             self.post.topic.title,
             self.store_date.strftime('%Y-%m-%d %H:%M')
         )
+
+    def get_absolute_url(self, action='restore'):
+        return href('forum', 'revision', self.id, 'restore')
+
+    @property
+    def rendered_text(self):
+        request = current_request._get_current_object()
+        context = RenderContext(request, simplified=True)
+        return parse(self.text).render(context, 'html')
+
+    def restore(self, request):
+        """
+        Edits the text of the post the revision belongs to and deletes the
+        revision.
+        """
+        self.post.edit(request, self.text)
+        dbsession.delete(self)
 
 
 class Attachment(object):
@@ -950,7 +970,13 @@ class WelcomeMessage(object):
 
     def render_text(self, request=None, format='html'):
         if request is None:
-            request = request._get_current_object()
+            # we have to do that becaus render_text is called during
+            # save() which might be triggered outside of a HTTP request
+            # eg: converter
+            try:
+                request = current_request._get_current_object()
+            except RuntimeError:
+                request = None
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, format)
 
@@ -1104,6 +1130,10 @@ dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post
     extension=PostMapperExtension(),
     order_by=None
 )
+dbsession.mapper(PostRevision, post_revision_table, properties={
+    'post': relation(Post, primaryjoin=post_revision_table.c.post_id ==
+                                                        post_table.c.id)
+})
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={
     'options': relation(PollOption, backref='poll',

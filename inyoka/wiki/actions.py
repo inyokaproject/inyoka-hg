@@ -98,7 +98,7 @@ def do_show(request, name):
                 escape(href('wiki', page.name, redirect='no')),
                 escape(page.title)
             ))
-            return HttpResponseRedirect(href('wiki', redirect))
+            return HttpResponseRedirect(href('wiki', redirect, redirect='no'))
     if page.rev.deleted:
         return do_missing_page(request, name, page)
 
