@@ -12,11 +12,12 @@ from inyoka.utils.jabber import send as send_jabber
 from inyoka.utils.templating import render_template
 
 
-def send_notification(user, template_name, subject, args={}):
+def send_notification(user, template_name=None, subject=None, args={}):
     """
     This sends a message to the user using the person's favourite method(s)
-    he has specified in the user control panel.
+    he has specified in the user control panel
     """
+    assert subject is not None
     #TODO: use xhtml jabber messages
     methods = user.settings.get('notify', ['mail'])
     if 'jabber' in methods and user.jabber:

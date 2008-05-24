@@ -361,18 +361,16 @@ class Topic(object):
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
-            'topic_count': forum_table.c.topic_count - 1,
-            'post_count': topic_table.select([func.count(topic_table.c.id)],
-                    topic_table.c.id == self.id) - 1,
+            'topic_count': forum_table.c.topic_count -1,
+            'post_count': forum_table.c.post_count -1,
         }))
         self.forum = forum
-        dbsession.flush(self)
+        dbsession.flush([self])
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count + 1,
-            'post_count': topic_table.select([func.count(topic_table.c.id)],
-                    topic_table.c.id == self.id) - 1,
+            'post_count': forum_table.c.post_count + 1,
         }))
         forum.invalidate_topic_cache()
         self.forum.invalidate_topic_cache()
@@ -1010,6 +1008,10 @@ class SAUser(object):
             instructions = parse(self.signature).compile(format)
             cache.set(key, instructions)
         return render(instructions, context)
+
+    @deferred
+    def settings(self):
+        return cPickle.loads(str(self._settings))
 
     def __unicode__(self):
         return self.username
