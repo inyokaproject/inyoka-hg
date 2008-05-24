@@ -161,11 +161,11 @@ class EmailField(forms.CharField):
                 Die von dir angebene E-Mail-Adresse ist ungültig.  Bitte
                 überpfüfe die Eingabe.
             '''.strip())
-        elif not may_accept_mails(value):
-            raise forms.ValidationError(u'''
-                Die E-Mail-Adresse zeigt auf eine ungültige Domain.  Bitte
-                überprüfe die Eingabe.
-            '''.strip())
+#        elif not may_accept_mails(value):
+#            raise forms.ValidationError(u'''
+#                Die E-Mail-Adresse zeigt auf eine ungültige Domain.  Bitte
+#                überprüfe die Eingabe.
+#            '''.strip())
         return value
 
 
