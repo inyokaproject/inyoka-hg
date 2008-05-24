@@ -220,7 +220,7 @@ class RecentChanges(Macro):
         for day, revisions in days:
             table.children.append(nodes.TableRow([
                 nodes.TableHeader([
-                    nodes.Text(day))
+                    nodes.Text(day)
                 ], colspan=4)
             ]))
 
