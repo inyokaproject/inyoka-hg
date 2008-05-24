@@ -192,10 +192,7 @@ jinja_env = InyokaEnvironment()
 
 
 # circular imports
-from inyoka.forum.acl import check_privilege
 from inyoka.portal.models import PrivateMessageEntry
 from inyoka.forum.models import Topic
 from inyoka.ikhaya.models import Suggestion
 from inyoka.utils.storage import storage
-# set a new helper function for the templates
-jinja_env.globals['check_privilege'] = check_privilege
