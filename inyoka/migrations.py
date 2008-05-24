@@ -371,6 +371,13 @@ def add_group_icon_cfg(m):
         'team_icon': '',
     })
 
+def add_ikhaya_suggestion_owner(m):
+    """Add a owner of a ikhaya suggestion"""
+    m.engine.execute('''
+        alter table ikhaya_suggestion
+            add column owner_id int(11) null after intro;
+    ''')ter table ikhaya
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -380,5 +387,5 @@ MIGRATIONS = [
     add_default_storage_values, add_blocked_hosts_storage, split_post_table,
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
-    add_group_icon_cfg
+    add_group_icon_cfg, add_ikhaya_suggestion_owner,
 ]

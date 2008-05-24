@@ -10,6 +10,7 @@
 """
 from datetime import datetime
 from inyoka.portal.utils import check_login
+from inyoka.portal.user import User
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, HttpResponse, PageNotFound
@@ -200,6 +201,21 @@ def suggestionlist(request):
     return {
         'suggestions': list(suggestions)
     }
+
+def suggestion_assign_to(request, suggestion, username):
+    suggestion = Suggestion.objects.get(id=suggestion)
+    if username == '-':
+        suggestion.owner = None
+        suggestion.save()
+        flash(u'Der Vorschlag wurde niemand zugewiesen', True)
+    else:
+        try:
+            suggestion.owner = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise PageNotFound
+        suggestion.save()
+        flash(u'Der Vorschlag wurde %s zugewiesen' % username, True)
+    return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
 
 def feed(request, category_slug=None, mode='short', count=20):
