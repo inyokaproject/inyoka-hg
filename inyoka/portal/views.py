@@ -817,7 +817,7 @@ def privmsg_new(request, username=None):
                     except:
                         break
                     data['subject'] = params[1](obj)
-                    if data['subject'].lower().startswith(u're: '):
+                    if not data['subject'].lower().startswith(u're: '):
                         data['subject'] = u'Re: %s' % data['subject']
                     author = params[2](obj)
                     if reply_to:
