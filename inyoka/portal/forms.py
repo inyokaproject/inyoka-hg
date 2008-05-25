@@ -419,5 +419,3 @@ class IkhayaFeedSelectorForm(FeedSelectorForm):
 
 class PlanetFeedSelectorForm(FeedSelectorForm):
     pass
-
-

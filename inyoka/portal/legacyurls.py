@@ -20,7 +20,7 @@ test_legacy_url = legacy.tester
 
 @legacy.url(r'^/ikhaya/(\d+)/?')
 def ikhaya_article(args, match, article_id):
-    # we cannot do that on the ikhaya subdomain, 
+    # we cannot do that on the ikhaya subdomain,
     # because there /\d+/ is for the pagination.
     try:
         article = Article.objects.get(id=int(article_id))
