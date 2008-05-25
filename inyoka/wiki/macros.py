@@ -39,6 +39,7 @@ from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
 from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.parsertools import OrderedDict
 
 
 def get_macro(name, args, kwargs):
@@ -224,24 +225,45 @@ class RecentChanges(Macro):
                 ], colspan=4)
             ]))
 
+            pagebuffer = OrderedDict()
+
             for rev in revisions:
-                if rev.user:
-                    author = nodes.Link(url_for(rev.user), [
-                             nodes.Text(rev.user.username)])
+                if not rev.page in pagebuffer:
+                    pagebuffer[rev.page] = []
+                pagebuffer[rev.page].append(rev)
+
+            for page in pagebuffer:
+                revs = pagebuffer[page]
+                if len(revs) > 1:
+                    stamps = (format_time(revs[-1].change_date),
+                              format_time(revs[0].change_date))
+                    stamp = u'%s' % (stamps[0]==stamps[-1] and stamps[0] or \
+                            u'%s - %s' % stamps)
                 else:
-                    author = nodes.Text(rev.remote_addr)
+                    stamp = format_time(revs[0].change_date)
+
                 table.children.append(nodes.TableRow([
                     nodes.TableCell([
-                        nodes.Text(format_time(rev.change_date))
+                        nodes.Text(stamp)
                     ], class_='timestamp'),
                     nodes.TableCell([
-                        nodes.InternalLink(rev.page.name)
-                    ], class_='page'),
-                    nodes.TableCell([author], class_='author'),
-                    nodes.TableCell([
-                        nodes.Text(rev.note or u'')
-                    ], class_='note')
-                ]))
+                        nodes.InternalLink(page.name),
+                        nodes.Text(u' ('),
+                        nodes.Link(href('wiki', page.name, action='log'), [
+                            nodes.Text(str(len(revs))+'x')
+                        ]),
+                        nodes.Text(u')')
+                    ])]))
+
+                page_notes = nodes.List('unordered', [], class_='note_list')
+                for rev in revs:
+                    if rev.note:
+                        page_notes.children.append(
+                            nodes.ListItem([nodes.Text(rev.note)]))
+                table.children[-1].children.append(
+                    nodes.TableCell(
+                        page_notes.children and page_notes.children or \
+                        [nodes.Text(u'')], class_='note'))
 
         # if rendering to html we add a pagination, pagination is stupid for
         # docbook and other static representations ;)
