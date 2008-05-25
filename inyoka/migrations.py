@@ -378,6 +378,13 @@ def add_ikhaya_suggestion_owner(m):
             add column owner_id int(11) null after intro;
     ''')
 
+def add_newtopic_default_text(m):
+    """Add a default text for a new topic"""
+    m.engine.execute('''
+        alter table forum_forum
+            add column newtopic_default_text text null after welcome_message_id;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -387,5 +394,5 @@ MIGRATIONS = [
     add_default_storage_values, add_blocked_hosts_storage, split_post_table,
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
-    add_group_icon_cfg, add_ikhaya_suggestion_owner,
+    add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
 ]

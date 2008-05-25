@@ -310,7 +310,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             raise PageNotFound()
         topic = quote.topic
         forum = topic.forum
-    form = (newtopic and NewTopicForm or EditPostForm)(request.POST or None)
+    if newtopic:
+        form = NewTopicForm(request.POST or None, initial={
+            'text': forum.newtopic_default_text})
+    else:
+        form = EditPostForm(request.POST or None)
 
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
@@ -530,6 +534,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif newtopic:
         form = form.__class__(initial={
             'title': article and article.name or '',
+            'text': forum.newtopic_default_text,
         })
 
     if not newtopic:

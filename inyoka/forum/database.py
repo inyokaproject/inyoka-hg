@@ -28,7 +28,8 @@ forum_table = Table('forum_forum', metadata,
     Column('post_count', Integer, default=0, nullable=False),
     Column('topic_count', Integer, default=0, nullable=False),
     Column('welcome_message_id', Integer, ForeignKey('forum_welcomemessage.id'),
-           nullable=True)
+           nullable=True),
+    Column('newtopic_default_text', Text, nullable=False),
 )
 
 topic_table = Table('forum_topic', metadata,
