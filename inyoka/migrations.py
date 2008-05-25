@@ -376,7 +376,7 @@ def add_ikhaya_suggestion_owner(m):
     m.engine.execute('''
         alter table ikhaya_suggestion
             add column owner_id int(11) null after intro;
-    ''')ter table ikhaya
+    ''')
 
 
 MIGRATIONS = [
