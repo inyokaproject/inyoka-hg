@@ -149,3 +149,62 @@ class TokenStream(object):
         self.push(old_current)
         self.push(token)
         self.next()
+
+
+# from http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747,
+# with some modifications
+
+class OrderedDict(dict):
+
+    def __init__(self, __dct__=None, **items):
+        if __dct__:
+            dict.__init__(self, __dct__)
+        else:
+            dict.__init__(self, **items)
+        self._keys = dict.keys(self)
+
+    def __delitem__(self, key):
+        dict.__delitem__(self, key)
+        self._keys.remove(key)
+
+    def __setitem__(self, key, item):
+        dict.__setitem__(self, key, item)
+        if key not in self._keys: self._keys.append(key)
+
+    def clear(self):
+        dict.clear(self)
+        self._keys = []
+
+    def copy(self):
+        dct = self.__class__(self)
+        dct._keys = self._keys[:]
+        return dct
+
+    def items(self):
+        return zip(self._keys, self.values())
+
+    def keys(self):
+        return self._keys
+
+    def popitem(self):
+        try:
+            key = self._keys[-1]
+        except IndexError:
+            raise KeyError('dictionary is empty')
+
+        val = self[key]
+        del self[key]
+
+        return (key, val)
+
+    def setdefault(self, key, failobj = None):
+        dict.setdefault(self, key, failobj)
+        if key not in self._keys: self._keys.append(key)
+
+    def update(self, dct):
+        dict.update(self, dct)
+        for key in dct.keys():
+            if key not in self._keys: self._keys.append(key)
+
+    def values(self):
+        return map(self.get, self._keys)
