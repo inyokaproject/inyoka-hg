@@ -39,6 +39,7 @@ from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
 from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.sortable import Sortable
 from inyoka.utils.parsertools import OrderedDict
 
 
@@ -206,10 +207,12 @@ class RecentChanges(Macro):
             if parameters:
                 rv += '?' + url_encode(parameters)
             return rv
-        pagination = Pagination(context.request, Revision.objects.all(),
-                                page_num, self.per_page, link_func)
 
-        for revision in pagination.objects:
+        sitems = Sortable(Revision.objects.all(), context.request.GET,
+            'change_date')
+        pagination = Pagination(context.request, sitems.get_objects(),
+                                page_num, self.per_page, link_func)
+        for revision in sitems.get_objects():
             d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
@@ -217,7 +220,13 @@ class RecentChanges(Macro):
                 days_found.add(key)
             days[-1][1].append(revision)
 
-        table = nodes.Table(class_='recent_changes')
+        table = nodes.Table(children=[
+            nodes.TableRow([
+                nodes.TableHeader([
+                    nodes.Text('Sortieren nach: '),
+                    nodes.HTML(sitems.get_html('change_date',
+                        u'Änderungsdatum')),
+        ])])], class_='recent_changes')
         for day, revisions in days:
             table.children.append(nodes.TableRow([
                 nodes.TableHeader([

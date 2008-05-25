@@ -416,7 +416,7 @@ def clean_thumbnail_cache():
 def quote_text(text, author=None):
     """
     Returns the wiki syntax quoted version of `text`.
-    If the optional argument `author` (username as string or User object) is 
+    If the optional argument `author` (username as string or User object) is
     given, a written-by info is prepended.
     """
     if isinstance(author, User):

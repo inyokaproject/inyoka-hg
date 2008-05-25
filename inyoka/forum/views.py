@@ -463,8 +463,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                               'topic':      topic,
                                               'forum':      forum,
                                           })
-                # we always notify about new topics, even if the forum was 
-                # not visited, because unlike the posts you won't see 
+                # we always notify about new topics, even if the forum was
+                # not visited, because unlike the posts you won't see
                 # other new topics
         if topic:
             for s in Subscription.objects.filter(topic_id=topic.id,
@@ -485,7 +485,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             article.topic_id = topic.id
             article.save()
             for s in Subscription.objects.filter(wiki_page=article):
-                # also notify if the user has not yet visited the page, 
+                # also notify if the user has not yet visited the page,
                 # since otherwise he would never know about the topic
                 send_notification(s.user, 'new_page_discussion', u'Neue Diskussion für die '
                     u'Seite „%s“ wurde eröffnet' % article.title, {
