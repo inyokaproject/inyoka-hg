@@ -18,6 +18,8 @@ from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
                                HiddenCaptchaField, EmailField, JabberField
 from inyoka.wiki.parser import validate_signature, SignatureError
+from inyoka.utils.local import current_request
+from inyoka.utils.html import escape
 
 
 #: Some constants used for ChoiceFields
@@ -141,7 +143,9 @@ class RegisterForm(forms.Form):
 
             raise forms.ValidationError(
                 u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
-                #TODO: add some link to the lost password function
+                u' Fals du dein Passwort vergessen hast, kannst du es '
+                u'<a href="%s">wiederherstellen lassen</a>' % escape(
+                    href('portal', 'lost_password'))
             )
         else:
             raise forms.ValidationError(
@@ -255,6 +259,13 @@ class UserCPSettingsForm(forms.Form):
         label='Bilder-Vorschau im Forum aktivieren',
         help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
 
+    def clean_notify(self):
+        if u'jabber' in self.cleaned_data['notify']:
+            if not current_request.user.jabber:
+                raise forms.ValidationError(u'Du musst eine gültige Jabber '
+                    u'Adresse <a href="%s">angeben</a>. um unseren Jabber '
+                    u'Service nutzen zu können.' % escape(href(
+                        'portal', 'usercp', 'profile')))
 
 
 class UserCPProfileForm(forms.Form):
