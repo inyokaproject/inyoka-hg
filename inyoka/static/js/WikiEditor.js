@@ -285,11 +285,11 @@
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
     }, ['wiki']),
-    button('shrink', 'Verkleinern', function(evt) {
+    button('shrink', 'Eingabefeld verkleinern', function(evt) {
       var height = this.textarea.height() - 50;
       this.textarea.height((height >= 100) ? height : 100).focus();
     }),
-    button('enlarge', 'Vergrößern', function(evt) {
+    button('enlarge', 'Eingabefeld vergrößern', function(evt) {
       this.textarea.height(this.textarea.height() + 50).focus();
     })
   ]};
