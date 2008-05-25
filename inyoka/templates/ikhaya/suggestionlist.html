@@ -35,6 +35,10 @@
         <td class="author">
           <a href="{{ suggestion.author|url }}">{{ suggestion.author.username }}</a>
           {%- if suggestion.author.avatar and not USER.settings['hide_avatars'] %}
+          <img src="{{ suggestion.author.avatar_url }}" alt=ion.author.username }}</a>
+          {%- elif suggestion.author.avatar and not USER.settings['hide_avatars'] %}
+          <img src="{{ suggestion.author.avatar_url }}" alt=ion.author.username }}</a>
+          {%- elif suggestion.author.avatar and not USER.settings['hide_avatars'] %}
           <img src="{{ suggestion.author.avatar_url }}" alt="Avatar von {{ suggestion.author.username|e }}" />
           {%- endif %}
         </td>
@@ -42,6 +46,14 @@
           <div class="postinfo">
             Verfasst: {{ suggestion.pub_date.strftime('%d.%m.%Y %H:%M') }}
             <span class="linklist"> |
+              {%- if suggestion.owner_id == none %}
+              <a href="{{ href('ikhaya', 'suggestions', 'assign', suggestion.id, USER.username) }}">Mir zuweisen</a> |
+              {%- elif suggestion.owner == USER %}
+              </span><strong>Du</strong> kümmerst dich um diesen Vorschlag<span class="linklist"> |
+              <a href="{{ href('ikhaya', 'suggestions', 'assign', suggestion.id, '-') }}">Doch nicht</a> |
+              {%- else %}
+              </span><strong>{{ USER.username|e }}</strong> kümmert sich um diesen Vorschlag<span class="linklist"> |
+              {%- endif %}
               <a href="?delete={{ suggestion.id }}">Löschen</a> |
               <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a> |
               <a href="{{ href('portal', 'privmsg', 'new', reply_to='suggestion:%d' % suggestion.id) }}">PN schreiben</a>

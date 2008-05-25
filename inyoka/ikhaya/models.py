@@ -248,6 +248,7 @@ class Suggestion(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     intro = models.TextField()
+    owner = models.ForeignKey(User)
 
     @property
     def rendered_text(self):
