@@ -846,7 +846,8 @@ def hide_post(request, post_id):
     Sets the hidden flag of a post to True which has the effect that normal
     users can't see it anymore (moderators still can).
     """
-    post = Post.query.get(post_id)
+    # XXX: Thanks to the join we need post_id twice now, as sa thinks there are two?
+    post = Post.query.get((post_id, post_id))
     if not post:
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
@@ -868,7 +869,8 @@ def restore_post(request, post_id):
     This function removes the hidden flag of a post to make it visible for
     normal users again.
     """
-    post = Post.query.get(post_id)
+    # XXX: Thanks to the join we need post_id twice now, as sa thinks there are two?
+    post = Post.query.get((post_id, post_id))
     if not post:
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
