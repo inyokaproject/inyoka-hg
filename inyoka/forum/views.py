@@ -241,6 +241,10 @@ def viewtopic(request, topic_slug, page=1):
     else:
         team_icon = None
 
+    can_mod = check_privilege(privileges, 'moderate')
+    can_reply = check_privilege(privileges, 'reply')
+
+
     return {
         'topic':             t,
         'forum':             t.forum,
@@ -250,7 +254,10 @@ def viewtopic(request, topic_slug, page=1):
         'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
         'can_vote':          polls and bool([True for p in polls if p.can_vote]),
-        'can_moderate':      check_privilege(privileges, 'moderate'),
+        'can_moderate':      can_mod,
+        'can_edit':          lambda post: can_mod or (post.author_id ==
+                                          request.user.id and can_reply),
+        'can_reply':         can_reply,
         'team_icon_url':     team_icon
     }
 

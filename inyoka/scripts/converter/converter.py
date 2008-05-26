@@ -45,7 +45,7 @@ from inyoka.scripts.converter.create_templates import create
 _account = '%s:%s@%s' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
                        settings.DATABASE_HOST)
 FORUM_URI = 'mysql://%s/ubuntu_de?charset=utf8' % _account
-OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal?charset=utf8' % _account
+OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal' % _account
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
@@ -829,7 +829,6 @@ def convert_ikhaya():
         try:
             StaticFile(**{
                 'id':           image.id,
-                'identifier':   path.basename(image.file),
                 'file':         image.image.replace('uploads', 'portal/files')
             }).save()
         except IntegrityError:

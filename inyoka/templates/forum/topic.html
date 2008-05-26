@@ -34,7 +34,9 @@
 
 {% macro topic_actions() %}
   <span class="linklist">
+    {%- if can_reply %}
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
+    {%- endif %}
     {%- if is_subscribed %}
     <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a> |
     {%- else %}
@@ -140,7 +142,7 @@
         <td class="post">
           <div class="postinfo">
             <div class="linklist floatright">
-              {%- if can_moderate %}
+              {%- if can_edit(post) %}
               <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
               {%- endif %}
               <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
