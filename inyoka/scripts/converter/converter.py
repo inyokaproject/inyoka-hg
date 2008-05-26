@@ -825,24 +825,25 @@ def convert_ikhaya():
             user_mapping[user.id] = 1
 
     for image in select_blocks(image_table.select()):
-        image_mapping[image.identifer] = image.id
         try:
-            StaticFile(**{
+            f = StaticFile(**{
                 'id':           image.id,
                 'file':         image.image.replace('uploads', 'portal/files')
-            }).save()
+            })
+            f.save()
+            image_mapping[image.identifer] = f
         except IntegrityError:
             pass
 
     category_mapping = {}
     for data in category_table.select().execute():
-        category = Category(name=data.name)
+        category = Category(name=data.name.decode('utf8'))
         category.save()
         category_mapping[data.id] = category
 
     for data in article_table.select().execute():
         article = Article(
-            subject=data.subject,
+            subject=data.subject.decode('utf8'),
             pub_date=data.pub_date,
             author_id=user_mapping[data.author_id],
             intro=render_article(data.intro, data.parser),
