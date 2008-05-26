@@ -244,8 +244,8 @@ class RecentChanges(Macro):
             for page in pagebuffer:
                 revs = pagebuffer[page]
                 if len(revs) > 1:
-                    stamps = (format_time(revs[-1].change_date),
-                              format_time(revs[0].change_date))
+                    stamps = (format_time(revs[0].change_date),
+                              format_time(revs[-1].change_date))
                     stamp = u'%s' % (stamps[0]==stamps[-1] and stamps[0] or \
                             u'%s - %s' % stamps)
                 else:
