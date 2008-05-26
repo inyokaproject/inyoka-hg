@@ -389,8 +389,8 @@ class InyokaFormatter(FormatterBase):
 
     def linebreak(self, preformatted=1):
         if preformatted:
-            return u'\\\n'
-        return u'\n'
+            return u'\n'
+        return u'\\\n'
 
     def code(self, on, **kw):
         return u'``'
@@ -449,4 +449,4 @@ class InyokaFormatter(FormatterBase):
                 return u'# X-Redirect: %s\n' % page
             except (IndexError, ValueError):
                 return u''
-        return u'##%s\n' % text
+        return u'\n##%s\n' % text

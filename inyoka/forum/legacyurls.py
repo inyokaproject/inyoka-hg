@@ -80,6 +80,9 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
         return href('forum', 'topic', topic.slug, page, **kwargs)
 
 
+@legacy.url(r'^/topic/([0-9]+)/next/?$')
+def next_topic(args, match, topic_id):
+    pass
 @legacy.url(r'^/index(\.php)?/?$')
 def index(args, match):
     return href('forum')
