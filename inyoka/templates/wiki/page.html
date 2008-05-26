@@ -40,7 +40,7 @@
     <li><a href="?action=log"{{ action == 'log' and ' class="active"' or '' }}>Versionen</a></li>
     <li><a href="?action=backlinks"{{ action == 'backlinks' and ' class="active"' or '' }}>Backlinks</a></li>
     {%- if page %}
-    <li><a href="{{ page.topic and page.topic|url or href('forum', 'new_discussion', page.title) }}">Diskussion</a></li>
+    <li{% if not page.topic %} class="disabled"{% endif %}><a href="{{ page.topic and page.topic|url or href('forum', 'new_discussion', page.title) }}">Diskussion</a></li>
     {%- endif %}
     <li><a href="?action={% if is_subscribed %}un{% endif %}subscribe">{% if is_subscribed %}Abbestellen{% else %}Abonnieren{% endif %}</a></li>
     <li><a href="?action=manage"{{ action == 'manage' and ' class="active"' or '' }}>Weitere Aktionen</a></li>

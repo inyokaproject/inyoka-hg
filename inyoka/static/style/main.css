@@ -633,6 +633,10 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   background: #f8f8f8;
 }
 
+.navi_tabbar li.disabled a {
+  color: #aaa;
+}
+
 /*** Appheader / Global Navigation / Pathbar **********************************/
 
 .appheader {

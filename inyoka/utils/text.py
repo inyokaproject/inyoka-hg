@@ -52,10 +52,12 @@ def get_random_password():
     return password
 
 
-def slugify(string):
+def slugify(string, convert_lowercase=True):
     """Slugify a string."""
     result = []
-    for word in _punctuation_re.split(string.strip().lower()):
+    if convert_lowercase:
+        string = string.lower()
+    for word in _punctuation_re.split(string.strip()):
         if word:
             for search, replace in _slugify_replacement_table.iteritems():
                 word = word.replace(search, replace)
