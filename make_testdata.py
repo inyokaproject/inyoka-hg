@@ -8,12 +8,16 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
+import sys
 import math
 import time
 from random import randint, choice
 from datetime import datetime
+from itertools import cycle, izip
 from jinja2.constants import LOREM_IPSUM_WORDS
 from inyoka.conf import settings
+settings.DEBUG = False # for nice progressbar output ;)
+
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum, Topic, Post, Privilege
 from inyoka.forum.acl import join_flags, PRIVILEGES
@@ -30,11 +34,57 @@ users = []
 page_names = []
 forums = []
 
+GROUPS_COUNT = 10
+USERS_COUNT = 500
+FORUMS_COUNT = 30
+MAX_TOPIC_COUNT = 5
+MAX_TOPIC_POST_COUNT = 10
+IKHAYA_ARTICLE_COUNT = 20
+WIKI_PAGES_COUNT = 50
+
+
+# original from Jochen Kupperschmidt with some modifications
+class ProgressBar(object):
+    """Visualize a status bar on the console."""
+
+    def __init__(self, max_width):
+        """Prepare the visualization."""
+        self.max_width = max_width
+        self.spin = cycle(r'-\|/').next
+        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
+        show(' [ ')
+        self.last_output_length = 0
+
+    def update(self, percent):
+        """Update the visualization."""
+        # Remove last state.
+        show('\b' * self.last_output_length)
+
+        # Generate new state.
+        width = int(percent / 100.0 * self.max_width)
+        output = self.tpl % ('-' * width, self.spin(), percent)
+
+        # Show the new state and store its length.
+        show(output)
+        self.last_output_length = len(output)
+
+
+def show(string):
+    """Show a string instantly on STDOUT."""
+    sys.stdout.write(string)
+    sys.stdout.flush()
+
+
+def percentize(steps):
+    """Generate percental values."""
+    for i in range(steps + 1):
+        yield i * 100.0 / steps
+
 
 def create_names(count, func=lambda: choice(NAME_WORDS)):
     """Yields a bunch of unique names"""
     used = []
-    for _ in xrange(count):
+    for _ in xrange(count+1):
         for i in xrange(100):
             if i < 5:
                 name = func()
@@ -97,14 +147,18 @@ def randtime():
 
 def make_groups():
     print 'Creating groups'
-    for name in create_names(10):
+    pb = ProgressBar(40)
+    for percent, name in izip(percentize(GROUPS_COUNT), create_names(GROUPS_COUNT)):
         groups.append(Group(name=name))
         groups[-1].save()
+        pb.update(percent)
+    show('\n')
 
 
 def make_users():
     print 'Creating users'
-    for name in create_names(30):
+    pb = ProgressBar(40)
+    for percent, name in izip(percentize(USERS_COUNT), create_names(USERS_COUNT)):
         u = User.objects.register_user(
             name, '%s@ubuntuusers.local' % name, name, False)
         u.date_joined = randtime()
@@ -124,15 +178,18 @@ def make_users():
             u.is_active = False
         u.save()
         users.append(u)
+        pb.update(percent)
+    show('\n')
 
 
 def make_forum():
     print 'Creating forum test data'
+    pb = ProgressBar(40)
     try:
         admin = User.objects.filter(is_manager=True)[0]
     except:
         admin = None
-    for name in create_names(7, title):
+    for percent, name in izip(percentize(FORUMS_COUNT), create_names(FORUMS_COUNT, title)):
         parent = None
         if randint(1, 6) != 6:
             try:
@@ -148,14 +205,15 @@ def make_forum():
         forums.append(f)
         session.commit()
         if parent:
-            for _ in xrange(randint(1, 3)):
+            for _ in xrange(randint(1, MAX_TOPIC_COUNT)):
                 author = choice(users)
                 t = Topic(title=title()[:100], author_id=author.id, forum=f)
                 p = Post(topic=t, text=sentences(min=1, max=10), author_id=author.id, pub_date=randtime())
                 session.commit()
-                for _ in xrange(randint(1, 40)):
+                for _ in xrange(randint(1, MAX_TOPIC_POST_COUNT)):
                     p = Post(topic=t, text=sentences(min=1, max=10), author_id=choice(users).id, pub_date=randtime())
             session.commit()
+        pb.update(percent)
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)
     d = Forum(name=u'Diskussionen', slug=settings.WIKI_DISCUSSION_FORUM, parent=f)
@@ -169,11 +227,13 @@ def make_forum():
     forums.append(f)
     forums.append(d)
     session.commit()
+    show('\n')
 
 
 def make_ikhaya():
     print 'Creating ikhaya test data'
-    for name in create_names(5, title):
+    pb = ProgressBar(40)
+    for percent, name in izip(percentize(IKHAYA_ARTICLE_COUNT), create_names(IKHAYA_ARTICLE_COUNT, title)):
         c = Category(name=name)
         c.save()
         for name in create_names(5, title):
@@ -199,17 +259,22 @@ def make_ikhaya():
                     author_id=choice(users).id,
                     pub_date=randtime()
                 ).save()
+        pb.update(percent)
+    show('\n')
 
 
 def make_wiki():
     print 'Creating wiki pages'
-    for name in page_names:
+    pb = ProgressBar(40)
+    for percent, name in izip(percentize(len(page_names)), page_names):
         Page.objects.create(name, sentences(min=10, max=20),
                             choice(users), note=title())
+        pb.update(percent)
+    show('\n')
 
 
 if __name__ == '__main__':
-    page_names = ['Startseite'] + list(create_names(20))
+    page_names = ['Startseite'] + list(create_names(WIKI_PAGES_COUNT))
     make_groups()
     make_users()
     make_wiki()
