@@ -901,7 +901,7 @@ def delete_post(request, post_id):
             if 'cancel' in request.POST:
                 flash(u'Das löschen wurde abgebrochen.')
             else:
-                post.delete()
+                session.delete(post)
                 session.commit()
                 flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde gelöscht.'
                       % (url_for(post), escape(post.author.username)),
