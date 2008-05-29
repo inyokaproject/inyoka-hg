@@ -208,7 +208,7 @@ class RecentChanges(Macro):
                 rv += '?' + url_encode(parameters)
             return rv
 
-        sitems = Sortable(Revision.objects.all(), context.request.GET,
+        sitems = Sortable(Revision.objects.select_related(), context.request.GET,
             'change_date')
         pagination = Pagination(context.request, sitems.get_objects(),
                                 page_num, self.per_page, link_func)

@@ -87,7 +87,7 @@ def percentize(steps):
 def create_names(count, func=lambda: choice(NAME_WORDS)):
     """Yields a bunch of unique names"""
     used = []
-    for _ in xrange(count):
+    for _ in xrange(count+1):
         name = func()
         if name in used:
             # use some random...
@@ -150,7 +150,7 @@ def randtime():
 def make_groups():
     print 'Creating groups'
     pb = ProgressBar(40)
-    for percent, name in izip(percentize(GROUPS_COUNT+1), create_names(GROUPS_COUNT)):
+    for percent, name in izip(percentize(GROUPS_COUNT), create_names(GROUPS_COUNT)):
         groups.append(Group(name=name))
         groups[-1].save()
         pb.update(percent)
