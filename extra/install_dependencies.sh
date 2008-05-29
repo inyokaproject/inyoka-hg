@@ -41,7 +41,9 @@ ln -s /opt/werkzeug/werkzeug /usr/lib/python2.5/site-packages/
 
 wget 'http://prdownloads.sourceforge.net/sqlalchemy/SQLAlchemy-0.4.6.tar.gz?download'
 tar -xvf SQLAlchemy-0.4.6.tar.gz
+rm SQLAlchemy-0.4.6.tar.gz
 mv SQLAlchemy-0.4.6 sqlalchemy
+ln -s /opt/sqlalchemy/lib/sqlalchemy /usr/lib/python2.5/site-packages/
 
 svn co http://www.dnspython.org/svn/dnspython/head/ dnspython
 ln -s /opt/dnspython/dns /usr/lib/python2.5/site-packages/
