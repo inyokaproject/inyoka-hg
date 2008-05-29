@@ -24,6 +24,9 @@ from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.ikhaya.models import Category, Article, Comment
 from inyoka.wiki.models import Page
 from inyoka.utils.database import session
+from inyoka.utils.captcha import generate_word
+from inyoka.utils.text import increment_string
+
 
 MARKS = ('.', ';', '!', '?')
 WORDS = LOREM_IPSUM_WORDS.split(' ')
@@ -35,12 +38,12 @@ page_names = []
 forums = []
 
 GROUPS_COUNT = 10
-USERS_COUNT = 500
-FORUMS_COUNT = 30
-MAX_TOPIC_COUNT = 5
-MAX_TOPIC_POST_COUNT = 10
-IKHAYA_ARTICLE_COUNT = 20
-WIKI_PAGES_COUNT = 50
+USERS_COUNT = 60
+FORUMS_COUNT = 20
+MAX_TOPIC_COUNT = 40
+MAX_TOPIC_POST_COUNT = 30
+IKHAYA_ARTICLE_COUNT = 50
+WIKI_PAGES_COUNT = 60
 
 
 # original from Jochen Kupperschmidt with some modifications
@@ -84,17 +87,16 @@ def percentize(steps):
 def create_names(count, func=lambda: choice(NAME_WORDS)):
     """Yields a bunch of unique names"""
     used = []
-    for _ in xrange(count+1):
-        for i in xrange(100):
-            if i < 5:
-                name = func()
-            else:
-                # put some random into the names
-                name = '%d%s' % (randint(1, 100), func())
-            if name not in used:
-                yield name
-                used.append(name)
-                break
+    for _ in xrange(count):
+        name = func()
+        if name in used:
+            # use some random...
+            name = '%s%s%d' % (generate_word(), name, randint(1, 100))
+        if name in used:
+            # now we need to increment that thingy...
+            name = increment_string(name)
+        used.append(name)
+        yield name
 
 
 def word(markup=True):
@@ -148,7 +150,7 @@ def randtime():
 def make_groups():
     print 'Creating groups'
     pb = ProgressBar(40)
-    for percent, name in izip(percentize(GROUPS_COUNT), create_names(GROUPS_COUNT)):
+    for percent, name in izip(percentize(GROUPS_COUNT+1), create_names(GROUPS_COUNT)):
         groups.append(Group(name=name))
         groups[-1].save()
         pb.update(percent)
