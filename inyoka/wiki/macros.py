@@ -208,11 +208,9 @@ class RecentChanges(Macro):
                 rv += '?' + url_encode(parameters)
             return rv
 
-        sitems = Sortable(Revision.objects.select_related(), context.request.GET,
-            'change_date')
-        pagination = Pagination(context.request, sitems.get_objects(),
-                                page_num, self.per_page, link_func)
-        for revision in sitems.get_objects():
+        pagination = Pagination(context.request, Revision.objects.order_by('change_date'),
+                                page_num, self.per_page, link_func, True)
+        for revision in pagination.objects:
             d = revision.change_date
             key = (d.year, d.month, d.day)
             if key not in days_found:
@@ -220,13 +218,14 @@ class RecentChanges(Macro):
                 days_found.add(key)
             days[-1][1].append(revision)
 
-        table = nodes.Table(children=[
-            nodes.TableRow([
-                nodes.TableHeader([
-                    nodes.Text('Sortieren nach: '),
-                    nodes.HTML(sitems.get_html('change_date',
-                        u'Änderungsdatum')),
-        ])])], class_='recent_changes')
+        table = nodes.Table(class_='recent_changes')
+#        table = nodes.Table(children=[
+#            nodes.TableRow([
+#                nodes.TableHeader([
+#                    nodes.Text('Sortieren nach: '),
+#                    nodes.HTML(sitems.get_html('change_date',
+#                        u'Änderungsdatum')),
+#        ])])], class_='recent_changes')
         for day, revisions in days:
             table.children.append(nodes.TableRow([
                 nodes.TableHeader([

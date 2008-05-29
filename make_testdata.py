@@ -43,7 +43,7 @@ FORUMS_COUNT = 10
 MAX_TOPIC_COUNT = 20
 MAX_TOPIC_POST_COUNT = 10
 IKHAYA_ARTICLE_COUNT = 5
-WIKI_PAGES_COUNT = 20
+WIKI_PAGES_COUNT = 50
 
 
 # original from Jochen Kupperschmidt with some modifications
