@@ -290,7 +290,7 @@ def set_new_password(request, username, new_password_key):
 def login(request):
     """Login dialog that supports permanent logins"""
     redirect = is_safe_domain(request.GET.get('next', '')) and \
-                 request.GET['next'] or href('portal')
+               request.GET['next'] or href('portal')
     if request.user.is_authenticated:
         flash(u'Du bist bereits angemeldet!', False)
         return HttpResponseRedirect(redirect)

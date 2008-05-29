@@ -774,7 +774,6 @@ class Attachment(object):
         """
         Update the post_id of a few unbound attachments.
         :Parameters:
-
             att_ids
                 A list of the attachment's ids.
             post_id
@@ -864,18 +863,15 @@ class Attachment(object):
 
         if self.mimetype.startswith('image/') and show_thumbnails:
             # handle and cache thumbnails
-            thumb_path = path.join(settings.MEDIA_ROOT,
-                'forum/thumbnails/%s.thumbnail' % self.file.split('/')[-1])
-            if not path.exists(path.abspath(thumb_path)):
+            img_path = path.join(settings.MEDIA_ROOT,
+                'forum/thumbnails/%s' % self.file.split('/')[-1])
+            if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
-                thumbnail = Image.open(StringIO(self.contents))
-                format = thumbnail.format
-                if thumbnail.size > settings.FORUM_THUMBNAIL_SIZE:
-                    thumbnail = thumbnail.resize(settings.FORUM_THUMBNAIL_SIZE)
-                    thumbnail.save(thumb_path, format)
-                else:
-                    thumbnail.save(thumb_path, format)
-            thumb_url = href('media', 'forum/thumbnails/%s.thumbnail'
+                img = Image.open(StringIO(self.contents))
+                if img.size > settings.FORUM_THUMBNAIL_SIZE:
+                    img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
+                img.save(img_path, img.format)
+            thumb_url = href('media', 'forum/thumbnails/%s'
                              % self.file.split('/')[-1])
             return u'<a href="%s"><img class="preview" src="%s" ' \
                    u'alt="%s"></a>' % (url, thumb_url, self.comment)
@@ -1151,7 +1147,7 @@ dbsession.mapper(Topic, topic_table, properties={
 dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
     'author': relation(SAUser, foreign_keys=[post_table.c.author_id],
                        primaryjoin=post_table.c.author_id == user_table.c.id),
-    'attachments': relation(Attachment, cascade='all, delete-orphan')
+    'attachments': relation(Attachment)
     }, extension=PostMapperExtension(), order_by=None
 )
 dbsession.mapper(PostRevision, post_revision_table, properties={

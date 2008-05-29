@@ -32,10 +32,11 @@
     <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
         {{ form.errors.autosubscribe }}</dd>
     <dd>{{ form.show_preview }} <label for="id_show_preview">{{ form.show_preview.label }}</label>
-        {{ form.errors.show_preview }}</dd>
-    <dd>{{ form.show_thumbnails }} <label for="id_show_thumbnails">{{ form.show_thumbnails.label }}</label><br />
+        {{ form.errors.show_preview }}
+        <dl><dd>{{ form.show_thumbnails }} <label for="id_show_thumbnails">{{ form.show_thumbnails.label }}</label><br />
         <span class="note"> {{ form.show_thumbnails.help_text }}</span>
-        {{ form.errors.show_thumbnails }}</dd>
+        {{ form.errors.show_thumbnails }}</dd></dl>
+    </dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

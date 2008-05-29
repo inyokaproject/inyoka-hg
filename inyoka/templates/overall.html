@@ -215,7 +215,7 @@
       </form>
     </div>
     {%- if not USER.is_authenticated %}
-    <form action="{{ href('portal', 'login') }}" method="post" id="js_login_form">
+    <form action="{{ href('portal', 'login', next=CURRENT_URL) }}" method="post" id="js_login_form">
       <div>
         <label for="js_login_username">Benutzername:</label>
         <input name="username" id="js_login_username" class="right" />
