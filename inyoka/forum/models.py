@@ -136,16 +136,16 @@ class TopicMapperExtension(MapperExtension):
         connection.execute(forum_table.update(
             forum_table.c.last_post_id.in_(select([post_table.c.id],
                 post_table.c.topic_id == instance.id)), values={
-            'last_post_id': None
+                    'last_post_id': None
         }))
         connection.execute(topic_table.update(
             topic_table.c.id == instance.id, values={
-            'last_post_id': None,
-            'first_post_id': None
+                'last_post_id': None,
+                'first_post_id': None
         }))
-        connection.execute(post_table.delete(
-            post_table.c.topic_id == instance.id
-        ))
+#        connection.execute(post_table.delete(
+#            post_table.c.topic_id == instance.id
+#        ))
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
@@ -202,15 +202,40 @@ class PostMapperExtension(MapperExtension):
                 page))
         search.queue('f', instance.id)
 
-    def unregister(self, mapper, connection, instance):
+    def before_delete(self, mapper, connection, instance):
+        self.deregister(mapper, connection, instance)
+
+    def deregister(self, mapper, connection, instance):
+        """Remove references and decrement post counts for this topic."""
         forums = instance.topic.forum.parents
         forums.append(instance.topic.forum)
+        parent_ids = list(p.id for p in forums)
         parent_ids.append(instance.topic.forum_id)
-        connection.ex
+        # degrade user post count
+        connection.execute(user_table.update(
+            user_table.c.id == instance.author_id, values={
+                'post_count': user_table.c.post_count - 1}
+        ))
 
-    def before_delete(self, mapper, connection, instance):
-        # TODO: unregister
-        pass
+        if instance.id == instance.topic.last_post_id:
+            new_last_post = Post.query.filter(and_(
+                topic_table.c.id == instance.topic_id,
+                post_table.c.id != instance.id
+            )).order_by(post_table.c.id.asc()).first()
+            connection.execute(topic_table.update(
+                topic_table.c.id == instance.topic_id, values={
+                    'last_post_id': new_last_post.id}
+            ))
+        if instance.id == instance.topic.forum.last_post_id:
+            new_last_post = Post.query.filter(and_(
+                topic_table.c.id == instance.topic_id,
+                forum_table.c.id == instance.topic.forum_id,
+                post_table.c.id != instance.id
+            )).order_by(post_table.c.id.desc()).first()
+            connection.execute(forum_table.update(
+                forum_table.c.id == instance.topic.forum_id, values={
+                    'last_post_id': new_last_post.id}
+            ))
 
 
 class Forum(object):
@@ -1101,40 +1126,36 @@ dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
 })
 dbsession.mapper(Forum, forum_table, properties={
-    'topics': dynamic_loader(Topic),
+    'topics': relation(Topic, lazy='dynamic'),
     '_children': relation(Forum, backref=backref('parent',
-        remote_side=[forum_table.c.id])),
-    'last_post': relation(Post, post_update=True)},
-    extension=ForumMapperExtension(),
+                          remote_side=[forum_table.c.id])),
+    'last_post': relation(Post, post_update=True)
+    }, extension=ForumMapperExtension(),
 )
 dbsession.mapper(Topic, topic_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=topic_table.c.author_id == user_table.c.id,
-        foreign_keys=[topic_table.c.author_id]),
-    'reporter': relation(SAUser,
-        primaryjoin=topic_table.c.reporter_id == user_table.c.id,
-        foreign_keys=[topic_table.c.reporter_id]),
+    'author': relation(SAUser, foreign_keys=[topic_table.c.author_id],
+                       primaryjoin=topic_table.c.author_id == user_table.c.id),
+    'reporter': relation(SAUser, foreign_keys=[topic_table.c.reporter_id],
+                         primaryjoin=topic_table.c.reporter_id == user_table.c.id),
     'last_post': relation(Post, post_update=True,
-        primaryjoin=topic_table.c.last_post_id == post_table.c.id),
+                          primaryjoin=topic_table.c.last_post_id == post_table.c.id),
     'first_post': relation(Post, post_update=True,
-        primaryjoin=topic_table.c.first_post_id == post_table.c.id),
+                           primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
-    'posts': dynamic_loader(Post, backref='topic',
-        primaryjoin=topic_table.c.id == post_table.c.topic_id),
+    'posts': relation(Post, backref='topic', cascade='all, delete',
+                      primaryjoin=topic_table.c.id == post_table.c.topic_id,
+                      lazy='dynamic'),
     }, extension=TopicMapperExtension()
 )
 dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id == user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(Attachment)},
-    extension=PostMapperExtension(),
-    order_by=None
+    'author': relation(SAUser, foreign_keys=[post_table.c.author_id],
+                       primaryjoin=post_table.c.author_id == user_table.c.id),
+    'attachments': relation(Attachment, cascade='all, delete-orphan')
+    }, extension=PostMapperExtension(), order_by=None
 )
 dbsession.mapper(PostRevision, post_revision_table, properties={
-    'post': relation(Post, primaryjoin=post_revision_table.c.post_id ==
-                                                        post_table.c.id)
+    'post': relation(Post, primaryjoin=post_revision_table.c.post_id == post_table.c.id)
 })
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={

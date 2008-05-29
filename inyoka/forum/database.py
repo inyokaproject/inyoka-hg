@@ -72,7 +72,6 @@ post_text_table = Table('forum_post_text', metadata,
     Column('rendered_text', Text(), nullable=False),
 )
 
-
 post_revision_table = Table('forum_postrevision', metadata,
     Column('id', Integer, primary_key=True),
     Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=False),

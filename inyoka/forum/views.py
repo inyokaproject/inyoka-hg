@@ -985,10 +985,12 @@ def delete_topic(request, topic_slug):
         if 'cancel' in request.POST:
             flash(u'Löschen des Themas „%s“ wurde abgebrochen' % topic.title)
         else:
-            topic.delete()
+            redirect = url_for(topic.forum)
+            session.delete(topic)
             flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
                   success=True)
-            return HttpResponseRedirect(url_for(topic.forum))
+            session.commit()
+            return HttpResponseRedirect(redirect)
     else:
         flash(render_template('forum/delete_topic.html', {'topic': topic}))
     topic.forum.invalidate_topic_cache()
