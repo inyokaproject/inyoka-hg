@@ -35,6 +35,7 @@
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
+      {% if USER.is_manager %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
     </p>
     {%- if article.comments_enabled %}
     <a name="comments"></a>
@@ -58,10 +59,7 @@
     </ul>
     {%- if USER.is_authenticated %}
     <h4><a name="new_comment">Kommentar schreiben</a></h4>
-    <p class="note">
-
-    </p>
-    <form action="{{ article|url }}#new_comment" method="post">
+    <form action="{{ article|url }}#new_comment" method="post" class="new_comment">
       {{ render_form(form, ['title', 'text']) }}
       <p>
         <input type="submit" name="preview" value="Vorschau" />

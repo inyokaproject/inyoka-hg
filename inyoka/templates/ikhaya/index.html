@@ -42,6 +42,7 @@
         {%- elif article.comment_count == 1 %} Ein <a href="{{ article|url }}#comments">Kommentar</a>
         {%- else %} {{ article.comment_count|hnumber|capitalize }} <a href="{{ article|url }}#comments">Kommentare</a>
         {%- endif %}
+        {% if USER.is_manager %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
       </p>
     </li>
     {%- endfor %}

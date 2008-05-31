@@ -112,3 +112,8 @@ a.comment_link:hover {
   border: 1px solid #222;
   padding: 0.5em;
 }
+
+form.new_comment {
+  border: 1px solid #ccc;
+  padding: 5px 20px 0px 20px;
+}
