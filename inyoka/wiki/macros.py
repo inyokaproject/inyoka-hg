@@ -26,9 +26,9 @@
     :license: GNU GPL.
 """
 import random
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from inyoka.conf import settings
-from inyoka.utils.urls import href, url_encode
+from inyoka.utils.urls import href, url_encode, url_for
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
      pagename_join, is_external_target, debug_repr, dump_argstring, \
@@ -37,7 +37,6 @@ from inyoka.wiki.models import Page, Revision
 from inyoka.utils.text import human_number
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
      natural_date
-from inyoka.utils.urls import url_for
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.parsertools import OrderedDict
@@ -177,11 +176,13 @@ class RecentChanges(Macro):
 
     arguments = (
         ('per_page', int, 50),
+        ('days', int, 10),
     )
     is_block_tag = True
 
-    def __init__(self, per_page):
+    def __init__(self, per_page, days):
         self.per_page = per_page
+        self.default_days = days
 
     def build_node(self, context, format):
         if not context.request or not context.wiki_page:
@@ -190,11 +191,8 @@ class RecentChanges(Macro):
                            u'nicht dargestellt werden.')
             ])
 
-        try:
-            page_num = int(context.request.GET['page'])
-        except (ValueError, KeyError):
-            page_num = 1
-
+        max_days = int(context.request.GET.get('max_days', self.default_days))
+        page_num = int(context.request.GET.get('page', '1'))
         days = []
         days_found = set()
 
@@ -208,8 +206,14 @@ class RecentChanges(Macro):
                 rv += '?' + url_encode(parameters)
             return rv
 
-        pagination = Pagination(context.request, Revision.objects.order_by('change_date'),
-                                page_num, self.per_page, link_func, True)
+        #XXX: for every user url one query is send. select_related(depth=4+)
+        #     doesn't fix that.... for now it's not that bad, but should
+        #     be optimized.
+        revisions = Revision.objects.filter(change_date__gt=(
+            datetime.utcnow()-timedelta(days=max_days))).select_related()
+        sitems = Sortable(revisions, context.request.GET, '-change_date')
+        pagination = Pagination(context.request, sitems.get_objects(),
+                                page_num, self.per_page, link_func)
         for revision in pagination.objects:
             d = revision.change_date
             key = (d.year, d.month, d.day)
@@ -219,14 +223,16 @@ class RecentChanges(Macro):
             days[-1][1].append(revision)
 
         table = nodes.Table(class_='recent_changes')
-#        table = nodes.Table(children=[
-#            nodes.TableRow([
-#                nodes.TableHeader([
-#                    nodes.Text('Sortieren nach: '),
-#                    nodes.HTML(sitems.get_html('change_date',
-#                        u'Änderungsdatum')),
-#        ])])], class_='recent_changes')
-        for day, revisions in days:
+
+        table = nodes.Table(children=[
+            nodes.TableRow([
+                nodes.TableHeader([
+                    nodes.Text('Sortieren nach: '),
+                    nodes.HTML(sitems.get_html('change_date',
+                        u'Änderungsdatum')),
+        ])])], class_='recent_changes')
+
+        for day, changes in days:
             table.children.append(nodes.TableRow([
                 nodes.TableHeader([
                     nodes.Text(day)
@@ -235,7 +241,7 @@ class RecentChanges(Macro):
 
             pagebuffer = OrderedDict()
 
-            for rev in revisions:
+            for rev in changes:
                 if not rev.page in pagebuffer:
                     pagebuffer[rev.page] = []
                 pagebuffer[rev.page].append(rev)
@@ -243,8 +249,8 @@ class RecentChanges(Macro):
             for page in pagebuffer:
                 revs = pagebuffer[page]
                 if len(revs) > 1:
-                    stamps = (format_time(revs[0].change_date),
-                              format_time(revs[-1].change_date))
+                    stamps = (format_time(revs[-1].change_date),
+                              format_time(revs[0].change_date))
                     stamp = u'%s' % (stamps[0]==stamps[-1] and stamps[0] or \
                             u'%s - %s' % stamps)
                 else:
@@ -264,14 +270,19 @@ class RecentChanges(Macro):
                     ])]))
 
                 page_notes = nodes.List('unordered', [], class_='note_list')
-                for rev in revs:
-                    if rev.note:
-                        page_notes.children.append(
-                            nodes.ListItem([nodes.Text(rev.note)]))
-                table.children[-1].children.append(
+                for rev in filter(lambda r: bool(r.note), revs):
+                    if rev.user:
+                        page_notes.children.append(nodes.ListItem([
+                            nodes.Link(href('portal', 'user', rev.user.username), [
+                                nodes.Text(rev.note)])
+                        ]))
+                    else:
+                        page_notes.children.append(nodes.ListItem([
+                            nodes.Text(rev.note)]))
+                table.children[-1].children.extend([
                     nodes.TableCell(
-                        page_notes.children and page_notes.children or \
-                        [nodes.Text(u'')], class_='note'))
+                        page_notes.children and [page_notes] or \
+                        [nodes.Text(u'')], class_='note')])
 
         # if rendering to html we add a pagination, pagination is stupid for
         # docbook and other static representations ;)

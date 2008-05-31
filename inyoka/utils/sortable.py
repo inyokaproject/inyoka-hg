@@ -106,11 +106,8 @@ class Sortable(object):
 
     def get_objects(self):
         order = self.order
-        if self.related:
-            if self.is_sqlalchemy:
-                return self.objects.order_by(order)
-            else:
-                return self.objects.order_by(order).select_related()
+        if self.related and not self.is_sqlalchemy:
+            return self.objects.order_by(order).select_related()
         return self.objects.order_by(order)
 
 

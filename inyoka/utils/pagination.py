@@ -34,7 +34,7 @@ from werkzeug import url_encode
 
 class Pagination(object):
 
-    def __init__(self, request, query, page, per_page=10, link=None, related=False):
+    def __init__(self, request, query, page, per_page=10, link=None):
         self.page = int(page)
         self.per_page = per_page
 
@@ -42,9 +42,6 @@ class Pagination(object):
         result = query[idx:idx + self.per_page]
         if not result and self.page != 1:
             raise PageNotFound()
-
-        if related:
-            result = result.select_related()
         self.objects = result
 
         if isinstance(query, list):
