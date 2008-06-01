@@ -222,15 +222,13 @@ class RecentChanges(Macro):
                 days_found.add(key)
             days[-1][1].append(revision)
 
-        table = nodes.Table(class_='recent_changes')
-
         table = nodes.Table(children=[
             nodes.TableRow([
                 nodes.TableHeader([
                     nodes.Text('Sortieren nach: '),
                     nodes.HTML(sitems.get_html('change_date',
                         u'Änderungsdatum')),
-        ])])], class_='recent_changes')
+        ], colspan=3)])], class_='recent_changes')
 
         for day, changes in days:
             table.children.append(nodes.TableRow([
