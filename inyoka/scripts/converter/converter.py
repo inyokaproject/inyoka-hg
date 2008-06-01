@@ -661,7 +661,8 @@ def convert_attachments():
         except IOError:
             continue
         att = Attachment.create(row.real_filename, file_.read(), None, [],
-                              id=row.attach_id, comment=unescape(row.comment))
+                              id=row.attach_id, comment=unescape(row.comment),
+                              post_id=row.post_id)
         file_.close()
         session.commit()
 

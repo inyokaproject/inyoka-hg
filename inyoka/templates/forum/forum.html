@@ -93,7 +93,7 @@
         <td class="last_post">{% if row.last_post_id %}
           <a href="{{ href('forum', 'post', row.last_post_id) }}" class="date">{{
               row.last_post_pub_date|datetimeformat }}</a><br />
-          von <a href="{ row.last_post.author|url}}">{ row.last_post.author }}</a>
+          von <a href="{{ href('forum', 'post', row.last_post_author_username) }}">{{ row.last_post_author_username|e }}</a>
         {%- else %}---{% endif %}</td>
       </tr>
       {%- endif %}

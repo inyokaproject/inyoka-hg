@@ -122,12 +122,14 @@ def forum(request, slug, page=1):
         t = topic_table.c
         p = post_table.c
         u = user_table.c
+        lpa = user_table.alias('last_post_author').c
         prefix = lambda c, pre: [a.label(pre + a.name) for a in c]
         topics = select(prefix(t, 'topic_') + prefix(p, 'last_post_') +
-                        prefix(u, 'author_'),
+                        prefix(u, 'author_') + prefix(lpa, 'last_post_author_'),
             (t.forum_id == f.id) &
             (t.last_post_id == p.id) &
-            (t.author_id == u.id),
+            (t.author_id == u.id) &
+            (lpa.id == p.author_id),
             order_by=(t.sticky.desc(), t.last_post_id.desc())
         )
         count_query = select([func.count(t.id)], t.forum_id == f.id)
@@ -154,7 +156,7 @@ def forum(request, slug, page=1):
         'is_subscribed':    Subscription.objects.user_subscribed(request.user,
                                                                  forum=f),
         'can_moderate':     check_privilege(privs, 'moderate'),
-        'get_read_status':  lambda post_id: request.user.is_authenticated() \
+        'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id)
     })
     return data
