@@ -31,22 +31,22 @@
   </tr>
 {% endmacro %}
 
-{% macro topic_icon(topic) -%}
-  {% set is_read = topic.get_read_status(USER) -%}
+{% macro topic_icon(row) -%}
+  {% set is_read = get_read_status(row.last_post_id) -%}
   <img src="
   {{- href('static', 'img', 'forum', 'topic' ) -}}
   {%- if not is_read %}-new{% endif -%}
-  {%- if topic.solved %}-solved{% endif -%}
+  {%- if row.topic_solved %}-solved{% endif -%}
   {#- TODO: watched -#}
-  {%- if topic.locked %}-locked{% endif -%}
-  {%- if topic.hidden %}-hidden{% endif -%}
-  {%- if topic.reported %}-reported{% endif -%}
+  {%- if row.topic_locked %}-locked{% endif -%}
+  {%- if row.topic_hidden %}-hidden{% endif -%}
+  {%- if row.topic_reported %}-reported{% endif -%}
   .png" alt="
   {%- if not is_read %}ungelesenes {% endif -%}
-  {%- if topic.solved %}gelöstes {% endif -%}
+  {%- if row.topic_solved %}gelöstes {% endif -%}
   {#- TODO: watched -#}
-  {%- if topic.locked %}gesperrtes {% endif -%}
-  {%- if topic.hidden %}verstecktes {% endif -%}
-  {%- if topic.reported %}gemeldetes {% endif -%}
+  {%- if row.topic_locked %}gesperrtes {% endif -%}
+  {%- if row.topic_hidden %}verstecktes {% endif -%}
+  {%- if row.topic_reported %}gemeldetes {% endif -%}
   Thema" />
 {%- endmacro %}

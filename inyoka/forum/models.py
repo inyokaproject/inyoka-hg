@@ -1058,19 +1058,21 @@ class ReadStatus(object):
     def __init__(self, serialized_data):
         self.data = serialized_data and cPickle.loads(str(serialized_data)) or {}
 
-    def __call__(self, item):
+    def __call__(self, item=None, forum_id=None, post_id=None):
         """
         Determine the read status for a forum or topic. If the topic
         was allready read by the user, True is returned.
+        You can either pass a Forum / Topic object or the forum / topic id
+        and the last post id directly.
         """
-        forum_id, post_id = None, None
-        is_forum = isinstance(item, Forum)
-        if is_forum:
-            forum_id, post_id = item.id, item.last_post_id
-        elif isinstance(item, Topic):
-            forum_id, post_id = item.forum_id, item.last_post_id
-        else:
-            raise ValueError('Can\'t determine read status of an unknown type')
+        if item:
+            is_forum = isinstance(item, Forum)
+            if is_forum:
+                forum_id, post_id = item.id, item.last_post_id
+            elif isinstance(item, Topic):
+                forum_id, post_id = item.forum_id, item.last_post_id
+            else:
+                raise ValueError('Can\'t determine read status of an unknown type')
         row = self.data.get(forum_id, (None, []))
         if row[0] >= post_id:
             return True
@@ -1145,14 +1147,16 @@ dbsession.mapper(Topic, topic_table, properties={
     }, extension=TopicMapperExtension()
 )
 dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
-    'author': relation(SAUser, foreign_keys=[post_table.c.author_id],
-                       primaryjoin=post_table.c.author_id == user_table.c.id),
-    'attachments': relation(Attachment)
-    }, extension=PostMapperExtension(), order_by=None
+    'author': relation(SAUser,
+        primaryjoin=post_table.c.author_id == user_table.c.id,
+        foreign_keys=[post_table.c.author_id]),
+    'attachments': relation(Attachment),
+    'revisions': dynamic_loader(PostRevision, backref='post',
+        primaryjoin= post_revision_table.c.post_id == post_table.c.id)
+    },
+    extension=PostMapperExtension(),
 )
-dbsession.mapper(PostRevision, post_revision_table, properties={
-    'post': relation(Post, primaryjoin=post_revision_table.c.post_id == post_table.c.id)
-})
+dbsession.mapper(PostRevision, post_revision_table)
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={
     'options': relation(PollOption, backref='poll',
