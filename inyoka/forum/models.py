@@ -308,8 +308,6 @@ class Forum(object):
         """
         if user.is_anonymous:
             return True
-        if not hasattr(user, '_readstatus'):
-            user._readstatus = ReadStatus(user.forum_read_status)
         return user._readstatus(self)
 
     def mark_read(self, user):

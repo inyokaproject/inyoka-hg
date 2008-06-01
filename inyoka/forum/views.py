@@ -154,8 +154,8 @@ def forum(request, slug, page=1):
         'is_subscribed':    Subscription.objects.user_subscribed(request.user,
                                                                  forum=f),
         'can_moderate':     check_privilege(privs, 'moderate'),
-        'get_read_status':  lambda post_id: request.user._readstatus(
-                                       forum_id=f.id, post_id=post_id)
+        'get_read_status':  lambda post_id: request.user.is_authenticated() \
+                  and request.user._readstatus(forum_id=f.id, post_id=post_id)
     })
     return data
 

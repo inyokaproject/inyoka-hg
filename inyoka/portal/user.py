@@ -313,6 +313,10 @@ class User(models.Model):
     def settings(self):
         return cPickle.loads(str(self._settings))
 
+    @deferred
+    def _readstatus(self):
+        return ReadStatus(self.forum_read_status)
+
     @property
     def rendered_signature(self):
         return self.render_signature()
@@ -416,3 +420,4 @@ from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.utils import send_activation_mail
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
+from inyoka.forum.models import ReadStatus
