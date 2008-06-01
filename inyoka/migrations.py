@@ -371,6 +371,7 @@ def add_group_icon_cfg(m):
         'team_icon': '',
     })
 
+
 def add_ikhaya_suggestion_owner(m):
     """Add a owner of a ikhaya suggestion"""
     m.engine.execute('''
@@ -378,11 +379,20 @@ def add_ikhaya_suggestion_owner(m):
             add column owner_id int(11) null after intro;
     ''')
 
+
 def add_newtopic_default_text(m):
     """Add a default text for a new topic"""
     m.engine.execute('''
         alter table forum_forum
             add column newtopic_default_text text null after welcome_message_id;
+    ''')
+
+
+def add_launchpad_nick(m):
+    """Adds the launchpad nickname to the users' profile"""
+    m.engine.execute('''
+        alter table portal_user
+            add column launchpad varchar(50) after website;
     ''')
 
 
@@ -395,4 +405,5 @@ MIGRATIONS = [
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
+    add_launchpad_nick,
 ]

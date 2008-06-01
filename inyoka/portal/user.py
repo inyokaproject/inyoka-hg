@@ -24,6 +24,7 @@ from inyoka.conf import settings
 from inyoka.utils.decorators import deferred
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
+from inyoka.utils.html import escape
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
 
@@ -224,6 +225,7 @@ class User(models.Model):
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
+    launchpad = models.CharField('Launchpad Nickname', max_length=50, blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
 
     # the user can access the admin panel
@@ -328,6 +330,10 @@ class User(models.Model):
             instructions = parse(self.signature).compile(format)
             cache.set(key, instructions)
         return render(instructions, context)
+
+    @property
+    def launchpad_url(self):
+        return u'http://launchpad.net/~%s' % escape(self.launchpad)
 
     @property
     def avatar_url(self):

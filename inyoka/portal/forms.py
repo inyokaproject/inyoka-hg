@@ -297,6 +297,8 @@ class UserCPProfileForm(forms.Form):
     interests = forms.CharField(label='Interessen', required=False,
                                 max_length=50)
     website = forms.URLField(label='Webseite', required=False)
+    launchpad = forms.CharField(label=u'Launchpad Nickname', required=False,
+                                max_length=50)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                  max_length=10, required=False, help_text=u'''
     Hier kannst du deinen GPG-Key eintragen. Näheres zu diesem Thema

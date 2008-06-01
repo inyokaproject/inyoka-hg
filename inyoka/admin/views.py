@@ -612,7 +612,8 @@ def edit_user(request, username):
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'is_manager', 'member_title'):
+                        'wengophone', 'is_manager', 'member_title',
+                        'launchpad'):
                 setattr(user, key, data[key])
             if data['delete_avatar']:
                 user.delete_avatar()

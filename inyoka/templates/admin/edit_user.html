@@ -76,7 +76,7 @@
     <dd class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</dd>
   </dl>
   <h3>Persönliche Details von {{ user.username|e }}</h3>
-  {{ render_form(form, ['website', 'interests', 'location']) }}
+  {{ render_form(form, ['website', 'launchpad', 'interests', 'location']) }}
   <h3>Benachrichtigungs-Einstellungen</h3>
   {{ render_form(form, ['jabber', 'icq', 'msn', 'aim', 'yim', 'skype', 'wengophone', 'sip']) }}
   <h3>Sonstige Einstellungen</h3>

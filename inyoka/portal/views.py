@@ -476,7 +476,8 @@ def usercp_profile(request):
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email', 'gpgkey'):
+                        'interests', 'website', 'email', 'gpgkey',
+                        'launchpad'):
                 setattr(user, key, data[key] or '')
             if data['coordinates']:
                 user.coordinates_lat, user.coordinates_long = \

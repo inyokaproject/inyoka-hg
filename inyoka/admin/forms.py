@@ -171,6 +171,7 @@ class EditUserForm(forms.Form):
     interests = forms.CharField(label=u'Interessen', max_length=200,
                                 required=False)
     website = forms.URLField(label=u'Webseite', required=False)
+    launchpad = forms.CharField(label=u'Launchpad Nickname', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
