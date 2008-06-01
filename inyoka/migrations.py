@@ -386,6 +386,11 @@ def add_newtopic_default_text(m):
     ''')
 
 
+def add_incides(m):
+    m.engine.execute('''
+        create index viewforum on forum_topic (forum_id, sticky, last_post_id);
+    ''')
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -395,4 +400,5 @@ MIGRATIONS = [
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
+    add_indices
 ]

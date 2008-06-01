@@ -14,7 +14,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_, select
+from sqlalchemy.sql import and_, select, func
 from sqlalchemy.exceptions import InvalidRequestError
 from inyoka.utils.urls import global_not_found
 from inyoka.portal.utils import simple_check_login, abort_access_denied
@@ -27,7 +27,7 @@ from inyoka.utils.http import templated, does_not_exist_is_404, \
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
-from inyoka.utils.pagination import Pagination
+from inyoka.utils.pagination import Pagination, SAQueryPagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
@@ -46,7 +46,7 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
     check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
-    poll_option_table, attachment_table
+    poll_option_table, attachment_table, user_table
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -119,16 +119,26 @@ def forum(request, slug, page=1):
     key = 'forum/topics/%d/%d' % (f.id, int(page))
     data = cache.get(key)
     if not data:
-        topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
-            eagerload('last_post.author')).filter_by(forum_id=f.id) \
-            .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
+        t = topic_table.c
+        p = post_table.c
+        u = user_table.c
+        prefix = lambda c, pre: [a.label(pre + a.name) for a in c]
+        topics = select(prefix(t, 'topic_') + prefix(p, 'last_post_') +
+                        prefix(u, 'author_'),
+            (t.forum_id == f.id) &
+            (t.last_post_id == p.id) &
+            (t.author_id == u.id),
+            order_by=(t.sticky.desc(), t.last_post_id.desc())
+        )
+        count_query = select([func.count(t.id)], t.forum_id == f.id)
         subforums = Forum.query.options(eagerload('last_post'),
                 eagerload('last_post.author')).filter_by(parent_id=f.id).all()
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
+        pagination = SAQueryPagination(count_query, request, topics,
+                                       page, TOPICS_PER_PAGE, url_for(f))
         data = {
             'forum':            f,
             'subforums':        subforums,
-            'topics':           list(pagination.objects),
+            'rows':             list(dict(o) for o in pagination.objects.execute().fetchall()),
             'pagination_left':  pagination.generate(),
             'pagination_right': pagination.generate('right')
         }
@@ -139,10 +149,14 @@ def forum(request, slug, page=1):
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
-    data['subforums'] = filter_invisible(request.user, data['subforums'])
-    data['is_subscribed'] = Subscription.objects.user_subscribed(request.user,
-                                                                 forum=f)
-    data['can_moderate'] = check_privilege(privs, 'moderate')
+    data.update({
+        'subforums':        filter_invisible(request.user, data['subforums']),
+        'is_subscribed':    Subscription.objects.user_subscribed(request.user,
+                                                                 forum=f),
+        'can_moderate':     check_privilege(privs, 'moderate'),
+        'get_read_status':  lambda post_id: request.user._readstatus(
+                                       forum_id=f.id, post_id=post_id)
+    })
     return data
 
 
@@ -913,13 +927,12 @@ def delete_post(request, post_id):
 
 @templated('forum/revisions.html')
 def revisions(request, post_id):
-    revs = PostRevision.query.options(eagerload('post'),
-            eagerload('post.topic'), eagerload('post.topic.forum')) \
-        .filter(PostRevision.post_id == post_id)
-    if not have_privilege(request.user, revs[0].post.topic.forum, CAN_MODERATE):
+    post = Post.query.options(eagerload('revisions'), eagerload('topic'), eagerload('topic.forum')) \
+        .get(int(post_id))
+    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     return {
-        'revisions': list(revs)
+        'revisions': list(post.revisions)
     }
 
 

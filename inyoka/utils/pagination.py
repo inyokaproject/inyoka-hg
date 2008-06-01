@@ -39,16 +39,11 @@ class Pagination(object):
         self.per_page = per_page
 
         idx = (self.page - 1) * self.per_page
-        result = query[idx:idx + self.per_page]
+        result = self.limit(query, idx)
         if not result and self.page != 1:
             raise PageNotFound()
         self.objects = result
-
-        if isinstance(query, list):
-            self.total = len(query)
-        else:
-            self.total = query.count()
-
+        self.total = self.get_total(query)
         if link is None:
             link = request.path
         self.parameters = request.GET
@@ -56,6 +51,15 @@ class Pagination(object):
             self.link_base = link
         else:
             self.generate_link = link
+
+    def limit(self, query, idx):
+        return query[idx:idx + self.per_page]
+
+    def get_total(self, query):
+        if isinstance(query, list):
+            return len(query)
+        else:
+            return query.count()
 
     def generate_link(self, page, params):
         if page == 1:
@@ -106,3 +110,15 @@ class Pagination(object):
             class_ += ' pagination_' + position
         return u'<div class="%s">%s<div style="clear: both">' \
                u'</div></div>' % (class_, u''.join(result))
+
+
+class SAQueryPagination(Pagination):
+    def __init__(self, count_query, *args, **kwargs):
+        self.count_query = count_query
+        Pagination.__init__(self, *args, **kwargs)
+
+    def limit(self, query, idx):
+        return query.offset(idx).limit(self.per_page)
+
+    def get_total(self, query):
+        return self.count_query.execute().fetchone()[0]
