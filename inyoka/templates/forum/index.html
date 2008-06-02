@@ -13,9 +13,9 @@
 {% set scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
 {% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}
-  {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
+  {% set title_trace = ['Kategorie „%s“'|format(categories[0].forum_name)] %}
   {% set navigation_trace = [
-      (categories[0]|url, categories[0].name|capitalize|e),
+      (href('forum', 'category', categories[0].forum_slug), categories[0].forum_name|capitalize|e),
     ] + navigation_trace|default([]) %}
 {% else %}
 {% set title_trace = ['Index'] %}
@@ -29,10 +29,10 @@
 {% block forum_content %}
   {%- if categories %}
   <table class="forum{% if is_index %} category_box{% endif %}">
-  {%- for category in categories %}
-  <tr class="head" id="category-{{ category.id }}">
-    <th colspan="5"><a href="{{ category|url
-      }}">{{ category.name|e }}</a></th></tr>
+  {%- for row in categories %}
+  <tr class="head" id="category-{{ row.forum_id }}">
+    <th colspan="5"><a href="{{ href('forum', 'category', row.forum_slug)
+      }}">{{ row.forum_name|e }}</a></th></tr>
     {%- for forum in category.children -%}
       {{ render_forum(forum) }}
     {%- else %}

@@ -119,10 +119,10 @@ def check_privilege(mask, privilege):
 
 def filter_invisible(user, forums, priv=CAN_READ):
     """Filter all forums where the user has a privilege on it."""
-    privileges = get_privileges(user, [f.id for f in forums])
+    privileges = get_privileges(user, [f['forum_id'] for f in forums])
     result = []
     for forum in forums:
-        if privileges.get(forum.id, DISALLOW_ALL) & priv != 0:
+        if privileges.get(forum['forum_id'], DISALLOW_ALL) & priv != 0:
             result.append(forum)
     return result
 

@@ -49,6 +49,7 @@ from inyoka.forum.database import post_table, topic_table, forum_table, \
     poll_option_table, attachment_table, user_table
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
+_prefix = lambda c, pre: [a.label(pre + a.name) for a in c]
 
 
 def not_found(request, err_message=None):
@@ -68,23 +69,39 @@ def index(request, category=None):
     Return all forums without parents.
     These forums are treated as categories but not as real forums.
     """
-    categories = []
+    key = 'forum/%s' % category and ('category/%s' % category) or 'index'
+    categories = cache.get(key)
+    if categories is None:
+        f = forum_table.c
+        p = post_table.c
+        u = user_table.c
+        categories = select(_prefix(f, 'forum_') + _prefix(p, 'last_post_') +
+                            _prefix(u, 'last_post_author_'),
+            (f.last_post_id == p.id) &
+            (p.author_id == u.id)
+        )
+        if category:
+            categories.append_whereclause()
+            category = Forum.query.get(category)
+            if not category or category.parent_id != None:
+                raise PageNotFound
+            fmsg = None # category.find_welcome(request.user)
+            if fmsg is not None:
+                return welcome(request, fmsg.slug, request.path)
+            categories = [category]
+        else:
+            categories.append_whereclause(f.parent_id == None)
+        categories = [dict(c) for c in categories.execute().fetchall()]
+        cache.set(key, categories)
+
     if category:
-        category = Forum.query.get(category)
-        if not category or category.parent_id != None:
-            raise PageNotFound
-        fmsg = None # category.find_welcome(request.user)
-        if fmsg is not None:
-            return welcome(request, fmsg.slug, request.path)
         set_session_info(request, (u'sieht sich die Forenübersicht der '
-                                   u'Kategorie „%s“ an'
-                                   % category.name),
+                                   u'Kategorie „%s“ an.' % category.name),
                          u'Kategorieübersicht')
-        categories = [category]
     else:
-        categories = Forum.query.filter(forum_table.c.parent_id == None)
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
+
 
     hidden_categories = []
     if request.user.is_authenticated:
@@ -104,42 +121,46 @@ def forum(request, slug, page=1):
     """
     Return a single forum to show a topic list.
     """
-    f = Forum.query.get(slug)
+    forum = Forum.query.get(slug)
     # if the forum is a category we raise PageNotFound.  categories have
     # their own url at /category.
-    if not f or f.parent_id is None:
+    if not forum or forum.parent_id is None:
         raise PageNotFound()
-    privs = get_forum_privileges(request.user, f.id)
+    privs = get_forum_privileges(request.user, forum.id)
     if not check_privilege(privs, 'read'):
         return abort_access_denied(request)
-    fmsg = f.find_welcome(request.user)
+    fmsg = forum.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
     page = int(page)
-    key = 'forum/topics/%d/%d' % (f.id, int(page))
+    key = 'forum/topics/%d/%d' % (forum.id, int(page))
     data = cache.get(key)
-    if not data:
+    if data is None:
         t = topic_table.c
         p = post_table.c
         u = user_table.c
+        f = forum_table.c
         lpa = user_table.alias('last_post_author').c
-        prefix = lambda c, pre: [a.label(pre + a.name) for a in c]
-        topics = select(prefix(t, 'topic_') + prefix(p, 'last_post_') +
-                        prefix(u, 'author_') + prefix(lpa, 'last_post_author_'),
-            (t.forum_id == f.id) &
+        topics = select(_prefix(t, 'topic_') + _prefix(p, 'last_post_') +
+                        _prefix(u, 'author_') + _prefix(lpa, 'last_post_author_'),
+            (t.forum_id == forum.id) &
             (t.last_post_id == p.id) &
             (t.author_id == u.id) &
             (lpa.id == p.author_id),
             order_by=(t.sticky.desc(), t.last_post_id.desc())
         )
-        count_query = select([func.count(t.id)], t.forum_id == f.id)
-        subforums = Forum.query.options(eagerload('last_post'),
-                eagerload('last_post.author')).filter_by(parent_id=f.id).all()
+        count_query = select([func.count(t.id)], t.forum_id == forum.id)
+        subforums = select(_prefix(f, 'forum_') + _prefix(p, 'last_post_') +
+                           _prefix(u, 'last_post_author_'),
+            (p.id == f.last_post_id) &
+            (u.id == p.author_id) &
+            (f.parent_id == forum.id)
+        ).execute().fetchall()
         pagination = SAQueryPagination(count_query, request, topics,
-                                       page, TOPICS_PER_PAGE, url_for(f))
+                                       page, TOPICS_PER_PAGE, url_for(forum))
         data = {
-            'forum':            f,
-            'subforums':        subforums,
+            'forum':            forum,
+            'subforums':        list(dict(f) for f in subforums),
             'rows':             list(dict(o) for o in pagination.objects.execute().fetchall()),
             'pagination_left':  pagination.generate(),
             'pagination_right': pagination.generate('right')
@@ -148,16 +169,21 @@ def forum(request, slug, page=1):
         # forum.models.Forum.invalidate_topic_cache, too.
         if page < 5:
             cache.set(key, data)
+
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
-                     u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
+                     u'%s</a>“ an' % (escape(url_for(forum)), escape(forum.name)),
                      'besuche das Forum')
+
     data.update({
         'subforums':        filter_invisible(request.user, data['subforums']),
         'is_subscribed':    Subscription.objects.user_subscribed(request.user,
-                                                                 forum=f),
+                                                                 forum=forum),
         'can_moderate':     check_privilege(privs, 'moderate'),
-        'get_read_status':  lambda post_id: request.user.is_authenticated \
-                  and request.user._readstatus(forum_id=f.id, post_id=post_id)
+        'get_read_status':  lambda post_id: request.user.is_anonymous and True \
+            or request.user._readstatus(forum_id=forum.id, post_id=post_id),
+        'get_forum_read_status': lambda r: request.user.is_anonymous and True \
+            or request.user._readstatus(forum_id=row.forum_id, post_id=
+                                                        row.last_post_id)
     })
     return data
 
