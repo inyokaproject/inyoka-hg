@@ -1063,6 +1063,7 @@ class ReadStatus(object):
         You can either pass a Forum / Topic object or the forum / topic id
         and the last post id directly.
         """
+        is_forum = False
         if item:
             is_forum = isinstance(item, Forum)
             if is_forum:
@@ -1148,7 +1149,7 @@ dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(Attachment),
+    'attachments': relation(Attachment, cascade='all, delete'),
     'revisions': dynamic_loader(PostRevision, backref='post',
         primaryjoin= post_revision_table.c.post_id == post_table.c.id)
     },

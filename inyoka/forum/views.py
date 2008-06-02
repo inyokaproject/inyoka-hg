@@ -154,7 +154,7 @@ def forum(request, slug, page=1):
         'is_subscribed':    Subscription.objects.user_subscribed(request.user,
                                                                  forum=f),
         'can_moderate':     check_privilege(privs, 'moderate'),
-        'get_read_status':  lambda post_id: request.user.is_authenticated() \
+        'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id)
     })
     return data
@@ -1213,7 +1213,9 @@ def newposts(request, page=1):
         href('forum', 'newposts'))
     return {
         'topics':     list(pagination.objects),
-        'pagination': pagination
+        'pagination': pagination,
+        'get_read_status':  lambda post_id: request.user.is_authenticated \
+                  and request.user._readstatus(forum_id=f.id, post_id=post_id)
     }
 
 
@@ -1258,7 +1260,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     return {
         'topics':       list(pagination.objects),
         'pagination':   pagination.generate(),
-        'title':        title
+        'title':        title,
+        'get_read_status':  lambda post_id: request.user.is_authenticated \
+                  and request.user._readstatus(post_id=post_id)
     }
 
 
