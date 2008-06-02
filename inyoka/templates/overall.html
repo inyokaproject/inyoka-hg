@@ -125,13 +125,13 @@
         {% if active_app == 'forum' %}
           <div class="dropdown">
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
-              <li><a href="{{ href('portal', 'search') }}">Eigene Beiträge</a></li>
-              <li><a href="{{ href('portal', 'search') }}">Neue Beiträge</a></li>
-              <li><a href="{{ href('portal', 'search') }}">Unbeantwortete Themen</a></li>
-              <li><a href="{{ href('portal', 'search') }}">Ungelöste Themen</a></li>
-              <li><a href="{{ href('portal', 'search') }}">24 Stunden</a></li>
-              <li><a href="{{ href('portal', 'search') }}">12 Stunden</a></li>
-              <li><a href="{{ href('portal', 'search') }}">6 Stunden</a></li>
+              <li><a href="{{ href('forum', 'egosearch') }}">Eigene Beiträge</a></li>
+              <li><a href="{{ href('forum', 'newposts') }}">Neue Beiträge</a></li>
+              <li><a href="{{ href('forum', 'unanswered') }}">Unbeantwortete Themen</a></li>
+              <li><a href="{{ href('forum', 'unsolved') }}">Ungelöste Themen</a></li>
+              <li><a href="{{ href('forum', 'last24') }}">24 Stunden</a></li>
+              <li><a href="{{ href('forum', 'last12') }}">12 Stunden</a></li>
+              <li><a href="{{ href('forum', 'last6') }}">6 Stunden</a></li>
             </ul></li></ul>
           </div>
         {% endif %}
