@@ -268,10 +268,19 @@ class Parser(object):
     def parse_wiki(self):
         """parse [wiki]-tags."""
         token = self.expect_tag('wiki')
+        def _alter_page(page):
+            # this is needed because the [wiki] tag is misused sometimes
+            page = urlparse(page)[2]
+            if page.startswith('/'):
+                page = page[1:]
+            return '#' in page and page.rsplit('#', 1) or [page, None]
         if token.attr:
-            return nodes.InternalLink(token.attr, self.parse_until('/wiki'))
+            page, anchor = _alter_page(token.attr)
+            return nodes.InternalLink(page, self.parse_until('/wiki'),
+                                      anchor=anchor)
         target = self.parse_until('/wiki', raw=True)
-        return nodes.InternalLink(target, [nodes.Text(target)])
+        page, anchor = _alter_page(target)
+        return nodes.InternalLink(page, [nodes.Text(target)], anchor=anchor)
 
     def parse_mod(self):
         """parse [mod]-tags."""
