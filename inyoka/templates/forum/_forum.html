@@ -1,52 +1,56 @@
-{% macro render_forum(row) %}
-  <tr class="entry category-{{ row.forum_parent_id }}">
+{% macro render_forum(forum) %}
+  <tr class="entry category-{{ forum.parent_id }}">
     <td class="icon">
-      {% if get_read_status(row.forum_id) %}
+      {% if forum.get_read_status(REQUEST.user) %}
         <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
       {% else %}
         <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
       {% endif %}
     </td>
     <td class="forum">
-      <p class="name"><a href="{{ forum|url }}" class="title">{{ row.forum_name|e }}</a></p>
-      {%- if row.forum_description %}
-      <p class="description">{{ row.forum_description|e }}</p> 
+      <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
+
+      {%- if forum.description %}
+      <p class="description">{{ forum.description|e }}</p> 
       {%- endif %}
-      {%- if row.forum_children %}
+      {%- if forum.children %}
       <p class="subforums">Subforen:
-      {%- for subforum in row.forum_children %}
-        <a href="{{ subforum|url }}">{{ subrow.forum_name|e }}</a>{% if not loop.last %}, {% endif %}
+      {%- for subforum in forum.children %}
+        <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
       {%- endfor %}
       </p>
       {%- endif %}
     </td>
-    <td class="topic_count" title="Anzahl der Themen">{{ row.forum_topic_count }}</td>
-    <td class="post_count" title="Anzahl der Beiträge">{{ row.forum_post_count }}</td>
+    <td class="topic_count" title="Anzahl der Themen">{{ forum.topic_count }}</td>
+    <td class="post_count" title="Anzahl der BeitrÃ¤ge">{{ forum.post_count }}</td>
+
     <td class="last_post">
-    {%- if row.last_post_id -%}
-    <a href="{{ href('forum', 'post', row.last_post_id) }}">{{ row.last_post_pub_date|datetimeformat }}</a><br />
-    von <a href="{{ href('portal', 'user', row.last_post_author_username) }}">{{ row.last_post_author_username|e }}</a>
+    {%- if forum.last_post_id -%}
+    <a href="{{ forum.last_post|url }}">{{ forum.last_post.pub_date|datetimeformat }}</a><br />
+    von <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author|e }}</a>
     {%- else %}---
     {%- endif %}</td>
   </tr>
 {% endmacro %}
 
-{% macro topic_icon(row) -%}
-  {% set is_read = get_read_status(row.last_post_id) -%}
+{% macro topic_icon(topic) -%}
+  {% set is_read = topic.get_read_status(USER) -%}
   <img src="
   {{- href('static', 'img', 'forum', 'topic' ) -}}
   {%- if not is_read %}-new{% endif -%}
-  {%- if row.topic_solved %}-solved{% endif -%}
+  {%- if topic.solved %}-solved{% endif -%}
   {#- TODO: watched -#}
-  {%- if row.topic_locked %}-locked{% endif -%}
-  {%- if row.topic_hidden %}-hidden{% endif -%}
-  {%- if row.topic_reported %}-reported{% endif -%}
+  {%- if topic.locked %}-locked{% endif -%}
+  {%- if topic.hidden %}-hidden{% endif -%}
+  {%- if topic.reported %}-reported{% endif -%}
   .png" alt="
   {%- if not is_read %}ungelesenes {% endif -%}
-  {%- if row.topic_solved %}gelöstes {% endif -%}
+  {%- if topic.solved %}gelÃ¶stes {% endif -%}
   {#- TODO: watched -#}
-  {%- if row.topic_locked %}gesperrtes {% endif -%}
-  {%- if row.topic_hidden %}verstecktes {% endif -%}
-  {%- if row.topic_reported %}gemeldetes {% endif -%}
+  {%- if topic.locked %}gesperrtes {% endif -%}
+  {%- if topic.hidden %}verstecktes {% endif -%}
+  {%- if topic.reported %}gemeldetes {% endif -%}
   Thema" />
+
 {%- endmacro %}
+
