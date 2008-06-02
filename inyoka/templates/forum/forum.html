@@ -11,9 +11,9 @@
 {% from 'forum/_forum.html' import render_forum, topic_icon with context %}
 
 {% set title_trace = [forum.name|e] %}
-{% set name = 'Forum „%s“ - ' % forum.name|e %}
+{% set name = 'Forum â€ž%sâ€œ - ' % forum.name|e %}
 {% set feeds = [
-  (name + 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
+  (name + 'Nur Ãœberschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
   (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
   (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
@@ -34,9 +34,10 @@
       <tr>
         <td colspan="5">
           {%- if forum.description %}
-          <p class="description">{{ forum.description|e }}</p>
+          <p class="description">{{Â forum.description|e }}</p>
+
           {%- endif %}
-          {{ pagination_right }}
+          {{Â pagination_right }}
           <p class="actions">
             <a href="{{ forum|url('newtopic') }}">Neues Thema</a> | 
             {%- if is_subscribed %}
@@ -46,6 +47,7 @@
             {%- endif %}
           </p>
         </td>
+
       </tr>
     </thead>
     <tbody>
@@ -56,49 +58,54 @@
       <th class="topic" colspan="2">Thema</th>
       <th class="view_count">Aufrufe</th>
       <th class="post_count">Antworten</th>
+
       <th class="last_post">Letzter Beitrag</th>
     </tr>
-    {%- for row in rows %}
-      {%- if row.topic_hidden and not can_moderate %}
+    {%- for topic in topics %}
+      {%- if topic.hidden and not can_moderate %}
       <tr class="deleted">
         <td class="icon">
-          <img src="{{ href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
+          <img src="{{Â href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
         </td>
         <td colspan="5">
-          Dieses Thema wurde von einem Moderator gelöscht.
+          Dieses Thema wurde von einem Moderator gelÃ¶scht.
         </td>
+
       </tr>
       {%- else %}
-      <tr{% if row.topic_hidden or row.topic_reported %} class="{% if row.topic_hidden %}hidden {% endif %}{% if row.topic_reported %}reported{% endif %}"{% endif %}>
+      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         <td class="icon">
-          {{ topic_icon(row) }}
+          {{ topic_icon(topic) }}
         </td>
         <td class="topic">
           <p class="topic_title">
-            {%- if row.topic_sticky %}<strong>Wichtig: </strong>{% endif -%}
-            {%- if row.topic_has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-            {%- if row.topic_hidden %} [Verborgen] {% endif -%}
-            {%- if row.topic_reported %} [Gemeldet] {% endif -%}
-            <a href="{{ href('forum', 'topic', row.topic_slug) }}">{{- row.topic_title|e -}}</a>
+            {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
+            {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
+            {%- if topic.hidden %} [Verborgen] {% endif -%}
+            {%- if topic.reported %} [Gemeldet] {% endif -%}
+            <a href="{{ topic|url }}">{{- topic.title|e -}}</a>
+
           </p>
           <p class="description">
-            von <a href="{{ href('portal', 'user', row.author_username) }}">{{ row.author_username|e }}</a>
-            {%- if row.topic_paginated %} &#160; &#160; [
-              Gehe zu Seite {{ row.topic_get_pagination() }}
+            von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
+            {%- if topic.paginated %} &#160; &#160; [
+              Gehe zu Seite {{ topic.get_pagination() }}
             ]{% endif -%}
           </p>
         </td>
-        <td class="view_count">{{ row.topic_view_count }}</td>
-        <td class="post_count">{{ row.topic_post_count - 1 }}</td>
-        <td class="last_post">{% if row.last_post_id %}
-          <a href="{{ href('forum', 'post', row.last_post_id) }}" class="date">{{
-              row.last_post_pub_date|datetimeformat }}</a><br />
-          von <a href="{{ href('forum', 'post', row.last_post_author_username) }}">{{ row.last_post_author_username|e }}</a>
+        <td class="view_count">{{ topic.view_count }}</td>
+
+        <td class="post_count">{{ topic.post_count - 1 }}</td>
+        <td class="last_post">{% if topic.last_post_id %}
+          <a href="{{ topic.last_post|url}}" class="date">{{
+              topic.last_post.pub_date|datetimeformat }}</a><br />
+          von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
         {%- else %}---{% endif %}</td>
       </tr>
       {%- endif %}
     {% else %}
       <tr>
+
         <td colspan="5">
           Es existieren noch keine Themen. <a href="{{ forum|url('newtopic') }}">Erstelle</a> doch das Erste!</td>
       </tr>
@@ -106,6 +113,8 @@
     </tbody>
   </table>
   <div class="forum_offset_pagination">
+
     {{ pagination_left }}
   </div>
 {% endblock %}
+

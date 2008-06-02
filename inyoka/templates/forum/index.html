@@ -13,14 +13,14 @@
 {% set scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
 {% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}
-  {% set title_trace = ['Kategorie „%s“'|format(categories[0].forum_name)] %}
+  {% set title_trace = ['Kategorie â€ž%sâ€œ'|format(categories[0])] %}
   {% set navigation_trace = [
-      (href('forum', 'category', categories[0].forum_slug), categories[0].forum_name|capitalize|e),
+      (categories[0]|url, categories[0].name|capitalize|e),
     ] + navigation_trace|default([]) %}
 {% else %}
 {% set title_trace = ['Index'] %}
   {% set feeds = [
-    ('Forum - Nur Überschrift', href('forum', 'feeds/title/20')),
+    ('Forum - Nur Ãœberschrift', href('forum', 'feeds/title/20')),
     ('Forum - Nur Einleitung', href('forum', 'feeds/short/20')),
     ('Forum - Ganzer Beitrag', href('forum', 'feeds/full/20'))
   ] %}
@@ -29,18 +29,19 @@
 {% block forum_content %}
   {%- if categories %}
   <table class="forum{% if is_index %} category_box{% endif %}">
-  {%- for row in categories %}
-  <tr class="head" id="category-{{ row.forum_id }}">
-    <th colspan="5"><a href="{{ href('forum', 'category', row.forum_slug)
-      }}">{{ row.forum_name|e }}</a></th></tr>
+  {%- for category in categories %}
+  <tr class="head" id="category-{{ category.id }}">
+    <th colspan="5"><a href="{{ category|url
+      }}">{{ category.name|e }}</a></th></tr>
     {%- for forum in category.children -%}
       {{ render_forum(forum) }}
     {%- else %}
     <tr class="empty category-{{ category.id }}">
-      <td colspan="5">Diese Kategorie enthält keine Foren.</td></tr>
+      <td colspan="5">Diese Kategorie enthÃ¤lt keine Foren.</td></tr>
     {%- endfor %}
   {%- endfor %}
   </table>
+
   {%- else %}
     <p>Keine Kategorien</p>
   {%- endif %}
@@ -52,3 +53,4 @@
   </script>
   {% endif %}
 {% endblock %}
+
