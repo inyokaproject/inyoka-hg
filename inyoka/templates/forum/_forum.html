@@ -22,7 +22,7 @@
       {%- endif %}
     </td>
     <td class="topic_count" title="Anzahl der Themen">{{ forum.topic_count }}</td>
-    <td class="post_count" title="Anzahl der BeitrÃ¤ge">{{ forum.post_count }}</td>
+    <td class="post_count" title="Anzahl der Beiträge">{{ forum.post_count }}</td>
 
     <td class="last_post">
     {%- if forum.last_post_id -%}
@@ -45,7 +45,7 @@
   {%- if topic.reported %}-reported{% endif -%}
   .png" alt="
   {%- if not is_read %}ungelesenes {% endif -%}
-  {%- if topic.solved %}gelÃ¶stes {% endif -%}
+  {%- if topic.solved %}gelöstes {% endif -%}
   {#- TODO: watched -#}
   {%- if topic.locked %}gesperrtes {% endif -%}
   {%- if topic.hidden %}verstecktes {% endif -%}

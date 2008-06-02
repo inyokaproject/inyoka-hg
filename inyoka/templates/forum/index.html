@@ -13,14 +13,14 @@
 {% set scripts = ['jQuery.Cookie.js'] + scripts|default([]) %}
 {% from 'forum/_forum.html' import render_forum %}
 {% if not is_index %}
-  {% set title_trace = ['Kategorie â€ž%sâ€œ'|format(categories[0])] %}
+  {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% set navigation_trace = [
       (categories[0]|url, categories[0].name|capitalize|e),
     ] + navigation_trace|default([]) %}
 {% else %}
 {% set title_trace = ['Index'] %}
   {% set feeds = [
-    ('Forum - Nur Ãœberschrift', href('forum', 'feeds/title/20')),
+    ('Forum - Nur Überschrift', href('forum', 'feeds/title/20')),
     ('Forum - Nur Einleitung', href('forum', 'feeds/short/20')),
     ('Forum - Ganzer Beitrag', href('forum', 'feeds/full/20'))
   ] %}
@@ -37,7 +37,7 @@
       {{ render_forum(forum) }}
     {%- else %}
     <tr class="empty category-{{ category.id }}">
-      <td colspan="5">Diese Kategorie enthÃ¤lt keine Foren.</td></tr>
+      <td colspan="5">Diese Kategorie enthält keine Foren.</td></tr>
     {%- endfor %}
   {%- endfor %}
   </table>

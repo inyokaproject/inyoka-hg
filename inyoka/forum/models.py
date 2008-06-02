@@ -675,6 +675,25 @@ class Post(object):
         )
 
 
+class FlattenedPost(object):
+    def get_absolute_url(self, action='show'):
+        if action == 'show':
+            return href('forum', 'post', self.id)
+        if action == 'fullurl':
+            return Post.url_for_post(self.id)
+        return href('forum', 'post', self.id, action)
+
+    def __unicode__(self):
+        return self.topic.title
+
+    def __repr__(self):
+        return '<%s id=%s author=%s>' % (
+            self.__class__.__name__,
+            self.id,
+            self.author
+        )
+
+
 class PostRevision(object):
     """
     This saves old revisions of posts. It can be used to restore posts if
@@ -1063,17 +1082,6 @@ class ReadStatus(object):
         Determine the read status for a forum or topic. If the topic
         was allready read by the user, True is returned.
         """
-<<<<<<< local
-        is_forum = False
-        if item:
-            is_forum = isinstance(item, Forum)
-            if is_forum:
-                forum_id, post_id = item.id, item.last_post_id
-            elif isinstance(item, Topic):
-                forum_id, post_id = item.forum_id, item.last_post_id
-            else:
-                raise ValueError('Can\'t determine read status of an unknown type')
-=======
         forum_id, post_id = None, None
         is_forum = isinstance(item, Forum)
         if is_forum:
@@ -1082,7 +1090,6 @@ class ReadStatus(object):
             forum_id, post_id = item.forum_id, item.last_post_id
         else:
             raise ValueError('Can\'t determine read status of an unknown type')
->>>>>>> other
         row = self.data.get(forum_id, (None, []))
         if row[0] >= post_id:
             return True
@@ -1137,7 +1144,7 @@ dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic, lazy='dynamic'),
     '_children': relation(Forum, backref=backref('parent',
                           remote_side=[forum_table.c.id])),
-    'last_post': relation(Post, post_update=True)
+    'last_post': relation(FlattenedPost, post_update=True)
     }, extension=ForumMapperExtension(),
 )
 dbsession.mapper(Topic, topic_table, properties={
@@ -1145,9 +1152,9 @@ dbsession.mapper(Topic, topic_table, properties={
                        primaryjoin=topic_table.c.author_id == user_table.c.id),
     'reporter': relation(SAUser, foreign_keys=[topic_table.c.reporter_id],
                          primaryjoin=topic_table.c.reporter_id == user_table.c.id),
-    'last_post': relation(Post, post_update=True,
+    'last_post': relation(FlattenedPost, post_update=True,
                           primaryjoin=topic_table.c.last_post_id == post_table.c.id),
-    'first_post': relation(Post, post_update=True,
+    'first_post': relation(FlattenedPost, post_update=True,
                            primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
@@ -1156,6 +1163,11 @@ dbsession.mapper(Topic, topic_table, properties={
                       lazy='dynamic'),
     }, extension=TopicMapperExtension()
 )
+dbsession.mapper(FlattenedPost, post_table, properties={
+    'author': relation(SAUser,
+        primaryjoin=post_table.c.author_id == user_table.c.id,
+        foreign_keys=[post_table.c.author_id]),
+})
 dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
@@ -1166,9 +1178,7 @@ dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post
     },
     extension=PostMapperExtension(),
 )
-dbsession.mapper(PostRevision, post_revision_table, properties={
-    'post': relation(Post, primaryjoin=post_revision_table.c.post_id == post_table.c.id)
-})
+dbsession.mapper(PostRevision, post_revision_table)
 dbsession.mapper(Attachment, attachment_table)
 dbsession.mapper(Poll, poll_table, properties={
     'options': relation(PollOption, backref='poll',

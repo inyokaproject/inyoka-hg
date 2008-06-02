@@ -11,9 +11,9 @@
 {% from 'forum/_forum.html' import render_forum, topic_icon with context %}
 
 {% set title_trace = [forum.name|e] %}
-{% set name = 'Forum â€ž%sâ€œ - ' % forum.name|e %}
+{% set name = 'Forum „%s“ - ' % forum.name|e %}
 {% set feeds = [
-  (name + 'Nur Ãœberschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
+  (name + 'Nur Überschrift', href('forum', 'feeds/forum', forum.slug, 'title/20')),
   (name + 'Nur Einleitung', href('forum', 'feeds/forum', forum.slug, 'short/20')),
   (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
@@ -34,10 +34,9 @@
       <tr>
         <td colspan="5">
           {%- if forum.description %}
-          <p class="description">{{Â forum.description|e }}</p>
-
+          <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
-          {{Â pagination_right }}
+          {{ pagination_right }}
           <p class="actions">
             <a href="{{ forum|url('newtopic') }}">Neues Thema</a> | 
             {%- if is_subscribed %}
@@ -65,7 +64,7 @@
       {%- if topic.hidden and not can_moderate %}
       <tr class="deleted">
         <td class="icon">
-          <img src="{{Â href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
+          <img src="{{ href('static', 'img', 'forum', 'topic-deleted.png') }}" alt="" />
         </td>
         <td colspan="5">
           Dieses Thema wurde von einem Moderator gelÃ¶scht.
