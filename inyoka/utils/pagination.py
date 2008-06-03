@@ -12,13 +12,17 @@
                                     Model.objects.all(),
         ...                         page_number,
         ...                         per_page,
-                                    optional_link)
+                                    optional_link,
+                                    total=123)
         >>> # the database entries on this page
         >>> objects = pagination.objects
         >>> # the generated HTML code for the pagination
         >>> html = pagination.generate()
 
     If the page is out of range, it throws a PageNotFound exception.
+    You can pass the optional argument `total` if you already know how
+    many entries match your query. If you don't, `Pagination` will use
+    a db query to find it out.
 
     Caveat: paginations with link functions generated in a closure are
     not pickleable.
@@ -34,7 +38,8 @@ from werkzeug import url_encode
 
 class Pagination(object):
 
-    def __init__(self, request, query, page, per_page=10, link=None):
+    def __init__(self, request, query, page, per_page=10, link=None,
+                 total=None):
         self.page = int(page)
         self.per_page = per_page
 
@@ -44,7 +49,9 @@ class Pagination(object):
             raise PageNotFound()
         self.objects = result
 
-        if isinstance(query, list):
+        if total:
+            self.total = total
+        elif isinstance(query, list):
             self.total = len(query)
         else:
             self.total = query.count()

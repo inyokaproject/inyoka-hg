@@ -476,22 +476,22 @@ ul.image_list a:hover img {
   opacity: 0.9;
 }
 
-.codeblock {
+pre, .codeblock {
     max-height: 15em;
     overflow: auto;
     margin: 0;
     padding: 0;
 }
 
-.codeblock .syntaxtable {
+pre, .codeblock .syntaxtable {
     margin: 0 -1px;
 }
 
-.codeblock .syntaxtable tbody {
+pre, .codeblock .syntaxtable tbody {
     margin: -2px 0;
 }
 
-.codeblock_resizer {
+pre, .codeblock_resizer {
     height: 6px;
     background: url(../img/expand-bar.png);
     margin-bottom: -6px;

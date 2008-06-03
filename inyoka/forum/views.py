@@ -123,7 +123,8 @@ def forum(request, slug, page=1):
         topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
             eagerload('last_post.author')).filter_by(forum_id=f.id) \
             .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f),
+                                total=f.topic_count)
         data = {
             'forum':            f,
             'topics':           list(pagination.objects),
@@ -218,7 +219,8 @@ def viewtopic(request, topic_slug, page=1):
     else:
         polls = None
 
-    pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t))
+    pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
+                            total=t.post_count)
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
