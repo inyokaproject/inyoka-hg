@@ -15,6 +15,7 @@ BASE_PATH = dirname(__file__)
 
 # debug mode is off by default
 DEBUG = False
+DATABASE_DEBUG = False
 
 # so is the code execution debugger.  never enable on production
 ENABLE_DEBUGGER = False

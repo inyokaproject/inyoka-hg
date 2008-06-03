@@ -313,6 +313,10 @@ class User(models.Model):
     def settings(self):
         return cPickle.loads(str(self._settings))
 
+    @deferred
+    def _readstatus(self):
+        return ReadStatus(self.forum_read_status)
+
     @property
     def rendered_signature(self):
         return self.render_signature()

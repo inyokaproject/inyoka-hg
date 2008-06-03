@@ -251,3 +251,7 @@ div.moderated {
   border: 1px solid #aaa;
   padding: 0 1em;
 }
+
+pre {
+  padding: 0.5em;
+}

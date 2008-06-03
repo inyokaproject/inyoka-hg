@@ -20,7 +20,7 @@ from inyoka.conf import settings
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
-), pool_recycle=300, convert_unicode=False, echo=settings.DEBUG)
+), pool_recycle=300, convert_unicode=False, echo=settings.DATABASE_DEBUG)
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,

@@ -73,7 +73,7 @@ def index(request, category=None):
         category = Forum.query.get(category)
         if not category or category.parent_id != None:
             raise PageNotFound
-        fmsg = None # category.find_welcome(request.user)
+        fmsg = category.find_welcome(request.user)
         if fmsg is not None:
             return welcome(request, fmsg.slug, request.path)
         set_session_info(request, (u'sieht sich die Forenübersicht der '
@@ -116,18 +116,16 @@ def forum(request, slug, page=1):
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
     page = int(page)
+
     key = 'forum/topics/%d/%d' % (f.id, int(page))
     data = cache.get(key)
     if not data:
         topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
             eagerload('last_post.author')).filter_by(forum_id=f.id) \
             .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
-        subforums = Forum.query.options(eagerload('last_post'),
-                eagerload('last_post.author')).filter_by(parent_id=f.id).all()
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
         data = {
             'forum':            f,
-            'subforums':        subforums,
             'topics':           list(pagination.objects),
             'pagination_left':  pagination.generate(),
             'pagination_right': pagination.generate('right')
@@ -136,13 +134,23 @@ def forum(request, slug, page=1):
         # forum.models.Forum.invalidate_topic_cache, too.
         if page < 5:
             cache.set(key, data)
+
+    key = 'forum/subforums/%d' % f.id
+    subforums = cache.get(key)
+    if not subforums:
+        subforums = Forum.query.options(eagerload('last_post'),
+            eagerload('last_post.author')).filter_by(parent_id=f.id).all()
+        cache.set(key, subforums)
+
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
-    data['subforums'] = filter_invisible(request.user, data['subforums'])
-    data['is_subscribed'] = Subscription.objects.user_subscribed(request.user,
-                                                                 forum=f)
-    data['can_moderate'] = check_privilege(privs, 'moderate')
+    data.update({
+        'subforums':     filter_invisible(request.user, subforums),
+        'is_subscribed': Subscription.objects.user_subscribed(request.user,
+                                                                 forum=f),
+        'can_moderate' = check_privilege(privs, 'moderate'),
+    })
     return data
 
 
