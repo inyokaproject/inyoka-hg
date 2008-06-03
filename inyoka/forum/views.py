@@ -123,8 +123,7 @@ def forum(request, slug, page=1):
         topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
             eagerload('last_post.author')).filter_by(forum_id=f.id) \
             .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f),
-                                total=f.topic_count)
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
         data = {
             'forum':            f,
             'topics':           list(pagination.objects),
@@ -150,7 +149,7 @@ def forum(request, slug, page=1):
         'subforums':     filter_invisible(request.user, subforums),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                                  forum=f),
-        'can_moderate' = check_privilege(privs, 'moderate'),
+        'can_moderate':  check_privilege(privs, 'moderate'),
     })
     return data
 
