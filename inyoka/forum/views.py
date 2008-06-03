@@ -38,7 +38,8 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
-    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision
+    TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
+    CACHE_PAGES_COUNT
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -68,23 +69,34 @@ def index(request, category=None):
     Return all forums without parents.
     These forums are treated as categories but not as real forums.
     """
-    categories = []
     if category:
-        category = Forum.query.get(category)
-        if not category or category.parent_id != None:
-            raise PageNotFound
-        fmsg = category.find_welcome(request.user)
-        if fmsg is not None:
-            return welcome(request, fmsg.slug, request.path)
+        key = 'forum/forum/%s' % category
         set_session_info(request, (u'sieht sich die Forenübersicht der '
-                                   u'Kategorie „%s“ an'
-                                   % category.name),
+                                   u'Kategorie „%s“ an' % category.name),
                          u'Kategorieübersicht')
-        categories = [category]
     else:
-        categories = Forum.query.filter(forum_table.c.parent_id == None)
+        key = 'forum/index'
         set_session_info(request, u'sieht sich die Forenübersicht an.',
                          u'Forenübersicht')
+    categories = cache.get(key)
+
+    if categories is None:
+        query = Forum.query.options(eagerload('_children'),
+                                    eagerload('_children.last_post'),
+                                    eagerload('_children.last_post.author'))
+        if category:
+            category = query.get(category)
+            if not category or category.parent_id != None:
+                raise PageNotFound
+            categories = [category]
+
+            fmsg = category.find_welcome(request.user)
+            if fmsg is not None:
+                return welcome(request, fmsg.slug, request.path)
+        else:
+            categories = list(query.filter(forum_table.c.parent_id == None))
+
+        cache.set(key, categories)
 
     hidden_categories = []
     if request.user.is_authenticated:
@@ -104,54 +116,67 @@ def forum(request, slug, page=1):
     """
     Return a single forum to show a topic list.
     """
-    f = Forum.query.get(slug)
-    # if the forum is a category we raise PageNotFound.  categories have
-    # their own url at /category.
-    if not f or f.parent_id is None:
-        raise PageNotFound()
+    key = 'forum/forum/%s' % slug
+    f = cache.get(key)
+
+    if f is None:
+        f = Forum.query.options(eagerload('_children'),
+                                eagerload('_children.last_post'),
+                                eagerload('_children.last_post.author')) \
+                       .get(slug)
+
+        # if the forum is a category we raise PageNotFound. Categories have
+        # their own url at /category.
+        if not f or f.parent_id is None:
+            raise PageNotFound()
+
+        cache.set(key, f)
+
     privs = get_forum_privileges(request.user, f.id)
     if not check_privilege(privs, 'read'):
         return abort_access_denied(request)
+
     fmsg = f.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    page = int(page)
 
-    key = 'forum/topics/%d/%d' % (f.id, int(page))
-    data = cache.get(key)
-    if not data:
-        topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
-            eagerload('last_post.author')).filter_by(forum_id=f.id) \
-            .order_by((topic_table.c.sticky.desc(), topic_table.c.last_post_id.desc()))
+    if page < CACHE_PAGES_COUNT:
+        key = 'forum/topics/%d/%d' % (f.id, int(page))
+        ctx = cache.get(key)
+    else:
+        ctx = None
+
+    if ctx is None:
+        topics = Topic.query.options(eagerload('author'),
+                                     eagerload('last_post'),
+                                     eagerload('last_post.author')) \
+            .filter_by(forum_id=f.id) \
+            .order_by((topic_table.c.sticky.desc(),
+                       topic_table.c.last_post_id.desc()))
+
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
-        data = {
-            'forum':            f,
+
+        ctx = {
             'topics':           list(pagination.objects),
             'pagination_left':  pagination.generate(),
             'pagination_right': pagination.generate('right')
         }
-        # if you alter this value, change it in
-        # forum.models.Forum.invalidate_topic_cache, too.
-        if page < 5:
-            cache.set(key, data)
 
-    key = 'forum/subforums/%d' % f.id
-    subforums = cache.get(key)
-    if not subforums:
-        subforums = Forum.query.options(eagerload('last_post'),
-            eagerload('last_post.author')).filter_by(parent_id=f.id).all()
-        cache.set(key, subforums)
+        if page < CACHE_PAGES_COUNT:
+            cache.set(key, ctx)
 
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                      'besuche das Forum')
-    data.update({
-        'subforums':     filter_invisible(request.user, subforums),
+
+    ctx.update({
+        'forum':         f,
+        'subforums':     filter_invisible(request.user, f._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                                  forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
     })
-    return data
+    return ctx
 
 
 @templated('forum/topic.html')

@@ -61,6 +61,7 @@ UBUNTU_DISTROS = {
     'edubuntu': 'Edubuntu',
     'server': 'Server',
 }
+CACHE_PAGES_COUNT = 5
 
 
 class SearchMapperExtension(MapperExtension):
@@ -353,7 +354,7 @@ class Forum(object):
         dbsession.flush(user)
 
     def invalidate_topic_cache(self):
-        for page in range(5):
+        for page in range(CACHE_PAGES_COUNT):
             cache.delete('forum/topics/%d/%d' % (self.id, page))
 
     def __unicode__(self):
@@ -1144,6 +1145,7 @@ dbsession.mapper(Forum, forum_table, properties={
                           remote_side=[forum_table.c.id])),
     'last_post': relation(FlattenedPost, post_update=True)
     }, extension=ForumMapperExtension(),
+    order_by=forum_table.c.position
 )
 dbsession.mapper(Topic, topic_table, properties={
     'author': relation(SAUser, foreign_keys=[topic_table.c.author_id],
@@ -1167,6 +1169,7 @@ dbsession.mapper(FlattenedPost, post_table, properties={
         foreign_keys=[post_table.c.author_id]),
 })
 dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
+    'id': [post_table.c.id, post_text_table.c.id],
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),

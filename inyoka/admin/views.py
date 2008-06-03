@@ -505,7 +505,6 @@ def forums_edit(request, id=None):
     Display an interface to let the user create or edit an forum.
     If `id` is given, the forum with id `id` will be edited.
     """
-
     def _add_field_choices():
         if id:
             query = Forum.query.filter(forum_table.c.id!=id)
@@ -516,11 +515,11 @@ def forums_edit(request, id=None):
 
     forum = None
     errors = False
+
     if id:
         forum = Forum.query.get(int(id))
         if forum is None:
-            flash(u'Forum mit der ID „%s“ existiert nicht' % id)
-            return HttpResponseRedirect(href('admin', 'forum'))
+            raise PageNotFound()
 
     if request.method == 'POST':
         form = EditForumForm(request.POST)
@@ -539,6 +538,7 @@ def forums_edit(request, id=None):
                 forum = Forum()
             forum.name = data['name']
             forum.position = data['position']
+            old_slug = forum.slug
             forum.slug = slug
             forum.description = data['description']
             if int(data['parent']) != -1:
@@ -551,6 +551,8 @@ def forums_edit(request, id=None):
 
             if not form.errors and not errors:
                 dbsession.commit()
+                cache.delete_many(['forum/index', 'forum/forum/' + old_slug] +
+                             ['forum/forum/' + f.slug for f in forum.parents])
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
                       escape(forum.name), id and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
