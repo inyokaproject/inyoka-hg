@@ -419,7 +419,8 @@ def search(request):
                 'area':             d['area'],
                 'results':          results,
                 'show_all':         show_all,
-                'pagination':       u''.join(pagination)
+                'pagination':       u''.join(pagination),
+                'sort':             d['sort']
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %

@@ -26,7 +26,8 @@
   {%- if not show_all %}
   <div class="message">
     Aus Gründen der Übersichtlichkeit wurden manche Beiträge ausgeblendet:
-    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true")|e }}">
+    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true",
+      sort=sort)|e }}">
       Alles anzeigen
     </a>
   </div>
