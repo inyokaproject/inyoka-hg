@@ -491,7 +491,7 @@ pre, .codeblock .syntaxtable tbody {
     margin: -2px 0;
 }
 
-pre, .codeblock_resizer {
+.codeblock_resizer {
     height: 6px;
     background: url(../img/expand-bar.png);
     margin-bottom: -6px;
