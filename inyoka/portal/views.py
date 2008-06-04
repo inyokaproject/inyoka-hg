@@ -380,7 +380,8 @@ def search(request):
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
-            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or []
+            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or [],
+            sort=d['sort']
         )
         if len(results.results ) > -1:
             normal = u'<a href="%(href)s" class="pageselect">%(page)s</a>'
@@ -392,7 +393,8 @@ def search(request):
             add = pagination.append
             def _link(page):
                 return href('portal', 'search', page=page, query=d['query'],
-                            area=d['area'], per_page=results.per_page)
+                            area=d['area'], per_page=results.per_page,
+                            sort=d['sort'])
             for page in show:
                 if page - last_page > 1:
                     add(ellipsis)
@@ -417,7 +419,7 @@ def search(request):
                 'area':             d['area'],
                 'results':          results,
                 'show_all':         show_all,
-                'pagination':       u''.join(pagination),
+                'pagination':       u''.join(pagination)
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %

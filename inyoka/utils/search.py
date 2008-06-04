@@ -275,7 +275,8 @@ class SearchSystem(object):
         return QueryParser(self.prefix_handlers).parse(query)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
-              date_end=None, collapse=True, component=None, exclude=[]):
+              date_end=None, collapse=True, component=None, exclude=[],
+              sort='relevance'):
         """Search for something."""
         enq = xapian.Enquire(self.get_connection())
         qry = self.parse_query(query)
@@ -293,6 +294,8 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
+        if sort == 'date':
+            enq.set_sort_by_value_then_relevance(2)
         if collapse:
             enq.set_collapse_key(1)
         enq.set_query(qry)
