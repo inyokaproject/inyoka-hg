@@ -72,7 +72,7 @@ def index(request, category=None):
     if category:
         key = 'forum/forum/%s' % category
         set_session_info(request, (u'sieht sich die Forenübersicht der '
-                                   u'Kategorie „%s“ an' % category.name),
+                                   u'Kategorie „%s“ an' % category),
                          u'Kategorieübersicht')
     else:
         key = 'forum/index'
