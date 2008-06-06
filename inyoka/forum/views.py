@@ -264,6 +264,15 @@ def viewtopic(request, topic_slug, page=1):
     post_objects = pagination.objects.options(eagerload('attachments'),
                                               eagerload('author')).all()
 
+    # load authors and attachments into the object store too (to avoid lazy loading)
+    if post_objects:
+        Attachment.query.filter((Attachment.post_id == Post.id) &
+                (Post.topic_id == t.id) & (Post.id.between(post_objects[0].id,
+                post_objects[-1].id))).order_by(None).all()
+        SAUser.query.filter((User.id == Post.author_id) &
+            (Post.topic_id == t.id) & (Post.id.between(x[0].id, x[-1].id))) \
+            .order_by(None).all()
+
     for post in post_objects:
         if not post.rendered_text:
             post.rendered_text = post.render_text(force_existing=True)
