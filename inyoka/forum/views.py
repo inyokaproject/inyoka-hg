@@ -39,7 +39,7 @@ from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT
+    CACHE_PAGES_COUNT, SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -269,9 +269,9 @@ def viewtopic(request, topic_slug, page=1):
         Attachment.query.filter((Attachment.post_id == Post.id) &
                 (Post.topic_id == t.id) & (Post.id.between(post_objects[0].id,
                 post_objects[-1].id))).order_by(None).all()
-        SAUser.query.filter((User.id == Post.author_id) &
-            (Post.topic_id == t.id) & (Post.id.between(x[0].id, x[-1].id))) \
-            .order_by(None).all()
+        SAUser.query.filter((SAUser.id == Post.author_id) &
+            (Post.topic_id == t.id) & (Post.id.between(post_objects[0].id,
+            post_objects[-1].id))).order_by(None).all()
 
     for post in post_objects:
         if not post.rendered_text:
