@@ -261,8 +261,7 @@ def viewtopic(request, topic_slug, page=1):
         except Subscription.DoesNotExist:
             subscribed = False
 
-    post_objects = pagination.objects.options(eagerload('attachments'),
-                                              eagerload('author')).all()
+    post_objects = pagination.objects.all()
 
     # load authors and attachments into the object store too (to avoid lazy loading)
     if post_objects:
