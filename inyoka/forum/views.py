@@ -12,6 +12,7 @@
 import re
 from django.conf import settings
 from datetime import datetime, timedelta
+from itertools import groupby
 from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
@@ -262,15 +263,13 @@ def viewtopic(request, topic_slug, page=1):
             subscribed = False
 
     post_objects = pagination.objects.all()
-
-    # load authors and attachments into the object store too (to avoid lazy loading)
-    if post_objects:
-        Attachment.query.filter((Attachment.post_id == Post.id) &
-                (Post.topic_id == t.id) & (Post.id.between(post_objects[0].id,
-                post_objects[-1].id))).order_by(None).all()
-        SAUser.query.filter((SAUser.id == Post.author_id) &
-            (Post.topic_id == t.id) & (Post.id.between(post_objects[0].id,
-            post_objects[-1].id))).order_by(None).all()
+    range = post_objects and (post_objects[0].id, post_objects[-1].id)
+    if range:
+        for p in post_objects:
+            session.expunge(p)
+        post_objects = Post.query.options(eagerload('attachments'), \
+            eagerload('author')).filter((Post.topic_id == t.id) &
+            Post.id.between(*range)).all()
 
     for post in post_objects:
         if not post.rendered_text:
