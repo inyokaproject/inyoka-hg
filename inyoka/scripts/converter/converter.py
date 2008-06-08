@@ -717,13 +717,16 @@ def convert_privmsgs():
                                 msg_table.c.privmsgs_id != msg.privmsgs_id)
                     ).limit(1)).fetchone()
 
-        m = PrivateMessage()
-        m.author_id = msg.privmsgs_from_userid;
-        m.subject = unescape(msg.privmsgs_subject)
-        m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
-        m.text = convert_bbcode(unescape(msg_text.privmsgs_text),
-                                msg_text.privmsgs_bbcode_uid)
-        m.save()
+        try:
+            m = PrivateMessage()
+            m.author_id = msg.privmsgs_from_userid;
+            m.subject = unescape(msg.privmsgs_subject)
+            m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
+            m.text = convert_bbcode(unescape(msg_text.privmsgs_text),
+                                    msg_text.privmsgs_bbcode_uid)
+            m.save()
+        except IntegrityError:
+            pass
 
         # If the status is sent, the first user is the sender.
         if msg.privmsgs_type in (1, 2, 4):
@@ -735,30 +738,36 @@ def convert_privmsgs():
             user = msg.privmsgs_to_userid
             second_user = msg.privmsgs_from_userid
 
-        m1 = PrivateMessageEntry()
-        m1.message = m
-        m1.user_id = user
-        m1.read = msg.privmsgs_type != 5
-        m1.folder = FOLDER_MAPPING[msg.privmsgs_type]
-        m1.save()
+        if m.id is not None:
+            try:
+                m1 = PrivateMessageEntry()
+                m1.message = m
+                m1.user_id = user
+                m1.read = msg.privmsgs_type != 5
+                m1.folder = FOLDER_MAPPING[msg.privmsgs_type]
+                m1.save()
 
-        m2 = PrivateMessageEntry()
-        m2.message = m
-        m2.user_id = second_user
-        if other_msg is None: # Then the message is deleted
-            m2.read = True
-            m2.folder = None
-            # Except if the type is 1 (for 'Postausgang'), where no copy exists;
-            # We put one in the users inbox, and mark it unread
-            if msg.privmsgs_type == 1:
-                m2.read = False
-                m2.folder = 1
-        else:
-            m2.read = other_msg.privmsgs_type != 5
-            m2.folder = FOLDER_MAPPING[other_msg.privmsgs_type]
-            ids.append(other_msg.privmsgs_id)
+                m2 = PrivateMessageEntry()
+                m2.message = m
+                m2.user_id = second_user
+                if other_msg is None: # Then the message is deleted
+                    m2.read = True
+                    m2.folder = None
+                    # Except if the type is 1 (for 'Postausgang'), where no copy exists;
+                    # We put one in the users inbox, and mark it unread
+                    if msg.privmsgs_type == 1:
+                        m2.read = False
+                        m2.folder = 1
+                else:
+                    m2.read = other_msg.privmsgs_type != 5
+                    m2.folder = FOLDER_MAPPING[other_msg.privmsgs_type]
+                    ids.append(other_msg.privmsgs_id)
 
-        m2.save()
+                m2.save()
+            except IntegrityError:
+                # and again corrupted data on database side...
+                # (e.g one private message is bind to an user_id that does not exist)
+                pass
 
         conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
 
