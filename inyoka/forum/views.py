@@ -206,7 +206,7 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = t.posts.options(eagerload('author'), eagerload('last_post'))
+    posts = t.posts.options(eagerload('author'), eagerload('attachments'))
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
