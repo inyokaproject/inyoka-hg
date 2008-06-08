@@ -17,6 +17,7 @@
     :license: GNU GPL.
 """
 import re
+from urlparse import urlparse
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
 from inyoka.wiki.parser.constants import HTML_COLORS
 from inyoka.wiki.parser.lexer import Lexer
