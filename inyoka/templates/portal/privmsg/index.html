@@ -52,8 +52,10 @@
       </tr>
       {% endfor %}
     </tbody>
+    <tfoot>
+      <tr><td><p><a href="">Neue Nachricht schreiben</a></p></td></tr>
+    </tfoot>
   </table>
-
   {% if message %}
     <div class="prvmsg">
       <img class="avatar" src="{{ message.author.avatar_url|e }}" alt="Avatar von {{ message.author.username|e }}" />
@@ -84,4 +86,5 @@
       </div>
     </div>
   {% endif %}
+
 {% endblock %}
