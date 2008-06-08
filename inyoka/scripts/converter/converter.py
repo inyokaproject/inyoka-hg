@@ -32,8 +32,7 @@ from inyoka.wiki.parser.transformers import AutomaticParagraphs, Transformer
 from inyoka.forum.models import Privilege, Attachment, Topic, \
     Poll, Forum, topic_table as sa_topic_table, forum_table as \
     sa_forum_table, post_table as sa_post_table, poll_vote_table as \
-    sa_poll_vote_table, poll_option_table as sa_poll_option_table, \
-    post_text_table as sa_post_text_table
+    sa_poll_vote_table, poll_option_table as sa_poll_option_table
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
     Subscription, StaticFile, StaticPage
 from inyoka.ikhaya.models import Article, Category
@@ -427,12 +426,10 @@ def convert_forum():
             'topic_id':      row[post_table.c.topic_id],
             'author_id':     row[post_table.c.poster_id],
             'pub_date':      datetime.fromtimestamp(row[post_table.c.post_time]),
-            'hidden':        False
-        }))
-        session.execute(sa_post_text_table.insert(values={
-            'id':            row[post_table.c.post_id],
+            'hidden':        False,
             'text':          text,
             'rendered_text': '',
+
         }))
         session.commit()
 
