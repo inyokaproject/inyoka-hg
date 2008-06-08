@@ -53,7 +53,7 @@
       {% endfor %}
     </tbody>
     <tfoot>
-      <tr><td><p><a href="">Neue Nachricht schreiben</a></p></td></tr>
+      <tr><td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td></tr>
     </tfoot>
   </table>
   {% if message %}
