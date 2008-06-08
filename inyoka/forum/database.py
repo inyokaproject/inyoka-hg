@@ -63,11 +63,7 @@ post_table = Table('forum_post', metadata,
            nullable=False),
     Column('pub_date', DateTime, nullable=False),
     Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=False),
-    Column('hidden', Boolean, default=False, nullable=False)
-)
-
-post_text_table = Table('forum_post_text', metadata,
-    Column('id', Integer, primary_key=True),
+    Column('hidden', Boolean, default=False, nullable=False),
     Column('text', Text(), nullable=False),
     Column('rendered_text', Text(), nullable=False),
 )

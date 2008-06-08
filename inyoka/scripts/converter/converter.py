@@ -457,6 +457,13 @@ def convert_forum():
     session.execute(sa_forum_table.update(values={
         sa_forum_table.c.last_post_id: subselect
     }))
+    subselect_count = select(
+        [func.count(sa_post_table.c.id)],
+        sa_topic_table.c.id == sa_post_table.c.topic_id
+    )
+    session.execute(sa_topic_table.update(values={
+        sa_topic_table.c.post_count: subselect_count
+    }))
     session.commit()
 
     # Fix anon user:

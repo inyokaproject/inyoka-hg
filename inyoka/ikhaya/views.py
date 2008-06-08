@@ -46,29 +46,30 @@ def context_modifier(request, context):
     `categories`
         A list of all ikhaya categories.
     """
-    c = cache.get('ikhaya/archive')
-    s = cache.get('ikhaya/short_archive')
-    if c is not None and s is not None:
-        archive = c
-        short_archive = s
-    else:
+    key = 'ikhaya/archive'
+    data = cache.get(key)
+    if data is None:
         archive = list(Article.objects.dates('pub_date', 'month', order='DESC'))
         if len(archive) > 5:
             archive = archive[:5]
             short_archive = True
         else:
             short_archive = False
-        cache.set('ikhaya/archive', archive)
-        cache.set('ikhaya/short_archive', short_archive)
+        data = {
+            'archive':       archive,
+            'short_archive': short_archive
+        }
+        cache.set(key, data)
+
     categories = cache.get('ikhaya/categories')
     if categories is None:
         categories = list(Category.objects.all())
         cache.set('ikhaya/categories', categories)
+
     context.update(
         MONTHS=dict(enumerate([''] + MONTHS)),
-        archive=archive,
-        short_archive=short_archive,
-        categories=categories
+        categories=categories,
+        **data
     )
 
 

@@ -37,8 +37,7 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table, group_table, post_text_table, \
-        post_revision_table
+        poll_option_table, poll_vote_table, group_table, post_revision_table
 
 
 POSTS_PER_PAGE = 15
@@ -1168,8 +1167,7 @@ dbsession.mapper(FlattenedPost, post_table, properties={
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
 })
-dbsession.mapper(Post, join(post_table, post_text_table, post_table.c.id == post_text_table.c.id), properties={
-    'id': [post_table.c.id, post_text_table.c.id],
+dbsession.mapper(Post, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
