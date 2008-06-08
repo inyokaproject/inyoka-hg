@@ -205,7 +205,7 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = t.posts
+    posts = t.posts.options(eagerload('author'), eagerload('last_post'))
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -261,8 +261,7 @@ def viewtopic(request, topic_slug, page=1):
         except Subscription.DoesNotExist:
             subscribed = False
 
-    post_objects = pagination.objects.options(eagerload('attachments'),
-                                              eagerload('author')).all()
+    post_objects = pagination.objects.all()
 
     for post in post_objects:
         if not post.rendered_text:
@@ -277,7 +276,6 @@ def viewtopic(request, topic_slug, page=1):
 
     can_mod = check_privilege(privileges, 'moderate')
     can_reply = check_privilege(privileges, 'reply')
-
 
     return {
         'topic':             t,
