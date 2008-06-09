@@ -10,8 +10,8 @@
 {%- extends 'portal/privmsg/overall.html' %}
 {% from 'macros.html' import render_form %}
 {% set styles = styles|default([]) + ['portal.css', 'editor.css'] %}
+{% set scripts = ['WikiEditor.js', 'jQuery.autocomplete.js'] %}
 {% set title_trace = ['Neue Nachricht'] %}
-{% set scripts = ['WikiEditor.js'] %}
 {% set selected = 'new' %}
 
 {% block portal_content %}
@@ -50,6 +50,8 @@
         });
         return false;
       }).parent().parent().parent().append(preview);
+      $('#id_recipient').autocomplete("/?__service__=admin.get_user_autocompletion", {
+        delay: 40, maxItemsToShow: 15, cacheLength: 10});
     })();
     /* ]]> */
   </script>
