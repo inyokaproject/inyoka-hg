@@ -1192,7 +1192,8 @@ def markread(request, slug=None):
     """
     user = request.user
     if user.is_anonymous:
-        return
+        flash(u'Bitte melde dich an, um Beiträge als gelesen zu markieren.')
+        return HttpResponseRedirect(url_for('forum'))
     if slug:
         forum = Forum.query.get(slug)
         if not forum:
