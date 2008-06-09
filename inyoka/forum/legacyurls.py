@@ -132,12 +132,11 @@ def quote(args, match, post_id):
 
 
 @legacy.url(r'^/go(:?to)?(:?\.php)?/?$')
-def goto(args, match):
+def goto(args, match, *_):
     if 'post' in args and args['post'].isdigit():
         return href('forum', 'post', args['post'])
     if 'wikipage' in args:
-        return href('wiki', args['wikipage'])
-        #XXX: there might be some problems with urlencoding
+        return href('wiki', unquote(args['wikipage']))
 
 
 @legacy.url(r'^/groups(:?/(.+))/?$')
