@@ -68,7 +68,6 @@ def config(request):
         form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            print data
             for k in keys:
                 storage[k] = data[k]
             if data['team_icon']:

@@ -76,6 +76,7 @@ PAGE_REPLACEMENTS = {
     'Gimp':         'GIMP',
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
+FLAG_RE = re.compile(r'\[\[([a-z]{2})\]\]')
 
 
 def convert_bbcode(text, uid):
@@ -802,6 +803,7 @@ def convert_ikhaya():
         """
         if not text.strip():
             return u''
+        text = FLAG_RE.sub(r'{\g<1>}', text)
         # TODO: Parse images
         if parser == 'markdown':
             return markdown(text)

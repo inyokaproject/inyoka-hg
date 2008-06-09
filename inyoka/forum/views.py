@@ -351,7 +351,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         forum = topic.forum
     if newtopic:
         form = NewTopicForm(request.POST or None, initial={
-            'text': forum.newtopic_default_text})
+            'text':  forum.newtopic_default_text,
+            'title': article and article.name or '',
+        })
+    elif quote:
+        form = EditPostForm(request.POST or None, initial={
+            'text': quote_text(quote.text, quote.author)
+        })
     else:
         form = EditPostForm(request.POST or None)
 
@@ -467,7 +473,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             session.commit()
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
-    # the user submited a valid form
+    # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
         d = form.cleaned_data
         if not topic:
@@ -564,17 +570,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
-
-    # the user is going to quote an existing post
-    elif quote:
-        form = form.__class__(initial={'text': quote_text(quote.text,
-                                                         quote.author)})
-
-    elif newtopic:
-        form = form.__class__(initial={
-            'title': article and article.name or '',
-            'text': forum.newtopic_default_text,
-        })
 
     if not newtopic:
         posts = list(topic.posts.order_by(post_table.c.id.desc())[:15])
