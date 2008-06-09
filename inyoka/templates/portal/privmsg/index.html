@@ -33,7 +33,7 @@
           <a href="{{ entry.message.recipients[0]|url }}">
             {{ entry.message.recipients[0]|e }}</a>
           {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
-        <td>{{ entry.message.pub_date|e }}</td>
+        <td>{{ entry.message.pub_date|datetimeformat }}</td>
         <td>
           {% if not entry.is_own_message %}
           <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
@@ -69,7 +69,7 @@
         <dt>Betreff:</dt>
         <dd>{{ message.subject|e }}</dd>
         <dt>Datum:</dt>
-        <dd>{{ message.pub_date|e }}</dd>
+        <dd>{{ message.pub_date|datetimeformat }}</dd>
       </dl>
       <div class="prvmsg_body">
         {{ message.rendered_text }}
