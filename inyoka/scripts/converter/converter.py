@@ -13,7 +13,7 @@
 import re
 import sys
 import cPickle
-from os import path
+from os import path, listdir
 from datetime import datetime
 from werkzeug import unescape
 from werkzeug.utils import url_unquote
@@ -844,12 +844,16 @@ def convert_ikhaya():
     idents = []
 
     # we have two different icon tables in our old portal :/
+    names = ['allgemein.png', 'edubuntu.png', 'gnome.png', 'kde.png', 'key.png',
+        'kubuntu.png', 'kxubuntu.png', 'linux.png', 'software.png', 'ubuntu.png',
+        'ubuntu_und_ich.png', 'ubuntuusers.png', 'veranstaltung.png',
+        'wochenrueckblick.png', 'xubuntu.png']
 
-    pth = os.path.join(os.path.dirname(__file__), 'ikhaya_icons')
-    for name in os.listdir(pth):
+    for name in names:
         f = StaticFile(**{
-            'identifier': name,
-            'file':       os.path.join('portal', 'files', name)
+            'identifier':       name,
+            'file':             path.join('portal', 'files', name),
+            'is_ikhaya_icon':   True
         })
         f.save()
         idents.append(name)
@@ -883,8 +887,8 @@ def convert_ikhaya():
             public=data.public,
             category=category_mapping[data.category_id],
             is_xhtml=1,
-            icon=data.icon2 and dynamic_images[data.icon2] or \
-                static_images[data.icon]
+            icon=data.icon2 and dynamic_images.get(data.icon2) or \
+                static_images.get(data.icon.split('/')[-1])
         ).save()
         connection.queries = []
 
