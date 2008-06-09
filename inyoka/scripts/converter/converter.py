@@ -725,7 +725,7 @@ def convert_privmsgs():
             m.text = convert_bbcode(unescape(msg_text.privmsgs_text),
                                     msg_text.privmsgs_bbcode_uid)
             m.save()
-        except IntegrityError:
+        except (IntegrityError, OperationalError):
             pass
 
         # If the status is sent, the first user is the sender.
@@ -764,7 +764,7 @@ def convert_privmsgs():
                     ids.append(other_msg.privmsgs_id)
 
                 m2.save()
-            except IntegrityError:
+            except (IntegrityError, OperationalError):
                 # and again corrupted data on database side...
                 # (e.g one private message is bind to an user_id that does not exist)
                 pass
