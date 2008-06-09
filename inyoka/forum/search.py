@@ -43,18 +43,19 @@ class ForumSearchAdapter(SearchAdapter):
     def store(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author')) \
             .get(post_id)
-        search.store(
-            component='f',
-            uid=post.id,
-            title=post.topic.title,
-            user=post.author_id,
-            date=post.pub_date,
-            collapse=post.topic_id,
-            category=[p.slug for p in post.topic.forum.parents] + \
-                [post.topic.forum.slug],
-            auth=[post.topic.forum_id, post.topic.hidden],
-            text=post.text
-        )
+        if post:
+            search.store(
+                component='f',
+                uid=post.id,
+                title=post.topic.title,
+                user=post.author_id,
+                date=post.pub_date,
+                collapse=post.topic_id,
+                category=[p.slug for p in post.topic.forum.parents] + \
+                    [post.topic.forum.slug],
+                auth=[post.topic.forum_id, post.topic.hidden],
+                text=post.text
+            )
 
     def recv(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author')). \
