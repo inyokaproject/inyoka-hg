@@ -272,8 +272,8 @@ class Forum(object):
         children_ids = cache.get(cache_key)
         if children_ids is None:
             children_ids = [row[0] for row in dbsession.execute(select(
-                [forum_table.c.id], forum_table.c.parent_id == self.id)) \
-                .fetchall()]
+                [forum_table.c.id], forum_table.c.parent_id == self.id) \
+                .order_by(forum_table.c.position)).fetchall()]
             cache.set(cache_key, children_ids)
         children = [Forum.query.get(id) for id in children_ids]
         return children

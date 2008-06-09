@@ -95,7 +95,8 @@ def index(request, category=None):
             if fmsg is not None:
                 return welcome(request, fmsg.slug, request.path)
         else:
-            categories = list(query.filter(forum_table.c.parent_id == None))
+            categories = list(query.filter(forum_table.c.parent_id == None) \
+                              .order_by(forum_table.c.position))
 
         cache.set(key, categories)
 
@@ -124,7 +125,7 @@ def forum(request, slug, page=1):
         f = Forum.query.options(eagerload('_children'),
                                 eagerload('_children.last_post'),
                                 eagerload('_children.last_post.author')) \
-                       .get(slug)
+                .get(slug)
 
         # if the forum is a category we raise PageNotFound. Categories have
         # their own url at /category.
