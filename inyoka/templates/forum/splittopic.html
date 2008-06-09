@@ -15,8 +15,8 @@
     (topic.forum|url, topic.forum.name),
     (topic|url, topic.title),
     (topic|url('split'), 'Thema aufteilen')
-  ] + navigation_trace|default([]) %}
-{% set scripts = scripts|default([]) + ['jQuery.autocomplete.js'] %}
+  ] %}
+{% set scripts = ['jQuery.autocomplete.js'] %}
 
 {% block forum_content %}
   <form action="" method="post" class="new_topic">

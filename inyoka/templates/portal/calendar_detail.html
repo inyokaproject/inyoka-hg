@@ -10,12 +10,12 @@
 
 {%- extends 'portal/overall.html' %}
 {% set title_trace = [event.name|e, 'Kalender'] %}
-{% set styles = styles|default([]) + ['calendar.css'] %}
+{% set styles = ['calendar.css'] %}
 {% set navigation_trace =  [
     (href('portal', 'calendar'), 'Kalender'),
     (href('portal', 'calendar', event.date.year, '%02d' % event.date.month), '%s %d' % (MONTHS[event.date.month], event.date.year)),
     (event|url, event.name|e),
-  ] + navigation_trace|default([]) %}
+  ] %}
 {% block appheader %}
   <h1>Kalender</h1>
   <h2>{{ event.name|e }}</h2>

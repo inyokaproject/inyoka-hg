@@ -13,8 +13,8 @@
 
 {% set title_trace = [page.title|e] %}
 {% action = 'manage' %}
-{% set styles = ['editor.css'] + styles|default([]) %}
-{% set scripts = ['WikiEditor.js'] + scripts|default([]) %}
+{% set styles = ['editor.css'] %}
+{% set scripts = ['WikiEditor.js'] %}
 
 {% block wiki_content %}
   <h1 class="pagetitle">Dateianhang bearbeiten</h1>

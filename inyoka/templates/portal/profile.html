@@ -10,7 +10,7 @@
 {%- extends 'portal/overall.html' %}
 
 {% set title_trace = [user.username|e, 'Mitglieder'] %}
-{% set styles = styles|default([]) + ['portal.css', 'highlight.css'] %}
+{% set styles = ['portal.css', 'highlight.css'] %}
 
 {% block appheader %}
   <h1>Mitglieder</h1>

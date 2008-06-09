@@ -10,7 +10,7 @@
 
 {% extends 'portal/overall.html' %}
 
-{% set title_trace = title_trace|default([]) + ['Seite existiert nicht'] %}
+{% set title_trace = ['Seite existiert nicht'] %}
 {% block appheader %}
   <h1>Fehler</h1>
   <h2>404 Seite Nicht Gefunden</h2>
@@ -22,7 +22,6 @@
       <strong>{{ err_message }}</strong>
     {% else %}
       <strong>Die Seite konnte nicht gefunden werden.</strong>
-
     {% endif %}
     </p>
     <img src="{{ href('static', 'img/not_found.png') }}" />

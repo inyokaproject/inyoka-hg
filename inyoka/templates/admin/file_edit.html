@@ -21,7 +21,7 @@
 {% endif %}
 {% set navigation_trace = [
     (href('admin', 'files'), 'Statische Dateien')
-  ] + navigation_trace|default([]) %}
+  ] %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>

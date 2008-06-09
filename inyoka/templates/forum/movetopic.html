@@ -13,7 +13,7 @@
 {% set navigation_trace =  [
     (topic.forum|url, topic.forum.name),
     (topic|url, topic.title)
-  ] + navigation_trace|default([]) %}
+  ] %}
 
 {% block forum_content %}
   <form action="" method="post" class="new_topic">

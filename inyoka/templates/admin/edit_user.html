@@ -9,8 +9,8 @@
 #}
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% set styles = styles|default([]) + ['editor.css', 'datetimefield.css'] %}
-{% set scripts = scripts|default([]) + ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}
+{% set styles = ['editor.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.js', 'DateTime.js', 'PrivilegeBox.js', 'UserGroupBox.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),

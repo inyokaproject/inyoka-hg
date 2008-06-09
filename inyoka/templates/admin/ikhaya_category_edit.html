@@ -22,7 +22,7 @@
 {% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'categories'), 'Kategorien')
-  ] + navigation_trace|default([]) %}
+  ] %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>

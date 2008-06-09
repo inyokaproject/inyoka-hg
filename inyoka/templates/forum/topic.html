@@ -23,7 +23,7 @@
 {% for parent in forum.parents %}
   {% do navigation_trace.append((parent|url, parent.name)) %}
 {% endfor %}
-{% set navigation_trace = navigation_trace|default([]) + [
+{% set navigation_trace = [
     (forum|url, forum.name),
     (topic|url, topic.title)
   ] %}
