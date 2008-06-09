@@ -946,12 +946,13 @@ def delete_post(request, post_id):
 
 @templated('forum/revisions.html')
 def revisions(request, post_id):
-    revs = PostRevision.query.options(eagerload('post'),
-            eagerload('post.topic'), eagerload('post.topic.forum')) \
-        .filter(PostRevision.post_id == post_id)
-    if not have_privilege(request.user, revs[0].post.topic.forum, CAN_MODERATE):
+    p = Post.query.options(eagerload('topic'), eagerload('topic.forum')) \
+                  .get(post_id)
+    if not have_privilege(request.user, p.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
+    revs = PostRevision.query.filter(PostRevision.post_id == post_id)
     return {
+        'post':      post,
         'revisions': list(revs)
     }
 
