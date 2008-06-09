@@ -188,7 +188,9 @@ table.forum tr.deleted {
 .action_report {
     background-image: url('../img/forum/report.png');
 }
-
+.action_review {
+    background-image: url('../img/forum/review.png');
+}
 .action_edit {
     background-image: url('../img/forum/comment_edit.png');
 }

@@ -247,15 +247,14 @@ class Forum(object):
     """
 
     def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('forum', self.parent_id and 'forum' or 'category',
-                     self.slug),
-            'newtopic': ('forum', 'forum', self.slug, 'newtopic'),
-            'welcome': ('forum', 'forum', self.slug, 'welcome'),
-            'subscribe': ('forum', 'forum', self.slug, 'subscribe'),
-            'unsubscribe': ('forum', 'forum', self.slug, 'unsubscribe'),
-            'edit': ('admin', 'forum', 'edit', self.id)
-        }[action])
+        if action == 'show':
+            return href('forum', self.parent_id and 'forum' or 'category',
+                        self.slug)
+        if action in ('newtopic', 'welcome', 'subscribe', 'unsubscribe',
+                      'markread'):
+            return href('forum', 'forum', self.slug, action)
+        if action == 'edit':
+            return href('admin', 'forum', 'edit', self.id)
 
     @property
     def parents(self):
@@ -399,7 +398,7 @@ class Topic(object):
         self.forum.invalidate_topic_cache()
 
     def get_absolute_url(self, action='show'):
-        if action in ('show', None):
+        if action in ('show',):
             return href('forum', 'topic', self.slug)
         if action in ('reply', 'delete', 'hide', 'restore', 'split', 'move',
                       'solve', 'unsolve', 'lock', 'unlock', 'report',
@@ -664,25 +663,6 @@ class Post(object):
             self.topic.title,
             self.text[0:20]
         )
-
-    def __repr__(self):
-        return '<%s id=%s author=%s>' % (
-            self.__class__.__name__,
-            self.id,
-            self.author
-        )
-
-
-class FlattenedPost(object):
-    def get_absolute_url(self, action='show'):
-        if action == 'show':
-            return href('forum', 'post', self.id)
-        if action == 'fullurl':
-            return Post.url_for_post(self.id)
-        return href('forum', 'post', self.id, action)
-
-    def __unicode__(self):
-        return self.topic.title
 
     def __repr__(self):
         return '<%s id=%s author=%s>' % (
@@ -1142,7 +1122,7 @@ dbsession.mapper(Forum, forum_table, properties={
     'topics': relation(Topic, lazy='dynamic'),
     '_children': relation(Forum, backref=backref('parent',
                           remote_side=[forum_table.c.id])),
-    'last_post': relation(FlattenedPost, post_update=True)
+    'last_post': relation(Post, post_update=True)
     }, extension=ForumMapperExtension(),
     order_by=forum_table.c.position
 )
@@ -1151,9 +1131,9 @@ dbsession.mapper(Topic, topic_table, properties={
                        primaryjoin=topic_table.c.author_id == user_table.c.id),
     'reporter': relation(SAUser, foreign_keys=[topic_table.c.reporter_id],
                          primaryjoin=topic_table.c.reporter_id == user_table.c.id),
-    'last_post': relation(FlattenedPost, post_update=True,
+    'last_post': relation(Post, post_update=True,
                           primaryjoin=topic_table.c.last_post_id == post_table.c.id),
-    'first_post': relation(FlattenedPost, post_update=True,
+    'first_post': relation(Post, post_update=True,
                            primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
@@ -1162,11 +1142,6 @@ dbsession.mapper(Topic, topic_table, properties={
                       lazy='dynamic'),
     }, extension=TopicMapperExtension()
 )
-dbsession.mapper(FlattenedPost, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id == user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-})
 dbsession.mapper(Post, post_table, properties={
     'author': relation(SAUser,
         primaryjoin=post_table.c.author_id == user_table.c.id,

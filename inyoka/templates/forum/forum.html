@@ -38,11 +38,14 @@
           {%- endif %}
           {{ pagination_right }}
           <p class="actions">
-            <a href="{{ forum|url('newtopic') }}">Neues Thema</a> | 
+            <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> | 
             {%- if is_subscribed %}
             <a href="{{ forum|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a>
             {%- else %}
             <a href="{{ forum|url('subscribe') }}" class="action action_subscribe">abonnieren</a>
+            {%- endif %}
+            {%- if USER.is_authenticated %}
+            | <a href="{{ forum|url('markread') }}">als gelesen markieren</a>
             {%- endif %}
           </p>
         </td>
