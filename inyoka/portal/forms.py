@@ -260,12 +260,14 @@ class UserCPSettingsForm(forms.Form):
         help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
 
     def clean_notify(self):
-        if u'jabber' in self.cleaned_data['notify']:
+        data = self.cleaned_data['notify']
+        if u'jabber' in data:
             if not current_request.user.jabber:
                 raise forms.ValidationError(u'Du musst eine gültige Jabber '
                     u'Adresse <a href="%s">angeben</a>. um unseren Jabber '
                     u'Service nutzen zu können.' % escape(href(
                         'portal', 'usercp', 'profile')))
+        return data
 
 
 class UserCPProfileForm(forms.Form):
