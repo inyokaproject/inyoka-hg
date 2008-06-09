@@ -192,7 +192,7 @@ def get_smilies(full=False):
 
 def resolve_interwiki_link(wiki, page):
     """
-    Resolve an interwiki link.  If no such wiki exists the return value
+    Resolve an interwiki link. If no such wiki exists the return value
     will be `None`.
     """
     if wiki == 'user':

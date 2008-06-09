@@ -97,6 +97,12 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
             raise forms.ValidationError('Text darf nicht leer sein')
         return text
 
+    def clean_title(self):
+        title = self.cleaned_data.get('title', '')
+        if not title.strip():
+            raise forms.ValidationError('Titel darf nicht leer sein')
+        return title
+
 
 class MoveTopicForm(forms.Form):
     """
