@@ -17,7 +17,7 @@ from os import path
 from datetime import datetime
 from werkzeug import unescape
 from werkzeug.utils import url_unquote
-from _mysql_exceptions import IntegrityError
+from _mysql_exceptions import IntegrityError, OperationalError as meOperationalError
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, and_
@@ -725,8 +725,8 @@ def convert_privmsgs():
             m.text = convert_bbcode(unescape(msg_text.privmsgs_text),
                                     msg_text.privmsgs_bbcode_uid)
             m.save()
-        except (IntegrityError, OperationalError):
-            pass
+        except (IntegrityError, OperationalError, meOperationalError):
+            continue
 
         # If the status is sent, the first user is the sender.
         if msg.privmsgs_type in (1, 2, 4):
@@ -764,10 +764,10 @@ def convert_privmsgs():
                     ids.append(other_msg.privmsgs_id)
 
                 m2.save()
-            except (IntegrityError, OperationalError):
+            except (IntegrityError, OperationalError, meOperationalError):
                 # and again corrupted data on database side...
                 # (e.g one private message is bind to an user_id that does not exist)
-                pass
+                continue
 
         conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
 
