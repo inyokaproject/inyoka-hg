@@ -37,7 +37,8 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table, group_table, post_revision_table
+        poll_option_table, poll_vote_table, group_table, post_revision_table, \
+        forum_welcomemessage_table
 
 
 POSTS_PER_PAGE = 15
@@ -349,7 +350,7 @@ class Forum(object):
         else:
             status.discard(self.id)
         user.forum_welcome = ','.join(str(i) for i in status)
-        dbsession.flush(user)
+        dbsession.flush([user])
 
     def invalidate_topic_cache(self):
         for page in range(CACHE_PAGES_COUNT):
@@ -979,10 +980,14 @@ class WelcomeMessage(object):
     #title = models.CharField(max_length=120)
     #text = models.TextField('Nachricht')
     #rendered_text = models.TextField('Gerenderte Nachricht')
+    def __init__(self, title, text):
+        self.title = title
+        self.text = text
 
     def save(self):
         self.rendered_text = self.render_text()
-        super(WelcomeMessage, self).save()
+        dbsession.save(self)
+        dbsession.flush([self])
 
     def render_text(self, request=None, format='html'):
         if request is None:
@@ -1161,3 +1166,4 @@ dbsession.mapper(Poll, poll_table, properties={
 })
 dbsession.mapper(PollOption, poll_option_table)
 dbsession.mapper(PollVote, poll_vote_table)
+dbsession.mapper(WelcomeMessage, forum_welcomemessage_table)

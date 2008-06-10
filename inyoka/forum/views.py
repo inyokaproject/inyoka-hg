@@ -40,7 +40,7 @@ from inyoka.wiki.models import Page
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, SAUser
+    CACHE_PAGES_COUNT, SAUser, WelcomeMessage
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -138,7 +138,7 @@ def forum(request, slug, page=1):
         return abort_access_denied(request)
 
     fmsg = f.find_welcome(request.user)
-    if fmsg is not None:
+    if not fmsg:
         return welcome(request, fmsg.slug, request.path)
 
     if page < CACHE_PAGES_COUNT:
@@ -1294,19 +1294,20 @@ def welcome(request, slug, path=None):
     inform him about special rules.
     """
     user = request.user
-    forum = Forum.objects.get(slug=slug)
-    if not forum.welcome_message:
+    forum = Forum.query.filter_by(slug=slug).first()
+    if not forum.welcome_message_id:
         raise PageNotFound()
     goto_url = path or url_for(forum)
     if request.method == 'POST':
         accepted = request.POST.get('accept', False)
         forum.read_welcome(request.user, accepted)
+        session.commit()
         if accepted:
             return HttpResponseRedirect(request.POST.get('goto_url'))
         else:
             return HttpResponseRedirect(href('forum'))
     return {
         'goto_url': goto_url,
-        'message': forum.welcome_message,
+        'message': WelcomeMessage.query.get(forum.welcome_message_id),
         'forum': forum
     }

@@ -104,10 +104,6 @@ class EditFileForm(forms.Form):
         forms.Form.__init__(self, *args, **kwargs)
 
     def clean_file(self):
-        data = self.cleaned_data.get('identifier')
-        return data
-
-    def clean_file(self):
         data = self.cleaned_data.get('file')
         filename = data.filename
         if not data and not self._file:
@@ -197,6 +193,25 @@ class EditForumForm(forms.Form):
                                   label=u'Beschreibung', required=False)
     parent = forms.ChoiceField(label=u'Elternforum', required=False)
     position = forms.IntegerField(label=u'Position', initial=0)
+
+    welcome_msg_subject = forms.CharField(label=u'Titel', max_length=120,
+        required=False)
+    welcome_msg_text = forms.CharField(label=u'Text', required=False)
+
+    def clean_welcome_msg_subject(self):
+        data = self.cleaned_data
+        print data
+        if data.get('welcome_msg_text') and not data.get('welcome_msg_subject'):
+            raise forms.ValidationError(u'Du musst einen Titel angeben für die'
+                u' Willkommensnachricht')
+        return data['welcome_msg_subject']
+
+    def clean_welcome_msg_text(self):
+        data = self.cleaned_data
+        if data.get('welcome_msg_subject') and not data.get('welcome_msg_text'):
+            raise forms.ValidationError(u'Du musst einen Text für die '
+                u'Willkommensnachricht eingeben.')
+        return data['welcome_msg_text']
 
 
 class EditStyleForm(forms.Form):

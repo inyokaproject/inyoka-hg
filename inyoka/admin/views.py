@@ -19,6 +19,7 @@ from django.newforms.models import model_to_dict
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
+from inyoka.utils.cache import cache
 from inyoka.utils.urls import url_for, href, global_not_found
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -40,7 +41,7 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
     join_flags, split_flags
-from inyoka.forum.models import Forum, Privilege
+from inyoka.forum.models import Forum, Privilege, WelcomeMessage
 from inyoka.forum.database import forum_table, privilege_table
 
 
@@ -549,12 +550,22 @@ def forums_edit(request, id=None):
                 else:
                     forum.parent = parent
 
+            if data['welcome_msg_subject']:
+                # subject and text are bound to each other, validation
+                # is done in admin.forms
+                welcome_msg = WelcomeMessage(
+                    title=data['welcome_msg_subject'],
+                    text=data['welcome_msg_text']
+                )
+                welcome_msg.save()
+                forum.welcome_message_id = welcome_msg.id
+
             if not form.errors and not errors:
                 dbsession.commit()
-                cache.delete_many(['forum/index', 'forum/forum/' + old_slug] +
-                             ['forum/forum/' + f.slug for f in forum.parents])
+                cache.delete_many(tuple(['forum/index', 'forum/forum/' + old_slug] +
+                             ['forum/forum/' + f.slug for f in forum.parents]))
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
-                      escape(forum.name), id and 'angelegt' or 'editiert'))
+                      escape(forum.name), not id and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
             else:
                 flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
@@ -563,12 +574,18 @@ def forums_edit(request, id=None):
         if id is None:
             form = EditForumForm()
         else:
+            welcome_msg = None
+            if forum.welcome_message_id:
+                welcome_msg = WelcomeMessage.query.get(forum.welcome_message_id)
+
             form = EditForumForm({
                 'name': forum.name,
                 'slug': forum.slug,
                 'description': forum.description,
                 'parent': forum.parent_id,
-                'position': forum.position
+                'position': forum.position,
+                'welcome_msg_subject': welcome_msg and welcome_msg.title or u'',
+                'welcome_msg_text': welcome_msg and welcome_msg.text or u''
             })
         _add_field_choices()
     return {
