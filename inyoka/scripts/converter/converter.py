@@ -13,7 +13,7 @@
 import re
 import sys
 import cPickle
-from os import path
+from os import path, listdir
 from datetime import datetime
 from werkzeug import unescape
 from werkzeug.utils import url_unquote
@@ -76,6 +76,7 @@ PAGE_REPLACEMENTS = {
     'Gimp':         'GIMP',
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
+FLAG_RE = re.compile(r'\[\[([a-z]{2})\]\]')
 
 
 def convert_bbcode(text, uid):
@@ -802,6 +803,7 @@ def convert_ikhaya():
         """
         if not text.strip():
             return u''
+        text = FLAG_RE.sub(r'{\g<1>}', text)
         # TODO: Parse images
         if parser == 'markdown':
             return markdown(text)
@@ -823,7 +825,8 @@ def convert_ikhaya():
 
     # contains a mapping of old_user_id -> new_user_id
     user_mapping = {}
-    image_mapping = {}
+    dynamic_images = {}
+    static_images = {}
     force = {
         'tux123': 'tux21b',
     }
@@ -838,16 +841,35 @@ def convert_ikhaya():
             print u'Not able to find user', name, u'using anonymous instead'
             user_mapping[user.id] = 1
 
+    idents = []
+
+    # we have two different icon tables in our old portal :/
+    names = ['allgemein.png', 'edubuntu.png', 'gnome.png', 'kde.png', 'key.png',
+        'kubuntu.png', 'kxubuntu.png', 'linux.png', 'software.png', 'ubuntu.png',
+        'ubuntu_und_ich.png', 'ubuntuusers.png', 'veranstaltung.png',
+        'wochenrueckblick.png', 'xubuntu.png']
+
+    for name in names:
+        f = StaticFile(**{
+            'identifier':       name,
+            'file':             path.join('portal', 'files', name),
+            'is_ikhaya_icon':   True
+        })
+        f.save()
+        idents.append(name)
+        static_images[name] = f
+
     for image in select_blocks(image_table.select()):
-        try:
-            f = StaticFile(**{
-                'id':           image.id,
-                'file':         image.image.replace('uploads', 'portal/files')
-            })
-            f.save()
-            image_mapping[image.identifer] = f
-        except IntegrityError:
-            pass
+        ident = image.image.split('/')[-1]
+        while ident in idents:
+            ident = '1' + ident
+        idents.append(ident)
+        f = StaticFile(**{
+            'identifier':   ident,
+            'file':         image.image.replace('uploads', 'portal/files')
+        })
+        f.save()
+        dynamic_images[image.identifer] = f
 
     category_mapping = {}
     for data in category_table.select().execute():
@@ -856,7 +878,7 @@ def convert_ikhaya():
         category_mapping[data.id] = category
 
     for data in article_table.select().execute():
-        article = Article(
+        Article(
             subject=data.subject.decode('utf8'),
             pub_date=data.pub_date,
             author_id=user_mapping[data.author_id],
@@ -865,9 +887,9 @@ def convert_ikhaya():
             public=data.public,
             category=category_mapping[data.category_id],
             is_xhtml=1,
-            icon=image_mapping.get(data.icon2)
-        )
-        article.save()
+            icon=data.icon2 and dynamic_images.get(data.icon2) or \
+                static_images.get(data.icon.split('/')[-1])
+        ).save()
         connection.queries = []
 
 

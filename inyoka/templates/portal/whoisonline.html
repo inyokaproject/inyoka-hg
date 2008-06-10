@@ -44,9 +44,9 @@
     {%- for session in sessions.sessions %}
     <li>
       {%- if session.link %}
-      <a href="{{ session.link }}" class="{{ session.type }}">{{ session.text|e or 'Gast' }}</a>
+      <a href="{{ session.link }}" class="{{ session.type }}">{{ (session.text or 'Gast')|e }}</a>
       {%- else %}
-      <span class="{{ session.type }}">{{ session.text|e or 'Gast' }}</span>
+      <span class="{{ session.type }}">{{ (session.text or 'Gast')|e }}</span>
       {%- endif %}
       {{ session.action }}
       <small>({{ session.last_change|timedeltaformat(true) }})</small>

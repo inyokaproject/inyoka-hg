@@ -95,7 +95,8 @@ def index(request, category=None):
             if fmsg is not None:
                 return welcome(request, fmsg.slug, request.path)
         else:
-            categories = list(query.filter(forum_table.c.parent_id == None))
+            categories = list(query.filter(forum_table.c.parent_id == None) \
+                              .order_by(forum_table.c.position))
 
         cache.set(key, categories)
 
@@ -124,7 +125,7 @@ def forum(request, slug, page=1):
         f = Forum.query.options(eagerload('_children'),
                                 eagerload('_children.last_post'),
                                 eagerload('_children.last_post.author')) \
-                       .get(slug)
+                .get(slug)
 
         # if the forum is a category we raise PageNotFound. Categories have
         # their own url at /category.
@@ -350,7 +351,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         forum = topic.forum
     if newtopic:
         form = NewTopicForm(request.POST or None, initial={
-            'text': forum.newtopic_default_text})
+            'text':  forum.newtopic_default_text,
+            'title': article and article.name or '',
+        })
+    elif quote:
+        form = EditPostForm(request.POST or None, initial={
+            'text': quote_text(quote.text, quote.author)
+        })
     else:
         form = EditPostForm(request.POST or None)
 
@@ -466,7 +473,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             session.commit()
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
-    # the user submited a valid form
+    # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
         d = form.cleaned_data
         if not topic:
@@ -563,17 +570,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
-
-    # the user is going to quote an existing post
-    elif quote:
-        form = form.__class__(initial={'text': quote_text(quote.text,
-                                                         quote.author)})
-
-    elif newtopic:
-        form = form.__class__(initial={
-            'title': article and article.name or '',
-            'text': forum.newtopic_default_text,
-        })
 
     if not newtopic:
         posts = list(topic.posts.order_by(post_table.c.id.desc())[:15])
@@ -1191,7 +1187,8 @@ def markread(request, slug=None):
     """
     user = request.user
     if user.is_anonymous:
-        return
+        flash(u'Bitte melde dich an, um Beiträge als gelesen zu markieren.')
+        return HttpResponseRedirect(href('forum'))
     if slug:
         forum = Forum.query.get(slug)
         if not forum:

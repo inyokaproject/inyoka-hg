@@ -9,4 +9,4 @@ Beschreibung:
 
     {{ description|wordwrap(60)|indent(4) }}
 
-Kontaktinformationen des Autors: {{ url_for(USER) }}
+Kontaktinformationen des Autors: {{ USER|url }}

@@ -69,7 +69,6 @@ def config(request):
         form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            print data
             for k in keys:
                 storage[k] = data[k]
             if data['team_icon']:
@@ -860,6 +859,8 @@ def events(request, show_all=False):
 @require_manager
 @templated('admin/event_edit.html')
 def event_edit(request, id=None):
+    mode = (id is None) and 'new' or 'edit'
+
     if request.method == 'POST':
         form = EditEventForm(request.POST)
         if form.is_valid():
@@ -868,10 +869,8 @@ def event_edit(request, id=None):
                     event = Event.objects.get(id=id)
                 except Event.DoesNotExist:
                     raise PageNotFound
-                mode = 'edit'
             else:
                 event = Event()
-                mode = 'new'
             data = form.cleaned_data
             event.name = data['name']
             event.date = data['date']
@@ -902,11 +901,9 @@ def event_edit(request, id=None):
                 'location_lat': event.location_lat,
                 'location_long': event.location_long,
             });
-            mode = 'edit'
         else:
             form = EditEventForm()
             event = None
-            mode = 'new'
     return {
         'form': form,
         'mode': mode,
