@@ -276,15 +276,17 @@ class RecentChanges(Macro):
                         if rev.user:
                             page_notes.children.append(nodes.ListItem([
                                 nodes.Text(rev.note or ''),
-                                nodes.Text(u' (von '),
+                                nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
                                 nodes.Link(href('portal', 'user', rev.user.username), [
                                     nodes.Text(rev.user.username)]),
-                                nodes.Text(u')')
+                                nodes.Text(rev.note and u')' or '')
                             ]))
                         else:
                             page_notes.children.append(nodes.ListItem([
                                 nodes.Text(rev.note),
-                                nodes.Text(u' (anonymous)')]))
+                                nodes.Text(u'%svon ' % (rev.note and u'(' or '')),
+                                nodes.Text(rev.remote_addr),
+                                nodes.Text(rev.note and u')' or '')]))
                     table.children[-1].children.extend([
                         nodes.TableCell(
                             page_notes.children and [page_notes] or \
