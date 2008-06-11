@@ -272,15 +272,19 @@ class RecentChanges(Macro):
                         ])]))
 
                     page_notes = nodes.List('unordered', [], class_='note_list')
-                    for rev in filter(lambda r: bool(r.note), revs):
+                    for rev in revs:
                         if rev.user:
                             page_notes.children.append(nodes.ListItem([
+                                nodes.Text(rev.note or ''),
+                                nodes.Text(u' (von '),
                                 nodes.Link(href('portal', 'user', rev.user.username), [
-                                    nodes.Text(rev.note)])
+                                    nodes.Text(rev.user.username)]),
+                                nodes.Text(u')')
                             ]))
                         else:
                             page_notes.children.append(nodes.ListItem([
-                                nodes.Text(rev.note)]))
+                                nodes.Text(rev.note),
+                                nodes.Text(u' (anonymous)')]))
                     table.children[-1].children.extend([
                         nodes.TableCell(
                             page_notes.children and [page_notes] or \
