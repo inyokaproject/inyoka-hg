@@ -38,8 +38,12 @@
   {%- if article.icon %}
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
-  {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id',
-                        'icon_id', 'pub_date', 'slug', 'public', 'comments_enabled']) }}
+  <dl>
+  {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id', 'icon_id'], inline=true) }}
+  <dt>{{ form.pub_date.label }}</dt>
+  <dd>{{ form.pub_date }} <span class="note_link pub_date_ui_switcher">Datum auswählen</span></dd>
+  {{ render_form(form, ['slug', 'public', 'comments_enabled'], inline=true) }}
+  </dl>
   <p>
     <input type="submit" value="Speichern" />
     {%- if article %}
@@ -62,7 +66,21 @@
       intro.textarea.val(value.substr(0, value.length - 2));
       intro_skipped = true;
     }
-  })
+  });
+
+  var pub_date = null;
+  var pub_date_switcher = $('.pub_date_ui_switcher')
+    .click(function() {
+      if (pub_date instanceof DateTimeField) {
+        pub_date.destroy();
+        pub_date = null;
+        pub_date_switcher.text('Datum auswählen');
+      } else {
+        pub_date = new DateTimeField('input[@name="pub_date"]');
+        pub_date_switcher.text('grafischen Editor deaktivieren');
+      }
+    });
+
   /* ]]> */
 </script>
 {%- endblock %}
