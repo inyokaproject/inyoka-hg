@@ -710,15 +710,6 @@ class Link(Element):
         if self.scheme == 'javascript':
             yield escape(self.caption)
             return
-        if self.scheme == 'mailto':
-            try:
-                request = current_request._get_current_object()
-                if not request.user.is_authenticated:
-                    href = escape(self.href[7:])
-                    yield Text(href)
-                    return
-            except RuntimeError:
-                pass
         rel = style = title = None
         if not self.netloc or self.netloc == settings.BASE_DOMAIN_NAME or \
            self.netloc.endswith('.' + settings.BASE_DOMAIN_NAME):
