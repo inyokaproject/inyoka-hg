@@ -47,6 +47,9 @@
           <strong>„{{ comment.title|e }}“</strong> —
           von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
           {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
+            {%- if USER.is_ikhaya_writer %}
+            <a href="{{ href('ikhaya', 'comment', 'delete', comment.id) }}">Löschen</a>
+            {% endif %}
           {%- endif %}
           {{ comment.rendered_text }}
         </div>

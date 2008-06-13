@@ -149,6 +149,31 @@ def archive(request):
     }
 
 
+@check_login(message=u'Bitte melde dich an, um Ikhaya-Kommentare zu '
+             'administrieren')
+def comment_delete(request, comment_id):
+    """Delete a single comment."""
+    try:
+        comment = Comment.objects.get(id=comment_id)
+    except Comment.DoesNotExist:
+        return HttpResponseRedirect(href('ikhaya'))
+    url = url_for(comment.article)
+    if not request.user.is_ikhaya_writer:
+        return HttpResponseRedirect(url)
+    if request.GET.get('confirm') != 'yes':
+        flash(u'Soll das Kommentar von „%s“ wirklich gelöscht werden? ' \
+              u'<a href="%s">Löschen</a> <a href="%s">Abbrechen</a>' % (
+                  comment.author.username,
+                  href('ikhaya', 'comment', 'delete', comment_id,
+                       confirm='yes'), url))
+    else:
+        comment.article.comment_count -= 1
+        comment.article.save()
+        comment.delete()
+        flash(u'Das Kommentar wurde erfolgreich gelöscht.')
+    return HttpResponseRedirect(url)
+
+
 @check_login(message=u'Bitte melde dich an, um einen Ikhaya-Artikel '
                      u'vorzuschlagen.')
 @templated('ikhaya/suggest.html', modifier=context_modifier)
