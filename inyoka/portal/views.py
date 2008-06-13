@@ -668,7 +668,7 @@ def usercp_userpage(request):
 @templated('portal/privmsg/index.html')
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
-def privmsg(request, folder=None, entry_id=None):
+def privmsg(request, folder=None, entry_id=None, page=1):
     if folder is None:
         if entry_id is None:
             return HttpResponseRedirect(href('portal', 'privmsg',
@@ -714,8 +714,11 @@ def privmsg(request, folder=None, entry_id=None):
         user=request.user,
         folder=PRIVMSG_FOLDERS[folder][0]
     )
+    link = href('portal', 'privmsg', folder, 'page')
+    pagination = Pagination(request, entries, page, 10, link)
     return {
-        'entries': list(entries),
+        'entries': list(pagination.objects),
+        'pagination': pagination.generate(),
         'folder': {
             'name': PRIVMSG_FOLDERS[folder][2],
             'id': PRIVMSG_FOLDERS[folder][1]
@@ -780,7 +783,6 @@ def privmsg_new(request, username=None):
                                               'subject':  d['subject'],
                                               'entry':    entry,
                                           })
-
                 flash(u'Die persönliche Nachricht wurde erfolgreich '
                       u'versandt.', True)
                 return HttpResponseRedirect(href('portal', 'privmsg'))
