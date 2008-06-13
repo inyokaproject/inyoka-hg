@@ -77,7 +77,10 @@ def display(request, entry_id):
 
 
 def raw(request, entry_id):
-    entry = Entry.objects.get(id=entry_id)
+    try:
+        entry = Entry.objects.get(id=entry_id)
+    except Entry.DoesNotExist:
+        raise PageNotFound
     return HttpResponse(entry.code, content_type='text/plain')
 
 
