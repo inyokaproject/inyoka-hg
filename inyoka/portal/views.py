@@ -471,6 +471,7 @@ def usercp(request):
 @templated('portal/usercp/profile.html')
 def usercp_profile(request):
     """User control panel view for changing the user's profile"""
+    set_session_info(request, 'verändert sein Profil')
     user = request.user
     if request.method == 'POST':
         form = UserCPProfileForm(request.POST, request.FILES)
@@ -529,6 +530,7 @@ def usercp_profile(request):
 @templated('portal/usercp/settings.html')
 def usercp_settings(request):
     """User control panel view for changing various user settings"""
+    set_session_info(request, u'Ändert die Benutzereinstellungen')
     if request.method == 'POST':
         form = UserCPSettingsForm(request.POST, request.FILES)
         if form.is_valid():
@@ -669,6 +671,7 @@ def usercp_userpage(request):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg(request, folder=None, entry_id=None, page=1):
+    set_session_info(request, u'sieht sich seine privaten Nachrichten an')
     if folder is None:
         if entry_id is None:
             return HttpResponseRedirect(href('portal', 'privmsg',
@@ -731,6 +734,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg_new(request, username=None):
+    set_session_info(request, u'schreibt eine neue private Nachricht')
     preview = None
     form = PrivateMessageForm()
     if request.method == 'POST':
@@ -1009,6 +1013,7 @@ def calendar_month(request, year, month):
     month = int(month)
     days = calendar_entries_for_month(year, month)
     days = [(date(year, month, day), events) for day, events in days.items()]
+    set_session_info(request, u'sieht sich den Kalender an')
 
     return {
         'days': days,
@@ -1023,6 +1028,7 @@ def calendar_month(request, year, month):
 @templated('portal/calendar_overview.html')
 def calendar_overview(self):
     events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
+    set_session_info(request, u'sieht sich den Kalender an')
     return {
         'events': events,
         'year': datetime.utcnow().year,
@@ -1038,6 +1044,7 @@ def calendar_detail(self, slug):
         event = Event.objects.get(slug=slug)
     except Event.DoesNotExist:
         raise PageNotFound
+    set_session_info(request, u'sieht sich den Kalender an')
     return {
         'event': event,
         'MONTHS': dict(list(enumerate([''] + MONTHS))[1:]),
