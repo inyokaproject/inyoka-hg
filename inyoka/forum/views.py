@@ -1050,12 +1050,6 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
 
     anonymous = User.objects.get_anonymous_user()
 
-    # key = 'forum/feeds/%s/%s/%s/%s' % (component, slug, mode, count)
-    # content = cache.get(key)
-    # if content is not None:
-    #     content_type='application/atom+xml; charset=utf-8'
-    #     return HttpResponse(content, content_type=content_type)
-
     if component == 'topic':
         topic = Topic.query.filter_by(slug=slug).one()
         if topic is None:
@@ -1174,11 +1168,6 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     feed.truncate(count)
     cache.set(cache_key, feed, 600)
     return feed.get_atom_response()
-
-
-    # response = feed.get_atom_response()
-    # cache.set(key, response.content, 600)
-    # return response
 
 
 def markread(request, slug=None):
