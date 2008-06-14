@@ -78,7 +78,6 @@ PAGE_REPLACEMENTS = {
     'Gimp':         'GIMP',
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
-FLAG_RE = re.compile(r'\[\[([a-z]{2})\]\]')
 IMG_RE = re.compile(r'\[\[(.+?)\]\]')
 
 
@@ -799,8 +798,8 @@ def convert_ikhaya():
             img_style = []
             args = match.group()[2:-2].split('|')
             id = args[0]
-            desc = len(args) > 1 and args[1] or None,
-            align = len(args) > 2 and args[2] or 'right'
+            desc = len(args) > 1 and args[1] or None
+            align = len(args) > 2 and args[2] or None
             size = len(args) > 3 and args[3] or None
 
             if id not in dynamic_images:
@@ -847,7 +846,6 @@ def convert_ikhaya():
         """
         if not text.strip():
             return u''
-        text = FLAG_RE.sub(r'{\g<1>}', text)
         text = parse_imgs(text)
         # TODO: Parse images
         if parser == 'markdown':
