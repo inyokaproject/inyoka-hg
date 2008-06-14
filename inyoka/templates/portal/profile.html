@@ -14,7 +14,7 @@
 
 {% block appheader %}
   <h1><a href="{{ href('portal', 'users') }}">Mitglieder</a></h1>
-  <h2><a href="{{ url_for(user) }}">{{ user.username|e }}</a></h2>
+  <h2><a href="{{ user|e }}">{{ user.username|e }}</a></h2>
 {% endblock %}
 
 {% macro show_item(item) %}
