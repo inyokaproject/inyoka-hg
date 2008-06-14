@@ -666,6 +666,16 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   display:inline;
 }
 
+.appheader h1 a {
+  color: #a48f65;
+  text-decoration: none;
+}
+
+.appheader h2 a {
+  color: #816a3b;
+  text-decoration: none;
+}
+
 .navi_global {
   margin: 0;
   float: right;

@@ -11,7 +11,7 @@
 {% set navi_type = 'both' %}
 
 {% block appheader %}
-  <h1>Private Nachrichten</h1>
+  <h1><a href="{{ href('portal', 'privmsg') }}">Private Nachrichten</a></h1>
   <h2>{{ title_trace[:-1]|join(' » ') or 'Übersicht' }}</h2>
 {% endblock %}
 

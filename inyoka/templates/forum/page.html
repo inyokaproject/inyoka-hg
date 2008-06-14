@@ -18,7 +18,7 @@
 {% set navi_type = 'tabbar'%}
 
 {% block appheader %}
-  <h1>Forum</h1>
+  <h1><a href="{{ href('forum') }}">Forum</a></h1>
   <h2>{{ title_trace[:-1]|join(' » ') }}</h2>
 {% endblock %}
 

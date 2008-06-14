@@ -16,8 +16,8 @@
     (href('portal', 'calendar', year, '%02d' % month), '%s %d' % (MONTHS[month], year)),
   ] %}
 {% block appheader %}
-  <h1>Kalender</h1>
-  <h2>{{ MONTHS[month]|e }} {{ year }}</h2>
+  <h1><a href="{{ href('portal', 'calendar') }}">Kalender</a></h1>
+  <h2><a href="{{ href('portal', 'calendar', year, '%02d' % month) }}">{{ MONTHS[month]|e }} {{ year }}</a></h2>
 {% endblock %}
 {% block portal_content %}
 <ul class="switcher">

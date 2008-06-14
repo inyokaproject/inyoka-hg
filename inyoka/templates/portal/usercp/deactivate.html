@@ -13,8 +13,8 @@
 {% set selected = 'deactivate' %}
 
 {% block appheader %}
-  <h1>Verwaltung</h1>
-  <h2>Benutzer deaktivieren</h2>
+  <h1><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></h1>
+  <h2><a href="{{ href('portal', 'deactivate') }}">Benutzer deaktivieren</a></h2>
 {% endblock %}
 {% block portal_content %}
   <h3>Benutzer deaktivieren</h3>

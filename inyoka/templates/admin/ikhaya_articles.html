@@ -13,8 +13,8 @@
     (href('admin', 'articles'), 'Artikel'),
   ] %}
 {% block appheader %}
-<h1>Administration</h1>
-<h2>Ikhaya</h2>
+<h1><a href="{{ href('admin') }}">Administration</a></h1>
+<h2><a href="{{ href('admin', 'ikhaya') }}">Ikhaya</a></h2>
 {% endblock %}
 
 {% block admin_content %}

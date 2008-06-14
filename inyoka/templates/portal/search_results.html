@@ -12,7 +12,7 @@
 {%- extends 'portal/overall.html' %}
 {% set title = 'Suche' %}
 {% block appheader %}
-  <h1>Suche</h1>
+  <h1><a href="{{ href('portal', 'search') }}">Suche</a></h1>
   <h2>Ergebnisse für „{{ query|e }}“</h2>
 {% endblock %}
 
