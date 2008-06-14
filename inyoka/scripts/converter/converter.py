@@ -79,6 +79,7 @@ PAGE_REPLACEMENTS = {
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
 FLAG_RE = re.compile(r'\[\[([a-z]{2})\]\]')
+IMG_RE = re.compile(r'\[\[(.+?)\]\]')
 
 
 def convert_bbcode(text, uid):
@@ -794,26 +795,41 @@ def convert_ikhaya():
 
     def parse_imgs(text):
         def render_img(match):
+            style = []
+            img_style = []
             args = match.group()[2:-2].split('|')
-            id = args[0]
-            if id not in dynamic_images:
-                return u'[[%s]]' % u'|'.join(args)
+            id = args[0],
             desc = len(args) > 1 and args[1] or None,
             align = len(args) > 2 and args[2] or 'inline',
             size = len(args) > 3 and args[3] or None
 
-            args = []
-            if align in ('left', 'right', 'center'):
-                args.append('align=%s' % align)
-            if size and 'x' in args['size']:
-                args.append('size=%s' % size)
-            if desc:
-                args.append("alt='%s'" % desc)
-            args = ', '.join(args)
+            if id not in dynamic_images:
+                return ''
 
-            return u'[[Bild(%s%s)]]' % (dynamic_images[id].get_file_url(),
-                                        args and (', %s' % args) or '')
-        return re.sub(r'\[\[(.+?)\]\]', render_img, text)
+            if align in ('left', 'right', 'center'):
+                style.append('float: %s' % align)
+                img_style.append('float: %s' % align)
+
+            if size:
+                if 'x' in size:
+                    width, height = size.split('x')
+                    style.append('width: %spx' % width)
+                    img_style.extend(['width: %spx' % width, 'height: %spx' % height])
+
+            img_code = '<img src="%s" alt="%s" style="%s" />' % (
+                dynamic_images[id].get_file_url(), desc or id, ';'.join(img_style)
+            )
+            if desc:
+                return ''.join([
+                    '<div class="imgdiv" style="%s">' % ';'.join(style),
+                    img_code,
+                    '<br />%s' % desc,
+                    '</div>'
+                ])
+            else:
+                return img_code
+
+        return IMG_RE.sub(render_img, text)
 
     def linebreaks(value):
         """
