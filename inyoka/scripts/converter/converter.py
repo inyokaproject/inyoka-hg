@@ -792,6 +792,27 @@ def convert_ikhaya():
     from markdown import markdown
     from xml.sax import saxutils
 
+    def parse_imgs(text):
+        def render_img(match):
+            args = match.group()[2:-2].split('|')
+            id = args[0]
+            desc = len(args) > 1 and args[1] or None,
+            align = len(args) > 2 and args[2] or 'inline',
+            size = len(args) > 3 and args[3] or None
+
+            args = []
+            if align in ('left', 'right', 'center'):
+                args.append('align=%s' % align)
+            if size and 'x' in args['size']:
+                args.append('size=%s' % size)
+            if desc:
+                args.append("alt='%s'" % desc)
+            args = ', '.join(args)
+
+            return u'[[Bild(%s%s)]]' % (dynamic_images[id].get_file_url(),
+                                        args and (', %s' % args) or '')
+        return re.sub(r'\[\[(.+?)\]\]', render_img, text)
+
     def linebreaks(value):
         """
         Converts newlines into <p> and <br />s.
@@ -809,6 +830,7 @@ def convert_ikhaya():
         if not text.strip():
             return u''
         text = FLAG_RE.sub(r'{\g<1>}', text)
+        text = parse_imgs(text)
         # TODO: Parse images
         if parser == 'markdown':
             return markdown(text)
@@ -867,7 +889,9 @@ def convert_ikhaya():
     for image in select_blocks(image_table.select()):
         ident = image.image.split('/')[-1]
         while ident in idents:
-            ident = '1' + ident
+            ident = ident.split('.')
+            ident[-2] += '2'
+            ident = '.'join(ident)
         idents.append(ident)
         f = StaticFile(**{
             'identifier':   ident,
