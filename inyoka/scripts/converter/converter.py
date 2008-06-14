@@ -796,6 +796,8 @@ def convert_ikhaya():
         def render_img(match):
             args = match.group()[2:-2].split('|')
             id = args[0]
+            if id not in dynamic_images:
+                return u'[[%s]]' % u'|'.join(args)
             desc = len(args) > 1 and args[1] or None,
             align = len(args) > 2 and args[2] or 'inline',
             size = len(args) > 3 and args[3] or None
@@ -891,7 +893,7 @@ def convert_ikhaya():
         while ident in idents:
             ident = ident.split('.')
             ident[-2] += '2'
-            ident = '.'join(ident)
+            ident = '.'.join(ident)
         idents.append(ident)
         f = StaticFile(**{
             'identifier':   ident,

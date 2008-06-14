@@ -82,7 +82,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
             pub_date__year=year,
             pub_date__month=month
         )
-        link = ('month', '%s-%s' % (year, month))
+        link = ('%s/%s' % (year, month))
     elif category_slug:
         category = Category.objects.get(slug=category_slug)
         articles = category.article_set.all()
