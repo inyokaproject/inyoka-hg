@@ -139,7 +139,7 @@ def forum(request, slug, page=1):
         return abort_access_denied(request)
 
     fmsg = f.find_welcome(request.user)
-    if fmsg:
+    if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
 
     if page < CACHE_PAGES_COUNT:
