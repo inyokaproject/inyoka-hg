@@ -23,6 +23,8 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.sql import select, func, and_
 from sqlalchemy.exceptions import OperationalError
 from inyoka.conf import settings
+settings.DEBUG = False
+settings.DATABASE_DEBUG = False
 from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.wiki import bbcode
 from inyoka.wiki.utils import normalize_pagename
@@ -674,6 +676,7 @@ def convert_attachments():
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()
+    log = open('converter.log', 'w')
 
     try:
         conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
@@ -727,7 +730,8 @@ def convert_privmsgs():
                                     msg_text.privmsgs_bbcode_uid)
             m.save()
         except (IntegrityError, OperationalError, meOperationalError):
-            continue
+            print "skipped error"
+            pass
 
         # If the status is sent, the first user is the sender.
         if msg.privmsgs_type in (1, 2, 4):
@@ -768,7 +772,8 @@ def convert_privmsgs():
             except (IntegrityError, OperationalError, meOperationalError):
                 # and again corrupted data on database side...
                 # (e.g one private message is bind to an user_id that does not exist)
-                continue
+                print "skipped error"
+                pass
 
         conn.execute(msg_table.update(msg_table.c.privmsgs_id.in_(ids)), done=True)
 
