@@ -798,9 +798,9 @@ def convert_ikhaya():
             style = []
             img_style = []
             args = match.group()[2:-2].split('|')
-            id = args[0],
+            id = args[0]
             desc = len(args) > 1 and args[1] or None,
-            align = len(args) > 2 and args[2] or 'inline',
+            align = len(args) > 2 and args[2] or 'right'
             size = len(args) > 3 and args[3] or None
 
             if id not in dynamic_images:
@@ -821,7 +821,7 @@ def convert_ikhaya():
             )
             if desc:
                 return ''.join([
-                    '<div class="imgdiv" style="%s">' % ';'.join(style),
+                    '<div style="%s">' % ';'.join(style),
                     img_code,
                     '<br />%s' % desc,
                     '</div>'
