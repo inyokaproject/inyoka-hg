@@ -96,13 +96,12 @@ class AdvancedSessionMiddleware(object):
         if modified or settings.SESSION_SAVE_EVERY_REQUEST:
             if request.session.get('_perm'):
                 expires_time = request.session.get('_ex', 0)
-                max_age = max(expires_time - time(), 0)
                 expires = cookie_date(expires_time)
             else:
-                expires = max_age = None
+                expires = None
             response.set_cookie(settings.SESSION_COOKIE_NAME,
                                 request.session.serialize(),
-                                max_age=max_age, expires=expires,
+                                expires=expires,
                                 domain=settings.SESSION_COOKIE_DOMAIN,
                                 secure=settings.SESSION_COOKIE_SECURE or None)
         return response
