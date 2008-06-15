@@ -86,7 +86,7 @@ Solltest du dir nicht sicher sein, ob an dieser Anleitung noch gearbeitet wird, 
 <@ endif @>
 ----
 '''Achtung''': Insbesondere heißt das, dass dieser Artikel noch nicht fertig ist und dass wichtige Teile fehlen oder sogar falsch sein können. Bitte diesen Artikel nicht als Anleitung für Problemlösungen benutzen!|}}""",
-    u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @>}}}|}}""",
+    u'Befehl': u"""{{|<class="bash">{{{<@ $arguments @> }}}|}}""",
     u'Tasten': u"""<@ for $key in $arguments split_by "+" @>
 <@ if $loop.first @><@ else @> + <@ endif @>
 {{|<class="key"><@ if $key matches_regex "^[a-zA-Z0-9]{1}$" @><@ $key as uppercase @>

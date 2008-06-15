@@ -274,7 +274,9 @@ class SmileyInjector(Transformer):
             smilies = dict(storage.smilies)
         if not smilies:
             return tree
-        smiley_re = re.compile(r'(?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u)' %
+        # The old re was (?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u), but I changed
+        # it because then you had to put two spaces between smilies.
+        smiley_re = re.compile(r'(%s)' %
                                '|'.join(re.escape(s) for s in sorted(smilies,
                                         key=lambda x: -len(x))))
 
