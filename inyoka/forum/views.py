@@ -1140,6 +1140,10 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 if topic.hidden:
                     continue
 
+                if post is None:
+                    # this should not happen, but it does...
+                    continue
+
                 if post.rendered_text is None:
                     post.render_text()
                 rendered_text = post.rendered_text
