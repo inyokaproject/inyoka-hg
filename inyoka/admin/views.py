@@ -43,6 +43,7 @@ from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
     join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage
 from inyoka.forum.database import forum_table, privilege_table
+from inyoka.wiki.parser import parse, RenderContext
 
 
 def not_found(request, err_message=None):
@@ -305,8 +306,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         article = Article.objects.get(slug=article)
 
     if request.method == 'POST':
+        form = EditArticleForm(request.POST)
         if 'send' in request.POST:
-            form = EditArticleForm(request.POST)
             _add_field_choices()
             if form.is_valid():
                 data = form.cleaned_data
@@ -336,11 +337,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                               % escape(article.subject))
         elif 'preview' in request.POST:
             ctx = RenderContext(request)
-            preview = {
-                'intro': parse(request.POST.get('intro', '')).render(ctx, 'html'),
-                'text': parse(request.POST.get('text', '')).render(ctx, 'html')
-            }
-
+            preview = parse('%s\n\n%s' % (request.POST.get('intro', ''),
+                            request.POST.get('text'))).render(ctx, 'html')
     else:
         initial = {}
         if article:
