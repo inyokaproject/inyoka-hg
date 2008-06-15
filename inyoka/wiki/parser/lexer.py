@@ -282,7 +282,7 @@ class Lexer(object):
             include('function_call')
         ),
         'parser_data': ruleset(
-            rule(r'\}\}\}(?m)', leave=1)
+            rule(r'\}\}\}', leave=1)
         ),
         'pre_data': ruleset(
             include('parser_data'),
