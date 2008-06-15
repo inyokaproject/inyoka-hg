@@ -11,7 +11,7 @@
 $(document).ready(function() {
   // add a hide message link to all flash messages
   $.each($('div.message'), function(i, elm) {
-    $(elm).append($('<a href="#" class="hide" />')
+    $(elm).prepend($('<a href="#" class="hide" />')
       .click(function() {
         $(this).parent().slideUp('slow');
         return false;
