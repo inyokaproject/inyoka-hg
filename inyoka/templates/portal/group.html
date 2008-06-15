@@ -12,7 +12,7 @@
 {% set title_trace = [group.name|e] %}
 {% block appheader %}
   <h1><a href="{{ href('portal') }}">Portal</a></h1>
-  <h2><a href="{{ url_for(group) }}">{{ group.name|e }}</a></h2>
+  <h2><a href="{{ group|e }}">{{ group.name|e }}</a></h2>
 {% endblock %}
 {% block content %}
   <h3>{{ group.name|e }}</h3>
