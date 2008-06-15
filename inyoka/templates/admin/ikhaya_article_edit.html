@@ -73,18 +73,11 @@
     }
   });
 
-  var pub_date = null;
-  var pub_date_switcher = $('.pub_date_ui_switcher')
-    .click(function() {
-      if (pub_date instanceof DateTimeField) {
-        pub_date.destroy();
-        pub_date = null;
-        pub_date_switcher.text('Datum auswählen');
-      } else {
-        pub_date = new DateTimeField('input[@name="pub_date"]');
-        pub_date_switcher.text('grafischen Editor deaktivieren');
-      }
-    });
+  pub_date = new DateTimeField('input[@name="pub_date"]', auto_show=true);
+
+  $('input[@name="pub_date"]').focus(function() {
+    pub_date.show();
+  });
 
   /* Preview implementation */
   (function() {
