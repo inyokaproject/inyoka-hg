@@ -95,7 +95,7 @@
     $('form input[@name="preview"]').click(function() {
       preview.hide();
       $.post('/?__service__=wiki.render_preview', {
-        text: ieditor.val() + '\n\n' + teditor.val()
+        text: ieditor.val() + '\n----\n\n' + teditor.val()
       }, function(data) {
         output.html(data);
         preview.slideDown('fast');

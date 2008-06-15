@@ -115,3 +115,14 @@ div.group_titles input {
   display: inline;
   margin: 0 0 0 10px;
 }
+
+
+div.preview_wrapper {
+  margin: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+}
+
+div.preview_wrapper h2.title {
+  padding-bottom: 10px;
+}
