@@ -1142,7 +1142,7 @@ dbsession.mapper(Topic, topic_table, properties={
                            primaryjoin=topic_table.c.first_post_id == post_table.c.id),
     'forum': relation(Forum),
     'polls': relation(Poll, backref='topic', cascade='save-update'),
-    'posts': relation(Post, backref='topic', cascade='all, delete',
+    'posts': relation(Post, backref='topic', cascade='all, delete-orphan',
                       primaryjoin=topic_table.c.id == post_table.c.topic_id,
                       lazy='dynamic'),
     }, extension=TopicMapperExtension()

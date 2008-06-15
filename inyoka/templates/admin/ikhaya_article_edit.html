@@ -45,12 +45,17 @@
   {{ render_form(form, ['slug', 'public', 'comments_enabled'], inline=true) }}
   </dl>
   <p>
-    <input type="submit" value="Speichern" />
+    <input type="submit" value="Speichern" name="send" />
+    <input type="submit" value="Vorschau" name="preview" />
     {%- if article %}
     <a href="{{ article|url('delete') }}">Löschen</a>
     {%- endif %}
   </p>
 </form>
+{%- if preview %}
+<h2>Vorschau</h2>
+<div class="preview">{{ preview }}</div>
+{%- endif %}
 
 <script type="text/javascript">
   /* <![CDATA[ */
@@ -80,6 +85,34 @@
         pub_date_switcher.text('grafischen Editor deaktivieren');
       }
     });
+
+  /* Preview implementation */
+  (function() {
+    var
+      ieditor = $('textarea[@name="intro"]'),
+      teditor = $('textarea[@name="text"]'),
+      output = $('<div class="preview"></div>');
+    var preview = $('<div />')
+      .hide()
+      .append('<h2>Vorschau</h2>')
+      .append(output);
+
+    $('form input[@name="preview"]').click(function() {
+      preview.hide();
+      $.post('/?__service__=ikhaya.render_preview', {
+        intro: ieditor.val(),
+        text: teditor.val()
+      }, function(data) {
+        alert(data);
+        var intro =  $('<div class="intro">').append(output);
+        var text = $('<div class="text">').append(output);
+        intro.html(data["intro"]);
+        text.html(data["text"]);
+        preview.slideDown('fast');
+      });
+      return false;
+    }).parent().parent().parent().append(preview);
+  })();
 
   /* ]]> */
 </script>
