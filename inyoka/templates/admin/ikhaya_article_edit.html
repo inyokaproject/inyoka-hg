@@ -53,8 +53,10 @@
   </p>
 </form>
 {%- if preview %}
-<h2>Vorschau</h2>
-<div class="preview">{{ preview }}</div>
+<div class="preview_wrapper">
+  <h2 class="title">Vorschau</h2>
+  <div class="preview">{{ preview }}</div>
+</div>
 {%- endif %}
 
 <script type="text/javascript">
@@ -92,22 +94,17 @@
       ieditor = $('textarea[@name="intro"]'),
       teditor = $('textarea[@name="text"]'),
       output = $('<div class="preview"></div>');
-    var preview = $('<div />')
+    var preview = $('<div class="preview_wrapper" />')
       .hide()
-      .append('<h2>Vorschau</h2>')
+      .append('<h2 class="title">Vorschau</h2>')
       .append(output);
 
     $('form input[@name="preview"]').click(function() {
       preview.hide();
-      $.post('/?__service__=ikhaya.render_preview', {
-        intro: ieditor.val(),
-        text: teditor.val()
+      $.post('/?__service__=wiki.render_preview', {
+        text: ieditor.val() + '\n\n' + teditor.val()
       }, function(data) {
-        alert(data);
-        var intro =  $('<div class="intro">').append(output);
-        var text = $('<div class="text">').append(output);
-        intro.html(data["intro"]);
-        text.html(data["text"]);
+        output.html(data);
         preview.slideDown('fast');
       });
       return false;
