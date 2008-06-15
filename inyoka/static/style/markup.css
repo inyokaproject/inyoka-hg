@@ -176,6 +176,10 @@ div.knowledge h3 {
   background-color: #d7b97b;
 }
 
+div.knowledge .contents {
+  margin-left: 15px;
+}
+
 div.workinprogress {
   border: 1px solid #3F7DB1;
 }
