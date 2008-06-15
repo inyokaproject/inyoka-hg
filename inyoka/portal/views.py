@@ -1026,7 +1026,7 @@ def calendar_month(request, year, month):
 
 
 @templated('portal/calendar_overview.html')
-def calendar_overview(self):
+def calendar_overview(request):
     events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
     set_session_info(request, u'sieht sich den Kalender an')
     return {
@@ -1039,7 +1039,7 @@ def calendar_overview(self):
 
 
 @templated('portal/calendar_detail.html')
-def calendar_detail(self, slug):
+def calendar_detail(request, slug):
     try:
         event = Event.objects.get(slug=slug)
     except Event.DoesNotExist:
@@ -1053,7 +1053,7 @@ def calendar_detail(self, slug):
 
 
 @templated('portal/open_search.xml', content_type='text/xml; charset=utf-8')
-def open_search(self, app):
+def open_search(request, app):
     if app not in ('wiki', 'forum', 'planet', 'ikhaya'):
         app='portal'
     return {
