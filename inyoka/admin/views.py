@@ -292,6 +292,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     article suggestion made by a user.  After saving it, the suggestion will be
     deleted automatically.
     """
+    preview = None
+
     def _add_field_choices():
         categories = [(c.id, c.name) for c in Category.objects.all()]
         icons = [(i.id, i.identifier)
@@ -303,34 +305,42 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         article = Article.objects.get(slug=article)
 
     if request.method == 'POST':
-        form = EditArticleForm(request.POST)
-        _add_field_choices()
-        if form.is_valid():
-            data = form.cleaned_data
-            data['author'] = data['author'] or request.user
-            if not data.get('icon_id'):
-                data['icon_id'] = None
-            if not article:
-                article = Article(**data)
-                article.save()
-                if suggestion_id:
-                    Suggestion.objects.delete([suggestion_id])
-                flash(u'Der Artikel „%s“ wurde erstellt.'
-                      % escape(article.subject), True)
-            else:
-                changed = False
-                for k in data:
-                    if article.__getattribute__(k) != data[k]:
-                        article.__setattr__(k, data[k])
-                        changed = True
-                if changed:
-                    article.updated = datetime.utcnow()
+        if 'send' in request.POST:
+            form = EditArticleForm(request.POST)
+            _add_field_choices()
+            if form.is_valid():
+                data = form.cleaned_data
+                data['author'] = data['author'] or request.user
+                if not data.get('icon_id'):
+                    data['icon_id'] = None
+                if not article:
+                    article = Article(**data)
                     article.save()
-                    flash(u'Der Artikel „%s“ wurde geändert.'
+                    if suggestion_id:
+                        Suggestion.objects.delete([suggestion_id])
+                    flash(u'Der Artikel „%s“ wurde erstellt.'
                           % escape(article.subject), True)
                 else:
-                    flash(u'Der Artikel „%s“ wurde nicht verändert'
-                          % escape(article.subject))
+                    changed = False
+                    for k in data:
+                        if article.__getattribute__(k) != data[k]:
+                            article.__setattr__(k, data[k])
+                            changed = True
+                    if changed:
+                        article.updated = datetime.utcnow()
+                        article.save()
+                        flash(u'Der Artikel „%s“ wurde geändert.'
+                              % escape(article.subject), True)
+                    else:
+                        flash(u'Der Artikel „%s“ wurde nicht verändert'
+                              % escape(article.subject))
+        elif 'preview' in request.POST:
+            ctx = RenderContext(request)
+            preview = {
+                'intro': parse(request.POST.get('intro', '')).render(ctx, 'html'),
+                'text': parse(request.POST.get('text', '')).render(ctx, 'html')
+            }
+
     else:
         initial = {}
         if article:
@@ -354,9 +364,11 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             }
         form = EditArticleForm(initial=initial)
         _add_field_choices()
+
     return {
         'form': form,
-        'article': article
+        'article': article,
+        'preview': preview,
     }
 
 
