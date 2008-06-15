@@ -78,7 +78,7 @@ PAGE_REPLACEMENTS = {
     'Gimp':         'GIMP',
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
-FLAG_RE = re.compile(r'\[\[([a-z]{2})\]\]')
+IMG_RE = re.compile(r'\[\[(.+?)\]\]')
 
 
 def convert_bbcode(text, uid):
@@ -792,6 +792,44 @@ def convert_ikhaya():
     from markdown import markdown
     from xml.sax import saxutils
 
+    def parse_imgs(text):
+        def render_img(match):
+            style = []
+            img_style = []
+            args = match.group()[2:-2].split('|')
+            id = args[0]
+            desc = len(args) > 1 and args[1] or None
+            align = len(args) > 2 and args[2] or None
+            size = len(args) > 3 and args[3] or None
+
+            if id not in dynamic_images:
+                return ''
+
+            if align in ('left', 'right', 'center'):
+                style.append('float: %s' % align)
+                img_style.append('float: %s' % align)
+
+            if size:
+                if 'x' in size:
+                    width, height = size.split('x')
+                    style.append('width: %spx' % width)
+                    img_style.extend(['width: %spx' % width, 'height: %spx' % height])
+
+            img_code = '<img src="%s" alt="%s" style="%s" />' % (
+                dynamic_images[id].get_file_url(), desc or id, ';'.join(img_style)
+            )
+            if desc:
+                return ''.join([
+                    '<div style="%s">' % ';'.join(style),
+                    img_code,
+                    '<br />%s' % desc,
+                    '</div>'
+                ])
+            else:
+                return img_code
+
+        return IMG_RE.sub(render_img, text)
+
     def linebreaks(value):
         """
         Converts newlines into <p> and <br />s.
@@ -808,7 +846,7 @@ def convert_ikhaya():
         """
         if not text.strip():
             return u''
-        text = FLAG_RE.sub(r'{\g<1>}', text)
+        text = parse_imgs(text)
         # TODO: Parse images
         if parser == 'markdown':
             return markdown(text)
@@ -867,7 +905,9 @@ def convert_ikhaya():
     for image in select_blocks(image_table.select()):
         ident = image.image.split('/')[-1]
         while ident in idents:
-            ident = '1' + ident
+            ident = ident.split('.')
+            ident[-2] += '2'
+            ident = '.'.join(ident)
         idents.append(ident)
         f = StaticFile(**{
             'identifier':   ident,

@@ -23,7 +23,7 @@ from inyoka.utils.local import current_request
 SESSION_DELTA = 300
 
 
-@transaction.commit_on_success
+@transaction.commit_manually
 def set_session_info(request, action, category=None):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
@@ -55,6 +55,7 @@ def set_session_info(request, action, category=None):
                category = %s;
     ''', args + args[:-1])
     cursor.close()
+    transaction.commit()
 
 
 class SurgeProtectionMixin(object):

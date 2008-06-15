@@ -20,6 +20,7 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import MONTHS
+from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
@@ -82,7 +83,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
             pub_date__year=year,
             pub_date__month=month
         )
-        link = ('month', '%s-%s' % (year, month))
+        link = (year, month)
     elif category_slug:
         category = Category.objects.get(slug=category_slug)
         articles = category.article_set.all()
@@ -94,10 +95,12 @@ def index(request, year=None, month=None, category_slug=None, page=1):
     if not request.user.is_ikhaya_writer:
         articles = articles.filter(pub_date__lte=datetime.utcnow(),
                                    public=True)
+    link = href('ikhaya', *link)
+    set_session_info(request, u'sieht sich die <a href="%s">'
+                              u'Artikelübersicht</a> an' % link)
 
     articles = articles.order_by('-pub_date').select_related()
 
-    link = href('ikhaya', *link)
     pagination = Pagination(request, articles, page, 15, link)
 
     return {
@@ -111,6 +114,8 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 def detail(request, slug):
     """Shows a single article."""
     article = Article.objects.select_related().get(slug=slug)
+    set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
+                     u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None
     if article.hidden or article.pub_date > datetime.utcnow():
         if not request.user.is_ikhaya_writer:
@@ -143,6 +148,8 @@ def detail(request, slug):
 @templated('ikhaya/archive.html', modifier=context_modifier)
 def archive(request):
     """Shows the archive index."""
+    set_session_info(request, u'sieht sich das <a href="%s">Archiv</a> an' %
+                     href('ikhaya', 'archive'))
     months = Article.published.dates('pub_date', 'month')
     return {
         'months': months
