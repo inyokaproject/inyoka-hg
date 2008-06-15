@@ -24,7 +24,7 @@
     // add items to the select boxes
     this.rebuildBoxes(user_joined, user_not_joined);
   
-    // add needed submit event 
+    // add needed submit event
     $($(container).find('input[@type="submit"]')[0])
       .submit(function() {
         $.each([self.user_not_joined, self.user_joined], function() {
@@ -36,14 +36,12 @@
       });
     
     // add add/remove events
-    $('img.item_add')
-      .click(function() {
-        self.move(self.user_not_joined, self.user_joined);
-      });
-    $('img.item_remove')
-      .click(function() {
-        self.move(self.user_joined, self.user_not_joined);
-      });
+    $('img.item_add').click(function() {
+      self.move(self.user_not_joined, self.user_joined);
+    });
+    $('img.item_remove').click(function() {
+      self.move(self.user_joined, self.user_not_joined);
+    });
   }
 
   GroupBox.prototype = {
@@ -58,12 +56,7 @@
       });
     },
     move: function(from, to) {
-      from.find('option:selected').each(function() {
-        if (this.selected) {
-          this.selected = false;
-          $(this).appendTo(to);
-        }
-      });
+      from.find('option:selected').remove().appendTo(to);
     },
   }
 })()
