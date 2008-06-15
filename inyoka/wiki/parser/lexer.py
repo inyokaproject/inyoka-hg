@@ -162,7 +162,7 @@ class Lexer(object):
                  enter='external_link'),
             rule(r'\[\s*([^:\]]+?)?\s*:\s*((?:::|[^:])*)\s*:\s*',
                  astuple('link_target'), enter='wiki_link'),
-            rule(_url_pattern + '[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?',
+            rule(_url_pattern + r'[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?[^\)\\\s]',
                  'free_link')
         ),
         'highlightable': ruleset(
