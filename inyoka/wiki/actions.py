@@ -193,7 +193,7 @@ def do_revert(request, name):
               u'bereits die aktuelle ist.', success=False)
     elif request.method == 'POST':
         if 'cancel' in request.POST:
-            flash('Wiederherstellen abgebrochen.')
+            flash(u'Wiederherstellen abgebrochen.')
             url = href('wiki', name, rev=page.rev.id)
         else:
             new_revision = page.rev.revert(request.POST.get('note'),
@@ -216,9 +216,9 @@ def do_move(request, name):
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
         if 'cancel' in request.POST:
-            flash('Verschieben abgebrochen.')
+            flash(u'Verschieben abgebrochen.')
         elif not new_name:
-            flash('Kein Seitenname eingegeben.', success=False)
+            flash(u'Kein Seitenname eingegeben.', success=False)
         else:
             try:
                 Page.objects.get_by_name(new_name)
@@ -231,10 +231,10 @@ def do_move(request, name):
                 new_page = Page.objects.create(new_name, original_text,
                            request.user, note='Umbenannt von %s' % page.name,
                            remote_addr=request.META.get('REMOTE_ADDR'))
-                flash('Die Seite wurde erfolgreich umbenannt.', success=True)
+                flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(new_page))
             else:
-                flash('Eine Seite mit diesem Namen existiert bereits.')
+                flash(u'Eine Seite mit diesem Namen existiert bereits.')
                 rename_url=href('wiki', name, action='move',
                                 page_name=new_name)
                 return HttpResponseRedirect(rename_url)
@@ -255,9 +255,9 @@ def do_rename(request, name):
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
         if 'cancel' in request.POST:
-            flash('Umbenennen abgebrochen.')
+            flash(u'Umbenennen abgebrochen.')
         elif not new_name:
-            flash('Kein Seitenname eingegeben.', success=False)
+            flash(u'Kein Seitenname eingegeben.', success=False)
         else:
             try:
                 Page.objects.get_by_name(new_name)
@@ -269,10 +269,10 @@ def do_rename(request, name):
                 new_page = Page.objects.create(name, old_text, request.user,
                            note='Umbenannt nach %s' % page.name,
                            remote_addr=request.META.get('REMOTE_ADDR'))
-                flash('Die Seite wurde erfolgreich umbenannt.', success=True)
+                flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
-                flash('Eine Seite mit diesem Namen existiert bereits.')
+                flash(u'Eine Seite mit diesem Namen existiert bereits.')
                 rename_url=href('wiki', name, action='rename',
                                 page_name=new_name)
                 return HttpResponseRedirect(rename_url)
@@ -374,7 +374,7 @@ def do_edit(request, name):
     # form validation and handling
     if request.method == 'POST':
         if request.POST.get('cancel'):
-            flash('Bearbeitungsvorgang wurde abgebrochen.')
+            flash(u'Bearbeitungsvorgang wurde abgebrochen.')
             if page and page.metadata.get('redirect'):
                 url = href('wiki', page.name, redirect='no')
             else:
@@ -475,7 +475,7 @@ def do_delete(request, name):
     page = Page.objects.get_by_name(name, raise_on_deleted=True)
     if request.method == 'POST':
         if 'cancel' in request.POST:
-            flash('Bearbeiten wurde abgebrochen')
+            flash(u'Bearbeiten wurde abgebrochen')
         else:
             page.edit(user=request.user, deleted=True,
                       remote_addr=request.META.get('REMOTE_ADDR'),
@@ -679,7 +679,7 @@ def do_attach(request, name):
     """
     page = Page.objects.get_by_name(name)
     if page.rev.attachment_id is not None:
-        flash('Anhänge in Anhänge sind nicht erlaubt!')
+        flash(u'Anhänge in Anhänge sind nicht erlaubt!')
         return HttpResponseRedirect(url_for(page))
     attachments = Page.objects.get_attachment_list(name)
     attachments = [Page.objects.get_by_name(i) for i in attachments]
@@ -690,7 +690,7 @@ def do_attach(request, name):
     }
     if request.method == 'POST':
         if request.POST.get('cancel'):
-            flash('Hinzufügen des Dateianhangs abgebrochen.')
+            flash(u'Hinzufügen des Dateianhangs abgebrochen.')
             if page and page.metadata.get('redirect'):
                 url = href('wiki', page.name, redirect='no')
             else:
@@ -704,7 +704,7 @@ def do_attach(request, name):
         attachment_name = d.get('filename') or d['attachment'].filename
         filename = d['attachment'].filename or d.get('filename')
         if not attachment_name:
-            flash('Bitte gib einen Dateinamen für den Anhang an.')
+            flash(u'Bitte gib einen Dateinamen für den Anhang an.')
             return context
         attachment_name = u'%s/%s' % (name, attachment_name)
         attachment_name = normalize_pagename(attachment_name.strip('/'))
@@ -714,7 +714,7 @@ def do_attach(request, name):
             ap = None
         if ap is not None and (ap.rev.attachment is None or
                                not d.get('override', False)):
-            flash('Es existiert bereits eine Seite oder ein Anhang mit ' +
+            flash(u'Es existiert bereits eine Seite oder ein Anhang mit ' +
                   'diesem Namen.')
             return context
         remote_addr = request.META.get('REMOTE_ADDR')
@@ -736,7 +736,7 @@ def do_attach(request, name):
         attachments = Page.objects.get_attachment_list(name, nocache=True)
         attachments = [Page.objects.get_by_name(i) for i in attachments]
         context['attachments'] = attachments
-        flash('Der Dateianhang wurde erfolgreich gespeichert.')
+        flash(u'Der Dateianhang wurde erfolgreich gespeichert.')
         if ap.metadata.get('weiterleitung'):
             url = href('wiki', ap, redirect='no')
         else:
@@ -772,7 +772,7 @@ def do_attach_edit(request, name):
                         note=d.get('note', u''),
                         attachment_filename=attachment_filename,
                         attachment=attachment)
-            flash('Der Dateianhang wurde erfolgreich bearbeitet.')
+            flash(u'Der Dateianhang wurde erfolgreich bearbeitet.')
             return HttpResponseRedirect(url_for(page))
     return {
         'form': form,
@@ -784,7 +784,7 @@ def do_prune(request, name):
     """Clear the page cache."""
     page = Page.objects.get_by_name(name)
     page.prune()
-    flash('Der Seitencache wurde geleert.')
+    flash(u'Der Seitencache wurde geleert.')
     return HttpResponseRedirect(page.get_absolute_url())
 
 

@@ -119,7 +119,7 @@ class HighlighterMiddleware(object):
         # flash messages left.  Normally a template rendering would remove
         # those messages automatically but in the case of an redirect it
         # does not.
-        unflash('middleware/hide_highlights')
+        unflash(u'middleware/hide_highlights')
 
         try:
             if not getattr(request, 'highlight_searchwords', None) or \

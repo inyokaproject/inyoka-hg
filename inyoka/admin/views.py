@@ -893,7 +893,7 @@ def event_edit(request, id=None):
                 event.location_lat = data['location_lat']
                 event.location_long = data['location_long']
             event.save()
-            flash('Die Veranstaltung wurde gespeichert.', True)
+            flash(u'Die Veranstaltung wurde gespeichert.', True)
             return HttpResponseRedirect(event.get_absolute_url())
     else:
         if id is not None:

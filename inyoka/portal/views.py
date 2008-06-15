@@ -271,7 +271,7 @@ def set_new_password(request, username, new_password_key):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            flash('Diesen Benutzer gibt es nicht', False)
+            flash(u'Diesen Benutzer gibt es nicht', False)
             return HttpResponseRedirect(href())
         if user.new_password_key != new_password_key:
             flash(u'Ungültiger Bestätigungskey!', False)
