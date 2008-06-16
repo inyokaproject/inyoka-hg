@@ -255,6 +255,13 @@ class PostMapperExtension(MapperExtension):
                     }
             ))
 
+        # update position column of the older posts in this topic
+        connection.execute(post_table.update(
+                post_table.c.position > instance.position, values={
+                    'position': post_table.c.position - 1
+                }
+        ))
+
 
 class Forum(object):
     """
@@ -629,6 +636,18 @@ class Post(object):
             post_table.c.id.in_(ids), values={
                 'topic_id': t.id
         }))
+        dbsession.commit()
+
+        dbsession.execute('''set @rownum:=%s;''', [posts[0].position - 1])
+        dbsession.execute('''
+            update forum_post set position=(@rownum:=@rownum+1)
+                              where topic_id=%s and position > %s order by id;
+        ''', [old_topic.id, posts[0].position])
+        dbsession.execute('''set @rownum:=-1;''')
+        dbsession.execute('''
+            update forum_post set position=(@rownum:=@rownum+1)
+                              where topic_id=%s order by id;
+        ''', [t.id])
         dbsession.commit()
 
         if old_topic.forum.id != t.forum.id:

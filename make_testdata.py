@@ -216,7 +216,7 @@ def make_forum():
                 for i in xrange(randint(1, MAX_TOPIC_POST_COUNT)):
                     p = Post(topic=t, text=sentences(min=1, max=10),
                         author_id=choice(users).id, pub_date=randtime(),
-                        position=i - 1)
+                        position=i + 1)
             session.commit()
         pb.update(percent)
     # all about the wiki - forum (and diskussions subforum)

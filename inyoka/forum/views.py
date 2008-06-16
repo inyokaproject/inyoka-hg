@@ -838,7 +838,7 @@ def splittopic(request, topic_slug):
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in posts]
 
-    t = Topic.query.options(eagerload('posts')).filter_by(slug=topic_slug).first()
+    t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound
     posts = t.posts
