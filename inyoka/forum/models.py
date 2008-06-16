@@ -222,7 +222,6 @@ class PostMapperExtension(MapperExtension):
                 'post_count': user_table.c.post_count - 1}
         ))
 
-        print '\n\nDEREGISTER\n\n'
         if instance.id == instance.topic.last_post_id:
             new_last_post = Post.query.filter(and_(
                 topic_table.c.id == instance.topic_id,
@@ -237,7 +236,8 @@ class PostMapperExtension(MapperExtension):
                     'last_post_id': select([func.max(post_table.c.id)],
                         (post_table.c.topic_id == topic_table.c.id) &
                         (topic_table.c.forum_id == forum_table.c.id) &
-                        (post_table.c.id != instance.id))
+                        (post_table.c.id != instance.id)),
+                    'post_count': forum_table.c.post_count -1
                     }
             ))
 
