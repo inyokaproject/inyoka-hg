@@ -601,16 +601,18 @@ def usercp_password(request):
 @check_login(message=u'Du musst eingeloggt sein, um deine Benachrichtigungen '
                      u'sehen bzw. ändern zu können')
 @templated('portal/usercp/subscriptions.html')
-def usercp_subscriptions(request):
+def usercp_subscriptions(request, page=1, all=False):
     """
     This page shows all subscriptions of the current user and allows him
     to delete them.
     """
-    sub = list(request.user.subscription_set.all())
+    subscriptions = request.user.subscription_set.all()
+    sub = Pagination(request, subscriptions, page,
+                     all and len(subscriptions) or 25)
 
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
-        form.fields['delete'].choices = [(s.id, u'') for s in sub]
+        form.fields['delete'].choices = [(s.id, u'') for s in sub.objects]
         if form.is_valid():
             d = form.cleaned_data
             Subscription.objects.delete_list(d['delete'])
@@ -619,10 +621,11 @@ def usercp_subscriptions(request):
             else:
                 flash(u'Es wurden %s Abonnements gelöscht.'
                       % human_number(len(d['delete'])), success=True)
-            sub = filter(lambda s: str(s.id) not in d['delete'], sub)
+            sub = filter(lambda s: str(s.id) not in d['delete'], sub.objects)
 
     return {
-        'subscriptions': sub
+        'subscriptions': sub.objects,
+        'pagination': sub.generate()
     }
 
 
