@@ -231,13 +231,26 @@ class PostMapperExtension(MapperExtension):
                 topic_table.c.id == instance.topic_id, values={
                     'last_post_id': new_last_post.id}
             ))
+
+        # decrement post_counts
+        connection.execute(topic_table.update(
+            topic_table.c.id == instance.topic_id, values={
+                'post_count': topic_table.c.post_count - 1
+            }))
+        forum_ids = [f.id for f in instance.topic.forum.parents]
+        forum_ids.append(instance.topic.forum.id)
+        connection.execute(forum_table.update(
+            forum_table.c.id.in_(forum_ids), values={
+                'post_count': forum_table.c.post_count - 1
+            }))
+
+        # remove references
         connection.execute(forum_table.update(
                 forum_table.c.last_post_id == instance.id, values={
                     'last_post_id': select([func.max(post_table.c.id)],
                         (post_table.c.topic_id == topic_table.c.id) &
                         (topic_table.c.forum_id == forum_table.c.id) &
-                        (post_table.c.id != instance.id)),
-                    'post_count': forum_table.c.post_count -1
+                        (post_table.c.id != instance.id))
                     }
             ))
 
