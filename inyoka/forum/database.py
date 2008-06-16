@@ -11,7 +11,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \
-        ForeignKey, DateTime, UniqueConstraint, Boolean
+        ForeignKey, DateTime, UniqueConstraint, Boolean, Index
 from inyoka.utils.database import metadata, session
 
 
@@ -34,7 +34,7 @@ forum_table = Table('forum_forum', metadata,
 
 topic_table = Table('forum_topic', metadata,
     Column('id', Integer, primary_key=True),
-    Column('forum_id', Integer, ForeignKey('forum_forum.id'), index=True),
+    Column('forum_id', Integer, ForeignKey('forum_forum.id')),
     Column('title', String(100), nullable=False),
     Column('slug', String(50), nullable=False, index=True),
     Column('view_count', Integer, default=0, nullable=False),
@@ -59,6 +59,7 @@ topic_table = Table('forum_topic', metadata,
 
 post_table = Table('forum_post', metadata,
     Column('id', Integer, primary_key=True),
+    Column('position', Integer),
     Column('author_id', Integer, ForeignKey('portal_user.id'),
            nullable=False),
     Column('pub_date', DateTime, nullable=False),
@@ -119,6 +120,11 @@ attachment_table = Table('forum_attachment', metadata,
     Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=True),
     Column('mimetype', String(100), nullable=True),
 )
+
+# initialize indexes
+Index('viewtopic', post_table.c.topic_id, post_table.c.position)
+Index('viewforum', topic_table.c.forum_id, topic_table.c.sticky,
+      topic_table.c.last_post_id)
 
 
 metadata.create_all()

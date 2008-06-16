@@ -13,7 +13,8 @@
         ...                         page_number,
         ...                         per_page,
                                     optional_link,
-                                    total=123)
+                                    total=123,
+                                    rownum_column=my_table.c.col)
         >>> # the database entries on this page
         >>> objects = pagination.objects
         >>> # the generated HTML code for the pagination
@@ -22,7 +23,10 @@
     If the page is out of range, it throws a PageNotFound exception.
     You can pass the optional argument `total` if you already know how
     many entries match your query. If you don't, `Pagination` will use
-    a db query to find it out.
+    a database query to find it out.
+    For tables that are quite big it's sometimes useful to use an indexed
+    column determinating the position instead of using an offset / limit
+    statement. In this case you can use the `rownum_column` argument.
 
     Caveat: paginations with link functions generated in a closure are
     not pickleable.
@@ -39,12 +43,16 @@ from werkzeug import url_encode
 class Pagination(object):
 
     def __init__(self, request, query, page, per_page=10, link=None,
-                 total=None):
+                 total=None, rownum_column=None):
         self.page = int(page)
         self.per_page = per_page
 
         idx = (self.page - 1) * self.per_page
-        result = query[idx:idx + self.per_page]
+        if rownum_column:
+            result = query.filter(rownum_column.between(idx,
+                                          idx + self.per_page))
+        else:
+            result = query[idx:idx + self.per_page]
         if not result and self.page != 1:
             raise PageNotFound()
         self.objects = result

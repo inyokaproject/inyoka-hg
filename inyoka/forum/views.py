@@ -207,7 +207,8 @@ def viewtopic(request, topic_slug, page=1):
     t.touch()
     session.commit()
 
-    posts = t.posts.options(eagerload('author'), eagerload('attachments'))
+    posts = t.posts.options(eagerload('author'), eagerload('attachments')) \
+                   .order_by(post_table.c.position)
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -246,7 +247,7 @@ def viewtopic(request, topic_slug, page=1):
         polls = None
 
     pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
-                            total=t.post_count)
+                     total=t.post_count, rownum_column=post_table.c.position)
     set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
         u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
     subscribed = False
