@@ -571,8 +571,11 @@ def forums_edit(request, id=None):
 
             if not form.errors and not errors:
                 dbsession.commit()
-                cache.delete_many(tuple(['forum/index', 'forum/forum/' + old_slug] +
-                             ['forum/forum/' + f.slug for f in forum.parents]))
+                keys = ['forum/index'] + ['forum/forum/' + f.slug
+                                          for f in forum.parents]
+                if old_slug is not None:
+                    keys.append('forum/forum/' + old_slug)
+                cache.delete_many(*keys)
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
                       escape(forum.name), not id and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
