@@ -493,6 +493,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
+            if newtopic:
+                post.position = 0
         post.edit(request, d['text'])
 
         session.flush([post])
