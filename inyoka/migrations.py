@@ -425,6 +425,32 @@ def update_post_table(m):
     ''')
 
 
+def add_position_column(m):
+    topic_table = Table('forum_topic', m.metadata, autoload=True)
+
+    m.engine.execute('''
+        alter table forum_post
+            add column position integer not null after id,
+            drop index viewtopic,
+            add index viewtopic (topic_id, position);
+    ''')
+
+    for topic in select_blocks(topic_table.select()):
+        m.engine.execute('''set @rownum:=0;''')
+        m.engine.execute('''
+            update forum_post set position=(@rownum:=@rownum+1)
+                              where topic_id=%s order by id;
+        ''', [topic.id])
+
+    # remove some senseless indices
+    m.engine.execute('''
+        alter table forum_topic
+            drop index forum_topic_forum_id,
+            drop index forum_topic_reporter_id,
+            drop index forum_topic_author_id;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -434,5 +460,5 @@ MIGRATIONS = [
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
-    add_launchpad_nick, add_indices, update_post_table
+    add_launchpad_nick, add_indices, update_post_table, add_position_column
 ]

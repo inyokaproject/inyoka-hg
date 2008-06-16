@@ -16,7 +16,7 @@ from datetime import datetime
 from itertools import cycle, izip
 from jinja2.constants import LOREM_IPSUM_WORDS
 from inyoka.conf import settings
-settings.DEBUG = False # for nice progressbar output ;)
+settings.DEBUG = settings.DATABASE_DEBUG = False # for nice progressbar output ;)
 
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum, Topic, Post, Privilege
@@ -210,10 +210,13 @@ def make_forum():
             for _ in xrange(randint(1, MAX_TOPIC_COUNT)):
                 author = choice(users)
                 t = Topic(title=title()[:100], author_id=author.id, forum=f)
-                p = Post(topic=t, text=sentences(min=1, max=10), author_id=author.id, pub_date=randtime())
+                p = Post(topic=t, text=sentences(min=1, max=10),
+                    author_id=author.id, pub_date=randtime(), position=0)
                 session.commit()
-                for _ in xrange(randint(1, MAX_TOPIC_POST_COUNT)):
-                    p = Post(topic=t, text=sentences(min=1, max=10), author_id=choice(users).id, pub_date=randtime())
+                for i in xrange(randint(1, MAX_TOPIC_POST_COUNT)):
+                    p = Post(topic=t, text=sentences(min=1, max=10),
+                        author_id=choice(users).id, pub_date=randtime(),
+                        position=i - 1)
             session.commit()
         pb.update(percent)
     # all about the wiki - forum (and diskussions subforum)

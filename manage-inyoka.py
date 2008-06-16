@@ -59,9 +59,24 @@ def action_create_superuser(username='', email='', password=''):
                     break
                 password = ''
     from inyoka.portal.user import User
+    from inyoka.forum.models import Forum, Privilege
+    from inyoka.forum.acl import PRIVILEGES_DETAILS, join_flags
+    from inyoka.utils.database import session
     user = User.objects.register_user(username, email, password, False)
     user.is_manager = True
     user.save()
+    bits = dict(PRIVILEGES_DETAILS).keys()
+    bits.remove('void')
+    bits = join_flags(*bits)
+    for forum in Forum.query.all():
+        privilege = Privilege(
+            user=user,
+            forum=forum,
+            bits=bits
+        )
+        session.save(privilege)
+    session.commit()
+    session.flush()
     print 'created superuser'
 
 
