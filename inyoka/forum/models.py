@@ -174,11 +174,16 @@ class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
         instance.rendered_text = instance.render_text()
-        tmp = post_table.alias()
+        #tmp = post_table.alias()
         if instance.position is None:
-            instance.position = select([func.max(tmp.c.position) + 1],
-                tmp.c.topic_id == instance.topic_id
-            )
+        # XXX: race-conditions and other stupid staff... :/
+        # require a mysql update to work properly!
+            instance.position, = connection.execute(select(
+                [func.max(post_table.c.position)+1],
+                post_table.c.topic_id == instance.topic_id)).fetchone()
+        #    instance.position = select([func.max(tmp.c.position) + 1],
+        #        tmp.c.topic_id == instance.topic_id
+        #    )
         if not instance.pub_date:
             instance.pub_date = datetime.utcnow()
 
