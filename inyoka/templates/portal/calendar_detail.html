@@ -18,7 +18,7 @@
   ] %}
 {% block appheader %}
   <h1><a href="{{ href('portal', 'calendar') }}">Kalender</a></h1>
-  <h2><a href="{{ url_for(event) }}">{{ event.name|e }}</a></h2>
+  <h2><a href="{{ event|url }}">{{ event.name|e }}</a></h2>
 {% endblock %}
 {% block portal_content %}
 <h3>Veranstaltung „{{ event.name|e }}“</h3>
