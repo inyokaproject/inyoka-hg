@@ -250,6 +250,16 @@ table.usercp_subscriptions td.second, th.second {
   text-align: center;
 }
 
+table.usercp_subscriptions div.pagination {
+  float: right;
+  margin-right: 15px;
+  margin-top: 5px;
+}
+
+table.usercp_subscriptions th.delete_abbos {
+  cursor: pointer;
+}
+
 /* Private Messages **********************************************************/
 
 div.prvmsg {

@@ -24,7 +24,7 @@
   <table class="usercp_subscriptions">
     <tr>
       <th class="first">Name</th>
-      <th class="second">Abonnement löschen</th>
+      <th class="second delete_abbos">Abonnement löschen</th>
     </tr>
     {%- for sub in subscriptions %}
     <tr>
@@ -46,9 +46,24 @@
       </td>
     </tr>
     {%- endfor %}
+    <tr>
+      <td colspan="2">
+        {{ pagination }}
+      </td>
+    </tr>
   </table>
   <div>
     <input type="submit" value="Änderungen bestätigen" />
+    &nbsp; <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abbonements anzeigen</a>
   </div>
 </form>
+<script type="text/javascript">
+  /* <![CDATA[ */
+  $('table.usercp_subscriptions th.delete_abbos').click(function() {
+    $('input[@name="delete"]').each(function() {
+      this.checked = true;
+    });
+  });
+  /* ]]> */
+</script>
 {% endblock %}
