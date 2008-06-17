@@ -502,7 +502,7 @@ table.syntaxtable td.linenos {
 
 .content {
   clear: right;
-  border: solid 1px #ccc;
+  border: solid 1px #ccc; 
   background-color: #fff;
   padding: 15px 20px;
 }

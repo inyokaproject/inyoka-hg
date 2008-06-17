@@ -13,7 +13,7 @@
 .navi_sidebar .navi_archive      { background-image: url('../img/icons/archive.png'); }
 .navi_sidebar .navi_categories   { background-image: url('../img/icons/categories.png'); }
 
-div.content_sidebar {
+div.content {
   padding: 0;
   border:none;
 }

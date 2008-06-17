@@ -117,7 +117,7 @@ $(document).ready(function() {
     var togglebutton =
       $('<button class="navi_toggle_up" title="Navigation ausblenden" />')
         .click(function() {
-          $('.content_sidebar').toggleClass('content_full');
+          $('.content').toggleClass('content_sidebar');
           sidebar.toggle();
           togglebutton
             .toggleClass('navi_toggle_up')
