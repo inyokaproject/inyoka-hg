@@ -174,13 +174,13 @@ class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
         instance.rendered_text = instance.render_text()
-        #tmp = post_table.alias()
         if instance.position is None:
         # XXX: race-conditions and other stupid staff... :/
         # require a mysql update to work properly!
-            instance.position, = connection.execute(select(
+            instance.position = connection.execute(select(
                 [func.max(post_table.c.position)+1],
-                post_table.c.topic_id == instance.topic_id)).fetchone()
+                post_table.c.topic_id == instance.topic_id)).fetchone() or 0
+        #    tmp = post_table.alias()
         #    instance.position = select([func.max(tmp.c.position) + 1],
         #        tmp.c.topic_id == instance.topic_id
         #    )
