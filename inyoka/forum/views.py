@@ -595,6 +595,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     }
 
 
+@simple_check_login
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
     t = Topic.query.filter_by(slug=topic_slug).first()

@@ -34,20 +34,22 @@
 
 {% macro topic_actions() %}
   <span class="linklist">
-    {%- if can_reply %}
-    <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
+    {%- if not USER.is_authenticated or can_reply %}
+    <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> 
     {%- endif %}
-    {%- if is_subscribed %}
-    <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a> |
-    {%- else %}
-    <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonnieren</a> |
-    {%- endif %}
-    {%- if topic.solved %}
-    <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a> |
-    {%- else %}
-    <a href="{{ topic|url('solve') }}" class="action action_solve">als gelöst markieren</a> |
-    {%- endif %}
-    <a href="{{ topic|url('report') }}" class="action action_report">melden</a>
+    {% if USER.is_authenticated %}
+      {%- if is_subscribed %}
+      | <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a>
+      {%- else %}
+      | <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonnieren</a>
+      {%- endif %}
+      {%- if topic.solved %}
+      | <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a>
+      {%- else %}
+      | <a href="{{ topic|url('solve') }}" class="action action_solve">als gelöst markieren</a>
+      {%- endif %}
+      | <a href="{{ topic|url('report') }}" class="action action_report">melden</a>
+      {% endif %}
   </span>
 {% endmacro %}
 
