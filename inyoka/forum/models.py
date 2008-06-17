@@ -179,7 +179,7 @@ class PostMapperExtension(MapperExtension):
         # require a mysql update to work properly!
             instance.position = connection.execute(select(
                 [func.max(post_table.c.position)+1],
-                post_table.c.topic_id == instance.topic_id)).fetchone() or 0
+                post_table.c.topic_id == instance.topic_id)).fetchone()[0] or 0
         #    tmp = post_table.alias()
         #    instance.position = select([func.max(tmp.c.position) + 1],
         #        tmp.c.topic_id == instance.topic_id
