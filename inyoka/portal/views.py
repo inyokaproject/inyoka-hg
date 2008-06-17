@@ -607,12 +607,12 @@ def usercp_subscriptions(request, page=1, all=False):
     to delete them.
     """
     subscriptions = request.user.subscription_set.all()
-    sub = Pagination(request, subscriptions, page,
+    pagination = Pagination(request, subscriptions, page,
                      all and len(subscriptions) or 25)
 
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
-        form.fields['delete'].choices = [(s.id, u'') for s in sub.objects]
+        form.fields['delete'].choices = [(s.id, u'') for s in pagination.objects]
         if form.is_valid():
             d = form.cleaned_data
             Subscription.objects.delete_list(d['delete'])
@@ -621,11 +621,11 @@ def usercp_subscriptions(request, page=1, all=False):
             else:
                 flash(u'Es wurden %s Abonnements gelöscht.'
                       % human_number(len(d['delete'])), success=True)
-            sub.objects = filter(lambda s: str(s.id) not in d['delete'], sub.objects)
+            pagination.objects = filter(lambda s: str(s.id) not in d['delete'], pagination.objects)
 
     return {
-        'subscriptions': sub.objects,
-        'pagination': sub.generate()
+        'subscriptions': pagination.objects,
+        'pagination': pagination.generate()
     }
 
 
