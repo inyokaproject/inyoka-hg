@@ -607,8 +607,8 @@ def usercp_subscriptions(request, page=1, all=False):
     to delete them.
     """
     subscriptions = request.user.subscription_set.all()
-    pagination = Pagination(request, subscriptions, page,
-                     all and len(subscriptions) or 25)
+    pagination = Pagination(request, subscriptions, page, all and
+        len(subscriptions) or 25, href('portal', 'usercp', 'subscriptions'))
 
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
