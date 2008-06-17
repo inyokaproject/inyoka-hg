@@ -66,6 +66,7 @@
 
     <div class="body">
       <div class="appheader">
+        <a href="{{ href('portal', 'error_report', url=CURRENT_URL) }}" id="user_error_report_link">Bug melden</a><br/>
         {%- if not hide_quicklinks %}
         {%- if USER.is_manager %}
         <ul class="mod_navi">
@@ -100,7 +101,6 @@
         </ul>{# .navi_global #}
         {%- endif %}
         {% block appheader %}{% endblock %}
-        <a href="{{ href('portal', 'error_report', url=CURRENT_URL) }}" id="user_error_report_link">Bug melden</a>
       </div>{# .appheader #}
 
       <div class="pathbar">
