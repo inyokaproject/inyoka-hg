@@ -502,7 +502,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             Attachment.update_post_ids(att_ids, post.id)
         session.commit()
 
-        if forum:
+        if newtopic and not post_id:
             for s in Subscription.objects.filter(forum_id=forum.id,
                                                  notified=False) \
                                          .exclude(user=request.user):
@@ -516,7 +516,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 # we always notify about new topics, even if the forum was
                 # not visited, because unlike the posts you won't see
                 # other new topics
-        if topic:
+        elif not post_id:
             for s in Subscription.objects.filter(topic_id=topic.id,
                                                  notified=False) \
                                          .exclude(user=request.user):

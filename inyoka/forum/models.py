@@ -174,8 +174,8 @@ class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
         instance.rendered_text = instance.render_text()
-        tmp = post_table.alias()
         if instance.position is None:
+            tmp = post_table.alias()
             instance.position = select([func.max(tmp.c.position) + 1],
                 tmp.c.topic_id == instance.topic_id
             )
