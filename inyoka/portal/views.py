@@ -621,7 +621,7 @@ def usercp_subscriptions(request, page=1, all=False):
             else:
                 flash(u'Es wurden %s Abonnements gelöscht.'
                       % human_number(len(d['delete'])), success=True)
-            sub = filter(lambda s: str(s.id) not in d['delete'], sub.objects)
+            sub.objects = filter(lambda s: str(s.id) not in d['delete'], sub.objects)
 
     return {
         'subscriptions': sub.objects,
