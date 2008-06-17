@@ -757,6 +757,7 @@ def privmsg_new(request, username=None):
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
                               u'schicken.', False)
+                        break
                     else:
                         recipients.append(user)
             except User.DoesNotExist:
