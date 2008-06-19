@@ -66,7 +66,7 @@ class RegisterForm(forms.Form):
     techniques for bot catching included e.g a CAPTCHA and a hidden captcha
     for bots that just fill out everything.
     """
-    username = forms.CharField(label='Benutzername')
+    username = forms.CharField(label='Benutzername', max_length=30)
     email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
