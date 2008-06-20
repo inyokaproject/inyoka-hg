@@ -65,7 +65,7 @@ $(function () {
   })();
 
 
-  $('.codeblock').each(function () {
+  $('pre').each(function () {
     if (this.clientHeight < this.scrollHeight)
     {
       $(this)
