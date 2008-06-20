@@ -1072,7 +1072,8 @@ def user_error_report(request):
         if form.is_valid():
             data = form.cleaned_data
             spam_test = data['title'].lower() + data['text'].lower()
-            spam_words = ('porn', 'erotik', 'sex', 'casino', 'poker', '<a href=')
+            spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
+                          '<a href=', 'gay', 'female', 'nude', 'teen')
             for w in spam_words:
                 if w in spam_test:
                     return {'spam': True}
@@ -1082,7 +1083,7 @@ def user_error_report(request):
                     request.user.get_absolute_url(),
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
-                    escape('http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id)
+                    'http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id,
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
