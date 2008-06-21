@@ -41,6 +41,11 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         forum_welcomemessage_table
 
 
+# initialize PIL to make Image.ID available
+Image.init()
+SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
+print SUPPORTED_IMAGE_TYPES
+
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
@@ -900,7 +905,7 @@ class Attachment(object):
         if not show_preview:
             return fallback
 
-        if self.mimetype.startswith('image/') and show_thumbnails:
+        if show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
             # handle and cache thumbnails
             img_path = path.join(settings.MEDIA_ROOT,
                 'forum/thumbnails/%s' % self.file.split('/')[-1])
