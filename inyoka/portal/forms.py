@@ -294,10 +294,10 @@ class UserCPProfileForm(forms.Form):
     Probleme beim bestimmen der Koordinaten?
     <a href="http://www.fallingrain.com/world/">Suche einfach deinen Ort</a>
     und übernimm die Koordinaten.''')
-    location = forms.CharField(label='Wohnort', required=False, max_length=25)
-    occupation = forms.CharField(label='Beruf', required=False, max_length=25)
+    location = forms.CharField(label='Wohnort', required=False, max_length=50)
+    occupation = forms.CharField(label='Beruf', required=False, max_length=50)
     interests = forms.CharField(label='Interessen', required=False,
-                                max_length=50)
+                                max_length=100)
     website = forms.URLField(label='Webseite', required=False)
     launchpad = forms.CharField(label=u'Launchpad Nickname', required=False,
                                 max_length=50)
