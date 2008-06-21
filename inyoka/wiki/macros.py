@@ -687,7 +687,7 @@ class Template(Macro):
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
                                    u'Template „%s“ existiert nicht.' %
                                    self.template)
-        document = page.rev.text.parse(self.context, transformers=[])
+        document = page.rev.text.parse(self.context)
         return nodes.Container(document.children +
                                [nodes.MetaData('X-Attach', (self.template,))])
 
