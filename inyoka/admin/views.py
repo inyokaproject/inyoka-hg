@@ -351,7 +351,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 'icon_id': article.icon and article.icon.id or None,
                 'pub_date': article.pub_date,
                 'public': article.public,
-                'slug': article.slug
+                'slug': article.slug,
+                'comments_enabled': article.comments_enabled,
             }
         elif suggestion_id:
             suggestion = Suggestion.objects.get(id=suggestion_id)
