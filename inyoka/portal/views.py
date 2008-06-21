@@ -719,7 +719,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
     entries = PrivateMessageEntry.objects.filter(
         user=request.user,
         folder=PRIVMSG_FOLDERS[folder][0]
-    )
+    ).order_by('-id')
     link = href('portal', 'privmsg', folder, 'page')
     pagination = Pagination(request, entries, page, 10, link)
     return {
@@ -1074,7 +1074,7 @@ def user_error_report(request):
             spam_test = data['title'].lower() + data['text'].lower()
             spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
                           '<a href=', 'gay', 'female', 'nude', 'teen',
-                          'trama', 'wwkr')
+                          'wwrkckjbWRKcKjbtrama', 'wwkr')
             for w in spam_words:
                 if w in spam_test:
                     return {'spam': True}
