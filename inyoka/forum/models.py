@@ -44,7 +44,6 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
 # initialize PIL to make Image.ID available
 Image.init()
 SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
-print SUPPORTED_IMAGE_TYPES
 
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
