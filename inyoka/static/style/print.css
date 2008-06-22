@@ -8,7 +8,7 @@
  * :license: GNU GPL.
  */
 
-.header, .appheader, .pathbar, .navigation, .topic_box, .footer {
+.header, .appheader, .pathbar, .navigation, .topic_box, .footer, .message {
     display: none;
 }
 
