@@ -79,6 +79,11 @@ PAGE_REPLACEMENTS = {
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
 IMG_RE = re.compile(r'\[\[(.+?)\]\]')
+NOTIFICATION_MAPPING = {
+    0: ['mail'],
+    1: ['jabber'],
+    2: ['mail', 'jabber'],
+}
 
 
 def convert_bbcode(text, uid):
@@ -277,6 +282,8 @@ def convert_users():
             signature = convert_bbcode(unescape(row.user_sig),
                                        row.user_sig_bbcode_uid)
 
+        notify = NOTIFICATION_MAPPING.get(row.user_notify_jabber, [])
+
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
@@ -302,6 +309,7 @@ def convert_users():
             'occupation':       unescape(row.user_occ[:200]),
             'interests':        unescape(row.user_interests[:200]),
             'website':          unescape(row.user_website[:200]),
+            '_settings':        cPickle.dumps({'notify': notify}),
         }
         # make Anonymous id 1, luckily Sascha is 2 ;)
         # CAUTION: take care if mapping -1 to 1 in posts/topics too

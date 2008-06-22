@@ -8,11 +8,14 @@
  * :license: GNU GPL.
  */
 
+/*** General styles *********************************************************/
 
 div.content {
     padding: 0;
     border: none;
 }
+
+/*** Index page / View forum ************************************************/
 
 table.forum {
     margin: 0 0 10px 0;
@@ -24,7 +27,7 @@ table.forum td.view_count {
 }
 
 table.forum td.topic p {
-    margin: 0;    
+    margin: 0;
 }
 
 table.forum td.icon {
@@ -80,16 +83,53 @@ table.forum td.last_post {
     padding: 5px 15px 5px 0;
 }
 
-.author {
-    vertical-align: top;
-    background: #eeeeee;
-    border-right: 1px solid #cccccc;
+table.forum a.pageselect {
+    font-size: .8em;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
-.floatright{
+table.forum tr.deleted {
+    background-color: #eee;
+    color: #444;
+    font-style: italic;
+}
+
+table.forum a.collapse {
     float: right;
+    width: 16px;
+    height: 16px;
+    display: block;
+    margin-right: .5em;
+    color: #673B1A;
 }
 
+table.forum a.collapse {
+    background-image: url('../img/icons/small/collapse.png');
+}
+
+table.forum a.collapsed {
+    background-image: url('../img/icons/small/expand.png');
+}
+
+table.forum thead td p.actions {
+    margin: 0;
+    padding: 0.3em 0 0.5em 0;
+    font-size: 0.85em;
+}
+
+table.forum thead td div.pagination {
+    padding-top: 3px;
+}
+
+table.forum thead td p.description {
+    color: #666;
+    font-size: 0.85em;
+}
+
+/*** View topic *************************************************************/
+
+/* box at the top of posts */
 .topic_box {
     background: #f8f8f8;
     border: 1px solid #ccc;
@@ -107,29 +147,10 @@ table.forum td.last_post {
     border-bottom: 1px solid #ccc;
 }
 
-.topic_box_content{
+.topic_box div {
     padding: 5px 10px 5px 10px;
     line-height: 170%;
     font-size: 0.85em;
-}
-
-table.topic tr.deleted {
-    text-align: center;
-    background-color: #eee;
-    color: #444;
-    font-style: italic;
-}
-
-table.forum a.pageselect {
-    font-size: .8em;
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
-table.forum tr.deleted {
-    background-color: #eee;
-    color: #444;
-    font-style: italic;
 }
 
 .status_solved {
@@ -142,6 +163,89 @@ table.forum tr.deleted {
     background-repeat: no-repeat;
     background-image: url('../img/forum_unsolved.png');
     padding-left: 25px;
+}
+
+/* deleted post */
+table.topic tr.deleted {
+    text-align: center;
+    background-color: #eee;
+    color: #444;
+    font-style: italic;
+}
+
+/* author column of posts */
+table.topic td.author {
+    vertical-align: top;
+    background: #eeeeee;
+    border-right: 1px solid #cccccc;
+    width: 150px;
+}
+
+table.topic td.author p {
+    margin: 2px 0 5px 0;
+    font-size: 0.8em;
+    text-align: left;
+}
+
+table.topic td.author p.username a {
+    margin: 3px 0 10px 0;
+    font-size: 1.1em;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+table.topic td.author img.avatar {
+    margin: 10px 0 0 0;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+table.topic td.author img.teamicon {
+  position: absolute;
+  left: 155px;
+  float: right;
+}
+
+table.topic td.author p.member_title {
+  line-height: 0.2em;
+  font-size: 0.6em;
+  margin-bottom: 15px;
+}
+
+/* text column of posts */
+table.topic td.post {
+    font-size: 0.9em;
+    padding: 10px;
+    vertical-align: top;
+}
+
+table.topic td.post div.postinfo {
+    font-size: 0.9em;
+    background: #F4F4F4 url(../img/table-header-alternative.png); 
+    margin: -10px -10px 10px -10px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #CCC;
+}
+
+table.topic td.post div.signature { 
+    margin: 20px 0 -5px 0;
+    padding: 5px 0 0 0;
+    border-top: 1px solid #AAA;
+    color: #666;
+    font-size: .9em;
+    line-height: 140%;
+}
+
+table.topic td.post div.signature p {
+    padding: 0 0 5px 0;
+    margin: 0;
+}
+
+
+/* actions of a post */
+table.topic td.post div.linklist {
+    float: right;
 }
 
 .action {
@@ -196,104 +300,6 @@ table.forum tr.deleted {
 }
 .action_quote {
     background-image: url('../img/forum/quote.png');
-}
-
-table.forum a.collapse {
-    float: right;
-    width: 16px;
-    height: 16px;
-    display: block;
-    margin-right: .5em;
-    color: #673B1A;
-}
-
-table.forum a.collapse {
-    background-image: url('../img/icons/small/collapse.png');
-}
-
-table.forum a.collapsed {
-    background-image: url('../img/icons/small/expand.png');
-}
-
-.signature { 
-    margin: 20px 0 -5px 0;
-    padding: 5px 0 0 0;
-    border-top: 1px solid #AAA;
-    color: #666;
-    font-size: .85em;
-    line-height: 140%;
-}
-
-.signature p {
-    padding: 0 0 5px 0;
-    margin: 0;
-}
-
-.postinfo {
-    font-size: 0.8em;
-    background: #F4F4F4 url(../img/table-header-alternative.png); 
-    margin: -10px -10px 10px -10px;
-    padding: 6px 10px;
-    border-bottom: 1px solid #CCC;
-}
-
-table td.post {
-    padding: 10px;
-    vertical-align: top;
-}
-
-table td.author {
-    width: 150px;
-}
-
-table td.author p {
-    margin: 2px 0 5px 0;
-    font-size: 0.8em;
-    text-align: left;
-}
-
-table td.author p.username {
-    margin: 3px 0 10px 0;
-    font-size: 1.1em;
-}
-
-table td.author p.username a {
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-table td.author img.avatar {
-    margin: 10px 0 0 0;
-    border: 1px solid #ccc;
-    background-color: white;
-}
-
-table td.author img.teamicon {
-  position: absolute;
-  left: 155px;
-  float: right;
-}
-
-table td.author p.member_title {
-  line-height: 0.2em;
-  font-size: 0.6em;
-  margin-bottom: 15px;
-}
-
-table.forum thead td p.actions {
-    margin: 0;
-    padding: 0.3em 0 0.5em 0;
-    font-size: 0.85em;
-}
-
-table.forum thead td div.pagination {
-    padding-top: 3px;
-}
-
-table.forum thead td p.description {
-    color: #666;
-    font-size: 0.85em;
 }
 
 form.poll {
@@ -481,9 +487,7 @@ ul.image_list a:hover img {
 pre {
     max-height: 15em;
     overflow: auto;
-    margin: 0;
     margin-top: 0.5em;
-    padding: 0;
 }
 
 .codeblock_resizer {
@@ -491,4 +495,3 @@ pre {
     background: url(../img/expand-bar.png);
     cursor: pointer;
 }
-
