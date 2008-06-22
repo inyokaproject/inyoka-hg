@@ -1,0 +1,24 @@
+/**
+ * style.main
+ * ~~~~~~~~~~
+ *
+ * Print definitions.
+ *
+ * :copyright: 2007 by Florian Apolloner.
+ * :license: GNU GPL.
+ */
+
+.header, .appheader, .pathbar, .navigation, .topic_box, .footer {
+    display: none;
+}
+
+body, html {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.content {
+    margin: 0;
+    border: 0;
+}
