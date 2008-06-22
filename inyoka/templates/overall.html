@@ -123,7 +123,7 @@
             <input type="submit" value="Suchen" class="search_submit" />
         </form>{# .search #}
 
-        {% if active_app == 'forum' %}
+        {%- if active_app == 'forum' %}
           <div class="dropdown">
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
               <li><a href="{{ href('forum', 'egosearch') }}">Eigene Beiträge</a></li>
@@ -135,7 +135,13 @@
               <li><a href="{{ href('forum', 'last6') }}">6 Stunden</a></li>
             </ul></li></ul>
           </div>
-        {% endif %}
+        {%- elif active_app == 'wiki' %}
+          <div class="dropdown">
+            <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
+              <li><a href="{{ href('wiki', 'Wiki', 'Letzte Änderungen') }}">Letzte Änderungen</a></li>
+            </ul></li></ul>
+          </div>
+        {%- endif %}
 
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace|default([]) %}

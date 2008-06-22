@@ -143,7 +143,7 @@
         </td>
         <td class="post">
           <div class="postinfo">
-            <div class="linklist floatright">
+            <div class="linklist">
               {%- if can_edit(post) %}
               <a href="{{ post|url('edit') }}" class="action action_edit">bearbeiten</a> |
               {%- endif %}
@@ -152,12 +152,13 @@
                 <a href="{{ post|url('revisions') }}" class="action action_review">Versionen anzeigen</a> |
                 {%- if post.hidden %}
                 <a href="{{ post|url('restore') }}" class="action action_restore">wiederherstellen</a> |
+                <a href="{{ post|url('delete') }}" class="action action_delete">endgültig löschen</a>
                 {% else %}
                 <a href="{{ post|url('hide') }}" class="action action_hide">verbergen</a>
                 {% endif %}
               {% endif %}
-              {% if can_moderate and post.hidden or post.author_id == USER.id and loop.last %}
-                <a href="{{ post|url('delete') }}" class="action action_delete">endgültig löschen</a>
+              {% if post.author_id == USER.id and loop.last %}
+                <a href="{{ post|url('delete') }}" class="action action_delete">löschen</a>
               {%- endif %}
             </div>
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>

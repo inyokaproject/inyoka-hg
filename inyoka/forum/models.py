@@ -41,6 +41,10 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         forum_welcomemessage_table
 
 
+# initialize PIL to make Image.ID available
+Image.init()
+SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
+
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
@@ -596,10 +600,13 @@ class Post(object):
             cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
 
     @staticmethod
-    def split(posts, forum_id=None, title=None, topic_slug=None):
-        posts = list(posts)
-        old_topic = posts[0].topic
-
+    def split(posts, old_topic, new_topic):
+        """
+        This function splits `posts` out of `old_topic` and moves them into
+        `new_topic`.
+        It is important that `posts` is a list of posts ordered by id
+        ascending.
+        """
         if len(posts) == old_topic.post_count:
             # The user selected to split all posts out of the topic --> delete
             # the topic.
@@ -607,39 +614,20 @@ class Post(object):
         else:
             remove_topic = False
 
-        if forum_id and title:
-            action = 'new'
-        elif topic_slug:
-            action = 'add'
-        else:
-            return None
-
-        if action == 'new':
-            t = Topic(
-                title=title,
-                author=posts[0].author,
-                first_post=posts[0],
-                last_post=posts[-1],
-                forum_id=forum_id,
-                slug=None,
-                post_count=len(posts)
-            )
-            dbsession.flush()
-            t.forum.topic_count += 1
-        else:
-            t = Topic.query.filter_by(slug=topic_slug).first()
-            t.post_count += len(posts)
-            if posts[-1].id > t.last_post.id:
-                t.last_post = posts[-1]
-            if posts[0].id < t.first_post.id:
-                t.first_post = posts[0]
-                t.author = posts[0].author
+        new_topic.post_count += len(posts)
+        if not new_topic.last_post_id or \
+           posts[-1].id > new_topic.last_post.id:
+            new_topic.last_post = posts[-1]
+        if not new_topic.first_post_id or \
+           posts[0].id < new_topic.first_post.id:
+            new_topic.first_post = posts[0]
+            new_topic.author = posts[0].author
 
         dbsession.flush()
         ids = [p.id for p in posts]
         dbsession.execute(post_table.update(
             post_table.c.id.in_(ids), values={
-                'topic_id': t.id
+                'topic_id': new_topic.id
         }))
         dbsession.commit()
 
@@ -652,16 +640,17 @@ class Post(object):
         dbsession.execute('''
             update forum_post set position=(@rownum:=@rownum+1)
                               where topic_id=%s order by id;
-        ''', [t.id])
+        ''', [new_topic.id])
         dbsession.commit()
 
-        if old_topic.forum.id != t.forum.id:
+        if old_topic.forum.id != new_topic.forum.id:
             # update post count of the forums
             old_topic.forum.post_count -= len(posts)
-            t.forum.post_count += len(posts)
+            new_topic.forum.post_count += len(posts)
             # update last post of the forums
-            if not t.forum.last_post or posts[-1].id > t.forum.last_post.id:
-                t.forum.last_post = posts[-1]
+            if not new_topic.forum.last_post or \
+               posts[-1].id > new_topic.forum.last_post.id:
+                new_topic.forum.last_post = posts[-1]
             if posts[-1].id == old_topic.forum.last_post.id:
                 last_post = Post.query.filter(and_(
                     post_table.c.topic_id==topic_table.c.id,
@@ -670,7 +659,6 @@ class Post(object):
 
                 old_topic.forum.last_post_id = last_post and last_post.id \
                                                or None
-
         dbsession.commit()
 
         if not remove_topic:
@@ -692,13 +680,10 @@ class Post(object):
 
         # update the search index which has the post --> topic mapping indexed
         for post in posts:
-            post.topic = t
             post.update_search()
 
-        t.forum.invalidate_topic_cache()
+        new_topic.forum.invalidate_topic_cache()
         old_topic.forum.invalidate_topic_cache()
-
-        return t
 
     def __unicode__(self):
         return '%s - %s' % (
@@ -900,7 +885,7 @@ class Attachment(object):
         if not show_preview:
             return fallback
 
-        if self.mimetype.startswith('image/') and show_thumbnails:
+        if show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
             # handle and cache thumbnails
             img_path = path.join(settings.MEDIA_ROOT,
                 'forum/thumbnails/%s' % self.file.split('/')[-1])

@@ -365,6 +365,8 @@
       before = args[0] || '',
       after = args[1] || '';
 
+    scroll = t.scrollTop;
+
     if (typeof t.selectionStart != 'undefined') {
       var
         start = t.selectionStart,
@@ -386,6 +388,7 @@
       var text = range.text;
       range.text = before + (text.length > 0 ? text : def) + after;
     }
+    t.scrollTop = scroll;
   };
 
   /**

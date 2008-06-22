@@ -449,7 +449,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             # the user uploaded a new attachment
             if attach_form.is_valid():
                 d = attach_form.cleaned_data
-                att_name = d.get('filename') or d['attachment'].filename
+                att_name = (d.get('filename') or d['attachment'].filename) \
+                    .decode('utf8')
                 attachment = Attachment.create(
                     att_name, d['attachment'].content,
                     request.FILES['attachment']['content-type'],
@@ -837,39 +838,52 @@ def splittopic(request, topic_slug):
         form.fields['forum'].choices = [(f.id, f.name) for f in
             Forum.query.filter(Forum.c.parent_id != None)]
         form.fields['start'].choices = form.fields['select'].choices = \
-            [(p.id, u'') for p in posts]
+            [(p.id, u'') for p in old_posts]
 
-    t = Topic.query.filter_by(slug=topic_slug).first()
-    if not t:
+    old_topic = Topic.query.filter_by(slug=topic_slug).first()
+
+    if not old_topic:
         raise PageNotFound
-    posts = t.posts
-    if not have_privilege(request.user, t.forum, CAN_MODERATE):
+
+    if not have_privilege(request.user, old_topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
+
+    old_posts = old_topic.posts
 
     if request.method == 'POST':
         form = SplitTopicForm(request.POST)
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
+
             if data['select_following']:
-                p = Post.query.filter(and_(
-                    Post.c.topic_id==t.id, Post.c.id >= data['start']))
+                posts = old_posts.filter(Post.c.id >= data['start'])
             else:
-                p = Post.query.filter(Post.c.id.in_(data['select']))
+                posts = old_posts.filter(Post.c.id.in_(data['select']))
+
+            posts = list(posts)
 
             if data['action'] == 'new':
-                new = Post.split(p, data['forum'], title=data['title'])
+                new_topic = Topic(
+                    title=data['title'],
+                    forum=data['forum'],
+                    slug=None,
+                    post_count=0
+                )
+                new_topic.forum.topic_count += 1
+                Post.split(posts, old_topic, new_topic)
             else:
-                new = Post.split(p, topic_slug=data['topic_slug'])
-            return HttpResponseRedirect(new.get_absolute_url())
+                new_topic = data['topic']
+                Post.split(posts, old_topic, new_topic)
+            return HttpResponseRedirect(new_topic.get_absolute_url())
     else:
         form = SplitTopicForm()
         _add_field_choices()
 
     return {
-        'topic': t,
-        'forum': t.forum,
-        'posts': posts,
+        'topic': old_topic,
+        'forum': old_topic.forum,
+        'posts': list(old_posts),
         'form':  form
     }
 

@@ -391,7 +391,10 @@ class PageManager(models.Manager):
         if rev is None:
             return self.get_by_name(name, True, raise_on_deleted)
         rev = Revision.objects.select_related(depth=2).get(id=int(rev))
-        if rev.page.name != name or (rev.deleted and raise_on_deleted):
+        # XXX: comparison of .lower() is right for us because of our mysql
+        #      charset, but is it right for everyone?
+        if rev.page.name.lower() != name.lower() or \
+           (rev.deleted and raise_on_deleted):
             raise Page.DoesNotExist()
         rev.page.rev = rev
         return rev.page
