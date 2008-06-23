@@ -198,7 +198,6 @@ class EditForumForm(forms.Form):
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
-        print data
         if data.get('welcome_msg_text') and not data.get('welcome_msg_subject'):
             raise forms.ValidationError(u'Du musst einen Titel angeben für die'
                 u' Willkommensnachricht')
