@@ -264,7 +264,7 @@ class UserCPSettingsForm(forms.Form):
         if u'jabber' in data:
             if not current_request.user.jabber:
                 raise forms.ValidationError(u'Du musst eine gültige Jabber '
-                    u'Adresse <a href="%s">angeben</a>. um unseren Jabber '
+                    u'Adresse <a href="%s">angeben</a>, um unseren Jabber '
                     u'Service nutzen zu können.' % escape(href(
                         'portal', 'usercp', 'profile')))
         return data

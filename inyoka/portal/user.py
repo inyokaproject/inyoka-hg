@@ -356,7 +356,8 @@ class User(models.Model):
         self.delete_avatar()
 
         std = storage.get_many(('max_avatar_height', 'max_avatar_width'))
-        max_size = (std['max_avatar_height'], std['max_avatar_width'])
+        max_size = (int(std['max_avatar_height']),
+                    int(std['max_avatar_width']))
         if image.size > max_size:
             image = image.resize(max_size)
             image.save(image_path)
