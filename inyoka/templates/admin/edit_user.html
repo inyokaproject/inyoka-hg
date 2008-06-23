@@ -25,7 +25,7 @@
 
 {% block admin_content %}
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
-  <h3>Forum-Einstellungen</h3>
+  <h3>Benutzer bearbeiten</h3>
   <dl>
     {{ render_form(form, ['username', 'is_active'], inline=true) }}
     <dt>{{ form.member_title.label }}</dt>

@@ -130,7 +130,7 @@ class EditUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     new_password = forms.CharField(label=u'Neues Passwort',
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
-                                   ,'Bitte nur angeben, wenn benötigt'))
+                                   u'Bitte nur angeben, wenn benötigt'))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
@@ -139,7 +139,8 @@ class EditUserForm(forms.Form):
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
-    permissions = forms.MultipleChoiceField(label=u'Privilegien')
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                                            required=False)
 
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
@@ -179,7 +180,7 @@ class EditUserForm(forms.Form):
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
     permissions = forms.MultipleChoiceField(label=u'Privilegien',
-                              widget=forms.CheckboxSelectMultiple)
+        widget=forms.CheckboxSelectMultiple, required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 
