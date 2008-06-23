@@ -58,12 +58,15 @@ def action_create_superuser(username='', email='', password=''):
                 if password == getpass('repeat: '):
                     break
                 password = ''
-    from inyoka.portal.user import User
+    from inyoka.portal.user import User, PERMISSION_NAMES
     from inyoka.forum.models import Forum, Privilege
     from inyoka.forum.acl import PRIVILEGES_DETAILS, join_flags
     from inyoka.utils.database import session
     user = User.objects.register_user(username, email, password, False)
-    user.is_manager = True
+    permissions = 0
+    for perm in PERMISSION_NAMES.keys():
+        permissions |= perm
+    user._permissions = permissions
     user.save()
     bits = dict(PRIVILEGES_DETAILS).keys()
     bits.remove('void')
