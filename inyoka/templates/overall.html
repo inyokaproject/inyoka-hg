@@ -68,21 +68,25 @@
       <div class="appheader">
         <a href="{{ href('portal', 'error_report', url=CURRENT_URL) }}" id="user_error_report_link">Bug melden</a><br/>
         {%- if not hide_quicklinks %}
-        {%- if USER.is_manager %}
         <ul class="mod_navi">
+          {%- if USER.can('manage_topics') %}
           {%- if report_count %}
           <li><strong><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen ({{ report_count }})</a></strong></li>
           {%- else %}
           <li><a href="{{ href('forum', 'reported_topics') }}">Gemeldete Themen</a></li>
           {%- endif %}
+          {%- endif %}
+          {%- if USER.can('article_edit') %}
           {%- if suggestion_count %}
           <li><strong><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge ({{ suggestion_count }})</a></strong></li>
           {%- else %}
           <li><a href="{{ href('ikhaya', 'suggestions') }}">Artikelvorschläge</a></li>
           {%- endif %}
+          {%- endif %}
+          {%- if USER.can('admin_panel') %}
           <li><a href="{{ href('admin') }}">Adminbereich</a></li>
+          {%- endif %}
         </ul>
-        {%- endif %}
         <ul class="navi_global">
           {%- if USER.is_authenticated %}
           <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
@@ -138,6 +142,7 @@
           <div class="dropdown">
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
               <li><a href="{{ href('wiki', 'Wiki', 'Letzte Änderungen') }}">Letzte Änderungen</a></li>
+              <li><a href="{{ href('wiki', 'Wiki', 'Tags') }}">Tag-Wolke</a></li>
             </ul></li></ul>
           </div>
         {%- endif %}

@@ -130,20 +130,16 @@ class EditUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     new_password = forms.CharField(label=u'Neues Passwort',
         required=False, help_text=(u'Ändert das Benutzerpasswort. '
-                                   u'Bitte nur angeben, wenn benötigt'))
+                                   ,'Bitte nur angeben, wenn benötigt'))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
-    is_manager = forms.BooleanField(label=u'Teammitglied', required=False,
-        help_text=u'Der Benutzer kann das Administrationspanel benutzen')
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
-
-    # ikhaya permission
-    is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
+    permissions = forms.MultipleChoiceField(label=u'Privilegien')
 
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
@@ -182,6 +178,8 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                              widget=forms.CheckboxSelectMultiple)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 

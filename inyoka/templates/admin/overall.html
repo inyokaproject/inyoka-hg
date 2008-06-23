@@ -20,13 +20,15 @@
   {% do title_trace.insert(0, i[1]) %}
 {% endfor %}
 
-{% macro admin_button(link, icon, name) %}
+{% macro admin_button(link, icon, name, permission) %}
+  {%- if not permission or USER.can(permission) %}
   <li>
     <span><a href="{{ link }}">
       <img src="{{ href('static', 'img/admin/category_%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
       {{ name }}
     </a></span>
   </li>
+  {%- endif %}
 {% endmacro %}
 
 {% block appheader %}
