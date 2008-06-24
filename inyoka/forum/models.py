@@ -988,7 +988,7 @@ class PollOption(object):
     def percentage(self):
         """Calculate the percentage of votes for this poll option."""
         if self.poll.votes:
-            return int(round(self.votes / self.poll.votes * 100))
+            return self.votes / self.poll.votes * 100
         return 0
 
 
