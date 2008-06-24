@@ -31,7 +31,25 @@ from inyoka.utils.storage import storage
 
 UNUSABLE_PASSWORD = '!'
 _ANONYMOUS_USER = None
-DEFAULT_GROUP_ID = 1  # group id for all registered users
+DEFAULT_GROUP_ID = 1 # group id for all registered users
+PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
+    ('admin_panel', u'Portal | darf Administrationsbereich betreten'),
+    ('article_edit', u'Ikhaya | kann Artikel bearbeiten'),
+    ('category_edit', u'Ikhaya | kann Kategorien verändern'),
+    ('event_edit', u'Ikhaya | kann Termine eintragen'),
+    ('comment_edit', u'Ikhaya | kann Kommentare administrieren'),
+    ('blog_edit', u'Planet | kann Blogs verändern'),
+    ('configuration_edit', u'Portal | darf allgemeine Einstellungen verändern'),
+    ('static_page_edit', u'Portal | darf statische Seiten verändern'),
+    ('markup_css_edit', u'Portal | darf die Markup-Stylesheets bearbeiten'),
+    ('static_file_edit', u'Portal | darf statische Dateien verändern'),
+    ('user_edit', u'Portal | darf Benutzer verändern'),
+    ('group_edit', u'Portal | darf Gruppen editieren'),
+    ('forum_edit', u'Forum | darf Foren verändern'),
+    ('manage_topics', u'Forum | darf gemeldete Themen verwalten'),
+])]
+PERMISSION_NAMES = dict((i, desc) for i, name, desc in PERMISSIONS)
+PERMISSION_MAPPING = dict((name, i) for i, name, desc in PERMISSIONS)
 
 
 class UserBanned(Exception):
@@ -73,6 +91,7 @@ def check_password(raw_password, enc_password, convert_user=None):
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
     _default_group = None
+    permissions = models.IntegerField('Berechtigungen', default=0)
 
     def get_absolute_url(self):
         return href('portal', 'group', self.name)
@@ -227,10 +246,7 @@ class User(models.Model):
     website = models.URLField('Webseite', blank=True)
     launchpad = models.CharField('Launchpad Nickname', max_length=50, blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
-
-    # the user can access the admin panel
-    is_manager = models.BooleanField('Teammitglied (kann ins Admin-Panel)',
-                                     default=False)
+    _permissions = models.IntegerField('Rechte', default=0)
 
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post',
@@ -238,9 +254,6 @@ class User(models.Model):
     forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
     forum_welcome = models.TextField('Gelesene Willkommensnachrichten',
                                      blank=True)
-
-    # ikhaya permissions
-    is_ikhaya_writer = models.BooleanField('Ikhaya Autor', default=False)
 
     # member title & icon
     member_title = models.CharField('Benutzertitel', blank=True, null=True)
@@ -314,6 +327,25 @@ class User(models.Model):
         return cPickle.loads(str(self._settings))
 
     @deferred
+    def permissions(self):
+        if not self.is_authenticated:
+            return 0
+        key = 'user_permissions/%s' % self.id
+        result = cache.get(key)
+        if result is None:
+            result = self._permissions
+            for group in self.groups.all():
+                result |= group.permissions
+            cache.set(key, result)
+        return result
+
+    def can(self, name):
+        """
+        Return a boolean whether the user has a special privilege.
+        """
+        return bool(PERMISSION_MAPPING[name] & self.permissions)
+
+    @deferred
     def _readstatus(self):
         return ReadStatus(self.forum_read_status)
 
@@ -356,7 +388,8 @@ class User(models.Model):
         self.delete_avatar()
 
         std = storage.get_many(('max_avatar_height', 'max_avatar_width'))
-        max_size = (std['max_avatar_height'], std['max_avatar_width'])
+        max_size = (int(std['max_avatar_height']),
+                    int(std['max_avatar_width']))
         if image.size > max_size:
             image = image.resize(max_size)
             image.save(image_path)

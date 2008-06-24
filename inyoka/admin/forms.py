@@ -133,17 +133,14 @@ class EditUserForm(forms.Form):
                                    u'Bitte nur angeben, wenn benötigt'))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
-    is_manager = forms.BooleanField(label=u'Teammitglied', required=False,
-        help_text=u'Der Benutzer kann das Administrationspanel benutzen')
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
-
-    # ikhaya permission
-    is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                                            required=False)
 
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
@@ -167,7 +164,7 @@ class EditUserForm(forms.Form):
     interests = forms.CharField(label=u'Interessen', max_length=200,
                                 required=False)
     website = forms.URLField(label=u'Webseite', required=False)
-    launchpad = forms.CharField(label=u'Launchpad Nickname', required=False)
+    launchpad = forms.CharField(label=u'Launchpad-Nickname', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
@@ -182,6 +179,8 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+        widget=forms.CheckboxSelectMultiple, required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 
@@ -200,7 +199,6 @@ class EditForumForm(forms.Form):
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
-        print data
         if data.get('welcome_msg_text') and not data.get('welcome_msg_subject'):
             raise forms.ValidationError(u'Du musst einen Titel angeben für die'
                 u' Willkommensnachricht')

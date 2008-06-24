@@ -73,19 +73,22 @@ def populate_context_defaults(context):
             pms = PrivateMessageEntry.objects.filter(user__id=request.user.id,
                                                   read=False).count()
             cache.set(key, pms)
-        if not request.user.is_manager:
-            reported = suggestions = 0
-        else:
+        if request.user.can('manage_topics'):
             key = 'forum/reported_topic_count'
             reported = cache.get(key)
             if reported is None:
                 reported = Topic.query.filter(Topic.reported != None).count()
                 cache.set(key, reported)
+        else:
+            reported = 0
+        if request.user.can('article_edit'):
             key = 'ikhaya/suggestion_count'
             suggestions = cache.get(key)
             if suggestions is None:
                 suggestions = Suggestion.objects.all().count()
                 cache.set(key, suggestions)
+        else:
+            suggestions = 0
     else:
         reported = pms = suggestions = 0
 

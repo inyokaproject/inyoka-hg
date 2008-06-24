@@ -92,7 +92,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         articles = Article.objects.all()
         link = ()
 
-    if not request.user.is_ikhaya_writer:
+    if not request.user.can('article_edit'):
         articles = articles.filter(pub_date__lte=datetime.utcnow(),
                                    public=True)
     link = href('ikhaya', *link)
@@ -118,7 +118,7 @@ def detail(request, slug):
                      u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None
     if article.hidden or article.pub_date > datetime.utcnow():
-        if not request.user.is_ikhaya_writer:
+        if not request.user.can('article_edit'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
     if article.comments_enabled and request.method == 'POST':
@@ -165,7 +165,7 @@ def comment_delete(request, comment_id):
     except Comment.DoesNotExist:
         return HttpResponseRedirect(href('ikhaya'))
     url = url_for(comment.article)
-    if not request.user.is_ikhaya_writer:
+    if not request.user.can('comment_edit'):
         return HttpResponseRedirect(url)
     if request.GET.get('confirm') != 'yes':
         flash(u'Soll das Kommentar von „%s“ wirklich gelöscht werden? ' \

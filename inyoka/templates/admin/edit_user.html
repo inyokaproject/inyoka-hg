@@ -25,15 +25,7 @@
 
 {% block admin_content %}
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
-  <h3>Forum-Einstellungen</h3>
-  <p>
-    {%- if user_groups %}
-    Der Benutzer „{{ user.username|e }}“ gehört den folgenden Gruppen an: {% for group in user_groups %}<a href="{{ group|url|e }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-    {%- else %}
-    Der Benutzer {{ user.username|e }} gehört aktuell keinen Gruppen an.
-    {%- endif %}
-  </p>
-
+  <h3>Benutzer bearbeiten</h3>
   <dl>
     {{ render_form(form, ['username', 'is_active'], inline=true) }}
     <dt>{{ form.member_title.label }}</dt>
@@ -44,8 +36,6 @@
       {% endfor %}
       </div>
     {%- endif %}</dd>
-    <dt>{{ form.is_manager.label }}</dt>
-    <dd>{{ form.is_manager }} <span class="note">{{ form.is_manager.help_text }}</span></dd>
     {{ render_form(form, ['new_password', 'email', 'banned'], inline=true) }}
     <dd class="note_link bann_user_event">
       Benutzer sperren
@@ -68,10 +58,20 @@
         </tr>
       </table>
     </dd>
+    <dt>Privilegien</dt>
+    <dd>
+      {%- for id, name, checked, derived in permissions %}
+      <input type="checkbox" name="permissions" value="{{ id }}" id="perm_{{ id }}"
+             {%- if checked %} checked="checked"{% endif %} />
+      <label for="perm_{{ id }}">{{ name|e }}</label>
+      {%- if derived %}<span class="note"> (Geerbt von {% for group in derived %}<a href="{{ group|url }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}</span>{% endfor %})
+      {%- endif -%}
+      <br />
+      {%- endfor %}
+      {{ form.permissions.errors }}
+    </dd>
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
-    <dt>Ikhaya-Privilegien:</dt>
-    <dd>{{ form.is_ikhaya_writer }} {{ form.is_ikhaya_writer.label }}</dd>
     {{ render_form(form, ['date_joined'], inline=true) }}
     <dd class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</dd>
   </dl>

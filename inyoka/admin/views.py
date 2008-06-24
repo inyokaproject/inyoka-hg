@@ -12,7 +12,7 @@ import os
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from sqlalchemy import not_, and_
+from sqlalchemy import not_, and_, select
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
@@ -35,14 +35,15 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
-from inyoka.portal.user import User, Group
-from inyoka.portal.utils import require_manager
+from inyoka.portal.user import User, Group, PERMISSION_NAMES, PERMISSION_MAPPING
+from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
     join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage
-from inyoka.forum.database import forum_table, privilege_table
+from inyoka.forum.database import forum_table, privilege_table, \
+    user_group_table
 from inyoka.wiki.parser import parse, RenderContext
 
 
@@ -54,13 +55,13 @@ def not_found(request, err_message=None):
     return global_not_found(request, 'admin', err_message)
 
 
-@require_manager
+@require_permission('admin_panel')
 @templated('admin/index.html')
 def index(request):
     return {}
 
 
-@require_manager
+@require_permission('configuration_edit')
 @templated('admin/configuration.html')
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
@@ -98,7 +99,7 @@ def config(request):
     }
 
 
-@require_manager
+@require_permission('static_page_edit')
 @templated('admin/pages.html')
 def pages(request):
     sortable = Sortable(StaticPage.objects.all(), request.GET, '-key')
@@ -108,7 +109,7 @@ def pages(request):
     }
 
 
-@require_manager
+@require_permission('static_page_edit')
 @templated('admin/pages_edit.html')
 def pages_edit(request, page=None):
     if page:
@@ -149,7 +150,7 @@ def pages_edit(request, page=None):
     }
 
 
-@require_manager
+@require_permission('static_page_edit')
 def pages_delete(request, page_key):
     if not page_key:
         flash(u'Es wurde keine Seite zum löschen ausgewählt.')
@@ -167,7 +168,7 @@ def pages_delete(request, page_key):
     return HttpResponseRedirect(href('admin', 'pages'))
 
 
-@require_manager
+@require_permission('static_file_edit')
 @templated('admin/files.html')
 def files(request):
     sortable = Sortable(StaticFile.objects.all(), request.GET, 'identifier')
@@ -176,7 +177,7 @@ def files(request):
     }
 
 
-@require_manager
+@require_permission('static_file_edit')
 @templated('admin/file_edit.html')
 def file_edit(request, file=None):
     """
@@ -214,7 +215,7 @@ def file_edit(request, file=None):
     }
 
 
-@require_manager
+@require_permission('blog_edit')
 @templated('admin/planet.html')
 def planet(request):
     return {
@@ -222,7 +223,7 @@ def planet(request):
     }
 
 
-@require_manager
+@require_permission('blog_edit')
 @templated('admin/planet_edit.html')
 def planet_edit(request, blog=None):
     if blog:
@@ -266,13 +267,13 @@ def planet_edit(request, blog=None):
     }
 
 
-@require_manager
+@require_permission('article_edit', 'category_edit', 'event_edit')
 @templated('admin/ikhaya.html')
 def ikhaya(request):
     return {}
 
 
-@require_manager
+@require_permission('article_edit')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
     sortable = Sortable(Article.objects.all(), request.GET, '-pub_date')
@@ -284,7 +285,7 @@ def ikhaya_articles(request, page=1):
     }
 
 
-@require_manager
+@require_permission('article_edit')
 @templated('admin/ikhaya_article_edit.html')
 def ikhaya_article_edit(request, article=None, suggestion_id=None):
     """
@@ -371,7 +372,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
     }
 
 
-@require_manager
+@require_permission('article_edit')
 def ikhaya_article_delete(request, article):
     article = Article.objects.get(slug=article)
     if request.method == 'POST':
@@ -394,7 +395,7 @@ def ikhaya_article_delete(request, article):
     return HttpResponseRedirect(href('admin', 'ikhaya', 'articles'))
 
 
-@require_manager
+@require_permission('category_edit')
 @templated('admin/ikhaya_categories.html')
 def ikhaya_categories(request):
     sortable = Sortable(Category.objects.all(), request.GET, '-name')
@@ -403,7 +404,7 @@ def ikhaya_categories(request):
     }
 
 
-@require_manager
+@require_permission('category_edit')
 @templated('admin/ikhaya_category_edit.html')
 def ikhaya_category_edit(request, category=None):
     """
@@ -452,7 +453,7 @@ def ikhaya_category_edit(request, category=None):
     }
 
 
-@require_manager
+@require_permission('event_edit')
 @templated('admin/ikhaya_dates.html')
 def ikhaya_dates(request):
     sortable = Sortable(Event.objects.all(), request.GET, 'title')
@@ -461,7 +462,7 @@ def ikhaya_dates(request):
     }
 
 
-@require_manager
+@require_permission('event_edit')
 @templated('admin/ikhaya_date_edit.html')
 def ikhaya_date_edit(request, date=None):
     """
@@ -499,7 +500,7 @@ def ikhaya_date_edit(request, date=None):
     }
 
 
-@require_manager
+@require_permission('forum_edit')
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.query, request.GET, '-name',
@@ -509,7 +510,7 @@ def forums(request):
     }
 
 
-@require_manager
+@require_permission('forum_edit')
 @templated('admin/forums_edit.html')
 def forums_edit(request, id=None):
     """
@@ -604,7 +605,7 @@ def forums_edit(request, id=None):
     }
 
 
-@require_manager
+@require_permission('user_edit')
 @templated('admin/users.html')
 def users(request):
     if request.method == 'POST':
@@ -619,7 +620,7 @@ def users(request):
     return {}
 
 
-@require_manager
+@require_permission('user_edit')
 @templated('admin/edit_user.html')
 def edit_user(request, username):
     #: check if the user exists
@@ -629,20 +630,23 @@ def edit_user(request, username):
         flash(u'Der Benutzer „%s“ existiert nicht.'
               % escape(username))
         return HttpResponseRedirect(href('admin', 'users'))
+
     groups = dict((g.name, g) for g in Group.objects.all())
     groups_joined, groups_not_joined = ([], [])
+    checked_perms = [int(p) for p in request.POST.getlist('permissions')]
 
     if request.method == 'POST':
         form = EditUserForm(request.POST, request.FILES)
+        form.fields['permissions'].choices = [(k, '') for k in
+                                              PERMISSION_NAMES.keys()]
         if form.is_valid():
             data = form.cleaned_data
             #: set the user attributes, avatar and forum privileges
-            for key in ('username', 'is_active', 'date_joined', 'is_ikhaya_writer',
+            for key in ('username', 'is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'is_manager', 'member_title',
-                        'launchpad'):
+                        'wengophone', 'member_title', 'launchpad'):
                 setattr(user, key, data[key])
             if data['delete_avatar']:
                 user.delete_avatar()
@@ -655,6 +659,12 @@ def edit_user(request, username):
 
             if data['banned'] != user.banned:
                 user.banned = data['banned']
+
+            # permissions
+            permissions = 0
+            for perm in checked_perms:
+                permissions |= perm
+            user._permissions = permissions
 
             #: forum privileges
             privileges = Privilege.query
@@ -687,6 +697,7 @@ def edit_user(request, username):
             # database changes
             user.save()
             dbsession.commit()
+            cache.delete('user_permissions/%s' % user.id)
 
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
                   % escape(user.username), True)
@@ -696,7 +707,7 @@ def edit_user(request, username):
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     else:
-        form = EditUserForm(model_to_dict(user))
+        form = EditUserForm(initial=model_to_dict(user))
 
     # collect forum privileges
     forum_privileges = []
@@ -718,20 +729,32 @@ def edit_user(request, username):
                         [x for x in groups.itervalues() if not x in groups_joined]
 
     storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
+
+    permissions = []
+
+    groups = request.user.groups.all()
+    for id, name in PERMISSION_NAMES.iteritems():
+        derived = filter(lambda g: id & g.permissions, groups)
+        if request.method == 'POST':
+            checked = id in checked_perms
+        else:
+            checked = id & request.user._permissions
+        permissions.append((id, name, checked, derived))
+
     return {
         'user': user,
         'form': form,
         'user_forum_privileges': forum_privileges,
         'forum_privileges': PRIVILEGES_DETAILS,
-        'user_groups': sorted(groups_joined, lambda x,y: cmp(x.name, y.name)),
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined],
         'avatar_height': storage_data['max_avatar_height'],
         'avatar_width': storage_data['max_avatar_width'],
+        'permissions': sorted(permissions, key=lambda p: p[1]),
     }
 
 
-@require_manager
+@require_permission('user_edit')
 @templated('admin/new_user.html')
 def new_user(request):
     if request.method == 'POST':
@@ -758,7 +781,7 @@ def new_user(request):
     }
 
 
-@require_manager
+@require_permission('group_edit')
 @templated('admin/groups.html')
 def groups(request):
     if request.method == 'POST':
@@ -779,10 +802,16 @@ def groups(request):
     }
 
 
-@require_manager
+@require_permission('group_edit')
 @templated('admin/groups_edit.html')
 def groups_edit(request, name=None):
+    def _add_choices(form):
+        form.fields['permissions'].choices = sorted(
+            [(k, v) for k, v in PERMISSION_NAMES.iteritems()],
+            key=lambda p: p[1]
+        )
     new = name is None
+    changed_permissions = False
     if new:
         group = Group()
     else:
@@ -795,9 +824,18 @@ def groups_edit(request, name=None):
 
     if request.method == 'POST':
         form = EditGroupForm(request.POST)
+        _add_choices(form)
         if form.is_valid():
             data = form.cleaned_data
             group.name = data['name']
+
+            # permissions
+            permissions = 0
+            for perm in data['permissions']:
+                permissions |= int(perm)
+            if permissions != group.permissions:
+                changed_permissions = True
+                group.permissions = permissions
 
             #: forum privileges
             for key, value in request.POST.iteritems():
@@ -821,12 +859,25 @@ def groups_edit(request, name=None):
             group.save()
             dbsession.commit()
 
+            # clear permission cache of users if needed
+            if changed_permissions:
+                c = user_group_table.c
+                keys = ['user_permissions/%s' % row[0] for row in
+                    dbsession.execute(
+                        select([c.user_id]).where(c.group_id == group.id)
+                    ).fetchall()
+                ]
+                cache.delete_many(*keys)
+
             flash(u'Die Gruppe „%s“ wurde erfolgreich %s'
                   % (escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
-            return HttpResponseRedirect(href('admin', 'groups'))
     else:
-        form = EditGroupForm(not new and model_to_dict(group) or None)
+        form = EditGroupForm(initial=not new and {
+            'name': group.name,
+            'permissions': filter(lambda p: p & group.permissions, PERMISSION_NAMES.keys())
+        } or {})
+        _add_choices(form)
 
     # collect forum privileges
     forum_privileges = []
@@ -852,7 +903,7 @@ def groups_edit(request, name=None):
     }
 
 
-@require_manager
+@require_permission('event_edit')
 @templated('admin/events.html')
 def events(request, show_all=False):
     if show_all:
@@ -867,7 +918,7 @@ def events(request, show_all=False):
     }
 
 
-@require_manager
+@require_permission('event_edit')
 @templated('admin/event_edit.html')
 def event_edit(request, id=None):
     mode = (id is None) and 'new' or 'edit'
@@ -922,7 +973,7 @@ def event_edit(request, id=None):
     }
 
 
-@require_manager
+@require_permission('event_edit')
 @templated('admin/event_delete.html')
 def event_delete(request, id):
     try:
@@ -939,7 +990,7 @@ def event_delete(request, id):
         return {'event': event}
 
 
-@require_manager
+@require_permission('markup_css_edit')
 @templated('admin/styles.html')
 def styles(request):
     key = 'markup_styles'
