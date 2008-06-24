@@ -273,7 +273,7 @@ def do_rename(request, name):
                 return HttpResponseRedirect(url_for(page))
             else:
                 flash(u'Eine Seite mit diesem Namen existiert bereits.', False)
-                return HttpResponseRedirect(href('wiki', name)
+                return HttpResponseRedirect(href('wiki', name))
         return HttpResponseRedirect(url_for(page))
     flash(render_template('wiki/action_rename.html', {
         'page':         page,
