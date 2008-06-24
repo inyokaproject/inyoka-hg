@@ -511,8 +511,8 @@ def forums(request):
 
 
 @require_permission('forum_edit')
-@templated('admin/forums_edit.html')
-def forums_edit(request, id=None):
+@templated('admin/forum_edit.html')
+def forum_edit(request, id=None):
     """
     Display an interface to let the user create or edit an forum.
     If `id` is given, the forum with id `id` will be edited.
@@ -621,8 +621,8 @@ def users(request):
 
 
 @require_permission('user_edit')
-@templated('admin/edit_user.html')
-def edit_user(request, username):
+@templated('admin/user_edit.html')
+def user_edit(request, username):
     #: check if the user exists
     try:
         user = User.objects.get(username=username)
@@ -803,8 +803,8 @@ def groups(request):
 
 
 @require_permission('group_edit')
-@templated('admin/groups_edit.html')
-def groups_edit(request, name=None):
+@templated('admin/group_edit.html')
+def group_edit(request, name=None):
     def _add_choices(form):
         form.fields['permissions'].choices = sorted(
             [(k, v) for k, v in PERMISSION_NAMES.iteritems()],
