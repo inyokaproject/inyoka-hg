@@ -1249,9 +1249,11 @@ def newposts(request, page=1):
 @templated('forum/topiclist.html')
 def topiclist(request, page=1, action='newposts', hours=24, user=None):
     hours = int(hours)
-    user = user and User.objects.get(username=user) or request.user
 
-    topics = Topic.query.order_by(topic_table.c.last_post_id.desc())
+    forums_ids = [f.id for f in filter_invisible(request.user,
+                                                 Forum.query.all())]
+    topics = Topic.query.order_by(topic_table.c.last_post_id.desc()) \
+                  .filter_by(topic_table.c.forum_id.in_(forum_ids))
 
     if action == 'last':
         topics = topics.filter(and_(
@@ -1269,6 +1271,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         title = u'Ungelöste Themen'
         url = href('forum', 'unsolved')
     elif action == 'author':
+        user = user and User.objects.get(username=user) or request.user
         topics = topics.filter(topic_table.c.id.in_(post_table.c.topic_id)) \
                        .filter(post_table.c.author_id == user.id)
         if user != request.user:
@@ -1280,7 +1283,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
 
     # TODO: eagerload('last_post'), eagerload('last_post.author') raises
     #       an error.
-    topics = topics.options(eagerload('author'))
+    topics = topics.options(eagerload('author'), eagerload('last_post'), eagerload('last_post.author'))
 
     pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
 
