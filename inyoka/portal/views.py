@@ -73,6 +73,8 @@ def index(request):
     and some records of ubuntuusers.de
     """
     ikhaya_latest = Article.published.all()[:10]
+    events = Event.objects.order_by('date').filter(
+        date__gt=datetime.utcnow())[:4]
     set_session_info(request, u'ist am Portal', 'Portal')
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
@@ -84,6 +86,7 @@ def index(request):
         'record_time':              record_time,
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
+        'calendar_events':          events,
     }
 
 

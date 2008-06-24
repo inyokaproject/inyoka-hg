@@ -33,11 +33,15 @@
 <br />
 
 <h3>die nächsten Termine</h3>
+{% if events %}
 <ul class="events">
   {% for event in events %}
   <li>{{ event.friendly_title(with_html_link=true) }}</li>
   {%- endfor %}
 </ul>
+{% else %}
+<p>Zur Zeit sind keine Termine eingetragen.</p>
+{% endif %}
 
 
 {% endblock %}
