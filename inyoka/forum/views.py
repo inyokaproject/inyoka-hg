@@ -226,8 +226,6 @@ def viewtopic(request, topic_slug, page=1):
                     if not check_privilege(privileges, 'vote'):
                         return abort_access_denied(request)
                     elif poll.participated:
-                        flash(u'Du hast bereits an dieser Abstimmung '
-                              u'teilgenommen.', False)
                         continue
                     elif poll.ended:
                         flash(u'Die Abstimmung ist bereits zu Ende.', False)
@@ -409,7 +407,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
-            flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question)
+            flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question, True)
             session.commit()
             poll_ids.append(poll.id)
         elif 'add_option' in request.POST:
