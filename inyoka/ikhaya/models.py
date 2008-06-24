@@ -303,7 +303,7 @@ class ArticleSearchAuthDecider(object):
 
     def __init__(self, user):
         self.now = datetime.utcnow()
-        self.priv = user.is_ikhaya_writer
+        self.priv = user.can('article_edit')
 
     def __call__(self, auth):
         return self.priv or ((not auth[0]) and auth[1] <= self.now)
