@@ -549,7 +549,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   background-repeat: repeat-x;
   padding: 0em 1em 0.5em 1em;
   width: 12em;
-  margin-bottom: 1.0em;
+  margin-bottom: 0.8em;
 }
 
 .navi_sidebar h3 {
