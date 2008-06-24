@@ -35,6 +35,13 @@ $(document).ready(function() {
         .appendTo(navigation);
   })();
 
+  // make the calendar button show some events
+  $('.container.calendar h3').after('<span><a href="/calendar/" class="calendar_link">Nächste Termine</a></span>');
+  $('a.calendar_link').click(function() {
+    $('.calendar.overview').slideToggle('fast');
+    return false;
+  });
+
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
   (function() {

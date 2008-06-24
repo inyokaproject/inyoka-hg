@@ -558,6 +558,17 @@ class Post(object):
     def get_max_id():
         return dbsession.execute(select([func.max(Post.c.id)])).fetchone()[0]
 
+    @staticmethod
+    def multi_update_search(ids):
+        """
+        Updates the search index for quite a lot of posts with a single query.
+        """
+        dbsession.execute('''
+            insert into portal_searchqueue (component, doc_id)
+                values %s;
+        ''' % ', '.join(('("f", %s)',) * len(ids)), ids)
+        dbsession.commit()
+
     def edit(self, request, text):
         """
         Changes the text of the post. If the post is already stored in the
@@ -679,8 +690,7 @@ class Post(object):
         dbsession.commit()
 
         # update the search index which has the post --> topic mapping indexed
-        for post in posts:
-            post.update_search()
+        Post.multi_update_search([post.id for post in posts])
 
         new_topic.forum.invalidate_topic_cache()
         old_topic.forum.invalidate_topic_cache()

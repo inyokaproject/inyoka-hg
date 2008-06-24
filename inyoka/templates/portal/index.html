@@ -25,8 +25,7 @@
   </div>
   <div class="container calendar">
     <div class="calendar link">
-      <h3><a href="{{ href('portal', 'calendar') }}" class="calendar_link">Kalender</a></h3>
-      <span><a href="{{ href('portal', 'calendar') }}" class="calendar_link">Letzte Events zeigen</a></span>
+      <h3><a href="{{ href('portal', 'calendar') }}">Kalender</a></h3>
     </div>
     <div class="calendar overview">
     {% if calendar_events %}
@@ -40,14 +39,6 @@
     {% endif %}
     </div>    
   </div>
-<script type="text/javascript">
-  /*<![CDATA[*/
-  $('a.calendar_link').attr('href', '#');
-  $('a.calendar_link').click(function() {
-    $('.calendar.overview').slideToggle();
-  });
-  /*]]>*/
-</script>
 {% endblock %}
 
 {% block portal_content %}
