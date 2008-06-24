@@ -53,6 +53,10 @@ a.interwiki-ubuntu {
   width: auto;
 }
 
+#page table td, #page table th {
+  border-width: 1px;
+}
+
 span.underline {
   text-decoration: underline;
 }
