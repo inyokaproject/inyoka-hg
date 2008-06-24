@@ -36,14 +36,14 @@
       {%- endfor %}
       </ul>
     {% else %}
-    <p>Zur Zeit sind keine Termine eingetragen.</p>
+    <p>Keine anstehenden Termine.</p>
     {% endif %}
     </div>    
   </div>
 <script type="text/javascript">
   /*<![CDATA[*/
   $('a.calendar_link').attr('href', '#');
-  $('.calendar.link').click(function() {
+  $('a.calendar_link').click(function() {
     $('.calendar.overview').slideToggle();
   });
   /*]]>*/
