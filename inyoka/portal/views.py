@@ -780,7 +780,7 @@ def privmsg_new(request, username=None):
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
                       % escape(recipient), False)
-            except GroupDoesNotExist:
+            except Group.DoesNotExist:
                 recipients = None
                 flash(u'Die Gruppe „%s“ wurde nicht gefunden'
                       % escape(recipient), False)
