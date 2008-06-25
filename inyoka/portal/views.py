@@ -770,7 +770,7 @@ def privmsg_new(request, username=None):
                     recipients.update(users)
                 except Group.DoesNotExist:
                     flash(u'Die Gruppe „%s“ wurde nicht gefunden'
-                          % escape(recipient), False)
+                          % escape(group), False)
                     return HttpResponseRedirect(href('portal', 'privmsg'))
 
             try:
