@@ -18,7 +18,8 @@ from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
 from inyoka.utils.urls import global_not_found
-from inyoka.portal.utils import simple_check_login, abort_access_denied
+from inyoka.portal.utils import simple_check_login, abort_access_denied, \
+    require_permission
 from inyoka.portal.user import User
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.html import escape
@@ -727,6 +728,7 @@ def report(request, topic_slug):
     }
 
 
+@require_permission('manage_topics')
 @templated('forum/reportlist.html')
 def reportlist(request):
     """Get a list of all reported topics"""
