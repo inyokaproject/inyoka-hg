@@ -45,6 +45,7 @@ PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
     ('static_file_edit', u'Portal | darf statische Dateien verändern'),
     ('user_edit', u'Portal | darf Benutzer verändern'),
     ('group_edit', u'Portal | darf Gruppen editieren'),
+    ('send_group_pm', u'Portal | darf PN an Gruppen versenden'),
     ('forum_edit', u'Forum | darf Foren verändern'),
     ('manage_topics', u'Forum | darf gemeldete Themen verwalten'),
 ])]

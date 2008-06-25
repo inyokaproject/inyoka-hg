@@ -757,9 +757,9 @@ def privmsg_new(request, username=None):
                 recipients = set()
                 for recipient in recipient_names:
                     if recipient.startswith('@'):
-                        if not request.user.can('admin_panel'):
+                        if not request.user.can('send_group_pm'):
                             recipients = None
-                            flash(u'Nur Administratoren können Nachrichten an'
+                            flash(u'Du darfst keine Nachrichten an'
                                   u'Gruppen schicken.', False)
                             break
                         recipient = recipient[1:]
