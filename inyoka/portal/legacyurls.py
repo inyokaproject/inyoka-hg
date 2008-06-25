@@ -47,15 +47,15 @@ def user_profile(args, match, username):
 
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
-@legacy.url(r'^/portal\.php$')
+@legacy.url(r'^/portal\.php')
 def v1_portal(args, match):
     return href()
 
-@legacy.url(r'^/index\.php$')
+@legacy.url(r'^/index\.php')
 def v1_forum_index(args, match):
     return href('forum')
 
-@legacy.url(r'^/viewtopic\.php$')
+@legacy.url(r'^/viewtopic\.php')
 def v1_forum_topic(args, match):
     if 't' in args:
         return href('forum', 'topic', args['t'])
@@ -64,22 +64,22 @@ def v1_forum_topic(args, match):
     else:
         return href('forum')
 
-@legacy.url(r'^/viewforum\.php$')
+@legacy.url(r'^/viewforum\.php')
 def v1_forum_forum(args, match):
     if 'f' in args:
         return href('forum', 'forum', args['f'], args.get('start'))
     else:
         return href('forum')
 
-@legacy.url(r'^/login\.php$')
+@legacy.url(r'^/login\.php')
 def v1_login(args, match):
     return href('portal', 'login')
 
-@legacy.url(r'^/map\.php$')
+@legacy.url(r'^/map\.php')
 def v1_map(args, match):
     return href('portal', 'map')
 
-@legacy.url(r'^/profile\.php$')
+@legacy.url(r'^/profile\.php')
 def v1_profile(args, match):
     return href('portal', 'usercp')
 

@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from inyoka.portal.utils import check_login
+from inyoka.portal.utils import check_login, require_permission
 from inyoka.portal.user import User
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
@@ -207,6 +207,7 @@ def suggest(request):
     }
 
 
+@require_permission('article_edit')
 @templated('ikhaya/suggestionlist.html')
 def suggestionlist(request):
     """Get a list of all reported topics"""
