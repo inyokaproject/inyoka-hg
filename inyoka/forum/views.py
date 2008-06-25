@@ -406,6 +406,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             session.commit()
             if topic:
                 topic.has_poll = True
+                session.commit()
                 topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
@@ -487,7 +488,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if check_privilege(privileges, 'create_poll'):
                 topic.polls = polls
                 topic.has_poll = bool(polls)
-            session.flush([topic])
             session.commit()
 
             topic.forum.invalidate_topic_cache()
@@ -497,7 +497,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if newtopic:
                 post.position = 0
         post.edit(request, d['text'])
-        session.flush([post])
+        session.commit()
 
         if attachments:
             Attachment.update_post_ids(att_ids, post.id)
