@@ -754,7 +754,7 @@ def privmsg_new(request, username=None):
             try:
                 recipient_names = set(r.strip() for r in \
                                       d['recipient'].split(';') if r)
-                recipients = []
+                recipients = set()
                 for recipient in recipient_names:
                     if recipient.startswith('@'):
                         if not request.user.can('admin_panel'):
@@ -766,7 +766,7 @@ def privmsg_new(request, username=None):
                         users = Group.objects.get(name=recipient).user_set.\
                             all().exclude(pk=request.user.id)
                         for user in users:
-                            recipients.append(user)
+                            recipients.add(user)
                     else:
                         user = User.objects.get(username__exact=recipient)
                         if user.id == request.user.id:
@@ -775,7 +775,7 @@ def privmsg_new(request, username=None):
                                   u'schicken.', False)
                             break
                         else:
-                            recipients.append(user)
+                            recipients.add(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
@@ -790,7 +790,7 @@ def privmsg_new(request, username=None):
                 msg.subject = d['subject']
                 msg.text = d['text']
                 msg.pub_date = datetime.utcnow()
-                msg.send(recipients)
+                msg.send(list(recipients))
                 # send notification
                 for recipient in recipients:
                     entry = PrivateMessageEntry.objects.get(message=msg,
