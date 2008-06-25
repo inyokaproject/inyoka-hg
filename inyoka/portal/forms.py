@@ -364,8 +364,9 @@ class PrivateMessageForm(forms.Form):
     text = forms.CharField(label=u'Text', widget=forms.Textarea)
 
     def clean(self):
-        if not (self.cleaned_data.get('recipient', None) and
-            self.cleaned_data.get('group_recipient', None)):
+        d = self.cleaned_data
+        if 'recipient' in d and 'group_recipient' in d:
+            if not d['recipient'].strip() and not d['group_recipient'].strip():
                 raise forms.ValidationError(u'Mindestens einen Empfänger angeben.')
         return self.cleaned_data
 
