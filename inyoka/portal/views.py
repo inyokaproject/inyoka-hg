@@ -751,39 +751,43 @@ def privmsg_new(request, username=None):
             preview = parse(request.POST.get('text','')).render(ctx, 'html')
         elif form.is_valid():
             d = form.cleaned_data
+            recipient_names = set(r.strip() for r in \
+                                  d['recipient'].split(';') if r)
+            group_recipient_names = set(r.strip() for r in \
+                                  d['group_recipient'].split(';') if r)
+
+            recipients = set()
+
+            if d.get('group_recipient', None) and not request.user.can('send_group_pm'):
+               flash(u'Du darfst keine Nachrichten an'
+                     u'Gruppen schicken.', False)
+               return HttpResponseRedirect(href('portal', 'privmsg'))
+ 
+            for group in group_recipient_names:
+                try:
+                    users = Group.objects.get(name=group).user_set.\
+                        all().exclude(pk=request.user.id)
+                    recipients.update(users)
+                except Group.DoesNotExist:
+                    flash(u'Die Gruppe „%s“ wurde nicht gefunden'
+                          % escape(recipient), False)
+                    return HttpResponseRedirect(href('portal', 'privmsg'))
+
             try:
-                recipient_names = set(r.strip() for r in \
-                                      d['recipient'].split(';') if r)
-                recipients = set()
                 for recipient in recipient_names:
-                    if recipient.startswith('@'):
-                        if not request.user.can('send_group_pm'):
-                            recipients = None
-                            flash(u'Du darfst keine Nachrichten an'
-                                  u'Gruppen schicken.', False)
-                            break
-                        recipient = recipient[1:]
-                        users = Group.objects.get(name=recipient).user_set.\
-                            all().exclude(pk=request.user.id)
-                        for user in users:
-                            recipients.add(user)
+                    user = User.objects.get(username__exact=recipient)
+                    if user.id == request.user.id:
+                        recipients = None
+                        flash(u'Du kannst dir selber keine Nachrichten '
+                              u'schicken.', False)
+                        break
                     else:
-                        user = User.objects.get(username__exact=recipient)
-                        if user.id == request.user.id:
-                            recipients = None
-                            flash(u'Du kannst dir selber keine Nachrichten '
-                                  u'schicken.', False)
-                            break
-                        else:
-                            recipients.add(user)
+                        recipients.add(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
                       % escape(recipient), False)
-            except Group.DoesNotExist:
-                recipients = None
-                flash(u'Die Gruppe „%s“ wurde nicht gefunden'
-                      % escape(recipient), False)
+
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user
@@ -813,7 +817,8 @@ def privmsg_new(request, username=None):
                                           })
                 flash(u'Die persönliche Nachricht wurde erfolgreich '
                       u'versandt.', True)
-                return HttpResponseRedirect(href('portal', 'privmsg'))
+
+            return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
         reply_to = request.GET.get('reply_to', '')
