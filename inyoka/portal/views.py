@@ -756,17 +756,33 @@ def privmsg_new(request, username=None):
                                       d['recipient'].split(';') if r)
                 recipients = []
                 for recipient in recipient_names:
-                    user = User.objects.get(username__exact=recipient)
-                    if user.id == request.user.id:
-                        recipients = None
-                        flash(u'Du kannst dir selber keine Nachrichten '
-                              u'schicken.', False)
-                        break
+                    if recipient.startswith('@'):
+                        if not request.user.can('admin_panel'):
+                            recipients = None
+                            flash(u'Nur Administratoren können Nachrichten an'
+                                  u'Gruppen schicken.', False)
+                            break
+                        recipient = recipient[1:]
+                        users = Group.objects.get(name=recipient).user_set.\
+                            all().exclude(pk=request.user.id)
+                        for user in users:
+                            recipients.append(user)
                     else:
-                        recipients.append(user)
+                        user = User.objects.get(username__exact=recipient)
+                        if user.id == request.user.id:
+                            recipients = None
+                            flash(u'Du kannst dir selber keine Nachrichten '
+                                  u'schicken.', False)
+                            break
+                        else:
+                            recipients.append(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
+                      % escape(recipient), False)
+            except GroupDoesNotExist:
+                recipients = None
+                flash(u'Die Gruppe „%s“ wurde nicht gefunden'
                       % escape(recipient), False)
             if recipients:
                 msg = PrivateMessage()
