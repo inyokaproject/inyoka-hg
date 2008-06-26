@@ -13,7 +13,39 @@
 {% set title_trace = [folder.name] %}
 
 {% block portal_content %}
-  <table>
+   {% if message %}
+    <div class="prvmsg">
+      <img class="avatar" src="{{ message.author.avatar_url|e }}" alt="Avatar von {{ message.author.username|e }}" />
+      <dl class="prvmsg_header">
+        <dt>Von:</dt>
+        <dd><a href="{{ message.author|url }}">{{ message.author|e }}</a></dd>
+        <dt>An:</dt>
+        <dd>{% for user in message.recipients -%}
+          <a href="{{ user|url }}">{{ user|e }}</a>
+          {%- if not loop.last %}, {% endif %}{% else %}...{% endfor %}</dd>
+        <dt>Betreff:</dt>
+        <dd>{{ message.subject|e }}</dd>
+        <dt>Datum:</dt>
+        <dd>{{ message.pub_date|datetimeformat }}</dd>
+      </dl>
+      <div class="prvmsg_body">
+        {{ message.rendered_text }}
+      </div>
+      <div class="linklist pn_actions">
+        <a class="pn_delete" href="?action=delete">Nachricht löschen</a> |
+        {% if folder.id == 'trash' %}
+        <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
+        {% elif folder.id != 'archive' %}
+        <a class="pn_archive" href="?action=archive">Archivieren</a> |
+        {% endif %}
+        <a class="pn_reply" href="{{ message.get_absolute_url('reply') }}">Antworten</a> |
+        <a class="pn_forward" href="{{ message.get_absolute_url('forward') }}">Weiterleiten</a> 
+      </div>
+    </div>
+    <br/>
+  {% endif %}
+
+ <table>
     <tbody>
       <tr>
         <th class="subject">Betreff</th>
@@ -61,35 +93,4 @@
       </tr>
     </tfoot>
   </table>
-  {% if message %}
-    <div class="prvmsg">
-      <img class="avatar" src="{{ message.author.avatar_url|e }}" alt="Avatar von {{ message.author.username|e }}" />
-      <dl class="prvmsg_header">
-        <dt>Von:</dt>
-        <dd><a href="{{ message.author|url }}">{{ message.author|e }}</a></dd>
-        <dt>An:</dt>
-        <dd>{% for user in message.recipients -%}
-          <a href="{{ user|url }}">{{ user|e }}</a>
-          {%- if not loop.last %}, {% endif %}{% else %}...{% endfor %}</dd>
-        <dt>Betreff:</dt>
-        <dd>{{ message.subject|e }}</dd>
-        <dt>Datum:</dt>
-        <dd>{{ message.pub_date|datetimeformat }}</dd>
-      </dl>
-      <div class="prvmsg_body">
-        {{ message.rendered_text }}
-      </div>
-      <div class="linklist pn_actions">
-        <a class="pn_delete" href="?action=delete">Nachricht löschen</a> |
-        {% if folder.id == 'trash' %}
-        <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
-        {% elif folder.id != 'archive' %}
-        <a class="pn_archive" href="?action=archive">Archivieren</a> |
-        {% endif %}
-        <a class="pn_reply" href="{{ message.get_absolute_url('reply') }}">Antworten</a> |
-        <a class="pn_forward" href="{{ message.get_absolute_url('forward') }}">Weiterleiten</a> 
-      </div>
-    </div>
-  {% endif %}
-
 {% endblock %}
