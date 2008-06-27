@@ -34,8 +34,8 @@ ul.articles {
   margin: 0.0em;
   margin-bottom: 1.0em;
   padding: 0 1em;
-  background-image:url(../img/ikhaya/article.jpg);
-  background-repeat:no-repeat;
+  background-image:url(../img/ikhaya/article1px.jpg);
+  background-repeat:repeat-x;
   background-position:-8px 0px;;
 }
 
