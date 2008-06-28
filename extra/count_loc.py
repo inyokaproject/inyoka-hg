@@ -17,6 +17,7 @@ def main(root, search):
     LOC = 0
 
     root = path.abspath(root)
+    offset = len(root) + 1
 
     print '+%s+' % ('=' * 78)
     print '| Lines of Code %s |' % (' ' * 62)
@@ -28,15 +29,16 @@ def main(root, search):
         folder = path.join(root, folder)
         for base, dirname, files in os.walk(folder):
             for fn in files:
+                fn = path.join(base, fn)
                 if fn.endswith('.py') or fn.endswith('.js') or fn.endswith('.html'):
                     try:
-                        fp = file(path.join(base, fn))
+                        fp = file(fn)
                         lines = sum(1 for l in fp.read().splitlines() if l.strip())
                     except:
                         print '%-70sskipped' % fn
                     else:
                         LOC += lines
-                        print '| %-68s %7d |' % (fn, lines)
+                        print '| %-68s %7d |' % (fn[offset:], lines)
                     fp.close()
 
     print '+%s+' % ('-' * 78)
