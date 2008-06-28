@@ -1040,10 +1040,9 @@ def about_inyoka(request):
 def calendar_month(request, year, month):
     year = int(year)
     month = int(month)
-    try:
-        days = calendar_entries_for_month(year, month)
-    except ValueError:
+    if year < 1900 or month < 1 or month > 12:
         raise PageNotFound
+    days = calendar_entries_for_month(year, month)
     days = [(date(year, month, day), events) for day, events in days.items()]
     set_session_info(request, u'sieht sich den Kalender an')
 
