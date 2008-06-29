@@ -759,10 +759,10 @@ def privmsg_new(request, username=None):
             recipients = set()
 
             if d.get('group_recipient', None) and not request.user.can('send_group_pm'):
-               flash(u'Du darfst keine Nachrichten an'
-                     u'Gruppen schicken.', False)
-               return HttpResponseRedirect(href('portal', 'privmsg'))
- 
+                flash(u'Du darfst keine Nachrichten an'
+                      u'Gruppen schicken.', False)
+                return HttpResponseRedirect(href('portal', 'privmsg'))
+
             for group in group_recipient_names:
                 try:
                     users = Group.objects.get(name=group).user_set.\
