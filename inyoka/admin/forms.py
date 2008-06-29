@@ -180,7 +180,8 @@ class EditUserForm(forms.Form):
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
     permissions = forms.MultipleChoiceField(label=u'Privilegien',
-        widget=forms.CheckboxSelectMultiple, required=False)
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'permission'}),
+        required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 

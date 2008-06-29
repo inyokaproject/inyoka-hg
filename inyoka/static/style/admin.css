@@ -126,3 +126,7 @@ div.preview_wrapper {
 div.preview_wrapper h2.title {
   padding-bottom: 10px;
 }
+
+ul.permissions {
+  list-style: none;
+}

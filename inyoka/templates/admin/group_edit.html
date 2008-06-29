@@ -47,5 +47,6 @@
 <script type="text/javascript">
   var forum_rights = new PrivilegeBox('#forum_rights', {{ group_forum_privileges|jsonencode }},
     {{ forum_privileges|jsonencode }});
+  $('input.permission').parent().parent().parent().attr('class', 'permissions');
 </script>
 {% endblock %}
