@@ -350,7 +350,10 @@ class TableOfContents(TreeMacro):
             elif headline.level < len(stack):
                 for x in xrange(len(stack) - headline.level):
                     stack.pop()
-            caption = [nodes.Text(headline.text)]
+            ml = headline.level*((45-self.depth-headline.level)/headline.level)
+            text = len(headline.text)>ml and headline.text[:ml]+'...' or \
+                   headline.text
+            caption = [nodes.Text(text)]
             link = nodes.Link('#' + headline.id, caption)
             stack[-1].children.append(nodes.ListItem([link]))
         return result
