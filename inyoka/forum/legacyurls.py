@@ -241,3 +241,7 @@ def login(args, match):
 @legacy.url('^/logout/?$')
 def logout(args, match):
     return href('portal', 'logout')
+
+@legacy.url('^/memberlist/?$')
+def memberlist(args, match):
+    return href('portal', 'users')
