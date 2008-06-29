@@ -404,7 +404,9 @@ def convert_forum():
         forums[f.id] = f
 
     for row in conn.execute(select([topic_table])):
-        if row.topic_replies == -1:
+        if row.topic_replies == 1 and row.topic_moved_id > 0:
+            # this should match topics with one post that are moved
+            # to another one and are now topics with -1 posts :=)
             continue
         t = Topic(**{
             'id':             row.topic_id,
