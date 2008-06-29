@@ -35,7 +35,24 @@ _free_link_re = re.compile('(?<!%s)(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]'
 
 
 class BBMarkupWriter(MarkupWriter):
-    def escape(self, text):
+    _text_escapes = [
+            '----',
+            '((',
+            '[[', 
+            '{{{',
+            "''",
+            '``',
+            '__',
+            '--(',
+            '~-',
+            '~+',
+            ',,',
+            '^^',
+        ]
+
+    def escape_text(self, text):
+        for e in self._text_escapes:
+            text = text.replace(e, '\\' + e)
         return text
 
 
