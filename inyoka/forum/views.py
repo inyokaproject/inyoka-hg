@@ -356,7 +356,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         })
     elif quote:
         form = EditPostForm(request.POST or None, initial={
-            'text': quote_text(quote.text, quote.author)
+            'text': quote_text(quote.text, quote.author) + '\n',
         })
     else:
         form = EditPostForm(request.POST or None)
@@ -555,7 +555,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             subscription.save()
 
         flash(u'Der Beitrag wurde erfolgreich gespeichert')
-        return HttpResponseRedirect(url_for(post))
+        if newtopic:
+            return HttpResponseRedirect(url_for(post.topic))
+        else:
+            return HttpResponseRedirect(url_for(post))
 
     # the user wants to see a preview
     elif 'preview' in request.POST:
