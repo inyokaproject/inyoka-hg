@@ -197,5 +197,5 @@ jinja_env = InyokaEnvironment()
 # circular imports
 from inyoka.portal.models import PrivateMessageEntry
 from inyoka.forum.models import Topic
-from inyoka.ikhaya.models import Suggestion
 from inyoka.utils.storage import storage
+from inyoka.ikhaya.models import Suggestion
