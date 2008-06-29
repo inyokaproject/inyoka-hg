@@ -179,7 +179,7 @@ def privmsg_new(args, match):
         return href('portal', 'privmsg', 'new')
 
 
-@legacy.url(r'^/privmsg/folder/([^/]+)(:?/view/(\d+))/?$')
+@legacy.url(r'^/privmsg/folder/([^/]+)(:?/view/(?:\d+))/?$')
 def privmsg_folder(args, match, folder, privmsg_id=None):
     FOLDER_MAPPING = {
         'inbox': 'inbox',
