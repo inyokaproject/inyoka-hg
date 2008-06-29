@@ -404,6 +404,8 @@ def convert_forum():
         forums[f.id] = f
 
     for row in conn.execute(select([topic_table])):
+        if row.topic_replies == -1:
+            continue
         t = Topic(**{
             'id':             row.topic_id,
             'forum':          row.forum_id in forums and \
