@@ -250,6 +250,10 @@ def convert_wiki():
             text = request.redirectedOutput(parser.format, formatter)
             text += formatter.get_tags()
             text = CATEGORY_RE.sub('', text)
+        text = text.strip()
+        # remove senseless horizontal lines at the bottom of the pages
+        if text[-4:] == '----':
+            text = text[:-4]
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
