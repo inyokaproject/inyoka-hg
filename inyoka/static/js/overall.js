@@ -171,7 +171,7 @@ $(document).ready(function() {
         $(apt).hide();
       }), ' ',
       $('<a>apturl</a>').attr('href', 'apt://' + $(apt).text().split(' ')
-                                                       .slice(3).join(' '))
+                                                       .slice(3).join(','))
     )
   });
 

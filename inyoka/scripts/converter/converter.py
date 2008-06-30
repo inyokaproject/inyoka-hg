@@ -247,13 +247,15 @@ def convert_wiki():
             formatter.setPage(page)
             formatter.inyoka_page = new_page
             parser = InyokaParser(text, request)
-            text = request.redirectedOutput(parser.format, formatter)
-            text += formatter.get_tags()
+            text = request.redirectedOutput(parser.format, formatter).strip()
+            # remove old category links at the bottom of the page.
+            # we don't need them anymore since we have tags now
             text = CATEGORY_RE.sub('', text)
-        text = text.strip()
-        # remove senseless horizontal lines at the bottom of the pages
-        if text[-4:] == '----':
-            text = text[:-4]
+            # remove senseless horizontal lines at the bottom of the pages
+            if text[-4:] == '----':
+                text = text[:-4].strip()
+            # add tags to the bottom of the page
+            text += formatter.get_tags()
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
