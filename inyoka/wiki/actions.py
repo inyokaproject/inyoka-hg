@@ -333,7 +333,6 @@ def do_edit(request, name):
     form = PageEditForm()
     if page is not None:
         form.initial = {'text': page.rev.text.value}
-#    elif 'wiki_newpage_template' in storage:
     else:
         form.initial = {'text': storage['wiki_newpage_template'] or ''}
 

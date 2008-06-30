@@ -43,6 +43,11 @@ def feeds(args, match):
 def user_profile(args, match, username):
     return href('portal', 'user', username)
 
+@legacy.url(r'^/downloads/?$')
+def downloads(args, match):
+    return href('wiki', 'Downloads')
+    # until we have a new downloads page
+
 
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
