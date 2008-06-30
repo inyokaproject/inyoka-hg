@@ -80,10 +80,6 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
         return href('forum', 'topic', topic.slug, page, **kwargs)
 
 
-@legacy.url(r'^/topic/([0-9]+)/next/?$')
-def next_topic(args, match, topic_id):
-    pass #TODO
-
 @legacy.url(r'^/index(\.php)?/?$')
 def index(args, match):
     return href('forum')
@@ -106,7 +102,8 @@ def forum_actions(args, match, forum_id, action):
     return href('forum', 'forum', forum.slug, action)
 
 
-@legacy.url(r'^/topic/(\d+)/(report|reply|watch|unwatch|solved|unsolved)/?$')
+@legacy.url(r'^/topic/(\d+)/(report|reply|watch|unwatch|solved|unsolved|'
+            r'next|previous)/?$')
 def topic_actions(args, match, topic_id, action):
     topic = Topic.query.get(topic_id)
     if not topic:

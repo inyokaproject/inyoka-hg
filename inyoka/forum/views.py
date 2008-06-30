@@ -1332,3 +1332,30 @@ def welcome(request, slug, path=None):
         'message': WelcomeMessage.query.get(forum.welcome_message_id),
         'forum': forum
     }
+
+
+def next_topic(request, topic_slug):
+    this = Topic.query.filter_by(slug=topic_slug).first()
+    if this is None:
+        raise PageNotFound
+    next = Topic.query.filter_by(forum_id=this.forum_id) \
+                      .filter(Topic.last_post_id > this.last_post_id) \
+                      .order_by('last_post_id').first()
+    if next is None:
+        flash('Es gibt keine neueren Themen in diesem Forum.')
+        next = this.forum
+    return HttpResponseRedirect(url_for(next))
+
+
+def previous_topic(request, topic_slug):
+    this = Topic.query.filter_by(slug=topic_slug).first()
+    if this is None:
+        raise PageNotFound
+    previous = Topic.query.filter_by(forum_id=this.forum_id) \
+                          .filter(Topic.last_post_id < this.last_post_id) \
+                          .order_by('-last_post_id').first()
+    if previous is None:
+        flash('Es gibt keine neueren Themen in diesem Forum.')
+        previous = this.forum
+    return HttpResponseRedirect(url_for(previous))
+
