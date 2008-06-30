@@ -454,32 +454,43 @@ def convert_forum():
 
     print 'fixing forum references'
 
-    subselect_max = select(
-        [func.max(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
-    subselect_min = select(
-        [func.min(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
+    # fix topic table
     session.execute(sa_topic_table.update(values={
-        sa_topic_table.c.last_post_id: subselect_max,
-        sa_topic_table.c.first_post_id: subselect_min
+        # last post id
+        sa_topic_table.c.last_post_id: select(
+            [func.min(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        ),
+        # first post id
+        sa_topic_table.c.first_post_id: select(
+            [func.max(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        ),
+        # post count
+        sa_topic_table.c.post_count: select(
+            [func.count(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        )
     }))
-    subselect = select(
-        [func.max(sa_topic_table.c.last_post_id)],
-        sa_topic_table.c.forum_id == sa_forum_table.c.id
-    )
+
+    # fix forum table
     session.execute(sa_forum_table.update(values={
-        sa_forum_table.c.last_post_id: subselect
+        # last post id
+        sa_forum_table.c.last_post_id: select(
+            [func.max(sa_topic_table.c.last_post_id)],
+            sa_topic_table.c.forum_id == sa_forum_table.c.id
+        ),
+        # post count
+        sa_forum_table.c.post_count: select([func.count(sa_post_table.c.id)],
+            (sa_forum_table.c.id == sa_topic_table.c.forum_id) &
+            (sa_topic_table.c.id == sa_post_table.c.topic_id)
+        ),
+        # topic count
+        sa_forum_table.c.topic_count: select([func.count(sa_topic_table.c.id)],
+            sa_forum_table.c.id == sa_topic_table.c.forum_id
+        )
     }))
-    subselect_count = select(
-        [func.count(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
-    session.execute(sa_topic_table.update(values={
-        sa_topic_table.c.post_count: subselect_count
-    }))
+
     session.commit()
 
     # Fix anon user:
