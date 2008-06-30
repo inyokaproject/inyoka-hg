@@ -66,7 +66,7 @@ def index(request):
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
-            'get_ubuntu_description', 'blocked_hosts']
+            'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():

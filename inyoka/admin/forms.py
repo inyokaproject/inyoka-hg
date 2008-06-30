@@ -38,6 +38,9 @@ class ConfigurationForm(forms.Form):
     get_ubuntu_link = forms.URLField(required=False,
         label=u'Der Downloadlink für die Startseite')
     get_ubuntu_description = forms.CharField(label=u'Beschreibung des Links')
+    wiki_newpage_template = forms.CharField(required=False,
+        widget=forms.Textarea(attrs={'rows': 5}),
+        label=u'Standardtext beim Anlegen neuer Wiki-Seiten')
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))

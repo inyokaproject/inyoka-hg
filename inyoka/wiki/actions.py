@@ -33,6 +33,7 @@ from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
+from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
@@ -332,6 +333,9 @@ def do_edit(request, name):
     form = PageEditForm()
     if page is not None:
         form.initial = {'text': page.rev.text.value}
+#    elif 'wiki_newpage_template' in storage:
+    else:
+        form.initial = {'text': storage['wiki_newpage_template'] or ''}
 
     # if there a template is in use, load initial text from the template
     template = request.GET.get('template')
