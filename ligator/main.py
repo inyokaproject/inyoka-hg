@@ -105,7 +105,7 @@ class JabberChannel(Channel):
             self.leave(username)
 
     def _join(self, username):
-        resource = 'user%d' % len(self.clients)
+        resource = 'user_%s' % username
         channel = '%s/%s' % (self.channel, username)
         client = Client('%s/%s' % (self.account, resource),
                         self.password, channel)
@@ -174,6 +174,7 @@ class IRCChannel(Channel):
         quit = lambda key: lambda c, e: self.handle_quit(c, e, key)
         for key in ['quit', 'part', 'kick']:
             self.main_server.add_global_handler(key, quit(key))
+        self._join('nurzumtesteinzweiter')
 
     def disconnect(self):
         self.irc.disconnect_all()
