@@ -5,7 +5,7 @@
 
     Ligator is a bridge between jabber and irc channels.
 
-    :copyright: Copyright 2008 by Benjamin Wiegand.
+    :copyright: Copyright 2008 by Benjamin Wiegand, Florian Apolloner.
     :license: GNU GPL.
 """
 import xmpp
@@ -62,13 +62,6 @@ class Client(xmpp.client.Client):
         self.channel = channel
         xmpp.client.Client.__init__(self, self.jid.getDomain(), debug=[])
 
-    def event(self, eventName, args={}):
-        """
-        Event Handler
-        """
-        print eventName
-        print args
-
     def connect(self):
         """
         Connect Handler
@@ -116,6 +109,7 @@ class JabberChannel(Channel):
 
     def join(self, username):
         self.clients[username] = self._join(username)
+        self.managed_users.append(username)
 
     def leave(self, username):
         self.clients[username].disconnect()
@@ -144,6 +138,7 @@ class JabberChannel(Channel):
             if username not in self.users:
                 self.unmanaged_users.append(username)
                 self.control.join(username)
+
 
 def filter_duplicates(f):
     """
@@ -185,9 +180,12 @@ class IRCChannel(Channel):
                                       self.main_user_password)
         self.main_server.add_global_handler('pubmsg', self.recieve_message)
         self.main_server.add_global_handler('join', self.handle_join)
+        self.main_server.add_global_handler('namreply', self.handle_names)
         quit = lambda key: lambda c, e: self.handle_quit(c, e, key)
         for key in ['quit', 'part', 'kick']:
             self.main_server.add_global_handler(key, quit(key))
+
+        self.main_server.send_raw('NAMES %s' % self.channel)
 
     def disconnect(self):
         self.irc.disconnect_all()
@@ -239,6 +237,13 @@ class IRCChannel(Channel):
         if username != self.main_user_name:
             self.control.join(username)
 
+    @filter_duplicates
+    def handle_names(self, connection, event):
+        users = event.arguments()[-1].split()
+        for user in users:
+            if user not in self.users:
+                self.unmanaged_users.append(user)
+                self.control.join(user)
 
 class Control(object):
     """
@@ -276,4 +281,5 @@ if __name__ == '__main__':
     while True:
         for channel in c.channels:
             channel.process()
-        sleep(1)
+        sleep(0.25)
+
