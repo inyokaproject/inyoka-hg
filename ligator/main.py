@@ -110,6 +110,7 @@ class JabberChannel(Channel):
         client = Client('%s/%s' % (self.account, resource),
                         self.password, channel)
         client.connect()
+        client.RegisterHandler("presence", self.handle_presence)
         return client
 
     def join(self, username):
@@ -129,9 +130,15 @@ class JabberChannel(Channel):
     def recieve_message(self, session, message):
         username = xmpp.protocol.JID(message.getFrom()).getResource()
         text = message.getBody()
-        print username, text
+        print "jabber:", username, text
         self.control.send_message(username, text)
 
+    def handle_presence(self, dispatcher, event):
+        if event.getType == "unavailable":
+            self.control.leave(xmpp.protocol.JID(event.getFrom()).getResource())
+        else:
+            # todo: check if in userlist, if yes don't join
+            self.control.join(xmpp.protocol.JID(event.getFrom()).getResource())
 
 def filter_duplicates(f):
     """
@@ -208,6 +215,7 @@ class IRCChannel(Channel):
         username = event.source().split('!')[0]
         text = event.arguments()[0]
         self.control.send_message(username, text)
+        print 'irc:', username, text
 
     @filter_duplicates
     def handle_quit(self, connection, event, how):
