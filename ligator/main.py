@@ -56,7 +56,6 @@ class Channel(object):
 
 
 class Client(xmpp.client.Client):
-
     def __init__(self, jid, password, channel):
         self.jid = xmpp.protocol.JID(jid)
         self.password = password
@@ -85,6 +84,8 @@ class Client(xmpp.client.Client):
 
 
 class JabberChannel(Channel):
+    unmanaged_users = []
+    managed_users = []
     clients = {}
 
     def __init__(self, account, password, channel, main_user_name):
@@ -97,6 +98,7 @@ class JabberChannel(Channel):
         self.control = control
         client = self._join(self.main_user_name)
         client.RegisterHandler("message", self.recieve_message)
+        client.RegisterHandler("presence", self.handle_presence)
         self.main_client = client
 
     def disconnect(self):
@@ -110,7 +112,6 @@ class JabberChannel(Channel):
         client = Client('%s/%s' % (self.account, resource),
                         self.password, channel)
         client.connect()
-        client.RegisterHandler("presence", self.handle_presence)
         return client
 
     def join(self, username):
@@ -129,16 +130,20 @@ class JabberChannel(Channel):
 
     def recieve_message(self, session, message):
         username = xmpp.protocol.JID(message.getFrom()).getResource()
-        text = message.getBody()
-        print "jabber:", username, text
-        self.control.send_message(username, text)
+        if username not in self.managed_users:
+            text = message.getBody()
+            print "jabber:", username, text
+            self.control.send_message(username, text)
 
     def handle_presence(self, dispatcher, event):
-        if event.getType == "unavailable":
-            self.control.leave(xmpp.protocol.JID(event.getFrom()).getResource())
+        username = xmpp.protocol.JID(event.getFrom()).getResource()
+        if event.getStatus() == "offline":
+            self.unmanaged_users.remove(username)
+            self.control.leave(username)
         else:
-            # todo: check if in userlist, if yes don't join
-            self.control.join(xmpp.protocol.JID(event.getFrom()).getResource())
+            if username not in self.users:
+                self.unmanaged_users.append(username)
+                self.control.join(username)
 
 def filter_duplicates(f):
     """
@@ -161,6 +166,8 @@ class IRCChannel(Channel):
     #: contains a user --> server mapping
     servers = {}
     msgs = {}
+    unmanaged_users = []
+    managed_users = []
 
     def __init__(self, server, port, channel, main_user_name,
                  main_user_password=None, channel_password=None):
@@ -181,7 +188,6 @@ class IRCChannel(Channel):
         quit = lambda key: lambda c, e: self.handle_quit(c, e, key)
         for key in ['quit', 'part', 'kick']:
             self.main_server.add_global_handler(key, quit(key))
-        self._join('nurzumtesteinzweiter')
 
     def disconnect(self):
         self.irc.disconnect_all()
@@ -205,7 +211,7 @@ class IRCChannel(Channel):
         server.close()
 
     def send_message(self, username, message):
-        self.servers[username].privmsg(self.channel, message)
+        self.servers[username].privmsg(self.channel, message.encode('utf8'))
 
     def process(self):
         self.irc.process_once()
@@ -213,9 +219,10 @@ class IRCChannel(Channel):
     @filter_duplicates
     def recieve_message(self, connection, event):
         username = event.source().split('!')[0]
-        text = event.arguments()[0]
-        self.control.send_message(username, text)
-        print 'irc:', username, text
+        if username not in self.managed_users:
+            text = event.arguments()[0]
+            self.control.send_message(username, text)
+            print 'irc:', username, text
 
     @filter_duplicates
     def handle_quit(self, connection, event, how):
@@ -223,6 +230,7 @@ class IRCChannel(Channel):
             username = event.source().split('!')[0]
         else:
             username = event.arguments()[0]
+        self.unmanaged_users.remove(username)
         self.control.leave(username)
 
     @filter_duplicates
@@ -242,12 +250,6 @@ class Control(object):
         self.usernames = set()
         for channel in channels:
             channel.connect(self)
-            for username in channel.unmanaged_users:
-                self.usernames.add(username)
-
-        for username in self.usernames:
-            for channel in channels:
-                channel.join(username)
 
     def send_message(self, username, message):
         for channel in self.channels:
