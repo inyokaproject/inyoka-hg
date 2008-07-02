@@ -507,7 +507,7 @@ class Parser(object):
     parse_paste = _make_interwiki_link('paste')
     parse_wikipedia = _make_interwiki_link('wikipedia')
     parse_google = _make_interwiki_link('google')
-    parse_linuxgoogle = make_interwiki_link('linuxgoogle', 'googlelinux')
+    parse_linuxgoogle = _make_interwiki_link('linuxgoogle', 'googlelinux')
     parse_ikhaya = _make_interwiki_link('ikhaya')
     parse_wikipedia_en = _make_interwiki_link('wikipedia-en',
                                               'wikipedia_en')
