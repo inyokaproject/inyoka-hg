@@ -147,8 +147,8 @@ def filter_duplicates(f):
     event only once.
     """
     def decorator(self, connection, event, *args, **kwargs):
-        key = md5('|'.join([event.source(), event.target()]
-                           + event.arguments())).hexdigest()
+        key = md5('|'.join([event.source() or '', event.target() or '']
+                           + event.arguments() or '')).hexdigest()
         if self.msgs.setdefault(key, 0) == 0:
             f(self, connection, event, *args, **kwargs)
         self.msgs[key] += 1
@@ -204,7 +204,7 @@ class IRCChannel(Channel):
     def leave(self, username):
         server = self.servers[username]
         del self.servers[username]
-        del self.managed_users[username]
+        self.managed_users.remove(username)
         server.disconnect('weg')
         server.close()
 
@@ -228,13 +228,16 @@ class IRCChannel(Channel):
             username = event.source().split('!')[0]
         else:
             username = event.arguments()[0]
-        self.unmanaged_users.remove(username)
-        self.control.leave(username)
+        if username in self.unmanaged_users:
+            self.unmanaged_users.remove(username)
+            self.control.leave(username)
 
     @filter_duplicates
     def handle_join(self, connection, event):
         username = event.source().split('!')[0]
-        if username != self.main_user_name:
+        if username != self.main_user_name and username not in \
+                                            self.managed_users:
+            self.unmanaged_users.append(username)
             self.control.join(username)
 
     @filter_duplicates
