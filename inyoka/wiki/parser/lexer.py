@@ -94,7 +94,7 @@ class Lexer(object):
     _url_pattern = (
         # urls with netloc
         r'(?:(?:https?|ftps?|file|ssh|mms|svn(?:\+ssh)?|git|dict|nntp|irc|'
-        r'rsync|smb)://|'
+        r'rsync|smb|apt)://|'
         # urls without netloc
         r'(?:mailto|telnet|s?news|sips?|skype):)'
     )
