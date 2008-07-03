@@ -133,7 +133,7 @@ def detail(request, slug):
             c.author = request.user
             c.pub_date = datetime.utcnow()
             c.save()
-            flash(u'Der Kommentar „%s“ wurde erstellt.' % escape(c.title))
+            flash(u'Dein Kommentar wurde erstellt.')
             return HttpResponseRedirect(url_for(article))
     else:
         form = EditCommentForm()
