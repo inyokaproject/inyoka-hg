@@ -1358,4 +1358,3 @@ def previous_topic(request, topic_slug):
         flash('Es gibt keine neueren Themen in diesem Forum.')
         previous = this.forum
     return HttpResponseRedirect(url_for(previous))
-

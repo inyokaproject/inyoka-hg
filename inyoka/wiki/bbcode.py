@@ -38,7 +38,7 @@ class BBMarkupWriter(MarkupWriter):
     _text_escapes = [
             '----',
             '((',
-            '[[', 
+            '[[',
             '{{{',
             "''",
             '``',
