@@ -36,8 +36,7 @@ $(document).ready(function() {
   })();
 
   // make the calendar button show some events
-  $('.container.calendar h3').after('<span><a href="/calendar/" class="calendar_link">Nächste Termine</a></span>');
-  $('a.calendar_link').click(function() {
+  $('.container.calendar a.calendar_link').click(function() {
     $('.calendar.overview').slideToggle('fast');
     return false;
   });
