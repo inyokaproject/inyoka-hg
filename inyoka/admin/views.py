@@ -755,8 +755,8 @@ def user_edit(request, username):
 
 
 @require_permission('user_edit')
-@templated('admin/new_user.html')
-def new_user(request):
+@templated('admin/user_new.html')
+def user_new(request):
     if request.method == 'POST':
         form = CreateUserForm(request.POST)
         if form.is_valid():

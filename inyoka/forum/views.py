@@ -5,8 +5,8 @@
 
     The views for the forum.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
-                                  Christoph Hack.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Christopher Grebs,
+                                       Christoph Hack.
     :license: GNU GPL.
 """
 import re
@@ -176,7 +176,7 @@ def forum(request, slug, page=1):
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
-                                                                 forum=f),
+                                                              forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
     })
     return ctx
@@ -198,7 +198,6 @@ def viewtopic(request, topic_slug, page=1):
         return abort_access_denied(request)
     if t.hidden:
         if not check_privilege(privileges, 'moderate'):
-            # XXX: don't show the topic if the user isn't a moderator
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
             return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
@@ -1077,7 +1076,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     anonymous = User.objects.get_anonymous_user()
 
     if component == 'topic':
-        topic = Topic.query.filter_by(slug=slug).one()
+        topic = Topic.query.filter_by(slug=slug).first()
         if topic is None:
             raise PageNotFound
         if not have_privilege(anonymous, topic.forum, CAN_READ):

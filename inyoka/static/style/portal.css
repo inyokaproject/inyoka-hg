@@ -4,7 +4,7 @@
  *
  * The styles for the portal.
  *
- * :copyright: 2007 by Armin Ronacher, Benjamin Wiegand, Christopher Grebs.
+ * :copyright: 2007-2008 by Armin Ronacher, Benjamin Wiegand, Christopher Grebs.
  * :license: GNU GPL.
  */
 
@@ -367,6 +367,10 @@ table.calendar td.noday {
 table.calendar td.time {
   background-color: #f1dfc8;
   border-width: 0 1px 0 0;
+}
+
+table.pms {
+  margin-top: 20px;
 }
 
 table.pms td.actions {

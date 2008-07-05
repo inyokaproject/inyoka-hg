@@ -27,7 +27,7 @@
     {{ render_form(form, ['username', 'password', 'email'], inline=true) }}
     <dt>Autentifizieren:</dt>
     <dd>
-      <input type="checkbox" name="authenticate" id="id_authenticate" />
+      {{ form.authenticate }}
       <span class="note">{{ form.authenticate.help_text }}</span>
     </dd>
   </dl>

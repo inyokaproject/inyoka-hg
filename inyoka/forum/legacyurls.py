@@ -5,7 +5,8 @@
 
     Forum legacy URL support.
 
-    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler.
+    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler,
+                                  Christopher Grebs.
     :license: GNU GPL.
 """
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
@@ -87,9 +88,10 @@ def index(args, match):
 
 @legacy.url(r'^/forum/(\d+)/(newtopic|watch|unwatch|mark_read)/?$')
 def forum_actions(args, match, forum_id, action):
-    forum = Forum.query.get(forum_id)
+    forum = Forum.query.get(int(forum_id))
     if not forum:
         return
+
     ACTIONS = {
         'watch': 'subscribe',
         'unwatch': 'unsubscribe',
@@ -176,7 +178,7 @@ def privmsg_new(args, match):
         return href('portal', 'privmsg', 'new')
 
 
-@legacy.url(r'^/privmsg/folder/([^/]+)(:?/view/(?:\d+))/?$')
+@legacy.url(r'^/privmsg/folder/([^/]+)/view/(\d+)/?$')
 def privmsg_folder(args, match, folder, privmsg_id=None):
     FOLDER_MAPPING = {
         'inbox': 'inbox',

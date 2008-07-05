@@ -12,7 +12,7 @@ from datetime import datetime
 from django import newforms as forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
-                               DateTimeWidget
+                               DateTimeWidget, EmailField
 from inyoka.utils.html import cleanup_html
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 from inyoka.portal.models import StaticFile
@@ -121,11 +121,10 @@ class EditFileForm(forms.Form):
 class CreateUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     password = forms.CharField(label=u'Passwort')
-    #XXX: use forms.EmailField after testing, see portal.user.User
-    email = forms.CharField(label=u'E-Mail')
-    authenticate = forms.BooleanField(label=u'Autentifizieren', required=False,
-        help_text=(u'Der Benutzer bekommt eine Bestätigungsmail zugesandt'
-                   u' und wird als inaktiv erstellt.'))
+    email = EmailField(label=u'E-Mail')
+    authenticate = forms.BooleanField(label=u'Autentifizieren', initial=True,
+        required=False, help_text=(u'Der Benutzer bekommt eine '
+            u'Bestätigungsmail zugesandt und wird als inaktiv erstellt.'))
 
 
 class EditUserForm(forms.Form):
