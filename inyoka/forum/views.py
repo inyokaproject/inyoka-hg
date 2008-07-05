@@ -176,7 +176,7 @@ def forum(request, slug, page=1):
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
-                                                              forum=f),
+                                                                 forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
     })
     return ctx
@@ -197,6 +197,9 @@ def viewtopic(request, topic_slug, page=1):
     if not check_privilege(privileges, 'read'):
         return abort_access_denied(request)
     if t.hidden:
+        if not check_privilege(privileges, 'moderate'):
+            flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
+            return HttpResponseRedirect(url_for(t.forum))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
     fmsg = t.forum.find_welcome(request.user)
     if fmsg is not None:
