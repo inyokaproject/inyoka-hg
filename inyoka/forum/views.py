@@ -176,7 +176,7 @@ def forum(request, slug, page=1):
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
-                                                                 forum=f),
+                                                              forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
     })
     return ctx

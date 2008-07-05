@@ -369,6 +369,10 @@ table.calendar td.time {
   border-width: 0 1px 0 0;
 }
 
+table.pms {
+  margin-top: 20px;
+}
+
 table.pms td.actions {
   min-width: 80px;
 }
