@@ -1076,7 +1076,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     anonymous = User.objects.get_anonymous_user()
 
     if component == 'topic':
-        topic = Topic.query.filter_by(slug=slug).one()
+        topic = Topic.query.filter_by(slug=slug).first()
         if topic is None:
             raise PageNotFound
         if not have_privilege(anonymous, topic.forum, CAN_READ):
