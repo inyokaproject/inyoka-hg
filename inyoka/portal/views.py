@@ -7,8 +7,8 @@
     private messages, static pages and the login/register and search
     dialogs.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
-                                  Christoph Hack, Marian Sigler.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Christopher Grebs,
+                                       Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
 from werkzeug import parse_accept_header

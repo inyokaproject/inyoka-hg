@@ -5,7 +5,8 @@
 
     Forum legacy URL support.
 
-    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler.
+    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler,
+                                  Christopher Grebs.
     :license: GNU GPL.
 """
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE

@@ -5,8 +5,8 @@
 
     The views for the forum.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
-                                  Christoph Hack.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Christopher Grebs,
+                                       Christoph Hack.
     :license: GNU GPL.
 """
 import re
