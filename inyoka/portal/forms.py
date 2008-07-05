@@ -53,7 +53,8 @@ class LoginForm(forms.Form):
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False))
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
-                                   widget=forms.CheckboxInput)
+                                   widget=forms.CheckboxInput,
+                                   required=False)
 
 
 class RegisterForm(forms.Form):
