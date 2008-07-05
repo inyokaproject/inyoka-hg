@@ -183,7 +183,7 @@ class InyokaFormatter(FormatterBase):
             else:
                 args = []
 
-        if name in ['Inhaltsverzeichnis', 'Seitenzahl']:
+        if name in ['Seitenzahl']:
             args = []
 
         if args:
