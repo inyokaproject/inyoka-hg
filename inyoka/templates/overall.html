@@ -111,7 +111,7 @@
       <div class="pathbar">
 
         <form action="{{ href('portal', 'search') }}" method="get" class="search">
-          <input type="text" name="q" class="search_query" value="{{ query|e }}" />
+          <input type="text" name="query" class="search_query" value="{{ query|e }}" />
             {%- if topic %}
             <input type="hidden" name="topic_id" value="{{ topic.id }}" />
             {%- elif forum %}
