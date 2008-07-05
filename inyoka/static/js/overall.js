@@ -108,7 +108,7 @@ $(document).ready(function() {
           if (e.hasClass('default_value'))
             e.val('').removeClass('default_value');
         });
-      $('.search_query').val('').blur();
+      $('.search_query').blur();
     $(document).click(function() {
       if (areaPopup.is(':visible'))
         areaPopup.hide();
