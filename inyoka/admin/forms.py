@@ -88,7 +88,8 @@ class EditArticleForm(forms.Form):
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
                   u'Feld frei, um ihn automatisch generieren zu lassen '
                   u'(empfohlen).')
-    comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt')
+    comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt',
+                                          required=False)
 
 
 class EditCategoryForm(forms.Form):
@@ -99,6 +100,7 @@ class EditCategoryForm(forms.Form):
 class EditFileForm(forms.Form):
     file = forms.FileField(label=u'Datei', required=False)
     is_ikhaya_icon = forms.BooleanField(label=u'Ist Ikhaya-Icon',
+            required=False,
             help_text=u'Wähle dieses Feld aus, wenn die Datei im Auswahlfeld '
                       u'für Artikel- und Kategorie-Icons erscheinen soll.')
 
@@ -170,7 +172,7 @@ class EditUserForm(forms.Form):
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
-    delete_avatar = forms.BooleanField(label=u'Avatar löschen')
+    delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
 
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()

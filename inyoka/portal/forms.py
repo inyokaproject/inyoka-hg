@@ -53,7 +53,7 @@ class LoginForm(forms.Form):
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False))
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
-                                   widget=forms.CheckboxInput)
+                                   required=False)
 
 
 class RegisterForm(forms.Form):
@@ -78,7 +78,7 @@ class RegisterForm(forms.Form):
         widget=forms.PasswordInput(render_value=False))
     captcha = CaptchaField(label='CAPTCHA')
     hidden_captcha = HiddenCaptchaField(required=False)
-    terms_of_usage = forms.BooleanField(widget=forms.CheckboxInput)
+    terms_of_usage = forms.BooleanField()
 
     def clean_username(self):
         """
@@ -248,9 +248,12 @@ class UserCPSettingsForm(forms.Form):
         widget=forms.CheckboxSelectMultiple)
     timezone = forms.ChoiceField(label='Zeitzone', required=True,
         choices=zip(TIMEZONES, TIMEZONES))
-    hide_profile = forms.BooleanField(label='Online-Status verstecken')
-    hide_avatars = forms.BooleanField(label='Avatare ausblenden')
-    hide_signatures = forms.BooleanField(label='Signaturen ausblenden')
+    hide_profile = forms.BooleanField(label='Online-Status verstecken',
+                                      required=False)
+    hide_avatars = forms.BooleanField(label='Avatare ausblenden',
+                                      required=False)
+    hide_signatures = forms.BooleanField(label='Signaturen ausblenden',
+                                         required=False)
     autosubscribe = forms.BooleanField(required=False,
                         label='Thema bei Antwort automatisch abonnieren')
     show_preview = forms.BooleanField(required=False,
@@ -272,7 +275,7 @@ class UserCPSettingsForm(forms.Form):
 
 class UserCPProfileForm(forms.Form):
     avatar = forms.ImageField(label='Avatar', required=False)
-    delete_avatar = forms.BooleanField(label=u'Avatar löschen')
+    delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
     email = EmailField(label='E-Mail', required=True)
     jabber = JabberField(label='Jabber', required=False)
     icq = forms.IntegerField(label='ICQ', required=False,
