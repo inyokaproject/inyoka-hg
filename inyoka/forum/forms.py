@@ -10,7 +10,7 @@
 """
 from django import newforms as forms
 from inyoka.utils.forms import MultiField
-from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS
+from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS, Topic, Forum
 from inyoka.utils.sessions import SurgeProtectionMixin
 
 
@@ -123,7 +123,7 @@ class SplitTopicForm(forms.Form):
     #: the forum of the new topic
     forum = forms.ChoiceField()
     #: the slug of the existing topic
-    topic_slug = forms.CharField(max_length=200)
+    topic = forms.CharField(max_length=200)
     #: this is a boolean that is True if the user wants to select single posts
     #: for splitting out of the topic.
     select_selected = forms.BooleanField(required=False)
@@ -145,11 +145,26 @@ class SplitTopicForm(forms.Form):
         elif data['select_following']:
             self._errors.pop('select', None)
         if data.get('action') == 'new':
-            self._errors.pop('topic_slug', None)
+            self._errors.pop('topic', None)
         elif data.get('action') == 'add':
             self._errors.pop('title', None)
             self._errors.pop('forum', None)
         return data
+
+    def clean_topic(self):
+        slug = self.cleaned_data.get('topic')
+        if slug:
+            t = Topic.query.filter_by(slug=slug).first()
+            if not t:
+                raise forms.ValidationError(u'Ein Thema mit diesem Slug '
+                                            u'existiert nicht')
+            return t
+        return slug
+
+    def clean_forum(self):
+        id = self.cleaned_data.get('forum')
+        if id:
+            return Forum.query.filter_by(id=id).first()
 
 
 class AddAttachmentForm(forms.Form):

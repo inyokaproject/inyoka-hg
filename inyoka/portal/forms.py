@@ -66,7 +66,7 @@ class RegisterForm(forms.Form):
     techniques for bot catching included e.g a CAPTCHA and a hidden captcha
     for bots that just fill out everything.
     """
-    username = forms.CharField(label='Benutzername')
+    username = forms.CharField(label='Benutzername', max_length=30)
     email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
@@ -264,7 +264,7 @@ class UserCPSettingsForm(forms.Form):
         if u'jabber' in data:
             if not current_request.user.jabber:
                 raise forms.ValidationError(u'Du musst eine gültige Jabber '
-                    u'Adresse <a href="%s">angeben</a>. um unseren Jabber '
+                    u'Adresse <a href="%s">angeben</a>, um unseren Jabber '
                     u'Service nutzen zu können.' % escape(href(
                         'portal', 'usercp', 'profile')))
         return data
@@ -294,10 +294,10 @@ class UserCPProfileForm(forms.Form):
     Probleme beim bestimmen der Koordinaten?
     <a href="http://www.fallingrain.com/world/">Suche einfach deinen Ort</a>
     und übernimm die Koordinaten.''')
-    location = forms.CharField(label='Wohnort', required=False, max_length=25)
-    occupation = forms.CharField(label='Beruf', required=False, max_length=25)
+    location = forms.CharField(label='Wohnort', required=False, max_length=50)
+    occupation = forms.CharField(label='Beruf', required=False, max_length=50)
     interests = forms.CharField(label='Interessen', required=False,
-                                max_length=50)
+                                max_length=100)
     website = forms.URLField(label='Webseite', required=False)
     launchpad = forms.CharField(label=u'Launchpad Nickname', required=False,
                                 max_length=50)
@@ -355,11 +355,20 @@ class SearchForm(forms.Form):
 
 class PrivateMessageForm(forms.Form):
     """Form for writing a new private message"""
-    recipient = forms.CharField(label=u'Empfänger',
+    recipient = forms.CharField(label=u'Empfänger', required=False,
         help_text="Mehrere Namen mit Semikolon getrennt eingeben.")
+    group_recipient = forms.CharField(label=u'Gruppen', required=False,
+        help_text="Mehrere Gruppen mit Semikolon getrennt eingeben.")
     subject = forms.CharField(label=u'Betreff',
                               widget=forms.TextInput(attrs={'size': 50}))
     text = forms.CharField(label=u'Text', widget=forms.Textarea)
+
+    def clean(self):
+        d = self.cleaned_data
+        if 'recipient' in d and 'group_recipient' in d:
+            if not d['recipient'].strip() and not d['group_recipient'].strip():
+                raise forms.ValidationError(u'Mindestens einen Empfänger angeben.')
+        return self.cleaned_data
 
 
 class DeactivateUserForm(forms.Form):

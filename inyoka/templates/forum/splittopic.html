@@ -40,7 +40,7 @@
         <label for="id_add">An altes Topic anfügen</label>
       </dt>
       <dd>
-        Slug des Topics: {{ form.topic_slug }}{{ form.errors.topic_slug }}
+        Slug des Topics: {{ form.topic }}{{ form.errors.topic }}
       </dd>
     </dl>
     {{ form.errors.action }}
@@ -99,7 +99,7 @@
   <script type="text/javascript">
     /* <![CDATA[ */
     (function () {
-      $('#id_topic_slug').autocomplete('/?__service__=forum.get_topic_autocompletion', {
+      $('#id_topic').autocomplete('/?__service__=forum.get_topic_autocompletion', {
         delay: 40, cacheLength: 10});
     })();
     /* ]]> */

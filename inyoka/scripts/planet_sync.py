@@ -46,6 +46,8 @@ def sync():
     """
     debug('debugging enabled')
     for blog in Blog.objects.all():
+        debug('syncing blog %s' % blog.name)
+
         # parse the feed. feedparser.parse will never given an exception
         # but the bozo bit might be defined.
         feed = feedparser.parse(blog.feed_url)
@@ -110,8 +112,6 @@ def sync():
             # convert the time tuples to datetime objects.
             pub_date = datetime(*pub_date[:6])
             updated = datetime(*updated[:6])
-            if old_entry and updated <= old_entry.updated:
-                continue
 
             # get the blog author or fall back to blog default.
             author = entry.get('author') or blog_author

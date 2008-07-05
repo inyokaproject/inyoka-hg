@@ -35,6 +35,12 @@ $(document).ready(function() {
         .appendTo(navigation);
   })();
 
+  // make the calendar button show some events
+  $('.container.calendar a.calendar_link').click(function() {
+    $('.calendar.overview').slideToggle('fast');
+    return false;
+  });
+
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
   (function() {
@@ -117,7 +123,7 @@ $(document).ready(function() {
     var togglebutton =
       $('<button class="navi_toggle_up" title="Navigation ausblenden" />')
         .click(function() {
-          $('.content_sidebar').toggleClass('content_full');
+          $('.content').toggleClass('content_sidebar');
           sidebar.toggle();
           togglebutton
             .toggleClass('navi_toggle_up')
@@ -164,7 +170,7 @@ $(document).ready(function() {
         $(apt).hide();
       }), ' ',
       $('<a>apturl</a>').attr('href', 'apt://' + $(apt).text().split(' ')
-                                                       .slice(3).join(' '))
+                                                       .slice(3).join(','))
     )
   });
 

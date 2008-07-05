@@ -47,7 +47,7 @@
      {%- elif day.weekday() == 5 %} class="saturday"
      {%- endif %}>
     <td class="weekday">
-      {{- day.strftime('%a') -}}
+      {{- WEEKDAYS[day.weekday()][:2] -}}
     </td>
     <td class="day">
       {{- day.strftime('%d') -}}

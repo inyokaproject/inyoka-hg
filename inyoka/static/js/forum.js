@@ -64,10 +64,8 @@ $(function () {
     };
   })();
 
-
-  $('.codeblock').each(function () {
-    if (this.clientHeight < this.scrollHeight)
-    {
+  $('table').each(function () {
+    if (this.clientHeight < this.scrollHeight) {
       $(this)
         .after('<div class="codeblock_resizer" title="vergrößern"></div>')
         .css('height', '15em').css('max-height', 'none')
@@ -76,19 +74,15 @@ $(function () {
   });
   $('.codeblock_resizer').click(function () {
     $codeblock = $(this).prev();
-    if (! $codeblock.hasClass('codeblock_expanded'))
-    {
+    if (!$codeblock.hasClass('codeblock_expanded')) {
       $codeblock.addClass('codeblock_expanded');
       $codeblock.animate({'height': $codeblock[0].scrollHeight}, 500);
       this.title = 'verkleinern';
-    }
-    else
-    {
+    } else {
       $codeblock.removeClass('codeblock_expanded');
       $codeblock.animate({'height': $codeblock.data('original_height')}, 500);
       this.title = 'vergrößern';
     }
   });
-
 });
 

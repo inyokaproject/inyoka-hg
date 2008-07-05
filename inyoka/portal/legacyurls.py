@@ -8,8 +8,8 @@
     :copyright: Copyright 2008 by Marian Sigler.
     :license: GNU GPL.
 """
-#from inyoka.forum.models import Forum, Topic
 from inyoka.utils.urls import href
+from inyoka.utils.flashing import flash
 from inyoka.utils.legacyurls import LegacyDispatcher
 from inyoka.ikhaya.models import Article
 
@@ -28,11 +28,10 @@ def ikhaya_article(args, match, article_id):
         return
     return href('ikhaya', article.slug)
 
-@legacy.url(r'^/ikhaya/([^0-9].*|)$')
+@legacy.url(r'^/ikhaya/([^\d].*)/?$')
 def ikhaya(args, match, url):
     # further redirects are done in ikhaya.legacyurls
     return href('ikhaya', url, **args)
-
 
 @legacy.url(r'^/rss/')
 def feeds(args, match):
@@ -44,18 +43,30 @@ def feeds(args, match):
 def user_profile(args, match, username):
     return href('portal', 'user', username)
 
+@legacy.url(r'^/downloads/?$')
+def downloads(args, match):
+    return href('wiki', 'Downloads')
+    # until we have a new downloads page
+
+@legacy.url(r'^/bookmarks(?:/[^/]+/(?:\d+)?)?/?$')
+def bookmarks(args, match):
+    flash(u'Seit der Einführung von Inyoka auf ubuntuusers.de gibt es '
+          u'keine Lesezeichen mehr.<br/>Als Ersatz kannst du die '
+          u'<a href="http://de.wikipedia.org/wiki/Bookmark">Lesezeichen-Funktion'
+          u'</a> moderner Web-Browser nutzen.', False)
+    return href('portal')
 
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
-@legacy.url(r'^/portal\.php$')
+@legacy.url(r'^/portal\.php')
 def v1_portal(args, match):
     return href()
 
-@legacy.url(r'^/index\.php$')
+@legacy.url(r'^/index\.php')
 def v1_forum_index(args, match):
     return href('forum')
 
-@legacy.url(r'^/viewtopic\.php$')
+@legacy.url(r'^/viewtopic\.php')
 def v1_forum_topic(args, match):
     if 't' in args:
         return href('forum', 'topic', args['t'])
@@ -64,22 +75,22 @@ def v1_forum_topic(args, match):
     else:
         return href('forum')
 
-@legacy.url(r'^/viewforum\.php$')
+@legacy.url(r'^/viewforum\.php')
 def v1_forum_forum(args, match):
     if 'f' in args:
         return href('forum', 'forum', args['f'], args.get('start'))
     else:
         return href('forum')
 
-@legacy.url(r'^/login\.php$')
+@legacy.url(r'^/login\.php')
 def v1_login(args, match):
     return href('portal', 'login')
 
-@legacy.url(r'^/map\.php$')
+@legacy.url(r'^/map\.php')
 def v1_map(args, match):
     return href('portal', 'map')
 
-@legacy.url(r'^/profile\.php$')
+@legacy.url(r'^/profile\.php')
 def v1_profile(args, match):
     return href('portal', 'usercp')
 

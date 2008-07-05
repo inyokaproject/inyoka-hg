@@ -7,10 +7,11 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+from inyoka.conf import settings
+settings.DATABASE_DEBUG = False
 from sqlalchemy.sql import desc
 from inyoka.forum.models import Post
 from inyoka.utils.database import session
-
 
 def render_posts():
     query = Post.query.filter(Post.c.rendered_text == '') \
@@ -22,6 +23,7 @@ def render_posts():
             post.rendered_text = post.render_text(nocache=True,
                                                   force_existing=True)
             session.commit()
+            session.flush()
         result = query.all()
 
 

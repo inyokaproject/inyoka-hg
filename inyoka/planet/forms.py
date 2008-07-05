@@ -17,5 +17,5 @@ class SuggestBlogForm(forms.Form):
     url =  forms.URLField(label=u'URL')
     description = forms.CharField(label=u'Beschreibung',
         widget=forms.Textarea,
-        help_text=(u'Die Beschreibung dient dem Ikhaya Team '
+        help_text=(u'Die Beschreibung dient dem Ikhaya-Team '
               u'sich einen besseren Überblick zu verschaffen.'))

@@ -18,13 +18,13 @@
 <h3>{{ title_trace[0] }}</h3>
 <form enctype="multipart/form-data" action="" method="post" id="configuration">
   <dl>
-    {{ render_form(form, ['global_message', 'blocked_hosts', 'team_icon', 'max_signature_length',
+    {{ render_form(form, ['global_message', 'blocked_hosts', 'wiki_newpage_template', 'team_icon', 'max_signature_length',
                           'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
     <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel
         {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
   </dl>
-  <h3>Get Ubuntu-Link</h3>
+  <h3>Get-Ubuntu-Link</h3>
   {{ render_form(form, ['get_ubuntu_link', 'get_ubuntu_description']) }}
   <br />
   <p>

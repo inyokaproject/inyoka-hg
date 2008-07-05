@@ -5,7 +5,8 @@
 
     Forum legacy URL support.
 
-    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler.
+    :copyright: Copyright 2008 by Armin Ronacher, Marian Sigler,
+                                  Christopher Grebs.
     :license: GNU GPL.
 """
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
@@ -80,10 +81,6 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
         return href('forum', 'topic', topic.slug, page, **kwargs)
 
 
-@legacy.url(r'^/topic/([0-9]+)/next/?$')
-def next_topic(args, match, topic_id):
-    pass #TODO
-
 @legacy.url(r'^/index(\.php)?/?$')
 def index(args, match):
     return href('forum')
@@ -91,9 +88,10 @@ def index(args, match):
 
 @legacy.url(r'^/forum/(\d+)/(newtopic|watch|unwatch|mark_read)/?$')
 def forum_actions(args, match, forum_id, action):
-    forum = Forum.query.get(forum_id)
+    forum = Forum.query.get(int(forum_id))
     if not forum:
         return
+
     ACTIONS = {
         'watch': 'subscribe',
         'unwatch': 'unsubscribe',
@@ -106,7 +104,8 @@ def forum_actions(args, match, forum_id, action):
     return href('forum', 'forum', forum.slug, action)
 
 
-@legacy.url(r'^/topic/(\d+)/(report|reply|watch|unwatch|solved|unsolved)/?$')
+@legacy.url(r'^/topic/(\d+)/(report|reply|watch|unwatch|solved|unsolved|'
+            r'next|previous)/?$')
 def topic_actions(args, match, topic_id, action):
     topic = Topic.query.get(topic_id)
     if not topic:
@@ -179,7 +178,7 @@ def privmsg_new(args, match):
         return href('portal', 'privmsg', 'new')
 
 
-@legacy.url(r'^/privmsg/folder/([^/]+)(:?/view/(\d+))/?$')
+@legacy.url(r'^/privmsg/folder/([^/]+)/view/(\d+)/?$')
 def privmsg_folder(args, match, folder, privmsg_id=None):
     FOLDER_MAPPING = {
         'inbox': 'inbox',
@@ -241,3 +240,7 @@ def login(args, match):
 @legacy.url('^/logout/?$')
 def logout(args, match):
     return href('portal', 'logout')
+
+@legacy.url('^/memberlist/?$')
+def memberlist(args, match):
+    return href('portal', 'users')

@@ -22,7 +22,8 @@
         };
       });
     $.each(forums, function(i, forum) {
-      var [id, name, perms] = forum;
+      var id, name, perms;
+      [id, name, perms] = forum;
       mapping[id] = perms;
       select.append($('<option></option>').val(id).text(name));
     });

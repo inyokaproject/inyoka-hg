@@ -40,13 +40,20 @@ def check_login(message=None):
     return _wrapper
 
 
-def require_manager(f):
-    """Require that the user is logged in and is a manager."""
-    def decorator(request, *args, **kwargs):
-        if request.user.is_manager:
-            return f(request, *args, **kwargs)
-        return abort_access_denied(request)
-    return simple_check_login(patch_wrapper(decorator, f))
+def require_permission(*perms):
+    """
+    This decorator checks whether the user has a special permission and
+    raises 403 if he doesn't. If you pass more than one permission name,
+    the view function is executed if the user has one of them.
+    """
+    def f1(func):
+        def f2(request, *args, **kwargs):
+            for perm in perms:
+                if request.user.can(perm):
+                    return func(request, *args, **kwargs)
+            return abort_access_denied(request)
+        return f2
+    return f1
 
 
 def simple_check_login(f):

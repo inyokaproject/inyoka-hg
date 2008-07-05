@@ -33,6 +33,7 @@ from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
+from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
@@ -272,10 +273,8 @@ def do_rename(request, name):
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
-                flash(u'Eine Seite mit diesem Namen existiert bereits.')
-                rename_url=href('wiki', name, action='rename',
-                                page_name=new_name)
-                return HttpResponseRedirect(rename_url)
+                flash(u'Eine Seite mit diesem Namen existiert bereits.', False)
+                return HttpResponseRedirect(href('wiki', name))
         return HttpResponseRedirect(url_for(page))
     flash(render_template('wiki/action_rename.html', {
         'page':         page,
@@ -334,6 +333,8 @@ def do_edit(request, name):
     form = PageEditForm()
     if page is not None:
         form.initial = {'text': page.rev.text.value}
+    else:
+        form.initial = {'text': storage['wiki_newpage_template'] or ''}
 
     # if there a template is in use, load initial text from the template
     template = request.GET.get('template')

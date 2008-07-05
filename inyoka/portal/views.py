@@ -7,8 +7,8 @@
     private messages, static pages and the login/register and search
     dialogs.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christopher Grebs,
-                                  Christoph Hack, Marian Sigler.
+    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Christopher Grebs,
+                                       Christoph Hack, Marian Sigler.
     :license: GNU GPL.
 """
 from werkzeug import parse_accept_header
@@ -73,6 +73,8 @@ def index(request):
     and some records of ubuntuusers.de
     """
     ikhaya_latest = Article.published.all()[:10]
+    events = Event.objects.order_by('date').filter(
+        date__gt=datetime.utcnow())[:4]
     set_session_info(request, u'ist am Portal', 'Portal')
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
@@ -84,6 +86,7 @@ def index(request):
         'record_time':              record_time,
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
+        'calendar_events':          events,
     }
 
 
@@ -514,7 +517,7 @@ def usercp_profile(request):
         form = UserCPProfileForm(values)
 
     storage_keys = storage.get_many(('max_avatar_width',
-        'max_avatar_height'))
+        'max_avatar_height', 'max_signature_length'))
 
     return {
         'form':                 form,
@@ -522,6 +525,7 @@ def usercp_profile(request):
         'gmaps_apikey':         settings.GOOGLE_MAPS_APIKEY,
         'max_avatar_width':     storage_keys.get('max_avatar_width', -1),
         'max_avatar_height':    storage_keys.get('max_avatar_height', -1),
+        'max_sig_length':       storage_keys.get('max_signature_length'),
     }
 
 
@@ -607,12 +611,12 @@ def usercp_subscriptions(request, page=1, all=False):
     to delete them.
     """
     subscriptions = request.user.subscription_set.all()
-    sub = Pagination(request, subscriptions, page,
-                     all and len(subscriptions) or 25)
+    pagination = Pagination(request, subscriptions, page, all and
+        len(subscriptions) or 25, href('portal', 'usercp', 'subscriptions'))
 
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
-        form.fields['delete'].choices = [(s.id, u'') for s in sub.objects]
+        form.fields['delete'].choices = [(s.id, u'') for s in pagination.objects]
         if form.is_valid():
             d = form.cleaned_data
             Subscription.objects.delete_list(d['delete'])
@@ -621,11 +625,11 @@ def usercp_subscriptions(request, page=1, all=False):
             else:
                 flash(u'Es wurden %s Abonnements gelöscht.'
                       % human_number(len(d['delete'])), success=True)
-            sub = filter(lambda s: str(s.id) not in d['delete'], sub.objects)
+            pagination.objects = filter(lambda s: str(s.id) not in d['delete'], pagination.objects)
 
     return {
-        'subscriptions': sub.objects,
-        'pagination': sub.generate()
+        'subscriptions': pagination.objects,
+        'pagination': pagination.generate()
     }
 
 
@@ -719,7 +723,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
     entries = PrivateMessageEntry.objects.filter(
         user=request.user,
         folder=PRIVMSG_FOLDERS[folder][0]
-    )
+    ).order_by('-id')
     link = href('portal', 'privmsg', folder, 'page')
     pagination = Pagination(request, entries, page, 10, link)
     return {
@@ -747,29 +751,50 @@ def privmsg_new(request, username=None):
             preview = parse(request.POST.get('text','')).render(ctx, 'html')
         elif form.is_valid():
             d = form.cleaned_data
+            recipient_names = set(r.strip() for r in \
+                                  d['recipient'].split(';') if r)
+            group_recipient_names = set(r.strip() for r in \
+                                  d['group_recipient'].split(';') if r)
+
+            recipients = set()
+
+            if d.get('group_recipient', None) and not request.user.can('send_group_pm'):
+                flash(u'Du darfst keine Nachrichten an'
+                      u'Gruppen schicken.', False)
+                return HttpResponseRedirect(href('portal', 'privmsg'))
+
+            for group in group_recipient_names:
+                try:
+                    users = Group.objects.get(name=group).user_set.\
+                        all().exclude(pk=request.user.id)
+                    recipients.update(users)
+                except Group.DoesNotExist:
+                    flash(u'Die Gruppe „%s“ wurde nicht gefunden'
+                          % escape(group), False)
+                    return HttpResponseRedirect(href('portal', 'privmsg'))
+
             try:
-                recipient_names = set(r.strip() for r in \
-                                      d['recipient'].split(';') if r)
-                recipients = []
                 for recipient in recipient_names:
                     user = User.objects.get(username__exact=recipient)
                     if user.id == request.user.id:
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
                               u'schicken.', False)
+                        break
                     else:
-                        recipients.append(user)
+                        recipients.add(user)
             except User.DoesNotExist:
                 recipients = None
                 flash(u'Der Benutzer „%s“ wurde nicht gefunden'
                       % escape(recipient), False)
+
             if recipients:
                 msg = PrivateMessage()
                 msg.author = request.user
                 msg.subject = d['subject']
                 msg.text = d['text']
                 msg.pub_date = datetime.utcnow()
-                msg.send(recipients)
+                msg.send(list(recipients))
                 # send notification
                 for recipient in recipients:
                     entry = PrivateMessageEntry.objects.get(message=msg,
@@ -792,7 +817,8 @@ def privmsg_new(request, username=None):
                                           })
                 flash(u'Die persönliche Nachricht wurde erfolgreich '
                       u'versandt.', True)
-                return HttpResponseRedirect(href('portal', 'privmsg'))
+
+            return HttpResponseRedirect(href('portal', 'privmsg'))
     else:
         data = {}
         reply_to = request.GET.get('reply_to', '')
@@ -1014,6 +1040,8 @@ def about_inyoka(request):
 def calendar_month(request, year, month):
     year = int(year)
     month = int(month)
+    if year < 1900 or month < 1 or month > 12:
+        raise PageNotFound
     days = calendar_entries_for_month(year, month)
     days = [(date(year, month, day), events) for day, events in days.items()]
     set_session_info(request, u'sieht sich den Kalender an')
@@ -1071,7 +1099,9 @@ def user_error_report(request):
         if form.is_valid():
             data = form.cleaned_data
             spam_test = data['title'].lower() + data['text'].lower()
-            spam_words = ('porn', 'erotik', 'sex', 'casino', 'poker', '<a href=')
+            spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
+                          '<a href=', 'gay', 'female', 'nude', 'teen',
+                          'wwrkckjbWRKcKjbtrama', 'wwkr')
             for w in spam_words:
                 if w in spam_test:
                     return {'spam': True}
@@ -1081,7 +1111,7 @@ def user_error_report(request):
                     request.user.get_absolute_url(),
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
-                    escape('http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id)
+                    'http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id,
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']

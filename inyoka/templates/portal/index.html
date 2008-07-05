@@ -23,6 +23,23 @@
       <span><a href="{{ get_ubuntu_link }}">{{ get_ubuntu_description }}</a></span>
     </div>
   </div>
+  <div class="container calendar">
+    <div class="calendar link">
+      <h3><a href="{{ href('portal', 'calendar') }}">Kalender</a></h3>
+      <span><a href="/calendar/" class="calendar_link">Nächste Termine</a></span>
+    </div>
+    <div class="calendar overview">
+    {% if calendar_events %}
+      <ul class="events">
+      {% for event in calendar_events %}
+        <li>{{ event.friendly_title(with_date=false, with_html_link=true) }}</li>
+      {%- endfor %}
+      </ul>
+    {% else %}
+    <p>Keine anstehenden Termine.</p>
+    {% endif %}
+    </div>    
+  </div>
 {% endblock %}
 
 {% block portal_content %}

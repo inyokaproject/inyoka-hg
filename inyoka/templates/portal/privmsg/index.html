@@ -4,7 +4,8 @@
 
     Display a list of private messages.
 
-    :copyright: 2007 by Christoph Hack, Benjamin Wiegand.
+    :copyright: 2007-2008 by Christoph Hack, Benjamin Wiegand,
+                             Christopher Grebs.
     :license: GNU GPL.
 #}
 {%- extends 'portal/privmsg/overall.html' %}
@@ -13,55 +14,7 @@
 {% set title_trace = [folder.name] %}
 
 {% block portal_content %}
-  <table>
-    <tbody>
-      <tr>
-        <th class="subject">Betreff</th>
-        <th class="author">Von</th>
-        <th class="recipients">An</th>
-        <th class="date">Datum</th>
-        <th class="actions">Aktionen</th>
-      </tr>
-      {% for entry in entries %}
-      <tr{% if message == entry.message %} class="active_pn"{% endif %}>
-        <td>{% if not entry.read %}<strong>{% endif -%}
-        <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
-        {% if not entry.read %}</strong>{% endif %}</td>
-        <td><a href="{{ entry.message.author|url }}">
-          {{ entry.message.author|e }}</a></td>
-        <td>
-          <a href="{{ entry.message.recipients[0]|url }}">
-            {{ entry.message.recipients[0]|e }}</a>
-          {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
-        <td>{{ entry.message.pub_date|datetimeformat }}</td>
-        <td>
-          {% if not entry.is_own_message %}
-          <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
-          {% endif %}
-          <a href="{{ entry|url('forward') }}" title="Weiterleiten"><img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" /></a>
-          {% if not entry.in_archive %}
-          <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
-          {% endif %}
-          <a href="{{ entry|url }}?action=delete" title="Löschen"><img src="{{ href('static', 'img/icons/small/delete.png') }}" alt="Löschen" /></a>
-        </td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="5">Derzeit befinden sich noch keine Nachrichten
-        in diesem Ordner.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-      <tr><td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>
-        <td colspan="4">
-          <div style="float: right;">
-            {{ pagination }}
-          </div></td>
-      </tr>
-    </tfoot>
-  </table>
-  {% if message %}
+   {% if message %}
     <div class="prvmsg">
       <img class="avatar" src="{{ message.author.avatar_url|e }}" alt="Avatar von {{ message.author.username|e }}" />
       <dl class="prvmsg_header">
@@ -90,6 +43,55 @@
         <a class="pn_forward" href="{{ message.get_absolute_url('forward') }}">Weiterleiten</a> 
       </div>
     </div>
+    <br/>
   {% endif %}
 
+ <table class="pms">
+    <tbody>
+      <tr>
+        <th class="subject">Betreff</th>
+        <th class="author">Von</th>
+        <th class="recipients">An</th>
+        <th class="date">Datum</th>
+        <th class="actions">Aktionen</th>
+      </tr>
+      {% for entry in entries %}
+      <tr{% if message == entry.message %} class="active_pn"{% endif %}>
+        <td>{% if not entry.read %}<strong>{% endif -%}
+        <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
+        {% if not entry.read %}</strong>{% endif %}</td>
+        <td><a href="{{ entry.message.author|url }}">
+          {{ entry.message.author|e }}</a></td>
+        <td>
+          <a href="{{ entry.message.recipients[0]|url }}">
+            {{ entry.message.recipients[0]|e }}</a>
+          {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
+        <td>{{ entry.message.pub_date|datetimeformat }}</td>
+        <td class="actions">
+          {% if not entry.is_own_message %}
+          <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
+          {% endif %}
+          <a href="{{ entry|url('forward') }}" title="Weiterleiten"><img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" /></a>
+          {% if not entry.in_archive %}
+          <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
+          {% endif %}
+          <a href="{{ entry|url }}?action=delete" title="Löschen"><img src="{{ href('static', 'img/icons/small/delete.png') }}" alt="Löschen" /></a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Derzeit befinden sich noch keine Nachrichten
+        in diesem Ordner.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>
+        <td colspan="4">
+          <div style="float: right;">
+            {{ pagination }}
+          </div></td>
+      </tr>
+    </tfoot>
+  </table>
 {% endblock %}

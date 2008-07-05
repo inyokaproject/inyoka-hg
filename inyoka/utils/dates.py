@@ -36,7 +36,7 @@ def group_by_day(entries, date_func=attrgetter('pub_date'),
                  enforce_utc=False):
     """
     Group a list of entries by the date but in the users's timezone
-    (or UTC if enforce_utc is set to `True`).  Per defualt the pub_date
+    (or UTC if enforce_utc is set to `True`).  Per default the pub_date
     Attribute is used.  If this is not desired a different `date_func`
     can be provided.  It's important that the list is already sorted
     by date otherwise the behavior is undefined.

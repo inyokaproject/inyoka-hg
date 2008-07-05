@@ -19,9 +19,9 @@
 {% block admin_content %}
   <div class="admin_control">
     <ul>
-      {{ admin_button(href('admin', 'ikhaya', 'articles'), 'articles', 'Artikel') }}
-      {{ admin_button(href('admin', 'ikhaya', 'categories'), 'categories', 'Kategorien') }}
-      {{ admin_button(href('admin', 'events'), 'calendar_add', 'Termine') }}
+      {{ admin_button(href('admin', 'ikhaya', 'articles'), 'articles', 'Artikel', 'article_edit') }}
+      {{ admin_button(href('admin', 'ikhaya', 'categories'), 'categories', 'Kategorien', 'category_edit') }}
+      {{ admin_button(href('admin', 'events'), 'calendar_add', 'Termine', 'event_edit') }}
     </ul>
   </div>
 {% endblock %}

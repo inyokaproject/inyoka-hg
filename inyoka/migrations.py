@@ -451,6 +451,32 @@ def add_position_column(m):
     ''')
 
 
+def add_permissions(m):
+    m.engine.execute('''
+        alter table portal_user
+            add column _permissions integer  not null default 0,
+            drop column is_ikhaya_writer,
+            drop column is_manager;
+
+    ''')
+    m.engine.execute('''
+        alter table portal_group
+            add column permissions integer not null default 0;
+    ''')
+
+
+def add_post_pub_date_index(m):
+    m.engine.execute('''
+        alter table forum_post add index forum_post_pub_date (pub_date);
+    ''')
+
+
+def drop_comment_title_column(m):
+    m.engine.execute('''
+        alter table ikhaya_comment drop column title;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -460,5 +486,6 @@ MIGRATIONS = [
     add_ikhaya_discussion_disabler, fix_forum_text_table, add_staticfile,
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
-    add_launchpad_nick, add_indices, update_post_table, add_position_column
+    add_launchpad_nick, add_indices, update_post_table, add_position_column,
+    add_permissions, add_post_pub_date_index, drop_comment_title_column
 ]

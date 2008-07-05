@@ -37,14 +37,12 @@
       {%- endif %}
       {% if USER.is_manager %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
     </p>
-    {%- if article.comments_enabled %}
     <a name="comments"></a>
     <ul class="comments">
       {%- for comment in comments %}
       <li class="comment" id="comment_{{ loop.index }}">
         <div class="counter">{{ loop.index }}</div>
         <div class="comment">
-          <strong>„{{ comment.title|e }}“</strong> —
           von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
           {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
             {%- if USER.is_ikhaya_writer %}
@@ -60,49 +58,52 @@
       </li>  
       {%- endfor %}
     </ul>
-    {%- if USER.is_authenticated %}
-    <h4><a name="new_comment">Kommentar schreiben</a></h4>
-    <form action="{{ article|url }}#new_comment" method="post" class="new_comment">
-      {{ render_form(form, ['title', 'text']) }}
-      <p>
-        <input type="submit" name="preview" value="Vorschau" />
-        <input type="submit" value="Speichern" />
-      </p>
-      {%- if preview %}
-      <div class="preview_wrapper">
-        <h2 class="title">Vorschau</h2>
-        <div id="preview" class="preview">{{ preview }}</div>
-      </div>
+    {%- if article.comments_enabled %}
+      {%- if USER.is_authenticated %}
+      <h4><a name="new_comment">Kommentar schreiben</a></h4>
+      <form action="{{ article|url }}#new_comment" method="post" class="new_comment">
+        {{ render_form(form, ['text']) }}
+        <p>
+          <input type="submit" name="preview" value="Vorschau" />
+          <input type="submit" value="Speichern" />
+        </p>
+        {%- if preview %}
+        <div class="preview_wrapper">
+          <h2 class="title">Vorschau</h2>
+          <div id="preview" class="preview">{{ preview }}</div>
+        </div>
+        {%- endif %}
+      </form>
+      <script type="text/javascript">
+        /* <![CDATA[ */
+        var text = new WikiEditor('textarea[@name="text"]', 'forum');
+        (function() {
+          var
+            editor = $('textarea[@name="text"]'),
+            output = $('<div class="preview" />')
+          var preview = $('<div class="preview_wrapper" />')
+            .hide()
+            .append('<h2 class="title">Vorschau<\/h2>')
+            .append(output);
+
+          $('form input[@name="preview"]').click(function() {
+            preview.hide();
+            $.post('/?__service__=wiki.render_preview', {
+              text: editor.val()
+            }, function(data) {
+              output.html(data);
+              makeCommentLinks(output);
+              preview.slideDown('fast');
+            });
+            return false;
+          }).parent().parent().parent().append(preview);
+        })();
+
+        /* ]]> */
+      </script>
       {%- endif %}
-    </form>
-    <script type="text/javascript">
-      /* <![CDATA[ */
-      var text = new WikiEditor('textarea[@name="text"]', 'forum');
-      (function() {
-        var
-          editor = $('textarea[@name="text"]'),
-          output = $('<div class="preview" />')
-        var preview = $('<div class="preview_wrapper" />')
-          .hide()
-          .append('<h2 class="title">Vorschau<\/h2>')
-          .append(output);
-
-        $('form input[@name="preview"]').click(function() {
-          preview.hide();
-          $.post('/?__service__=wiki.render_preview', {
-            text: editor.val()
-          }, function(data) {
-            output.html(data);
-            makeCommentLinks(output);
-            preview.slideDown('fast');
-          });
-          return false;
-        }).parent().parent().parent().append(preview);
-      })();
-
-      /* ]]> */
-    </script>
-    {%- endif %}
+    {%- else %}
+      <h4>Zu diesem Artikel sind keine Kommentare erlaubt.</h4>
     {%- endif %}
   </div>
 {% endblock %}

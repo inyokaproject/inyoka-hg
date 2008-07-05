@@ -287,8 +287,7 @@ class MarkupWriter(object):
                 _indent()
             self._newline = self._new_paragraph = self._new_break = False
 
-
-    def escape(self, text):
+    def escape_text(self, text):
         return escape(text)
 
     def text(self, text):
@@ -296,7 +295,7 @@ class MarkupWriter(object):
         for s in self._escapes:
             text = text.replace(s, u'\\%s' % s)
         if not self.is_raw:
-            text = self.escape(text)
+            text = self.escape_text(text)
             text = _whitespace_re.sub(u' ', text)
         self._result.append(text)
 

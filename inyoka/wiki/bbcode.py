@@ -35,7 +35,24 @@ _free_link_re = re.compile('(?<!%s)(%s[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]'
 
 
 class BBMarkupWriter(MarkupWriter):
-    def escape(self, text):
+    _text_escapes = [
+            '----',
+            '((',
+            '[[',
+            '{{{',
+            "''",
+            '``',
+            '__',
+            '--(',
+            '~-',
+            '~+',
+            ',,',
+            '^^',
+        ]
+
+    def escape_text(self, text):
+        for e in self._text_escapes:
+            text = text.replace(e, '\\' + e)
         return text
 
 
@@ -142,6 +159,9 @@ class Parser(object):
             'bookzilla':    self.parse_bookzilla,
             'ubuntuwiki':   self.parse_ubuntuwiki,
             'flag':         self.parse_flag,
+            'google':       self.parse_google,
+            'linuxgoogle':  self.parse_linuxgoogle,
+            'bug':          self.parse_bug,
         }
 
         def add_text(value):
@@ -489,8 +509,11 @@ class Parser(object):
     parse_search = _make_interwiki_link('search')
     parse_paste = _make_interwiki_link('paste')
     parse_wikipedia = _make_interwiki_link('wikipedia')
+    parse_google = _make_interwiki_link('google')
+    parse_linuxgoogle = _make_interwiki_link('linuxgoogle', 'googlelinux')
     parse_ikhaya = _make_interwiki_link('ikhaya')
     parse_wikipedia_en = _make_interwiki_link('wikipedia-en',
                                               'wikipedia_en')
     parse_bookzilla = _make_interwiki_link('bookzilla', 'isbn')
     parse_ubuntuwiki = _make_interwiki_link('ubuntuwiki', 'ubuntu')
+    parse_bug = _make_interwiki_link('bug')

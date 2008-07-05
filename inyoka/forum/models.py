@@ -41,6 +41,10 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         forum_welcomemessage_table
 
 
+# initialize PIL to make Image.ID available
+Image.init()
+SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
+
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
@@ -56,7 +60,7 @@ UBUNTU_VERSIONS = {
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
-    'kubuntu-kde4': 'Kubuntu (KDE 4)',
+    'kubuntu-kde4': u'Kubuntu (KDE 4)',
     'xubuntu': 'Xubuntu',
     'edubuntu': 'Edubuntu',
     'server': 'Server',
@@ -144,9 +148,6 @@ class TopicMapperExtension(MapperExtension):
                 'last_post_id': None,
                 'first_post_id': None
         }))
-#        connection.execute(post_table.delete(
-#            post_table.c.topic_id == instance.id
-#        ))
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
@@ -159,26 +160,36 @@ class TopicMapperExtension(MapperExtension):
         forums = instance.forum.parents
         forums.append(instance.forum)
         for forum in forums:
-            forum.topic_count = forum_table.c.topic_count - 1
-            forum.post_count = forum_table.c.post_count - instance.post_count
+            values={
+                'topic_count': forum_table.c.topic_count - 1,
+                'post_count': forum_table.c.post_count - instance.post_count
+            }
             if forum.last_post_id == instance.last_post_id:
                 children = []
                 collect_children_ids(forum, children)
-                forum.last_post_id = select([func.max(post_table.c.id)], and_(
+                values['last_post_id'] = select([func.max(post_table.c.id)], and_(
                     post_table.c.topic_id != instance.id,
                     topic_table.c.forum_id.in_(children),
                     topic_table.c.id == post_table.c.topic_id))
+            connection.execute(forum_table.update(
+                forum_table.c.id == forum.id, values=values
+            ))
 
 
 class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
         instance.rendered_text = instance.render_text()
-        tmp = post_table.alias()
         if instance.position is None:
-            instance.position = select([func.max(tmp.c.position) + 1],
-                tmp.c.topic_id == instance.topic_id
-            )
+        # XXX: race-conditions and other stupid staff... :/
+        # require a mysql update to work properly!
+            instance.position = connection.execute(select(
+                [func.max(post_table.c.position)+1],
+                post_table.c.topic_id == instance.topic_id)).fetchone()[0] or 0
+        #    tmp = post_table.alias()
+        #    instance.position = select([func.max(tmp.c.position) + 1],
+        #        tmp.c.topic_id == instance.topic_id
+        #    )
         if not instance.pub_date:
             instance.pub_date = datetime.utcnow()
 
@@ -549,6 +560,17 @@ class Post(object):
     def get_max_id():
         return dbsession.execute(select([func.max(Post.c.id)])).fetchone()[0]
 
+    @staticmethod
+    def multi_update_search(ids):
+        """
+        Updates the search index for quite a lot of posts with a single query.
+        """
+        dbsession.execute('''
+            insert into portal_searchqueue (component, doc_id)
+                values %s;
+        ''' % ', '.join(('("f", %s)',) * len(ids)), ids)
+        dbsession.commit()
+
     def edit(self, request, text):
         """
         Changes the text of the post. If the post is already stored in the
@@ -591,10 +613,13 @@ class Post(object):
             cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
 
     @staticmethod
-    def split(posts, forum_id=None, title=None, topic_slug=None):
-        posts = list(posts)
-        old_topic = posts[0].topic
-
+    def split(posts, old_topic, new_topic):
+        """
+        This function splits `posts` out of `old_topic` and moves them into
+        `new_topic`.
+        It is important that `posts` is a list of posts ordered by id
+        ascending.
+        """
         if len(posts) == old_topic.post_count:
             # The user selected to split all posts out of the topic --> delete
             # the topic.
@@ -602,39 +627,20 @@ class Post(object):
         else:
             remove_topic = False
 
-        if forum_id and title:
-            action = 'new'
-        elif topic_slug:
-            action = 'add'
-        else:
-            return None
-
-        if action == 'new':
-            t = Topic(
-                title=title,
-                author=posts[0].author,
-                first_post=posts[0],
-                last_post=posts[-1],
-                forum_id=forum_id,
-                slug=None,
-                post_count=len(posts)
-            )
-            dbsession.flush()
-            t.forum.topic_count += 1
-        else:
-            t = Topic.query.filter_by(slug=topic_slug).first()
-            t.post_count += len(posts)
-            if posts[-1].id > t.last_post.id:
-                t.last_post = posts[-1]
-            if posts[0].id < t.first_post.id:
-                t.first_post = posts[0]
-                t.author = posts[0].author
+        new_topic.post_count += len(posts)
+        if not new_topic.last_post_id or \
+           posts[-1].id > new_topic.last_post.id:
+            new_topic.last_post = posts[-1]
+        if not new_topic.first_post_id or \
+           posts[0].id < new_topic.first_post.id:
+            new_topic.first_post = posts[0]
+            new_topic.author = posts[0].author
 
         dbsession.flush()
         ids = [p.id for p in posts]
         dbsession.execute(post_table.update(
             post_table.c.id.in_(ids), values={
-                'topic_id': t.id
+                'topic_id': new_topic.id
         }))
         dbsession.commit()
 
@@ -647,16 +653,17 @@ class Post(object):
         dbsession.execute('''
             update forum_post set position=(@rownum:=@rownum+1)
                               where topic_id=%s order by id;
-        ''', [t.id])
+        ''', [new_topic.id])
         dbsession.commit()
 
-        if old_topic.forum.id != t.forum.id:
+        if old_topic.forum.id != new_topic.forum.id:
             # update post count of the forums
             old_topic.forum.post_count -= len(posts)
-            t.forum.post_count += len(posts)
+            new_topic.forum.post_count += len(posts)
             # update last post of the forums
-            if not t.forum.last_post or posts[-1].id > t.forum.last_post.id:
-                t.forum.last_post = posts[-1]
+            if not new_topic.forum.last_post or \
+               posts[-1].id > new_topic.forum.last_post.id:
+                new_topic.forum.last_post = posts[-1]
             if posts[-1].id == old_topic.forum.last_post.id:
                 last_post = Post.query.filter(and_(
                     post_table.c.topic_id==topic_table.c.id,
@@ -665,7 +672,6 @@ class Post(object):
 
                 old_topic.forum.last_post_id = last_post and last_post.id \
                                                or None
-
         dbsession.commit()
 
         if not remove_topic:
@@ -686,14 +692,10 @@ class Post(object):
         dbsession.commit()
 
         # update the search index which has the post --> topic mapping indexed
-        for post in posts:
-            post.topic = t
-            post.update_search()
+        Post.multi_update_search([post.id for post in posts])
 
-        t.forum.invalidate_topic_cache()
+        new_topic.forum.invalidate_topic_cache()
         old_topic.forum.invalidate_topic_cache()
-
-        return t
 
     def __unicode__(self):
         return '%s - %s' % (
@@ -895,7 +897,7 @@ class Attachment(object):
         if not show_preview:
             return fallback
 
-        if self.mimetype.startswith('image/') and show_thumbnails:
+        if show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
             # handle and cache thumbnails
             img_path = path.join(settings.MEDIA_ROOT,
                 'forum/thumbnails/%s' % self.file.split('/')[-1])
@@ -998,7 +1000,7 @@ class PollOption(object):
     def percentage(self):
         """Calculate the percentage of votes for this poll option."""
         if self.poll.votes:
-            return int(round(self.votes / self.poll.votes * 100))
+            return self.votes / self.poll.votes * 100
         return 0
 
 
@@ -1188,8 +1190,9 @@ dbsession.mapper(Post, post_table, properties={
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
     'attachments': relation(Attachment, cascade='all, delete'),
-    'revisions': dynamic_loader(PostRevision, backref='post',
-        primaryjoin= post_revision_table.c.post_id == post_table.c.id)
+    'revisions': relation(PostRevision, backref='post', lazy='dynamic',
+        cascade='all, delete-orphan',
+        primaryjoin=post_revision_table.c.post_id == post_table.c.id)
     },
     extension=PostMapperExtension(),
 )

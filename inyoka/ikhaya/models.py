@@ -273,7 +273,6 @@ class Suggestion(models.Model):
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, null=True)
-    title = models.CharField(max_length=100)
     text = models.TextField()
     author = models.ForeignKey(User)
     pub_date = models.DateTimeField()
@@ -303,7 +302,7 @@ class ArticleSearchAuthDecider(object):
 
     def __init__(self, user):
         self.now = datetime.utcnow()
-        self.priv = user.is_ikhaya_writer
+        self.priv = user.can('article_edit')
 
     def __call__(self, auth):
         return self.priv or ((not auth[0]) and auth[1] <= self.now)

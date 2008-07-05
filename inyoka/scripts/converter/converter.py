@@ -79,6 +79,11 @@ PAGE_REPLACEMENTS = {
 }
 CATEGORY_RE = re.compile('[\n]+ \* Kategorie/[^\n]+')
 IMG_RE = re.compile(r'\[\[(.+?)\]\]')
+NOTIFICATION_MAPPING = {
+    0: ['mail'],
+    1: ['jabber'],
+    2: ['mail', 'jabber'],
+}
 
 
 def convert_bbcode(text, uid):
@@ -242,9 +247,15 @@ def convert_wiki():
             formatter.setPage(page)
             formatter.inyoka_page = new_page
             parser = InyokaParser(text, request)
-            text = request.redirectedOutput(parser.format, formatter)
-            text += formatter.get_tags()
+            text = request.redirectedOutput(parser.format, formatter).strip()
+            # remove old category links at the bottom of the page.
+            # we don't need them anymore since we have tags now
             text = CATEGORY_RE.sub('', text)
+            # remove senseless horizontal lines at the bottom of the pages
+            if text[-4:] == '----':
+                text = text[:-4].strip()
+            # add tags to the bottom of the page
+            text += formatter.get_tags()
         new_page.edit(text=text, user=User.objects.get_system_user(),
                       note=u'Automatische Konvertierung auf neue Syntax')
         transaction.commit()
@@ -277,6 +288,8 @@ def convert_users():
             signature = convert_bbcode(unescape(row.user_sig),
                                        row.user_sig_bbcode_uid)
 
+        notify = NOTIFICATION_MAPPING.get(row.user_notify_jabber, [])
+
         #TODO: Everthing gets truncated, dunno if this is the correct way.
         # This might break the layout...
         data = {
@@ -302,6 +315,7 @@ def convert_users():
             'occupation':       unescape(row.user_occ[:200]),
             'interests':        unescape(row.user_interests[:200]),
             'website':          unescape(row.user_website[:200]),
+            '_settings':        cPickle.dumps({'notify': notify}),
         }
         # make Anonymous id 1, luckily Sascha is 2 ;)
         # CAUTION: take care if mapping -1 to 1 in posts/topics too
@@ -396,6 +410,10 @@ def convert_forum():
         forums[f.id] = f
 
     for row in conn.execute(select([topic_table])):
+        if row.topic_replies == 1 and row.topic_moved_id > 0:
+            # this should match topics with one post that are moved
+            # to another one and are now topics with -1 posts :=)
+            continue
         t = Topic(**{
             'id':             row.topic_id,
             'forum':          row.forum_id in forums and \
@@ -438,32 +456,43 @@ def convert_forum():
 
     print 'fixing forum references'
 
-    subselect_max = select(
-        [func.max(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
-    subselect_min = select(
-        [func.min(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
+    # fix topic table
     session.execute(sa_topic_table.update(values={
-        sa_topic_table.c.last_post_id: subselect_max,
-        sa_topic_table.c.first_post_id: subselect_min
+        # last post id
+        sa_topic_table.c.last_post_id: select(
+            [func.min(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        ),
+        # first post id
+        sa_topic_table.c.first_post_id: select(
+            [func.max(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        ),
+        # post count
+        sa_topic_table.c.post_count: select(
+            [func.count(sa_post_table.c.id)],
+            sa_topic_table.c.id == sa_post_table.c.topic_id
+        )
     }))
-    subselect = select(
-        [func.max(sa_topic_table.c.last_post_id)],
-        sa_topic_table.c.forum_id == sa_forum_table.c.id
-    )
+
+    # fix forum table
     session.execute(sa_forum_table.update(values={
-        sa_forum_table.c.last_post_id: subselect
+        # last post id
+        sa_forum_table.c.last_post_id: select(
+            [func.max(sa_topic_table.c.last_post_id)],
+            sa_topic_table.c.forum_id == sa_forum_table.c.id
+        ),
+        # post count
+        sa_forum_table.c.post_count: select([func.count(sa_post_table.c.id)],
+            (sa_forum_table.c.id == sa_topic_table.c.forum_id) &
+            (sa_topic_table.c.id == sa_post_table.c.topic_id)
+        ),
+        # topic count
+        sa_forum_table.c.topic_count: select([func.count(sa_topic_table.c.id)],
+            sa_forum_table.c.id == sa_topic_table.c.forum_id
+        )
     }))
-    subselect_count = select(
-        [func.count(sa_post_table.c.id)],
-        sa_topic_table.c.id == sa_post_table.c.topic_id
-    )
-    session.execute(sa_topic_table.update(values={
-        sa_topic_table.c.post_count: subselect_count
-    }))
+
     session.commit()
 
     # Fix anon user:

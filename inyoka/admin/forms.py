@@ -12,7 +12,7 @@ from datetime import datetime
 from django import newforms as forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
-                               DateTimeWidget
+                               DateTimeWidget, EmailField
 from inyoka.utils.html import cleanup_html
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 from inyoka.portal.models import StaticFile
@@ -38,6 +38,9 @@ class ConfigurationForm(forms.Form):
     get_ubuntu_link = forms.URLField(required=False,
         label=u'Der Downloadlink für die Startseite')
     get_ubuntu_description = forms.CharField(label=u'Beschreibung des Links')
+    wiki_newpage_template = forms.CharField(required=False,
+        widget=forms.Textarea(attrs={'rows': 5}),
+        label=u'Standardtext beim Anlegen neuer Wiki-Seiten')
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))
@@ -118,11 +121,10 @@ class EditFileForm(forms.Form):
 class CreateUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
     password = forms.CharField(label=u'Passwort')
-    #XXX: use forms.EmailField after testing, see portal.user.User
-    email = forms.CharField(label=u'E-Mail')
-    authenticate = forms.BooleanField(label=u'Autentifizieren', required=False,
-        help_text=(u'Der Benutzer bekommt eine Bestätigungsmail zugesandt'
-                   u' und wird als inaktiv erstellt.'))
+    email = EmailField(label=u'E-Mail')
+    authenticate = forms.BooleanField(label=u'Autentifizieren', initial=True,
+        required=False, help_text=(u'Der Benutzer bekommt eine '
+            u'Bestätigungsmail zugesandt und wird als inaktiv erstellt.'))
 
 
 class EditUserForm(forms.Form):
@@ -133,17 +135,14 @@ class EditUserForm(forms.Form):
                                    u'Bitte nur angeben, wenn benötigt'))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
-    is_manager = forms.BooleanField(label=u'Teammitglied', required=False,
-        help_text=u'Der Benutzer kann das Administrationspanel benutzen')
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
-
-    # ikhaya permission
-    is_ikhaya_writer = forms.BooleanField(label=u'Ikhaya Autor')
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                                            required=False)
 
     # notification informations
     jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
@@ -167,7 +166,7 @@ class EditUserForm(forms.Form):
     interests = forms.CharField(label=u'Interessen', max_length=200,
                                 required=False)
     website = forms.URLField(label=u'Webseite', required=False)
-    launchpad = forms.CharField(label=u'Launchpad Nickname', required=False)
+    launchpad = forms.CharField(label=u'Launchpad-Nickname', required=False)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
@@ -182,6 +181,9 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'permission'}),
+        required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 
@@ -200,7 +202,6 @@ class EditForumForm(forms.Form):
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
-        print data
         if data.get('welcome_msg_text') and not data.get('welcome_msg_subject'):
             raise forms.ValidationError(u'Du musst einen Titel angeben für die'
                 u' Willkommensnachricht')

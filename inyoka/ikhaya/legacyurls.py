@@ -26,7 +26,7 @@ def archive(args, match, year, month):
 @legacy.url('^/category/(\d+)/?$')
 def category(args, match, category_id):
     try:
-        category = Category.objects.get(category_id)
+        category = Category.objects.filter(id=int(category_id))[0]
     except Category.DoesNotExist:
         return
-    return href('ikhaya', category.slug)
+    return href('ikhaya', 'category', category.slug)

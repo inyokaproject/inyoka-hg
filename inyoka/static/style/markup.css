@@ -12,7 +12,7 @@ a.missing {
   color: #999;
 }
 
-a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu {
+a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug {
   background-repeat: no-repeat;
   padding-left: 16px;
 }
@@ -49,8 +49,16 @@ a.interwiki-ubuntu {
   background-image: url(../img/interwiki/ubuntu.png);
 }
 
+a.interwiki-bug {
+  background-image: url(../img/interwiki/bug.png);
+}
+
 #page table {
   width: auto;
+}
+
+#page table td, #page table th {
+  border-width: 1px;
 }
 
 span.underline {
@@ -195,6 +203,7 @@ div.workinprogress h3 {
   border: 1px solid #d7b97b;
   -moz-border-radius: 5px;
   background-image: url(../img/wiki/toc.png);
+  background-color: #fff;
   background-position: top right;
   background-repeat:no-repeat;
 }
@@ -224,6 +233,13 @@ code {
   text-decoration: none;
   color: #999;
 }
+
+h1 { margin-left: 10px; }
+h2 { margin-left: 12px; }
+h3 { margin-left: 14px; }
+h4 { margin-left: 16px; }
+h5 { margin-left: 18px; }
+h6 { margin-left: 20px; }
 
 h1:hover *, h2:hover *, h3:hover *, h4:hover *, h5:hover *, h6:hover * {
   display: inline;

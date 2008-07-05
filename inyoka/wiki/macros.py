@@ -350,7 +350,10 @@ class TableOfContents(TreeMacro):
             elif headline.level < len(stack):
                 for x in xrange(len(stack) - headline.level):
                     stack.pop()
-            caption = [nodes.Text(headline.text)]
+            ml = headline.level*((45-self.depth-headline.level)/headline.level)
+            text = len(headline.text)>ml and headline.text[:ml]+'...' or \
+                   headline.text
+            caption = [nodes.Text(text)]
             link = nodes.Link('#' + headline.id, caption)
             stack[-1].children.append(nodes.ListItem([link]))
         return result
@@ -687,7 +690,7 @@ class Template(Macro):
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
                                    u'Template „%s“ existiert nicht.' %
                                    self.template)
-        document = page.rev.text.parse(self.context, transformers=[])
+        document = page.rev.text.parse(self.context)
         return nodes.Container(document.children +
                                [nodes.MetaData('X-Attach', (self.template,))])
 
