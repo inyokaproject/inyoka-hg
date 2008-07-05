@@ -1096,16 +1096,17 @@ div.not_found img {
 }
 
 #js_login_form {
-    display: none;
+    /*display: none;*/
     position: absolute; /* IE */
     position: fixed;
-    top: 0;
-    width: 100%;
+    top: 5px;
+    left: 0.5%;
+    width: 98%;
     padding: .5em;
     text-align: center;
-    border-bottom: 1px solid #888;
+    border: 1px solid #222;
     background-image: url(../img/jslogin.png);
-    background-repeat: no-repeat;
+    background-repeat: repeat-x;
 }
 
 #js_login_form .right {

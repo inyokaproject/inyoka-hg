@@ -238,7 +238,7 @@
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
         <input type="submit" value="Einloggen" class="submit" />
         <input type="button" onclick="javascript:$('#js_login_form').fadeOut('slow');void(0);" value="Abbrechen" />
-        <a href="{{ href('portal', 'lost_password') }}" class="strong">Passwort vergessen</a>
+        <a href="{{ href('portal', 'lost_password') }}" class="strong note">Passwort vergessen</a>
       </div>
     </form>
     {%- endif %}
