@@ -87,9 +87,10 @@ def index(args, match):
 
 @legacy.url(r'^/forum/(\d+)/(newtopic|watch|unwatch|mark_read)/?$')
 def forum_actions(args, match, forum_id, action):
-    forum = Forum.query.get(forum_id)
+    forum = Forum.query.get(int(forum_id))
     if not forum:
         return
+
     ACTIONS = {
         'watch': 'subscribe',
         'unwatch': 'unsubscribe',
