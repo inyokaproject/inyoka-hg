@@ -148,9 +148,6 @@ class TopicMapperExtension(MapperExtension):
                 'last_post_id': None,
                 'first_post_id': None
         }))
-#        connection.execute(post_table.delete(
-#            post_table.c.topic_id == instance.id
-#        ))
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
@@ -163,15 +160,20 @@ class TopicMapperExtension(MapperExtension):
         forums = instance.forum.parents
         forums.append(instance.forum)
         for forum in forums:
-            forum.topic_count = forum_table.c.topic_count - 1
-            forum.post_count = forum_table.c.post_count - instance.post_count
+            values={
+                'topic_count': forum_table.c.topic_count - 1,
+                'post_count': forum_table.c.post_count - instance.post_count
+            }
             if forum.last_post_id == instance.last_post_id:
                 children = []
                 collect_children_ids(forum, children)
-                forum.last_post_id = select([func.max(post_table.c.id)], and_(
+                values['last_post_id'] = select([func.max(post_table.c.id)], and_(
                     post_table.c.topic_id != instance.id,
                     topic_table.c.forum_id.in_(children),
                     topic_table.c.id == post_table.c.topic_id))
+            connection.execute(forum_table.update(
+                forum_table.c.id == forum.id, values=values
+            ))
 
 
 class PostMapperExtension(MapperExtension):
@@ -1188,8 +1190,9 @@ dbsession.mapper(Post, post_table, properties={
         primaryjoin=post_table.c.author_id == user_table.c.id,
         foreign_keys=[post_table.c.author_id]),
     'attachments': relation(Attachment, cascade='all, delete'),
-    'revisions': dynamic_loader(PostRevision, backref='post',
-        primaryjoin= post_revision_table.c.post_id == post_table.c.id)
+    'revisions': relation(PostRevision, backref='post', lazy='dynamic',
+        cascade='all, delete-orphan',
+        primaryjoin=post_revision_table.c.post_id == post_table.c.id)
     },
     extension=PostMapperExtension(),
 )
