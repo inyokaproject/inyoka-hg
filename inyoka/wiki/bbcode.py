@@ -159,6 +159,9 @@ class Parser(object):
             'bookzilla':    self.parse_bookzilla,
             'ubuntuwiki':   self.parse_ubuntuwiki,
             'flag':         self.parse_flag,
+            'google':       self.parse_google,
+            'linuxgoogle':  self.parse_linuxgoogle,
+            'bug':          self.parse_bug,
         }
 
         def add_text(value):
@@ -513,3 +516,4 @@ class Parser(object):
                                               'wikipedia_en')
     parse_bookzilla = _make_interwiki_link('bookzilla', 'isbn')
     parse_ubuntuwiki = _make_interwiki_link('ubuntuwiki', 'ubuntu')
+    parse_bug = _make_interwiki_link('bug')

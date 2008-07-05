@@ -141,6 +141,7 @@ googlelinux = http://www.google.de/linux?q=
 wikipedia = http://de.wikipedia.org/wiki/
 wikipedia_en = http://en.wikipedia.org/wiki/
 moinmoin = http://moinmoin.wikiwikiweb.de/
+bug = https://bugs.launchpad.net/bugs/
 }}}
 '''
 
