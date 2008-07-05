@@ -8,8 +8,8 @@
     :copyright: Copyright 2008 by Marian Sigler.
     :license: GNU GPL.
 """
-#from inyoka.forum.models import Forum, Topic
 from inyoka.utils.urls import href
+from inyoka.utils.flashing import flash
 from inyoka.utils.legacyurls import LegacyDispatcher
 from inyoka.ikhaya.models import Article
 
@@ -48,6 +48,13 @@ def downloads(args, match):
     return href('wiki', 'Downloads')
     # until we have a new downloads page
 
+@legacy.url(r'^/bookmarks(?:/[^/]+/(?:\d+)?)?/?$')
+def bookmarks(args, match):
+    flash(u'Seit der Einführung von Inyoka auf ubuntuusers.de gibt es '
+          u'keine Lesezeichen mehr.<br/>Als Ersatz kannst du die '
+          u'<a href="http://de.wikipedia.org/wiki/Bookmark">Lesezeichen-Funktion'
+          u'</a> moderner Web-Browser nutzen.', False)
+    return href('portal')
 
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
