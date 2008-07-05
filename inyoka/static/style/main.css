@@ -1096,7 +1096,7 @@ div.not_found img {
 }
 
 #js_login_form {
-    /*display: none;*/
+    display: none;
     position: absolute; /* IE */
     position: fixed;
     top: 5px;
