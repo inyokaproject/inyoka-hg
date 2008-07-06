@@ -705,7 +705,6 @@ def convert_attachments():
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()
-    log = open('converter.log', 'w')
 
     try:
         conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
@@ -752,6 +751,7 @@ def convert_privmsgs():
 
         try:
             m = PrivateMessage()
+            m.id = msg.privmsgs_id
             m.author_id = msg.privmsgs_from_userid;
             m.subject = unescape(msg.privmsgs_subject)
             m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)
