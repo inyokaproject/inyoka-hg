@@ -164,6 +164,8 @@ def do_missing_page(request, name, _page=None):
     return {
         'page':         _page,
         'page_name':    name,
+        'create_link':  href('wiki', storage['wiki_newpage_root'],
+                             name, action='edit'),
         'title':        get_title(name),
         'can_create':   has_privilege(request.user, name, 'create'),
         'similar': [{
