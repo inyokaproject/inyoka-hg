@@ -384,8 +384,6 @@ class Lexer(object):
         def tokenize_blocks():
             for line in string.splitlines():
                 block_open = open_blocks[-1]
-                print line, block_open
-
                 if not block_open:
                     m = self._quote_re.match(line)
                     if m is None:
