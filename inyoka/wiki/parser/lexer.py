@@ -384,11 +384,9 @@ class Lexer(object):
         def tokenize_blocks():
             for line in string.splitlines():
                 block_open = open_blocks[-1]
-                if not block_open and changes_block_state(line, False):
-                    open_blocks[-1] = True
-                elif block_open and changes_block_state(line, True):
-                    open_blocks[-1] = False
-                elif not block_open:
+                print line, block_open
+
+                if not block_open:
                     m = self._quote_re.match(line)
                     if m is None:
                         level = 0
@@ -411,6 +409,10 @@ class Lexer(object):
                             yield 'quote_end', None
                 else:
                     line = re.sub('^' + '> ?' * (len(open_blocks) - 1), '', line)
+                if not block_open and changes_block_state(line, False):
+                    open_blocks[-1] = True
+                elif block_open and changes_block_state(line, True):
+                    open_blocks[-1] = False
                 buffer.append(line)
 
             for item in tokenize_buffer():
