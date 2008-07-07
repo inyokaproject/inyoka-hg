@@ -259,7 +259,6 @@ def make_ikhaya():
                     text = '@%d: %s' % (randint(1, i), text)
                 Comment(
                     article_id=a.id,
-                    title=name,
                     text=text,
                     author_id=choice(users).id,
                     pub_date=randtime()
