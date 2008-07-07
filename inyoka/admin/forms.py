@@ -41,6 +41,8 @@ class ConfigurationForm(forms.Form):
     wiki_newpage_template = forms.CharField(required=False,
         widget=forms.Textarea(attrs={'rows': 5}),
         label=u'Standardtext beim Anlegen neuer Wiki-Seiten')
+    wiki_newpage_root = forms.CharField(required=False,
+        label=u'Unter welcher Wikiseite sollen neue Seiten erstellt werden?')
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))

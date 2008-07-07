@@ -23,22 +23,12 @@
 </p>
 <form action="" method="post">
   <table class="topic">
-    <thead>
-      <tr>
-        <th>Autor</th>
-        <th>Artikel</th>
-      </tr>
-    </thead>
     <tbody>
       {%- for suggestion in suggestions %}
       <tr>
         <td class="author">
-          <a href="{{ suggestion.author|url }}">{{ suggestion.author.username }}</a>
+          <a href="{{ suggestion.author|url }}">{{ suggestion.author.username|e }}</a>
           {%- if suggestion.author.avatar and not USER.settings['hide_avatars'] %}
-          <img src="{{ suggestion.author.avatar_url }}" alt=ion.author.username }}</a>
-          {%- elif suggestion.author.avatar and not USER.settings['hide_avatars'] %}
-          <img src="{{ suggestion.author.avatar_url }}" alt=ion.author.username }}</a>
-          {%- elif suggestion.author.avatar and not USER.settings['hide_avatars'] %}
           <img src="{{ suggestion.author.avatar_url }}" alt="Avatar von {{ suggestion.author.username|e }}" />
           {%- endif %}
         </td>
@@ -61,7 +51,7 @@
           </div>
           <h3 class="title">{{ suggestion.title|e }}</h3>
           <div class="intro">{{ suggestion.rendered_intro }}</div>
-          {{ suggestion.rendered_text }}
+          <div class="text">{{ suggestion.rendered_text }}</div>
         </td>
       </tr>
       {%- else %}

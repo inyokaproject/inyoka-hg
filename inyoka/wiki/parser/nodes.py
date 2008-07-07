@@ -940,16 +940,16 @@ class Preformatted(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.raw()
         w.markup(u'{{{')
+        w.raw()
         w.start_escaping('}}}')
         Element.generate_markup(self, w)
         if w._result[-1][-1] == u'}':
             # prevent four }s
             w.touch_whitespace()
         w.stop_escaping()
-        w.markup(u'}}}')
         w.endraw()
+        w.markup(u'}}}')
 
     def prepare_html(self):
         yield build_html_tag(u'pre', id=self.id, style=self.style,

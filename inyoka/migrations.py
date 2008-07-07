@@ -477,6 +477,13 @@ def drop_comment_title_column(m):
     ''')
 
 
+def add_new_page_root_storage(m):
+    _set_storage(m, {
+        'wiki_newpage_template':    u'',
+        'wiki_newpage_root':        'Baustelle'
+    })
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -487,5 +494,6 @@ MIGRATIONS = [
     remove_unused_topic_column, add_member_title, remove_unused_is_public,
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
     add_launchpad_nick, add_indices, update_post_table, add_position_column,
-    add_permissions, add_post_pub_date_index, drop_comment_title_column
+    add_permissions, add_post_pub_date_index, drop_comment_title_column,
+    add_new_page_root_storage
 ]

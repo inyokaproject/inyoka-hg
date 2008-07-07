@@ -136,10 +136,10 @@
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}
-          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
-          <p>Beiträge: {{ post.author.post_count }}</p>
+          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
+          <p>Beiträge: {{ post.author.post_count }}</p>
           {%- if post.author.location %}
-          <p>Wohnort: {{ post.author.location|e }}</p>
+          <p>Wohnort: {{ post.author.location|e }}</p>
           {%- endif %}
         </td>
         <td class="post">
@@ -165,7 +165,9 @@
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
-          {{ post.rendered_text }}
+          <div class="text">
+            {{ post.rendered_text }}
+          </div>
           {%- if attachments %}
           <hr />
           <dl class="attachments">

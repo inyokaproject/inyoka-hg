@@ -334,7 +334,7 @@ class TableOfContents(TreeMacro):
         self.list_type = list_type
 
     def build_node(self, tree):
-        result = nodes.List(self.list_type, class_='toc')
+        result = nodes.List(self.list_type)
         stack = [result]
         for headline in tree.query.by_type(nodes.Headline):
             if headline.level > self.depth:
@@ -356,6 +356,9 @@ class TableOfContents(TreeMacro):
             caption = [nodes.Text(text)]
             link = nodes.Link('#' + headline.id, caption)
             stack[-1].children.append(nodes.ListItem([link]))
+        head = nodes.Layer(children=[nodes.Text(u'Inhaltsverzeichnis')],
+                           class_='head')
+        result = nodes.Layer(class_='toc', children = [head, result])
         return result
 
 

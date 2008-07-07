@@ -165,6 +165,10 @@ table.forum thead td p.description {
     padding-left: 25px;
 }
 
+table.topic {
+    table-layout: fixed;
+}
+
 /* deleted post */
 table.topic tr.deleted {
     text-align: center;
@@ -218,6 +222,10 @@ table.topic td.post {
     font-size: 0.9em;
     padding: 10px;
     vertical-align: top;
+}
+
+table.topic td.post div.text {
+    overflow: auto;
 }
 
 table.topic td.post div.postinfo {
@@ -484,14 +492,27 @@ ul.image_list a:hover img {
   opacity: 0.9;
 }
 
-pre {
+div.code, pre {
+    border: 1px solid #ccc;
     max-height: 15em;
     overflow: auto;
-    margin-top: 0.5em;
+    margin: 0.5em 0 0 0;
+}
+
+div.code pre {
+    max-height: none;
 }
 
 .codeblock_resizer {
-    height: 6px;
-    background: url(../img/expand-bar.png);
+    width: 10em;
+    margin-left: auto;
+    background: url(../img/expand-bar.png) #d6d6d6 bottom left repeat-x;
+    border-width: 0 1px 0 1px;
+    border-style: solid;
+    border-color: #a8a8a8;
     cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    padding: 0 0 0.2em 0;
+    font-size: 0.9em;
 }
