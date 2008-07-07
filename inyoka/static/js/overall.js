@@ -41,6 +41,17 @@ $(document).ready(function() {
     return false;
   });
 
+  // create a link to hide a toc
+  $('.toc .head').append(
+    $('<a> [-]</a>').toggle(function() {
+        $(this).text(' [+]').parent().parent().find('ol').hide();
+      },
+      function() {
+        $(this).text(' [-]').parent().parent().find('ol').show();
+      }
+    )
+  );
+
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
   (function() {
