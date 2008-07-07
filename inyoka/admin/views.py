@@ -16,6 +16,7 @@ from sqlalchemy import not_, and_, select
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
+from django.newforms.util import ErrorList
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
@@ -642,8 +643,17 @@ def user_edit(request, username):
                                               PERMISSION_NAMES.keys()]
         if form.is_valid():
             data = form.cleaned_data
+            if data['username'] != user.username:
+                try:
+                    User.objects.get(username=data['username'])
+                except User.DoesNotExist:
+                    user.username = data['username']
+                else:
+                    form.errors['username'] = ErrorList([u'Ein Benutzer mit '
+                        u'diesem Namen existiert bereits'])
+        if form.is_valid():
             #: set the user attributes, avatar and forum privileges
-            for key in ('username', 'is_active', 'date_joined',
+            for key in ('is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
