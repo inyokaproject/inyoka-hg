@@ -132,6 +132,10 @@
             {% if post.author.member_title %}
             <p class="member_title">{{ post.author.member_title }}</p>
             {% endif %}
+            {% if not loop.first and post.author == topic.author%}
+            {# TODO: different class?! #}
+            <p class="member_title">(Threadstarter)</p>
+            {% endif %}
           </p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
