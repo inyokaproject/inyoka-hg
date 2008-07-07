@@ -492,10 +492,15 @@ ul.image_list a:hover img {
   opacity: 0.9;
 }
 
-pre {
+div.code, pre {
+    border: 1px solid #ccc;
     max-height: 15em;
     overflow: auto;
-    margin-top: 0.5em;
+    margin: 0.5em 0 0 0;
+}
+
+div.code pre {
+    max-height: none;
 }
 
 .codeblock_resizer {

@@ -16,7 +16,7 @@ from pygments.styles.friendly import FriendlyStyle
 
 
 _pygments_formatter = HtmlFormatter(style='colorful', cssclass='syntax',
-                                    linenos='inline')
+                                    linenos='table')
 
 
 def highlight_code(code, lang=None, filename=None, mimetype=None):

@@ -109,8 +109,10 @@ class PygmentsParser(Parser):
         except ClassNotFound:
             rv = None
         if rv is None:
-            return nodes.Preformatted([nodes.Text(self.data)])
-        return nodes.HTML(rv)
+            result = [nodes.Preformatted([nodes.Text(self.data)])]
+        result = [nodes.HTML(rv)]
+        return nodes.Layer(class_='code', children=result)
+
 
 
 class CSVParser(Parser):

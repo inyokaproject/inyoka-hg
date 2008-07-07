@@ -64,7 +64,7 @@ $(function () {
     };
   })();
 
-  $('table').each(function () {
+  $('div.code').add('pre').each(function () {
     if (this.clientHeight < this.scrollHeight) {
       $(this)
         .after('<div class="codeblock_resizer" title="vergrößern"></div>')
