@@ -504,7 +504,15 @@ div.code pre {
 }
 
 .codeblock_resizer {
-    height: 6px;
-    background: url(../img/expand-bar.png);
+    width: 10em;
+    margin-left: auto;
+    background: url(../img/expand-bar.png) #d6d6d6 bottom left repeat-x;
+    border-width: 0 1px 0 1px;
+    border-style: solid;
+    border-color: #a8a8a8;
     cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    padding: 0 0 0.2em 0;
+    font-size: 0.9em;
 }
