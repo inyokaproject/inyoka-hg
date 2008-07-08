@@ -280,7 +280,6 @@ class Comment(models.Model):
     def get_absolute_url(self, action='show'):
         return href('ikhaya', self.article.slug,
                     _anchor='comment_%s' % self.id)
-
     @property
     def rendered_text(self):
         context = RenderContext(current_request)
@@ -293,6 +292,8 @@ class Comment(models.Model):
 
     def save(self):
         super(Comment, self).save()
+        if self.id:
+            cache.delete('ikhaya/comment/%d' % self.id)
         self.article.comment_count += 1
         self.article.save()
 
