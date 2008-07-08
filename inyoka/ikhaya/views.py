@@ -126,15 +126,29 @@ def detail(request, slug):
         if 'preview' in request.POST:
             ctx = RenderContext(request)
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
+        elif 'delete' in request.POST:
+            # TODO
+            pass
         elif form.is_valid():
             data = form.cleaned_data
-            c = Comment(**data)
-            c.article = article
-            c.author = request.user
-            c.pub_date = datetime.utcnow()
+            if data['comment_id'] and request.user.can('comment_edit'):
+                c = Comment.objects.get(id=data['comment_id'])
+                c.text = data['text']
+            else:
+                del data['comment_id']
+                c = Comment(**data)
+                c.article = article
+                c.author = request.user
+                c.pub_date = datetime.utcnow()
             c.save()
             flash(u'Dein Kommentar wurde erstellt.')
             return HttpResponseRedirect(url_for(article))
+    elif request.GET.get('moderate'):
+        comment = Comment.objects.get(id=int(request.GET.get('moderate')))
+        form = EditCommentForm({
+            'comment_id':   comment.id,
+            'text':         comment.text
+        })
     else:
         form = EditCommentForm()
     return {

@@ -35,7 +35,7 @@
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-      {% if USER.is_manager %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
+      {% if USER.can('article_edit') %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
     </p>
     <a name="comments"></a>
     <ul class="comments">
@@ -45,8 +45,8 @@
         <div class="comment">
           von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
           {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
-            {%- if USER.is_ikhaya_writer %}
-            <a href="{{ href('ikhaya', 'comment', 'delete', comment.id) }}">Löschen</a>
+            {%- if USER.can('comment_edit') %}
+            <a href="{{ article|url }}?moderate={{ comment.id }}#new_comment">Moderieren</a>
             {% endif %}
           {%- endif %}
           {{ comment.rendered_text }}
@@ -63,9 +63,13 @@
       <h4><a name="new_comment">Kommentar schreiben</a></h4>
       <form action="{{ article|url }}#new_comment" method="post" class="new_comment">
         {{ render_form(form, ['text']) }}
+        {{ form.comment_id }}
         <p>
           <input type="submit" name="preview" value="Vorschau" />
           <input type="submit" value="Speichern" />
+          {% if form.data.comment_id %}
+          <input type="submit" name="delete" value="Löschen" />
+          {% endif %}
         </p>
         {%- if preview %}
         <div class="preview_wrapper">
@@ -81,7 +85,7 @@
           var
             editor = $('textarea[@name="text"]'),
             output = $('<div class="preview" />')
-          var preview = $('<div class="preview_wrapper" />')
+          var preview = $('<div class="preview_wrapper"  />')
             .hide()
             .append('<h2 class="title">Vorschau<\/h2>')
             .append(output);

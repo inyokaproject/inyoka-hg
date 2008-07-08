@@ -19,6 +19,7 @@ class SuggestArticleForm(forms.Form):
 
 
 class EditCommentForm(forms.Form):
+    comment_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     text = forms.CharField(label=u'Text', widget=forms.Textarea,
              help_text=u'Um dich auf einen anderen Kommentar zu beziehen, '
                u'kannst du <em>@kommentar_nummer</em> verwenden.<br />'
