@@ -76,8 +76,8 @@ def config(request):
             for k in keys:
                 storage[k] = data[k]
             if data['team_icon']:
-                icon = Image.open(StringIO(data['team_icon'].content))
-                ext = icon.format
+                img_data = data['team_icon'].read()
+                icon = Image.open(StringIO(img_data))
                 fn = 'portal/team_icon.%s' % icon.format.lower()
                 imgp = path.join(settings.MEDIA_ROOT, fn)
 
@@ -86,7 +86,7 @@ def config(request):
 
                 f = open(imgp, 'wb')
                 try:
-                    f.write(data['team_icon'].content)
+                    f.write(img_data)
                 finally:
                     f.close()
 
