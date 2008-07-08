@@ -1177,3 +1177,10 @@ div.dropdown {
   height:20px;
   margin-right:4px;
 }
+
+/*** preload ************************************************************/
+
+#preload {
+  height: 0;
+  overflow: hidden;
+} 
