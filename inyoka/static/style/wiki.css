@@ -19,6 +19,10 @@ h1.pagetitle a {
     text-decoration: none;
 }
 
+h2, h3, h4 {
+    margin-top: 1.4em;
+}
+
 #page, .preview {
     line-height: 1.5em;
     font-size: 1em;
@@ -172,3 +176,4 @@ div.conflict {
 div.conflict strong {
     color: black;
 }
+
