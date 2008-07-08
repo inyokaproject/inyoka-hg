@@ -37,7 +37,7 @@
       {%- if user.avatar %}
       <dd>{{ form.delete_avatar }} <label for="id_delete_avatar">Aktuellen Avatar löschen</label></dd>
       {%- endif %}
-      {%- if form.errors[avatar] %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
+      {%- if form.errors.avatar or form.errors.delete_avatar %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
     </dl>
     <h3>Kontakt-Adressen</h3>
     <dl>
