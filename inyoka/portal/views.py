@@ -17,7 +17,7 @@ from datetime import datetime, date
 from django.newforms.models import model_to_dict
 from django import newforms as forms
 from inyoka.conf import settings
-from inyoka.utils.text import get_random_password, human_number
+from inyoka.utils.text import get_random_password, human_number, normalize_pagename
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
      PageNotFound, does_not_exist_is_404, HttpResponseRedirect
@@ -36,7 +36,7 @@ from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.portal.utils import check_activation_key, send_activation_mail, \
      send_new_user_password
 from inyoka.wiki.models import Page as WikiPage
-from inyoka.wiki.utils import normalize_pagename, quote_text
+from inyoka.wiki.utils import quote_text
 from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.models import Forum, SAUser, Topic, Post
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \

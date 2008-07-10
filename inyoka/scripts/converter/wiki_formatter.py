@@ -13,7 +13,7 @@ import re
 from MoinMoin.formatter.base import FormatterBase
 from inyoka.scripts.converter.converter import PAGE_REPLACEMENTS
 from inyoka.scripts.converter.create_templates import templates
-from inyoka.wiki.utils import normalize_pagename
+from inyoka.utils.text import normalize_pagename
 from MoinMoin.parser.wiki import Parser
 from inyoka.forum.models import Topic
 from inyoka.pastebin.forms import LANGUAGES

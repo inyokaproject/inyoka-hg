@@ -30,13 +30,13 @@ from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode, url_for
 from inyoka.wiki.parser import nodes
-from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
-     pagename_join, is_external_target, debug_repr, dump_argstring, \
-     ArgumentCollector
+from inyoka.wiki.utils import simple_filter, get_title, debug_repr, \
+    dump_argstring, ArgumentCollector
 from inyoka.wiki.models import Page, Revision
-from inyoka.utils.text import human_number
+from inyoka.utils.urls import is_external_target
+from inyoka.utils.text import human_number, join_pagename, normalize_pagename
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
-     natural_date
+    natural_date
 from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
@@ -679,7 +679,7 @@ class Template(Macro):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):
             items.append(('arguments.%d' % idx, arg))
-        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+        self.template = join_pagename(settings.WIKI_TEMPLATE_BASE,
                                       normalize_pagename(args[0], False))
         self.context = items
 
@@ -759,7 +759,7 @@ class Picture(Macro):
             return img
         else:
             if context.wiki_page:
-                target = pagename_join(context.wiki_page, self.target)
+                target = join_pagename(context.wiki_page, self.target)
             source = href('wiki', '_image',
                 target=target,
                 width=self.width,

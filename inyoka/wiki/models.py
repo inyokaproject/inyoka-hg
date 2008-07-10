@@ -84,7 +84,7 @@ from mimetypes import guess_type
 from django.db import models, connection
 from inyoka.conf import settings
 from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
-     get_close_matches, get_title, pagename_join
+     get_close_matches, get_title
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils.decorators import deferred
@@ -97,6 +97,7 @@ from inyoka.utils.collections import MultiMap
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
+from inyoka.utils.text import join_pagename
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
@@ -897,7 +898,7 @@ class Page(models.Model):
             if key in ('X-Link', 'X-Attach'):
                 if t in new_metadata:
                     new_metadata.remove(t)
-                new_metadata.add((key, pagename_join(self.name, value)))
+                new_metadata.add((key, join_pagename(self.name, value)))
 
         cur = connection.cursor()
         cur.execute('''

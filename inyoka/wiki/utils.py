@@ -27,14 +27,11 @@ from itertools import ifilter
 from werkzeug.utils import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, is_external_target
 from inyoka.utils.html import escape
+from inyoka.utils.text import normalize_pagename
 from inyoka.portal.user import User
 
-
-_path_crop = re.compile(r'^(..?/)+')
-_unsupported_re = re.compile(r'[\x00-\x19#%?]+')
-_schema_re = re.compile(r'[a-z]+://')
 
 
 def has_conflicts(text):
@@ -43,56 +40,6 @@ def has_conflicts(text):
     if isinstance(text, basestring):
         text = parse(text)
     return text.query.all.by_type(nodes.ConflictMarker).has_any
-
-
-def pagename_join(name1, name2):
-    """
-    Join a page with another one.  This works similar to a normal filesystem
-    path join but with different rules.  Here some examples:
-
-    >>> pagename_join('Foo', 'Bar')
-    'Foo/Bar'
-    >>> pagename_join('Foo', '/Bar')
-    'Bar'
-    >>> pagename_join('Foo', 'Bar/Baz')
-    'Bar/Baz'
-    >>> pagename_join('Foo', './Bar/Baz')
-    'Foo/Bar/Baz'
-    """
-    if '/' in name2 and not _path_crop.match(name2):
-        name2 = '/' + name2
-    path = posixpath.join(name1, name2).lstrip('/')
-    return _path_crop.sub('', posixpath.normpath(path))
-
-
-def normalize_pagename(name, strip_location_markers=True):
-    """
-    Normalize a pagename.  Strip unsupported characters.  You have to call
-    this function whenever you get a pagename from user input.  The models
-    itself never check for normalized names and passing unnormalized page
-    names to the models can cause serious breakage.
-
-    If the second parameter is set to `False` the leading slashes or slash
-    like path location markers are not removed.  That way the pagename is
-    left unnormalized to a part but will be fully normalized after a
-    `pagename_join` call.
-    """
-    name = u'_'.join(_unsupported_re.sub('', name).split()).rstrip('/')
-    if not strip_location_markers:
-        return name
-    if name.startswith('./'):
-        return name[2:]
-    elif name.startswith('../'):
-        return name[3:]
-    return name.lstrip('/')
-
-
-def is_external_target(location):
-    """
-    Check if a target points to an external URL or an internal page.  Returns
-    `True` if the target is an external URL.
-    """
-    return _schema_re.match(location) is not None
 
 
 def get_title(name, full=True):

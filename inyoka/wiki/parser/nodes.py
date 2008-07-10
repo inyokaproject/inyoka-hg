@@ -21,12 +21,11 @@
 """
 from urlparse import urlparse, urlunparse
 from inyoka.conf import settings
-from inyoka.utils.text import slugify
+from inyoka.utils.text import slugify, normalize_pagename
 from inyoka.utils.html import build_html_tag, striptags, escape
 from inyoka.utils.urls import href, url_quote_plus
 from inyoka.utils.templating import render_template
-from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
-     resolve_interwiki_link
+from inyoka.wiki.utils import get_title, debug_repr, resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
 from inyoka.utils.local import current_request

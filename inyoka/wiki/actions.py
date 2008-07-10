@@ -30,6 +30,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.text import normalize_pagename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
@@ -37,7 +38,7 @@ from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
-from inyoka.wiki.utils import get_title, normalize_pagename
+from inyoka.wiki.utils import get_title
 from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
