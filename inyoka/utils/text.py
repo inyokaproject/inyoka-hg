@@ -124,3 +124,14 @@ def normalize_pagename(name, strip_location_markers=True):
     elif name.startswith('../'):
         return name[3:]
     return name.lstrip('/')
+
+def get_pagetitle(name, full=True):
+    """
+    Get the title for a page by name.  Per default it just returns the title
+    for the full page, not just the last part.  If you just want the part
+    after the last slash set `full` to `False`.
+    """
+    name = normalize_pagename(name)
+    if not full:
+        name = name.rsplit('/', 1)[-1]
+    return u' '.join(x for x in name.split('_') if x)

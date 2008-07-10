@@ -21,11 +21,11 @@
 """
 from urlparse import urlparse, urlunparse
 from inyoka.conf import settings
-from inyoka.utils.text import slugify, normalize_pagename
+from inyoka.utils.text import slugify, normalize_pagename, get_pagetitle
 from inyoka.utils.html import build_html_tag, striptags, escape
 from inyoka.utils.urls import href, url_quote_plus
 from inyoka.utils.templating import render_template
-from inyoka.wiki.utils import get_title, debug_repr, resolve_interwiki_link
+from inyoka.wiki.utils import debug_repr, resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
 from inyoka.utils.local import current_request
@@ -568,7 +568,7 @@ class InternalLink(Element):
                  anchor=None, id=None, style=None, class_=None):
         page = normalize_pagename(page)
         if not children:
-            children = [Text(get_title(page))]
+            children = [Text(get_pagetitle(page))]
         Element.__init__(self, children, id, style, class_)
         self.force_existing = force_existing
         self.page = page

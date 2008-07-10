@@ -9,8 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from inyoka.portal.utils import check_login, require_permission
-from inyoka.portal.user import User
+
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, HttpResponse, PageNotFound
@@ -23,6 +22,8 @@ from inyoka.utils.dates import MONTHS
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
+from inyoka.portal.utils import check_login, require_permission
+from inyoka.portal.user import User
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext

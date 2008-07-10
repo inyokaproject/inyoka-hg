@@ -17,12 +17,12 @@
 """
 from urlparse import urljoin
 from inyoka.conf import settings
-from inyoka.utils.urls import href, is_safe_domain, url_for
 from inyoka.utils.html import escape
-from inyoka.utils.http import PageNotFound, HttpResponseRedirect
-from inyoka.utils.flashing import flash
-from inyoka.utils.http import templated, AccessDeniedResponse
+from inyoka.utils.urls import href, is_safe_domain, url_for
 from inyoka.utils.text import join_pagename, normalize_pagename
+from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
+    AccessDeniedResponse
+from inyoka.utils.flashing import flash
 from inyoka.wiki.models import Page
 from inyoka.wiki.actions import PAGE_ACTIONS
 from inyoka.wiki.utils import get_thumbnail

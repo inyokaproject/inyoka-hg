@@ -83,8 +83,6 @@ from datetime import datetime
 from mimetypes import guess_type
 from django.db import models, connection
 from inyoka.conf import settings
-from inyoka.wiki.utils import generate_udiff, prepare_udiff, \
-     get_close_matches, get_title
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils.decorators import deferred
@@ -97,7 +95,9 @@ from inyoka.utils.collections import MultiMap
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
-from inyoka.utils.text import join_pagename
+from inyoka.utils.text import join_pagename, get_pagetitle
+from inyoka.utils.diff3 import generate_udiff, prepare_udiff, \
+    get_close_matches
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
@@ -785,7 +785,7 @@ class Page(models.Model):
         name and cannot be changed.  However future versions might support
         giving pages different titles by using the metadata system.
         """
-        return get_title(self.name)
+        return get_pagetitle(self.name)
 
     @property
     def short_title(self):
@@ -794,7 +794,7 @@ class Page(models.Model):
         outermost part (after the last slash).  This is primarly used in the
         `do_show` action.
         """
-        return get_title(self.name, full=False)
+        return get_pagetitle(self.name, full=False)
 
     @property
     def full_title(self):
@@ -806,7 +806,7 @@ class Page(models.Model):
     @property
     def trace(self):
         """The trace of pages to this page."""
-        parts = get_title(self.name, full=True).split('/')
+        parts = get_pagetitle(self.name, full=True).split('/')
         return [u'/'.join(parts[:idx + 1]) for idx in xrange(len(parts))]
 
     @deferred

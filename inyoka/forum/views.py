@@ -17,9 +17,6 @@ from django.utils.text import truncate_html_words
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
-from inyoka.portal.utils import simple_check_login, abort_access_denied, \
-    require_permission
-from inyoka.portal.user import User
 from inyoka.utils.urls import global_not_found, href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
@@ -38,6 +35,9 @@ from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page
+from inyoka.portal.utils import simple_check_login, abort_access_denied, \
+    require_permission
+from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \

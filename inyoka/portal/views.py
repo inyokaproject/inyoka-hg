@@ -23,7 +23,7 @@ from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
      PageNotFound, does_not_exist_is_404, HttpResponseRedirect
 from inyoka.utils.sessions import get_sessions, set_session_info, \
      make_permanent, get_user_record, test_session_cookie
-from inyoka.utils.urls import href, url_for, is_safe_domain
+from inyoka.utils.urls import href, url_for, is_safe_domain, global_not_found
 from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
@@ -33,10 +33,11 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
-from inyoka.portal.utils import check_activation_key, send_activation_mail, \
-     send_new_user_password
-from inyoka.wiki.models import Page as WikiPage
+from inyoka.utils.storage import storage
+from inyoka.utils.tracreporter import Trac
 from inyoka.wiki.utils import quote_text
+from inyoka.wiki.parser import parse, RenderContext
+from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.models import Forum, SAUser, Topic, Post
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
@@ -48,11 +49,9 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
-from inyoka.portal.utils import check_login, calendar_entries_for_month
-from inyoka.utils.storage import storage
-from inyoka.utils.tracreporter import Trac
-from inyoka.utils.urls import global_not_found
-from inyoka.wiki.parser import parse, RenderContext
+from inyoka.portal.utils import check_login, calendar_entries_for_month, \
+    check_activation_key, send_activation_mail, send_new_user_password
+
 
 
 def not_found(request, err_message=None):
