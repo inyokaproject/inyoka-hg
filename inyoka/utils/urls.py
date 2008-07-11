@@ -10,6 +10,7 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
+import re
 import cgi
 from urlparse import urlparse
 from django.core.urlresolvers import RegexURLResolver
@@ -25,6 +26,7 @@ _url_reverse_map = dict((v.split('.')[1], k) for k, v in
 _url_reverse_map['static'] = 'static'
 _url_reverse_map['media'] = 'media'
 _resolvers = {}
+_schema_re = re.compile(r'[a-z]+://')
 
 
 def href(_module='portal', *parts, **query):
@@ -68,6 +70,14 @@ def is_safe_domain(url):
     if scheme not in ('http', 'https', 'ftp'):
         return False
     return ('.' + netloc).endswith('.' + settings.BASE_DOMAIN_NAME)
+
+
+def is_external_target(location):
+    """
+    Check if a target points to an external URL or an internal page.  Returns
+    `True` if the target is an external URL.
+    """
+    return _schema_re.match(location) is not None
 
 
 def get_query_string(url):

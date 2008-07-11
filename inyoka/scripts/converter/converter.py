@@ -27,7 +27,6 @@ settings.DEBUG = False
 settings.DATABASE_DEBUG = False
 from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.wiki import bbcode
-from inyoka.wiki.utils import normalize_pagename
 from inyoka.wiki.models import Page as InyokaPage
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.parser.transformers import AutomaticParagraphs, Transformer
@@ -40,8 +39,10 @@ from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
 from inyoka.ikhaya.models import Article, Category
 from inyoka.pastebin.models import Entry
 from inyoka.utils.database import session
+from inyoka.utils.text import nromalize_pagename
 from inyoka.portal.user import User, Group
 from inyoka.scripts.converter.create_templates import create
+
 
 _account = '%s:%s@%s' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
                        settings.DATABASE_HOST)
@@ -705,7 +706,6 @@ def convert_attachments():
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()
-    log = open('converter.log', 'w')
 
     try:
         conn.execute("ALTER TABLE `%sprivmsgs` ADD `done` BOOL NOT NULL DEFAULT '0';" % FORUM_PREFIX)
@@ -752,6 +752,7 @@ def convert_privmsgs():
 
         try:
             m = PrivateMessage()
+            m.id = msg.privmsgs_id
             m.author_id = msg.privmsgs_from_userid;
             m.subject = unescape(msg.privmsgs_subject)
             m.pub_date = datetime.fromtimestamp(msg.privmsgs_date)

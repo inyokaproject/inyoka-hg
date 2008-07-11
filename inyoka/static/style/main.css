@@ -380,10 +380,8 @@ h3 .note {
 }
 
 table.syntaxtable {
-  border: 1px solid #DDDDDD;
-  border-collapse: collapse;
+  border: 0;
   margin: /*1em 0 0*/ 0;
-  width: 100%;
 }
 
 table.syntaxtable pre {
@@ -1179,3 +1177,10 @@ div.dropdown {
   height:20px;
   margin-right:4px;
 }
+
+/*** preload ************************************************************/
+
+#preload {
+  height: 0;
+  overflow: hidden;
+} 

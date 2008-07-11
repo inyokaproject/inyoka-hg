@@ -30,13 +30,13 @@ from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode, url_for
 from inyoka.wiki.parser import nodes
-from inyoka.wiki.utils import simple_filter, get_title, normalize_pagename, \
-     pagename_join, is_external_target, debug_repr, dump_argstring, \
-     ArgumentCollector
+from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
+    ArgumentCollector
 from inyoka.wiki.models import Page, Revision
-from inyoka.utils.text import human_number
+from inyoka.utils.urls import is_external_target
+from inyoka.utils.text import human_number, join_pagename, normalize_pagename
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
-     natural_date
+    natural_date
 from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
@@ -211,8 +211,8 @@ class RecentChanges(Macro):
         data = cache.get(cache_key)
         if data is None:
             #XXX: for every user url one query is send. select_related(depth=4+)
-            #     doesn't fix that.... for now it's not that bad, but should
-            #     be optimized.
+            #     doesn't fix that.... for now it's not that bad (because of caching),
+            #     but should be optimized.
             revisions = Revision.objects.filter(change_date__gt=(
                 datetime.utcnow()-timedelta(days=max_days))).select_related()
             sitems = Sortable(revisions, context.request.GET, '-change_date')
@@ -334,7 +334,7 @@ class TableOfContents(TreeMacro):
         self.list_type = list_type
 
     def build_node(self, tree):
-        result = nodes.List(self.list_type, class_='toc')
+        result = nodes.List(self.list_type)
         stack = [result]
         for headline in tree.query.by_type(nodes.Headline):
             if headline.level > self.depth:
@@ -356,6 +356,9 @@ class TableOfContents(TreeMacro):
             caption = [nodes.Text(text)]
             link = nodes.Link('#' + headline.id, caption)
             stack[-1].children.append(nodes.ListItem([link]))
+        head = nodes.Layer(children=[nodes.Text(u'Inhaltsverzeichnis')],
+                           class_='head')
+        result = nodes.Layer(class_='toc', children = [head, result])
         return result
 
 
@@ -392,7 +395,7 @@ class PageList(Macro):
             pagelist = simple_filter(self.pattern, pagelist,
                                      self.case_sensitive)
         for page in pagelist:
-            title = [nodes.Text(get_title(page, not self.shorten_title))]
+            title = [nodes.Text(get_pagetitle(page, not self.shorten_title))]
             link = nodes.InternalLink(page, title, force_existing=True)
             result.children.append(nodes.ListItem([link]))
         return result
@@ -416,7 +419,7 @@ class AttachmentList(Macro):
         result = nodes.List('unordered')
         pagelist = Page.objects.get_attachment_list(self.page or None)
         for page in pagelist:
-            title = [nodes.Text(get_title(page, not self.shorten_title))]
+            title = [nodes.Text(get_pagetitle(page, not self.shorten_title))]
             link = nodes.InternalLink(page, title, force_existing=True)
             result.children.append(nodes.ListItem([link]))
         return result
@@ -432,7 +435,7 @@ class OrphanedPages(Macro):
     def build_node(self, context, format):
         result = nodes.List('unordered')
         for page in Page.objects.get_orphans():
-            title = [nodes.Text(get_title(page, True))]
+            title = [nodes.Text(get_pagetitle(page, True))]
             link = nodes.InternalLink(page, title,
                                       force_existing=True)
             result.children.append(nodes.ListItem([link]))
@@ -449,7 +452,7 @@ class MissingPages(Macro):
     def build_node(self, context, format):
         result = nodes.List('unordered')
         for page in Page.objects.get_missing():
-            title = [nodes.Text(get_title(page, True))]
+            title = [nodes.Text(get_pagetitle(page, True))]
             link = nodes.InternalLink(page, title,
                                       force_existing=True)
             result.children.append(nodes.ListItem([link]))
@@ -469,7 +472,7 @@ class RedirectPages(Macro):
             target = page.metadata.get('weiterleitung')
             link = nodes.InternalLink(page.name, [nodes.Text(page.title)],
                                       force_existing=True)
-            title = [nodes.Text(get_title(target, True))]
+            title = [nodes.Text(get_pagetitle(target, True))]
             target = nodes.InternalLink(target, title)
             result.children.append(nodes.ListItem([link, nodes.Text(u' \u2794 '),
                                                    target]))
@@ -544,7 +547,7 @@ class SimilarPages(Macro):
         for page in Page.objects.get_similar(name):
             if page == ignore:
                 continue
-            title = [nodes.Text(get_title(page, True))]
+            title = [nodes.Text(get_pagetitle(page, True))]
             link = nodes.InternalLink(page, title,
                                       force_existing=True)
             result.children.append(nodes.ListItem([link]))
@@ -676,7 +679,7 @@ class Template(Macro):
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):
             items.append(('arguments.%d' % idx, arg))
-        self.template = pagename_join(settings.WIKI_TEMPLATE_BASE,
+        self.template = join_pagename(settings.WIKI_TEMPLATE_BASE,
                                       normalize_pagename(args[0], False))
         self.context = items
 
@@ -756,7 +759,7 @@ class Picture(Macro):
             return img
         else:
             if context.wiki_page:
-                target = pagename_join(context.wiki_page, self.target)
+                target = join_pagename(context.wiki_page, self.target)
             source = href('wiki', '_image',
                 target=target,
                 width=self.width,
@@ -830,7 +833,7 @@ class NewPages(Macro):
                 text = nodes.Text(change_date.strftime('%B'))
                 headline = nodes.Headline(level=3, children=[text])
                 result.children.extend([headline, last_list])
-            title = [nodes.Text(get_title(page, True))]
+            title = [nodes.Text(get_pagetitle(page, True))]
             link = nodes.InternalLink(page, title, force_existing=True)
             last_list.children.append(nodes.ListItem([link]))
         return result
@@ -895,7 +898,7 @@ class RandomPageList(Macro):
             found += 1
 
         for page in pages:
-            title = [nodes.Text(get_title(page, not self.shorten_title))]
+            title = [nodes.Text(get_pagetitle(page, not self.shorten_title))]
             link = nodes.InternalLink(page, title, force_existing=True)
             result.children.append(nodes.ListItem([link]))
 

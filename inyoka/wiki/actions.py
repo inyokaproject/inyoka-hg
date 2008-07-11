@@ -30,6 +30,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.text import normalize_pagename, get_pagetitle
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
@@ -37,7 +38,6 @@ from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
 from inyoka.wiki.parser import parse, RenderContext
-from inyoka.wiki.utils import get_title, normalize_pagename
 from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
@@ -164,11 +164,13 @@ def do_missing_page(request, name, _page=None):
     return {
         'page':         _page,
         'page_name':    name,
-        'title':        get_title(name),
+        'create_link':  href('wiki', storage['wiki_newpage_root'],
+                             name, action='edit'),
+        'title':        get_pagetitle(name),
         'can_create':   has_privilege(request.user, name, 'create'),
         'similar': [{
             'name':     x,
-            'title':    get_title(x)
+            'title':    get_pagetitle(x)
         } for x in sorted(Page.objects.get_similar(name))],
         'backlinks': [{
             'name':     x.name,
@@ -455,7 +457,7 @@ def do_edit(request, name):
             escape(page.title)
         )
     else:
-        session_page = escape(get_title(name))
+        session_page = escape(get_pagetitle(name))
     set_session_info(request, u'bearbeitet den Wiki Artikel %s' %
                      session_page)
 

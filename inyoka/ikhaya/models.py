@@ -276,13 +276,16 @@ class Comment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(User)
     pub_date = models.DateTimeField()
+    deleted = models.BooleanField(null=False, default=False)
 
     def get_absolute_url(self, action='show'):
         return href('ikhaya', self.article.slug,
                     _anchor='comment_%s' % self.id)
-
     @property
     def rendered_text(self):
+        if self.deleted:
+            return u'<p class="deleted">Dieses Kommentar wurde von der ' \
+                    u'Moderation gelöscht</p>'
         context = RenderContext(current_request)
         key = 'ikhaya/comment/%s' % self.id
         instructions = cache.get(key)
@@ -293,6 +296,8 @@ class Comment(models.Model):
 
     def save(self):
         super(Comment, self).save()
+        if self.id:
+            cache.delete('ikhaya/comment/%d' % self.id)
         self.article.comment_count += 1
         self.article.save()
 

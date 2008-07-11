@@ -8,9 +8,10 @@
     :license: GNU GPL.
 #}
 
-
 {%- extends 'portal/overall.html' %}
 {% set title = 'Suche' %}
+{% set active_app = area %}
+
 {% block appheader %}
   <h1><a href="{{ href('portal', 'search') }}">Suche</a></h1>
   <h2>Ergebnisse für „{{ query|e }}“</h2>

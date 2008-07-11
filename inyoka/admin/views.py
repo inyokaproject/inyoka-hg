@@ -16,6 +16,7 @@ from sqlalchemy import not_, and_, select
 from copy import copy as ccopy
 from datetime import datetime, date
 from django.newforms.models import model_to_dict
+from django.newforms.util import ErrorList
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
@@ -66,7 +67,8 @@ def index(request):
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
-            'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template']
+            'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template',
+            'wiki_newpage_root']
     if request.method == 'POST':
         form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -74,8 +76,8 @@ def config(request):
             for k in keys:
                 storage[k] = data[k]
             if data['team_icon']:
-                icon = Image.open(StringIO(data['team_icon'].content))
-                ext = icon.format
+                img_data = data['team_icon'].read()
+                icon = Image.open(StringIO(img_data))
                 fn = 'portal/team_icon.%s' % icon.format.lower()
                 imgp = path.join(settings.MEDIA_ROOT, fn)
 
@@ -84,7 +86,7 @@ def config(request):
 
                 f = open(imgp, 'wb')
                 try:
-                    f.write(data['team_icon'].content)
+                    f.write(img_data)
                 finally:
                     f.close()
 
@@ -644,8 +646,17 @@ def user_edit(request, username):
                                               PERMISSION_NAMES.keys()]
         if form.is_valid():
             data = form.cleaned_data
+            if data['username'] != user.username:
+                try:
+                    User.objects.get(username=data['username'])
+                except User.DoesNotExist:
+                    user.username = data['username']
+                else:
+                    form.errors['username'] = ErrorList([u'Ein Benutzer mit '
+                        u'diesem Namen existiert bereits'])
+        if form.is_valid():
             #: set the user attributes, avatar and forum privileges
-            for key in ('username', 'is_active', 'date_joined',
+            for key in ('is_active', 'date_joined',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',

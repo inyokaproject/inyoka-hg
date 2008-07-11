@@ -381,8 +381,8 @@ class User(models.Model):
 
     def save_avatar(self, img):
         """Save `img` to the file system."""
-        image = Image.open(StringIO(img.content))
-        ext = image.format
+        data = img.read()
+        image = Image.open(StringIO(data))
         fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
              image.format.lower())
         image_path = path.join(settings.MEDIA_ROOT, fn)
@@ -398,7 +398,7 @@ class User(models.Model):
         else:
             f = open(image_path, 'wb')
             try:
-                f.write(img.content)
+                f.write(data)
             finally:
                 f.close()
         self.avatar = fn

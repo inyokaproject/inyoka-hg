@@ -16,7 +16,6 @@ import os
 import re
 import difflib
 import heapq
-import posixpath
 import shutil
 import urllib
 from subprocess import Popen, PIPE
@@ -27,14 +26,11 @@ from itertools import ifilter
 from werkzeug.utils import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, is_external_target
 from inyoka.utils.html import escape
+from inyoka.utils.text import normalize_pagename
 from inyoka.portal.user import User
 
-
-_path_crop = re.compile(r'^(..?/)+')
-_unsupported_re = re.compile(r'[\x00-\x19#%?]+')
-_schema_re = re.compile(r'[a-z]+://')
 
 
 def has_conflicts(text):
@@ -43,86 +39,6 @@ def has_conflicts(text):
     if isinstance(text, basestring):
         text = parse(text)
     return text.query.all.by_type(nodes.ConflictMarker).has_any
-
-
-def pagename_join(name1, name2):
-    """
-    Join a page with another one.  This works similar to a normal filesystem
-    path join but with different rules.  Here some examples:
-
-    >>> pagename_join('Foo', 'Bar')
-    'Foo/Bar'
-    >>> pagename_join('Foo', '/Bar')
-    'Bar'
-    >>> pagename_join('Foo', 'Bar/Baz')
-    'Bar/Baz'
-    >>> pagename_join('Foo', './Bar/Baz')
-    'Foo/Bar/Baz'
-    """
-    if '/' in name2 and not _path_crop.match(name2):
-        name2 = '/' + name2
-    path = posixpath.join(name1, name2).lstrip('/')
-    return _path_crop.sub('', posixpath.normpath(path))
-
-
-def normalize_pagename(name, strip_location_markers=True):
-    """
-    Normalize a pagename.  Strip unsupported characters.  You have to call
-    this function whenever you get a pagename from user input.  The models
-    itself never check for normalized names and passing unnormalized page
-    names to the models can cause serious breakage.
-
-    If the second parameter is set to `False` the leading slashes or slash
-    like path location markers are not removed.  That way the pagename is
-    left unnormalized to a part but will be fully normalized after a
-    `pagename_join` call.
-    """
-    name = u'_'.join(_unsupported_re.sub('', name).split()).rstrip('/')
-    if not strip_location_markers:
-        return name
-    if name.startswith('./'):
-        return name[2:]
-    elif name.startswith('../'):
-        return name[3:]
-    return name.lstrip('/')
-
-
-def is_external_target(location):
-    """
-    Check if a target points to an external URL or an internal page.  Returns
-    `True` if the target is an external URL.
-    """
-    return _schema_re.match(location) is not None
-
-
-def get_title(name, full=True):
-    """
-    Get the title for a page by name.  Per default it just returns the title
-    for the full page, not just the last part.  If you just want the part
-    after the last slash set `full` to `False`.
-    """
-    name = normalize_pagename(name)
-    if not full:
-        name = name.rsplit('/', 1)[-1]
-    return u' '.join(x for x in name.split('_') if x)
-
-
-def get_close_matches(name, matches, n=10, cutoff=0.6):
-    """
-    This is a replacement for a function in the difflib with the same name.
-    The difference between the two implementations is that this one is case
-    insensitive and optimized for page names.
-    """
-    s = difflib.SequenceMatcher()
-    s.set_seq2(name.lower())
-    result = []
-    for name in matches:
-        s.set_seq1(name.lower())
-        if s.real_quick_ratio() >= cutoff and \
-           s.quick_ratio() >= cutoff and \
-           s.ratio() >= cutoff:
-            result.append((s.ratio(), name))
-    return heapq.nlargest(n, result)
 
 
 def debug_repr(obj):
@@ -208,31 +124,6 @@ def resolve_interwiki_link(wiki, page):
     else:
         link = rule.replace('$PAGE', page)
     return link
-
-
-def generate_udiff(old, new, old_title='', new_title='',
-                   context_lines=4):
-    """
-    Generate an udiff out of two texts.  If titles are given they will be
-    used on the diff.  `context_lines` defaults to 5 and represents the
-    number of lines used in an udiff around a changed line.
-    """
-    return u'\n'.join(difflib.unified_diff(
-        old.splitlines(),
-        new.splitlines(),
-        fromfile=old_title,
-        tofile=new_title,
-        lineterm='',
-        n=context_lines
-    ))
-
-
-def prepare_udiff(udiff):
-    """
-    Prepare an udiff for the template.  The `Diff` model uses this to render
-    an udiff into a HTML table.
-    """
-    return DiffRenderer(udiff).prepare()
 
 
 def get_thumbnail(location, width=None, height=None, force=False):
@@ -488,151 +379,3 @@ class ArgumentCollector(type):
             new_init.__module__ = old_init.__module__
         d['__init__'] = new_init
         return type.__new__(cls, name, bases, d)
-
-
-class DiffRenderer(object):
-    """
-    Give it a unified diff and it returns a list of the files that were
-    mentioned in the diff together with a dict of meta information that
-    can be used to render it in a HTML template.
-    """
-    _chunk_re = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
-
-    def __init__(self, udiff):
-        """
-        :param udiff:   a text in udiff format
-        """
-        self.lines = [escape(line) for line in udiff.splitlines()]
-
-    def _extract_rev(self, line1, line2):
-        """Extract the filename and revision hint from a line."""
-        try:
-            if line1.startswith('--- ') and line2.startswith('+++ '):
-                filename, old_rev = line1[4:].split(None, 1)
-                new_rev = line2[4:].split(None, 1)[1]
-                return filename, 'Alt', 'Neu'
-        except (ValueError, IndexError):
-            pass
-        return None, None, None
-
-    def _highlight_line(self, line, next):
-        """Highlight inline changes in both lines."""
-        start = 0
-        limit = min(len(line['line']), len(next['line']))
-        while start < limit and line['line'][start] == next['line'][start]:
-            start += 1
-        end = -1
-        limit -= start
-        while -end <= limit and line['line'][end] == next['line'][end]:
-            end -= 1
-        end += 1
-        if start or end:
-            def do(l):
-                last = end + len(l['line'])
-                if l['action'] == 'add':
-                    tag = 'ins'
-                else:
-                    tag = 'del'
-                l['line'] = u'%s<%s>%s</%s>%s' % (
-                    l['line'][:start],
-                    tag,
-                    l['line'][start:last],
-                    tag,
-                    l['line'][last:]
-                )
-            do(line)
-            do(next)
-
-    def _parse_udiff(self):
-        """Parse the diff an return data for the template."""
-        lineiter = iter(self.lines)
-        files = []
-        try:
-            line = lineiter.next()
-            while True:
-                # continue until we found the old file
-                if not line.startswith('--- '):
-                    line = lineiter.next()
-                    continue
-
-                chunks = []
-                filename, old_rev, new_rev = \
-                    self._extract_rev(line, lineiter.next())
-                files.append({
-                    'filename':         filename,
-                    'old_revision':     old_rev,
-                    'new_revision':     new_rev,
-                    'chunks':           chunks
-                })
-
-                line = lineiter.next()
-                while line:
-                    match = self._chunk_re.match(line)
-                    if not match:
-                        break
-
-                    lines = []
-                    chunks.append(lines)
-
-                    old_line, old_end, new_line, new_end = \
-                        [int(x or 1) for x in match.groups()]
-                    old_line -= 1
-                    new_line -= 1
-                    old_end += old_line
-                    new_end += new_line
-                    line = lineiter.next()
-
-                    while old_line < old_end or new_line < new_end:
-                        if line:
-                            command, line = line[0], line[1:]
-                        else:
-                            command = ' '
-                        affects_old = affects_new = False
-
-                        if command == ' ':
-                            affects_old = affects_new = True
-                            action = 'unmod'
-                        elif command == '+':
-                            affects_new = True
-                            action = 'add'
-                        elif command == '-':
-                            affects_old = True
-                            action = 'del'
-                        else:
-                            raise RuntimeError()
-
-                        old_line += affects_old
-                        new_line += affects_new
-                        lines.append({
-                            'old_lineno':   affects_old and old_line or u'',
-                            'new_lineno':   affects_new and new_line or u'',
-                            'action':       action,
-                            'line':         line
-                        })
-                        line = lineiter.next()
-
-        except StopIteration:
-            pass
-
-        # highlight inline changes
-        for file in files:
-            for chunk in chunks:
-                lineiter = iter(chunk)
-                first = True
-                try:
-                    while True:
-                        line = lineiter.next()
-                        if line['action'] != 'unmod':
-                            nextline = lineiter.next()
-                            if nextline['action'] == 'unmod' or \
-                               nextline['action'] == line['action']:
-                                continue
-                            self._highlight_line(line, nextline)
-                except StopIteration:
-                    pass
-
-        return files
-
-    def prepare(self):
-        """Prepare the passed udiff for HTML rendering."""
-        return self._parse_udiff()

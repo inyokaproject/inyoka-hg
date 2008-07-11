@@ -17,15 +17,15 @@
 """
 from urlparse import urljoin
 from inyoka.conf import settings
-from inyoka.utils.urls import href, is_safe_domain, url_for
 from inyoka.utils.html import escape
-from inyoka.utils.http import PageNotFound, HttpResponseRedirect
+from inyoka.utils.urls import href, is_safe_domain, url_for
+from inyoka.utils.text import join_pagename, normalize_pagename
+from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
+    AccessDeniedResponse
 from inyoka.utils.flashing import flash
-from inyoka.utils.http import templated, AccessDeniedResponse
 from inyoka.wiki.models import Page
 from inyoka.wiki.actions import PAGE_ACTIONS
-from inyoka.wiki.utils import normalize_pagename, get_thumbnail, \
-     pagename_join
+from inyoka.wiki.utils import get_thumbnail
 from inyoka.wiki.acl import has_privilege
 
 
@@ -72,12 +72,12 @@ def redirect_new_page(request):
               'wurde.', success=False)
         return HttpResponseRedirect(backref)
     if base:
-        page = pagename_join(base, page)
+        page = join_pagename(base, page)
     try:
         page = Page.objects.get(name=page)
     except Page.DoesNotExist:
         if template:
-            options['template'] = pagename_join(settings.WIKI_TEMPLATE_BASE,
+            options['template'] = join_pagename(settings.WIKI_TEMPLATE_BASE,
                                                 template)
         return HttpResponseRedirect(href('wiki', page, **options))
     flash(u'Eine Seite mit dem Namen „<a href="%s">%s</a>“existiert '

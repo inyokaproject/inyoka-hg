@@ -325,11 +325,11 @@ class SearchSystem(object):
         if data.get('title'):
             title = list(tokenize(data['title']))
             for token in title:
-                doc.add_posting(token, pos)
+                doc.add_posting(token, pos, 3)
                 pos += 1
             pos += 20
             for token in title:
-                doc.add_posting('T%s' % token, pos)
+                doc.add_posting('T%s' % token, pos, 3)
                 pos += 1
             pos += 20
 

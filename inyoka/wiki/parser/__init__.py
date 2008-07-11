@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""
+"""
     inyoka.wiki.parser
     ~~~~~~~~~~~~~~~~~~
 
@@ -935,7 +935,8 @@ class Parser(object):
             name = stream.current.value
             stream.next()
             args, kwargs = self.parse_arguments(stream, 'parser_end')
-            stream.next()
+            if stream.current.type != 'pre_end':
+                stream.next()
         else:
             name = None
 

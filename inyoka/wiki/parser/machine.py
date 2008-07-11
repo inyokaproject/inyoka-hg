@@ -97,7 +97,7 @@ class Query(object):
     def __init__(self, nodes, recurse=True):
         self.nodes = nodes
         self._nodeiter = iter(self.nodes)
-        self.recurse = True
+        self.recurse = recurse
 
     def __iter__(self):
         return self

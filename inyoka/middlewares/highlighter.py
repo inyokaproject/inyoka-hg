@@ -31,6 +31,7 @@
 """
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_decode
+from inyoka.utils.http import HttpResponseRedirect
 from inyoka.utils.flashing import flash, unflash
 import re
 
@@ -107,6 +108,8 @@ class HighlighterMiddleware(object):
                       u'<a class="hide_searchwords" href="%s">ausblenden</a>.'
                       % escape(plain_url),
                       classifier='middleware/hide_highlights')
+            else:
+                return HttpResponseRedirect(plain_url)
 
     def process_response(self, request, response):
         """

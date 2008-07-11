@@ -21,12 +21,11 @@
 """
 from urlparse import urlparse, urlunparse
 from inyoka.conf import settings
-from inyoka.utils.text import slugify
+from inyoka.utils.text import slugify, normalize_pagename, get_pagetitle
 from inyoka.utils.html import build_html_tag, striptags, escape
 from inyoka.utils.urls import href, url_quote_plus
 from inyoka.utils.templating import render_template
-from inyoka.wiki.utils import normalize_pagename, get_title, debug_repr, \
-     resolve_interwiki_link
+from inyoka.wiki.utils import debug_repr, resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
 from inyoka.utils.local import current_request
@@ -569,7 +568,7 @@ class InternalLink(Element):
                  anchor=None, id=None, style=None, class_=None):
         page = normalize_pagename(page)
         if not children:
-            children = [Text(get_title(page))]
+            children = [Text(get_pagetitle(page))]
         Element.__init__(self, children, id, style, class_)
         self.force_existing = force_existing
         self.page = page
@@ -940,16 +939,16 @@ class Preformatted(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.raw()
         w.markup(u'{{{')
+        w.raw()
         w.start_escaping('}}}')
         Element.generate_markup(self, w)
         if w._result[-1][-1] == u'}':
             # prevent four }s
             w.touch_whitespace()
         w.stop_escaping()
-        w.markup(u'}}}')
         w.endraw()
+        w.markup(u'}}}')
 
     def prepare_html(self):
         yield build_html_tag(u'pre', id=self.id, style=self.style,

@@ -9,8 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
-from inyoka.portal.utils import check_login, require_permission
-from inyoka.portal.user import User
+
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, HttpResponse, PageNotFound
@@ -23,6 +22,8 @@ from inyoka.utils.dates import MONTHS
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
+from inyoka.portal.utils import check_login, require_permission
+from inyoka.portal.user import User
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
@@ -128,13 +129,26 @@ def detail(request, slug):
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
         elif form.is_valid():
             data = form.cleaned_data
-            c = Comment(**data)
-            c.article = article
-            c.author = request.user
-            c.pub_date = datetime.utcnow()
+            if data['comment_id'] and request.user.can('comment_edit'):
+                c = Comment.objects.get(id=data['comment_id'])
+                c.text = data['text']
+                c.deleted = data['deleted']
+                flash(u'Das Kommentar wurde erfolgreich bearbeitet.')
+            else:
+                c = Comment(text=data['text'])
+                c.article = article
+                c.author = request.user
+                c.pub_date = datetime.utcnow()
+                flash(u'Dein Kommentar wurde erstellt.')
             c.save()
-            flash(u'Dein Kommentar wurde erstellt.')
             return HttpResponseRedirect(url_for(article))
+    elif request.GET.get('moderate'):
+        comment = Comment.objects.get(id=int(request.GET.get('moderate')))
+        form = EditCommentForm({
+            'comment_id':   comment.id,
+            'text':         comment.text,
+            'deleted':      comment.deleted
+        })
     else:
         form = EditCommentForm()
     return {
@@ -154,31 +168,6 @@ def archive(request):
     return {
         'months': months
     }
-
-
-@check_login(message=u'Bitte melde dich an, um Ikhaya-Kommentare zu '
-             'administrieren')
-def comment_delete(request, comment_id):
-    """Delete a single comment."""
-    try:
-        comment = Comment.objects.get(id=comment_id)
-    except Comment.DoesNotExist:
-        return HttpResponseRedirect(href('ikhaya'))
-    url = url_for(comment.article)
-    if not request.user.can('comment_edit'):
-        return HttpResponseRedirect(url)
-    if request.GET.get('confirm') != 'yes':
-        flash(u'Soll das Kommentar von „%s“ wirklich gelöscht werden? ' \
-              u'<a href="%s">Löschen</a> <a href="%s">Abbrechen</a>' % (
-                  comment.author.username,
-                  href('ikhaya', 'comment', 'delete', comment_id,
-                       confirm='yes'), url))
-    else:
-        comment.article.comment_count -= 1
-        comment.article.save()
-        comment.delete()
-        flash(u'Das Kommentar wurde erfolgreich gelöscht.')
-    return HttpResponseRedirect(url)
 
 
 @check_login(message=u'Bitte melde dich an, um einen Ikhaya-Artikel '
