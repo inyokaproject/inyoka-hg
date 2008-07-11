@@ -127,28 +127,27 @@ def detail(request, slug):
         if 'preview' in request.POST:
             ctx = RenderContext(request)
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
-        elif 'delete' in request.POST:
-            # TODO
-            pass
         elif form.is_valid():
             data = form.cleaned_data
             if data['comment_id'] and request.user.can('comment_edit'):
                 c = Comment.objects.get(id=data['comment_id'])
                 c.text = data['text']
+                c.deleted = data['deleted']
+                flash(u'Das Kommentar wurde erfolgreich bearbeitet.')
             else:
-                del data['comment_id']
-                c = Comment(**data)
+                c = Comment(text=data['text'])
                 c.article = article
                 c.author = request.user
                 c.pub_date = datetime.utcnow()
+                flash(u'Dein Kommentar wurde erstellt.')
             c.save()
-            flash(u'Dein Kommentar wurde erstellt.')
             return HttpResponseRedirect(url_for(article))
     elif request.GET.get('moderate'):
         comment = Comment.objects.get(id=int(request.GET.get('moderate')))
         form = EditCommentForm({
             'comment_id':   comment.id,
-            'text':         comment.text
+            'text':         comment.text,
+            'deleted':      comment.deleted
         })
     else:
         form = EditCommentForm()
@@ -169,31 +168,6 @@ def archive(request):
     return {
         'months': months
     }
-
-
-@check_login(message=u'Bitte melde dich an, um Ikhaya-Kommentare zu '
-             'administrieren')
-def comment_delete(request, comment_id):
-    """Delete a single comment."""
-    try:
-        comment = Comment.objects.get(id=comment_id)
-    except Comment.DoesNotExist:
-        return HttpResponseRedirect(href('ikhaya'))
-    url = url_for(comment.article)
-    if not request.user.can('comment_edit'):
-        return HttpResponseRedirect(url)
-    if request.GET.get('confirm') != 'yes':
-        flash(u'Soll das Kommentar von „%s“ wirklich gelöscht werden? ' \
-              u'<a href="%s">Löschen</a> <a href="%s">Abbrechen</a>' % (
-                  comment.author.username,
-                  href('ikhaya', 'comment', 'delete', comment_id,
-                       confirm='yes'), url))
-    else:
-        comment.article.comment_count -= 1
-        comment.article.save()
-        comment.delete()
-        flash(u'Das Kommentar wurde erfolgreich gelöscht.')
-    return HttpResponseRedirect(url)
 
 
 @check_login(message=u'Bitte melde dich an, um einen Ikhaya-Artikel '

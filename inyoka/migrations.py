@@ -483,6 +483,12 @@ def add_new_page_root_storage(m):
         'wiki_newpage_root':        'Baustelle'
     })
 
+def add_ikhaya_comment_deleted_column(m):
+    m.engine.execute('''
+        alter table ikhaya_comment
+            add column deleted bool not null default 0;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -495,5 +501,6 @@ MIGRATIONS = [
     add_group_icon_cfg, add_ikhaya_suggestion_owner, add_newtopic_default_text,
     add_launchpad_nick, add_indices, update_post_table, add_position_column,
     add_permissions, add_post_pub_date_index, drop_comment_title_column,
-    add_new_page_root_storage
+    add_new_page_root_storage,
+    add_ikhaya_comment_deleted_column
 ]

@@ -25,3 +25,5 @@ class EditCommentForm(forms.Form):
                u'kannst du <em>@kommentar_nummer</em> verwenden.<br />'
                u'Dies wird automatisch eingefügt, wenn du bei einem Beitrag '
                u'auf „Antworten“ klickst.')
+    deleted = forms.BooleanField(label=u'Kommentar als gelöscht markieren',
+                                 required=False)

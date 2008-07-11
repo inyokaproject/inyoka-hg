@@ -24,7 +24,6 @@ urlpatterns = patterns('inyoka.ikhaya.views',
     (r'^suggestions/assign/(?P<suggestion>\d+)/(?P<username>[^/]+)/$', 'suggestion_assign_to'),
     (r'^feeds/(?P<mode>\w+)/(?P<count>\d+)/$', 'feed'),
     (r'^feeds/(?P<category_slug>[^/]+)/(?P<mode>\w+)/(?P<count>\d+)/$','feed'),
-    (r'^comment/delete/(?P<comment_id>\d+)/$', 'comment_delete'),
     (r'^(?P<slug>.+)/$', 'detail')
 )
 
