@@ -23,7 +23,7 @@ from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr
 from inyoka.wiki.models import Page
 from inyoka.utils.highlight import highlight_code
-from inyoka.utils.text import pagename_join, normalize_pagename
+from inyoka.utils.text import join_pagename, normalize_pagename
 from pygments.util import ClassNotFound
 
 
