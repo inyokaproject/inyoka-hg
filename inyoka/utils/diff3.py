@@ -14,6 +14,7 @@
 import re
 import heapq
 import difflib
+from inyoka.utils.html import escape
 
 
 DEFAULT_MARKERS = (
