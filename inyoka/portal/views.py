@@ -45,7 +45,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
      NOTIFICATION_CHOICES, ForumFeedSelectorForm, IkhayaFeedSelectorForm, \
-     PlanetFeedSelectorForm
+     PlanetFeedSelectorForm, WikiFeedSelectorForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
@@ -964,7 +964,7 @@ def usermap(request):
 
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
-    for fapp in ('forum', 'ikhaya', 'planet'):
+    for fapp in ('forum', 'ikhaya', 'planet', 'wiki'):
         if app in (fapp, None):
             globals()['%s_form' % fapp] = request.POST \
                 and globals()['%sFeedSelectorForm' % fapp.capitalize()] \
@@ -973,7 +973,6 @@ def feedselector(request, app=None):
                     (auto_id='id_%s_%%s' % fapp)
         else:
             globals()['%s_form' % fapp] = None
-
     if forum_form:
         #TODO: filter those readable by anonymous
         forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
@@ -981,6 +980,13 @@ def feedselector(request, app=None):
     if ikhaya_form:
         ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
+    if wiki_form:
+        wiki_pages = cache.get('feedselector/wiki/pages')
+        if not wiki_pages:
+            wiki_pages = WikiPage.objects.all()
+            cache.set('feedselector/wiki/pages', wiki_pages)
+        wiki_form.fields['page'].choices = [('*', u'Alle')] + \
+            [(p.name, p.name) for p in wiki_pages]
 
     if request.method == 'POST':
         form = globals()['%s_form' % app]
@@ -1006,11 +1012,20 @@ def feedselector(request, app=None):
                 return HttpResponseRedirect(href('planet', 'feeds',
                        data['mode'], data['count']))
 
+            elif app == 'wiki':
+                if data['page'] == '*':
+                    return HttpResponseRedirect(href('wiki', '_feed',
+                           data['count']))
+                else:
+                    return HttpResponseRedirect(href('wiki', '_feed',
+                           data['page'], data['count']))
+
     return {
         'app':         app,
         'forum_form':  forum_form,
         'ikhaya_form': ikhaya_form,
         'planet_form': planet_form,
+        'wiki_form':   wiki_form,
     }
 
 

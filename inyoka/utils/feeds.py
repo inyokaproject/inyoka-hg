@@ -204,6 +204,7 @@ class FeedBuilder(object):
         """truncate the number of entries to `count`"""
         self.entries = self.entries[:count]
 
+
 class FeedEntry(object):
     """
     Represents a single entry in a feed.
