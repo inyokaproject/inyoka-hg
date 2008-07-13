@@ -378,7 +378,7 @@ def search(request):
             query += ' forum:"%s"' % request.GET['forum_id']
         results = search_system.query(request.user,
             query,
-            page=int(d['page']) or 1, per_page=d['per_page'] or 20,
+            page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
