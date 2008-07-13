@@ -24,6 +24,7 @@
     <li><a href="#forum">Forum</a></li>
     <li><a href="#ikhaya">Ikhaya</a></li>
     <li><a href="#planet">Planet</a></li>
+    <li><a href="#wiki">Wiki</a></li>
   </ul>
   {%- endif %}
   
@@ -98,6 +99,21 @@
     </dd>
   </dl>
   <p id="planet_submit_p"><input type="submit" value="Feed anzeigen" /></p>
+  </form>
+  {%- endif %}
+  {%- if wiki_form %}
+  <form action="/feeds/wiki/" method="post" id="wiki">
+  <h4>Wiki</h4>
+  <dl>
+    <dt>Was</dt>
+    <dd>{{ wiki_form.page.label_tag() }}: {{ wiki_form.page }}</dd>
+    <p>
+      {{ wiki_form.count.label_tag() }}: {{ wiki_form.count }}{{ wiki_form.errors.count }}
+      <span class="help_text">{{ wiki_form.count.help_text }}</span>
+    </p>
+    <dd>{{ wiki_form.errors }}</dd>
+  </dl>
+  <p id="wiki_submit_p"><input type="submit" value="Feed anzeigen"/></p>
   </form>
   {%- endif %}
 {%- endblock %}

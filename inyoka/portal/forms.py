@@ -446,3 +446,9 @@ class IkhayaFeedSelectorForm(FeedSelectorForm):
 
 class PlanetFeedSelectorForm(FeedSelectorForm):
     pass
+
+
+class WikiFeedSelectorForm(FeedSelectorForm):
+    #: `mode` is never used but needs to be overwritten because of that.
+    mode = forms.ChoiceField(required=False)
+    page = forms.ChoiceField(label=u'Seitenname', required=False)

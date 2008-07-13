@@ -16,6 +16,8 @@ urlpatterns = patterns('inyoka.wiki.views',
     (r'^_image$', 'get_image_resource'),
     (r'^_newpage$', 'redirect_new_page'),
     (r'^_attachment$', 'get_attachment'),
+    (r'^_feed/(?P<count>\d+)', 'feed'),
+    (r'^_feed/(?P<page_slug>[^/]+)/(?P<count>\d+)','feed'),
     (r'^(.+?)$', 'show_page')
 )
 
