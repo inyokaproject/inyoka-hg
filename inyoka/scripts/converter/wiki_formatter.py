@@ -76,7 +76,7 @@ class InyokaFormatter(FormatterBase):
         return self.request.redirectedOutput(parser.format, self)
 
     def macro(self, macro_obj, name, args):
-        if name in ['Diskussion']:
+        if name == 'Diskussion':
             try:
                 topic_id = int(args.split(',')[0].strip())
             except (ValueError, IndexError):
