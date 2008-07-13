@@ -39,7 +39,7 @@ from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
 from inyoka.ikhaya.models import Article, Category
 from inyoka.pastebin.models import Entry
 from inyoka.utils.database import session
-from inyoka.utils.text import nromalize_pagename
+from inyoka.utils.text import normalize_pagename
 from inyoka.portal.user import User, Group
 from inyoka.scripts.converter.create_templates import create
 
