@@ -114,6 +114,7 @@ class JabberChannel(Channel):
     def leave(self, username):
         self.clients[username].disconnect()
         del self.clients[username]
+        self.managed_users.remove(username)
 
     def send_message(self, username, message):
         self.clients[username].send(xmpp.protocol.Message(self.channel,
@@ -197,11 +198,13 @@ class IRCChannel(Channel):
         return server
 
     def join(self, username):
+        print 'do join', username
         self.managed_users.append(username)
         server = self._join(username)
         self.servers[username] = server
 
     def leave(self, username):
+        print 'do leave', username
         server = self.servers[username]
         del self.servers[username]
         self.managed_users.remove(username)
@@ -216,14 +219,15 @@ class IRCChannel(Channel):
 
     @filter_duplicates
     def recieve_message(self, connection, event):
+        print 'recieve message'
         username = event.source().split('!')[0]
         if username not in self.managed_users:
             text = event.arguments()[0]
             self.control.send_message(username, text)
-            print 'irc:', username, text
 
     @filter_duplicates
     def handle_quit(self, connection, event, how):
+        print 'recieve', how, event.source()
         if how in ['part', 'quit']:
             username = event.source().split('!')[0]
         else:
@@ -234,6 +238,7 @@ class IRCChannel(Channel):
 
     @filter_duplicates
     def handle_join(self, connection, event):
+        print 'recieve join', event.source()
         username = event.source().split('!')[0]
         if username != self.main_user_name and username not in \
                                             self.managed_users:
@@ -242,6 +247,7 @@ class IRCChannel(Channel):
 
     @filter_duplicates
     def handle_names(self, connection, event):
+        print 'recieve names', event.arguments()
         users = event.arguments()[-1].split()
         for user in users:
             if user not in self.users:
@@ -253,11 +259,19 @@ class Control(object):
     The `Control` instance provides functions to perform actions in all joined
     channels.
     """
+    users = []
+
     def __init__(self, channels=[]):
         self.channels = channels
         self.usernames = set()
         for channel in channels:
             channel.connect(self)
+
+    def process_forever(self):
+        while True:
+            for channel in self.channels:
+                channel.process()
+            sleep(2)
 
     def send_message(self, username, message):
         for channel in self.channels:
@@ -265,23 +279,23 @@ class Control(object):
                 channel.send_message(username, message)
 
     def join(self, username):
+        print 'main join', username
         for channel in self.channels:
             if username not in channel.users:
                 channel.join(username)
+        print 'end main join'
 
     def leave(self, username):
         for channel in self.channels:
             if username in channel.managed_users:
                 channel.leave(username)
+        print 'end leave'
 
 
 if __name__ == '__main__':
     c = Control(channels=[
-        JabberChannel('stefan_betz@jabber.org', '81021024',
+        JabberChannel('ubuntuusers@jabber.ccc.de', '5b5nt5',
                       'test@conference.ubuntu-jabber.de', 'ligator'),
         IRCChannel('brown.freenode.net', 8000, '#blabla', 'ligator')
     ])
-    while True:
-        for channel in c.channels:
-            channel.process()
-        sleep(0.25)
+    c.process_forever()

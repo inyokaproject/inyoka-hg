@@ -60,8 +60,7 @@
     </ul>
     {%- if article.comments_enabled %}
       {%- if USER.is_authenticated %}
-      <h4><a name="new_comment">Kommentar schreiben</a></h4>
-      <form action="{{ article|url }}#new_comment" method="post" class="new_comment">
+      <form action="{{ article|url }}#new_comment" method="post" id="new_comment">
         {{ render_form(form, ['text']) }}
         {% if form.data.comment_id and USER.can('comment_edit') %}
         {{ form.comment_id }}

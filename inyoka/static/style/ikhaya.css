@@ -111,11 +111,7 @@ a.comment_link:hover {
   background-color: #F9F9F9;
   border: 1px solid #222;
   padding: 0.5em;
-}
-
-form.new_comment {
-  border: 1px solid #ccc;
-  padding: 5px 20px 0px 20px;
+  margin: 0 4em 0 0;
 }
 
 p.deleted {
