@@ -41,7 +41,7 @@ def xapian_install(home_dir):
     core_folder = os.path.join(folder, 'xapian-core-' + xapian_version)
     call_subprocess(['./configure', '--prefix', prefix], cwd=core_folder)
     call_subprocess(['make'], cwd=core_folder)
-    call_subprocess(['make install'], cwd=core_folder)
+    call_subprocess(['make', 'install'], cwd=core_folder)
 
     binding_folder = os.apth.join(folder, 'xapian-bindings-' + xapian_version)
     call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
@@ -50,7 +50,7 @@ def xapian_install(home_dir):
                                          xapian_version, 'xapian-config')
     }, cwd=binding_folder)
     call_subprocess(['make'], cwd=binding_folder)
-    call_subprocess(['make install'], cwd=binding_folder)
+    call_subprocess(['make, 'install'], cwd=binding_folder)
 
     shutil.rmtree(folder)
 
