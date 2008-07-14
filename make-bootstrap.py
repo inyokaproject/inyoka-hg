@@ -43,7 +43,7 @@ def xapian_install(home_dir):
     call_subprocess(['make'], cwd=core_folder)
     call_subprocess(['make', 'install'], cwd=core_folder)
 
-    binding_folder = os.apth.join(folder, 'xapian-bindings-' + xapian_version)
+    binding_folder = os.path.join(folder, 'xapian-bindings-' + xapian_version)
     call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
