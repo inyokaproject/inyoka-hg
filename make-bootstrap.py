@@ -1,3 +1,4 @@
+##!/usr/bin/env python
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
@@ -18,6 +19,7 @@ EXTRA_TEXT = """
 import tempfile, shutil
 
 xapian_version = '1.0.6'
+pil_version = '1.1.6'
 
 def easy_install(package, home_dir, optional_args=None):
     optional_args = optional_args or []
@@ -53,6 +55,25 @@ def xapian_install(home_dir):
 
     shutil.rmtree(folder)
 
+def pil_install(home_dir):
+    folder = tempfile.mkdtemp(prefix='virtualenv')
+
+    call_subprocess(['wget', 'http://effbot.org/downloads/Imaging-%s.tar.gz' % pil_version], cwd=folder)
+    call_subprocess(['tar', '-xzf', 'Imaging-%s.tar.gz' % pil_version], cwd=folder)
+
+    img_folder = os.path.join(folder, 'Imaging-%s' % pil_version)
+
+    f1 = os.path.join(img_folder, 'setup_new.py')
+    f2 = os.path.join(img_folder, 'setup.py')
+
+    file(f1, 'w').write(file(f2).read().replace('import _tkinter', 'raise ImportError()'))
+
+    cmd = [os.path.join(home_dir, 'bin', 'python')]
+    cmd.extend([os.path.join(os.getcwd(), f1), 'install'])
+    call_subprocess(cmd)
+
+    shutil.rmtree(folder)
+
 def after_install(options, home_dir):
     input = 'x'
     while not input.lower() in ('y', 'n'):
@@ -62,22 +83,21 @@ def after_install(options, home_dir):
         call_subprocess(['sudo', 'apt-get', 'build-dep', 'python-mysqldb', 'python-imaging'])
     else:
         print 'Not installing developement headers.'
-    easy_install('Jinja2', home_dir) 
+    easy_install('Jinja2', home_dir)
     easy_install('Werkzeug', home_dir)
     easy_install('Pygments', home_dir)
     easy_install('SQLAlchemy==0.4.6', home_dir)
-#    easy_install('Imaging', home_dir, ['--find-links', 'http://www.pythonware.com/products/pil/']) # wtf is wrong with it?
     easy_install('simplejson', home_dir)
     easy_install('pytz', home_dir)
     easy_install('html5lib', home_dir)
     easy_install('dnspython', home_dir)
     easy_install('wsgiref', home_dir)
-    easy_install('MySQL-python', home_dir) # Install via apt-get
+    easy_install('MySQL-python', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('http://code.djangoproject.com/svn/django/trunk/', home_dir)
     easy_install('http://gijsbert.org/downloads/cmemcache/cmemcache-0.95.tar.bz2', home_dir)
     xapian_install(home_dir)
-
+    pil_install(home_dir)
 """
 
 XAPIAN_INSTALL = """
