@@ -29,29 +29,27 @@ def easy_install(package, home_dir, optional_args=None):
 
 def xapian_install(home_dir):
     folder = tempfile.mkdtemp(prefix='virtualenv')
-    os.chdir(folder)
 
     call_subprocess(['wget', 'http://oligarchy.co.uk/xapian/%s/xapian-core-%s.tar.gz' %
-                    (xapian_version, xapian_version)])
-    call_subprocess(['tar', '-xzf', 'xapian-core-%s.tar.gz' % xapian_version])
+                    (xapian_version, xapian_version)], cwd=folder)
+    call_subprocess(['tar', '-xzf', 'xapian-core-%s.tar.gz' % xapian_version], cwd=folder)
     call_subprocess(['wget', 'http://oligarchy.co.uk/xapian/%s/xapian-bindings-%s.tar.gz' %
-                    (xapian_version, xapian_version)])
-    call_subprocess(['tar', '-xzf', 'xapian-bindings-%s.tar.gz' % xapian_version])
+                    (xapian_version, xapian_version)], cwd=folder)
+    call_subprocess(['tar', '-xzf', 'xapian-bindings-%s.tar.gz' % xapian_version], cwd=folder)
 
-    os.chdir('xapian-core-' + xapian_version)
-    call_subprocess(['./configure', '--prefix', os.path.join(home_dir, 'lib')])
-    call_subprocess(['make'])
-    call_subprocess(['make', 'install'])
+    core_folder = os.path.join(folder, 'xapian-core-' + xapian_version)
+    call_subprocess(['./configure', '--prefix', os.path.join(home_dir, 'lib')], cwd=core_folder)
+    call_subprocess(['make'], cwd=core_folder)
+    call_subprocess(['make install'], cwd=core_folder)
 
-    os.chdir('../xapian-bindings-' + xapian_version)
+    binding_folder = os.apth.join(folder, 'xapian-bindings-' + xapian_version)
     call_subprocess(['./configure', '--with-python'], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
                                          xapian_version, 'xapian-config')
-    })
-    call_subprocess(['make'])
-    call_subprocess(['make', 'install'])
-    call_subprocess(['make install'])
+    }, cwd=binding_folder)
+    call_subprocess(['make'], cwd=binding_folder)
+    call_subprocess(['make install'], cwd=binding_folder)
 
     shutil.rmtree(folder)
 
@@ -97,7 +95,7 @@ def after_install(options, home_dir):
     easy_install('http://code.djangoproject.com/svn/django/trunk/', home_dir)
     easy_install('http://gijsbert.org/downloads/cmemcache/cmemcache-0.95.tar.bz2', home_dir)
     xapian_install(os.path.abspath(home_dir))
-    pil_install(home_dir)
+    pil_install(os.path.abspath(home_dir))
 """
 
 XAPIAN_INSTALL = """
