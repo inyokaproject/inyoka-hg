@@ -303,6 +303,37 @@ class SmileyInjector(Transformer):
                     new_children.pop()
         tree.children[:] = new_children
         return tree
+"""                prev = new_children[-1]
+                next = tree.children[idx - 1]
+                if is_paragraph(prev):
+                    prev.children.append(tree.children.pop(idx))
+                    idx -= 1
+                if is_paragraph(next):
+                    prev.children.append(tree.children.pop(idx + 1))
+                new_children[-1] = prev"""
+
+
+class KeyHandler(Transformer):
+    """
+    Removes unused paragraphs around key templates.
+    """
+
+    def transform(self, tree, nested=False):
+        new_children = []
+        for idx, node in enumerate(tree.children):
+            contains_key = False
+            if hasattr(node, 'class_') and node.class_ == 'key':
+                return tree, True
+            if node.is_container and not node.is_raw:
+                node, contains_key = self.transform(node, nested=True)
+            if contains_key:
+                new_children.extend(node.children)
+            else:
+                new_children.append(node)
+        tree.children = new_children
+        if nested:
+            return tree, False
+        return tree
 
 
 class FootnoteSupport(Transformer):
@@ -382,4 +413,5 @@ class AutomaticStructure(Transformer):
 
 DEFAULT_TRANSFORMERS = [AutomaticParagraphs(), GermanTypography(),
                         SmileyInjector(), FootnoteSupport(),
-                        HeadlineProcessor(), AutomaticStructure()]
+                        HeadlineProcessor(), AutomaticStructure(),
+                        KeyHandler()]

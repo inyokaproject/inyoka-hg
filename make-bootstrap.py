@@ -99,9 +99,6 @@ def after_install(options, home_dir):
     pil_install(os.path.abspath(home_dir))
 """
 
-XAPIAN_INSTALL = """
-"""
-
 def main():
     print virtualenv.create_bootstrap_script(EXTRA_TEXT, python_version='2.4')
 
