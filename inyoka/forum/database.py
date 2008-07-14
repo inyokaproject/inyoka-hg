@@ -59,7 +59,7 @@ topic_table = Table('forum_topic', metadata,
 
 post_table = Table('forum_post', metadata,
     Column('id', Integer, primary_key=True),
-    Column('position', Integer),
+    Column('position', Integer, nullable=False, default=0),
     Column('author_id', Integer, ForeignKey('portal_user.id'),
            nullable=False),
     Column('pub_date', DateTime, nullable=False, index=True),
