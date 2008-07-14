@@ -136,7 +136,7 @@ class PlanetSearchAdapter(SearchAdapter):
     type_id = 'p'
 
     def recv(self, entry_id):
-        entry = Entry.objects.select_related(1).get(id=entry_id)
+        entry = Entry.objects.select_related(depth=1).get(id=entry_id)
         return {
             'title': entry.title,
             'user': entry.blog.name,
@@ -147,7 +147,7 @@ class PlanetSearchAdapter(SearchAdapter):
         }
 
     def store(self, entry_id):
-        entry = Entry.objects.select_related(1).get(id=entry_id)
+        entry = Entry.objects.select_related(depth=1).get(id=entry_id)
         search.store(
             component='p',
             uid=entry.id,

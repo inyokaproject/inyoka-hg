@@ -44,7 +44,7 @@ if __name__ == '__main__':
     for ecount, user in enumerate(get_expired_users()):
         user.delete()
     print "deleted %d expired user accounts" % ecount
-    icount = 0
-    for icount, user in enumerate(get_inactive_users()):
-        user.delete()
-    print "deleted %d inactive user accounts" % icount
+#    icount = 0
+#    for icount, user in enumerate(get_inactive_users()):
+#        user.delete()
+#    print "deleted %d inactive user accounts" % icount
