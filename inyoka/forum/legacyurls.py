@@ -253,7 +253,7 @@ def activation(args, match):
             user = User.objects.get(id=args['u'])
         except User.DoesNotExist:
             return
-        print(u'Da wir kürzlich auf eine neue Portalsoftware umgestellt '
+        flash(u'Da wir kürzlich auf eine neue Portalsoftware umgestellt '
               u'haben, sind die alten Aktivierungslink nicht mehr gültig, '
               u'du erhältst deshalb eine weitere Mail mit einem neuen Link.')
         return href('portal', 'register', 'resend', user.username)
