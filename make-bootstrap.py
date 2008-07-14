@@ -76,7 +76,7 @@ def after_install(options, home_dir):
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('http://code.djangoproject.com/svn/django/trunk/', home_dir)
     easy_install('http://gijsbert.org/downloads/cmemcache/cmemcache-0.95.tar.bz2', home_dir)
-    xapian_install(home_dir)
+    xapian_install(os.path.abspath(home_dir))
 
 """
 
