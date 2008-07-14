@@ -147,6 +147,17 @@ class InyokaFormatter(FormatterBase):
                     if len(args) > 2 and args[2]:
                         args[2] = u"alt='%s'" % args[2]
 
+        elif name == 'RandomMirror':
+            name = u'ZufälligerServer'
+            args = [a.strip() for a in args.split(',')]
+            keys = ['ports', 'xubuntu', 'dvd']
+            for k in keys:
+                if k in args[0]:
+                    args[0] = k
+                    break
+                else:
+                    args[0] = 'general'
+
         elif name == 'ImageLink':
             args = [a.strip() for a in args.split(',')]
             img = args[0]

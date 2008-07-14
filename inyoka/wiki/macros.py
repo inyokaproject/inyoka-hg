@@ -905,6 +905,72 @@ class RandomPageList(Macro):
         return result
 
 
+# TODO: Remove this at PostRelease and find something better
+MIRRORS = {
+    'general': ['http://download.pcwelt.de/ubuntu/',
+        'ftp://ftp.fu-berlin.de/linux/ubuntu/releases/',
+        'http://de.archive.ubuntu.com/ubuntu-releases/',
+        'http://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/',
+        'http://ftp.cw.net/pub/linux/ftp.ubuntu.com/releases/',
+        'http://ftp.halifax.rwth-aachen.de/ubuntu-releases/',
+        'ftp://ftp.rrzn.uni-hannover.de/pub/mirror/linux/ubuntu-releases/',
+        'http://ftp.stw-bonn.de/ubuntu-cd/',
+        'http://ftp.uni-kl.de/pub/linux/ubuntu.iso/',
+        'http://sunsite.informatik.rwth-aachen.de/ftp/pub/Linux/ubuntu/releases/',
+        'http://cdmirror.ubuntu.xena.abysmal.eu/',
+        'http://ftp.hosteurope.de/mirror/releases.ubuntu.com/',
+        'http://ftp.tu-clausthal.de/ftp/mirror/ubuntu/releases/',
+        'http://ftp.uni-bayreuth.de/linux/ubuntu/releases/',
+        'ftp://mirror.secaron.lu/ubuntu/',
+        'http://releases.ubuntu.uasw.edu/',
+        'http://ftp-stud.fht-esslingen.de/Mirrors/releases.ubuntu.com/',
+        'http://ftp.tu-chemnitz.de/pub/linux/ubuntu-releases/',
+        'http://ubuntu.intergenia.de/releases/',
+        'http://snert.mi.hs-heilbronn.de/pub/ubuntu/releases/'],
+    'xubuntu': ['http://ubuntu.ipacct.com/xubuntu/',
+        'ftp://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/',
+        'http://ubuntu.univ-nantes.fr/ubuntu-cd/xubuntu/',
+        'http://ubuntu-cdimage.datahop.it/xubuntu/releases/',
+        'http://nl.archive.ubuntu.com/ubuntu-cdimage-xubuntu/releases/',
+        'http://ftp.dei.uc.pt/pub/linux/xubuntu/releases/',
+        'http://neacm.fe.up.pt/pub/xubuntu/releases/',
+        'http://se.archive.ubuntu.com/mirror/cdimage.ubuntu.com/xubuntu/releases/',
+        'http://cdimages.ubuntu.com/xubuntu/releases/',
+        'http://ftp.cw.net/xubuntu/releases/'],
+    'ports': ['http://cdimage.ubuntu.com/ports/releases/',
+        'http://ftp.gnome.org/mirror/cdimage.ubuntu.com/ports/releases/',
+        'http://ftp.acc.umu.se/mirror/cdimage.ubuntu.com/ports/releases/'],
+    'dvd': ['http://ftp.funet.fi/pub/Linux/INSTALL/Ubuntu/dvd-releases/releases/',
+        'http://ftp.ntua.gr/pub/linux/ubuntu-releases-dvd/',
+        'ftp://ubuntu.etf.bg.ac.yu/distributions/ubuntu/ubuntu-dvd/',
+        'http://ubuntu-cdimage.datahop.it/releases/',
+        'http://nl.archive.ubuntu.com/ubuntu-cdimages/',
+        'ftp://nl.archive.ubuntu.com/ubuntu-cdimages/',
+        'http://ftp.acc.umu.se/mirror/cdimage.ubuntu.com/releases/',
+        'http://es.archive.ubuntu.com/cdimage/releases/',
+        'ftp://ftp.ulak.net.tr/linux/ubuntu-releases/',
+        'ftp://ftp.linux.org.tr/pub/ubuntu-releases/',
+        'http://www.mirrorservice.org/sites/cdimage.ubuntu.com/cdimage/releases/']
+}
+
+class RandomMirror(Macro):
+    arguments = (
+        ('key', unicode, 'general'),
+        ('path', unicode, ''),
+        ('description', unicode, '')
+    )
+
+    def __init__(self, key, path, description):
+        self.key = key in MIRRORS and key or 'general'
+        self.path = path
+        self.description = description
+
+    def build_node(self, context, format):
+        url = random.choice(MIRRORS[self.key]) + self.path
+        if self.description:
+            return nodes.Link(url, children=[nodes.Text(self.description)])
+        return nodes.Text(url)
+
 
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
@@ -929,7 +995,8 @@ ALL_MACROS = {
     u'Vorlage':             Template,
     u'Weiterleitungen':     RedirectPages,
     u'Zufallsseite':        RandomPageList,
-    u'ÄhnlicheSeiten':      SimilarPages
+    u'ÄhnlicheSeiten':      SimilarPages,
+    u'ZufälligerServer':    RandomMirror,
 }
 
 
