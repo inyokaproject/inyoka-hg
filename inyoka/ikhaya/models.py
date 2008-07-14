@@ -318,7 +318,7 @@ class IkhayaSearchAdapter(SearchAdapter):
     auth_decider = ArticleSearchAuthDecider
 
     def store(self, docid):
-        article = Article.objects.select_related(1).get(id=docid)
+        article = Article.objects.select_related(depth=1).get(id=docid)
         search.store(
             component='i',
             uid=article.id,
@@ -331,7 +331,7 @@ class IkhayaSearchAdapter(SearchAdapter):
         )
 
     def recv(self, docid):
-        article = Article.objects.select_related(1).get(id=docid)
+        article = Article.objects.select_related(depth=1).get(id=docid)
         return {
             'title': article.subject,
             'user': article.author,

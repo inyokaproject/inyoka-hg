@@ -29,7 +29,8 @@ class WikiSearchAdapter(SearchAdapter):
     auth_decider = WikiSearchAuthDecider
 
     def recv(self, page_id):
-        rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
+        rev = Revision.objects.select_related(depth=1) \
+                .filter(page__id=page_id).latest()
         return {
             'title': rev.page.name,
             'user': rev.user,
@@ -40,7 +41,8 @@ class WikiSearchAdapter(SearchAdapter):
         }
 
     def store(self, page_id):
-        rev = Revision.objects.select_related(1).filter(page__id=page_id).latest()
+        rev = Revision.objects.select_related(depth=1) \
+                .filter(page__id=page_id).latest()
         search.store(
             component='w',
             uid=rev.page.id,
