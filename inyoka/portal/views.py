@@ -223,8 +223,8 @@ def resend_activation_mail(request, username):
               escape(user.username), False)
         return HttpResponseRedirect(href('portal'))
     send_activation_mail(user)
-    flash(u'Es wurde eine E-Mail an „%s“ gesendet, in der du dein '
-          u'Benutzerkonto aktivieren kannst.' % escape(user.email), True)
+    flash(u'Es wurde eine E-Mail gesendet, mit der du dein '
+          u'Benutzerkonto aktivieren kannst.', True)
     return HttpResponseRedirect(href('portal'))
 
 

@@ -13,6 +13,7 @@ from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
 from inyoka.portal.user import User
+from inyoka.utils.flashing import flash
 
 
 legacy = LegacyDispatcher()
@@ -244,3 +245,15 @@ def logout(args, match):
 @legacy.url('^/memberlist/?$')
 def memberlist(args, match):
     return href('portal', 'users')
+
+@legacy.url('^/profile\.php/?$')
+def activation(args, match):
+    if 'mode' in args and args['mode'] == 'activate' and 'u' in args:
+        try:
+            user = User.objects.get(id=args['u'])
+        except User.DoesNotExist:
+            return
+        print(u'Da wir kürzlich auf eine neue Portalsoftware umgestellt '
+              u'haben, sind die alten Aktivierungslink nicht mehr gültig, '
+              u'du erhältst deshalb eine weitere Mail mit einem neuen Link.')
+        return href('portal', 'register', 'resend', user.username)

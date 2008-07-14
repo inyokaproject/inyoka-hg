@@ -56,6 +56,7 @@ def bookmarks(args, match):
           u'</a> moderner Web-Browser nutzen.', False)
     return href('portal')
 
+
 # Very old legacy URLs from UUv1, copied from UUv2.portal.redirect
 
 @legacy.url(r'^/portal\.php')
