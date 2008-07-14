@@ -29,6 +29,7 @@ def easy_install(package, home_dir, optional_args=None):
 
 def xapian_install(home_dir):
     folder = tempfile.mkdtemp(prefix='virtualenv')
+    prefix=os.path.join(home_dir, 'lib')
 
     call_subprocess(['wget', 'http://oligarchy.co.uk/xapian/%s/xapian-core-%s.tar.gz' %
                     (xapian_version, xapian_version)], cwd=folder)
@@ -38,12 +39,12 @@ def xapian_install(home_dir):
     call_subprocess(['tar', '-xzf', 'xapian-bindings-%s.tar.gz' % xapian_version], cwd=folder)
 
     core_folder = os.path.join(folder, 'xapian-core-' + xapian_version)
-    call_subprocess(['./configure', '--prefix', os.path.join(home_dir, 'lib')], cwd=core_folder)
+    call_subprocess(['./configure', '--prefix', prefix], cwd=core_folder)
     call_subprocess(['make'], cwd=core_folder)
     call_subprocess(['make install'], cwd=core_folder)
 
     binding_folder = os.apth.join(folder, 'xapian-bindings-' + xapian_version)
-    call_subprocess(['./configure', '--with-python'], extra_env={
+    call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
                                          xapian_version, 'xapian-config')
