@@ -905,6 +905,24 @@ class RandomPageList(Macro):
         return result
 
 
+class Span(Macro):
+    is_static = True
+    arguments = (
+        ('content', unicode, ''),
+        ('class_', unicode, None),
+        ('style', unicode, None),
+    )
+
+    def __init__(self, content, class_, style):
+        self.content = content
+        self.class_ = class_
+        self.style = style
+
+    def build_node(self):
+        return nodes.Span(children=[nodes.Text(self.content)],
+                        class_=self.class_, style=self.style)
+
+
 # TODO: Remove this at PostRelease and find something better
 MIRRORS = {
     'general': ['http://download.pcwelt.de/ubuntu/',
@@ -961,7 +979,7 @@ class RandomMirror(Macro):
     )
 
     def __init__(self, key, path, description):
-        self.key = key in MIRRORS and key or 'general'
+        self.key = key
         self.path = path
         self.description = description
 
@@ -996,6 +1014,7 @@ ALL_MACROS = {
     u'Weiterleitungen':     RedirectPages,
     u'Zufallsseite':        RandomPageList,
     u'ÄhnlicheSeiten':      SimilarPages,
+    u'SPAN':                Span,
     u'ZufälligerServer':    RandomMirror,
 }
 
