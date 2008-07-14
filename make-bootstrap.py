@@ -44,7 +44,7 @@ def after_install(options, home_dir):
     easy_install('MySQL-python', home_dir) # Install via apt-get
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('http://code.djangoproject.com/svn/django/trunk/', home_dir)
-#    easy_install('http://python-libmemcached.googlecode.com/files/python-libmemcached-0.13.1.tgz', home_dir)
+    easy_install('http://gijsbert.org/downloads/cmemcache/cmemcache-0.95.tar.bz2', home_dir)
 
 """
 
