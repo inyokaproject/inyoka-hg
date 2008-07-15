@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import os
+import pytz
 from os import path
 from PIL import Image
 from StringIO import StringIO
@@ -31,6 +32,8 @@ from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
+from inyoka.utils.dates import datetime_to_naive_utc, datetime_to_timezone, \
+     get_user_timezone
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -315,6 +318,8 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             if form.is_valid():
                 data = form.cleaned_data
                 data['author'] = data['author'] or request.user
+                data['pub_date'] = get_user_timezone().localize(
+                    data['pub_date']).astimezone(pytz.utc).replace(tzinfo=None)
                 if not data.get('icon_id'):
                     data['icon_id'] = None
                 if not article:
@@ -352,7 +357,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 'author': article.author,
                 'category_id': article.category.id,
                 'icon_id': article.icon and article.icon.id or None,
-                'pub_date': article.pub_date,
+                'pub_date': datetime_to_timezone(article.pub_date).replace(tzinfo=None),
                 'public': article.public,
                 'slug': article.slug,
                 'comments_enabled': article.comments_enabled,
