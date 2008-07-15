@@ -36,7 +36,7 @@ PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
     ('admin_panel', u'Portal | darf Administrationsbereich betreten'),
     ('article_edit', u'Ikhaya | kann Artikel bearbeiten'),
     ('category_edit', u'Ikhaya | kann Kategorien verändern'),
-    ('event_edit', u'Ikhaya | kann Termine eintragen'),
+    ('event_edit', u'Ikhaya | kann Veranstaltungen eintragen'),
     ('comment_edit', u'Ikhaya | kann Kommentare administrieren'),
     ('blog_edit', u'Planet | kann Blogs verändern'),
     ('configuration_edit', u'Portal | darf allgemeine Einstellungen verändern'),
