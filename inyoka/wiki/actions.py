@@ -728,7 +728,7 @@ def do_attach(request, name):
                                      name=attachment_name,
                                      note=d.get('note', u''),
                                      attachment_filename=filename,
-                                     attachment=d['attachment'].content)
+                                     attachment=d['attachment'].read())
         else:
             ap.edit(user=request.user,
                     text=d.get('text', ap.rev.text),
