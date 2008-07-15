@@ -342,6 +342,19 @@ class UserCPProfileForm(forms.Form):
             raise forms.ValidationError(u'Breitenmaße müssen zwischen -180 und 180 sein.')
         return lat, long
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email', None).strip()
+        if not email:
+            raise forms.ValidationError(u'Keine Email-Adresse angegeben!')
+        try:
+            other_user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return email
+        else:
+            if other_user.id != current_request.user.id:
+                raise forms.ValidationError(u'Diese E-Mail-Adresse wird schon verwendet!')
+            return email
+
 
 class SearchForm(forms.Form):
     """The search formular"""

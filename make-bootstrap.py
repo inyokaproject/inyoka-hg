@@ -82,6 +82,7 @@ def after_install(options, home_dir):
         call_subprocess(['sudo', 'apt-get', 'build-dep', 'python-mysqldb', 'python-imaging'])
     else:
         print 'Not installing developement headers.'
+    easy_install('Fabric', home_dir)
     easy_install('Jinja2', home_dir)
     easy_install('Werkzeug', home_dir)
     easy_install('Pygments', home_dir)
