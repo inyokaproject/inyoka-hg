@@ -8,7 +8,6 @@
     :license: GNU GPL.
 #}
 
-
 <form action="{{ article|url('delete')|e }}" method="post">
   <p>Möchtest du den Artikel „<a href="{{ article|url('show')|e }}">{{ article.subject }}</a>“ wirklich löschen?</p>
   <p>

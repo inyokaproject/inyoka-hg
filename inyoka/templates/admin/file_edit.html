@@ -10,18 +10,14 @@
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 
-{% if not file %}
-  {% set navigation_trace = [
-      (href('admin', 'files', 'new'), 'Statische Datei erstellen')
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (file|url('edit'), 'Statische Datei „%s“ bearbeiten'|format(file.identifier|e))
-    ] %}
-{% endif %}
 {% set navigation_trace = [
     (href('admin', 'files'), 'Statische Dateien')
   ] %}
+{% if not file %}
+  {% do navigation_trace.append([href('admin', 'files', 'new'), 'Statische Datei erstellen']) %}
+{% else %}
+  {% do navigation_trace.append([file|url('edit'), 'Statische Datei „%s“ bearbeiten'|format(file.identifier|e)]) %}
+{% endif %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>

@@ -112,13 +112,14 @@ class EditFileForm(forms.Form):
 
     def clean_file(self):
         data = self.cleaned_data.get('file')
-        filename = data.filename
-        if not data and not self._file:
+        if data is None and not self._file:
             raise forms.ValidationError(u'Bitte eine Datei auswählen')
-        changed = filename != (self._file and self._file.identifier or None)
-        if changed and list(StaticFile.objects.filter(identifier=filename)):
-            raise forms.ValidationError(u'Eine Datei mit diesem Namen '
-                                        u'existiert bereits.')
+        if data:
+            filename = data.filename
+            changed = filename != (self._file and self._file.identifier or None)
+            if changed and list(StaticFile.objects.filter(identifier=filename)):
+                raise forms.ValidationError(u'Eine Datei mit diesem Namen '
+                                            u'existiert bereits.')
         return data
 
 

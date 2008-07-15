@@ -221,7 +221,10 @@ class Article(models.Model):
         # now that we have the article id we can put it into the slug
         if suffix_id:
             self.slug = '%s-%s' % (slug, self.id)
-            super(Article, self).save()
+            cur = connection.cursor()
+            cur.execute('''
+                update ikhaya_article a set a.slug = %s where a.id = %s
+            ''', [self.slug, self.id])
         cache.delete('ikhaya/archive')
         cache.delete('ikhaya/short_archive')
 

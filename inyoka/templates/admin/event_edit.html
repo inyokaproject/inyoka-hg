@@ -11,20 +11,19 @@
 {% set styles = ['editor.css', 'datetimefield.css'] %}
 {% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
-{% if not date %}
-  {% set navigation_trace = [
-      (href('admin', 'ikhaya', 'dates', 'new'), 'Veranstaltung eintragen')
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (date|url('edit'), 'Veranstaltung „%s“ bearbeiten'|format(date.title|e))
-    ] %}
-{% endif %}
-
 {% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'events'), 'Veranstaltungen'),
   ] %}
+{% if not date %}
+  {% do navigation_trace.append([
+      href('admin', 'ikhaya', 'dates', 'new'), 'Veranstaltung eintragen'
+    ]) %}
+{% else %}
+  {% do navigation_trace.append([
+      date|url('edit'), 'Veranstaltung „%s“ bearbeiten'|format(date.title|e)
+    ]) %}
+{% endif %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>

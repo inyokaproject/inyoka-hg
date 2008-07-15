@@ -704,8 +704,8 @@ def do_attach(request, name):
             context['form'] = form
             return context
         d = form.cleaned_data
-        attachment_name = d.get('filename') or d['attachment'].filename
-        filename = d['attachment'].filename or d.get('filename')
+        attachment_name = d.get('filename') or d['attachment'].file_name
+        filename = d['attachment'].file_name or d.get('filename')
         if not attachment_name:
             flash(u'Bitte gib einen Dateinamen für den Anhang an.')
             return context
@@ -728,14 +728,14 @@ def do_attach(request, name):
                                      name=attachment_name,
                                      note=d.get('note', u''),
                                      attachment_filename=filename,
-                                     attachment=d['attachment'].content)
+                                     attachment=d['attachment'].read())
         else:
             ap.edit(user=request.user,
                     text=d.get('text', ap.rev.text),
                     remote_addr=remote_addr,
                     note=d.get('note', u''),
                     attachment_filename=filename,
-                    attachment=d['attachment'].content)
+                    attachment=d['attachment'].read())
         attachments = Page.objects.get_attachment_list(name, nocache=True)
         attachments = [Page.objects.get_by_name(i) for i in attachments]
         context['attachments'] = attachments
@@ -766,8 +766,8 @@ def do_attach_edit(request, name):
             attachment = None
             attachment_filename = None
             if d['attachment']:
-                attachment = d['attachment'].content
-                attachment_filename = d['attachment'].filename or \
+                attachment = d['attachment'].read()
+                attachment_filename = d['attachment'].name or \
                                         page.rev.attachment.filename
             page.edit(user=request.user,
                         text=d.get('text', page.rev.text.value),
