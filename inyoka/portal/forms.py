@@ -467,4 +467,4 @@ class PlanetFeedSelectorForm(FeedSelectorForm):
 class WikiFeedSelectorForm(FeedSelectorForm):
     #: `mode` is never used but needs to be overwritten because of that.
     mode = forms.ChoiceField(required=False)
-    page = forms.ChoiceField(label=u'Seitenname', required=False)
+    page = forms.CharField(label=u'Seitenname', required=False)
