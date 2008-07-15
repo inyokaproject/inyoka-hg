@@ -1,7 +1,8 @@
+import tempfile
+
 set(
     fab_user = 'ubuntu_de',
-    inyoka_user = 'ubuntu_de',
-    inyoka_password = 'xxx'
+    python_interpreter = 'python'
 )
 
 def test():
@@ -11,33 +12,23 @@ def staging():
     set(fab_hosts = ['staging.ubuntuusers.de'])
 
 def production():
-    set(fab_hosts = ['x.ubuntu-eu.org', 'y.ubuntu-eu.org'],)
+    set(fab_hosts = ['yurugu.ubuntu-eu.org'])
 
-def upload_wsgifile():
-    """Uploads a wsgifile"""
-    require('fab_hosts', provided_by = [test, staging, production])
-    put('welches files?!', 'inyoka.wsgi')
+def bootstrap():
+    set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
 
-def checkout_inyoka():
-    """Create a inyoka clone"""
-    require('fab_hosts', provided_by = [test, staging, production])
-    run('hg clone http://$(inyoka_user):$(inyoka_password)@hg.ubuntu-eu.org/ubuntu-de-inyoka/ inyoka')
-
-def create_virtualenv():
-    """Set up the virtualenv on each host"""
-    require('fab_hosts', provided_by = [test, staging, production])
-    local('python make-bootstrap.py > bootstrap.py')
-    put('bootstrap.py', 'bootstrap.py')
-    run('python2.4 bootstrap.py virtualenv')
+def create_environ():
+    """Create a virtual environment.  Call this once on every new server."""
+    bootstrap = tempfile.mktemp(".py", "fabric_")
+    require('fab_hosts', provided_by = [bootstrap])
+    put('inyoka.wsgi', 'inyoka.wsgi')
+    run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ inyoka')
+    local("python make-bootstrap.py > '%s'" % bootstrap)
+    put(bootstrap, 'bootstrap.py')
+    run('$(python_interpreter) bootstrap.py virtualenv')
 
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
     run('hg pull -u /home/ubuntu_de/inyoka')
     run('touch /home/ubuntu_de/inyoka.wsgi')
-
-def all():
-    upload_wsgifile()
-    checkout_inyoka()
-    create_virtualenv()
-    deploy()
