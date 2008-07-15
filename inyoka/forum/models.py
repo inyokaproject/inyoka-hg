@@ -149,6 +149,9 @@ class TopicMapperExtension(MapperExtension):
                 'first_post_id': None
         }))
 
+    def after_delete(self, mapper, connection, instance):
+        instance.reindex()
+
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
         def collect_children_ids(forum, children):
@@ -432,6 +435,7 @@ class Topic(object):
         }))
         forum.invalidate_topic_cache()
         self.forum.invalidate_topic_cache()
+        self.reindex()
 
     def get_absolute_url(self, action='show'):
         if action in ('show',):
@@ -495,6 +499,12 @@ class Topic(object):
             user._readstatus = ReadStatus(user.forum_read_status)
         if user._readstatus.mark(self):
             user.forum_read_status = user._readstatus.serialize()
+
+    def reindex(self):
+        """Mark the whole topic for reindexing."""
+        for p, in dbsession.execute(select([post_table.c.id],
+                                           post_table.c.topic_id == self.id)):
+            search.queue('f', p)
 
     def __unicode__(self):
         return self.title
