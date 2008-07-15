@@ -199,8 +199,8 @@ def file_edit(request, file=None):
             if not file:
                 file = StaticFile()
             if data['file']:
-                file.save_file_file(data['file'].file_name, data['file'].read())
-            file.identifier = data['file'].file_name
+                file.save_file_file(data['file'].name, data['file'].read())
+                file.identifier = data['file'].name
             file.is_ikhaya_icon = data['is_ikhaya_icon']
             file.save()
             flash(u'Die statische Datei wurde geändert.', True)

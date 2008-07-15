@@ -767,7 +767,7 @@ def do_attach_edit(request, name):
             attachment_filename = None
             if d['attachment']:
                 attachment = d['attachment'].read()
-                attachment_filename = d['attachment'].file_name or \
+                attachment_filename = d['attachment'].name or \
                                         page.rev.attachment.filename
             page.edit(user=request.user,
                         text=d.get('text', page.rev.text.value),
