@@ -55,6 +55,9 @@ class LoginForm(forms.Form):
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
                                    required=False)
 
+    def clean_username(self):
+        return normalize_username(self.cleaned_data.get('username', ''))
+
 
 class RegisterForm(forms.Form):
     """

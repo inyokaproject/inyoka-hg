@@ -553,7 +553,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             )
             subscription.save()
 
-        flash(u'Der Beitrag wurde erfolgreich gespeichert')
+        flash(u'Der Beitrag wurde erfolgreich gespeichert', True)
         if newtopic:
             return HttpResponseRedirect(url_for(post.topic))
         else:
