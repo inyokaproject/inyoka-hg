@@ -15,12 +15,10 @@ def production():
     set(fab_hosts = ['yurugu.ubuntu-eu.org'])
 
 def bootstrap():
-    set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
-
-def create_environ():
     """Create a virtual environment.  Call this once on every new server."""
+    set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
     bootstrap = tempfile.mktemp(".py", "fabric_")
-    require('fab_hosts', provided_by = [bootstrap])
+    require('fab_hosts')
     put('inyoka.wsgi', 'virtualenv/inyoka.wsgi')
     run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ inyoka')
     local("python make-bootstrap.py > '%s'" % bootstrap)
