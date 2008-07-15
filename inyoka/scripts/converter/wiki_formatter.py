@@ -199,7 +199,7 @@ class InyokaFormatter(FormatterBase):
 
         if args:
             return u'[[%s(%s)]]' % (name, ', '.join(
-                re.findall('[\'",=\s]', a)
+                re.findall('[\'",\s]', a)
                     and ('"%s"' % addslashes(a)) or a
                 for a in args
             ))

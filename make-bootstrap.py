@@ -74,14 +74,10 @@ def pil_install(home_dir):
     shutil.rmtree(folder)
 
 def after_install(options, home_dir):
-    input = 'x'
-    while not input.lower() in ('y', 'n'):
-        input = raw_input('Install the neccessary header files via apt-get (y/n): ')
-    if input.lower() == 'y':
-        call_subprocess(['sudo', 'apt-get', 'install', 'libmemcache-dev', 'libxapian-dev', 'python-dev', 'swig'])
-        call_subprocess(['sudo', 'apt-get', 'build-dep', 'python-mysqldb', 'python-imaging'])
-    else:
-        print 'Not installing developement headers.'
+    print 'On errors execute the following commands on the machine first:'
+    print '  apt-get install libmemcache-dev libxapian-dev python-dev'
+    print '  apt-get build-dep python-mysqldb python-imaging'
+    print
     easy_install('Fabric', home_dir)
     easy_install('Jinja2', home_dir)
     easy_install('Werkzeug', home_dir)
