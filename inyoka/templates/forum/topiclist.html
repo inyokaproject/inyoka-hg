@@ -46,9 +46,13 @@
         <td class="post_count">{{ topic.post_count }}</td>
         <td class="view_count">{{ topic.view_count }}</td>
         <td class="last_post">
-          <a href="{{ topic.last_post|url}}" class="date">{{
+          {% if topic.last_post %}
+            <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
-          <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
+            <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
+          {% else %}
+            -
+          {% endif %}
         </td>
       </tr>
     {%- else %}
