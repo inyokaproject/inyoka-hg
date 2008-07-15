@@ -121,7 +121,7 @@ class Query(object):
 
     @property
     def all(self):
-        """Retrn a `Query` object for all nodes this node holds."""
+        """Retrun a `Query` object for all nodes this node holds."""
         def walk(nodes):
             for node in nodes:
                 yield node
