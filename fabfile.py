@@ -21,7 +21,7 @@ def create_environ():
     """Create a virtual environment.  Call this once on every new server."""
     bootstrap = tempfile.mktemp(".py", "fabric_")
     require('fab_hosts', provided_by = [bootstrap])
-    put('inyoka.wsgi', 'inyoka.wsgi')
+    put('inyoka.wsgi', 'virtualenv/inyoka.wsgi')
     run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ inyoka')
     local("python make-bootstrap.py > '%s'" % bootstrap)
     put(bootstrap, 'bootstrap.py')
@@ -30,5 +30,5 @@ def create_environ():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
-    run('hg pull -u /home/ubuntu_de/inyoka')
-    run('touch /home/ubuntu_de/inyoka.wsgi')
+    run('cd virtualenv/inyoka; hg pull -u')
+    run('cd ..; touch inyoka.wsgi')
