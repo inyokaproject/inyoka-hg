@@ -11,19 +11,18 @@
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 
-{% if is_new %}
-  {% set navigation_trace = [
-    (href('admin', 'groups', 'new'), 'neue Gruppe'),
-  ] %}
-{% else %}
-  {% set navigation_trace = [
-    (href('admin', 'groups', 'edit', group_name), 'Gruppe „%s“ editieren'|format(group_name)),
-  ] %}
-{% endif %}
-
 {% set navigation_trace = [
     (href('admin', 'groups'), 'Gruppen')
 ] %}
+{% if is_new %}
+  {% do navigation_trace.append([
+    href('admin', 'groups', 'new'), 'neue Gruppe'
+  ]) %}
+{% else %}
+  {% do navigation_trace.append([
+    href('admin', 'groups', 'edit', group_name), 'Gruppe „%s“ editieren'|format(group_name)
+  ]) %}
+{% endif %}
 
 {% set scripts = ['PrivilegeBox.js'] %}
 

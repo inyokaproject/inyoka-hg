@@ -9,18 +9,18 @@
 #}
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% if page %}
-  {% set navigation_trace = [
-      (page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.title))
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (href('admin', 'pages', 'new'), 'Neue Seite erstellen')
-    ] %}
-{% endif %}
 {% set navigation_trace = [
     (href('admin', 'pages'), 'Statische Seiten')
   ] %}
+{% if page %}
+  {% do navigation_trace.append([
+      page|url('edit'), 'Seite „%s“ bearbeiten'|format(page.title)
+    ]) %}
+{% else %}
+  {% do navigation_trace.append([
+      href('admin', 'pages', 'new'), 'Neue Seite erstellen'
+    ]) %}
+{% endif %}
 {% block admin_content %}
   <h3>{{ title_trace[0] }}</h3>
   <form action="" method="post">

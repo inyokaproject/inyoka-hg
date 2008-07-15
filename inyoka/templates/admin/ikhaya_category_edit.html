@@ -10,19 +10,20 @@
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 
-{% if not category %}
-  {% set navigation_trace = [
-      (href('admin', 'ikhaya', 'categories', 'new'), 'Kategorie erstellen')
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (category|url('edit'), 'Kategorie „%s“ bearbeiten'|format(category.name|e))
-    ] %}
-{% endif %}
 {% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'categories'), 'Kategorien')
   ] %}
+
+{% if not category %}
+  {% do navigation_trace.append([
+      href('admin', 'ikhaya', 'categories', 'new'), 'Kategorie erstellen'
+    ]) %}
+{% else %}
+  {% do navigation_trace.append([
+      category|url('edit'), 'Kategorie „%s“ bearbeiten'|format(category.name|e)
+    ]) %}
+{% endif %}
 
 {% block admin_content %}
 <h2>{{ title_trace[0] }}</h2>
