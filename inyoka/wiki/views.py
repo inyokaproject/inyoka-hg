@@ -198,11 +198,10 @@ def feed(request, page_name=None, count=20):
 
     for rev in revisions[:count]:
         kwargs = {}
-        text = (u'%s hat am %s den Wikiartikel „%s“ geändert.%s' % (
+        text = (u'%s hat am %s den Wikiartikel „%s“ %s.%s' % (
                 rev.user or 'Ein anonymer Benutzer', rev.change_date,
-                rev.page.name, rev.note and (u' Zusammenfassung: \n%s'
-                                             % rev.note) \
-                                        or ''))
+                rev.page.name, rev.deleted and u'gelöscht' or u'geändert',
+                rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
 
         kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
                              u'%s</div>' % text)
