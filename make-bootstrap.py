@@ -78,7 +78,6 @@ def after_install(options, home_dir):
     print '  apt-get install libmemcache-dev libxapian-dev python-dev'
     print '  apt-get build-dep python-mysqldb python-imaging'
     print
-    easy_install('Fabric', home_dir)
     easy_install('Jinja2', home_dir)
     easy_install('Werkzeug', home_dir)
     easy_install('Pygments', home_dir)
