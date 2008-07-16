@@ -28,3 +28,9 @@ def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
     run('cd virtualenv/inyoka; hg pull -u; touch inyoka.wsgi')
+
+def easy_install():
+    """Run easy_install on the server"""
+    require('fab_hosts', provided_by = [test, staging, production])
+    prompt('ez', 'easy_install parameters', validate=str)
+    run('source virtualenv/bin/activate; easy_install %(ez)')
