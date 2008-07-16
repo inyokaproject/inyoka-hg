@@ -85,7 +85,7 @@
         <ul>
           {%- for att in attachments %}
           <li>
-            {{ att.name|e }} - {{ att.size|filesizeformat }}
+            {{ att.name|e }} - {{ att.size|filesizeformat(true) }}
             <button type="submit" name="delete_attachment" value="{{ att.id }}">Löschen</button>
           </li>
           {%- endfor %}
