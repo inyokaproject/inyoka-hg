@@ -2,7 +2,8 @@ import tempfile
 
 set(
     fab_user = 'ubuntu_de',
-    python_interpreter = 'python'
+    python_interpreter = 'python',
+    python_version = '2.4'
 )
 
 def test():
@@ -39,4 +40,4 @@ def easy_uninstall():
     """Unstall an egg on the servers"""
     require('fab_hosts', provided_by = [test, staging, production])
     prompt('ez', 'egg to uninstall')
-    run('$(python_interpreter) virtualenv/inyoka/easy_uninstall.py $(ez)')
+    run('cd virtualenv/lib/python$(python_version)/site-packages; $(python_interpreter) ~/virtualenv/inyoka/easy_uninstall.py $(ez)')
