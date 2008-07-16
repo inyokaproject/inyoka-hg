@@ -34,3 +34,9 @@ def easy_install():
     require('fab_hosts', provided_by = [test, staging, production])
     prompt('ez', 'easy_install parameters')
     run('source virtualenv/bin/activate; easy_install $(ez)')
+
+def easy_uninstall():
+    """Unstall an egg on the servers"""
+    require('fab_hosts', provided_by = [test, staging, production])
+    prompt('ez', 'egg to uninstall')
+    run('$(python_interpreter) virtualenv/inyoka/easy_uninstall.py $(ez)')
