@@ -19,7 +19,7 @@ def bootstrap():
     set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
     bootstrap = tempfile.mktemp(".py", "fabric_")
     run('mkdir virtualenv')
-    run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ virtualenv/inyoka')
+#    run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ virtualenv/inyoka')
     local("python make-bootstrap.py > '%s'" % bootstrap)
     put(bootstrap, 'bootstrap.py')
     run('$(python_interpreter) bootstrap.py virtualenv')
@@ -32,5 +32,5 @@ def deploy():
 def easy_install():
     """Run easy_install on the server"""
     require('fab_hosts', provided_by = [test, staging, production])
-    prompt('ez', 'easy_install parameters', validate=str)
-    run('source virtualenv/bin/activate; easy_install %(ez)')
+    prompt('ez', 'easy_install parameters')
+    run('source virtualenv/bin/activate; easy_install $(ez)')
