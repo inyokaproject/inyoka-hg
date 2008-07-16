@@ -199,8 +199,8 @@ def file_edit(request, file=None):
             if not file:
                 file = StaticFile()
             if data['file']:
-                file.save_file_file(data['file'].file_name, data['file'].read())
-            file.identifier = data['file'].file_name
+                file.save_file_file(data['file'].name, data['file'].read())
+                file.identifier = data['file'].name
             file.is_ikhaya_icon = data['is_ikhaya_icon']
             file.save()
             flash(u'Die statische Datei wurde geändert.', True)
@@ -329,6 +329,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                         Suggestion.objects.delete([suggestion_id])
                     flash(u'Der Artikel „%s“ wurde erstellt.'
                           % escape(article.subject), True)
+                    return HttpResponseRedirect(article.get_absolute_url('edit'))
                 else:
                     changed = False
                     for k in data:
@@ -488,7 +489,7 @@ def ikhaya_date_edit(request, date=None):
             date.author_id = request.user.id
             date.description = data['description']
             date.save()
-            flash(u'Der Termin „%s“ wurde geändert.'
+            flash(u'Die Veranstaltung „%s“ wurde geändert.'
                   % escape(date.title), True)
             return HttpResponseRedirect(href('admin', 'ikhaya', 'dates'))
     else:

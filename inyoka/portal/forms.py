@@ -55,6 +55,9 @@ class LoginForm(forms.Form):
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
                                    required=False)
 
+    def clean_username(self):
+        return normalize_username(self.cleaned_data.get('username', ''))
+
 
 class RegisterForm(forms.Form):
     """
@@ -464,4 +467,4 @@ class PlanetFeedSelectorForm(FeedSelectorForm):
 class WikiFeedSelectorForm(FeedSelectorForm):
     #: `mode` is never used but needs to be overwritten because of that.
     mode = forms.ChoiceField(required=False)
-    page = forms.ChoiceField(label=u'Seitenname', required=False)
+    page = forms.CharField(label=u'Seitenname', required=False)

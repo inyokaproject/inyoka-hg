@@ -21,7 +21,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.urls import href, is_safe_domain, url_for
 from inyoka.utils.text import join_pagename, normalize_pagename
 from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
-    AccessDeniedResponse
+    AccessDeniedResponse, HttpResponse
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.feeds import FeedBuilder
@@ -206,13 +206,16 @@ def feed(request, page_name=None, count=20):
 
         kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
                              u'%s</div>' % text)
+        author = rev.user \
+            and {'name': rev.user.username, 'uri': rev.user.get_absolute_url()} \
+            or 'Anonymous'
         feed.add(
             title='%s (%s)' % (
                 rev.user or 'Anonymous',
                 format_datetime(rev.change_date),
             ),
             url=url_for(rev),
-            author=rev.user or 'Anonymous',
+            author=author,
             published=rev.change_date,
             updated=rev.change_date,
             **kwargs

@@ -38,7 +38,7 @@ def is_valid_username(name):
 def normalize_username(name):
     """Normalize the username."""
     if _username_re.search(name) is not None:
-        rv = ' '.join(_username_split_re.split(name))
+        rv = ' '.join(_username_split_re.split(name)).strip()
         if rv:
             return rv
     raise ValueError('invalid username')

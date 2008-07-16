@@ -12,19 +12,20 @@
 {% set styles = ['editor.css', 'datetimefield.css'] %}
 {% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
-{% if not article %}
-  {% set navigation_trace = [
-      (href('ikhaya', 'add'), 'Artikel erstellen')
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (article|url('edit'), 'Artikel „%s“ bearbeiten'|format(article.subject|e))
-    ] %}
-{% endif %}
 {% set navigation_trace = [
     (href('admin', 'ikhaya'), 'Ikhaya'),
     (href('admin', 'ikhaya', 'articles'), 'Artikel')
   ] %}
+
+{% if not article %}
+  {% do navigation_trace.append([
+      href('ikhaya', 'add'), 'Artikel erstellen'
+    ]) %}
+{% else %}
+  {% do navigation_trace.append([
+      article|url('edit'), 'Artikel „%s“ bearbeiten'|format(article.subject|e)
+    ]) %}
+{% endif %}
 
 {% block appheader %}
 <h1><a href="{{ href('admin') }}">Administration</a></h1>
@@ -32,7 +33,11 @@
 {% endblock %}
 
 {% block admin_content %}
-<h3>{{ title_trace[0] }}</h3>
+{%- if article %}
+<h3>Artikel „<a href="{{ article|url }}" title="Artikel anzeigen">{{ article.subject|e }}</a>“ bearbeiten</h3>
+{%- else %}
+<h3>Artikel erstellen</h3>
+{% endif %}
 
 <form action="" method="post" class="ikhaya">
   {%- if article.icon %}
@@ -48,7 +53,10 @@
     <input type="submit" value="Speichern" name="send" />
     <input type="submit" value="Vorschau" name="preview" />
     {%- if article %}
-    <a href="{{ article|url('delete') }}">Löschen</a>
+    <span class="linklist">|
+      <a href="{{ article|url() }}">Artikel anzeigen</a> |
+      <a href="{{ article|url('delete') }}">Löschen</a>
+    </span>
     {%- endif %}
   </p>
 </form>
