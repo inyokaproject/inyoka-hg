@@ -187,7 +187,7 @@
             </dd>
             {%- else %}
             {%- for att in group.list %}
-            <dt>{{ att.name|e }} ({{ att.size|filesizeformat }})</dt>
+            <dt>{{ att.name|e }} ({{ att.size|filesizeformat(true) }})</dt>
             {%- if att.comment %}
             <dd class="comment">{{ att.comment|e }}</dd>
             {%- endif %}

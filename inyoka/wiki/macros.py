@@ -34,7 +34,8 @@ from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision
 from inyoka.utils.urls import is_external_target
-from inyoka.utils.text import human_number, join_pagename, normalize_pagename
+from inyoka.utils.text import human_number, join_pagename, normalize_pagename, \
+    get_pagetitle
 from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
     natural_date
 from inyoka.utils.cache import cache
