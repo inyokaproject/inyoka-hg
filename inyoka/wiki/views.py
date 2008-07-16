@@ -169,13 +169,11 @@ def feed(request, page_name=None, count=20):
     if count not in (10, 20, 30, 50, 50, 75, 100):
         raise PageNotFound()
 
-    #XXX: what's if there is a wiki page named `None`?
-    cache_key = 'wiki/feeds/%s' % page_name
-
     new_cache = False
-    feed = cache.get(cache_key)
-    if feed is None:
-        if page_name:
+    if page_name:
+        cache_key = 'wiki/feeds/%s' % page_name
+        feed = cache.get(cache_key)
+        if feed is None:
             feed = FeedBuilder(
                 title=u'ubuntuusers Wiki – %s' % page_name,
                 url=href('wiki', page_name),
@@ -183,7 +181,11 @@ def feed(request, page_name=None, count=20):
                 id=href('wiki', page_name),
                 rights=href('portal', 'lizenz'),
             )
-        else:
+            new_cache = True
+    else:
+        cache_key = 'wiki/LastChangesFeed'
+        feed = cache.get(cache_key)
+        if feed is None:
             feed = FeedBuilder(
                 title=u'ubuntuusers Wiki – Letzte Änderungen',
                 url=href('wiki', u'Letzte_Änderungen'),
@@ -191,7 +193,7 @@ def feed(request, page_name=None, count=20):
                 id=href('wiki', u'Letzte_Änderungen'),
                 rights=href('portal', 'lizenz'),
             )
-        new_cache = True
+            new_cache = True
 
     if new_cache:
         revisions = Revision.objects.all()
