@@ -169,57 +169,59 @@ def feed(request, page_name=None, count=20):
     if count not in (10, 20, 30, 50, 50, 75, 100):
         raise PageNotFound()
 
-    key = 'wiki/feeds/%s/%s' % (page_name, count)
-    content = cache.get(key)
-    if content is not None:
-        content_type = 'application/atom-xml; charset=utf-8'
-        return HttpResponse(content, content_type=content_type)
+    #XXX: what's if there is a wiki page named `None`?
+    cache_key = 'wiki/feeds/%s' % page_name
 
-    if page_name:
-        feed = FeedBuilder(
-            title=u'ubuntuusers Wiki – %s' % page_name,
-            url=href('wiki', page_name),
-            feed_url=request.build_absolute_uri(),
-            id=href('wiki', page_name),
-            rights=href('portal', 'lizenz'),
-        )
-    else:
-        feed = FeedBuilder(
-            title=u'ubuntuusers Wiki – Letzte Änderungen',
-            url=href('wiki', u'Letzte_Änderungen'),
-            feed_url=request.build_absolute_uri(),
-            id=href('wiki', u'Letzte_Änderungen'),
-            rights=href('portal', 'lizenz'),
-        )
+    new_cache = False
+    feed = cache.get(cache_key)
+    if feed is None:
+        if page_name:
+            feed = FeedBuilder(
+                title=u'ubuntuusers Wiki – %s' % page_name,
+                url=href('wiki', page_name),
+                feed_url=request.build_absolute_uri(),
+                id=href('wiki', page_name),
+                rights=href('portal', 'lizenz'),
+            )
+        else:
+            feed = FeedBuilder(
+                title=u'ubuntuusers Wiki – Letzte Änderungen',
+                url=href('wiki', u'Letzte_Änderungen'),
+                feed_url=request.build_absolute_uri(),
+                id=href('wiki', u'Letzte_Änderungen'),
+                rights=href('portal', 'lizenz'),
+            )
+        new_cache = True
 
-    revisions = Revision.objects.all()
-    if page_name:
-        revisions = revisions.filter(page__name=page_name)
+    if new_cache:
+        revisions = Revision.objects.all()
+        if page_name:
+            revisions = revisions.filter(page__name=page_name)
 
-    for rev in revisions[:count]:
-        kwargs = {}
-        text = (u'%s hat am %s den Wikiartikel „%s“ %s.%s' % (
-                rev.user or 'Ein anonymer Benutzer', rev.change_date,
-                rev.page.name, rev.deleted and u'gelöscht' or u'geändert',
-                rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
+        for rev in revisions:
+            kwargs = {}
+            text = (u'%s hat am %s den Wikiartikel „%s“ %s.%s' % (
+                    rev.user or 'Ein anonymer Benutzer', rev.change_date,
+                    rev.page.name, rev.deleted and u'gelöscht' or u'geändert',
+                    rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
 
-        kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
-                             u'%s</div>' % text)
-        author = rev.user \
-            and {'name': rev.user.username, 'uri': rev.user.get_absolute_url()} \
-            or 'Anonymous'
-        feed.add(
-            title='%s (%s)' % (
-                rev.user or 'Anonymous',
-                format_datetime(rev.change_date),
-            ),
-            url=url_for(rev),
-            author=author,
-            published=rev.change_date,
-            updated=rev.change_date,
-            **kwargs
-        )
+            kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
+                                 u'%s</div>' % text)
+            author = rev.user \
+                and {'name': rev.user.username, 'uri': rev.user.get_absolute_url()} \
+                or 'Anonymous'
+            feed.add(
+                title='%s (%s)' % (
+                    rev.user or 'Anonymous',
+                    format_datetime(rev.change_date),
+                ),
+                url=url_for(rev),
+                author=author,
+                published=rev.change_date,
+                updated=rev.change_date,
+                **kwargs
+            )
+        cache.set(cache_key, feed, 600)
 
-    response = feed.get_atom_response()
-    cache.set(key, response.content, 600)
-    return response
+    feed.truncate(count)
+    return feed.get_atom_response()
