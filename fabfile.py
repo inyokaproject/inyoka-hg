@@ -27,5 +27,4 @@ def bootstrap():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
-    run('cd virtualenv/inyoka; hg pull -u')
-    run('cd ..; touch inyoka.wsgi')
+    run('cd virtualenv/inyoka; hg pull -u; touch inyoka.wsgi')
