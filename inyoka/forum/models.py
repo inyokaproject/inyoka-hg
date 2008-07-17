@@ -270,11 +270,12 @@ class PostMapperExtension(MapperExtension):
                     }
             ))
 
-        # update position column of the older posts in this topic
-        connection.execute(post_table.update(
-                post_table.c.position > instance.position, values={
-                    'position': post_table.c.position - 1
-                }
+        # decrement position
+        connection.execute(post_table.update(and_(
+            post_table.c.position > instance.position,
+            post_table.c.topic_id == instance.topic_id), values={
+                'position': post_table.c.position - 1
+            }
         ))
 
 
