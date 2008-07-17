@@ -136,8 +136,11 @@ class EditUserForm(forms.Form):
     # personal informations
     username = forms.CharField(label=u'Benutzername', max_length=30)
     new_password = forms.CharField(label=u'Neues Passwort',
-        required=False, help_text=(u'Ändert das Benutzerpasswort. '
-                                   u'Bitte nur angeben, wenn benötigt'))
+        required=False, widget=forms.PasswordInput(render_value=False),
+        help_text=(u'Ändert das Benutzerpasswort. Bitte nur angeben, '
+                   u'wenn benötigt'))
+    confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
+        required=False, widget=forms.PasswordInput(render_value=False))
     email = forms.CharField(label=u'E-Mail', required=False)
     is_active = forms.BooleanField(label=u'Aktiv', required=False)
     banned = forms.DateTimeField(label=u'Sperrung', required=False)
@@ -182,6 +185,22 @@ class EditUserForm(forms.Form):
         if gpgkey.startswith('0X'):
             gpgkey = gpgkey[2:]
         return gpgkey
+
+    def clean_confirm_password(self):
+        """
+        Validates that the two password inputs match.
+        """
+        data = self.cleaned_data
+        if 'new_password' in data and 'confirm_password' in data:
+            if data['new_password'] == data['confirm_password']:
+                return data['confirm_password']
+            raise forms.ValidationError(
+                u'Das Passwort muss mit der Paswortbestätigung übereinstimmen!'
+            )
+        else:
+            raise forms.ValidationError(
+                u'Du musst ein Passwort und eine Passwortbestätigung angeben!'
+            )
 
 
 class EditGroupForm(forms.Form):

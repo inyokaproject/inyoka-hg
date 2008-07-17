@@ -36,7 +36,7 @@
       {% endfor %}
       </div>
     {%- endif %}</dd>
-    {{ render_form(form, ['new_password', 'email', 'banned'], inline=true) }}
+    {{ render_form(form, ['new_password', 'confirm_password', 'email', 'banned'], inline=true) }}
     <dd class="note_link bann_user_event">
       Benutzer sperren
     </dd>
