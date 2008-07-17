@@ -820,9 +820,9 @@ def movetopic(request, topic_slug):
                 send_notification(t.author, 'topic_moved',
                     u'Dein Thema „%s“ wurde verschoben' % t.title, nargs)
 
-            subscribers = Subscription.objects.filter(topic_id=t.id)
-            for user in subscribers:
-                send_notification(user, 'topic_moved',
+            subscriptions = Subscription.objects.filter(topic_id=t.id)
+            for subscription in subscriptions:
+                send_notification(subscription.user, 'topic_moved',
                     u'Das Thema „%s“ wurde verschoben' % t.title, nargs)
             return HttpResponseRedirect(t.get_absolute_url())
     else:
