@@ -33,7 +33,7 @@
   <tr class="head" id="category-{{ category.id }}">
     <th colspan="5"><a href="{{ category|url
       }}">{{ category.name|e }}</a></th></tr>
-    {%- for forum in category.children -%}
+    {%- for forum in category.get_children_filtered(USER) -%}
       {{ render_forum(forum) }}
     {%- else %}
     <tr class="empty category-{{ category.id }}">
