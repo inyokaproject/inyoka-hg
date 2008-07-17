@@ -848,7 +848,7 @@ class Attachment(object):
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
-            new_fo = open(path.join(new_abs_path, name), 'w')
+            new_fo = open(path.join(new_abs_path, name[:50]), 'w')
             try:
                 new_fo.write(old_fo.read())
             finally:
