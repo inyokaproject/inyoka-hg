@@ -12,19 +12,19 @@
 {% set styles = ['editor.css', 'datetimefield.css'] %}
 {% set scripts = ['WikiEditor.js', 'DateTime.js'] %}
 
-
-{% if not forum %}
-  {% set navigation_trace = [
-      (href('forum', 'add'), 'Forum erstellen')
-    ] %}
-{% else %}
-  {% set navigation_trace = [
-      (forum|url('edit'), 'Forum „%s“ bearbeiten'|format(forum.name|e))
-    ] %}
-{% endif %}
 {% set navigation_trace = [
     (href('admin', 'forum'), 'Foren'),
   ] %}
+
+{% if not forum %}
+  {% do navigation_trace.append(
+    (href('forum', 'add'), 'Forum erstellen')
+  ) %}
+{% else %}
+  {% do navigation_trace.append(
+      (forum|url('edit'), 'Forum „%s“ bearbeiten'|format(forum.name|e))
+  ) %}
+{% endif %}
 
 {% block admin_content %}
 <h3>{{ title_trace[0] }}</h3>
