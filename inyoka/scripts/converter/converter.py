@@ -954,6 +954,7 @@ def convert_ikhaya():
 
     for data in article_table.select().execute():
         Article(
+            pk = data.id,
             subject=data.subject.decode('utf8'),
             pub_date=data.pub_date,
             author_id=user_mapping[data.author_id],
