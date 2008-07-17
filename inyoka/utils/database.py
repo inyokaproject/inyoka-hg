@@ -8,11 +8,12 @@
     This module must never import application code so that migrations
     can work properly for bootstrapping and upgrading.
 
+    The default session shutdown happens in the application handler in
+    `inyoka.application`.
+
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
-from django.dispatch import dispatcher
-from django.core.signals import request_finished
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
 from inyoka.conf import settings
@@ -25,7 +26,6 @@ metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
     autoflush=True, transactional=True))
-dispatcher.connect(session.remove, request_finished)
 
 if settings.DEBUG:
     import logging
