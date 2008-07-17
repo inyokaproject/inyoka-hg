@@ -47,7 +47,7 @@ from inyoka.scripts.converter.create_templates import create
 _account = '%s:%s@%s' % (settings.DATABASE_USER, settings.DATABASE_PASSWORD,
                        settings.DATABASE_HOST)
 FORUM_URI = 'mysql://%s/ubuntu_de?charset=utf8' % _account
-OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal' % _account
+OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal?charset=utf8' % _account
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
 OLD_ATTACHMENTS = '/tmp/'
@@ -888,7 +888,7 @@ def convert_ikhaya():
             return text
         return saxutils.escape(text)
 
-    engine = create_engine(OLD_PORTAL_URI)
+    engine = create_engine(OLD_PORTAL_URI, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     category_table = Table('ikhaya_categories', meta, autoload=True)
@@ -971,7 +971,7 @@ def convert_ikhaya():
 
 def convert_pastes():
     from pygments.lexers import get_all_lexers
-    engine = create_engine(OLD_PORTAL_URI)
+    engine = create_engine(OLD_PORTAL_URI, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     paste_table = Table('paste_pastes', meta, autoload=True)
@@ -1001,7 +1001,7 @@ def convert_pastes():
 
 
 def convert_static_pages():
-    engine = create_engine(OLD_PORTAL_URI)
+    engine = create_engine(OLD_PORTAL_URI, convert_unicode=True)
     meta = MetaData()
     meta.bind = engine
     page_table = Table('static_pages', meta, autoload=True)
