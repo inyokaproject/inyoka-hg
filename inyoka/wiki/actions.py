@@ -111,7 +111,7 @@ def do_show(request, name):
         except Subscription.DoesNotExist:
             pass
 
-    set_session_info(request, u'betrachtet Wiki Artikel „<a '
+    set_session_info(request, u'betrachtet Wiki-Artikel „<a '
                      u'href="%s">%s</a>“' % (
                         escape(url_for(page)),
                         escape(page.title)))
@@ -458,7 +458,7 @@ def do_edit(request, name):
         )
     else:
         session_page = escape(get_pagetitle(name))
-    set_session_info(request, u'bearbeitet den Wiki Artikel %s' %
+    set_session_info(request, u'bearbeitet den Wiki-Artikel %s' %
                      session_page)
 
     return {
@@ -568,7 +568,7 @@ def do_diff(request, name):
     diff = Page.objects.compare(name, old_rev, new_rev)
     if request.GET.get('format') == 'udiff':
         return HttpResponse(diff.udiff, mimetype='text/plain; charset=utf-8')
-    set_session_info(request, u'vergleicht zwei Revisionen des Wiki Artikels '
+    set_session_info(request, u'vergleicht zwei Revisionen des Wiki-Artikels '
                      u' „<a href="%s">%s</a>“' % (
                         escape(url_for(diff.page)),
                         escape(diff.page.title)))
@@ -589,7 +589,7 @@ def do_backlinks(request, name):
     sense to track pages that link to a deleted page.
     """
     page = Page.objects.get_by_name(name)
-    set_session_info(request, u'vergleicht die Backlinks des Wiki Artikels '
+    set_session_info(request, u'vergleicht die Backlinks des Wiki-Artikels '
                      u' „<a href="%s">%s</a>“' % (
                         escape(url_for(page)),
                         escape(page.title)))
@@ -745,7 +745,7 @@ def do_attach(request, name):
         else:
             url = href('wiki', ap)
         return HttpResponseRedirect(url)
-    set_session_info(request, u'verwaltet die Anhänge des Wiki Artikels '
+    set_session_info(request, u'verwaltet die Anhänge des Wiki-Artikels '
                      u' „<a href="%s">%s</a>“' % (
                         escape(url_for(page)),
                         escape(page.title)))
