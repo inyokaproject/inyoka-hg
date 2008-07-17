@@ -743,7 +743,7 @@ def privmsg_new(request, username=None):
     set_session_info(request, u'schreibt eine neue private Nachricht')
     preview = None
     form = PrivateMessageForm()
-    if request.method == 'POST---no-milk-today':
+    if request.method == 'POST':
         form = PrivateMessageForm(request.POST)
         if 'preview' in request.POST:
             ctx = RenderContext(request)
