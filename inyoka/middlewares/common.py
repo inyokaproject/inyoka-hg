@@ -74,6 +74,11 @@ class CommonServicesMiddleware(CommonMiddleware):
         Hook our X-Powered header in (and an easteregg header).  And clean up
         the werkzeug local.
         """
+        # XXX: move this to the connection-builder
+        session.execute('set session transaction isolation level read committed')
+        cur = connection.cursor()
+        cur.execute('set session transaction isolation level read committed')
+        cur.close()
         response = CommonMiddleware.process_response(self, request, response)
         powered_by = 'Inyoka'
         if INYOKA_REVISION:
