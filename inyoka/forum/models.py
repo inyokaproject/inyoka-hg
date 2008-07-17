@@ -39,6 +39,7 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table, post_revision_table, \
         forum_welcomemessage_table
+from inyoka.forum.acl import filter_invisible
 
 
 # initialize PIL to make Image.ID available
@@ -316,6 +317,11 @@ class Forum(object):
             cache.set(cache_key, children_ids)
         children = [Forum.query.get(id) for id in children_ids]
         return children
+
+    def get_children_filtered(self, user):
+        """Same as children, but check for acls if a user is given"""
+        return filter_invisible(user, self.children)
+
 
     def get_latest_topics(self, count=None):
         """
