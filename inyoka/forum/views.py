@@ -783,7 +783,8 @@ def movetopic(request, topic_slug):
     """Move a topic into another forum"""
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
-        form.fields['forum_id'].choices = [(f.id, f.name) for f in forums]
+        form.fields['forum_id'].choices = [(f.id, f.name) for f in
+            sorted(forums, key=lambda x: x.name)]
 
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
