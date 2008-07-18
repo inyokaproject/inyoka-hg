@@ -37,7 +37,7 @@ from inyoka.utils.dates import datetime_to_naive_utc, datetime_to_timezone, \
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
-     CreateUserForm, EditStyleForm
+     CreateUserForm, EditStyleForm, CreateGroupForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, PERMISSION_MAPPING
 from inyoka.portal.utils import require_permission
@@ -833,6 +833,7 @@ def group_edit(request, name=None):
     changed_permissions = False
     if new:
         group = Group()
+        form_class = CreateGroupForm
     else:
         try:
             group = Group.objects.get(name=name)
@@ -840,9 +841,10 @@ def group_edit(request, name=None):
             flash(u'Die Gruppe „%s“ existiert nicht.'
                   % escape(name), False)
             return HttpResponseRedirect(href('admin', 'groups'))
+        form_class = EditGroupForm
 
     if request.method == 'POST':
-        form = EditGroupForm(request.POST)
+        form = form_class(request.POST)
         _add_choices(form)
         if form.is_valid():
             data = form.cleaned_data
@@ -892,7 +894,7 @@ def group_edit(request, name=None):
                   % (escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
     else:
-        form = EditGroupForm(initial=not new and {
+        form = form_class(initial=not new and {
             'name': group.name,
             'permissions': filter(lambda p: p & group.permissions, PERMISSION_NAMES.keys())
         } or {})

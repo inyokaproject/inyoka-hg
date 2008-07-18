@@ -275,6 +275,9 @@ class EditGroupForm(forms.Form):
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
 
+
+class CreateGroupForm(EditGroupForm):
+
     def clean_name(self):
         """Validates that the name is alphanimeric and is not already in use."""
 
