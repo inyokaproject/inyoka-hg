@@ -261,7 +261,7 @@ def planet_edit(request, blog=None):
                         url_for(blog), escape(blog.name)))
             return HttpResponseRedirect(href('admin', 'planet'))
     else:
-        if blog:
+        if new:
             form = EditBlogForm(initial=model_to_dict(blog))
         else:
             form = EditBlogForm()
@@ -547,12 +547,11 @@ def forum_edit(request, id=None):
         if form.is_valid():
             data = form.cleaned_data
             slug = data['slug']
-            if Forum.query.filter(and_(Forum.slug == slug, Forum.id != id)).first():
+            if Forum.query.filter(and_(Forum.slug==slug, Forum.id!=id)).first():
                 form.errors['slug'] = (
                     (u'Bitte einen anderen Slug angeben,'
                      u'„%s“ ist schon vergeben.'
-                     % escape(data['slug'])),
-                )
+                     % escape(data['slug'])))
                 errors = True
             if not id:
                 forum = Forum()
