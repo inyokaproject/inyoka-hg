@@ -1,0 +1,4 @@
+Hallo {{ username }},
+
+Dein Thema „{{ topic.title }}“ wurde von {{ mod }} gelöscht.
+Du wirst nicht mehr über veränderungen in diesem Thema benachrichtigt.

@@ -1046,6 +1046,16 @@ def delete_topic(request, topic_slug):
             flash(u'Löschen des Themas „%s“ wurde abgebrochen' % topic.title)
         else:
             redirect = url_for(topic.forum)
+            subscriptions = Subscription.objects.filter(topic_id=topic.id)
+            for subscription in subscriptions:
+                nargs = {
+                    'username' : subscription.user.username,
+                    'mod'      : request.user.username,
+                    'topic'    : topic
+                }
+                send_notification(subscription.user, 'topic_deleted',
+                    u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
+                subscription.delete()
             session.delete(topic)
             session.commit()
             flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,

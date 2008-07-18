@@ -1010,7 +1010,7 @@ def convert_static_pages():
         StaticPage(**{
             'key':      page.identifier,
             'title':    page.title,
-            'content':  page.content.encode('iso-8859-15').decode('utf-8')
+            'content':  page.content.encode('utf-8').decode('utf-8')
         }).save()
         connection.queries = []
 
