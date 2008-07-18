@@ -24,6 +24,7 @@ def bootstrap():
     local("python make-bootstrap.py > '%s'" % bootstrap)
     put(bootstrap, 'bootstrap.py')
     run('$(python_interpreter) bootstrap.py virtualenv')
+    run('ln -s ~/virtualenv/inyoka/inyoka ~/virtualenv/lib/python$(python_version)/site-packages')
 
 def deploy():
     """Update Inyoka and touch the wsgi file"""

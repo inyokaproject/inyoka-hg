@@ -754,13 +754,13 @@ def user_edit(request, username):
 
     permissions = []
 
-    groups = request.user.groups.all()
+    groups = user.groups.all()
     for id, name in PERMISSION_NAMES.iteritems():
         derived = filter(lambda g: id & g.permissions, groups)
         if request.method == 'POST':
             checked = id in checked_perms
         else:
-            checked = id & request.user._permissions
+            checked = id & user._permissions
         permissions.append((id, name, checked, derived))
 
     return {
