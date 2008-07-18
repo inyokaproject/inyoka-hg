@@ -60,10 +60,13 @@ class SubscriptionManager(models.Manager):
 
     def delete_list(self, ids):
         cur = connection.cursor()
+
+        x = ', '.join(['%s'] * len(ids))
         cur.execute('''
             delete from portal_subscription
              where id in (%s)
-        ''' % ', '.join(['%s'] * len(ids)), list(ids))
+        ''' % x, list(ids))
+
         cur.close()
         connection._commit()
 
