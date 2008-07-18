@@ -705,18 +705,31 @@ def convert_attachments():
           and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
           attachment_table.c.post_id != 0))
 
+    att_dict = {}
+    conn.execute('set session transaction isolation level read committed')
 #    for row in select_blocks(sel):
     for row in conn.execute(sel):
         try:
-            file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+	    file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
         except IOError:
             continue
         att = Attachment.create(row.real_filename, file_.read(), None, [],
                               id=row.attach_id, comment=unescape(row.comment),
                               post_id=row.post_id)
+        att_dict.setdefault(row.post_id,[]).append(row.attach_id)
         file_.close()
         session.commit()
 
+    cur = connection.cursor()
+    cur.execute('set session transaction isolation level read committed')
+    cur.execute('UPDATE forum_attachment SET post_id = null')
+    connection._commit()
+
+    for key, item in att_dict.items():
+    	try:
+		Attachment.update_post_ids(item, key)
+	except IOError:
+	        print key, item	
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()
