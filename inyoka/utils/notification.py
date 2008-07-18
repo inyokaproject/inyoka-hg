@@ -25,6 +25,7 @@ def send_notification(user, template_name=None, subject=None, args={}):
         message = render_template('mails/%s.jabber.txt' % template_name, args)
         send_jabber(user.jabber, message, xhtml=False)
     if 'mail' in methods:
+        return # disable mail sending temporarily 
         message = render_template('mails/%s.txt' % template_name, args)
         #XXX: this should be handled somewhat better... but if an email
         #     is korrupted we get an exception so we quit it quite

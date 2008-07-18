@@ -484,7 +484,10 @@ def ikhaya_date_edit(request, date=None):
             data = form.cleaned_data
             if not date:
                 date = Event()
-            date.date = data['date']
+            date.date = get_user_timezone().localize(
+                data['date']).astimezone(pytz.utc).replace(tzinfo=None)
+            date.time = get_user_timezone().localize(
+                data['time']).astimezone(pytz.utc).replace(tzinfo=None)
             date.title = data['title']
             date.author_id = request.user.id
             date.description = data['description']
@@ -498,7 +501,7 @@ def ikhaya_date_edit(request, date=None):
             initial = {
                 'title': date.title,
                 'description': date.description,
-                'date': date.date
+                'date': datetime_to_timezone(date.date).replace(tzinfo=None)
             }
         form = EditDateForm(initial=initial)
 
