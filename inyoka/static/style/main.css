@@ -1080,6 +1080,12 @@ div.not_found img {
     background-color: #111;
     color: white;
     border: 1px solid #444;
+    font-family: sans-serif;
+}
+
+#user_error_report textarea {
+    background-image: url(../img/portal/errorreport_warning.png);
+    background-repeat: repeat-x;
 }
 
 #user_error_report input.disabled,
