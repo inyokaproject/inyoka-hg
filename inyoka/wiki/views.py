@@ -203,7 +203,7 @@ def feed(request, page_name=None, count=20):
         for rev in revisions:
             kwargs = {}
             text = (u'%s hat am %s den Wikiartikel „%s“ %s.%s' % (
-                    rev.user or 'Ein anonymer Benutzer', rev.change_date,
+                    rev.user or u'Ein anonymer Benutzer', rev.change_date,
                     rev.page.name, rev.deleted and u'gelöscht' or u'geändert',
                     rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
 
@@ -211,9 +211,9 @@ def feed(request, page_name=None, count=20):
                                  u'%s</div>' % text)
             author = rev.user \
                 and {'name': rev.user.username, 'uri': rev.user.get_absolute_url()} \
-                or 'Anonymous'
+                or u'Anonymous'
             feed.add(
-                title='%s (%s)' % (
+                title=u'%s (%s)' % (
                     rev.user or 'Anonymous',
                     format_datetime(rev.change_date),
                 ),
