@@ -1,0 +1,1 @@
+Das Thema „{{ topic.title}}“ wurde von {{ mod }} gelöscht, du wirst nicht mehr darüber Informiert.
