@@ -14,8 +14,10 @@ from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
                                DateTimeWidget, EmailField
 from inyoka.utils.html import cleanup_html
+from inyoka.utils.user import normalize_username
 from inyoka.forum.acl import PRIVILEGES_DETAILS
 from inyoka.portal.models import StaticFile
+from inyoka.portal.user import Group, User
 
 
 class ConfigurationForm(forms.Form):
@@ -125,11 +127,73 @@ class EditFileForm(forms.Form):
 
 class CreateUserForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
-    password = forms.CharField(label=u'Passwort')
+    password = forms.CharField(label=u'Passwort',
+        widget=forms.PasswordInput(render_value=False))
+    confirm_password = forms.CharField(label=u'Passwort (Wiederholung)',
+        widget=forms.PasswordInput(render_value=False))
     email = EmailField(label=u'E-Mail')
     authenticate = forms.BooleanField(label=u'Autentifizieren', initial=True,
         required=False, help_text=(u'Der Benutzer bekommt eine '
             u'Bestätigungsmail zugesandt und wird als inaktiv erstellt.'))
+
+    def clean_username(self):
+        """
+        Validates that the username is alphanumeric and is not already
+        in use.
+        """
+        data = self.cleaned_data
+        if 'username' in data:
+            try:
+                username = normalize_username(data['username'])
+            except ValueError:
+                raise forms.ValidationError(u'Der Benutzername enthält '
+                                            u'nicht benutzbare Zeichen')
+            try:
+                user = User.objects.get(username__exact=username)
+            except User.DoesNotExist:
+                return username
+
+            raise forms.ValidationError(
+                u'Der Benutzername ist leider schon vergeben. '
+                u'Bitte wähle einen anderen.'
+            )
+        else:
+            raise forms.ValidationError(u'Du musst einen Benutzernamen angeben!')
+
+    def clean_confirm_password(self):
+        """
+        Validates that the two password inputs match.
+        """
+        data = self.cleaned_data
+        if 'password' in data and 'confirm_password' in data:
+            if data['password'] == data['confirm_password']:
+                return data['confirm_password']
+            raise forms.ValidationError(
+                u'Das Passwort muss mit der Paswortbestätigung übereinstimmen!'
+            )
+        else:
+            raise forms.ValidationError(
+                u'Du musst ein Passwort und eine Passwortbestätigung angeben!'
+            )
+
+    def clean_email(self):
+        """
+        Validates if the required field `email` contains
+        a non existing mail address.
+        """
+        if 'email' in self.cleaned_data:
+            try:
+                user = User.objects.get(email__exact=self.cleaned_data['email'])
+            except User.DoesNotExist:
+                return self.cleaned_data['email']
+
+            raise forms.ValidationError(
+                u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
+            )
+        else:
+            raise forms.ValidationError(
+                u'Du musst eine E-Mail-Adresse angeben!'
+            )
 
 
 class EditUserForm(forms.Form):
@@ -210,6 +274,28 @@ class EditGroupForm(forms.Form):
         required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
+
+    def clean_name(self):
+        """Validates that the name is alphanimeric and is not already in use."""
+
+        data = self.cleaned_data
+        if 'name' in data:
+            try:
+                name = normalize_username(data['name'])
+            except ValueError:
+                raise forms.ValidationError(u'Der Gruppenname enthält '
+                                            u'nicht benutzbare Zeichen')
+            try:
+                group = Group.objects.get(name__exact=name)
+            except Group.DoesNotExist:
+                return name
+
+            raise forms.ValidationError(
+                u'Der Gruppename ist leider schon vergeben. '
+                u'Bitte wähle einen anderen.'
+            )
+        else:
+            raise forms.ValidationError(u'Du musst einen Gruppennamen angeben!')
 
 
 class EditForumForm(forms.Form):
