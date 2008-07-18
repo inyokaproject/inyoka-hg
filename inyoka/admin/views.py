@@ -763,6 +763,8 @@ def user_edit(request, username):
             checked = id & user._permissions
         permissions.append((id, name, checked, derived))
 
+    forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
+
     return {
         'user': user,
         'form': form,
