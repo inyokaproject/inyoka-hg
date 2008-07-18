@@ -710,7 +710,7 @@ def convert_attachments():
 #    for row in select_blocks(sel):
     for row in conn.execute(sel):
         try:
-	    file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+            file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
         except IOError:
             continue
         att = Attachment.create(row.real_filename, file_.read(), None, [],
@@ -726,10 +726,14 @@ def convert_attachments():
     connection._commit()
 
     for key, item in att_dict.items():
-    	try:
+        try:
 		Attachment.update_post_ids(item, key)
 	except IOError:
-	        print key, item	
+        print key, item
+
+    session.commit()
+    session.flush()
+
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()

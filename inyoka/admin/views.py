@@ -511,7 +511,7 @@ def ikhaya_date_edit(request, date=None):
 @require_permission('forum_edit')
 @templated('admin/forums.html')
 def forums(request):
-    sortable = Sortable(Forum.query, request.GET, '-name',
+    sortable = Sortable(Forum.query, request.GET, 'name',
         sqlalchemy=True, sa_column=forum_table.c.name)
     return {
         'table': sortable
