@@ -43,7 +43,7 @@ class ForumSearchAdapter(SearchAdapter):
     def store(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author')) \
             .get(post_id)
-        if post:
+        if post and post.topic:
             search.store(
                 component='f',
                 uid=post.id,
