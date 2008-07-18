@@ -53,13 +53,14 @@ p {
 div.intro {
   font-size: 0.95em;
   color: #777;
+  margin: 20px 0;
   font-weight: bold;
 }
 
 hr.intro_text_splitter {
   color: #fff;
   background-color: #fff;
-  border-bottom: 1px dotted #ccc;
+  border-bottom: 1px dotted #888;
   margin: 0 30px 1.0em 30px;
 }
 
@@ -72,8 +73,10 @@ p.meta_detail {
 }
 
 p.meta_detail {
+  border-top: 1px solid #b2b2b2;
+  border-bottom: 1px solid #999;
   background-image: url('../img/ikhaya/metabg.png');
-  margin: 0 -1em !important;
+  margin: 2em -1em !important;
 }
 
 img.icon {
@@ -89,6 +92,10 @@ ul.comments > li.comment {
   border-width: 0 0 1px 0;
   padding: 1em 0;
   list-style: none;
+}
+
+ul.comments {
+  font-size: 0.9em;
 }
 
 ul.comments > li.comment div.counter {
