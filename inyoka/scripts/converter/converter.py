@@ -50,7 +50,7 @@ FORUM_URI = 'mysql://%s/ubuntu_de?charset=utf8' % _account
 OLD_PORTAL_URI = 'mysql://%s/ubuntu_de_portal?charset=utf8' % _account
 FORUM_PREFIX = 'ubuntu_'
 AVATAR_PREFIX = 'portal/avatars'
-OLD_ATTACHMENTS = '/tmp/'
+OLD_ATTACHMENTS = '/nfs/www/de/files_tmp/files'
 WIKI_PATH = '/srv/www/de/wiki'
 DJANGO_URI = '%s://%s/%s' % (settings.DATABASE_ENGINE, _account,
                              settings.DATABASE_NAME)
@@ -86,6 +86,12 @@ NOTIFICATION_MAPPING = {
     2: ['mail', 'jabber'],
 }
 
+
+def fix_encoding(text):
+    try:
+        x = x.encode("latin1").decode("utf-8")
+    except:
+        pass
 
 def convert_bbcode(text, uid):
     """Parse bbcode, remove the bbcode uid and return inyoka wiki markup"""
@@ -123,6 +129,13 @@ def forum_db():
     meta.bind = engine
     conn = engine.connect()
     return engine, meta, conn
+
+
+def fix_encoding(text):
+    try:
+        return text.encode('latin1').decode('utf-8')
+    except UnicodeError:
+        return text
 
 
 def convert_wiki():
@@ -692,17 +705,31 @@ def convert_attachments():
           and_(attachment_table.c.attach_id == attachment_desc_table.c.attach_id,\
           attachment_table.c.post_id != 0))
 
-    for row in select_blocks(sel):
+    att_dict = {}
+    conn.execute('set session transaction isolation level read committed')
+#    for row in select_blocks(sel):
+    for row in conn.execute(sel):
         try:
-            file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
+	    file_ = open(path.join(OLD_ATTACHMENTS, row.physical_filename),'rb')
         except IOError:
             continue
         att = Attachment.create(row.real_filename, file_.read(), None, [],
                               id=row.attach_id, comment=unescape(row.comment),
                               post_id=row.post_id)
+        att_dict.setdefault(row.post_id,[]).append(row.attach_id)
         file_.close()
         session.commit()
 
+    cur = connection.cursor()
+    cur.execute('set session transaction isolation level read committed')
+    cur.execute('UPDATE forum_attachment SET post_id = null')
+    connection._commit()
+
+    for key, item in att_dict.items():
+    	try:
+		Attachment.update_post_ids(item, key)
+	except IOError:
+	        print key, item	
 
 def convert_privmsgs():
     engine, meta, conn = forum_db()
@@ -902,6 +929,9 @@ def convert_ikhaya():
     static_images = {}
     force = {
         'tux123': 'tux21b',
+        'beewee': 'highwaychile',
+        'Calvin': 'Eva',
+        'V_for_Vortex': 'V for Vortex',
     }
     for user in select_blocks(user_table.select()):
         if user.username in force:
@@ -948,18 +978,21 @@ def convert_ikhaya():
 
     category_mapping = {}
     for data in category_table.select().execute():
-        category = Category(name=data.name.decode('utf8'))
+        if data.name.startswith('W'):
+            import pdb
+            pdb.set_trace()
+        category = Category(name=fix_encoding(data.name))
         category.save()
         category_mapping[data.id] = category
 
     for data in article_table.select().execute():
         Article(
             pk = data.id,
-            subject=data.subject.decode('utf8'),
+            subject=fix_encoding(data.subject),
             pub_date=data.pub_date,
             author_id=user_mapping[data.author_id],
-            intro=render_article(data.intro, data.parser),
-            text=render_article(data.text, data.parser),
+            intro=render_article(fix_encoding(data.intro), data.parser),
+            text=render_article(fix_encoding(data.text), data.parser),
             public=data.public,
             category=category_mapping[data.category_id],
             is_xhtml=1,
@@ -985,14 +1018,19 @@ def convert_pastes():
     lexers = []
     for lexer in get_all_lexers():
         lexers.extend(lexer[1])
+    f = file('linked_pastes')
+    linked = [int(id) for id in f.read().split('\n')[:-1]]
+    f.close()
     for paste in select_blocks(paste_table.select()):
+        if not paste.id in linked:
+            continue
         lang = mapping.get(paste.language, paste.language)
         if not lang or lang not in lexers:
             lang = 'text'
         Entry(
             title=u'kein Titel',
             lang=lang,
-            code=paste.code,
+            code=fix_encoding(paste.code),
             pub_date=paste.date,
             author=anonymous,
             id=paste.id
