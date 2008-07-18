@@ -135,3 +135,14 @@ def get_pagetitle(name, full=True):
     if not full:
         name = name.rsplit('/', 1)[-1]
     return u' '.join(x for x in name.split('_') if x)
+
+def shorten_filename(name, length=20):
+    """
+    Shorten the `name` to the specified `length`.
+    """
+    try:
+        name, extension = name.rsplit('.', 1)
+        return name[:length - len(extension) - 1] + '.' + extension
+    except ValueError:
+        extension = ''
+        return name[:length]

@@ -26,7 +26,7 @@ from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils.text import slugify
+from inyoka.utils.text import slugify, shorten_filename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
@@ -848,7 +848,7 @@ class Attachment(object):
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
-            name = self.shorten_name(name)
+            name = shorten_filename(name)
             new_fo = open(path.join(new_abs_path, name), 'w')
             try:
                 new_fo.write(old_fo.read())
@@ -857,20 +857,13 @@ class Attachment(object):
                 old_fo.close()
             # delete the temp-file
             os.remove(path.join(settings.MEDIA_ROOT, old_fn))
-        at = attachment_table
-        dbsession.execute(at.update(and_(
-            at.c.id.in_(att_ids),
-            at.c.post_id == None
-        ), values={'post_id': post_id,
-                   at.c.file: '%s/%s'% (new_path, self.shorten_name(at.c.name))}
-        ))
-
-    def shorten_name(self, name):
-        try:
-            name, extension = name.rsplit('.',1)
-        except ValueError:
-            extension = ''
-        return name[:20] + extension
+            at = attachment_table
+            dbsession.execute(at.update(and_(
+                at.c.id == id,
+                at.c.post_id == None
+            ), values={'post_id': post_id,
+                       at.c.file: '%s/%s'% (new_path, name)}
+            ))
 
     @property
     def size(self):
