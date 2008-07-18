@@ -61,6 +61,10 @@
         <td class="area">{{ doc.component|e }}</td>
         <td class="score">{{ doc.score|e }}</td>
       </tr>
+      {%- else -%}
+      <tr>
+        <td><strong>Es wurden keine Ergebnisse gefunden</strong></td>
+      </tr>
       {%- endfor %}
     </tbody>
   </table>
