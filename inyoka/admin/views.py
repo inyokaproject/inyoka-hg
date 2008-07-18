@@ -966,6 +966,8 @@ def event_edit(request, id=None):
             event.save()
             flash(u'Die Veranstaltung wurde gespeichert.', True)
             return HttpResponseRedirect(event.get_absolute_url())
+        else:
+            event = None
     else:
         if id is not None:
             try:
