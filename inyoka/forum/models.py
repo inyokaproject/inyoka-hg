@@ -848,7 +848,8 @@ class Attachment(object):
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
-            new_fo = open(path.join(new_abs_path, name[:20]), 'w')
+            name = self.short_name(name)
+            new_fo = open(path.join(new_abs_path, name), 'w')
             try:
                 new_fo.write(old_fo.read())
             finally:
@@ -861,8 +862,15 @@ class Attachment(object):
             at.c.id.in_(att_ids),
             at.c.post_id == None
         ), values={'post_id': post_id,
-                   at.c.file: '%s/'%new_path + at.c.name}
+                   at.c.file: '%s/%s'% (new_path, self.shorten_name(at.c.name))}
         ))
+
+    def shorten_name(self, name):
+        try:
+            name, extension = name.rsplit('.',1)
+        except ValueError:
+            extension = ''
+        return name[:20] + extension
 
     @property
     def size(self):
