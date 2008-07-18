@@ -436,14 +436,17 @@ class Topic(object):
             'topic_count': forum_table.c.topic_count -1,
             'post_count': forum_table.c.post_count -1,
         }))
+        dbsession.commit()
         self.forum = forum
         dbsession.flush([self])
+        dbsession.commit()
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count + 1,
             'post_count': forum_table.c.post_count + 1,
         }))
+        dbsession.commit()
         forum.invalidate_topic_cache()
         self.forum.invalidate_topic_cache()
         self.reindex()
