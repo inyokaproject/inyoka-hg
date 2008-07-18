@@ -29,7 +29,7 @@
   <tbody>
   {%- for page in pages %}
   <tr>
-    <td class="key"><a href="{{ page|url }}">{{ page.key }}</a></td>
+    <td class="pagekey"><a href="{{ page|url }}">{{ page.key }}</a></td>
     <td class="title">{{ page.title }}</td>
     <td class="actions">
       <a href="{{ page|url('edit') }}">Editieren</a>
