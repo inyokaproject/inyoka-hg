@@ -261,7 +261,7 @@ def planet_edit(request, blog=None):
                         url_for(blog), escape(blog.name)))
             return HttpResponseRedirect(href('admin', 'planet'))
     else:
-        if new:
+        if not new:
             form = EditBlogForm(initial=model_to_dict(blog))
         else:
             form = EditBlogForm()
