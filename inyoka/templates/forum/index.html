@@ -12,7 +12,7 @@
 {%- extends 'forum/page.html' %}
 {% set scripts = ['jQuery.Cookie.js'] %}
 {% from 'forum/_forum.html' import render_forum %}
-{% if not is_index %}
+{% if not is_index and categories %}
   {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% set navigation_trace = [
       (categories[0]|url, categories[0].name|capitalize|e),
