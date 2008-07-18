@@ -14,6 +14,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from itertools import groupby
 from django.utils.text import truncate_html_words
+from django.db import transaction
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
@@ -182,6 +183,7 @@ def forum(request, slug, page=1):
     return ctx
 
 
+@transaction.commit_manually
 @templated('forum/topic.html')
 def viewtopic(request, topic_slug, page=1):
     """
@@ -252,6 +254,7 @@ def viewtopic(request, topic_slug, page=1):
     if request.user.is_authenticated:
         t.mark_read(request.user)
         request.user.save()
+        transaction.commit()
 
         try:
             s = Subscription.objects.get(user=request.user,
@@ -259,6 +262,7 @@ def viewtopic(request, topic_slug, page=1):
             subscribed = True
             s.notified = False
             s.save()
+            transaction.commit()
         except Subscription.DoesNotExist:
             subscribed = False
 
@@ -295,6 +299,7 @@ def viewtopic(request, topic_slug, page=1):
     }
 
 
+@transaction.commit_manually
 @templated('forum/edit.html')
 def edit(request, forum_slug=None, topic_slug=None, post_id=None,
          quote_id=None, article_name=None):
@@ -531,12 +536,14 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                      'topic':      topic})
                 s.notified = True
                 s.save()
+                transaction.commit()
 
         if article:
             # the topic is a wiki discussion, bind it to the wiki
             # article and send notifications.
             article.topic_id = topic.id
             article.save()
+            transaction.commit()
             for s in Subscription.objects.filter(wiki_page=article):
                 # also notify if the user has not yet visited the page,
                 # since otherwise he would never know about the topic
@@ -547,6 +554,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                     })
                 s.notified = True
                 s.save()
+                transaction.commit()
 
         if request.user.settings.get('autosubscribe') and \
            not Subscription.objects.user_subscribed(request.user,
@@ -556,6 +564,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 topic_id=topic.id,
             )
             subscription.save()
+            transaction.commit()
 
         flash(u'Der Beitrag wurde erfolgreich gespeichert', True)
         if newtopic:
@@ -624,6 +633,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
     return HttpResponseRedirect(t.get_absolute_url())
 
 
+@transaction.commit_manually
 def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
     """
     Generates a subscriber-function to deal with objects of type `obj`
@@ -648,11 +658,13 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
         except Subscription.DoesNotExist:
             # there's no such subscription yet, create a new one
             Subscription(user=request.user,**{subscriptionkw : x.id}).save()
+            transaction.commit()
             flash(flasher)
         return HttpResponseRedirect(url_for(x))
     return subscriber
 
 
+@transaction.commit_manually
 def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
     """
     Generates an unsubscriber-function to deal with objects of type `obj`
@@ -676,6 +688,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         else:
             # there's already a subscription for this forum, remove it
             s.delete()
+            transaction.commit()
             flash(flasher)
         return HttpResponseRedirect(url_for(x))
     return subscriber
@@ -1215,6 +1228,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
     return feed.get_atom_response()
 
 
+@transaction.commit_manually
 def markread(request, slug=None):
     """
     Mark either all or only the given forum as read.
@@ -1229,7 +1243,7 @@ def markread(request, slug=None):
             raise PageNotFound()
         forum.mark_read(user)
         user.save()
-        session.commit()
+        transaction.commit()
         flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name)
         return HttpResponseRedirect(url_for(forum))
     else:
@@ -1238,7 +1252,7 @@ def markread(request, slug=None):
         for row in category_ids:
             Forum.query.get(row[0]).mark_read(user)
         user.save()
-        session.commit()
+        transaction.commit()
         flash(u'Allen Foren wurden als gelesen markiert.')
     return HttpResponseRedirect(href('forum'))
 
