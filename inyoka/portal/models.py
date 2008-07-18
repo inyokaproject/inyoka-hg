@@ -61,12 +61,14 @@ class SubscriptionManager(models.Manager):
     def delete_list(self, ids):
         cur = connection.cursor()
 
-        x = ', '.join(['%s'] * len(ids))
-        cur.execute('''
+        query = '''
             delete from portal_subscription
-             where id in (%s)
-        ''' % x, list(ids))
+             where id in (%(id_list)s)
+        ''' % {'id_list': ','.join(['%s'] * len(ids))}
 
+        params = [int(i) for i in ids]
+
+        cur.execute(query, params)
         cur.close()
         connection._commit()
 
