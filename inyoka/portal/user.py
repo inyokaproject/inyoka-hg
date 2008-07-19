@@ -180,6 +180,8 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
+        print '!' * 100
+        print username
         user = User.objects.get(username__iexact=username)
 
         if user.banned is not None:
