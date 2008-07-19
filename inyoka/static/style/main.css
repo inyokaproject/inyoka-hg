@@ -543,7 +543,6 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 .navi_sidebar .container {
   border: solid 1px #ccc;
   background-color: #fff;
-  background-image: url(../img/boxbg.png);
   background-repeat: repeat-x;
   padding: 0em 1em 0.5em 1em;
   width: 12em;
