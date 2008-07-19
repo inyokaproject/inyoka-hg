@@ -3,7 +3,7 @@
     inyoka.utils.forms
     ~~~~~~~~~~~~~~~~~~
 
-    This file contains extensions for the django newforms like special form
+    This file contains extensions for the django forms like special form
     fields.
 
     :copyright: Copyright 2007 by Benjamin Wiegand.
@@ -12,14 +12,13 @@
 import sys
 import md5
 from random import randrange
-from django import newforms as forms
-from django.newforms.widgets import Input
+from django import forms
+from django.forms.widgets import Input
 from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
-from inyoka.utils.mail import may_accept_mails, may_be_valid_mail, \
-    is_blocked_host
+from inyoka.utils.mail import may_be_valid_mail, is_blocked_host
 from inyoka.utils.jabber import may_be_valid_jabber
 
 

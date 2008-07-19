@@ -15,7 +15,7 @@ from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password
-from inyoka.utils.http import PageNotFound, HttpResponseRedirect
+from inyoka.utils.http import PageNotFound
 from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha
@@ -73,11 +73,11 @@ def on_get_calendar_entry(request):
         try:
             slug = request.GET['slug']
         except KeyError:
-            raise HttpNotFound
+            raise PageNotFound
     try:
         event = Event.objects.get(slug=slug)
     except Event.DoesNotExist:
-        raise HttpNotFound
+        raise PageNotFound
 
     data = {
         'event': event,

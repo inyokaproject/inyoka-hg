@@ -8,7 +8,7 @@
     :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
     :license: GNU GPL.
 """
-from django import newforms as forms
+from django import forms
 from inyoka.wiki.utils import has_conflicts
 from inyoka.wiki.acl import test_changes_allowed
 from inyoka.wiki.parser import parse, StackExhaused

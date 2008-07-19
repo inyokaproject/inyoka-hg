@@ -10,7 +10,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
-import re
 import os
 import cPickle
 from os import path
@@ -20,9 +19,7 @@ from time import time
 from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
-from sqlalchemy import join
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension, \
-        dynamic_loader
+from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext

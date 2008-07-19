@@ -15,16 +15,11 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from time import time
 from django.db import connection
-from django.conf.urls.defaults import patterns
 from django.middleware.common import CommonMiddleware
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
-from inyoka.utils.http import PageNotFound, DirectResponse, \
-     TemplateResponse, HttpResponsePermanentRedirect, \
-     HttpResponseForbidden
-from inyoka.utils.logger import logger
+from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseForbidden
 from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
 
@@ -90,7 +85,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         if settings.DEBUG:
             import sys
             import re
-            from pprint import pformat
             from textwrap import wrap
             from inyoka.utils.terminal import get_dimensions, FancyPrinter
             p = FancyPrinter(sys.stderr)

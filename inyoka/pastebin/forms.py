@@ -8,8 +8,8 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django import newforms as forms
-from inyoka.utils.forms import CaptchaWidget, CaptchaField, HiddenCaptchaField
+from django import forms
+from inyoka.utils.forms import CaptchaField
 
 
 # languages for highlighting. We do not use the full list of pygments

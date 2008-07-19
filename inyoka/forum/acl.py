@@ -8,10 +8,9 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL, see LICENSE for more details.
 """
-from itertools import izip
 from sqlalchemy.sql import select
-from django.db import connection
-from inyoka.forum.database import session, user_group_table, privilege_table
+from inyoka.forum.database import user_group_table, privilege_table
+from inyoka.utils.database import session
 
 
 PRIVILEGES_DETAILS = [

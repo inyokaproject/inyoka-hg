@@ -11,7 +11,7 @@
 #from inyoka.forum.models import Forum, Topic
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
-from inyoka.ikhaya.models import Article, Category
+from inyoka.ikhaya.models import Category
 
 
 legacy = LegacyDispatcher()

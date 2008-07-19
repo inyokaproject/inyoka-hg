@@ -11,9 +11,7 @@
     :license: GNU GPL
 """
 import re
-import datetime
 from md5 import md5
-from sha import sha
 import random, string
 from inyoka.conf import settings
 from inyoka.utils.urls import href

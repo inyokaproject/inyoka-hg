@@ -8,14 +8,12 @@
     :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-import md5
-from django import newforms as forms
-from inyoka.conf import settings
+from django import forms
 from inyoka.portal.user import User
 from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
-from inyoka.utils.forms import CaptchaWidget, CaptchaField, DateTimeWidget, \
+from inyoka.utils.forms import CaptchaField, DateTimeWidget, \
                                HiddenCaptchaField, EmailField, JabberField
 from inyoka.wiki.parser import validate_signature, SignatureError
 from inyoka.utils.local import current_request
@@ -238,8 +236,7 @@ class ChangePasswordForm(forms.Form):
 
 class UserCPSettingsForm(forms.Form):
     """
-    Form used for the user control panel -- settings
-    dialog.
+    Form used for the user control panel – dialog.
     """
     notify = forms.MultipleChoiceField(
         label='Benachrichtigen per', required=False,

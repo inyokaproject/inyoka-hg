@@ -12,7 +12,7 @@
 from time import time
 from datetime import datetime, timedelta
 from django.db import connection, transaction
-from django.newforms import ValidationError
+from django.forms import ValidationError
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.urls import url_for
 from inyoka.utils.storage import storage

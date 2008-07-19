@@ -16,7 +16,6 @@ from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse, \
         PageNotFound
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.flashing import flash
-from inyoka.portal.utils import simple_check_login
 from inyoka.pastebin.forms import AddPasteForm
 from inyoka.pastebin.models import Entry
 

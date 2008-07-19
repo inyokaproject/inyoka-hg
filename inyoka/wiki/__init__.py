@@ -40,7 +40,7 @@
         derived from the MoinMoin system.
 
     `forms`
-        Holds django newforms used in the wiki system.  (For example the
+        Holds django forms used in the wiki system.  (For example the
         page edit form)
 
     `macros`

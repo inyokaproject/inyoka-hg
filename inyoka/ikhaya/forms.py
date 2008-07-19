@@ -8,7 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django import newforms as forms
+from django import forms
 
 
 class SuggestArticleForm(forms.Form):

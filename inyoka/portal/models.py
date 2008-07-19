@@ -11,7 +11,6 @@
     :license: GNU GPL.
 """
 from django.db import models, connection
-from inyoka.utils.http import HttpResponseRedirect
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request

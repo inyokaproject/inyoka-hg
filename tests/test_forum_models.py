@@ -46,6 +46,7 @@ def teardown_module(module):
     """
     Remove the test data again.
     """
+    global initial
     session.remove()
     forums = [
         Forum.query.get(initial['category'].id),
@@ -64,6 +65,7 @@ def test_topic_in_category():
     """
     Try to create a new topic inside a category.
     """
+    global initial
     session.remove()
     category = Forum.query.get(initial['category'].id)
     user = SAUser.query.get(initial['user'].id)

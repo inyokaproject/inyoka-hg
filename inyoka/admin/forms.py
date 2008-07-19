@@ -8,14 +8,12 @@
     :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
     :license: GNU GPL.
 """
-from datetime import datetime
-from django import newforms as forms
+from django import forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
                                DateTimeWidget, EmailField
 from inyoka.utils.html import cleanup_html
 from inyoka.utils.user import normalize_username
-from inyoka.forum.acl import PRIVILEGES_DETAILS
 from inyoka.portal.models import StaticFile
 from inyoka.portal.user import Group, User
 

@@ -13,11 +13,10 @@ import pytz
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from sqlalchemy import not_, and_, select
-from copy import copy as ccopy
+from sqlalchemy import and_, select
 from datetime import datetime, date
-from django.newforms.models import model_to_dict
-from django.newforms.util import ErrorList
+from django.forms.models import model_to_dict
+from django.forms.util import ErrorList
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
@@ -26,25 +25,22 @@ from inyoka.utils.urls import url_for, href, global_not_found
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.html import escape
-from inyoka.utils.http import HttpResponse, HttpResponseRedirect, \
-     PageNotFound
+from inyoka.utils.http import HttpResponseRedirect, PageNotFound
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
-from inyoka.utils.dates import datetime_to_naive_utc, datetime_to_timezone, \
-     get_user_timezone
+from inyoka.utils.dates import datetime_to_timezone, get_user_timezone
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
-from inyoka.portal.user import User, Group, PERMISSION_NAMES, PERMISSION_MAPPING
+from inyoka.portal.user import User, Group, PERMISSION_NAMES
 from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
-from inyoka.forum.acl import PRIVILEGES_DETAILS, PRIVILEGES_BITS, \
-    join_flags, split_flags
+from inyoka.forum.acl import PRIVILEGES_DETAILS, join_flags, split_flags
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage
 from inyoka.forum.database import forum_table, privilege_table, \
     user_group_table
@@ -479,7 +475,7 @@ def ikhaya_date_edit(request, date=None):
     if date:
         date = Event.objects.get(id=date)
     if request.method == 'POST':
-        form = EditDateForm(request.POST)
+        form = EditEventForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             if not date:
@@ -503,7 +499,7 @@ def ikhaya_date_edit(request, date=None):
                 'description': date.description,
                 'date': datetime_to_timezone(date.date).replace(tzinfo=None)
             }
-        form = EditDateForm(initial=initial)
+        form = EditEventForm(initial=initial)
 
     return {
         'form': form,

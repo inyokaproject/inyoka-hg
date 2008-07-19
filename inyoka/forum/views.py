@@ -12,7 +12,6 @@
 import re
 from django.conf import settings
 from datetime import datetime, timedelta
-from itertools import groupby
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
@@ -42,7 +41,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, SAUser, WelcomeMessage
+    CACHE_PAGES_COUNT, WelcomeMessage
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm

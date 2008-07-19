@@ -28,7 +28,6 @@ from inyoka.utils.templating import render_template
 from inyoka.wiki.utils import debug_repr, resolve_interwiki_link
 from inyoka.wiki.parser.machine import NodeCompiler, NodeRenderer, \
      NodeQueryInterface
-from inyoka.utils.local import current_request
 
 
 def error_box(title, message):

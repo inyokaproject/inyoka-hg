@@ -18,7 +18,6 @@ from time import mktime
 from datetime import datetime
 from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
 from inyoka.conf import settings
 from inyoka.utils.parsertools import TokenStream
 

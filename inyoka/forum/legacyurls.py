@@ -9,12 +9,10 @@
                                   Christopher Grebs.
     :license: GNU GPL.
 """
-from werkzeug import url_unquote
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
 from inyoka.portal.user import User
-from inyoka.utils.flashing import flash
 
 
 legacy = LegacyDispatcher()

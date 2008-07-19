@@ -22,7 +22,8 @@
 from datetime import datetime
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
-     TemplateResponse, AccessDeniedResponse, PageNotFound
+     TemplateResponse, AccessDeniedResponse, PageNotFound, \
+     HttpResponseRedirect, HttpResponse
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
@@ -33,7 +34,6 @@ from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.text import normalize_pagename, get_pagetitle
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
-from inyoka.utils.http import PageNotFound, HttpResponseRedirect, HttpResponse
 from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm

@@ -14,8 +14,8 @@
 from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
-from django.newforms.models import model_to_dict
-from django import newforms as forms
+from django.forms.models import model_to_dict
+from django import forms
 from inyoka.conf import settings
 from inyoka.utils.text import get_random_password, human_number, normalize_pagename
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone

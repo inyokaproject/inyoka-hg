@@ -14,8 +14,6 @@
 """
 import os
 import re
-import difflib
-import heapq
 import shutil
 import urllib
 from subprocess import Popen, PIPE
@@ -27,7 +25,6 @@ from werkzeug.utils import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
-from inyoka.utils.text import normalize_pagename
 from inyoka.portal.user import User
 
 
