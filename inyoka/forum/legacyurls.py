@@ -84,7 +84,7 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
 
 
 @legacy.url(r'^/index(\.php)?/?$')
-def index(args, *args):
+def index(args, *other):
     return href('forum')
 
 
