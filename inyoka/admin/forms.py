@@ -149,7 +149,7 @@ class CreateUserForm(forms.Form):
                 raise forms.ValidationError(u'Der Benutzername enthält '
                                             u'nicht benutzbare Zeichen')
             try:
-                user = User.objects.get(username__exact=username)
+                user = User.objects.get(username=username)
             except User.DoesNotExist:
                 return username
 
@@ -183,7 +183,7 @@ class CreateUserForm(forms.Form):
         """
         if 'email' in self.cleaned_data:
             try:
-                user = User.objects.get(email__exact=self.cleaned_data['email'])
+                user = User.objects.get(email=self.cleaned_data['email'])
             except User.DoesNotExist:
                 return self.cleaned_data['email']
 
@@ -289,7 +289,7 @@ class CreateGroupForm(EditGroupForm):
                 raise forms.ValidationError(u'Der Gruppenname enthält '
                                             u'nicht benutzbare Zeichen')
             try:
-                group = Group.objects.get(name__exact=name)
+                group = Group.objects.get(name=name)
             except Group.DoesNotExist:
                 return name
 

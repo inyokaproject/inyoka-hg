@@ -22,7 +22,7 @@ from inyoka.utils.search import search_handler, tokenize
 def handle_user(username):
     """Look up the user id for an given given username."""
     try:
-        user = User.objects.get(username__exact=username)
+        user = User.objects.get(username=username)
         return xapian.Query(u'U%d' % (user.id))
     except User.DoesNotExist:
         return None

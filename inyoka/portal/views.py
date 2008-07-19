@@ -774,7 +774,7 @@ def privmsg_new(request, username=None):
 
             try:
                 for recipient in recipient_names:
-                    user = User.objects.get(username__exact=recipient)
+                    user = User.objects.get(username=recipient)
                     if user.id == request.user.id:
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
