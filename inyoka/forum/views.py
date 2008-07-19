@@ -72,7 +72,7 @@ def index(request, category=None):
     These forums are treated as categories but not as real forums.
     """
     if category:
-        key = 'forum/forum/%s' % category
+        key = 'forum/category/%s' % category
         set_session_info(request, (u'sieht sich die Forenübersicht der '
                                    u'Kategorie „%s“ an' % category),
                          u'Kategorieübersicht')
