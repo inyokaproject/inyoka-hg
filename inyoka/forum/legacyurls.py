@@ -67,7 +67,7 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
         return
     if offset is None:
         try:
-            offset = int(args['start'])
+            page = int(args['start'])
         except KeyError:
             page = 1
         except ValueError:
