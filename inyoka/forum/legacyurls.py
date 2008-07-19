@@ -155,7 +155,7 @@ def whoisonline(args, match):
 def privmsg(args, match):
     if 'mode' in args and args['mode'] == 'post':
         try:
-            user = User.query.get(id=args['u'])
+            user = User.objects.get(id=args['u'])
             if user is None:
                 print 'no such user'
                 return
@@ -170,7 +170,7 @@ def privmsg(args, match):
 def privmsg_new(args, match):
     if 'u' in args:
         try:
-            user = User.query.get(id=args['u'])
+            user = User.objects.get(id=args['u'])
             if user is None:
                 return
             return href('portal', 'privmsg', 'new', user.username)
@@ -213,7 +213,7 @@ def profile(args, match):
         return href('portal', 'lost_password')
     elif args['mode'] == 'viewprofile':
         try:
-            user = User.query.get(id=int(args['u']))
+            user = User.objects.get(id=int(args['u']))
             if user is None:
                 return
             return href('portal', 'user', user.username)
@@ -221,7 +221,7 @@ def profile(args, match):
             return
     elif args['mode'] == 'email':
         try:
-            user = User.query.get(id=int(args['u']))
+            user = User.objects.get(id=int(args['u']))
             if user is None:
                 return
             return href('portal', 'user', user.username)
