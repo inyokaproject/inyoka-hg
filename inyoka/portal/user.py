@@ -180,7 +180,7 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        user = User.objects.get(username=username)
+        user = User.objects.get(username__iexact=username)
 
         if user.banned is not None:
             if not (user.banned.utctimetuple()[:3] ==
@@ -203,7 +203,7 @@ class UserManager(models.Manager):
         is the owner for log entries in the wiki triggered by inyoka itself.
         """
         try:
-            return User.objects.get(username=settings.INYOKA_SYSTEM_USER)
+            return User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
         except User.DoesNotExist:
             return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
                                             settings.INYOKA_SYSTEM_USER_EMAIL)
@@ -436,7 +436,7 @@ def deactivate_user(user):
         """Sets the user's name to a random string"""
         new_name = generate_word()
         try:
-            User.objects.get(username=new_name)
+            User.objects.get(username__iexact=new_name)
         except User.DoesNotExist:
             user.username = new_name
         else:

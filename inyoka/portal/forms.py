@@ -96,7 +96,7 @@ class RegisterForm(forms.Form):
                     u'Dein Benutzername enthält nicht benutzbare Zeichen'
                 )
             try:
-                user = User.objects.get(username=username)
+                user = User.objects.get(username__iexact=username)
             except User.DoesNotExist:
                 return username
 
@@ -173,7 +173,7 @@ class LostPasswordForm(forms.Form):
         if 'username' in data and 'email' in data \
             and data['username'] and data['email']:
             try:
-                self.user = User.objects.get(username=data['username'], email=data['email'])
+                self.user = User.objects.get(username__iexact=data['username'], email=data['email'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Der angegebene Benutzername und die angegebene '
@@ -181,7 +181,7 @@ class LostPasswordForm(forms.Form):
                 )
         elif 'username' in data and data['username']:
             try:
-                self.user = User.objects.get(username=data['username'])
+                self.user = User.objects.get(username__iexact=data['username'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Einen Benutzer „%s“ gibt es nicht!' % data['username']
@@ -216,7 +216,7 @@ class SetNewPasswordForm(forms.Form):
             raise forms.ValidationError(u'Die Passwörter stimmen nicht '
                                         u'überein!')
         try:
-            data['user'] = User.objects.get(username=self['username'].data,
+            data['user'] = User.objects.get(username__iexact=self['username'].data,
                                new_password_key=self['new_password_key'].data)
         except User.DoesNotExist:
             raise forms.ValidationError(u'Der Benutzer konnte nicht gefunden '

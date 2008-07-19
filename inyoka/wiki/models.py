@@ -368,7 +368,7 @@ class PageManager(models.Manager):
         if rev is None:
             try:
                 rev = Revision.objects.select_related(depth=2) \
-                                      .filter(page__name=name) \
+                                      .filter(page__name__iexact=name) \
                                       .latest()
             except Revision.DoesNotExist:
                 raise Page.DoesNotExist()

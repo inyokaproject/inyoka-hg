@@ -512,7 +512,7 @@ def do_log(request, name):
         pagination_page = int(request.GET['page'])
     except (ValueError, KeyError):
         pagination_page = 1
-    page = Page.objects.get(name=name)
+    page = Page.objects.get(name__iexact=name)
 
     def link_func(p, parameters):
         if p == 1:
@@ -809,7 +809,7 @@ def do_subscribe(request, page_name):
     """
     Subscribe the user to the page with `page_name`
     """
-    p = Page.objects.get(name=page_name)
+    p = Page.objects.get(name__iexact=page_name)
     try:
         s = Subscription.objects.get(user=request.user, wiki_page=p)
     except Subscription.DoesNotExist:
@@ -827,7 +827,7 @@ def do_unsubscribe(request, page_name):
     """
     Unsubscribe the user from the page with `page_name`
     """
-    p = Page.objects.get(name=page_name)
+    p = Page.objects.get(name__iexact=page_name)
     try:
         s = Subscription.objects.get(user=request.user, wiki_page=p)
     except Subscription.DoesNotExist:

@@ -77,7 +77,7 @@ def redirect_new_page(request):
     if base:
         page = join_pagename(base, page)
     try:
-        page = Page.objects.get(name=page)
+        page = Page.objects.get(name__iexact=page)
     except Page.DoesNotExist:
         if template:
             options['template'] = join_pagename(settings.WIKI_TEMPLATE_BASE,
@@ -198,7 +198,7 @@ def feed(request, page_name=None, count=20):
     if new_cache:
         revisions = Revision.objects.all()
         if page_name:
-            revisions = revisions.filter(page__name=page_name)
+            revisions = revisions.filter(page__name__iexact=page_name)
 
         for rev in revisions:
             kwargs = {}

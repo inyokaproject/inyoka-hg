@@ -183,7 +183,7 @@ def activate(request, action='', username='', activation_key=''):
     if not redirect:
         redirect = href('portal', 'login', username=username)
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(username__iexact=username)
     except User.DoesNotExist:
         flash(u'Der Benutzer „%s“ existiert nicht!' % escape(username), False)
         return HttpResponseRedirect(href('portal'))
@@ -218,7 +218,7 @@ def activate(request, action='', username='', activation_key=''):
 @does_not_exist_is_404
 def resend_activation_mail(request, username):
     """Resend the activation mail if the user is not already activated."""
-    user = User.objects.get(username=username)
+    user = User.objects.get(username__iexact=username)
     if user.is_active:
         flash(u'Das Benutzerkonto von „%s“ ist schon aktiviert worden!' %
               escape(user.username), False)
@@ -272,7 +272,7 @@ def set_new_password(request, username, new_password_key):
             return HttpResponseRedirect(href('portal', 'login'))
     else:
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username__iexact=username)
         except User.DoesNotExist:
             flash(u'Diesen Benutzer gibt es nicht', False)
             return HttpResponseRedirect(href())
@@ -440,7 +440,7 @@ def search(request):
 def profile(request, username):
     """Shows the user profile if the user is logged in."""
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(username__iexact=username)
         key = 'Benutzer/' + normalize_pagename(user.username)
         wikipage = WikiPage.objects.get_by_name(key)
         content = wikipage.rev.rendered_text
@@ -765,7 +765,7 @@ def privmsg_new(request, username=None):
 
             for group in group_recipient_names:
                 try:
-                    users = Group.objects.get(name=group).user_set.\
+                    users = Group.objects.get(name__iexact=group).user_set.\
                         all().exclude(pk=request.user.id)
                     recipients.update(users)
                 except Group.DoesNotExist:
@@ -775,7 +775,7 @@ def privmsg_new(request, username=None):
 
             try:
                 for recipient in recipient_names:
-                    user = User.objects.get(username=recipient)
+                    user = User.objects.get(username__iexact=recipient)
                     if user.id == request.user.id:
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
@@ -935,7 +935,7 @@ def grouplist(request, page=1):
 @templated('portal/group.html')
 def group(request, name, page=1):
     """Shows the informations about the group named `name`."""
-    group = Group.objects.get(name=name)
+    group = Group.objects.get(name__iexact=name)
     users = group.user_set
 
     table = Sortable(users, request.GET, 'id')
