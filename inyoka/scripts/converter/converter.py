@@ -474,12 +474,12 @@ def convert_forum():
     session.execute(sa_topic_table.update(values={
         # last post id
         sa_topic_table.c.last_post_id: select(
-            [func.min(sa_post_table.c.id)],
+            [func.max(sa_post_table.c.id)],
             sa_topic_table.c.id == sa_post_table.c.topic_id
         ),
         # first post id
         sa_topic_table.c.first_post_id: select(
-            [func.max(sa_post_table.c.id)],
+            [func.min(sa_post_table.c.id)],
             sa_topic_table.c.id == sa_post_table.c.topic_id
         ),
         # post count
