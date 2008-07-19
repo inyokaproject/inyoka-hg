@@ -1172,8 +1172,8 @@ class ReadStatus(object):
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
             r = list(row[1])
             r.sort()
-            row[1] = set(r[settings.FORUM_LIMIT_UNREAD//2:])
-            row[0] = r[settings.FORUM_LIMIT_UNREAD//2]
+            row = (r[settings.FORUM_LIMIT_UNREAD//2],
+                set(r[settings.FORUM_LIMIT_UNREAD//2:]))
         self.data[forum_id] = row
         return True
 
