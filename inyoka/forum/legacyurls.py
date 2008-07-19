@@ -40,6 +40,10 @@ def get_old_forum_url(args, match, forum_id=None, offset=None):
     if offset is None:
         page = 1
     else:
+        try:
+            offset = int(offset)
+        except ValueError:
+            return
         page = (offset / POSTS_PER_PAGE) + 1
     if forum.parent_id is None:
         if page <= 1:
