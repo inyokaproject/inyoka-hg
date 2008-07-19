@@ -255,10 +255,7 @@ def memberlist(args, match):
 def activation(args, match):
     if 'mode' in args and args['mode'] == 'activate' and 'u' in args:
         try:
-            user = User.objects.get(id=args['u'])
+            user = User.objects.get(id=int(args['u']))
         except User.DoesNotExist:
             return
-        flash(u'Da wir kürzlich auf eine neue Portalsoftware umgestellt '
-              u'haben, sind die alten Aktivierungslink nicht mehr gültig, '
-              u'du erhältst deshalb eine weitere Mail mit einem neuen Link.')
-        return href('portal', 'register', 'resend', user.username)
+        return href('portal', 'register', 'resend', user.username, legacy=True)

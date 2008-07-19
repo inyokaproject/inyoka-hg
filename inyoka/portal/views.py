@@ -219,6 +219,12 @@ def activate(request, action='', username='', activation_key=''):
 def resend_activation_mail(request, username):
     """Resend the activation mail if the user is not already activated."""
     user = User.objects.get(username__iexact=username)
+
+    if request.GET.get('legacy', False):
+        flash(u'Da wir kürzlich auf eine neue Portalsoftware umgestellt '
+              u'haben, sind die alten Aktivierungslink nicht mehr gültig, '
+              u'du erhältst deshalb eine weitere Mail mit einem neuen Link.')
+
     if user.is_active:
         flash(u'Das Benutzerkonto von „%s“ ist schon aktiviert worden!' %
               escape(user.username), False)
