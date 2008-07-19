@@ -307,7 +307,7 @@ class Forum(object):
         parents = []
         forum = self
         while forum.parent_id:
-            forum = forum.parent
+            forum = Forum.query.get(forum.parent_id)
             parents.append(forum)
         return parents
 

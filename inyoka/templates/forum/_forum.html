@@ -25,7 +25,7 @@
     <td class="post_count" title="Anzahl der Beiträge">{{ forum.post_count }}</td>
 
     <td class="last_post">
-    {%- if forum.last_post_id -%}
+    {%- if forum.last_post -%}
     <a href="{{ forum.last_post|url }}">{{ forum.last_post.pub_date|datetimeformat }}</a><br />
     von <a href="{{ forum.last_post.author|url }}">{{ forum.last_post.author|e }}</a>
     {%- else %}---
