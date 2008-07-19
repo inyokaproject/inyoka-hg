@@ -346,7 +346,7 @@ class UserCPProfileForm(forms.Form):
         return lat, long
 
     def clean_email(self):
-        email = self.cleaned_data.get('email', None).strip()
+        email = self.cleaned_data.get('email', '').strip()
         if not email:
             raise forms.ValidationError(u'Keine Email-Adresse angegeben!')
         try:
