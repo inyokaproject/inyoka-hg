@@ -33,6 +33,10 @@ def ikhaya(args, match, url):
     # further redirects are done in ikhaya.legacyurls
     return href('ikhaya', url, **args)
 
+@legacy.url(r'^/paste/(\d+)/?$')
+def paste(args, match, id):
+    return href('pastebin', id)
+
 @legacy.url(r'^/rss/')
 def feeds(args, match):
     # users shall select a new feed themselves

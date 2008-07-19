@@ -86,7 +86,6 @@ class Article(models.Model):
     drafts = ArticleManager(public=False)
     objects = ArticleManager(all=True)
 
-    id = models.IntegerField('ID', blank=True, unique=True)
     pub_date = models.DateTimeField('Datum')
     updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
     author = models.ForeignKey(User, related_name='article_set',

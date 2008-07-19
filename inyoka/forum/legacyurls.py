@@ -9,6 +9,7 @@
                                   Christopher Grebs.
     :license: GNU GPL.
 """
+from werkzeug import url_unquote
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE
 from inyoka.utils.urls import href
 from inyoka.utils.legacyurls import LegacyDispatcher
@@ -83,7 +84,7 @@ def get_old_topic_url(args, match, topic_id=None, offset=None):
 
 
 @legacy.url(r'^/index(\.php)?/?$')
-def index(args, match):
+def index(args, *args):
     return href('forum')
 
 
@@ -137,7 +138,7 @@ def goto(args, match, *_):
     if 'post' in args and args['post'].isdigit():
         return href('forum', 'post', args['post'])
     if 'wikipage' in args:
-        return href('wiki', unquote(args['wikipage']))
+        return href('wiki', url_unquote(args['wikipage']))
 
 
 @legacy.url(r'^/groups(:?/(.+))/?$')

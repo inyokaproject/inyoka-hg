@@ -81,8 +81,12 @@ def suggest(request):
             send_mail('Neuer Blogvorschlag', text,
                       settings.INYOKA_SYSTEM_USER_EMAIL,
                       [u.email for u in users])
+            if not users:
+                flash(u'Es sind keine Benutzer als Planet-Administratoren '\
+                      u'eingetragen', False)
+                return HttpResponseRedirect(href('planet'))
             flash(u'Der Blog „%s“ wurde vorgeschlagen.' %
-                  escape(form.cleaned_data['name']))
+                  escape(form.cleaned_data['name']), True)
             return HttpResponseRedirect(href('planet'))
     else:
         form = SuggestBlogForm()

@@ -16,9 +16,11 @@ from inyoka.utils.services import SimpleDispatcher
 def on_get_user_autocompletion(request):
     qs = list(User.objects.filter(username__startswith=
                                   request.GET.get('q', ''))[:11])
+    usernames = [x.username for x in qs]
     if len(qs) > 10:
-        qs[10] = '...'
-    return [x.username for x in qs]
+        usernames[10] = '...'
+    return usernames
+
 
 
 dispatcher = SimpleDispatcher(
