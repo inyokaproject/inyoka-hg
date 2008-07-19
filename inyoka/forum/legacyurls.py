@@ -142,7 +142,7 @@ def goto(args, match, *_):
     if 'post' in args and args['post'].isdigit():
         return href('forum', 'post', args['post'])
     if 'wikipage' in args:
-        return href('wiki', url_unquote(args['wikipage']))
+        return href('wiki', args['wikipage'])
 
 
 @legacy.url(r'^/groups(:?/(.+))/?$')
