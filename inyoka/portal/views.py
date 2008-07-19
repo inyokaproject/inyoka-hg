@@ -51,6 +51,7 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, deactivate_user, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month, \
     check_activation_key, send_activation_mail, send_new_user_password
+from inyoka.utils.antispam import is_spam
 
 
 
@@ -1119,6 +1120,8 @@ def user_error_report(request):
             for w in spam_words:
                 if w in spam_test:
                     return {'spam': True}
+            if is_spam(spam_test):
+                return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
                 text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN] | [%s PN(old)])" % (
