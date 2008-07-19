@@ -51,7 +51,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         # it's a request to a unknown subdomain
         request.subdomain, resolver = get_resolver(request.get_host())
         if not resolver:
-            print request.get_host()
+            #print request.get_host()
             main_url = 'http://%s/' % settings.BASE_DOMAIN_NAME
             return HttpResponsePermanentRedirect(main_url)
 
