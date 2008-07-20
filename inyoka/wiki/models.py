@@ -722,10 +722,14 @@ class Text(models.Model):
             context = parser.RenderContext(request, page)
         if template_context is not None or format != 'html':
             return self.parse(template_context).render(context, format)
-        if self.html_render_instructions is None:
-            self.update_html_render_instructions()
+        self.touch_html_render_instructions()
         instructions = pickle.loads(self.html_render_instructions)
         return parser.render(instructions, context)
+
+    def touch_html_render_instructions(self):
+        """update the html render instructions if they are none."""
+        if not self.html_render_instructions:
+            self.update_html_render_instructions()
 
     def update_html_render_instructions(self):
         """Puts the render instructions for this text in the database."""
@@ -1260,8 +1264,7 @@ class Revision(models.Model):
 
     def prepare_for_caching(self):
         """Called before the page object is stored in the cache."""
-        if self.text.html_render_instructions is None:
-            self.text.update_html_render_instructions()
+        self.text.touch_html_render_instructions()
 
     def __unicode__(self):
         return 'Revision %d (%s)' % (
