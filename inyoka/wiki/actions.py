@@ -106,10 +106,11 @@ def do_show(request, name):
     if request.user.is_authenticated:
         try:
             s = Subscription.objects.get(wiki_page=page, user=request.user, notified=True)
-            s.notified = False
-            s.save()
         except Subscription.DoesNotExist:
             pass
+        else:
+            s.notified = False
+            s.save()
 
     set_session_info(request, u'betrachtet Wiki-Artikel „<a '
                      u'href="%s">%s</a>“' % (
