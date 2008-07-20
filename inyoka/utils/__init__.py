@@ -8,4 +8,3 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import inyoka.utils.http
