@@ -35,7 +35,7 @@
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <h2>{{ title_trace[0] }}</h2>
     <dl>
-      {%- if isnewtopic or isfirstpost or can_moderate %}
+      {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
       <dt>Titel:</dt>
       <dd>{{ form.title }}{{ form.errors.title }}</dd>
@@ -102,7 +102,7 @@
         <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
       </dd>
       {%- endif %}
-      {%- if isnewtopic or isfirstpost %}
+      {%- if can_sticky and (isnewtopic or isfirstpost) %}
       <dt class="collapse">Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
