@@ -30,7 +30,8 @@ from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
-from inyoka.utils.dates import datetime_to_timezone, get_user_timezone
+from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
+        date_time_to_datetime
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -957,8 +958,11 @@ def event_edit(request, id=None):
                 event = Event()
             data = form.cleaned_data
             event.name = data['name']
-            event.date = data['date']
-            event.time = data['time']
+            d = get_user_timezone().localize(
+                date_time_to_datetime(data['date'], data['time'])) \
+                .astimezone(pytz.utc).replace(tzinfo=None)
+            event.date = d.date()
+            event.time = d.time()
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
