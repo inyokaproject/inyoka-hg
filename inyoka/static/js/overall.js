@@ -123,6 +123,8 @@ $(document).ready(function() {
     $(document).click(function() {
       if (areaPopup.is(':visible'))
         areaPopup.hide();
+      if (loginForm.is(':visible'))
+        loginForm.slideUp();
     });
   })();
 
@@ -195,15 +197,18 @@ $(document).ready(function() {
       return false;
   });
 
+  var loginForm = $('#js_login_form')
+    .prependTo('body')
+    .submit(function(event) {
+      loginForm.slideDown();
+      return true;
+    })
+    .click(function(event) {
+      event.stopPropagation();
+    });
   $('#login_link').click(function() {
-      $('#js_login_form').fadeIn('slow');
-      $('#js_login_username')[0].focus();
-      $('.wrap').click(function() {
-        $('#js_login_form').fadeOut('slow');
-      });
-      $('#js_login_form').submit(function() {
-        $('#js_login_form').fadeOut('slow');
-      });
-      return false;
+    loginForm.slideDown();
+    $('#js_login_username').focus();
+    return false;
   });
 });

@@ -1100,24 +1100,32 @@ div.not_found img {
 
 #js_login_form {
     display: none;
-    position: absolute; /* IE */
-    position: fixed;
-    top: 5px;
-    left: 0.5%;
-    width: 98%;
-    padding: .5em;
-    text-align: center;
-    border: 1px solid #222;
+    top: 0;
+    left: 0;
+    font-size: 0.85em;
+    color: white;
+    padding: 0.3em 20px;
+    border-bottom: 1px solid #291c06;
     background-image: url(../img/jslogin.png);
     background-repeat: repeat-x;
 }
 
-#js_login_form .right {
-    margin-right: 1.5em;
+#js_login_form a {
+    color: white;
 }
 
-#js_login_form label {
-    font-weight: bold;
+#js_login_form .right {
+    margin-right: 1em;
+}
+
+#js_login_form input {
+    background-color: #291c06;
+    color: #eee;
+    border: 1px solid #a4721b;
+}
+
+#js_login_form .submit {
+    display: none;
 }
 
 /*** Filterable ***************************************************************/
