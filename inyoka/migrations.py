@@ -501,6 +501,12 @@ def add_forum_atime_column(m):
             add column atime datetime null default null;
     ''')
 
+def add_wiki_text_html_render_instructions(m):
+    m.engine.execute('''
+        alter table wiki_text
+            add column html_render_instructions longtext default null;
+    ''')
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -513,6 +519,6 @@ MIGRATIONS = [
     add_launchpad_nick, add_indices, update_post_table, add_position_column,
     add_permissions, add_post_pub_date_index, drop_comment_title_column,
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
-    change_forum_post_position_column
+    change_forum_post_position_column, add_wiki_text_html_render_instructions
     # add_forum_atime_column
 ]

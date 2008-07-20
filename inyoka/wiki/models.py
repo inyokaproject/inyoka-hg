@@ -78,6 +78,7 @@
     :license: GNU GPL.
 """
 import sha
+import pickle
 from math import log
 from datetime import datetime
 from mimetypes import guess_type
@@ -377,6 +378,7 @@ class PageManager(models.Manager):
                 cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
             except (IndexError, ValueError):
                 cachetime = None
+            rev.prepare_for_caching()
             cache.set(key, rev, cachetime)
         page = rev.page
         page.rev = rev
@@ -579,9 +581,8 @@ class TextManager(models.Manager):
         """
         # XXX: check for hash collisions?
         hash = sha.new(value.encode('utf-8')).hexdigest()
-        return models.Manager.get_or_create(self, hash=hash, defaults={
-            'value': value
-        })
+        return models.Manager.get_or_create(self, hash=hash,
+                                            defaults={'value': value})
 
 
 class Diff(object):
@@ -667,7 +668,7 @@ class Text(models.Model):
     objects = TextManager()
     value = models.TextField()
     hash = models.CharField(max_length=40, unique=True)
-    cached_formats = ['html']
+    html_render_instructions = models.TextField()
 
     def parse(self, template_context=None, transformers=None):
         """
@@ -707,17 +708,11 @@ class Text(models.Model):
             'text':         tree.text
         }
 
-    def prune(self):
-        """Clear the page cache."""
-        for format in self.cached_formats:
-            cache.delete('wiki/text/%d/%s' % (self.id, format))
-
     def render(self, request=None, page=None, format='html',
-               context=None, template_context=None, nocache=False):
+               context=None, template_context=None):
         """
         This renders the markup of the text as html or any other
-        format supported.  Per default all formats are cached, if
-        you don't want to cache one just pass it ``nocache=True``.
+        format supported.
 
         If no request is given the current request is used.
         """
@@ -725,15 +720,18 @@ class Text(models.Model):
             if request is None:
                 request = current_request._get_current_object()
             context = parser.RenderContext(request, page)
-        if template_context is not None or nocache or self.id is None or \
-           format not in self.cached_formats:
+        if template_context is not None or format != 'html':
             return self.parse(template_context).render(context, format)
-        key = 'wiki/text/%d/%s' % (self.id, format)
-        instructions = cache.get(key)
-        if instructions is None:
-            instructions = self.parse().compile(format)
-            cache.set(key, instructions)
+        if self.html_render_instructions is None:
+            self.update_html_render_instructions()
+        instructions = pickle.loads(self.html_render_instructions)
         return parser.render(instructions, context)
+
+    def update_html_render_instructions(self):
+        """Puts the render instructions for this text in the database."""
+        self.html_render_instructions = \
+            pickle.dumps(self.parse().compile('html'), protocol=0)
+        self.save()
 
     def __unicode__(self):
         return self.render()
@@ -932,7 +930,7 @@ class Page(models.Model):
         """Clear the page cache."""
         cache.delete('wiki/page/' + self.name)
         if self.rev:
-            self.rev.text.prune()
+            self.rev.text.update_render_instructions()
         deferred.clear(self)
 
     def save(self, update_meta=True):
@@ -1260,6 +1258,11 @@ class Revision(models.Model):
         models.Model.save(self)
         cache.delete('wiki/page/' + self.page.name)
 
+    def prepare_for_caching(self):
+        """Called before the page object is stored in the cache."""
+        if self.text.html_render_instructions is None:
+            self.text.update_html_render_instructions()
+
     def __unicode__(self):
         return 'Revision %d (%s)' % (
             self.id,
@@ -1291,4 +1294,6 @@ class MetaData(models.Model):
     key = models.CharField(max_length=30)
     value = models.CharField(max_length=512)
 
+
+# imported here because of circular references
 from inyoka.wiki.parser import nodes
