@@ -495,7 +495,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             topic.title = d['title']
             topic.ubuntu_distro = d['ubuntu_distro']
             topic.ubuntu_version = d['ubuntu_version']
-            topic.sticky = d['sticky']
+            if check_privilege(privileges, 'sticky'):
+                topic.sticky = d['sticky']
             if check_privilege(privileges, 'create_poll'):
                 topic.polls = polls
                 topic.has_poll = bool(polls)
@@ -604,6 +605,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_attach':   check_privilege(privileges, 'upload'),
         'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'can_moderate': check_privilege(privileges, 'moderate'),
+        'can_sticky':   check_privilege(privileges, 'sticky'),
         'attach_form':  attach_form,
         'attachments':  list(attachments),
         'posts':        posts,
