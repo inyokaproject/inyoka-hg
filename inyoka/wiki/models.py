@@ -723,7 +723,8 @@ class Text(models.Model):
         if template_context is not None or format != 'html':
             return self.parse(template_context).render(context, format)
         self.touch_html_render_instructions()
-        instructions = pickle.loads(self.html_render_instructions)
+        blob = self.html_render_instructions.decode('base64')
+        instructions = pickle.loads(blob)
         return parser.render(instructions, context)
 
     def touch_html_render_instructions(self):
@@ -733,8 +734,8 @@ class Text(models.Model):
 
     def update_html_render_instructions(self):
         """Puts the render instructions for this text in the database."""
-        self.html_render_instructions = \
-            pickle.dumps(self.parse().compile('html'), protocol=0)
+        self.html_render_instructions = pickle.dumps(self.parse().
+            compile('html'), protocol=0).encode('base64')
         self.save()
 
     def __unicode__(self):
