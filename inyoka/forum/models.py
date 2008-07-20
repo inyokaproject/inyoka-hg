@@ -142,13 +142,9 @@ class TopicMapperExtension(MapperExtension):
                     'last_post_id': None
         }))
         connection.execute(topic_table.update(
-            topic_table.c.last_post_id.in_(select([post_table.c.id],
-                post_table.c.topic_id == instance.id)), values={
-                    'last_post_id': None
-        }))
-        connection.execute(topic_table.update(
             topic_table.c.id == instance.id, values={
-                'first_post_id': None
+                'first_post_id': None,
+                'last_post_id':  None,
         }))
 
     def after_delete(self, mapper, connection, instance):
