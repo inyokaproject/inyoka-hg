@@ -18,6 +18,7 @@ from werkzeug.contrib import profiler
 
 
 def make_app():
+    import inyoka.utils.http
     from inyoka.conf import settings
     from inyoka.application import application, StaticDomainHandler
     app = application
