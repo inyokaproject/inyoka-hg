@@ -58,6 +58,8 @@ class SubscriptionManager(models.Manager):
         return row is not None
 
     def delete_list(self, ids):
+        if not ids:
+            return
         cur = connection.cursor()
 
         query = '''
