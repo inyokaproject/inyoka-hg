@@ -142,13 +142,9 @@ class TopicMapperExtension(MapperExtension):
                     'last_post_id': None
         }))
         connection.execute(topic_table.update(
-            topic_table.c.last_post_id.in_(select([post_table.c.id],
-                post_table.c.topic_id == instance.id)), values={
-                    'last_post_id': None
-        }))
-        connection.execute(topic_table.update(
             topic_table.c.id == instance.id, values={
-                'first_post_id': None
+                'first_post_id': None,
+                'last_post_id':  None,
         }))
 
     def after_delete(self, mapper, connection, instance):
@@ -533,19 +529,10 @@ class Post(object):
     Represents a post in a topic.
     """
 
-    def render_text(self, request=None, format='html', nocache=False,
-                    force_existing=False):
+    def render_text(self, request=None, format='html', force_existing=False):
         context = RenderContext(request)
-        if nocache or self.id is None or format != 'html':
-            node = parse(self.text, wiki_force_existing=force_existing)
-            return node.render(context, format)
-        key = 'forum/post/%s' % self.id
-        instructions = cache.get(key)
-        if instructions is None:
-            node = parse(self.text, wiki_force_existing=force_existing)
-            instructions = node.compile(format)
-            cache.set(key, instructions)
-        return render(instructions, context)
+        node = parse(self.text, wiki_force_existing=force_existing)
+        return node.render(context, format)
 
     def update_search(self):
         """
@@ -603,7 +590,7 @@ class Post(object):
             rev.store_date = datetime.utcnow()
             rev.text = self.text
         self.text = text
-        self.rendered_text = self.render_text(request, nocache=True)
+        self.rendered_text = self.render_text(request)
 
     def deregister(self):
         """

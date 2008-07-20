@@ -910,21 +910,16 @@ def hide_post(request, post_id):
     Sets the hidden flag of a post to True which has the effect that normal
     users can't see it anymore (moderators still can).
     """
-    # XXX: Thanks to the join we need post_id twice now, as sa thinks there are two?
-    post = Post.query.get((post_id, post_id))
+    post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
-    if post.id == post.topic.first_post_id:
-        flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
-              u'werden.')
-    else:
-        post.hidden = True
-        session.commit()
-        flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
-              u'gemacht.' % (url_for(post), escape(post.author.username)),
-              success=True)
+    post.hidden = True
+    session.commit()
+    flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
+          u'gemacht.' % (url_for(post), escape(post.author.username)),
+          success=True)
     return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
@@ -933,8 +928,7 @@ def restore_post(request, post_id):
     This function removes the hidden flag of a post to make it visible for
     normal users again.
     """
-    # XXX: Thanks to the join we need post_id twice now, as sa thinks there are two?
-    post = Post.query.get((post_id, post_id))
+    post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
