@@ -38,7 +38,13 @@ def easy_install():
     run('source virtualenv/bin/activate; easy_install $(ez)')
 
 def easy_uninstall():
-    """Unstall an egg on the servers"""
+    """Uninstall an egg on the servers"""
     require('fab_hosts', provided_by = [test, staging, production])
     prompt('ez', 'egg to uninstall')
     run('cd virtualenv/lib/python$(python_version)/site-packages; $(python_interpreter) ~/virtualenv/inyoka/easy_uninstall.py $(ez)')
+
+def migrate():
+    """Migrate the database to the newest version."""
+    require('fab_hosts', provided_by = [test, staging, production])
+    run('source ~/virtualenv/bin/activate; cd virtualenv/inyoka; make migrate')
+
