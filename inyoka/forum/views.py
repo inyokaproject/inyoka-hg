@@ -911,7 +911,7 @@ def hide_post(request, post_id):
     users can't see it anymore (moderators still can).
     """
     # XXX: Thanks to the join we need post_id twice now, as sa thinks there are two?
-    post = Post.query.get((post_id, post_id))
+    post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
