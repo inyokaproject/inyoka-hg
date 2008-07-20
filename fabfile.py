@@ -45,6 +45,8 @@ def easy_uninstall():
 
 def migrate():
     """Migrate the database to the newest version."""
+    print 'broken currently'
+    return
     require('fab_hosts', provided_by = [test, staging, production])
     run('source ~/virtualenv/bin/activate; cd virtualenv/inyoka; make migrate')
 
