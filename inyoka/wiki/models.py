@@ -935,7 +935,7 @@ class Page(models.Model):
         """Clear the page cache."""
         cache.delete('wiki/page/' + self.name)
         if self.rev:
-            self.rev.text.update_render_instructions()
+            self.rev.text.update_html_render_instructions()
         deferred.clear(self)
 
     def save(self, update_meta=True):
