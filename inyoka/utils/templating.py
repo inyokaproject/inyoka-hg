@@ -22,7 +22,6 @@ from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from werkzeug import UserAgent
 
-
 # path to the dtd.  In debug mode we refer to the file system, otherwise
 # URL.  We do that because the firefox validator extension is unable to
 # load DTDs from URLs...  On first rendering the path is calculated because
