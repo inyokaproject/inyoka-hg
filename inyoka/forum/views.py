@@ -374,8 +374,14 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                  check_privilege(privileges, 'reply'))):
             return abort_access_denied(request)
     elif topic:
-        if not check_privilege(privileges, 'reply'):
-            return abort_access_denied(request)
+        if topic.locked:
+            if not check_privilege(privileges, 'moderate'):
+                flash(u'Du kannst auf in diesem Thema nicht antworten, da es '
+                      u'von einem Moderator geschlossen wurde.', False)
+                return HttpResponseRedirect(topic.get_absolute_url())
+        else:
+            if not check_privilege(privileges, 'reply'):
+                return abort_access_denied(request)
     else:
         if not check_privilege(privileges, 'create'):
             return abort_access_denied(request)
