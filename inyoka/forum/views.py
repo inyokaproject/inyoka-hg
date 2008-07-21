@@ -460,8 +460,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             # the user uploaded a new attachment
             if attach_form.is_valid():
                 d = attach_form.cleaned_data
-                att_name = (d.get('filename') or d['attachment'].name) \
-                    .decode('utf8')
+                att_name = (d.get('filename') or d['attachment'].name)
                 attachment = Attachment.create(
                     att_name, d['attachment'].read(),
                     request.FILES['attachment']['content-type'],

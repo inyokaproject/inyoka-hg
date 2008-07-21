@@ -18,7 +18,7 @@
   (name + 'Ganzer Beitrag', href('forum', 'feeds/forum', forum.slug, 'full/20'))
 ] %}
 {% set navigation_trace = [] %}
-{% for parent in forum.parents %}
+{% for parent in forum.parents|reverse %}
   {% do navigation_trace.append([parent|url, parent.name]) %}
 {% endfor %}
 {% do navigation_trace.append([forum|url, forum.name]) %}
