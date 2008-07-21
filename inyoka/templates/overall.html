@@ -139,6 +139,13 @@
               <li><a href="{{ href('forum', 'last6') }}">6 Stunden</a></li>
             </ul></li></ul>
           </div>
+
+          <div class="dropdown">
+            <ul class="dropdown" style="position:relative;right:30px"><li><a href="#">Optionen</a></li><li><ul>
+              <li><a href="{{ href('forum', 'markread') }}">Alle Foren als gelesen markieren</a></li>
+            </ul></li></ul>
+          </div>
+
         {%- elif active_app == 'wiki' %}
           <div class="dropdown">
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
