@@ -140,7 +140,7 @@
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}
-          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
+          <p>Anmeldungsdatum: <br />{{ post.author.date_joined|dateformat }}</p>
           <p>Beiträge: {{ post.author.post_count }}</p>
           {%- if post.author.location %}
           <p>Wohnort: {{ post.author.location|e }}</p>
