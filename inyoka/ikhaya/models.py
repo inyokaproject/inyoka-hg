@@ -82,9 +82,9 @@ class Category(models.Model):
 
 
 class Article(models.Model):
+    objects = models.Manager()
     published = ArticleManager(public=True)
     drafts = ArticleManager(public=False)
-    objects = ArticleManager(all=True)
 
     pub_date = models.DateTimeField('Datum')
     updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
