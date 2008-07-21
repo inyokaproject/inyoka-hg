@@ -955,12 +955,14 @@ p.badges img:hover {
   background-image: url(../img/hide.png);
   background-position: 0px 0px;
   background-repeat: no-repeat;
-  width: 16px;
+  width: 24px;
   height: 16px;
 }
 
 .message a.hide:hover {
-  background-color: #FFF6E7;
+  background-image: url(../img/message_fail.png);
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
 }
 
 .content .message {
@@ -1197,3 +1199,4 @@ div.dropdown {
   height: 0;
   overflow: hidden;
 } 
+
