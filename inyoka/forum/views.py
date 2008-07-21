@@ -16,7 +16,7 @@ from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
-from sqlalchemy.exceptions import InvalidRequestError
+from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 from inyoka.utils.urls import global_not_found, href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
@@ -205,8 +205,11 @@ def viewtopic(request, topic_slug, page=1):
     fmsg = t.forum.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    t.touch()
-    session.commit()
+    try:
+        t.touch()
+        session.commit()
+    except OperationalError:
+        pass
 
     posts = t.posts.options(eagerload('author'), eagerload('attachments')) \
                    .order_by(post_table.c.position)
