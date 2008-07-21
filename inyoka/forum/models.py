@@ -859,7 +859,10 @@ class Attachment(object):
     @property
     def size(self):
         """The size of the attachment in bytes."""
-        stat = os.stat(self.filename)
+        fn = self.filename
+        if isinstance(fn, unicode):
+            fn = fn.encode('utf-8')
+        stat = os.stat(fn)
         return stat.st_size
 
     @property
