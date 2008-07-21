@@ -167,7 +167,7 @@
         <td class="author">
           <p class="username"><a href="{{ post.author|url }}">{{ post.author|e }}</a></p>
           <p>Beiträge: {{ post.author.post_count }}</p>
-          <p>Anmeldungsdatum: {{ post.author.date_joined|dateformat }}</p>
+          <p>Anmeldungsdatum: <br />{{ post.author.date_joined|dateformat }}</p>
         </td>
         <td class="post">
           <div class="postinfo">

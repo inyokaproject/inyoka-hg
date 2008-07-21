@@ -166,7 +166,6 @@ table.forum thead td p.description {
 }
 
 table.topic {
-    table-layout: fixed;
 }
 
 /* deleted post */
