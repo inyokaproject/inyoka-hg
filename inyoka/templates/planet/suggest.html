@@ -12,6 +12,9 @@
 {% set title_trace = ['Blog vorschlagen'] %}
 
 {% block planet_content %}
+  <p>Hier kannst du einen Blog für den Planeten vorschlagen. Bitte beachte, dass es sich
+  dabei um einen Ubuntu/Linux Blog handeln muss und dass es womöglich einige Tage dauern
+  kann bis der Blog überprüft wurde.</p>
   <form action="{{ href('planet', 'suggest') }}" method="post">
     {{ render_form(form, ['name', 'url', 'description']) }}
     <p>
