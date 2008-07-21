@@ -293,13 +293,13 @@ def feed(request, category_slug=None, mode='short', count=20):
         if mode == 'full':
             kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
                                 u'xhtml">%s\n%s</div>' % (
-                                    article.intro,
-                                    article.text
+                                    article.rendered_intro,
+                                    article.rendered_text
                                 )
             kwargs['content_type'] = 'xhtml'
         if mode == 'short':
             kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                u'xhtml">%s</div>' % article.intro
+                                u'xhtml">%s</div>' % article.rendered_intro
         kwargs['author'] = {
             'name': article.author.username,
             'uri':  article.author.get_absolute_url()
