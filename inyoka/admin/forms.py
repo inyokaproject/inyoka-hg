@@ -309,7 +309,8 @@ class EditForumForm(forms.Form):
 
     welcome_msg_subject = forms.CharField(label=u'Titel', max_length=120,
         required=False)
-    welcome_msg_text = forms.CharField(label=u'Text', required=False)
+    welcome_msg_text = forms.CharField(label=u'Text', required=False,
+                                       widget=forms.Textarea(attrs={'rows': 3}))
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
