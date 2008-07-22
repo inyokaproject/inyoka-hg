@@ -279,7 +279,8 @@ def ikhaya(request):
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
     sortable = Sortable(Article.objects.all(), request.GET, '-pub_date')
-    pagination = Pagination(request, sortable.get_objects(), page, 25)
+    pagination = Pagination(request, sortable.get_objects(), page, 25,
+        href('admin', 'ikhaya', 'articles'))
     return {
         'table': sortable,
         'articles': list(pagination.objects),
