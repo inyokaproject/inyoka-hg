@@ -1124,7 +1124,6 @@ div.not_found img {
     background-color: #F1EAD8;
     color: #291c06;
     border: 1px solid #8E8674;
- 
 }
 
 #js_login_form input#js_login_permanent {
@@ -1133,6 +1132,8 @@ div.not_found img {
 }
 
 #js_login_form .submit {
+    position:relative;
+    right:15px;
 }
 
 /*** Filterable ***************************************************************/
