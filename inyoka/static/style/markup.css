@@ -55,6 +55,7 @@ a.interwiki-bug {
 
 #page table {
   width: auto;
+  margin: 1em;
 }
 
 #page table td, #page table th {
