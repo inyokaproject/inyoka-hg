@@ -79,7 +79,8 @@ a.strong {
 
 input {
   border: 1px solid #AAA;
-  padding: 1px 3px;
+  font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
+  font-size: 1em;
 }
 
 input[type="submit"], input[type="button"], input[type="reset"] {
@@ -119,6 +120,8 @@ div.actions {
 
 select {
   border: 1px solid #AAA;
+  font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
+  font-size: 1em;
 }
 
 hr {
@@ -1102,42 +1105,31 @@ div.not_found img {
 
 #js_login_form {
     display: none;
-    position:absolute;
-    top: 0;
-    left: 0;
-    height:40px;
-    width:100%;
-    z-index:1;
-    font-size: 0.85em;
-    color: black;
-    padding: 0.3em 20px;
-//    border-bottom: 1px solid #291c06;
-    background-image: url(../img/panel-top.png);
+    text-align: right;
+    font-size: 0.8em;
+    color: #d0af76;
+    color: white;
+    padding: 0.3em 16px;
+    border-bottom: 1px solid #291c06;
+    background-image: url(../img/jslogin.png);
     background-repeat: repeat-x;
 }
 
 #js_login_form a {
-    color: black;
-}
-
-#js_login_form .right {
-    margin-right: 1em;
+    color: white;
 }
 
 #js_login_form input {
-    background-color: #F1EAD8;
-    color: #291c06;
-    border: 1px solid #8E8674;
+    vertical-align: middle;
+    background-color: #291c06;
+    color: #eee;
+    border: 1px solid #a4721b;
+    margin-right: 0.5em;
 }
 
-#js_login_form input#js_login_permanent {
-    position:relative;
-    top:3px;
-}
-
-#js_login_form .submit {
-    position:relative;
-    right:15px;
+#js_login_form input.submit:active {
+    background-color: #47320f!important;
+    color: white;
 }
 
 /*** Filterable ***************************************************************/
@@ -1202,11 +1194,3 @@ div.dropdown {
   height:20px;
   margin-right:4px;
 }
-
-/*** preload ************************************************************/
-
-#preload {
-  height: 0;
-  overflow: hidden;
-} 
-

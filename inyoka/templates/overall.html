@@ -110,7 +110,7 @@
 
       <div class="pathbar">
 
-        <form action="{{ href('portal', 'search') }}" method="get" class="search">
+        <form action="{{ href('portal', 'search') }}" method="get" class="search"><div>
           <input type="text" name="query" class="search_query" value="{{ query|e }}" />
             {%- if topic %}
             <input type="hidden" name="topic_id" value="{{ topic.id }}" />
@@ -125,7 +125,7 @@
               <option value="planet"{% if active_app == 'planet' %} selected="selected"{% endif %}>Planet</option>
             </select>
             <input type="submit" value="Suchen" class="search_submit" />
-        </form>{# .search #}
+        </div></form>{# .search #}
 
         {%- if active_app == 'forum' %}
           <div class="dropdown">
@@ -236,18 +236,16 @@
     {%- if not USER.is_authenticated %}
     <form action="{{ href('portal', 'login', next=CURRENT_URL) }}" method="post" id="js_login_form">
       <div>
-        <label for="js_login_username">Benutzername:</label>
-        <input name="username" id="js_login_username" class="right" />
-        <label for="js_login_password">Passwort:</label>
-        <input type="password" name="password" id="js_login_password" class="right" />
-        <input type="submit" value="OK" class="submit" />
+        <label for="js_login_username">Benutzername</label>
+        <input name="username" id="js_login_username" />
+        <label for="js_login_password">Passwort</label>
+        <input type="password" name="password" id="js_login_password" />
+        <label for="js_login_permanent">dauerhaft?</label>
         <input type="checkbox" name="permanent" id="js_login_permanent" />
-        <label for="js_login_permanent" class="right">dauerhaft</label>
+        <input type="submit" value="Login" class="submit" />
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
-        <a href="{{ href('portal', 'lost_password') }}" class="strong note">Passwort vergessen</a>
       </div>
     </form>
     {%- endif %}
-  <div id="preload"><img src="{{ href('static', 'img/tabbar_border_hover.png') }}"/></div>
   </body>
 </html>

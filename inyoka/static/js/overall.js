@@ -9,6 +9,18 @@
  */
 
 $(document).ready(function() {
+  // preload images
+  (function() {
+    var container = $('<div>')
+      .appendTo('body')
+      .css({height: 0, overflow: 'hidden'});
+    $.each(['img/tabbar_border_hover.png'], function() {
+      $('<img />')
+        .attr('src', $STATIC_URL + this)
+        .appendTo(container);
+    });
+  })();
+
   // add a hide message link to all flash messages
   $.each($('div.message'), function(i, elm) {
     $(elm).prepend($('<a href="#" class="hide" />')
@@ -123,7 +135,7 @@ $(document).ready(function() {
     $(document).click(function() {
       if (areaPopup.is(':visible'))
         areaPopup.hide();
-      if (loginForm.is(':visible'))
+      if (loginForm && loginForm.is(':visible'))
         loginForm.slideUp();
     });
   })();
@@ -197,17 +209,21 @@ $(document).ready(function() {
       return false;
   });
 
-  var loginForm = $('#js_login_form')
-    .prependTo('body')
-    .submit(function(event) {
-      loginForm.slideDown();
-      return true;
-    })
-    .click(function(event) {
-      event.stopPropagation();
-    });
+  // the javascript powered login form
+  var loginForm = null;
   $('#login_link').click(function() {
-    loginForm.slideDown();
+    if (loginForm == null) {
+      loginForm = $('#js_login_form')
+        .prependTo('body')
+        .submit(function(event) {
+          loginForm.slideDown();
+          return true;
+        })
+        .click(function(event) {
+          event.stopPropagation();
+        });
+    }
+    loginForm.fadeIn();
     $('#js_login_username').focus();
     return false;
   });
