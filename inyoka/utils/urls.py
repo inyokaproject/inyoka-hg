@@ -109,10 +109,9 @@ def get_resolver(host):
     return None, None
 
 
-from inyoka.utils.http import templated
-@templated('errors/404.html')
+from inyoka.utils.http import TemplateResponse
 def global_not_found(request, app, err_message=None):
-    return {
+    return TemplateResponse('errors/404.html', {
         'err_message': err_message,
         'app': app,
-    }
+    }, 404)
