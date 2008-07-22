@@ -23,7 +23,7 @@ def bootstrap():
     run('hg clone http://hg.ubuntu-eu.org/ubuntu-de-inyoka/ virtualenv/inyoka')
     local("python make-bootstrap.py > '%s'" % bootstrap)
     put(bootstrap, 'bootstrap.py')
-    run('$(python_interpreter) bootstrap.py virtualenv')
+    run('unset PYTHONPATH; $(python_interpreter) bootstrap.py virtualenv')
     run('ln -s ~/virtualenv/inyoka/inyoka ~/virtualenv/lib/python$(python_version)/site-packages')
 
 def deploy():
@@ -35,7 +35,7 @@ def easy_install():
     """Run easy_install on the server"""
     require('fab_hosts', provided_by = [test, staging, production])
     prompt('ez', 'easy_install parameters')
-    run('source virtualenv/bin/activate; easy_install $(ez)')
+    run('unset PYTHONPATH; source virtualenv/bin/activate; easy_install $(ez)')
 
 def easy_uninstall():
     """Uninstall an egg on the servers"""
