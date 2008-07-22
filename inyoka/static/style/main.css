@@ -1105,15 +1105,15 @@ div.not_found img {
     top: 0;
     left: 0;
     font-size: 0.85em;
-    color: white;
+    color: black;
     padding: 0.3em 20px;
     border-bottom: 1px solid #291c06;
-    background-image: url(../img/jslogin.png);
+    background-image: url(../img/panel-top.png);
     background-repeat: repeat-x;
 }
 
 #js_login_form a {
-    color: white;
+    color: black;
 }
 
 #js_login_form .right {
@@ -1121,13 +1121,18 @@ div.not_found img {
 }
 
 #js_login_form input {
-    background-color: #291c06;
-    color: #eee;
-    border: 1px solid #a4721b;
+    background-color: #F1EAD8;
+    color: #291c06;
+    border: 1px solid #8E8674;
+ 
+}
+
+#js_login_form input#js_login_permanent {
+    position:relative;
+    top:3px;
 }
 
 #js_login_form .submit {
-    display: none;
 }
 
 /*** Filterable ***************************************************************/
