@@ -1102,12 +1102,16 @@ div.not_found img {
 
 #js_login_form {
     display: none;
+    position:absolute;
     top: 0;
     left: 0;
+    height:40px;
+    width:100%;
+    z-index:1;
     font-size: 0.85em;
     color: black;
     padding: 0.3em 20px;
-    border-bottom: 1px solid #291c06;
+//    border-bottom: 1px solid #291c06;
     background-image: url(../img/panel-top.png);
     background-repeat: repeat-x;
 }
