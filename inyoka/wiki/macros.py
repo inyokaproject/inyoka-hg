@@ -999,7 +999,7 @@ ALL_MACROS = {
     u'Bild':                Picture,
     u'Datum':               Date,
     u'Einbinden':           Include,
-#    u'FehlendeSeiten':      MissingPages,
+    u'FehlendeSeiten':      MissingPages,
     u'Inhaltsverzeichnis':  TableOfContents,
     u'LetzteÄnderungen':    RecentChanges,
     u'NeueSeite':           NewPage,
