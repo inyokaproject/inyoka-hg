@@ -301,15 +301,14 @@ class PageManager(models.Manager):
         ignore = set([settings.WIKI_MAIN_PAGE])
         cur = connection.cursor()
         cur.execute('''
-            select p.name, r.id
-              from wiki_page p, wiki_revision r
-             where r.attachment_id is null and not exists (
-                select *
-                  from wiki_metadata m
-                 where p.name = m.value and m.key = 'X-Link'
-             ) and r.page_id = p.id and r.id = (select max(id)
-               from wiki_revision where page_id = r.page_id)
-          order by p.name
+            select p.name, r.id from wiki_page p
+                left outer join wiki_metadata m
+                    on m.key = 'X-Link' and p.name = m.value,
+                wiki_revision r
+            where r.page_id = p.id and r.attachment_id is NULL
+                and m.id is NULL and r.id = (select max(id)
+                    from wiki_revision where page_id = p.id)
+            order by p.name
         ''')
         try:
             return [x[0] for x in cur.fetchall() if x[0] not in ignore]
