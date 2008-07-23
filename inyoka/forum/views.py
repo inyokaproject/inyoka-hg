@@ -1317,8 +1317,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         topics = topics.filter(topic_table.c.id.in_(post_table.c.topic_id)) \
                        .filter(post_table.c.author_id == user.id)
         if user != request.user:
-            title = u'Beiträge von „%s“' % escape(user.username)
-            url = href('forum', user.username)
+            title = u'Beiträge von %s' % escape(user.username)
+            url = href('forum', 'author', user.username)
         else:
             title = u'Eigene Beiträge'
             url = href('forum', 'egosearch')
