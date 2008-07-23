@@ -51,7 +51,8 @@ def index(request, page=1):
     The index function just returns the 30 latest entries of the planet.
     The page number is optional.
     """
-    pagination = Pagination(request, Entry.objects.all(), page, 30)
+    pagination = Pagination(request, Entry.objects.all(), page, 30,
+        href('planet'))
     set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
                      href('planet'), 'Planet')
     return {
