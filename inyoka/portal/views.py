@@ -81,7 +81,7 @@ def index(request):
         'get_ubuntu_description'))
     return {
         'ikhaya_latest':            list(ikhaya_latest),
-        'sessions':                 get_sessions(order_by='subject_text'),
+        'sessions':                 get_sessions(),
         'record':                   record,
         'record_time':              record_time,
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
