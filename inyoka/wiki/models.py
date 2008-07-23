@@ -74,7 +74,8 @@
     that is part of the `acl` system.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
+    :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand,
+                                  Christoph Hack.
     :license: GNU GPL.
 """
 import sha
@@ -308,6 +309,7 @@ class PageManager(models.Manager):
             where r.page_id = p.id and r.attachment_id is NULL
                 and m.id is NULL and r.id = (select max(id)
                     from wiki_revision where page_id = p.id)
+                and r.deleted = 0
             order by p.name
         ''')
         try:
