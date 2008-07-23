@@ -1266,7 +1266,8 @@ def newposts(request, page=1):
     if not all_topics:
         all_topics = list(Topic.query.options(eagerload('author'), \
             eagerload('last_post'), eagerload('last_post.author')) \
-            .order_by((topic_table.c.last_post_id.desc()))[:80])
+            .filter(topic_table.c.sticky == False) \
+            .order_by((topic_table.c.sticky, topic_table.c.last_post_id.desc()))[:80])
         cache.set('forum/lasttopics', all_topics)
     topics = []
     for topic in all_topics:
