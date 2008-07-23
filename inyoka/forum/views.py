@@ -317,7 +317,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     to this topic or to create one or more polls.
     """
     post = topic = forum = attachment = quote = posts = None
-    newtopic = False
+    newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
     attachments = []
@@ -345,14 +345,14 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         forum = Forum.query.get(forum_slug)
         if not forum or not forum.parent_id:
             raise PageNotFound()
-        newtopic = True
+        newtopic = firstpost = True
     elif post_id:
         post = Post.query.get(post_id)
         if not post:
             raise PageNotFound()
         topic = post.topic
         forum = topic.forum
-        newtopic = post.id == topic.first_post_id
+        firstpost = post.id == topic.first_post_id
     elif quote_id:
         quote = Post.query.options(eagerload('topic'), eagerload('author')) \
                           .get(quote_id)
@@ -406,7 +406,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
     #  handle polls
     poll_ids = map(int, filter(bool, request.POST.get('polls', '').split(',')))
-    if newtopic and check_privilege(privileges, 'create_poll'):
+    if (newtopic or firstpost) and check_privilege(privileges, 'create_poll'):
         poll_form = AddPollForm(('add_poll' in request.POST or
             'add_option' in request.POST) and request.POST or None)
         poll_options = request.POST.getlist('options') or ['', '']
@@ -496,7 +496,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         d = form.cleaned_data
         if not topic:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
-        if newtopic:
+        if newtopic or firstpost:
             topic.title = d['title']
             topic.ubuntu_distro = d['ubuntu_distro']
             topic.ubuntu_version = d['ubuntu_version']
@@ -520,7 +520,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             Attachment.update_post_ids(att_ids, post.id)
         session.commit()
 
-        if newtopic and not post_id:
+        if newtopic:
             for s in Subscription.objects.filter(forum_id=forum.id,
                                                  notified=False) \
                                          .exclude(user=request.user):
@@ -607,6 +607,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'topic':        topic,
         'preview':      preview,
         'isnewtopic':   newtopic,
+        'isfirstpost':  firstpost,
         'can_attach':   check_privilege(privileges, 'upload'),
         'can_create_poll':     check_privilege(privileges, 'create_poll'),
         'can_moderate': check_privilege(privileges, 'moderate'),
