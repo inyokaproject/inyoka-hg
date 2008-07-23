@@ -46,14 +46,14 @@ SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
 UBUNTU_VERSIONS = {
-    '4.10': '4.10 (Warty Warthog)',
-    '5.04': '5.04 (Hoary Hedgehog)',
-    '5.10': '5.10 (Breezy Badger)',
-    '6.06': '6.06 (Dapper Drake)',
-    '6.10': '6.10 (Edgy Eft)',
-    '7.04': '7.04 (Feisty Fawn)',
-    '7.10': '7.10 (Gutsy Gibbon)',
-    '8.04': '8.04 (Hardy Heron)'
+    '4.10': 'Warty Warthog',
+    '5.04': 'Hoary Hedgehog',
+    '5.10': 'Breezy Badger',
+    '6.06': 'Dapper Drake',
+    '6.10': 'Edgy Eft',
+    '7.04': 'Feisty Fawn',
+    '7.10': 'Gutsy Gibbon',
+    '8.04': 'Hardy Heron'
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
@@ -485,8 +485,8 @@ class Topic(object):
         if self.ubuntu_distro:
             out.append(UBUNTU_DISTROS[self.ubuntu_distro])
         if self.ubuntu_version:
-            out.append(u'%s (%s)' % (UBUNTU_VERSIONS[self.ubuntu_version],
-                                    self.ubuntu_version))
+            out.append(u'%s (%s)' % (self.ubuntu_version,
+                                    UBUNTU_VERSIONS[self.ubuntu_version]))
         return u' '.join(out)
 
     def get_read_status(self, user):

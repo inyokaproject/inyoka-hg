@@ -15,7 +15,8 @@ from inyoka.utils.sessions import SurgeProtectionMixin
 
 
 sorter = lambda x,y: cmp(x[0], y[0])
-VERSION_CHOICES = [('', 'Version auswählen')] + UBUNTU_VERSIONS.items()
+VERSION_CHOICES = [('', 'Version auswählen')] + \
+                  [(k, '%s (%s)' % (k,v)) for k, v in UBUNTU_VERSIONS.items()]
 VERSION_CHOICES.sort(sorter)
 DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS.items()
 DISTRO_CHOICES.sort(sorter)
