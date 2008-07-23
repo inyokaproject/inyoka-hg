@@ -322,27 +322,27 @@ class PageManager(models.Manager):
         Return a list of referenced page names that do not have existing
         pages.
         """
+        pages = set()
         cur = connection.cursor()
-        # FIXME: this query is hideous and probably the worst way to
-        # achieve that. Fix that!
-        cur.execute('''
-            select m.value
-              from wiki_metadata m
-             where m.key = 'X-Link' and m.value not in (
-                select s.name from (
-                    select p.name, max(r.id)
-                      from wiki_page p, wiki_revision r
-                     where r.attachment_id is null and
-                           p.id = r.id and not r.deleted
-                  group by r.id
-                ) as s
-             )
-          order by m.value
-        ''')
         try:
-            return [x[0] for x in cur.fetchall()]
+            cur.execute('''
+                select m.value from wiki_metadata m
+                    left outer join wiki_page p on m.value = p.name
+                    where m.key = 'X-Link' and p.id is NULL
+                ''')
+            pages = set(x[0] for x in cur.fetchall())
+            cur.execute('''
+                select m.value from wiki_metadata m, wiki_page p,
+                        wiki_revision r
+                    where m.key = 'X-Link' and m.value = p.name and r.deleted
+                        and p.id = r.page_id and r.id = (
+                            select max(id) from wiki_revision
+                                where page_id = p.id)
+                ''')
+            pages.union(x[0] for x in cur.fetchall())
         finally:
             cur.close()
+        return pages
 
     def get_similar(self, name, n=10):
         """
