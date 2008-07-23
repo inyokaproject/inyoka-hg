@@ -1009,7 +1009,7 @@ ALL_MACROS = {
     u'Seitenzahl':          PageCount,
     u'TagListe':            TagList,
     u'TagWolke':            TagCloud,
-    u'VerwaisteSeiten':     OrphanedPages,
+#    u'VerwaisteSeiten':     OrphanedPages,
     u'Vorlage':             Template,
     u'Weiterleitungen':     RedirectPages,
     u'Zufallsseite':        RandomPageList,
