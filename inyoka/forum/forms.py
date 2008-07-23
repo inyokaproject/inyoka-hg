@@ -8,18 +8,18 @@
     :copyright: 2007-2008 by Maximilian Trescher, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+import operator
 from django import forms
 from inyoka.utils.forms import MultiField
 from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS, Topic, Forum
 from inyoka.utils.sessions import SurgeProtectionMixin
 
 
-sorter = lambda x,y: cmp(x[0], y[0])
 VERSION_CHOICES = [('', 'Version auswählen')] + \
                   [(k, '%s (%s)' % (k,v)) for k, v in UBUNTU_VERSIONS.items()]
-VERSION_CHOICES.sort(sorter)
+VERSION_CHOICES.sort(operator.itemgetter(0))
 DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS.items()
-DISTRO_CHOICES.sort(sorter)
+DISTRO_CHOICES.sort(operator.itemgetter(0))
 
 
 class NewPostForm(SurgeProtectionMixin, forms.Form):
