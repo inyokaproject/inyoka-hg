@@ -84,7 +84,7 @@ class CachedStorage(object):
             values[key[8:]] = value
         #: a list of keys that aren't yet in the cache.
         #: They are queried using a database call.
-        to_fetch = [x for x in keys if x not in values]
+        to_fetch = [k for k in keys if values.get(k) is None]
         # get the items that are not in cache using a database query
         query = select(
                     [storage_table.c.key, storage_table.c.value]
