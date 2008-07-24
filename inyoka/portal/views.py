@@ -369,7 +369,8 @@ def search(request):
     """Search dialog for the Xapian search engine."""
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
     f = SearchForm(request.REQUEST)
-    if f.is_valid():
+    flush('Die Suche wurde vorübergehend deaktiviert');
+    if f.is_valid() and False:
         d = f.cleaned_data
         show_all = request.GET.get('show_all') == 'true'
         area = {
