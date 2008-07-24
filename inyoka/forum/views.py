@@ -229,7 +229,6 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     vote = request.POST.get('poll_%s' % poll.id)
                     votes = vote and [vote] or []
-                print votes
                 if votes:
                     if poll.participated:
                         continue
