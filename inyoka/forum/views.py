@@ -218,7 +218,9 @@ def viewtopic(request, topic_slug, page=1):
         polls = Poll.query.options(eagerload('options')).filter(
             Poll.topic_id==t.id).all()
 
-        if request.method == 'POST' and request.user.is_authenticated:
+        if request.method == 'POST':
+            if not check_privilege(privileges, 'vote'):
+                return abort_access_denied(request)
             # the user participated in a poll
             for poll in polls:
                 # get the votes for every poll in this topic
@@ -227,9 +229,7 @@ def viewtopic(request, topic_slug, page=1):
                 else:
                     votes = [request.POST.get('poll_%s' % poll.id)]
                 if votes:
-                    if not check_privilege(privileges, 'vote'):
-                        return abort_access_denied(request)
-                    elif poll.participated:
+                    if poll.participated:
                         continue
                     elif poll.ended:
                         flash(u'Die Abstimmung ist bereits zu Ende.', False)
@@ -245,6 +245,7 @@ def viewtopic(request, topic_slug, page=1):
             for poll in polls:
                 for option in poll.options:
                     session.refresh(option)
+
     else:
         polls = None
 
@@ -284,6 +285,7 @@ def viewtopic(request, topic_slug, page=1):
 
     can_mod = check_privilege(privileges, 'moderate')
     can_reply = check_privilege(privileges, 'reply')
+    can_vote = check_privilege(privileges, 'vote')
 
     return {
         'topic':             t,
@@ -298,6 +300,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_edit':          lambda post: can_mod or (post.author_id ==
                                           request.user.id and can_reply),
         'can_reply':         can_reply,
+        'can_vote':          can_vote,
         'team_icon_url':     team_icon
     }
 

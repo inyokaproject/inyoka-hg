@@ -76,7 +76,7 @@
       {%- for option in poll.options %}
       <tr>
         <td>
-          {%- if poll.can_vote and not show_vote_results %}
+          {%- if poll.can_vote and can_vote and not show_vote_results %}
           <input type="{{ poll.multiple_votes and 'checkbox' or 'radio' }}"
                  name="poll_{{ poll.id }}" id="option_{{ option.id }}"
                  value="{{ option.id }}" />
@@ -85,7 +85,7 @@
           {{ option.name|e }}
           {%- endif %}
         </td>
-        {%- if not poll.can_vote or show_vote_results %}
+        {%- if not (poll.can_vote and can_vote) or show_vote_results %}
         <td class="vote_bar"><div style="width: {{ (option.percentage * 3) or 2 }}px;"></div></td>
         {% set bc, ac = (option.percentage|string).split('.') %}
         <td>{{ bc }}{% if ac|int %}.{{ ac[:2] }}{% endif %} %</td>
