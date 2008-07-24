@@ -9,28 +9,31 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from inyoka.utils.cache import cache
 from django.db import models
+from sqlalchemy import Table, Column, Integer, Unicode, UnicodeText, \
+                        select, bindparam
+from sqlalchemy.exceptions import IntegrityError
+from inyoka.utils.cache import cache
+from inyoka.utils.database import metadata, session
 
+#XXX: migration: remove the id column and rename the table
+storage_table = Table('portal_storage', metadata,
+        Column('id', Integer, primary_key=True),
+        Column('key', Unicode(200), index=True),
+        Column('value', UnicodeText),
+        )
 
+update = storage_table.update(
+        storage_table.c.key==bindparam('key'),
+        values={'value':bindparam('value')})
 
-class Storage(models.Model):
-    """
-    Table for storing simple key --> value relations.
-    Use the `storage` object for accessing it (it behaves like a dict).
-    """
-    key = models.CharField(u'Schlüssel', max_length=200)
-    value = models.TextField(u'Wert')
+fetch = select(
+        [storage_table.c.value]
+    ).where(
+        storage_table.c.key==bindparam('key')
+    ).limit(1)
 
-    def __unicode__(self):
-        return self.key
-
-    class Meta:
-        # since this model was stored in the portal module
-        # some time ago it's table is known as portal_storage
-        # instead of utils_storage as django says.
-        db_table = 'portal_storage'
-
+insert = storage_table.insert()
 
 class CachedStorage(object):
     """
@@ -43,10 +46,11 @@ class CachedStorage(object):
         value = cache.get('storage/' + key)
         if value is not None:
             return value
-        try:
-            value = Storage.objects.get(key=key).value
-        except Storage.DoesNotExist:
+        results = session.execute(fetch, {'key': key}).fetchone()
+        if not results:
             return default
+        else:
+            value = results[0]
         self._update_cache(key, value, timeout)
         return value
 
@@ -55,12 +59,19 @@ class CachedStorage(object):
         Set *key* with *value* and if needed with a
         *timeout*.
         """
-        try:
-            entry = Storage.objects.get(key=key)
-        except Storage.DoesNotExist:
-            entry = Storage(key=key)
-        entry.value = value
-        entry.save()
+        #XXX: ugly check, find a more nice solution
+        rows = session.execute(fetch, {'key': key}).fetchall()
+        if rows:
+            session.execute(update, { 'key': key, 'value': value})
+            session.commit()
+        else:
+            try:
+                session.execute(insert, { 'key': key, 'value': value})
+                session.commit()
+            except IntegrityError:
+                # ignore concurrent insertion
+                return
+
         self._update_cache(key, value, timeout)
 
     def get_many(self, keys, timeout=None):
@@ -73,11 +84,17 @@ class CachedStorage(object):
             values[key[8:]] = value
         #: a list of keys that aren't yet in the cache.
         #: They are queried using a database call.
-        to_fetch = [x for x in keys if values.get(x) is None]
+        to_fetch = [x for x in keys if x not in values]
         # get the items that are not in cache using a database query
-        for obj in Storage.objects.filter(key__in=to_fetch):
-            values[obj.key] = obj.value
-            self._update_cache(obj.key, obj.value, timeout)
+        query = select(
+                    [storage_table.c.key, storage_table.c.value]
+                ).where(
+                    storage_table.c.key.in_(to_fetch)
+                )
+
+        for key, value in session.execute(query):
+            values[key] = value
+            self._update_cache(key, value, timeout)
         return values
 
     def __getitem__(self, key):
