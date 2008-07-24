@@ -1013,7 +1013,7 @@ class PollOption(object):
         """Calculate the percentage of votes for this poll option."""
         if self.poll.votes:
             return self.votes / self.poll.votes * 100
-        return 0
+        return 0.0
 
 
 class PollVote(object):
