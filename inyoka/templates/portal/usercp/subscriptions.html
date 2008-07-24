@@ -49,12 +49,12 @@
     <tr>
       <td colspan="2">
         {{ pagination }}
+        <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abonnements auf einer Seite anzeigen</a>
       </td>
     </tr>
   </table>
   <div>
     <input type="submit" value="Änderungen bestätigen" />
-    &nbsp; <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abbonements anzeigen</a>
   </div>
 </form>
 <script type="text/javascript">
