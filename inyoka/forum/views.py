@@ -624,7 +624,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
         t.solved = solved
         session.commit()
         flash(u'Das Thema wurde als %s markiert' % (solved and u'gelöst' or \
-                                                    u'ungelöst'))
+                                                    u'ungelöst'), True)
     if locked is not None:
         t.locked = locked
         session.commit()
