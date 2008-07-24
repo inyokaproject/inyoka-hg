@@ -94,11 +94,10 @@
       </tr>
       {%- endfor %}
     </table>
-    <div>Die Umfrage wurde {{ poll.start_time|dateformat(true) }} gestartet und
-      {%- if poll.ended %} endete {{ poll.end_time|dateformat(true) }}.
-      {%- elif not poll.end_time %} wird nie enden.
-      {%- else %} wird {{ poll.end_time|dateformat(true) }} enden.{% endif -%}
-    </div>
+    <div>Die Umfrage wurde {{ poll.start_time|dateformat(true) }} gestartet
+      {%- if poll.ended %} und endete {{ poll.end_time|dateformat(true) }}
+      {%- elif poll.end_time %} und wird {{ poll.end_time|dateformat(true) }} enden{% endif -%}
+    .</div>
     {%- endfor %}
     {%- if can_vote %}
     <p>
