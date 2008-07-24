@@ -327,8 +327,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         try:
             article = Page.objects.get(name=normalize_pagename(article_name))
         except Page.DoesNotExist:
-            flash(u'Der Artikel „%s“ existiert nicht. Du kannst ihn nun anlegen', False)
-            return HttpResponseRedirect('wiki', normalize_pagename(article_name))
+            flash(u'Der Artikel „%s“ existiert nicht. Du kannst ihn nun anlegen'
+                  % normalize_pagename(article_name), False)
+            return HttpResponseRedirect(href('wiki',
+                                             normalize_pagename(article_name)))
         forum_slug = settings.WIKI_DISCUSSION_FORUM
         flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
               u'Wenn du willst, kannst du hier eine neue anlegen.' %
