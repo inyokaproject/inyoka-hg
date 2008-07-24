@@ -1,0 +1,5 @@
+Hallo,
+
+Der Benutzer „{{ username }}“ hat deinen Artikelvorschlag „{{ title }}“ abgelehnt. Als Begründung hat er folgendes angegeben:
+
+{{ note|indent }}

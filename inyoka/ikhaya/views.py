@@ -206,13 +206,13 @@ def suggestionlist(request):
             if not 'cancel' in request.POST:
                 s = Suggestion.objects.get(id=request.GET['delete'])
                 if request.POST.get('note'):
-                    text = render_template('mails/suggestion_rejected.txt', {
+                    args = {
                         'title':    s.title,
                         'username': request.user.username,
                         'note':     request.POST['note']
-                    })
-                    send_notification(s.author, u'Ikhaya-Vorschlag abgelehnt',
-                                      text)
+                    }
+                    send_notification(s.author, u'suggestion_rejected',
+                                      u'Ikhaya-Vorschlag abgelehnt', args)
                 cache.delete('ikhaya/suggestion_count')
                 s.delete()
                 flash(u'Der Vorschlag wurde gelöscht.', True)
