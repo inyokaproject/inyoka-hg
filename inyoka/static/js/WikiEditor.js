@@ -160,7 +160,7 @@
            ['wiki', 'forum', 'small']),
     button('underlined', 'Unterstrichener Text', insert('__%s__'),
            ['wiki', 'forum', 'small']),
-    button('stroke', 'Durchgeschtrichener Text', insert('--(%s)--'),
+    button('stroke', 'Durchgestrichener Text', insert('--(%s)--'),
            ['wiki', 'forum']),
     //button('code', 'Code', insert("``%s``"),
     //       ['wiki', 'forum', 'small']),
