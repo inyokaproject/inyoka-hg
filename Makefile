@@ -31,7 +31,7 @@ migrate:
 	@(python manage-inyoka.py migrate)
 
 test_data:
-	@(sh make_test_data.sh)
+	@(python make_testdata.py)
 
 convert:
 	@(python inyoka/scripts/converter/converter.py)
