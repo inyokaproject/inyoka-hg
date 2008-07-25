@@ -1132,11 +1132,10 @@ def user_error_report(request):
                     return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
             if request.user.id != 1:
-                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN] | [%s PN(old)])" % (
+                text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
                     request.user.get_absolute_url(),
                     escape(request.user.username),
                     request.user.get_absolute_url('privmsg'),
-                    'http://forum.ubuntuusers.de/privmsg/?mode=post&u=%s' % request.user.id,
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
