@@ -127,7 +127,8 @@ class TracHandler(Handler):
             'summary':      summary,
             'description':  description,
             'priority':     priority,
-            'component':    'servererrors',
+            'component':    '-',
+            'ticket_type':  'servererror',
         }
 
     def analyseForComment(self, record):
