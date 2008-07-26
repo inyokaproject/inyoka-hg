@@ -411,7 +411,7 @@ class AutomaticStructure(Transformer):
         return tree
 
 
-DEFAULT_TRANSFORMERS = [AutomaticParagraphs(), GermanTypography(),
+DEFAULT_TRANSFORMERS = [AutomaticParagraphs(), #GermanTypography(),
                         SmileyInjector(), FootnoteSupport(),
                         HeadlineProcessor(), AutomaticStructure(),
                         KeyHandler()]
