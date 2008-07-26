@@ -23,7 +23,7 @@ def check_for_user_record():
     record = int(storage.get('session_record', 0))
     session_count = SessionInfo.objects.filter(last_change__gt=delta).count()
     if session_count > record:
-        storage['session_record'] = session_count
+        storage['session_record'] = unicode(session_count)
         storage['session_record_time'] = int(time())
 
 
