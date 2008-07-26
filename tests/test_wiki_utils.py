@@ -8,11 +8,11 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-from inyoka.wiki.utils import pagename_join, normalize_pagename
+from inyoka.utils.text import join_pagename, normalize_pagename
 
 
-def test_pagename_join():
-    j = pagename_join
+def test_join_pagename():
+    j = join_pagename
     assert j("Foo", "Bar") == "Foo/Bar"
     assert j("Foo", "Bar/Baz") == "Bar/Baz"
     assert j("Foo", "./Bar/Baz") == "Foo/Bar/Baz"
