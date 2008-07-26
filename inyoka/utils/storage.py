@@ -10,7 +10,7 @@
     :license: GNU GPL.
 """
 from django.db import models
-from sqlalchemy import Table, Column, Integer, Unicode, UnicodeText, \
+from sqlalchemy import Table, Column, Integer, String, Text, \
                         select, bindparam
 from sqlalchemy.exceptions import IntegrityError
 from inyoka.utils.cache import cache
@@ -19,8 +19,8 @@ from inyoka.utils.database import metadata, session
 #XXX: migration: remove the id column and rename the table
 storage_table = Table('portal_storage', metadata,
         Column('id', Integer, primary_key=True),
-        Column('key', Unicode(200), index=True),
-        Column('value', UnicodeText),
+        Column('key', String(200), index=True),
+        Column('value', Text()),
         )
 
 update = storage_table.update(
