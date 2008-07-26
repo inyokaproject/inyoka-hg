@@ -496,6 +496,7 @@ div.code, pre {
     max-height: 15em;
     overflow: auto;
     margin: 0.5em 0 0 0;
+    white-space: pre-wrap;
 }
 
 div.code pre {
