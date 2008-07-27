@@ -166,7 +166,7 @@
               {%- endif %}
             </div>
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
-            {{ post.pub_date|specificdatetimeformat }}
+            Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
           <div class="text">
             {{ post.rendered_text }}
