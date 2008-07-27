@@ -63,7 +63,7 @@ $(function () {
       });
     };
   })();
-
+/*
   $('div.code').add('pre').each(function () {
     if (this.clientHeight < this.scrollHeight) {
       $(this)
@@ -84,5 +84,6 @@ $(function () {
       this.innerHTML = this.title = 'vergrößern';
     }
   });
+*/
 });
 

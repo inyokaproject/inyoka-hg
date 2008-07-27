@@ -491,18 +491,6 @@ ul.image_list a:hover img {
   opacity: 0.9;
 }
 
-div.code, pre {
-    border: 1px solid #ccc;
-    max-height: 15em;
-    overflow: auto;
-    margin: 0.5em 0 0 0;
-    white-space: pre-wrap;
-}
-
-div.code pre {
-    max-height: none;
-}
-
 .codeblock_resizer {
     width: 10em;
     margin-left: auto;
