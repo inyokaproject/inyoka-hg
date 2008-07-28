@@ -14,7 +14,7 @@
       <p class="description">{{ forum.description|e }}</p> 
       {%- endif %}
       {%- if forum.children %}
-      <p class="subforums">Subforen:
+      <p class="subforums">Unterforen:
       {%- for subforum in forum.children %}
         <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
       {%- endfor %}
