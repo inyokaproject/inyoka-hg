@@ -727,6 +727,7 @@ def user_edit(request, username):
             else:
                 oprimary = ""
 
+            primary = None
             if oprimary != data['primary_group']:
                 try:
                     primary = Group.objects.get(name=data['primary_group'])

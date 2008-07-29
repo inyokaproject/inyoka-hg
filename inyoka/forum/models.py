@@ -37,6 +37,7 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         poll_option_table, poll_vote_table, group_table, post_revision_table, \
         forum_welcomemessage_table, user_group_table
 from inyoka.forum.acl import filter_invisible
+from inyoka.portal.user import Group
 
 
 # initialize PIL to make Image.ID available
@@ -1088,7 +1089,8 @@ class SAUser(object):
     def primary_group(self):
         if self._primary_group_id is None:
             # we use the first assigned group as the primary one
-            return self.groups.all()[0]
+            groups = self.groups.all()
+            return groups and groups[0] or Group.get_default_group()
         return SAGroup.query.get(self._primary_group_id)
 
     def __unicode__(self):
