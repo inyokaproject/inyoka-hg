@@ -1087,11 +1087,11 @@ class SAUser(object):
 
     @deferred
     def primary_group(self):
-        if self._primary_group_id is None:
+        if self.primary_group_id is None:
             # we use the first assigned group as the primary one
             groups = self.groups.all()
             return groups and groups[0] or Group.get_default_group()
-        return SAGroup.query.get(self._primary_group_id)
+        return SAGroup.query.get(self.primary_group_id)
 
     def __unicode__(self):
         return self.username

@@ -312,7 +312,7 @@ class User(models.Model):
     # e.g the membericon
     _primary_group = models.ForeignKey(Group, related_name='primary_users_set',
                                        blank=True, null=True,
-                                       db_column='primary_group')
+                                       db_column='primary_group_id')
 
     def save(self):
         """
