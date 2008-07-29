@@ -18,6 +18,7 @@ def send_notification(user, template_name=None, subject=None, args={}):
     This sends a message to the user using the person's favourite method(s)
     he has specified in the user control panel
     """
+    return
     assert subject is not None
     #TODO: use xhtml jabber messages
     methods = user.settings.get('notify', ['mail'])

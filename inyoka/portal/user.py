@@ -420,7 +420,7 @@ class User(models.Model):
         """Render the user signature and cache it if `nocache` is `False`."""
         if request is None:
             request = current_request._get_current_object()
-        context = RenderContext(request)
+        context = RenderContext(request, simplified=True)
         if nocache or self.id is None or format != 'html':
             return parse(self.signature).render(context, format)
         key = 'portal/user/%d/signature' % self.id
