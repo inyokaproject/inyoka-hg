@@ -527,10 +527,10 @@ def new_team_icon_system(m):
     m.engine.execute('''
         begin;
         alter table portal_user
-            add column _primary_group_id integer null after _permissions;
+            add column primary_group_id integer null after _permissions;
         commit;
         alter table portal_user
-            add foreign key (_primary_group_id) references portal_group(id);
+            add foreign key (primary_group_id) references portal_group(id);
     ''')
 
     # ensure `MEDIA/portal/teamicons` exists.

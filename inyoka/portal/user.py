@@ -311,7 +311,8 @@ class User(models.Model):
     # primary group from which the user gets some settings
     # e.g the membericon
     _primary_group = models.ForeignKey(Group, related_name='primary_users_set',
-                                       blank=True, null=True)
+                                       blank=True, null=True,
+                                       db_column='primary_group')
 
     def save(self):
         """
