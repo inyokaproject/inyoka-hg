@@ -130,3 +130,8 @@ div.preview_wrapper h2.title {
 ul.permissions {
   list-style: none;
 }
+
+img.admin_teamicon {
+  float: left;
+  margin: 20px;
+}

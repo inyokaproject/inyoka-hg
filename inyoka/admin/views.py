@@ -67,7 +67,10 @@ def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
             'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template',
-            'wiki_newpage_root']
+            'wiki_newpage_root', 'team_icon_height', 'team_icon_width']
+
+    team_icon = storage['team_icon']
+
     if request.method == 'POST':
         form = ConfigurationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -77,7 +80,7 @@ def config(request):
             if data['team_icon']:
                 img_data = data['team_icon'].read()
                 icon = Image.open(StringIO(img_data))
-                fn = 'portal/team_icon.%s' % icon.format.lower()
+                fn = 'portal/global_team_icon.%s' % icon.format.lower()
                 imgp = path.join(settings.MEDIA_ROOT, fn)
 
                 if path.exists(imgp):
@@ -90,13 +93,12 @@ def config(request):
                     f.close()
 
                 storage['team_icon'] = fn
-
             flash(u'Die Einstellungen wurden gespeichert.', True)
-            return HttpResponseRedirect(href('admin', 'config'))
     else:
         form = ConfigurationForm(initial=storage.get_many(keys))
     return {
-        'form': form
+        'form': form,
+        'team_icon_url': team_icon and href('media', team_icon) or None
     }
 
 
@@ -670,7 +672,14 @@ def user_edit(request, username):
                 user.delete_avatar()
 
             if data['avatar']:
-                user.save_avatar(data['avatar'])
+                avatar_resized = user.save_avatar(data['avatar'])
+                if avatar_resized:
+                    ava_mh, ava_mw = storage.get_many(('max_avatar_height',
+                        'max_avatar_width')).itervalues()
+                    flash(u'Der von dir hochgeladene Avatar wurde auf '
+                          u'%sx%s Pixel skaliert, dadurch können '
+                          u'Qualitätseinbußen auftreten. Bitte beachte dies.'
+                          % (ava_mh, ava_mw))
 
             if data['new_password']:
                 user.set_password(data['new_password'])
@@ -711,6 +720,18 @@ def user_edit(request, username):
             user.groups.remove(*groups_not_joined)
             user.groups.add(*groups_joined)
 
+            if user._primary_group:
+                oprimary = user._primary_group.name
+            else:
+                oprimary = ""
+
+            if oprimary != data['primary_group']:
+                try:
+                    primary = Group.objects.get(name=data['primary_group'])
+                except Group.DoesNotExist:
+                    primary = None
+            user._primary_group = primary
+
             # save the user object back to the database as well as other
             # database changes
             user.save()
@@ -725,7 +746,12 @@ def user_edit(request, username):
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     else:
-        form = EditUserForm(initial=model_to_dict(user))
+        initial = model_to_dict(user)
+        if initial['_primary_group']:
+            initial.update({
+                'primary_group': Group.objects.get(id=initial['_primary_group']).name
+            })
+        form = EditUserForm(initial=initial)
 
     # collect forum privileges
     forum_privileges = []
@@ -844,12 +870,43 @@ def group_edit(request, name=None):
             return HttpResponseRedirect(href('admin', 'groups'))
         form_class = EditGroupForm
 
+    icon_mh, icon_mw = storage.get_many(('team_icon_height',
+                                         'team_icon_width')).itervalues()
+
     if request.method == 'POST':
-        form = form_class(request.POST)
+        form = form_class(request.POST, request.FILES)
         _add_choices(form)
         if form.is_valid():
             data = form.cleaned_data
             group.name = data['name']
+
+            if data['delete_icon']:
+                group.delete_icon()
+
+            if data['icon'] and not data['import_icon_from_global']:
+                icon_resized = group.save_icon(data['icon'])
+                if icon_resized:
+                    flash(u'Das von dir hochgeladene Icon wurde auf '
+                          u'%sx%s Pixel skaliert, dadurch können '
+                          u'Qualitätseinbußen auftreten. Bitte beachte dies.'
+                          % (icon_mh, icon_mw))
+
+            if data['import_icon_from_global']:
+                group.delete_icon()
+
+                icon_path = 'portal/team_icons/team_%s.%s' % (group.name,
+                            storage['team_icon'].split('.')[-1])
+                if storage['team_icon']:
+                    global_icon = open(path.join(settings.MEDIA_ROOT, storage['team_icon']))
+                    icon_fo = open(path.join(settings.MEDIA_ROOT, icon_path), 'w')
+                    try:
+                        icon_fo.write(global_icon.read())
+                        group.icon = icon_path
+                    finally:
+                        global_icon.close()
+                        icon_fo.close()
+                else:
+                    flash(u'Es wurde noch kein globales Team-Icon definiert', False)
 
             # permissions
             permissions = 0
@@ -922,6 +979,9 @@ def group_edit(request, name=None):
         'group_name': '' or not new and group.name,
         'form': form,
         'is_new': new,
+        'group': group,
+        'team_icon_height': icon_mh,
+        'team_icon_width': icon_mw,
     }
 
 

@@ -94,6 +94,52 @@ class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
     _default_group = None
     permissions = models.IntegerField('Berechtigungen', default=0)
+    icon = models.ImageField('Teamicon', upload_to='portal/team_icons',
+                             blank=True, null=True)
+
+    @property
+    def icon_url(self):
+        if not self.icon:
+            return None
+        return self.get_icon_url()
+
+    def save_icon(self, img):
+        """
+        Save `img` to the file system.
+
+        :return: a boolean if the `img` was resized or not.
+        """
+        data = img.read()
+        image = Image.open(StringIO(data))
+        fn = 'portal/team_icons/team_%s.%s' % (self.name, image.format.lower())
+        image_path = path.join(settings.MEDIA_ROOT, fn)
+        # clear the file system
+        self.delete_icon()
+
+        std = storage.get_many(('team_icon_height', 'team_icon_width'))
+        max_size = (int(std['team_icon_height']),
+                    int(std['team_icon_width']))
+        resized = False
+        if image.size > max_size:
+            image = image.resize(max_size)
+            image.save(image_path)
+            resized = True
+        else:
+            f = open(image_path, 'wb')
+            try:
+                f.write(data)
+            finally:
+                f.close()
+        self.icon = fn
+
+        return resized
+
+    def delete_icon(self):
+        """Deletes the icon from the file system."""
+        fn = self.get_icon_filename()
+        if path.exists(fn):
+            os.remove(fn)
+        self.icon = None
 
     def get_absolute_url(self):
         return href('portal', 'group', self.name)
@@ -220,7 +266,8 @@ class User(models.Model):
     is_active = models.BooleanField('Aktiv', default=True)
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)
     date_joined = models.DateTimeField('Anmeldedatum', default=datetime.utcnow)
-    groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True)
+    groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True,
+                                    related_name='users_set')
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
@@ -257,8 +304,14 @@ class User(models.Model):
     forum_welcome = models.TextField('Gelesene Willkommensnachrichten',
                                      blank=True)
 
-    # member title & icon
-    member_title = models.CharField('Benutzertitel', blank=True, null=True)
+    # member title
+    member_title = models.CharField('Benutzertitel', blank=True, null=True,
+                                    max_length=200)
+
+    # primary group from which the user gets some settings
+    # e.g the membericon
+    _primary_group = models.ForeignKey(Group, related_name='primary_users_set',
+                                       blank=True, null=True)
 
     def save(self):
         """
@@ -348,6 +401,13 @@ class User(models.Model):
         return bool(PERMISSION_MAPPING[name] & self.permissions)
 
     @deferred
+    def primary_group(self):
+        if self._primary_group is None:
+            # we use the first assigned group as the primary one
+            return self.groups.all()[0]
+        return self._primary_group
+
+    @deferred
     def _readstatus(self):
         return ReadStatus(self.forum_read_status)
 
@@ -380,7 +440,11 @@ class User(models.Model):
         return self.get_avatar_url()
 
     def save_avatar(self, img):
-        """Save `img` to the file system."""
+        """
+        Save `img` to the file system.
+
+        :return: boolean value if `img` was resized or not.
+        """
         data = img.read()
         image = Image.open(StringIO(data))
         fn = 'portal/avatars/avatar_user%d.%s' % (self.id,
@@ -392,9 +456,11 @@ class User(models.Model):
         std = storage.get_many(('max_avatar_height', 'max_avatar_width'))
         max_size = (int(std['max_avatar_height']),
                     int(std['max_avatar_width']))
+        resized = False
         if image.size > max_size:
             image = image.resize(max_size)
             image.save(image_path)
+            resized = True
         else:
             f = open(image_path, 'wb')
             try:
@@ -403,8 +469,10 @@ class User(models.Model):
                 f.close()
         self.avatar = fn
 
+        return resized
+
     def delete_avatar(self):
-        """Delete the avater from the file system."""
+        """Delete the avatar from the file system."""
         fn = self.get_avatar_filename()
         if path.exists(fn):
             os.remove(fn)

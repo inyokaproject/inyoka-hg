@@ -58,6 +58,11 @@
         </tr>
       </table>
     </dd>
+    <dt>{{ form.primary_group.label }}</dt>
+    <dd>
+      {{ form.primary_group }} <a href="" class="delete_primary_group">löschen</a>
+      <p class="note">{{ form.primary_group.help_text }}</p>
+    </dd>
     <dt>Privilegien</dt>
     <dd>
       {%- for id, name, checked, derived in permissions %}
@@ -147,6 +152,15 @@
     $('#id_member_title').val(value);
   });
 
+  $('select[@name="user_groups_joined"]').change(function() {
+    var field = $('select[@name="user_groups_joined"]');
+    $('input[@name="primary_group"]').val(field.find('option:selected').val());
+  });
+
+  $('a.delete_primary_group').click(function() {
+    $('input[@name="primary_group"]').val("");
+    return false;
+  });
   /* ]]> */
 </script>
 {% endblock %}

@@ -15,13 +15,23 @@
   ] %}
 
 {% block admin_content %}
-<h3>{{ title_trace[0] }}</h3>
 <form enctype="multipart/form-data" action="" method="post" id="configuration">
+  <h3>Allgemeine Einstellungen</h3>
   <dl>
-    {{ render_form(form, ['global_message', 'blocked_hosts', 'wiki_newpage_template', 'wiki_newpage_root', 'team_icon', 'max_signature_length', 'max_signature_lines'], inline=true) }}
+    {{ render_form(form, ['global_message', 'blocked_hosts', 'wiki_newpage_template', 'wiki_newpage_root'], inline=true) }}
+    {% if team_icon_url %}<dd><img class="admin_teamicon" src="{{ team_icon_url }}" alt="Team Icon" /></dd>{% endif %}
+    <dt>{{ form.team_icon.label }}</dt>
+    <dd>{{ form.team_icon }}</dd>
+  </dl>
+  <h3>Verschiedene Richtgrößen</h3>
+  <dl>
+    {{ render_form(form, ['max_signature_length', 'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
-    <dd>{{ form.max_avatar_width }} x {{ form.max_avatar_height }} Pixel
+    <dd>{{ form.max_avatar_height }} x {{ form.max_avatar_width }} Pixel
         {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
+    <dt>Maximale Team-Icon Größe</dt>
+    <dd>{{ form.team_icon_height }} x {{ form.team_icon_width }} Pixel
+        {{ form.errors.team_icon_height }} {{ form.errors.team_icon_width }}</dd>
   </dl>
   <h3>Get-Ubuntu-Link</h3>
   {{ render_form(form, ['get_ubuntu_link', 'get_ubuntu_description']) }}

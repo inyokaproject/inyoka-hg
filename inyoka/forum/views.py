@@ -269,12 +269,6 @@ def viewtopic(request, topic_slug, page=1):
         if not post.rendered_text:
             post.rendered_text = post.render_text(force_existing=True)
             session.commit()
-    team_icon = storage['team_icon']
-
-    if team_icon:
-        team_icon = href('media', storage['team_icon'])
-    else:
-        team_icon = None
 
     can_mod = check_privilege(privileges, 'moderate')
     can_reply = check_privilege(privileges, 'reply')
@@ -291,8 +285,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_moderate':      can_mod,
         'can_edit':          lambda post: can_mod or (post.author_id ==
                                           request.user.id and can_reply),
-        'can_reply':         can_reply,
-        'team_icon_url':     team_icon
+        'can_reply':         can_reply
     }
 
 
