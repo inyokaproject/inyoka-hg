@@ -141,7 +141,8 @@ class PrivateMessage(models.Model):
 
     @property
     def rendered_text(self):
-        return parse(self.text).render(current_request, 'html')
+        context = RenderContext(current_request)
+        return parse(self.text).render(context, 'html')
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
