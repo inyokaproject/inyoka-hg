@@ -174,16 +174,16 @@ _table_align_re = re.compile(r'''(?x)
 
 
 property_list = [
-    'border', 'clear', 'float', 'font*', 'height', 'line-height',
-    'margin*', 'max-height', 'max-width', 'min-height', 'min-width',
-    'outline*', 'overflow', 'padding*', 'position', 'quotes', 'size',
-    'table-layout', 'text-*', 'vertical-align', 'width',
+    'border', 'clear', 'float', 'font.*?', 'height', 'line-height',
+    'margin.*?', 'max-height', 'max-width', 'min-height', 'min-width',
+    'outline.*?', 'overflow', 'padding.*?', 'position', 'quotes', 'size',
+    'table-layout', 'text-.*?', 'vertical-align', 'width',
     'background-color'
 ]
 
 _url_pattern = (
     # allowed urls with netloc
-    r'(?:(?:https?|ftps?|file)://)'
+    r'(?:(?:https?|ftps?|)://)'
 )
 _url_re = re.compile(r'url\(.*?\)')
 _allowed_url_re = re.compile(r'url\((%s[^\s\'"]+\S)\)' % _url_pattern)
