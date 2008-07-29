@@ -267,7 +267,7 @@ class User(models.Model):
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)
     date_joined = models.DateTimeField('Anmeldedatum', default=datetime.utcnow)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True,
-                                    related_name='users_set')
+                                    related_name='user_set')
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
