@@ -419,6 +419,10 @@ div.preview_wrapper h2.title {
     color: #673B1A;
 }
 
+input[name="cancel"] {
+    font-weight: normal;
+}
+
 /* mini pagination */
 span.pagination .pageselect, div.pagination .ellipsis {
     background-color: white;
