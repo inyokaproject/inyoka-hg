@@ -33,9 +33,27 @@
 
 {% block admin_content %}
 <h3>Gruppenkonfiguration</h3>
-<form action="" method="post">
+<form enctype="multipart/form-data" action="" method="post">
   <dl>
-    {{ render_form(form, ['name', 'permissions'], inline=true) }}
+    {{ render_form(form, ['name'], inline=true) }}
+    <dl>
+      <dt>Team-Icon:</dt>
+      {% if group.icon %}<dd><img class="admin_teamicon" src="{{ group.icon_url }}" alt="Team Icon" /></dd>{% endif %}
+      <dd>{{ form.icon }}</dd>
+      {%- if team_icon_height >= 0 and team_icon_width >= 0 %}
+      <dd class="note">
+        Beachte, dass das Team Icon maximal <strong>{{ team_icon_width }} x {{ team_icon_height }}</strong> Pixel groß sein darf.<br />
+        Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
+        Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
+      </dd>
+      {%- endif %}
+      <dd>{{ form.import_icon_from_global }} <label for="id_import_icon_from_global">Globales Team-Icon importieren</label></dd>
+      {%- if group.icon %}
+      <dd>{{ form.delete_icon }} <label for="id_delete_icon">Team Icon löschen</label></dd>
+      {%- endif %}
+      {%- if form.errors.avatar or form.errors.delete_avatar %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
+    </dl>
+    {{ render_form(form, ['permissions']) }}
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
   </dl>

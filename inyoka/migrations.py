@@ -81,7 +81,8 @@ def select_blocks(query, block_size=1000, start_with=0, max_fails=10):
 def create_initial_revision(m):
     """
     Created the initial revision for the applications and create the
-    migration information table as well as the anonymous user.
+    migration information table as well as the anonymous user and
+    the default group for registered users.
     """
     execute_script(m.engine, 'initial.sql')
 
@@ -454,7 +455,7 @@ def add_position_column(m):
 def add_permissions(m):
     m.engine.execute('''
         alter table portal_user
-            add column _permissions integer  not null default 0,
+            add column _permissions integer not null default 0,
             drop column is_ikhaya_writer,
             drop column is_manager;
 
@@ -483,11 +484,13 @@ def add_new_page_root_storage(m):
         'wiki_newpage_root':        'Baustelle'
     })
 
+
 def add_ikhaya_comment_deleted_column(m):
     m.engine.execute('''
         alter table ikhaya_comment
             add column deleted bool not null default 0;
     ''')
+
 
 def change_forum_post_position_column(m):
     m.engine.execute('''
@@ -495,17 +498,58 @@ def change_forum_post_position_column(m):
             modify column position integer not null default 0;
     ''')
 
+
 def add_forum_atime_column(m):
     m.engine.execute('''
         alter table forum_post
             add column atime datetime null default null;
     ''')
 
+
 def add_wiki_text_html_render_instructions(m):
     m.engine.execute('''
         alter table wiki_text
             add column html_render_instructions longtext default null;
     ''')
+
+
+def new_team_icon_system(m):
+    """
+    This migration is used to integrate a new team icon system.
+
+    It adds a new column `_primary_group_id` to the `portal_user` table
+    that references to the primary group of an user so we can add
+    a team icon to users with various groups as well.
+    Since the `portal_group` table got a new `icon` column every
+    team can have it's own team icon now.
+    """
+    # add the new _primary_group_id column to the portal_user table.
+    m.engine.execute('''
+        begin;
+        alter table portal_user
+            add column _primary_group_id integer null after _permissions;
+        commit;
+        alter table portal_user
+            add foreign key (_primary_group_id) references portal_group(id);
+    ''')
+
+    # ensure `MEDIA/portal/teamicons` exists.
+    media_path = path.join(settings.MEDIA_ROOT, 'portal', 'team_icons')
+    if not exists(media_path):
+        os.mkdir(media_path)
+
+    # set new storage items
+    _set_storage(m, {
+        'team_icon_height': 28,
+        'team_icon_width': 38,
+    })
+
+    # add icon column to group
+    m.engine.execute('''
+        alter table portal_group
+            add column icon varchar(100) null default null after permissions;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -519,6 +563,7 @@ MIGRATIONS = [
     add_launchpad_nick, add_indices, update_post_table, add_position_column,
     add_permissions, add_post_pub_date_index, drop_comment_title_column,
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
-    change_forum_post_position_column, add_wiki_text_html_render_instructions
+    change_forum_post_position_column, add_wiki_text_html_render_instructions,
+    new_team_icon_system,
     # add_forum_atime_column
 ]

@@ -277,6 +277,7 @@ def viewtopic(request, topic_slug, page=1):
                 session.commit()
             except OperationalError:
                 pass
+
     team_icon = storage['team_icon']
 
     if team_icon:

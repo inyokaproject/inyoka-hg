@@ -18,7 +18,7 @@ mkdir ./inyoka/media/wiki
 mkdir ./inyoka/media/wiki/attachments
 mkdir ./inyoka/media/portal
 mkdir ./inyoka/media/portal/avatars
-mkdir ./inyoka/media/portal/member_icons
+mkdir ./inyoka/media/portal/team_icons
 echo "Created media directories"
 
 python -c 'from inyoka.conf import settings;settings.DEBUG = True;from inyoka.utils.migrations import Migrations;from inyoka.migrations import MIGRATIONS;migrations = Migrations(MIGRATIONS);migrations.upgrade()'

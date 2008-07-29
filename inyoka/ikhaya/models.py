@@ -246,12 +246,12 @@ class Article(models.Model):
 
 class Suggestion(models.Model):
     objects = SuggestionManager()
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, related_name='suggestion_set')
     pub_date = models.DateTimeField('Datum')
     title = models.CharField(max_length=100)
     text = models.TextField()
     intro = models.TextField()
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, related_name='owned_suggestion_set')
 
     @property
     def rendered_text(self):

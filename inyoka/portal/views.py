@@ -498,7 +498,15 @@ def usercp_profile(request):
             if data['delete_avatar']:
                 user.delete_avatar()
             if data['avatar']:
-                user.save_avatar(data['avatar'])
+                avatar_resized = user.save_avatar(data['avatar'])
+                if avatar_resized:
+                    ava_mh, ava_mw = storage.get_many(('max_avatar_height',
+                        'max_avatar_width')).itervalues()
+                    flash(u'Der von dir hochgeladene Avatar wurde auf '
+                          u'%sx%s Pixel skaliert. Dadurch könnten '
+                          u'Qualitätseinbußen aufgetreten sein. '
+                          u'Bitte beachte dies.'
+                          % (ava_mh, ava_mw))
             for key in ('show_email', 'show_jabber'):
                 user.settings[key] = data[key]
             user.save()

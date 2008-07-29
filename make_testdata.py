@@ -129,9 +129,7 @@ def sentences(min=5, max=35, markup=True):
     s_list = []
     nls = ['\n\n', '\n\n\n\n', '\n', '']
     for i in xrange(randint(min, max)):
-        s_list.append(
-            words(markup) + choice(nls)
-        )
+        s_list.append(words(markup) + choice(nls))
     return ' '.join(s_list)
 
 
@@ -284,3 +282,4 @@ if __name__ == '__main__':
     make_wiki()
     make_ikhaya()
     make_forum()
+    print "created test data"

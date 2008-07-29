@@ -28,7 +28,8 @@ class ConfigurationForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 3}), required=False,
         help_text = u'Benutzer können keine E-Mail-Adressen von diesen Hosts '
                     u'zum Registrieren verwenden.')
-    team_icon = forms.ImageField(label=u'Teamicon', required=False)
+    team_icon = forms.ImageField(label=u'Globales Teamicon', required=False,
+        help_text=u'Beachte bitte untenstehende Angaben zu der Maximalgröße')
     max_avatar_width = forms.IntegerField(min_value=1)
     max_avatar_height = forms.IntegerField(min_value=1)
     max_signature_length = forms.IntegerField(min_value=1,
@@ -43,6 +44,8 @@ class ConfigurationForm(forms.Form):
         label=u'Standardtext beim Anlegen neuer Wiki-Seiten')
     wiki_newpage_root = forms.CharField(required=False,
         label=u'Unter welcher Wikiseite sollen neue Seiten erstellt werden?')
+    team_icon_width = forms.IntegerField(min_value=1, required=False)
+    team_icon_height = forms.IntegerField(min_value=1, required=False)
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))
@@ -242,6 +245,10 @@ class EditUserForm(forms.Form):
 
     delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
 
+    primary_group = forms.CharField(label=u'Primäre Gruppe', required=False,
+        widget=forms.TextInput({'readonly': 'readonly'}),
+        help_text=u'Wird unter anderem für das anzeigen des Team-Icons verwendet')
+
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
         if gpgkey.startswith('0X'):
@@ -272,6 +279,10 @@ class EditGroupForm(forms.Form):
         required=False)
     forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
                                                  required=False)
+    icon = forms.ImageField(label=u'Team-Icon', required=False)
+    delete_icon = forms.BooleanField(label=u'Team-Icon löschen', required=False)
+    import_icon_from_global = forms.BooleanField(label=u'Globales Team-Icon benutzen',
+        required=False)
 
 
 class CreateGroupForm(EditGroupForm):

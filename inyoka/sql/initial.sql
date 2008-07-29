@@ -409,6 +409,14 @@ CREATE TABLE `portal_group` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+
+LOCK TABLES `portal_group` WRITE;
+/*!40000 ALTER TABLE `portal_group` DISABLE KEYS */;
+INSERT INTO `portal_group` VALUES (1, 'Registriert', 0);
+/*!40000 ALTER TABLE `portal_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
 --
 -- Table structure for table `portal_privatemessage`
 --

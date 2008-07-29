@@ -35,7 +35,7 @@ from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table, post_revision_table, \
-        forum_welcomemessage_table
+        forum_welcomemessage_table, user_group_table
 from inyoka.forum.acl import filter_invisible
 
 
@@ -1084,17 +1084,27 @@ class SAUser(object):
     def settings(self):
         return cPickle.loads(str(self._settings))
 
+    @deferred
+    def primary_group(self):
+        if self._primary_group_id is None:
+            # we use the first assigned group as the primary one
+            return self.groups.all()[0]
+        return SAGroup.query.get(self._primary_group_id)
+
     def __unicode__(self):
         return self.username
 
 
 class SAGroup(object):
 
+    @property
+    def icon_url(self):
+        if not self.icon:
+            return None
+        return href('media', self.icon)
+
     def get_absolute_url(self):
         return href('portal', 'groups', self.name)
-
-    def __unicode__(self):
-        return self.name
 
     def __unicode__(self):
         return self.name
@@ -1166,7 +1176,10 @@ class ReadStatus(object):
         return cPickle.dumps(self.data)
 
 
-dbsession.mapper(SAUser, user_table)
+dbsession.mapper(SAUser, user_table, properties={
+    'groups': relation(SAGroup, secondary=user_group_table,
+                       lazy='dynamic')
+})
 dbsession.mapper(SAGroup, group_table)
 dbsession.mapper(Privilege, privilege_table, properties={
     'forum': relation(Forum)
