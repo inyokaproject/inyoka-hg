@@ -173,6 +173,24 @@ _table_align_re = re.compile(r'''(?x)
 ''')
 
 
+property_list = [
+    'border', 'clear', 'float', 'font*', 'height', 'line-height',
+    'margin*', 'max-height', 'max-width', 'min-height', 'min-width',
+    'outline*', 'overflow', 'padding*', 'position', 'quotes', 'size',
+    'table-layout', 'text-*', 'vertical-align', 'width'
+]
+
+_url_pattern = (
+    # allowed urls with netloc
+    r'(?:(?:https?|ftps?|file)://)'
+)
+_url_re = re.compile(r'url\(.*?\)')
+_allowed_url_re = re.compile(r'url\((%s[^\s\'"]+\S)\)' % _url_pattern)
+_allowed_properties_re = re.compile(r'|'.join(property_list))
+
+
+
+
 def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
           transformers=None):
     """Parse markup into a node."""
@@ -327,6 +345,28 @@ def _parse_align_args(args, kwargs):
                             break
 
     return attributes, args_left
+
+
+
+def filter_style(css):
+    if css is None:
+        return None
+    items = [x.strip() for x in css.split(';')]
+    tree = {}
+    for item in filter(lambda x: x and x, items):
+        property, value = item.split(':', 1)
+        property, value = property.strip(), value.strip()
+        if not _allowed_properties_re.match(property):
+            continue
+        # yet not implemented :D
+        #elif not _allowed_url_re.match(value):
+        #    continue
+        #else:
+        #    if not is_safe_domain(_allowed_url_re.match(value).groups()[0]):
+        #        continue
+
+        tree[property] = value
+    return u'; '.join((u': '.join((x, y)) for x, y in tree.items()))
 
 
 class StackExhaused(ValueError):
@@ -982,14 +1022,14 @@ class Parser(object):
                 attrs, args = _parse_align_args(args, kwargs)
                 if cell_type == 'tablefirst':
                     table.class_ = attrs.get('tableclass') or None
-                    table.style = attrs.get('tablestyle')
+                    table.style = filter_style(attrs.get('tablestyle')) or None
                 if cell_type in ('tablefirst', 'rowfirst'):
                     row.class_ = attrs.get('rowclass') or None
                     if not row.class_:
                         row.class_ = u' '.join(args) or None
-                    row.style = attrs.get('rowstyle')
+                    row.style = filter_style(attrs.get('rowstyle')) or None
                 cell.class_ = attrs.get('cellclass') or None
-                cell.style = attrs.get('cellstyle') or None
+                cell.style = filter_style(attrs.get('cellstyle')) or None
                 cell.colspan = attrs.get('colspan', 0)
                 cell.rowspan = attrs.get('rowspan', 0)
                 cell.align = attrs.get('align')
