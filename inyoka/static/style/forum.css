@@ -208,7 +208,7 @@ table.topic td.author img.avatar {
 table.topic td.author img.teamicon {
   position: relative;
   left: 5px;
-  top: -17px;
+  margin-top: -17px;
   float: right;
 }
 
@@ -522,3 +522,4 @@ div.code pre {
     padding: 0 0 0.2em 0;
     font-size: 0.9em;
 }
+
