@@ -35,9 +35,9 @@ def highlight_code(code, lang=None, filename=None, mimetype=None):
                     break
                 except ClassNotFound: continue
 
-        if lexer is None: lexer = TextLexer
+        if lexer is None: lexer = TextLexer(stripnl=False)
     except LookupError:
-        lexer = TextLexer
+        lexer = TextLexer(stripnl=False)
     return highlight(code, lexer, _pygments_formatter)
 
 
