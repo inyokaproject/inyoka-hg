@@ -64,12 +64,16 @@
   <div class="articles">
     {%- for article in ikhaya_latest %}
     <div class="article" onclick="document.location.href='{{ article|url }}'">
-      <div class="meta">{{ article.pub_date|datetimeformat }}<br /><span class="comments">
-        {%- if article.comment_count == 0 %} Keine Kommentare
-        {%- elif article.comment_count == 1 %} Ein Kommentar
-        {%- else %} {{ article.comment_count|hnumber|capitalize }} Kommentare
-        {%- endif %}  
-      </span></div>
+      <div class="meta">{{ article.pub_date|datetimeformat }}
+        {%- if article.comments_enabled %}
+          <br /><span class="comments">
+          {%- if article.comment_count == 0 %} Keine Kommentare
+          {%- elif article.comment_count == 1 %} Ein Kommentar
+          {%- else %} {{ article.comment_count|hnumber|capitalize }} Kommentare
+          {%- endif %}  
+          </span>
+        {%- endif %}
+      </div>
       <a href="{{ article|url }}">{{ article.subject|e }}</a>
       <p>
         {{ article.simplified_intro|truncate(250, true)|e }}
