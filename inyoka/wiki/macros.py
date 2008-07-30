@@ -765,7 +765,7 @@ class Picture(Macro):
             return img
         else:
             if context.wiki_page:
-                target = join_pagename(context.wiki_page.name, self.target)
+                target = join_pagename(context.wiki_page, self.target)
             source = href('wiki', '_image',
                 target=target,
                 width=self.width,

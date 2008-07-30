@@ -218,18 +218,18 @@
       {{ topic_actions() }}<br />
       {% if can_moderate %}
       <span class="linklist">
-        <a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> | 
-        <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
+        <a href="{{ topic|url('split') }}" class="action action_split">aufteilen</a> | 
+        <a href="{{ topic|url('move') }}" class="action action_move">verschieben</a> | 
         {%- if topic.locked %}
-        <a href="{{ topic|url('unlock') }}" class="action action_unlock adminlink">entsperren</a> | 
+        <a href="{{ topic|url('unlock') }}" class="action action_unlock">entsperren</a> | 
         {%- else %}
-        <a href="{{ topic|url('lock') }}" class="action action_lock adminlink">sperren</a> |
+        <a href="{{ topic|url('lock') }}" class="action action_lock">sperren</a> |
         {%- endif %}
         {%- if topic.hidden %}
-        <a href="{{ topic|url('restore') }}" class="action action_restore adminlink">wiederherstellen</a> |
-        <a href="{{ topic|url('delete') }}" class="action action_delete adminlink">löschen</a>
+        <a href="{{ topic|url('restore') }}" class="action action_restore">wiederherstellen</a> |
+        <a href="{{ topic|url('delete') }}" class="action action_delete">löschen</a>
         {%- else %}
-        <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a> 
+        <a href="{{ topic|url('hide') }}" class="action action_hide">verbergen</a> 
         {%- endif %}
       </span>
       {% endif %}
