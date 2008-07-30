@@ -63,8 +63,13 @@
         <td><a href="{{ entry.message.author|url }}">
           {{ entry.message.author|e }}</a></td>
         <td>
-          <a href="{{ entry.message.recipients[0]|url }}">
-            {{ entry.message.recipients[0]|e }}</a>
+          {% if entry.message.recipients|length == 0 %}
+            <a href="{{ entry.message.author|url }}">
+              {{ entry.message.author[0]|e }}</a>
+          {% else %}
+            <a href="{{ entry.message.recipients[0]|url }}">
+              {{ entry.message.recipients[0]|e }}</a>
+          {% endif %}
           {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
         <td>{{ entry.message.pub_date|datetimeformat }}</td>
         <td class="actions">
