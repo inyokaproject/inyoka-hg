@@ -24,20 +24,20 @@ def highlight_code(code, lang=None, filename=None, mimetype=None):
     """Highlight a block using pygments to HTML."""
     try:
         lexer = None
-        if lang is not None:
-            try: lexer = get_lexer_by_name(lang, stripnl=False)
-            except ClassNotFound: pass
-        elif filename is not None and lexer is None:
-            try: lexer = get_lexer_for_filename(filename, stripnl=False)
-            except ClassNotFound: pass
-        elif mimetype is not None and lexer is None:
-            try: lexer = get_lexer_for_mimetype(mimetype, stripnl=False)
-            except ClassNotFound: pass
-        else:
-            return
-        if lexer is None: return
+        guessers = [(lang, get_lexer_by_name),
+            (filename, get_lexer_for_filename),
+            (mimetype, get_lexer_for_mimetype)
+        ]
+        for var, guesser in guessers:
+            if var is not None:
+                try:
+                    lexer = guesser(var, stripnl=False)
+                    break
+                except ClassNotFound: continue
+
+        if lexer is None: return code
     except LookupError:
-        return
+        return code
     return highlight(code, lexer, _pygments_formatter)
 
 
