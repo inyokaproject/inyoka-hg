@@ -76,10 +76,18 @@
       </tr>
       {%- else %}
       <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+        {% if topic.author_id == USER.id %}
+        <td class="icon" style="background-color:#FFF6E0">
+        {% else %}
         <td class="icon">
+        {% endif %}
           {{ topic_icon(topic) }}
         </td>
+        {% if topic.author_id == USER.id %}
+        <td class="topic" style="background-color:#FFFBF0">
+        {% else %}
         <td class="topic">
+        {% endif %}
           <p class="topic_title">
             {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
             {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
@@ -95,10 +103,24 @@
             ]{% endif -%}
           </p>
         </td>
-        <td class="view_count">{{ topic.view_count }}</td>
-
-        <td class="post_count">{{ topic.post_count - 1 }}</td>
-        <td class="last_post">{% if topic.last_post_id %}
+        {% if topic.author_id == USER.id %}
+        <td class="view_count" style="background-color:#FFFBF0">
+        {% else %}
+        <td class="view_count">
+        {% endif %}
+         {{ topic.view_count }}</td>
+        {% if topic.author_id == USER.id %}
+        <td class="post_count" style="background-color:#FFFBF0">
+        {% else %}
+        <td class="post_count">
+        {% endif %}
+         {{ topic.post_count - 1 }}</td>
+        {% if topic.author_id == USER.id %}
+        <td class="last_post" style="background-color:#FFFBF0">
+        {% else %}
+        <td class="last_post">
+        {% endif %}
+          {% if topic.last_post_id %}
           <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
           von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
