@@ -10,7 +10,7 @@
 """
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, get_lexer_for_filename, \
-    get_lexer_for_mimetype
+    get_lexer_for_mimetype, TextLexer
 from pygments.formatters import HtmlFormatter
 from pygments.util import ClassNotFound
 from pygments.styles.friendly import FriendlyStyle
@@ -35,9 +35,9 @@ def highlight_code(code, lang=None, filename=None, mimetype=None):
                     break
                 except ClassNotFound: continue
 
-        if lexer is None: return code
+        if lexer is None: lexer = TextLexer
     except LookupError:
-        return code
+        lexer = TextLexer
     return highlight(code, lexer, _pygments_formatter)
 
 
