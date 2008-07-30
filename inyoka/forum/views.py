@@ -564,6 +564,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 send_notification(s.user, 'new_page_discussion', u'Neue Diskussion für die '
                     u'Seite „%s“ wurde eröffnet' % article.title, {
                         'username': s.user.username,
+                        'creator': request.user.username,
                         'page':     article,
                     })
                 s.notified = True
