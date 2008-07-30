@@ -178,7 +178,7 @@ property_list = [
     'margin.*?', 'max-height', 'max-width', 'min-height', 'min-width',
     'outline.*?', 'overflow', 'padding.*?', 'position', 'quotes', 'size',
     'table-layout', 'text-.*?', 'vertical-align', 'width',
-    'background-color'
+    '.*-?color'
 ]
 
 _url_pattern = (
