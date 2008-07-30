@@ -63,9 +63,9 @@
         <td><a href="{{ entry.message.author|url }}">
           {{ entry.message.author|e }}</a></td>
         <td>
-          {% if entry.message.recipients|length == 0 %}
+          {%- if entry.message.recipients|length == 0 %}
             <a href="{{ entry.message.author|url }}">
-              {{ entry.message.author[0]|e }}</a>
+              {{ entry.message.author|e }}</a>
           {% else %}
             <a href="{{ entry.message.recipients[0]|url }}">
               {{ entry.message.recipients[0]|e }}</a>
