@@ -1085,7 +1085,7 @@ class Page(models.Model):
             cache.delete('wiki/object_list')
 
     def get_absolute_url(self, action=None):
-        if action == 'edit':
+        if action in ('edit', 'subscribe', 'unsubscribe'):
             return href('wiki', self.name, action='edit')
         return href('wiki', self.name)
 
