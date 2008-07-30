@@ -29,7 +29,7 @@ import random
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
-from inyoka.wiki.parser import nodes
+from inyoka.wiki.parser import nodes, filter_style
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision
@@ -916,7 +916,7 @@ class Span(Macro):
     def __init__(self, content, class_, style):
         self.content = content
         self.class_ = class_
-        self.style = style
+        self.style = filter_style(style)
 
     def build_node(self):
         return nodes.Span(children=[nodes.Text(self.content)],

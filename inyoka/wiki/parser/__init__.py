@@ -355,9 +355,14 @@ def filter_style(css):
     items = [x.strip() for x in css.split(';')]
     tree = {}
     for item in filter(lambda x: x and x, items):
-        property, value = item.split(':', 1)
+        splitted = item.split(':', 1)
+        if len(splitted) > 1:
+            property, value = splitted
+        else:
+            # there was no css-value given so we filter that, too
+            continue
         property, value = property.strip(), value.strip()
-        if not _allowed_properties_re.match(property):
+        if not _allowed_properties_re.match(property) or not value:
             continue
         # yet not implemented :D
         #elif not _allowed_url_re.match(value):
@@ -1092,7 +1097,7 @@ class Parser(object):
             box.class_ = attrs.get('klasse')
             if not box.class_:
                 box.class_ = u' '.join(args)
-            box.style = attrs.get('style')
+            box.style = filter_style(attrs.get('style'))
             box.title = attrs.get('title')
             box.class_ = attrs.get('class')
 
