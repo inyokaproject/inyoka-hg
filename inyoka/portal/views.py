@@ -194,9 +194,11 @@ def activate(request, action='', username='', activation_key=''):
     if action == 'delete':
         if check_activation_key(user, activation_key):
             if not user.is_active:
-                user.delete()
-                flash(u'Der Benutzer „%s“ wurde gelöscht.' %
-                      escape(username), True)
+                # Is it save to delete an inactive user?
+                #user.delete()
+                #flash(u'Der Benutzer „%s“ wurde gelöscht.' %
+                #      escape(username), True)
+                falsh(u'Benutzer löschen derzeit inaktiv', False)
             else:
                 flash(u'Der Benutzer „%s“ wurde schon aktiviert.' %
                       escape(username), False)
