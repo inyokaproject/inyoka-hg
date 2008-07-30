@@ -192,8 +192,14 @@ class RecentChanges(Macro):
                            u'nicht dargestellt werden.')
             ])
 
-        max_days = int(context.request.GET.get('max_days', self.default_days))
-        page_num = int(context.request.GET.get('page', '1'))
+        def make_int(s, default):
+            try:
+                return int(s)
+            except (ValueError, TypeError):
+                return int(default)
+
+        max_days = make_int(context.request.GET.get('max_days'), self.default_days)
+        page_num = make_int(context.request.GET.get('page'), 1)
         days = []
         days_found = set()
 
