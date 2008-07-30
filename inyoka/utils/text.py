@@ -98,6 +98,10 @@ def join_pagename(name1, name2):
     >>> pagename_join('Foo', './Bar/Baz')
     'Foo/Bar/Baz'
     """
+    if not isinstance(name1, basestring):
+        name1 = name1.name
+    if not isinstance(name2, basestring):
+        name2 = name2.name
     if '/' in name2 and not _path_crop.match(name2):
         name2 = '/' + name2
     path = posixpath.join(name1, name2).lstrip('/')
