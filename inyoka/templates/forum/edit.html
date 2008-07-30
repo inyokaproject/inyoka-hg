@@ -157,10 +157,12 @@
     /* ]]> */
   </script>
   {%- if not isnewtopic %}
-  <table class="topic">
+  <table class="topic" style="position:relative; top:11px">
     <thead>
       <tr><th id="recent_posts" colspan="2">Letzte Einträge</th></tr>
     </thead>
+  </table>
+  <table class="topic">
     <tbody>
       {%- for post in posts %}
       <tr id="post-{{ post.id }}">

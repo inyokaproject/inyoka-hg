@@ -166,6 +166,7 @@ table.forum thead td p.description {
 }
 
 table.topic {
+    table-layout: fixed;
 }
 
 /* deleted post */
@@ -501,7 +502,7 @@ div.code, pre {
     max-height: 15em;
     overflow: auto;
     margin: 0.5em 0 0 0;
-    white-space: pre-wrap;
+//    white-space: pre-wrap;
 }
 
 div.code pre {
