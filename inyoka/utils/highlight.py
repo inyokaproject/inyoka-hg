@@ -12,6 +12,7 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name, get_lexer_for_filename, \
     get_lexer_for_mimetype
 from pygments.formatters import HtmlFormatter
+from pygments.util import ClassNotFound
 from pygments.styles.friendly import FriendlyStyle
 
 
