@@ -25,7 +25,10 @@ def highlight_code(code, lang=None, filename=None, mimetype=None):
         if lang is not None:
             lexer = get_lexer_by_name(lang, stripnl=False)
         elif filename is not None:
-            lexer = get_lexer_for_filename(filename, stripnl=False)
+            try:
+                lexer = get_lexer_for_filename(filename, stripnl=False)
+            except ClassNotFound:
+                pass
         elif mimetype is not None:
             lexer = get_lexer_for_mimetype(mimetype, stripnl=False)
         else:
