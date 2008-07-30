@@ -135,10 +135,27 @@
       </tr>
     {% endfor %}
     </tbody>
+    <thead>
+      <tr>
+        <td colspan="5">
+          {%- if forum.description %}
+          <p class="description">{{ forum.description|e }}</p>
+          {%- endif %}
+          {{ pagination_right }}
+          <p class="actions">
+            <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
+            {% if USER.is_authenticated %}
+              | {%- if is_subscribed %}
+              <a href="{{ forum|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a>
+              {%- else %}
+              <a href="{{ forum|url('subscribe') }}" class="action action_subscribe">abonnieren</a>
+              {%- endif %}
+              | <a href="{{ forum|url('markread') }}">als gelesen markieren</a>
+            {%- endif %}
+          </p>
+        </td>
+      </tr>
+    </thead>
   </table>
-  <div class="forum_offset_pagination">
-
-    {{ pagination_left }}
-  </div>
 {% endblock %}
 
