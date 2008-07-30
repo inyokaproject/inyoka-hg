@@ -81,7 +81,7 @@ class Bot(object):
         if isinstance(jid, basestring):
             jid = [jid]
         for jid in jid:
-            self.queue.append(xmpp.protocol.Message(jid, message))
+            self.queue.append(xmpp.protocol.Message(jid, message, typ='chat'))
             if self.debug:
                 log('Added message for %r to queue [format=raw]' % (jid,))
         return True
@@ -107,7 +107,7 @@ class Bot(object):
                     buffer.append(node.data)
         walk(node.getChildren())
 
-        msg = xmpp.protocol.Message(jid, u''.join(buffer))
+        msg = xmpp.protocol.Message(jid, u''.join(buffer), typ='chat')
         msg.addChild('html', {}, [node], xmpp.NS_XHTML_IM)
         return msg
 
