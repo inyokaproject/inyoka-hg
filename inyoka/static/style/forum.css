@@ -213,9 +213,9 @@ table.topic td.author img.teamicon {
 }
 
 table.topic td.author p.member_title {
-  line-height: 0.2em;
+  line-height: 1.2em;
   font-size: 0.6em;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 /* text column of posts */
