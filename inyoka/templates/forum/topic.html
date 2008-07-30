@@ -122,7 +122,11 @@
       {%- else %}
       {%- set attachments = post.attachments %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
+        {% if not loop.first and post.author_id == USER.id %}
+        <td class="author" style="background-color:#FFF6E0">
+        {% else %}
         <td class="author">
+        {% endif %}
           <p class="username">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
             {%- if post.author.primary_group.icon %}
@@ -145,7 +149,11 @@
           <p>Wohnort: {{ post.author.location|e }}</p>
           {%- endif %}
         </td>
+        {% if not loop.first and post.author_id == USER.id %}
+        <td class="post" style="background-color:#FFFBF0">
+        {% else %}
         <td class="post">
+        {% endif %}
           <div class="postinfo">
             <div class="linklist">
               {% if post.author_id == USER.id and loop.last %}
