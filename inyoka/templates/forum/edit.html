@@ -115,7 +115,7 @@
       {%- for poll in polls or () %}{% if not loop.first %},{% endif %}{{ poll.id }}
       {%- endfor %}">
       {{ form.errors.__all__ }}
-      <input type="submit" value="Speichern" name="send" />
+      <input type="submit" value="Veröffentlichen" name="send" />
       <input type="submit" value="Vorschau" name="preview" />
       <input type="submit" value="Abbrechen" name="cancel" />
     </p>

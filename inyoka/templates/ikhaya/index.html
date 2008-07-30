@@ -37,12 +37,14 @@
       <p class="meta">
         geschrieben von <a href="{{ article.author|url }}">{{ article.author.username|e }}</a>
         {{ article.pub_date|specificdatetimeformat(true) }}
-        in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> |
-        {%- if article.comment_count == 0 %} Keine <a href="{{ article|url }}#comments">Kommentare</a>
-        {%- elif article.comment_count == 1 %} Ein <a href="{{ article|url }}#comments">Kommentar</a>
-        {%- else %} {{ article.comment_count|hnumber|capitalize }} <a href="{{ article|url }}#comments">Kommentare</a>
+        in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a>
+        {%- if article.comments_enabled %} |
+          {%- if article.comment_count == 0 %} Keine <a href="{{ article|url }}#comments">Kommentare</a>
+          {%- elif article.comment_count == 1 %} Ein <a href="{{ article|url }}#comments">Kommentar</a>
+          {%- else %} {{ article.comment_count|hnumber|capitalize }} <a href="{{ article|url }}#comments">Kommentare</a>
+          {%- endif %}
         {%- endif %}
-        {% if USER.is_manager %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
+        {%- if USER.can('article_edit') %} | <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}" class="adminlink">bearbeiten</a>{% endif %}
       </p>
     </li>
     {%- endfor %}

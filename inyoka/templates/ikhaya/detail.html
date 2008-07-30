@@ -35,30 +35,30 @@
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-      {% if USER.can('article_edit') %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}">editieren</a>{% endif %}
+      {% if USER.can('article_edit') %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
-    <a name="comments"></a>
-    <ul class="comments">
-      {%- for comment in comments %}
-      <li class="comment" id="comment_{{ loop.index }}">
-        <div class="counter">{{ loop.index }}</div>
-        <div class="comment">
-          von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
-          {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
-            {%- if USER.can('comment_edit') %}
-            <a href="{{ article|url }}?moderate={{ comment.id }}#new_comment">Moderieren</a>
-            {% endif %}
-          {%- endif %}
-          {{ comment.rendered_text }}
-        </div>
-      </li>
-      {%- else %}
-      <li>
-        Es wurde noch kein Kommentar geschrieben.
-      </li>  
-      {%- endfor %}
-    </ul>
     {%- if article.comments_enabled %}
+      <a name="comments"></a>
+      <ul class="comments">
+        {%- for comment in comments %}
+        <li class="comment" id="comment_{{ loop.index }}">
+          <div class="counter">{{ loop.index }}</div>
+          <div class="comment">
+            von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
+            {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
+              {%- if USER.can('comment_edit') %}
+              <a href="{{ article|url }}?moderate={{ comment.id }}#new_comment" class="adminlink">Moderieren</a>
+              {% endif %}
+            {%- endif %}
+            {{ comment.rendered_text }}
+          </div>
+        </li>
+        {%- else %}
+        <li>
+          Es wurde noch kein Kommentar geschrieben.
+        </li>  
+        {%- endfor %}
+      </ul>
       {%- if USER.is_authenticated %}
       <form action="{{ article|url }}#new_comment" method="post" id="new_comment">
         {{ render_form(form, ['text']) }}
@@ -105,8 +105,6 @@
         /* ]]> */
       </script>
       {%- endif %}
-    {%- else %}
-      <h4>Zu diesem Artikel sind keine Kommentare erlaubt.</h4>
     {%- endif %}
   </div>
 {% endblock %}
