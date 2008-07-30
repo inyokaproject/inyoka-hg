@@ -1097,7 +1097,7 @@ class Parser(object):
             box.class_ = attrs.get('klasse')
             if not box.class_:
                 box.class_ = u' '.join(args)
-            box.style = filter_style(attrs.get('style'))
+            box.style = filter_style(attrs.get('style')) or None
             box.title = attrs.get('title')
             box.class_ = attrs.get('class')
 

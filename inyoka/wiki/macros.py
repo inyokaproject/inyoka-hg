@@ -916,7 +916,7 @@ class Span(Macro):
     def __init__(self, content, class_, style):
         self.content = content
         self.class_ = class_
-        self.style = filter_style(style)
+        self.style = filter_style(style) or None
 
     def build_node(self):
         return nodes.Span(children=[nodes.Text(self.content)],
