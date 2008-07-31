@@ -17,6 +17,7 @@
 import re
 import sys
 import feedparser
+import _mysql_exceptions
 from time import time
 from datetime import datetime
 from inyoka.conf import settings
@@ -59,7 +60,7 @@ def sync():
             # if none is available we skip the entry.
             guid = entry.get('id') or entry.get('link')
             if not guid:
-                debug('no guid found, next one')
+                debug('no guid found, skipping')
                 continue
 
             # if an entry for this guid exists already we skip the entry
@@ -135,7 +136,11 @@ def sync():
             entry.updated = updated
             entry.author = author
             entry.author_homepage = author_homepage
-            entry.save()
+            try:
+                entry.save()
+            except _mysql_exceptions.Warning, e:
+                if not e.args[0].startswith('Data truncated '):
+                    raise
             debug('synced entry %r' % guid)
         blog.last_sync = datetime.utcnow()
         blog.save()
