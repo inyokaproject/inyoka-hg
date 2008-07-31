@@ -198,7 +198,7 @@ def activate(request, action='', username='', activation_key=''):
                 #user.delete()
                 #flash(u'Der Benutzer „%s“ wurde gelöscht.' %
                 #      escape(username), True)
-                falsh(u'Benutzer löschen derzeit inaktiv', False)
+                flash(u'Benutzer löschen derzeit inaktiv', False)
             else:
                 flash(u'Der Benutzer „%s“ wurde schon aktiviert.' %
                       escape(username), False)
