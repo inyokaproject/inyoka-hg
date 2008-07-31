@@ -90,6 +90,7 @@
             .append(output);
 
           $('form input[@name="preview"]').click(function() {
+            $('body, input, textarea').css('cursor', 'progress');
             preview.hide();
             $.post('/?__service__=wiki.render_preview', {
               text: editor.val()
@@ -97,6 +98,7 @@
               output.html(data);
               makeCommentLinks(output);
               preview.slideDown('fast');
+              $('body, input, textarea').css('cursor', 'auto');
             });
             return false;
           }).parent().parent().parent().append(preview);
