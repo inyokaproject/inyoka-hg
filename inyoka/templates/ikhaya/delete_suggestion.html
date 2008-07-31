@@ -11,7 +11,7 @@
 -#}
 
 
-<form action="{{ href('ikhaya', 'suggestions', delete=s.id) }}" method="post">
+<form action="{{ href('ikhaya', 'suggestions', 'delete', s.id) }}" method="post">
   <p>Begründung für den Autor des Vorschlags:</p>
   <p><textarea name="note"></textarea></p>
   <p class="note">Lasse dieses Feld leer, wenn der Vorschlag ohne Begründung gelöscht werden soll.</p>

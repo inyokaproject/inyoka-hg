@@ -201,29 +201,33 @@ def suggest(request):
 def suggestionlist(request):
     """Get a list of all reported topics"""
     suggestions = Suggestion.objects.all()
-    if 'delete' in request.GET:
-        if request.method == 'POST':
-            if not 'cancel' in request.POST:
-                s = Suggestion.objects.get(id=request.GET['delete'])
-                if request.POST.get('note'):
-                    args = {
-                        'title':    s.title,
-                        'username': request.user.username,
-                        'note':     request.POST['note']
-                    }
-                    send_notification(s.author, u'suggestion_rejected',
-                                      u'Ikhaya-Vorschlag abgelehnt', args)
-                cache.delete('ikhaya/suggestion_count')
-                s.delete()
-                flash(u'Der Vorschlag wurde gelöscht.', True)
-            else:
-                flash(u'Der Vorschlag wurde nicht gelöscht.')
-        else:
-            flash(render_template('ikhaya/delete_suggestion.html',
-                  {'s': Suggestion.objects.get(id=request.GET['delete'])}))
     return {
         'suggestions': list(suggestions)
     }
+
+@require_permission('article_edit')
+def suggestion_delete(request, suggestion):
+    if request.method == 'POST':
+        if not 'cancel' in request.POST:
+            s = Suggestion.objects.get(id=suggestion)
+            if request.POST.get('note'):
+                args = {
+                    'title':    s.title,
+                    'username': request.user.username,
+                    'note':     request.POST['note']
+                }
+                send_notification(s.author, u'suggestion_rejected',
+                                  u'Ikhaya-Vorschlag abgelehnt', args)
+            cache.delete('ikhaya/suggestion_count')
+            s.delete()
+            flash(u'Der Vorschlag wurde gelöscht.', True)
+        else:
+            flash(u'Der Vorschlag wurde nicht gelöscht.')
+        return HttpResponseRedirect(href('ikhaya', 'suggestions'))
+    else:
+        flash(render_template('ikhaya/delete_suggestion.html',
+              {'s': Suggestion.objects.get(id=suggestion)}))
+        return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
 def suggestion_assign_to(request, suggestion, username):
     suggestion = Suggestion.objects.get(id=suggestion)
