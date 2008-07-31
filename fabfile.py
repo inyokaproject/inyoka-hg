@@ -49,4 +49,3 @@ def migrate():
     return
     require('fab_hosts', provided_by = [test, staging, production])
     run('source ~/virtualenv/bin/activate; cd virtualenv/inyoka; make migrate')
-
