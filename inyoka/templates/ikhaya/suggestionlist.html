@@ -44,7 +44,7 @@
               {%- else %}
               </span><strong>{{ USER.username|e }}</strong> kümmert sich um diesen Vorschlag<span class="linklist"> |
               {%- endif %}
-              <a href="?delete={{ suggestion.id }}">Löschen</a> |
+              <a href="{{ href('ikhaya', 'suggestions/delete', suggestion.id) }}">Löschen</a> |
               <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a> |
               <a href="{{ href('portal', 'privmsg', 'new', reply_to='suggestion:%d' % suggestion.id) }}">PN schreiben</a>
             </span>
