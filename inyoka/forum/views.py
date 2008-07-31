@@ -903,7 +903,8 @@ def splittopic(request, topic_slug):
                     title=data['title'],
                     forum=data['forum'],
                     slug=None,
-                    post_count=0
+                    post_count=0,
+                    author_id=posts[0].author_id
                 )
                 new_topic.forum.topic_count += 1
                 session.flush([new_topic])
@@ -1047,6 +1048,7 @@ def restore_topic(request, topic_slug):
     session.commit()
     flash(u'Das Thema „%s“ wurde wieder sichtbar gemacht.' % topic.title,
           success=True)
+    topic.forum.invalidate_topic_cache()
     return HttpResponseRedirect(url_for(topic))
 
 
