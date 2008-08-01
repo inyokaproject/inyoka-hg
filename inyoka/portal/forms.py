@@ -133,7 +133,8 @@ class RegisterForm(forms.Form):
         Validates if the required field `email` contains
         a non existing mail address.
         """
-        if 'email' in self.cleaned_data:
+        data = self.cleaned_data
+        if 'email' in data and data['email'] is not None:
             try:
                 user = User.objects.get(email__iexact=self.cleaned_data['email'])
             except User.DoesNotExist:
