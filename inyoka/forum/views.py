@@ -442,7 +442,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         elif 'delete_poll' in request.POST:
             poll = Poll.query.filter_by(id=request.POST['delete_poll'],
                 topic=topic).first()
-            if poll:
+            if poll is not None:
                 flash(u'Die Umfrage "%s" wurde gelöscht' % poll.question)
                 topic.has_poll = bool(session.execute(select([1],
                     (Poll.topic_id == topic.id) & (Poll.id != poll.id)) \
