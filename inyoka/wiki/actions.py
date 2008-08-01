@@ -213,66 +213,28 @@ def do_revert(request, name):
 
 @require_privilege('edit')
 @does_not_exist_is_404
-def do_move(request, name):
-    """Move the most recent revision."""
-    page = Page.objects.get_by_name(name, raise_on_deleted=True)
-    new_name = request.GET.get('page_name') or page.name
-    if request.method == 'POST':
-        new_name = normalize_pagename(request.POST.get('new_name', ''))
-        if 'cancel' in request.POST:
-            flash(u'Verschieben abgebrochen.')
-        elif not new_name:
-            flash(u'Kein Seitenname eingegeben.', success=False)
-        else:
-            try:
-                Page.objects.get_by_name(new_name)
-            except Page.DoesNotExist:
-                original_text = page.rev.text
-                page.edit('# X-Redirect: %s\n' % new_name,
-                          note='Umbenannt nach %s' % new_name,
-                          remote_addr=request.META.get('REMOTE_ADDR'),
-                          user=request.user)
-                new_page = Page.objects.create(new_name, original_text,
-                           request.user, note='Umbenannt von %s' % page.name,
-                           remote_addr=request.META.get('REMOTE_ADDR'))
-                flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
-                return HttpResponseRedirect(url_for(new_page))
-            else:
-                flash(u'Eine Seite mit diesem Namen existiert bereits.')
-                rename_url=href('wiki', name, action='move',
-                                page_name=new_name)
-                return HttpResponseRedirect(rename_url)
-        return HttpResponseRedirect(url_for(page))
-    flash(render_template('wiki/action_move.html', {
-        'page':         page,
-        'new_name':     new_name
-    }))
-    return HttpResponseRedirect(url_for(page))
-
-
-@require_privilege('edit')
-@does_not_exist_is_404
 def do_rename(request, name):
     """Rename all revisions."""
     page = Page.objects.get_by_name(name, raise_on_deleted=True)
     new_name = request.GET.get('page_name') or page.name
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
-        if 'cancel' in request.POST:
-            flash(u'Umbenennen abgebrochen.')
-        elif not new_name:
+        if not new_name:
             flash(u'Kein Seitenname eingegeben.', success=False)
         else:
             try:
                 Page.objects.get_by_name(new_name)
             except Page.DoesNotExist:
                 page.name = new_name
-                page.edit(note='Umbenannt von %s' % name, user=request.user,
+                page.edit(note=u'Umbenannt von %s' % name, user=request.user,
                           remote_addr=request.META.get('REMOTE_ADDR'))
-                old_text = '# X-Redirect: %s\n' % new_name
-                new_page = Page.objects.create(name, old_text, request.user,
-                           note='Umbenannt nach %s' % page.name,
-                           remote_addr=request.META.get('REMOTE_ADDR'))
+
+                if request.POST.get('add_redirect'):
+                    old_text = u'# X-Redirect: %s\n' % new_name
+                    new_page = Page.objects.create(
+                        name=name, text=old_text, user=request.user,
+                        note=u'Umbenannt nach %s' % page.name,
+                        remote_addr=request.META.get('REMOTE_ADDR'))
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
@@ -846,7 +808,6 @@ PAGE_ACTIONS = {
     'log':          do_log,
     'diff':         do_diff,
     'revert':       do_revert,
-    'move':         do_move,
     'rename':       do_rename,
     'edit':         do_edit,
     'delete':       do_delete,
