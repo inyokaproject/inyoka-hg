@@ -104,13 +104,18 @@ def markup_styles(request):
 @templated('portal/whoisonline.html')
 def whoisonline(request):
     """Shows who is online and a link to the page the user views."""
+    registered_users = cache.get('portal/registered_users')
+    if registered_users is None:
+        registered_users = int(User.objects.count())
+        cache.set('portal/registered_users', registered_users, 1000)
     set_session_info(request, u'schaut sich an, wer online ist',
                      u'Wer ist online')
     record, record_time = get_user_record()
     return {
-        'sessions':         get_sessions(),
-        'record':           record,
-        'record_time':      record_time
+        'sessions':                 get_sessions(),
+        'record':                   record,
+        'record_time':              record_time,
+        'global_registered_users':  registered_users
     }
 
 

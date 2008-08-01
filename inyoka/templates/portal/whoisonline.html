@@ -37,7 +37,8 @@
   </p>
   <p>
     Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern, die
-    {{ record_time|specificdatetimeformat(true) }} gleichzeitig online waren.
+    {{ record_time|specificdatetimeformat(true) }} gleichzeitig online waren.<br />
+    Insgesamt sind {{ global_registered_users }} Benutzer auf ubuntuusers.de registriert.
   </p>
   {%- if sessions.sessions %}
   <ul>
