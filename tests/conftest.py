@@ -14,6 +14,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import py
+import inyoka.application
 from inyoka.conf import settings
 
 from inyoka.utils.cache import set_test_cache

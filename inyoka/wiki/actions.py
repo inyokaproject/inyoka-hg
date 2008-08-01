@@ -15,8 +15,8 @@
     normalized.  The database models do not do this on their own!
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack,
-                                  Benjamin Wiegand.
+    :copyright: Copyright 2007-2007 by Armin Ronacher, Christoph Hack,
+                                       Benjamin Wiegand, Christopher Grebs.
     :license: GNU GPL.
 """
 from datetime import datetime
@@ -30,8 +30,9 @@ from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.cache import cache
 from inyoka.utils.feeds import FeedBuilder
-from inyoka.utils.text import normalize_pagename, get_pagetitle
+from inyoka.utils.text import normalize_pagename, get_pagetitle, join_pagename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.storage import storage
@@ -213,66 +214,42 @@ def do_revert(request, name):
 
 @require_privilege('edit')
 @does_not_exist_is_404
-def do_move(request, name):
-    """Move the most recent revision."""
-    page = Page.objects.get_by_name(name, raise_on_deleted=True)
-    new_name = request.GET.get('page_name') or page.name
-    if request.method == 'POST':
-        new_name = normalize_pagename(request.POST.get('new_name', ''))
-        if 'cancel' in request.POST:
-            flash(u'Verschieben abgebrochen.')
-        elif not new_name:
-            flash(u'Kein Seitenname eingegeben.', success=False)
-        else:
-            try:
-                Page.objects.get_by_name(new_name)
-            except Page.DoesNotExist:
-                original_text = page.rev.text
-                page.edit('# X-Redirect: %s\n' % new_name,
-                          note='Umbenannt nach %s' % new_name,
-                          remote_addr=request.META.get('REMOTE_ADDR'),
-                          user=request.user)
-                new_page = Page.objects.create(new_name, original_text,
-                           request.user, note='Umbenannt von %s' % page.name,
-                           remote_addr=request.META.get('REMOTE_ADDR'))
-                flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
-                return HttpResponseRedirect(url_for(new_page))
-            else:
-                flash(u'Eine Seite mit diesem Namen existiert bereits.')
-                rename_url=href('wiki', name, action='move',
-                                page_name=new_name)
-                return HttpResponseRedirect(rename_url)
-        return HttpResponseRedirect(url_for(page))
-    flash(render_template('wiki/action_move.html', {
-        'page':         page,
-        'new_name':     new_name
-    }))
-    return HttpResponseRedirect(url_for(page))
-
-
-@require_privilege('edit')
-@does_not_exist_is_404
 def do_rename(request, name):
     """Rename all revisions."""
     page = Page.objects.get_by_name(name, raise_on_deleted=True)
     new_name = request.GET.get('page_name') or page.name
     if request.method == 'POST':
         new_name = normalize_pagename(request.POST.get('new_name', ''))
-        if 'cancel' in request.POST:
-            flash(u'Umbenennen abgebrochen.')
-        elif not new_name:
+        if not new_name:
             flash(u'Kein Seitenname eingegeben.', success=False)
         else:
             try:
                 Page.objects.get_by_name(new_name)
             except Page.DoesNotExist:
                 page.name = new_name
-                page.edit(note='Umbenannt von %s' % name, user=request.user,
+                page.edit(note=u'Umbenannt von %s' % name, user=request.user,
                           remote_addr=request.META.get('REMOTE_ADDR'))
-                old_text = '# X-Redirect: %s\n' % new_name
-                new_page = Page.objects.create(name, old_text, request.user,
-                           note='Umbenannt nach %s' % page.name,
-                           remote_addr=request.META.get('REMOTE_ADDR'))
+
+                if request.POST.get('add_redirect'):
+                    #TODO: if a page was renamed sometime before
+                    #      the old redirect points to the wrong
+                    #      place. I have no idea how to handle that --entequak
+                    old_text = u'# X-Redirect: %s\n' % new_name
+                    new_page = Page.objects.create(
+                        name=name, text=old_text, user=request.user,
+                        note=u'Umbenannt nach %s' % page.name,
+                        remote_addr=request.META.get('REMOTE_ADDR'))
+
+                # move all attachments
+                for attachment in Page.objects.get_attachment_list(name):
+                    ap = Page.objects.get_by_name(attachment)
+                    old_attachment_name = ap.name
+                    ap.name = join_pagename(page.trace[-1],
+                                            normalize_pagename(ap.short_title))
+                    ap.edit(note=u'Umbenannt von %s' % old_attachment_name,
+                            remote_addr=request.META.get('REMOTE_ADDR'))
+
+                cache.delete('wiki/page/' + name)
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
@@ -324,6 +301,9 @@ def do_edit(request, name):
             return AccessDeniedResponse()
         current_rev_id = ''
     else:
+        # If the page is deleted it requires creation privilege
+        if page.rev.deleted and not has_privilege(request.user, name, 'create'):
+            return AccessDeniedResponse()
         current_rev_id = str(page.rev.id)
 
     # attachments have a custom editor
@@ -398,13 +378,16 @@ def do_edit(request, name):
                     if form.cleaned_data['text'] == page.rev.text.value:
                         flash(u'Keine Änderungen.')
                     else:
+                        action = page.rev.deleted and u'angelegt' or u'bearbeitet'
                         page.edit(user=request.user,
+                                  deleted=False,
                                   remote_addr=remote_addr,
                                   **form.cleaned_data)
                         flash(u'Die Seite „<a href="%s">%s</a>“ wurde '
-                              u'erfolgreich bearbeitet.' % (
+                              u'erfolgreich %s.' % (
                             escape(href('wiki', page.name)),
-                            escape(page.name)
+                            escape(page.name),
+                            action
                         ))
                 else:
                     page = Page.objects.create(user=request.user,
@@ -846,7 +829,6 @@ PAGE_ACTIONS = {
     'log':          do_log,
     'diff':         do_diff,
     'revert':       do_revert,
-    'move':         do_move,
     'rename':       do_rename,
     'edit':         do_edit,
     'delete':       do_delete,

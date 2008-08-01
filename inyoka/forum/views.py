@@ -10,13 +10,13 @@
     :license: GNU GPL.
 """
 import re
-from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
+from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
@@ -1324,8 +1324,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         user = user and User.objects.get(username=user) or request.user
         if user == User.objects.get_anonymous_user():
             raise PageNotFound()
-        flash(u'Die Suche nach eigenen Beiträgen ist zur Zeit deaktiviert.')
-        return HttpResponseRedirect(href('forum'))
+        # disabled, we are using xapian until we found a better solution
+        return HttpResponseRedirect(href('portal', 'search', area='forum',
+                sort='date', query='author:"%s"' % user.username))
         topics = topics.filter(topic_table.c.id.in_(post_table.c.topic_id)) \
                        .filter(post_table.c.author_id == user.id)
         if user != request.user:

@@ -14,10 +14,8 @@ import re
 import shutil
 from os import path
 from datetime import datetime
-from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
-from inyoka.wiki.parser import parse
 from inyoka.utils.templating import jinja_env
 
 INTERNAL_LINK_REGEX = re.compile('<ulink url="/([^"]*)')

@@ -129,6 +129,7 @@ def normalize_pagename(name, strip_location_markers=True):
         return name[3:]
     return name.lstrip('/')
 
+
 def get_pagetitle(name, full=True):
     """
     Get the title for a page by name.  Per default it just returns the title
@@ -139,6 +140,7 @@ def get_pagetitle(name, full=True):
     if not full:
         name = name.rsplit('/', 1)[-1]
     return u' '.join(x for x in name.split('_') if x)
+
 
 def shorten_filename(name, length=20):
     """

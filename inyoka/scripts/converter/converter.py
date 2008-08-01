@@ -727,9 +727,9 @@ def convert_attachments():
 
     for key, item in att_dict.items():
         try:
-		Attachment.update_post_ids(item, key)
-	except IOError:
-        print key, item
+            Attachment.update_post_ids(item, key)
+        except IOError:
+            print key, item
 
     session.commit()
     session.flush()

@@ -133,10 +133,9 @@
 """
 import re
 import unicodedata
-from inyoka.conf import settings
+from inyoka.utils.css import filter_style
 from inyoka.utils.urls import href
 from inyoka.utils.storage import storage
-from inyoka.utils.decorators import patch_wrapper
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
@@ -171,25 +170,6 @@ _table_align_re = re.compile(r'''(?x)
     (?P<middle>\~) |
     (?P<bottom>v)
 ''')
-
-
-property_list = [
-    'border', 'clear', 'float', 'font.*?', 'height', 'line-height',
-    'margin.*?', 'max-height', 'max-width', 'min-height', 'min-width',
-    'outline.*?', 'overflow', 'padding.*?', 'position', 'quotes', 'size',
-    'table-layout', 'text-.*?', 'vertical-align', 'width',
-    '.*-?color'
-]
-
-_url_pattern = (
-    # allowed urls with netloc
-    r'(?:(?:https?|ftps?|)://)'
-)
-_url_re = re.compile(r'url\(.*?\)')
-_allowed_url_re = re.compile(r'url\((%s[^\s\'"]+\S)\)' % _url_pattern)
-_allowed_properties_re = re.compile(r'|'.join(property_list))
-
-
 
 
 def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
@@ -346,33 +326,6 @@ def _parse_align_args(args, kwargs):
                             break
 
     return attributes, args_left
-
-
-
-def filter_style(css):
-    if css is None:
-        return None
-    items = [x.strip() for x in css.split(';')]
-    tree = {}
-    for item in filter(lambda x: x and x, items):
-        splitted = item.split(':', 1)
-        if len(splitted) > 1:
-            property, value = splitted
-        else:
-            # there was no css-value given so we filter that, too
-            continue
-        property, value = property.strip(), value.strip()
-        if not _allowed_properties_re.match(property) or not value:
-            continue
-        # yet not implemented :D
-        #elif not _allowed_url_re.match(value):
-        #    continue
-        #else:
-        #    if not is_safe_domain(_allowed_url_re.match(value).groups()[0]):
-        #        continue
-
-        tree[property] = value
-    return u'; '.join((u': '.join((x, y)) for x, y in tree.items()))
 
 
 class StackExhaused(ValueError):
