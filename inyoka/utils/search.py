@@ -191,6 +191,8 @@ class SearchResult(object):
                 data = adapter.recv(full_id[1])
             except ObjectDoesNotExist:
                 continue
+            if data is None:
+                continue
             data['score'] = match[xapian.MSET_PERCENT]
             self.results.append(data)
         self.terms = []
@@ -296,7 +298,7 @@ class SearchSystem(object):
         if sort == 'date':
             enq.set_sort_by_value_then_relevance(2)
         else:
-            enq.set_sort_by_relevance_then_value(2)
+            enq.set_sort_by_relevance_then_value(2, False)
         if collapse:
             enq.set_collapse_key(1)
         enq.set_query(qry)
