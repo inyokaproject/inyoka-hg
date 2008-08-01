@@ -29,10 +29,11 @@ import random
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
-from inyoka.wiki.parser import nodes, filter_style
+from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision
+from inyoka.utils.css import filter_style
 from inyoka.utils.urls import is_external_target
 from inyoka.utils.text import human_number, join_pagename, normalize_pagename, \
     get_pagetitle
