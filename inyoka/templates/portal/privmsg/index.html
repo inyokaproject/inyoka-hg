@@ -69,7 +69,7 @@
           {% else %}
             <a href="{{ entry.message.recipients[0]|url }}">
               {{ entry.message.recipients[0]|e }}</a>
-          {% endif %}
+          {%- endif %}
           {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
         <td>{{ entry.message.pub_date|datetimeformat }}</td>
         <td class="actions">
