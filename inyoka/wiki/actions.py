@@ -250,6 +250,7 @@ def do_rename(request, name):
                             remote_addr=request.META.get('REMOTE_ADDR'))
 
                 cache.delete('wiki/page/' + name)
+                cache.delete('wiki/object_list')
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
