@@ -919,6 +919,8 @@ def group_edit(request, name=None):
                 changed_permissions = True
                 group.permissions = permissions
 
+            group.save()
+
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges-'):
@@ -938,8 +940,8 @@ def group_edit(request, name=None):
                     dbsession.flush()
 
             # save changes to the database
-            group.save()
             dbsession.commit()
+            group.save()
 
             # clear permission cache of users if needed
             if changed_permissions:
@@ -951,9 +953,11 @@ def group_edit(request, name=None):
                 ]
                 cache.delete_many(*keys)
 
-            flash(u'Die Gruppe „%s“ wurde erfolgreich %s'
-                  % (escape(group.name), new and 'erstellt' or 'editiert'),
+            flash(u'Die Gruppe „<a href="%ss">%s</a>“ wurde erfolgreich %s'
+                  % (href('admin', 'groups', escape(group.name)),
+                     escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
+            return HttpResponseRedirect(href('admin', 'groups'))
     else:
         form = form_class(initial=not new and {
             'name': group.name,
