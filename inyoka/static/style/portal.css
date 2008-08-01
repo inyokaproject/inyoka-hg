@@ -172,16 +172,16 @@ img.cat {
   margin-left: 1.0em;
 }
 
+table.search_results .component img {
+    vertical-align: middle;
+}
+
 table.search_results .date {
     width: 15em;
 }
 
 table.search_results .user {
     width: 10em;
-}
-
-table.search_results .area {
-    width: 7em;
 }
 
 table.search_results .score {
