@@ -1306,6 +1306,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
                   .filter(topic_table.c.forum_id.in_(forum_ids))
 
     if action == 'last':
+        if hours > 24:
+            raise PageNotFound()
         topics = topics.filter(and_(
             topic_table.c.last_post_id == post_table.c.id,
             post_table.c.pub_date > datetime.now() - timedelta(hours=hours)
