@@ -225,6 +225,8 @@ def feed(request, page_name=None, count=20):
                 **kwargs
             )
         cache.set(cache_key, feed, 600)
+    else:
+        raise PageNotFound()
 
     feed.truncate(count)
     return feed.get_atom_response()
