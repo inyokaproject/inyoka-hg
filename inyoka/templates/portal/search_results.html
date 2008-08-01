@@ -36,16 +36,21 @@
   <table class="search_results">
     <thead>
       <tr>
+        <th class="component"></th>
         <th class="title">Titel</th>
         <th class="user">Autor</th>
         <th class="date">Datum</th>
-        <th class="area">Bereich</th>
+        <th class="group">Bereich</th>
         <th class="score">Relevanz</th>
       </tr>
     </thead>
     <tbody>
       {%- for doc in results.results %}
       <tr>
+        <td class="component">
+          <img src="{{ href('static', 'img/icons/small/%s.png' % doc.component|lower) }}"
+            alt="{{ doc.component }}" title="{{ doc.component }}" />
+        </td>
         {#- XXX check urls here! #}
         <td class="title"><a href="{{ doc.url
           }}{% if doc.highlight %}?highlight={{ highlight|urlencode|e
@@ -58,7 +63,7 @@
           {% else %}{{ doc.user|e }}{% endif %}
           {% else %}Anonymous{% endif %}</td>
         <td class="date">{{ doc.date|datetimeformat|e }}</td>
-        <td class="area">{{ doc.component|e }}</td>
+        <td class="group"><a href="{{ doc.group_url }}">{{ doc.group|e }}</a></td>
         <td class="score">{{ doc.score|e }}</td>
       </tr>
       {%- else -%}

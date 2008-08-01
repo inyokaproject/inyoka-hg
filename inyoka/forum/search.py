@@ -68,6 +68,8 @@ class ForumSearchAdapter(SearchAdapter):
             'date': post.pub_date,
             'url': url_for(post),
             'component': u'Forum',
+            'group': post.topic.forum.name,
+            'group_url': url_for(post.topic.forum),
             'highlight': True
         }
 search.register(ForumSearchAdapter())
