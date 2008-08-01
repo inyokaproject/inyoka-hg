@@ -729,7 +729,7 @@ def convert_attachments():
         try:
             Attachment.update_post_ids(item, key)
         except IOError:
-        print key, item
+            print key, item
 
     session.commit()
     session.flush()

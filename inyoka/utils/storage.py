@@ -9,7 +9,6 @@
     :copyright: Copyright 2007 by Benjamin Wiegand.
     :license: GNU GPL.
 """
-from django.db import models
 from sqlalchemy import Table, Column, Integer, String, Text, \
                         select, bindparam
 from sqlalchemy.exceptions import IntegrityError

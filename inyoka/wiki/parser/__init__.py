@@ -133,12 +133,10 @@
 """
 import re
 import unicodedata
-from inyoka.conf import settings
 from inyoka.utils.css import filter_style
 from inyoka.utils.urls import href
 from inyoka.utils.storage import storage
-from inyoka.utils.decorators import patch_wrapper
-from inyoka.wiki.parser.lexer import escape, Lexer
+from inyoka.wiki.parser.lexer import Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
 from inyoka.wiki.parser.transformers import DEFAULT_TRANSFORMERS
 from inyoka.wiki.parser.constants import HTML_COLORS
