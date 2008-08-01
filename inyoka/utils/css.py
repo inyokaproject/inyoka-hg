@@ -3,9 +3,12 @@ import re
 import xml.dom
 import logging
 import cssutils
-from cssutils.css import CSSStyleDeclaration as CSSStyleDeclarationBase
+from cssutils.css import CSSStyleDeclaration as CSSStyleDeclarationBase, \
+    CSSPrimitiveValue
 from cssutils.serialize import CSSSerializer as CSSSerializerBase, \
     Preferences as CSSPreferences, Out
+from inyoka.utils.urls import is_safe_domain
+
 
 cssutils.log.setLevel(logging.NOTSET)
 
@@ -14,7 +17,7 @@ property_list = [
     'margin.*?', 'max-height', 'max-width', 'min-height', 'min-width',
     'outline.*?', 'overflow', 'padding.*?', 'position', 'quotes', 'size',
     'table-layout', 'text-.*?', 'vertical-align', 'width',
-    'color', 'background-color'
+    'color', 'background-color', 'background-image',
 ]
 
 _url_pattern = (
@@ -22,7 +25,7 @@ _url_pattern = (
     r'(?:(?:https?|ftps?|)://)'
 )
 _url_re = re.compile(r'url\(.*?\)')
-_allowed_url_re = re.compile(r'url\((%s[^\s\'"]+\S)\)' % _url_pattern)
+_allowed_url_re = re.compile(r'url\([\'"]?(%s[^\s\'"]+)[\'"]?\)' % _url_pattern)
 _allowed_properties_re = re.compile(r'|'.join(property_list))
 
 
@@ -39,15 +42,19 @@ class CSSSerializer(CSSSerializerBase):
             return False
         elif not _allowed_properties_re.match(x.name):
             return False
+        elif _url_re.match(x.value):
+            m = _allowed_url_re.match(x.value)
+            if not m or not is_safe_domain(m.groups()[0]):
+                return False
+            return True
         else:
             return True
 
     def do_css_CSSStyleDeclaration(self, style, separator=None):
         """
-        Style declaration of CSSStyleRule
+        Overload of the CSSSerializer's method to get some
+        special behaviour.
         """
-#        # TODO: use Out()
-
         # may be comments only
         if len(style.seq) > 0:
             if separator is None:

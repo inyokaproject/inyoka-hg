@@ -10,13 +10,13 @@
     :license: GNU GPL.
 """
 import re
-from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
+from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename

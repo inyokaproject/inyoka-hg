@@ -208,7 +208,8 @@ class PostMapperExtension(MapperExtension):
         if instance.topic.first_post_id is None:
             values['first_post_id'] = instance.id
         connection.execute(topic_table.update(
-            topic_table.c.id==instance.topic_id, values=values))
+            topic_table.c.id==instance.topic_id, values=values
+        ))
         parent_ids = list(p.id for p in instance.topic.forum.parents)
         parent_ids.append(instance.topic.forum_id)
         connection.execute(forum_table.update(
@@ -217,8 +218,8 @@ class PostMapperExtension(MapperExtension):
             'last_post_id': instance.id
         }))
         for page in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d' % (instance.topic.forum_id,
-                page))
+            cache.delete('forum/topics/%d/%d'
+                         % (instance.topic.forum_id, page))
         search.queue('f', instance.id)
 
     def before_delete(self, mapper, connection, instance):
