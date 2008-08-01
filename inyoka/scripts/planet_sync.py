@@ -139,8 +139,9 @@ def sync():
             try:
                 entry.save()
             except _mysql_exceptions.Warning, e:
-                if not e.args[0].startswith('Data truncated '):
-                    raise
+                pass
+#                if not e.args[0].startswith('Data truncated '):
+#                    raise
             debug('synced entry %r' % guid)
         blog.last_sync = datetime.utcnow()
         blog.save()
