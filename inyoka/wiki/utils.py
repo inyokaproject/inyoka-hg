@@ -309,10 +309,10 @@ def quote_text(text, author=None):
     if isinstance(author, User):
         author = author.username
     by = author and (u"[user:%s:] schrieb:\n" % author) or u''
-    return by + u'\n'.join(
+    return text and by + u'\n'.join(
         '>' + (not line.startswith('>') and ' ' or '') + line
         for line in text.split('\n')
-    )
+    ) or u''
 
 
 class ArgumentCollector(type):
