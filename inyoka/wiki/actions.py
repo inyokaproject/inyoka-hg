@@ -30,6 +30,7 @@ from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
+from inyoka.utils.cache import cache
 from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.text import normalize_pagename, get_pagetitle
 from inyoka.utils.html import escape
@@ -230,11 +231,16 @@ def do_rename(request, name):
                           remote_addr=request.META.get('REMOTE_ADDR'))
 
                 if request.POST.get('add_redirect'):
+                    #TODO: if a page was renamed sometime before
+                    #      the old redirect points to the wrong
+                    #      place. I have no idea how to handle that --entequak
                     old_text = u'# X-Redirect: %s\n' % new_name
                     new_page = Page.objects.create(
                         name=name, text=old_text, user=request.user,
                         note=u'Umbenannt nach %s' % page.name,
                         remote_addr=request.META.get('REMOTE_ADDR'))
+
+                cache.delete('wiki/page/' + name)
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
                 return HttpResponseRedirect(url_for(page))
             else:
