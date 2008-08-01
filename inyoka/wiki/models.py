@@ -1019,7 +1019,7 @@ class Page(models.Model):
             attachment
                 see `attachment_filename`
 
-            attachmene
+            attachment_filename
                 if an attachment filename is given the page will act as an
                 attachment.  The `attachment` must be a bytestring in current
                 django versions, for performance reasons latter versions

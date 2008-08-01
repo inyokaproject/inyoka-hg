@@ -32,7 +32,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.feeds import FeedBuilder
-from inyoka.utils.text import normalize_pagename, get_pagetitle
+from inyoka.utils.text import normalize_pagename, get_pagetitle, join_pagename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.storage import storage
@@ -239,6 +239,15 @@ def do_rename(request, name):
                         name=name, text=old_text, user=request.user,
                         note=u'Umbenannt nach %s' % page.name,
                         remote_addr=request.META.get('REMOTE_ADDR'))
+
+                # move all attachments
+                for attachment in Page.objects.get_attachment_list(name):
+                    ap = Page.objects.get_by_name(attachment)
+                    old_attachment_name = ap.name
+                    ap.name = join_pagename(page.trace[-1],
+                                            normalize_pagename(ap.short_title))
+                    ap.edit(note=u'Umbenannt von %s' % old_attachment_name,
+                            remote_addr=request.META.get('REMOTE_ADDR'))
 
                 cache.delete('wiki/page/' + name)
                 flash(u'Die Seite wurde erfolgreich umbenannt.', success=True)
