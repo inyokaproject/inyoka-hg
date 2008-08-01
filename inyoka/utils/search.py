@@ -295,6 +295,8 @@ class SearchSystem(object):
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
         if sort == 'date':
             enq.set_sort_by_value_then_relevance(2)
+        else:
+            enq.set_sort_by_relevance_then_value(2)
         if collapse:
             enq.set_collapse_key(1)
         enq.set_query(qry)
