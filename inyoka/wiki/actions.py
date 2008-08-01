@@ -182,7 +182,7 @@ def do_missing_page(request, name, _page=None):
     }
 
 
-@require_privilege('edit')
+@require_privilege('manage')
 @does_not_exist_is_404
 def do_revert(request, name):
     """The revert action has no template, it uses a flashed form."""
@@ -212,7 +212,7 @@ def do_revert(request, name):
     return HttpResponseRedirect(url)
 
 
-@require_privilege('edit')
+@require_privilege('manage')
 @does_not_exist_is_404
 def do_rename(request, name):
     """Rename all revisions."""
