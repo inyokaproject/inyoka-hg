@@ -60,6 +60,8 @@ class ForumSearchAdapter(SearchAdapter):
     def recv(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author')). \
             get(post_id)
+        if post is None:
+            return
         return {
             'title': post.topic.title,
             'user': post.author,

@@ -191,6 +191,8 @@ class SearchResult(object):
                 data = adapter.recv(full_id[1])
             except ObjectDoesNotExist:
                 continue
+            if data is None:
+                continue
             data['score'] = match[xapian.MSET_PERCENT]
             self.results.append(data)
         self.terms = []
