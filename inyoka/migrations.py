@@ -551,6 +551,14 @@ def new_team_icon_system(m):
     ''')
 
 
+def fix_suggestion_owner_to_be_null(m):
+    """Fix for #2811 – a suggestion owner can be null"""
+    m.engine.execute('''
+        alter table ikhaya_suggestion
+            modify column owner_id int(11) null default null;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -564,6 +572,6 @@ MIGRATIONS = [
     add_permissions, add_post_pub_date_index, drop_comment_title_column,
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
-    new_team_icon_system,
+    new_team_icon_system, fix_suggestion_owner_to_be_null
     # add_forum_atime_column
 ]

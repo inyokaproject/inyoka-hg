@@ -251,7 +251,8 @@ class Suggestion(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     intro = models.TextField()
-    owner = models.ForeignKey(User, related_name='owned_suggestion_set')
+    owner = models.ForeignKey(User, related_name='owned_suggestion_set',
+                              null=True, blank=True)
 
     @property
     def rendered_text(self):
