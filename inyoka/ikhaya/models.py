@@ -342,6 +342,8 @@ class IkhayaSearchAdapter(SearchAdapter):
             'date': article.pub_date,
             'url': url_for(article),
             'component': u'Ikhaya',
+            'group': article.category.name,
+            'group_url': url_for(article.category),
             'highlight': True
         }
 
