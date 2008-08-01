@@ -324,6 +324,9 @@ def do_edit(request, name):
             return AccessDeniedResponse()
         current_rev_id = ''
     else:
+        # If the page is deleted it requires creation privilege
+        if page.rev.deleted and not has_privilege(request.user, name, 'create'):
+            return AccessDeniedResponse()
         current_rev_id = str(page.rev.id)
 
     # attachments have a custom editor
@@ -398,13 +401,16 @@ def do_edit(request, name):
                     if form.cleaned_data['text'] == page.rev.text.value:
                         flash(u'Keine Änderungen.')
                     else:
+                        action = page.rev.deleted and u'angelegt' or u'bearbeitet'
                         page.edit(user=request.user,
+                                  deleted=False,
                                   remote_addr=remote_addr,
                                   **form.cleaned_data)
                         flash(u'Die Seite „<a href="%s">%s</a>“ wurde '
-                              u'erfolgreich bearbeitet.' % (
+                              u'erfolgreich %s.' % (
                             escape(href('wiki', page.name)),
-                            escape(page.name)
+                            escape(page.name),
+                            action
                         ))
                 else:
                     page = Page.objects.create(user=request.user,
