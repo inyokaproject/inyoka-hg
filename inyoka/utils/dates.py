@@ -253,10 +253,8 @@ def format_specific_datetime(value, alt=False, enforce_utc=False):
     """
     if not isinstance(value, datetime):
         value = datetime(value.year, value.month, value.day)
-        delta = datetime.utcnow() - value
-    else:
-        value = datetime_to_timezone(value, enforce_utc)
-        delta = datetime.utcnow().replace(tzinfo=pytz.UTC) - value
+    delta = datetime_to_timezone(datetime.utcnow(), enforce_utc).date() - \
+            datetime_to_timezone(value, enforce_utc).date()
     if -1 <= delta.days <= 1:
         string = (
             (u'von morgen ', u'morgen um '),
