@@ -12,6 +12,10 @@
 #}
 
 {%- extends 'forum/page.html' %}
+{% set navigation_trace = [] %}
+{% for parent in forum.parents %}
+  {% do navigation_trace.append((parent|url, parent.name)) %}
+{% endfor %}
 {% if not topic %}
   {% set title_trace = ['Neues Thema in „%s“'|format(forum.name|e)] %}
   {% set navigation_trace =  [
