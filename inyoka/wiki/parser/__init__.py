@@ -187,18 +187,18 @@ def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
         ])
 
 
-def render(instructions, context=None):
+def render(instructions, context=None, format=None):
     """Render the compiled instructions."""
     if context is None:
         context = RenderContext()
-    return Renderer(instructions).render(context)
+    return Renderer(instructions).render(context, format)
 
 
-def stream(instructions, context=None):
+def stream(instructions, context=None, format=None):
     """Stream the compiled instructions."""
     if context is None:
         context = RenderContext()
-    return Renderer(instructions).stream(context)
+    return Renderer(instructions).stream(context, format)
 
 
 def validate_signature(signature):
@@ -207,9 +207,9 @@ def validate_signature(signature):
         if node.is_container:
             for n in node.children:
                 _walk(n)
-            if not node.allowed_in_signatures:
-                raise SignatureError(u'Deine Signatur enthält '
-                                     u'unerlaubte Syntax-Elemente.')
+        if not node.allowed_in_signatures:
+            raise SignatureError(u'Deine Signatur enthält '
+                                 u'unerlaubte Syntax-Elemente.')
         return node
     try:
         text = _walk(parse(signature, True, False)).text.strip()
