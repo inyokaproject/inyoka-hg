@@ -123,7 +123,7 @@
       {%- set attachments = post.attachments %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         {% if not loop.first and post.author_id == USER.id %}
-        <td class="author" style="background-color:#FFF6E0">
+        <td class="author" style="background-color:#FFF3E0">
         {% else %}
         <td class="author">
         {% endif %}
@@ -150,7 +150,7 @@
           {%- endif %}
         </td>
         {% if not loop.first and post.author_id == USER.id %}
-        <td class="post" style="background-color:#FFFBF0">
+        <td class="post" style="background-color:#FFF9F0">
         {% else %}
         <td class="post">
         {% endif %}
