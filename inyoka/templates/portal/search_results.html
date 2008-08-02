@@ -48,9 +48,9 @@
       </p>
       <p class="meta">
         {%- if doc.component in ('Forum', 'Ikhaya') %}
-        geschrieben von <a href="{{ doc.user|url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }} in <a href="{{ doc.group_url }}">{{ doc.group|e }}</a>
+        geschrieben von <a href="{{ doc.user_url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }} in <a href="{{ doc.group_url }}">{{ doc.group|e }}</a>
         {%- elif doc.component == 'Wiki' %}
-        zuletzt bearbeitet von <a href="{{ doc.user|url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }}
+        zuletzt bearbeitet von <a href="{{ doc.user_url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }}
         {%- endif %}
       </p>
     </li>
