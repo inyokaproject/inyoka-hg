@@ -41,6 +41,8 @@ _keywords = {
     'AND':      'and'
 }
 
+_description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
+
 _stemmer = xapian.Stem('de')
 search = None
 
@@ -194,12 +196,14 @@ class SearchResult(object):
                 continue
             if data is None:
                 continue
+            terms = _description_re.findall(query.get_description())
             try:
                 text = data.pop('text')
             except KeyError:
                 text = None
             if text:
-                data['excerpt'] = create_excerpt(text, ['tincidunt', 'commodo'])
+                data['excerpt'] = create_excerpt(text, terms)
+            data['title'] = create_excerpt(data['title'], terms)
             data['score'] = match[xapian.MSET_PERCENT]
             self.results.append(data)
         self.terms = []

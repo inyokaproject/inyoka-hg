@@ -171,7 +171,9 @@ def create_excerpt(text, terms, length=350):
 
     # find the best position to start the excerpt
     if idx + len(first_term) < length:
-        excerpt = u'%s...' % text[:length]
+        excerpt = text[:length]
+        if len(excerpt) < len(text):
+            excerpt += u'...'
     else:
         excerpt = u'...%s' % text[idx:idx + length]
         if len(text) > idx + length:

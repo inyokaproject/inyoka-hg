@@ -11,6 +11,7 @@
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
 from inyoka.wiki.models import Revision
 from inyoka.utils.urls import url_for, href
+from inyoka.utils.html import striptags
 from inyoka.utils.search import search, SearchAdapter
 
 
@@ -40,7 +41,7 @@ class WikiSearchAdapter(SearchAdapter):
             'group': u'Wiki',
             'group_url': href('wiki'),
             'highlight': True,
-            'text': rev.text.value
+            'text': striptags(rev.rendered_text)
         }
 
     def store(self, page_id):
