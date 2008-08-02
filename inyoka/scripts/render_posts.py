@@ -20,8 +20,7 @@ def render_posts():
     result = query.all()
     while result:
         for post in result:
-            post.rendered_text = post.render_text(nocache=True,
-                                                  force_existing=True)
+            post.rendered_text = post.render_text(force_existing=True)
             session.commit()
             session.flush()
         result = query.all()
