@@ -9,6 +9,7 @@
 #}
 
 {%- extends 'portal/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% set navi_type = 'tabbar' %}
 {% set styles = ['datetimefield.css'] %}
 {% set scripts = ['DateTime.js'] %}
@@ -50,6 +51,11 @@
         <code>2008-12-31 17:00</code></span></dd>
       <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
     </dl>
+    {%- if area in ('all', 'forum') %}
+    <dl class="search_fields" id="forum_fields">
+      {{ render_form(searchform, ['forums'], inline=true) }}
+    </dl>
+    {%- endif %}
     <div class="actions">
       {{ searchform.area }}
       <input type="submit" value="Suchen" />
@@ -57,9 +63,16 @@
   </form>
   <script type="text/javascript">
     $('ul.areas li').click(function() {
+      var id = $(this).attr('id');
       $('ul.areas li').removeClass('active');
+      if (id != 'all') {
+        $('dl.search_fields').hide();
+        $('#' + id + '_fields').show();
+      } else {
+        $('dl.search_fields').show();
+      }
       $(this).addClass('active');
-      $('#id_area').val($(this).attr('id'));
+      $('#id_area').val(id);
       return false;
     })
   </script>
