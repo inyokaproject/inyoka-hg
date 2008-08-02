@@ -222,7 +222,8 @@ class RecentChanges(Macro):
             #     but should be optimized.
             revisions = Revision.objects.filter(change_date__gt=(
                 datetime.utcnow()-timedelta(days=max_days))).select_related()
-            sitems = Sortable(revisions, context.request.GET, '-change_date')
+            sitems = Sortable(revisions, context.request.GET, '-change_date',
+                columns=['change_date'])
             pagination = Pagination(context.request, sitems.get_objects(),
                                     page_num, self.per_page, link_func)
             for revision in pagination.objects:

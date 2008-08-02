@@ -106,7 +106,8 @@ def config(request):
 @require_permission('static_page_edit')
 @templated('admin/pages.html')
 def pages(request):
-    sortable = Sortable(StaticPage.objects.all(), request.GET, '-key')
+    sortable = Sortable(StaticPage.objects.all(), request.GET, '-key',
+        columns=['key', 'title'])
     return {
         'table': sortable,
         'pages': sortable.get_objects(),
@@ -175,7 +176,8 @@ def pages_delete(request, page_key):
 @require_permission('static_file_edit')
 @templated('admin/files.html')
 def files(request):
-    sortable = Sortable(StaticFile.objects.all(), request.GET, 'identifier')
+    sortable = Sortable(StaticFile.objects.all(), request.GET, 'identifier',
+        columns=['identifier', 'is_ikhaya_icon'])
     return {
         'table': sortable
     }
@@ -280,7 +282,9 @@ def ikhaya(request):
 @require_permission('article_edit')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
-    sortable = Sortable(Article.objects.all(), request.GET, '-pub_date')
+    sortable = Sortable(Article.objects.all(), request.GET, '-pub_date',
+        columns=['subject', 'portal_user.username', 'ikhaya_category.name',
+                 'pub_date'])
     pagination = Pagination(request, sortable.get_objects(), page, 25,
         href('admin', 'ikhaya', 'articles'))
     return {
@@ -406,7 +410,8 @@ def ikhaya_article_delete(request, article):
 @require_permission('category_edit')
 @templated('admin/ikhaya_categories.html')
 def ikhaya_categories(request):
-    sortable = Sortable(Category.objects.all(), request.GET, '-name')
+    sortable = Sortable(Category.objects.all(), request.GET, '-name',
+        columns=['name'])
     return {
         'table': sortable
     }
@@ -462,15 +467,6 @@ def ikhaya_category_edit(request, category=None):
 
 
 @require_permission('event_edit')
-@templated('admin/ikhaya_dates.html')
-def ikhaya_dates(request):
-    sortable = Sortable(Event.objects.all(), request.GET, 'title')
-    return {
-        'table': sortable
-    }
-
-
-@require_permission('event_edit')
 @templated('admin/ikhaya_date_edit.html')
 def ikhaya_date_edit(request, date=None):
     """
@@ -515,7 +511,8 @@ def ikhaya_date_edit(request, date=None):
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.query, request.GET, 'name',
-        sqlalchemy=True, sa_column=forum_table.c.name)
+        sqlalchemy=True, sa_column=forum_table.c.name,
+        columns=['name', 'parent_id', 'position'])
     return {
         'table': sortable
     }
@@ -999,7 +996,8 @@ def events(request, show_all=False):
         objects = Event.objects.all()
     else:
         objects = Event.objects.filter(date__gt=date.today())
-    sortable = Sortable(objects, request.GET, '-date')
+    sortable = Sortable(objects, request.GET, '-date',
+        columns=['name', 'date'])
     return {
         'table': sortable,
         'events': sortable.get_objects(),

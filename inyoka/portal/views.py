@@ -913,7 +913,9 @@ def memberlist(request, page=1):
     `page` represents the current page in the pagination.
     """
     sortable = Sortable(SAUser.query, request.GET, 'id', sqlalchemy=True,
-                        sa_column=SAUser.id)
+                        sa_column=SAUser.id,
+                        columns=['id', 'username', 'location', 'date_joined',
+                                 'post_count'])
     filterable = Filterable(SAUser, sortable.get_objects(), {
         'id':           (u'Nummer', 'int'),
         'username':     (u'Benutzername', 'str'),
@@ -940,7 +942,8 @@ def grouplist(request, page=1):
 
     `page` represents the current page in the pagination.
     """
-    table = Sortable(Group.objects.all(), request.GET, 'name')
+    table = Sortable(Group.objects.all(), request.GET, 'name',
+                     columns=['id', 'name'])
     pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppenliste an.',
                      'Gruppenliste')
@@ -959,7 +962,8 @@ def group(request, name, page=1):
     group = Group.objects.get(name__iexact=name)
     users = group.user_set
 
-    table = Sortable(users, request.GET, 'id')
+    table = Sortable(users, request.GET, 'id',
+        columns=['id', 'username', 'location', 'date_joined', 'post_count'])
     pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (

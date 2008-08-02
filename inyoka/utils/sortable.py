@@ -71,13 +71,14 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.urls import href
+from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 
 
 class Sortable(object):
 
     def __init__(self, objects, args, default, sqlalchemy=False,
-                 sa_column=None):
+                 sa_column=None, columns=None):
         self.objects = objects
         self.order = args.get('order') or default
         self.order_column = self.order.startswith('-') and self.order[1:] or \
@@ -86,6 +87,7 @@ class Sortable(object):
         self.related = args.get('related') or False
         self.default = default
         self.is_sqlalchemy = sqlalchemy
+        self.columns = columns or []
 
     def get_html(self, key, value, related=False):
         if key == self.order_column:
@@ -106,6 +108,14 @@ class Sortable(object):
 
     def get_objects(self):
         order = self.order
+        if self.columns and not order.strip('-') in self.columns:
+            # safes us for some bad usage that raises an exception
+            flash(u'Die ausgewählte Kriterie zum sortieren („%s“) ist '
+                  u'nicht verfügbar' % order.strip('-'))
+            if self.related and not self.is_sqlalchemy:
+                return self.objects.select_related()
+            return self.objects.all()
+
         if self.related and not self.is_sqlalchemy:
             return self.objects.order_by(order).select_related()
         return self.objects.order_by(order)
