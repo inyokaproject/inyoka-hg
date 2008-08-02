@@ -159,7 +159,7 @@ def create_excerpt(text, terms, length=350):
     """
     # find the first occurence of a term in the text
     idx = 0
-    firt_term = None
+    first_term = ''
     for term in terms:
         try:
             i = text.index(term)
@@ -182,13 +182,8 @@ def create_excerpt(text, terms, length=350):
 
     # highlight the terms in the excerpt
     for term in terms:
-        ret = []
-        parts = excerpt.split(term)
-        for i, part in enumerate(parts):
-            ret.append(part)
-            if i + 1 < len(parts):
-                ret.append(u'<strong>%s</strong>' % term)
-        excerpt = u' '.join(ret)
+        r = re.compile('(%s)' % term, re.IGNORECASE)
+        excerpt = r.sub(r'<strong>\1</strong>', excerpt)
 
     return excerpt
 
