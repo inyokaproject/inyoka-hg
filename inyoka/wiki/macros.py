@@ -22,7 +22,7 @@
     which implements all the builtin macros.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
 """
 import random

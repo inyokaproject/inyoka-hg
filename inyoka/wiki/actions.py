@@ -15,7 +15,7 @@
     normalized.  The database models do not do this on their own!
 
 
-    :copyright: Copyright 2007-2007 by Armin Ronacher, Christoph Hack,
+    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack,
                                        Benjamin Wiegand, Christopher Grebs.
     :license: GNU GPL.
 """
