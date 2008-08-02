@@ -153,16 +153,21 @@ table.forum thead td p.description {
     font-size: 0.85em;
 }
 
-.status_solved {
-    background-repeat: no-repeat;
-    background-image: url('../img/forum_solved.png');
-    padding-left: 25px;
+.status_solved:before, 
+.status_unsolved:before {
+    font-size: 1.2em;
+    line-height: .1em;
+    margin-right: .2em;
 }
 
-.status_unsolved {
-    background-repeat: no-repeat;
-    background-image: url('../img/forum_unsolved.png');
-    padding-left: 25px;
+.status_solved:before {
+    color: #090;
+    content: "✔";
+}
+
+.status_unsolved:before {
+    color: #C00;
+    content: "✘";
 }
 
 table.topic {
