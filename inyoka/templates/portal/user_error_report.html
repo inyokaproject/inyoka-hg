@@ -23,7 +23,11 @@
   <div>Dein Eintrag wurde als Spam eingestuft. Wenn es keiner war, schreib ein Anliegen bitte per E-Mail an "webteam", dann das a mit dem lustigen Kringel drumrum, und dann diese Domain (ubuntuusers.de)</div>
   {%- else %}
   <form action="/error_report/" method="post">
+    {%- if show_url_field %}
     {{ render_form(form, ['title', 'text', 'url']) }}
+    {%- else %}
+    {{ render_form(form, ['title', 'text']) }}
+    {%- endif %}
     <p>
       {%- if not show_url_field %}
       {{- form.url }}
