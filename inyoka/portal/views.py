@@ -400,41 +400,35 @@ def search(request):
             sort=d['sort']
         )
         if len(results.results ) > -1:
-            normal = u'<a href="%(href)s" class="pageselect">%(page)s</a>'
-            active = u'<span class="pageselect active">%(page)d</span>'
-            ellipsis = u'<span class="ellipsis"> … </span>'
-            pagination = [u'<div class="pagination">']
-            show = [1, 2, results.page - 1, results.page]
-            last_page = 0
+            normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
+            disabled = u'<span class="disabled next">%(text)s</span>'
+            active = u'<span class="pageselect active">%(text)s</span>'
+            pagination = [u'<div class="pagination pagination_right">']
             add = pagination.append
+
             def _link(page):
                 return href('portal', 'search', page=page, query=d['query'],
                             area=d['area'], per_page=results.per_page,
                             sort=d['sort'])
-            for page in show:
-                if page - last_page > 1:
-                    add(ellipsis)
-                elif page - last_page < 1:
-                    continue
-                if page == results.page:
-                    add(active % {'page': page})
-                elif page < results.page_count:
-                    add(normal % {'href': _link(page), 'page': page})
-                last_page = page
 
-            if results.page < results.page_count:
-                add(normal % {
-                    'href': _link(results.page + 1),
-                    'page': u'Weiter'
-                })
+            add(((results.page == 1) and disabled or normal) % {
+                'href': _link(results.page - 1),
+                'text': u'« Zurück',
+            })
+            add(active % {
+                'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
+            })
+            add(((results.page < results.page_count) and normal or disabled) % {
+                'href': _link(results.page + 1),
+                'text': u'Weiter »'
+            })
+            add(u'<div style="clear: both"></div></div>')
 
-            pagination.append(u'<div style="clear: both"></div></div>')
             return TemplateResponse('portal/search_results.html', {
                 'query':            d['query'],
                 'highlight':        results.highlight_string,
                 'area':             d['area'],
                 'results':          results,
-                'show_all':         show_all,
                 'pagination':       u''.join(pagination),
                 'sort':             d['sort']
             })
@@ -443,6 +437,7 @@ def search(request):
                 escape(d['query']))
 
     return {
+        'area': request.GET.get('area') or 'all',
         'searchform': f
     }
 

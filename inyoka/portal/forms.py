@@ -356,15 +356,17 @@ class UserCPProfileForm(forms.Form):
 
 class SearchForm(forms.Form):
     """The search formular"""
-    query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput(attrs={'size':'100'}))
+    query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput)
     area = forms.ChoiceField(label='Bereich:', choices=SEARCH_AREA_CHOICES,
-                             required=False)
+                             required=False, widget=forms.HiddenInput)
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     per_page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
     date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
         required=False)
+#    forums = forms.ChoiceField(label=u'Foren:')
+#    categories = forms.ChoiceField(label=u'Kategorien:')
 
 
 class PrivateMessageForm(forms.Form):
