@@ -236,7 +236,7 @@ table.topic td.post div.text {
 
 table.topic td.post div.postinfo {
     font-size: 0.9em;
-    background: #F4F4F4 url(../img/table-header-alternative.png); 
+    background: url(../img/table-header-alternative.png); 
     margin: -10px -10px 10px -10px;
     padding: 6px 10px;
     border-bottom: 1px solid #CCC;
