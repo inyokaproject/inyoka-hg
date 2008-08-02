@@ -344,7 +344,9 @@ class IkhayaSearchAdapter(SearchAdapter):
             'component': u'Ikhaya',
             'group': article.category.name,
             'group_url': url_for(article.category),
-            'highlight': True
+            'highlight': True,
+            'text': u'%s %s' % (article.simplified_intro,
+                                article.simplified_text)
         }
 
 search.register(IkhayaSearchAdapter())

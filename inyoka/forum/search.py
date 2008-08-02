@@ -70,6 +70,7 @@ class ForumSearchAdapter(SearchAdapter):
             'component': u'Forum',
             'group': post.topic.forum.name,
             'group_url': url_for(post.topic.forum),
-            'highlight': True
+            'highlight': True,
+            'text': post.text
         }
 search.register(ForumSearchAdapter())

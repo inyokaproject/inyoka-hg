@@ -20,6 +20,7 @@ from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
 from inyoka.utils.parsertools import TokenStream
+from inyoka.utils.text import create_excerpt
 
 
 _word_re = re.compile(r'\b[\w:\.][\w:\.]{2,20}\b', re.U)
@@ -193,6 +194,12 @@ class SearchResult(object):
                 continue
             if data is None:
                 continue
+            try:
+                text = data.pop('text')
+            except KeyError:
+                text = None
+            if text:
+                data['excerpt'] = create_excerpt(text, ['tincidunt', 'commodo'])
             data['score'] = match[xapian.MSET_PERCENT]
             self.results.append(data)
         self.terms = []

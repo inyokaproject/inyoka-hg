@@ -33,45 +33,29 @@
     </a>
   </div>
   {%- endif %}
-  <table class="search_results">
-    <thead>
-      <tr>
-        <th class="component"></th>
-        <th class="title">Titel</th>
-        <th class="user">Autor</th>
-        <th class="date">Datum</th>
-        <th class="group">Bereich</th>
-        <th class="score">Relevanz</th>
-      </tr>
-    </thead>
-    <tbody>
-      {%- for doc in results.results %}
-      <tr>
-        <td class="component">
-          <img src="{{ href('static', 'img/icons/small/%s.png' % doc.component|lower) }}"
-            alt="{{ doc.component }}" title="{{ doc.component }}" />
-        </td>
-        {#- XXX check urls here! #}
-        <td class="title"><a href="{{ doc.url
-          }}{% if doc.highlight %}?highlight={{ highlight|urlencode|e
-          }}{% endif %}">{{ doc.title|e }}</a></td>
-        <td class="user">{% if doc.user
-          %}{% if doc.user and doc.user_url %}
-          <a href="{{ doc.user_url }}">{{ doc.user|e }}</a>
-          {% elif doc.user %}
-          <a href="{{ doc.user|url }}">{{ doc.user|e }}</a>
-          {% else %}{{ doc.user|e }}{% endif %}
-          {% else %}Anonymous{% endif %}</td>
-        <td class="date">{{ doc.date|datetimeformat|e }}</td>
-        <td class="group"><a href="{{ doc.group_url }}">{{ doc.group|e }}</a></td>
-        <td class="score">{{ doc.score|e }}</td>
-      </tr>
-      {%- else -%}
-      <tr>
-        <td><strong>Es wurden keine Ergebnisse gefunden</strong></td>
-      </tr>
-      {%- endfor %}
-    </tbody>
-  </table>
+  <ul class="search_results">
+    {%- for doc in results.results %}
+    <li>
+      <h2>
+        <img src="{{ href('static', 'img/icons/small/%s.png' % doc.component|lower) }}"
+          alt="{{ doc.component }}" title="{{ doc.component }}" />
+        <a href="{{ doc.url }}{% if doc.highlight %}?highlight={{ highlight|urlencode|e }}{% endif %}">
+          {{ doc.title|e }}
+        </a>
+      </h2>
+      <p class="description">
+        {{ doc.excerpt }}
+      </p>
+      <p class="meta">
+        {%- if doc.component in ('Forum', 'Ikhaya') %}
+        geschrieben von <a href="{{ doc.user|url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }} in <a href="{{ doc.group_url }}">{{ doc.group|e }}</a>
+        {%- elif doc.component == 'Wiki' %}
+        zuletzt bearbeitet von <a href="{{ doc.user|url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }}
+        {%- endif %}
+      </p>
+    </li>
+    {%- endfor %}
+  </ul>
+
   {{ pagination }}
 {% endblock %}

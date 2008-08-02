@@ -145,7 +145,8 @@ class PlanetSearchAdapter(SearchAdapter):
             'url': url_for(entry),
             'component': u'Planet',
             'group': entry.blog.name,
-            'group_url': url_for(entry.blog)
+            'group_url': url_for(entry.blog),
+            'text': entry.simplified_text
         }
 
     def store(self, entry_id):

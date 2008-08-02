@@ -39,7 +39,8 @@ class WikiSearchAdapter(SearchAdapter):
             'component': u'Wiki',
             'group': u'Wiki',
             'group_url': href('wiki'),
-            'highlight': True
+            'highlight': True,
+            'text': rev.text.value
         }
 
     def store(self, page_id):

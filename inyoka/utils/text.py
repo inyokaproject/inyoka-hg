@@ -152,3 +152,44 @@ def shorten_filename(name, length=20):
     except ValueError:
         extension = ''
         return name[:length]
+
+
+def create_excerpt(text, terms, length=350):
+    """
+    """
+    # find the first occurence of a term in the text
+    idx = 0
+    firt_term = None
+    for term in terms:
+        try:
+            i = text.index(term)
+        except ValueError:
+            i = 0
+        if i > idx or not idx:
+            idx = i
+            first_term = term
+
+    # find the best position to start the excerpt
+    if idx + len(first_term) < length:
+        excerpt = u'%s...' % text[:length]
+    else:
+        excerpt = u'...%s' % text[idx:idx + length]
+        if len(text) > idx + length:
+            excerpt += u'...'
+    excerpt = escape(excerpt)
+
+    # highlight the terms in the excerpt
+    for term in terms:
+        ret = []
+        parts = excerpt.split(term)
+        for i, part in enumerate(parts):
+            ret.append(part)
+            if i + 1 < len(parts):
+                ret.append(u'<strong>%s</strong>' % term)
+        excerpt = u' '.join(ret)
+
+    return excerpt
+
+
+# circular imports
+from inyoka.utils.html import escape

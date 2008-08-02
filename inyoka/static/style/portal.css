@@ -145,54 +145,32 @@ img.cat {
   color: #333;
 }
 
-.search_sidebar {
-  float: right;
-  padding: 0.4em;
-  margin: 0 0 1em 1em;
-  border: dotted 1px #ccc;
-  width: 10.0em;
-  text-align: center;
+ul.search_results {
+  list-style: none;
+  padding: 0 0 0 0.5em;
 }
 
-.search_sidebar ul {
-  list-style-type: none;
-  padding: 0px;
+ul.search_results h2 {
+  font-size: 1.1em;
 }
 
-.search_sidebar ul li {
-  margin: 0.5em 0.0em;
-  text-align: center;
+ul.search_results h2 img {
+  vertical-align: middle;
 }
 
-.search_ext dd, .search_ext dt {
-  margin: 0.5em 0.0em;
+ul.search_results h2 a {
+  font-weight: normal;
+  text-decoration: none;
 }
 
-.search_ext dd {
-  margin-left: 1.0em;
+ul.search_results p {
+  font-size: 0.9em;
+  margin: 0 !important;
 }
 
-table.search_results .component img {
-    vertical-align: middle;
+ul.search_results p.meta, ul.search_results p.meta a {
+  color: #888;
 }
-
-table.search_results .date {
-    width: 15em;
-}
-
-table.search_results .user {
-    width: 10em;
-}
-
-table.search_results .score {
-    text-align: right;
-    width: 6em;
-}
-
-form.search_ext #id_query {
-    max-width: 100%;
-}
-
 
 /*** Usermap ******************************************************************/
 div.usermap {
