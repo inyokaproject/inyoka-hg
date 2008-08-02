@@ -1303,7 +1303,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     forum_ids = [f.id for f in filter_invisible(request.user,
                                                  Forum.query.all())]
     topics = Topic.query.order_by(topic_table.c.last_post_id.desc()) \
-                  .filter(topic_table.c.forum_id.in_(forum_ids))
+                  .filter(topic_table.c.forum_id.in_(forum_ids)) \
+                  .options(eagerload('forum'))
 
     if action == 'last':
         if hours > 24:

@@ -14,11 +14,12 @@
 {% block forum_content %}
   <table class="forum">
     <thead>
-      <tr><th colspan="5" class="category">{{ title }}</th></tr>
+      <tr><th colspan="6" class="category">{{ title }}</th></tr>
     </thead>
     <tbody>
       <tr>
         <th class="topic" colspan="2">Thema</th>
+        <th>Forum</th>
         <th class="post_count">Antworten</th>
         <th class="view_count">Aufrufe</th>
         <th class="last_post">Letzte Antwort</th>
@@ -44,6 +45,7 @@
             ]{% endif -%}
           </p>
         </td>
+        <td><a href="{{ topic.forum|url }}">{{ topic.forum.name|e }}</a></td>
         <td class="post_count">{{ topic.post_count - 1 }}</td>
         <td class="view_count">{{ topic.view_count }}</td>
         <td class="last_post">
@@ -52,7 +54,7 @@
               topic.last_post.pub_date|datetimeformat }}</a><br />
             <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
           {% else %}
-            -
+            –
           {% endif %}
         </td>
       </tr>
