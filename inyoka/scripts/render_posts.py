@@ -7,23 +7,28 @@
     :copyright: 2007 by Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+import time
 from inyoka.conf import settings
 settings.DATABASE_DEBUG = False
 from sqlalchemy.sql import desc
-from inyoka.forum.models import Post
+from inyoka.forum.models import post_table
 from inyoka.utils.database import session
+from inyoka.scripts.converter.converter import select_blocks
+from inyoka.wiki.parser import RenderContext, parse
+
 
 def render_posts():
-    query = Post.query.filter(Post.c.rendered_text == '') \
-                      .order_by(desc(Post.c.id)) \
-                      .limit(100)
-    result = query.all()
-    while result:
-        for post in result:
-            post.rendered_text = post.render_text(force_existing=True)
+    context = RenderContext(None)
+    for post in select_blocks(post_table.select(), max_fails=100):
+        if not post.rendered_text:
+            text = parse(post.text, wiki_force_existing=True) \
+                .render(context, 'html')
+            session.execute(post_table.update(post_table.c.id == post.id, values={
+                post_table.c.rendered_text: text
+            }))
             session.commit()
             session.flush()
-        result = query.all()
+            time.sleep(2)
 
 
 if __name__ == '__main__':
