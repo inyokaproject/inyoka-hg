@@ -133,11 +133,11 @@
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
             {% endif %}
             {% if post.author.member_title %}
-            <p class="member_title">{{ post.author.member_title }}</p>
+            <div class="member_title">{{ post.author.member_title }}</div>
             {% endif %}
             {% if not loop.first and post.author == topic.author%}
             {# TODO: different class?! #}
-            <p class="member_title">(Threadstarter)</p>
+            <div class="member_title">(Threadstarter)</div>
             {% endif %}
           </p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}

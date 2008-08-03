@@ -217,7 +217,7 @@ table.topic td.author img.teamicon {
   float: right;
 }
 
-table.topic td.author p.member_title {
+table.topic td.author div.member_title {
   line-height: 1.2em;
   font-size: 0.6em;
   margin-bottom: 10px;
