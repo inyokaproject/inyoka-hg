@@ -366,8 +366,8 @@ class SearchForm(forms.Form):
     date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
         required=False)
-#    forums = forms.ChoiceField(label=u'Foren:')
-#    categories = forms.ChoiceField(label=u'Kategorien:')
+    forums = forms.ChoiceField(label=u'Foren', initial='support',
+        required=False)
 
 
 class PrivateMessageForm(forms.Form):

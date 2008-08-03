@@ -374,8 +374,18 @@ def logout(request):
 @templated('portal/search.html')
 def search(request):
     """Search dialog for the Xapian search engine."""
+    def _add_field_choices():
+        """Add dynamic field choices to the reported topic formular"""
+        f.fields['forums'].choices = [('all', u'Alle Foren'),
+            ('support', u'Alle Support-Foren')
+        ] + [(o.slug, o.name) for o in Forum.query.all()]
+
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
-    f = SearchForm(request.REQUEST)
+    if 'query' in request.REQUEST:
+        f = SearchForm(request.REQUEST)
+    else:
+        f = SearchForm()
+    _add_field_choices()
     if f.is_valid():
         d = f.cleaned_data
         show_all = request.GET.get('show_all') == 'true'
@@ -386,17 +396,22 @@ def search(request):
             'planet': 'p'
         }.get(d['area'])
         query = d['query']
+
         if d['area'] == 'topic':
             query += ' topic:"%s"' % request.GET['topic_id']
         elif d['area'] == 'current_forum':
             query += ' forum:"%s"' % request.GET['forum_id']
+
+        if d['forums'] and d['forums'] not in ('support', 'all'):
+            query += ' category:"%s"' % d['forums']
+
         results = search_system.query(request.user,
             query,
             page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
-            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or [],
+            exclude=d['forums'] == 'support' and settings.SEARCH_DEFAULT_EXCLUDE or [],
             sort=d['sort']
         )
         if len(results.results ) > -1:
