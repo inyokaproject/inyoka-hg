@@ -15,19 +15,19 @@ from inyoka.utils.templating import render_template
 
 def send_notification(user, template_name=None, subject=None, args={}):
     """
-    This sends a message to the user using the person's favourite method(s)
-    he has specified in the user control panel
+    Send a message to the user using the person's favourite method(s)
+    he has specified in the user control panel.
     """
     assert subject is not None
     #TODO: use xhtml jabber messages
     methods = user.settings.get('notify', ['mail'])
     if 'jabber' in methods and user.jabber:
         message = render_template('mails/%s.jabber.txt' % template_name, args)
-        send_jabber(user.jabber, message, xhtml=False)
+        send_jabber(user.jabber, message, xhtml=False):
     if 'mail' in methods:
         message = render_template('mails/%s.txt' % template_name, args)
         #XXX: this should be handled somewhat better... but if an email
-        #     is korrupted we get an exception so we quit it quite
+        #     is corrupted we get an exception so we quit it quite
         try:
             send_mail(settings.EMAIL_SUBJECT_PREFIX + subject, message,
                       settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
