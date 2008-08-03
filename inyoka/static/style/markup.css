@@ -215,6 +215,10 @@ div.workinprogress h3 {
   font-weight: bold;
 }
 
+.toc a {
+  color: #5E4000;
+}
+
 .toc .head a {
   text-decoration: none;
 }
@@ -279,3 +283,4 @@ div.moderated {
 pre {
   padding: 0.5em;
 }
+
