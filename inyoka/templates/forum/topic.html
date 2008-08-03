@@ -36,6 +36,8 @@
   <span class="linklist">
     {%- if not USER.is_authenticated or can_reply and not topic.locked %}
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
+    {%- elif can_moderate and topic.locked %}
+    <a href="{{ topic|url('reply') }}" class="action action_reply adminlink">antworten</a> |
     {%- endif %}
     {% if USER.is_authenticated %}
       {%- if is_subscribed %}
