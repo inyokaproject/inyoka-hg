@@ -463,6 +463,7 @@ def profile(request, username):
         'user':     user,
         'groups':   user.groups.all(),
         'wikipage': content,
+        'User':     User,
     }
 
 
@@ -796,6 +797,12 @@ def privmsg_new(request, username=None):
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
                               u'schicken.', False)
+                        break
+                    elif user in (User.objects.get_system_user(),
+                                  User.objects.get_anonymous_user()):
+                        recipients = None
+                        flash(u'Diesem Systemuser kannst du keine Nachrichten'
+                              u' schicken!', False)
                         break
                     else:
                         recipients.add(user)

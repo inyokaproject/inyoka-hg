@@ -29,6 +29,9 @@
 
 {% block portal_content %}  
   <h3>{{ user.username|e }}</h3>
+  {%- if user in (User.objects.get_system_user(), User.objects.get_anonymous_user()) %}
+  {{ user.username|e }} ist ein Systembenutzer.
+  {%- else %}
   <table class="userinfo">
     <tr>
       <th>Name</th>
@@ -136,5 +139,6 @@
     Der Benutzer „{{ user.username|e }}“ hat noch keine eigene Benutzerseite.
     <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">Anlegen</a>
   </p>
+  {%- endif %}
   {%- endif %}
 {% endblock %}

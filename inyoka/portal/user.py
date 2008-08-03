@@ -30,7 +30,7 @@ from inyoka.utils.storage import storage
 
 
 UNUSABLE_PASSWORD = '!'
-_ANONYMOUS_USER = None
+_ANONYMOUS_USER = _SYSTEM_USER = None
 DEFAULT_GROUP_ID = 1 # group id for all registered users
 PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
     ('admin_panel', u'Portal | darf Administrationsbereich betreten'),
@@ -248,11 +248,14 @@ class UserManager(models.Manager):
         is the sender for welcome notices, it updates the antispam list and
         is the owner for log entries in the wiki triggered by inyoka itself.
         """
-        try:
-            return User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
-        except User.DoesNotExist:
-            return User.objects.create_user(settings.INYOKA_SYSTEM_USER,
-                                            settings.INYOKA_SYSTEM_USER_EMAIL)
+        global _SYSTEM_USER
+        if not _SYSTEM_USER:
+            try:
+                _SYSTEM_USER = User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
+            except User.DoesNotExist:
+                _SYSTEM_USER = User.objects.create_user(settings.INYOKA_SYSTEM_USER,
+                                                settings.INYOKA_SYSTEM_USER_EMAIL)
+        return _SYSTEM_USER
 
 
 class User(models.Model):

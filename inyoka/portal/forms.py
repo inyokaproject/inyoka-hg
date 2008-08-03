@@ -173,7 +173,8 @@ class LostPasswordForm(forms.Form):
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Der angegebene Benutzername und die angegebene '
-                    u'E-Mail-Adresse stimmen nicht überein!'
+                    u'E-Mail-Adresse stimmen nicht überein! Es reicht, eines'
+                    u' von beidem anzugeben.'
                 )
         elif 'username' in data and data['username']:
             try:
