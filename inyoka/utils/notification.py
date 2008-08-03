@@ -23,7 +23,7 @@ def send_notification(user, template_name=None, subject=None, args={}):
     methods = user.settings.get('notify', ['mail'])
     if 'jabber' in methods and user.jabber:
         message = render_template('mails/%s.jabber.txt' % template_name, args)
-        send_jabber(user.jabber, message, xhtml=False):
+        send_jabber(user.jabber, message, xhtml=False)
     if 'mail' in methods:
         message = render_template('mails/%s.txt' % template_name, args)
         #XXX: this should be handled somewhat better... but if an email
