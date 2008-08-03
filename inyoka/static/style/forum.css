@@ -256,6 +256,10 @@ table.topic td.post div.signature p {
     margin: 0;
 }
 
+table.topic td.post div.signature a {
+    color: #666;
+}
+
 
 /* actions of a post */
 table.topic td.post div.linklist {
