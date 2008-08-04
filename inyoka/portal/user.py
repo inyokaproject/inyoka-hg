@@ -296,7 +296,7 @@ class User(models.Model):
     occupation = models.CharField('Beruf', max_length=200, blank=True)
     interests = models.CharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
-    launchpad = models.CharField('Launchpad Nickname', max_length=50, blank=True)
+    launchpad = models.CharField('Launchpad-Benutzername', max_length=50, blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
     _permissions = models.IntegerField('Rechte', default=0)
 
