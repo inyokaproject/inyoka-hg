@@ -60,7 +60,7 @@ def sync():
             # if none is available we skip the entry.
             guid = entry.get('id') or entry.get('link')
             if not guid:
-                debug('no guid found, skipping')
+                debug(' no guid found, skipping')
                 continue
 
             # if an entry for this guid exists already we skip the entry
@@ -84,7 +84,7 @@ def sync():
                    entry.get('summary_detail')
 
             if not title or not text:
-                debug('no text or title for %r found, skipping' % guid)
+                debug(' no text or title for %r found, skipping' % guid)
                 continue
 
             # if we have an html text we use that, otherwise we HTML
@@ -107,7 +107,7 @@ def sync():
 
             # if we don't have a pub_date we skip.
             if not pub_date:
-                debug('no pub_date for %r found, skipping' % guid)
+                debug(' no pub_date for %r found, skipping' % guid)
                 continue
 
             # convert the time tuples to datetime objects.
@@ -120,29 +120,25 @@ def sync():
             if not author and author_detail:
                 author = author_detail.get('name')
             if not author:
-                debug('not author for entry %r found, skipping' % guid)
+                debug(' no author for entry %r found, skipping' % guid)
             author_homepage = author_detail and author_detail.get('href') \
                               or blog.blog_url
 
             # create a new entry object based on the data collected or
             # update the old one.
             entry = old_entry or Entry()
-            entry.blog = blog
-            entry.guid = guid
-            entry.title = title
-            entry.url = url
-            entry.text = text
-            entry.pub_date = pub_date
-            entry.updated = updated
-            entry.author = author
-            entry.author_homepage = author_homepage
-            try:
-                entry.save()
-            except _mysql_exceptions.Warning, e:
-                pass
-#                if not e.args[0].startswith('Data truncated '):
-#                    raise
-            debug('synced entry %r' % guid)
+            for n in ('blog', 'guid', 'title', 'url', 'text', 'pub_date',
+                      'updated', 'author', 'author_homepage'):
+                setattr(entry, n, locals()[n])
+                # prevent mysql warnings
+                try:
+                    max_length = entry._meta.get_field(n).max_length
+                except AttributeError:
+                    max_length = None
+                if isinstance(locals()[n], basestring):
+                    setattr(entry, n, locals()[n][:max_length])
+            entry.save()
+            debug(' synced entry %r' % guid)
         blog.last_sync = datetime.utcnow()
         blog.save()
 
