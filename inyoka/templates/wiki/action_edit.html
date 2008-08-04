@@ -23,6 +23,9 @@
     <div class="editor">{{ form.text }}</div>
     <p>Änderungsnotiz: {{ form.note }}</p>
     {{ form.errors.text }}
+    {%- if storage['license_note_rendered'] %}
+    <div class="license_note">{{ storage['license_note_rendered'] }}</div>
+    {%- endif %}
     {{ form.errors.__all__ }}
     <div class="actions">
       <input type="hidden" name="edit_time" value="{{ edit_time }}" />

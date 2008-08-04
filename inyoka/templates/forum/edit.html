@@ -54,6 +54,9 @@
       {%- endif %}
       <dt class="text">Text:</dt>
       <dd class="text">{{ form.text }}{{ form.errors.text }}</dd>
+      {%- if storage['license_note_rendered'] %}
+      <dd class="license_note">{{ storage['license_note_rendered'] }}</dd>
+      {%- endif %}
       {# when enter is pressed the first submit button is used #}
       {# XXX: I'm sure that a better sollution exists for this #}
       {# then put it here :) #}
@@ -114,10 +117,10 @@
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="
       {%- for att in attachments or () %}{% if not loop.first %},{% endif %}{{ att.id }}
-      {% endfor %}">
+      {% endfor %}" />
       <input type="hidden" name="polls" id="id_polls" value="
       {%- for poll in polls or () %}{% if not loop.first %},{% endif %}{{ poll.id }}
-      {%- endfor %}">
+      {%- endfor %}" />
       {{ form.errors.__all__ }}
       <input type="submit" value="Veröffentlichen" name="send" />
       <input type="submit" value="Vorschau" name="preview" />

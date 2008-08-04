@@ -68,7 +68,8 @@ def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
             'max_signature_lines', 'get_ubuntu_link', 'global_message',
             'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template',
-            'wiki_newpage_root', 'team_icon_height', 'team_icon_width']
+            'wiki_newpage_root', 'team_icon_height', 'team_icon_width',
+            'license_note']
 
     team_icon = storage['team_icon']
 
@@ -94,6 +95,12 @@ def config(request):
                     f.close()
 
                 storage['team_icon'] = fn
+
+            if data['license_note']:
+                context = RenderContext(request, simplified=True)
+                node = parse(data['license_note'])
+                storage['license_note_rendered'] = node.render(context, 'html')
+
             flash(u'Die Einstellungen wurden gespeichert.', True)
     else:
         form = ConfigurationForm(initial=storage.get_many(keys))

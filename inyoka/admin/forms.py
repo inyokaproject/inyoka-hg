@@ -47,6 +47,8 @@ class ConfigurationForm(forms.Form):
         label=u'Unter welcher Wikiseite sollen neue Seiten erstellt werden?')
     team_icon_width = forms.IntegerField(min_value=1, required=False)
     team_icon_height = forms.IntegerField(min_value=1, required=False)
+    license_note = forms.CharField(required=False, label=u'Lizenzhinweis',
+                                   widget=forms.Textarea(attrs={'rows': 2}))
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))

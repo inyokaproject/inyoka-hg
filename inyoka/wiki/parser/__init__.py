@@ -181,8 +181,8 @@ def parse(markup, wiki_force_existing=False, catch_stack_errors=True,
         if not catch_stack_errors:
             raise
         return nodes.Paragraph([
-            nodes.Strong([nodes.Text('Interner Parser Fehler: ')]),
-            nodes.Text(u'Der Parser konnte den Text nicht verarbeiten weil '
+            nodes.Strong([nodes.Text('Interner Parserfehler: ')]),
+            nodes.Text(u'Der Parser konnte den Text nicht verarbeiten, weil '
                        u'zu tief verschachtelte Elemente gefunden wurden.')
         ])
 
