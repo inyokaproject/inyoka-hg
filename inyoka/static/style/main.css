@@ -202,10 +202,8 @@ div.pagination_right {
     float: right;
 }
 
-div.pagination .pageselect, div.pagination .next, div.pagination .ellipsis {
+div.pagination .pageselect, div.pagination .next, div.pagination .ellipsis, div.pagination .prev {
     font-size: 13px;
-    float: left;
-    display: block;
     line-height: 1.4em;
     background-color: white;
     height: 1.4em;
@@ -213,7 +211,7 @@ div.pagination .pageselect, div.pagination .next, div.pagination .ellipsis {
     margin-left: 1px;
 }
 
-div.pagination .pageselect, div.pagination .next {
+div.pagination .pageselect, div.pagination .next, div.pagination .prev {
     border: 1px solid #aaa;
     padding: 4px;
     text-decoration: none;
