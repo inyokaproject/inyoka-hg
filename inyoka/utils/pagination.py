@@ -40,6 +40,7 @@ from inyoka.utils.html import escape
 from werkzeug import url_encode
 
 
+
 class Pagination(object):
 
     def __init__(self, request, query, page, per_page=10, link=None,
@@ -79,7 +80,8 @@ class Pagination(object):
             url = '%s%d/' % (self.link_base, page)
         return url + (params and '?' + url_encode(params) or '')
 
-    def generate(self, position=None, threshold=2, show_next_link=True):
+    def generate(self, position=None, threshold=2, show_next_link=True,
+                 show_prev_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
         active = u'<span class="pageselect active">%(page)d</span>'
         ellipsis = u'<span class="ellipsis"> … </span>'
@@ -115,6 +117,14 @@ class Pagination(object):
                 add(tmpl % escape(link))
             else:
                 add(u'<span class="disabled next"> Weiter » </span>')
+
+        if show_prev_link:
+            if self.page > 1:
+                link = self.generate_link(self.page -1, params)
+                tmpl = u'<a href="%s" class="prev"> « Zurück </a>'
+                result.insert(0, tmpl % escape(link))
+            else:
+                result.insert(0, (u'<span class="disabled prev"> « Zurück </span>'))
 
         class_ = 'pagination'
         if position:

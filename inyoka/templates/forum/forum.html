@@ -77,14 +77,14 @@
       {%- else %}
       <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         {% if topic.author_id == USER.id %}
-        <td class="icon" style="background-color:#FFF3E0">
+        <td class="icon" style="background-color: #F6F4EF">
         {% else %}
         <td class="icon">
         {% endif %}
           {{ topic_icon(topic) }}
         </td>
         {% if topic.author_id == USER.id %}
-        <td class="topic" style="background-color:#FFF9F0">
+        <td class="topic" style="background-color: #F8F6F1">
         {% else %}
         <td class="topic">
         {% endif %}
