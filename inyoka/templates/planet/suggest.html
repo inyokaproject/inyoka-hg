@@ -13,10 +13,13 @@
 
 {% block planet_content %}
   <p>Hier kannst du einen Blog für den Planeten vorschlagen. Bitte beachte, dass es sich
-  dabei um einen Ubuntu/Linux Blog handeln muss und dass es womöglich einige Tage dauern
+  dabei um einen Ubuntu/Linux-Blog handeln muss und dass es womöglich einige Tage dauern
   kann bis der Blog überprüft wurde.</p>
   <form action="{{ href('planet', 'suggest') }}" method="post">
-    {{ render_form(form, ['name', 'url', 'description']) }}
+    <dl>
+      {{ render_form(form, ['name', 'url', 'feed_url', 'description', 'contact_email'], inline=True) }}
+      <dd>{{ form.mine }} <label for="id_mine">{{ form.mine.label|e }}</label></dd>
+    </dl>
     <p>
       <input type="submit" value="Abschicken" />
       <input type="submit" name="abort" value="Abbrechen" />
