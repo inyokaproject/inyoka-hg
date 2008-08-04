@@ -67,6 +67,8 @@ $(document).ready(function() {
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
   (function() {
+    if (navigator.appName.toLowerCase() == 'konqueror')
+      return
     var
       initialized = false,
       $currentSearchArea = $('select.search_area').val(),
@@ -210,21 +212,25 @@ $(document).ready(function() {
   });
 
   // the javascript powered login form
-  var loginForm = null;
-  $('#login_link').click(function() {
-    if (loginForm == null) {
-      loginForm = $('#js_login_form')
-        .prependTo('body')
-        .submit(function(event) {
-          loginForm.slideDown();
-          return true;
-        })
-        .click(function(event) {
-          event.stopPropagation();
-        });
-    }
-    loginForm.fadeIn();
-    $('#js_login_username').focus();
-    return false;
-  });
+  (function() {
+    if (navigator.appName.toLowerCase() == 'konqueror')
+      return
+    var loginForm = null;
+    $('#login_link').click(function() {
+      if (loginForm == null) {
+        loginForm = $('#js_login_form')
+          .prependTo('body')
+          .submit(function(event) {
+            loginForm.slideDown();
+            return true;
+          })
+          .click(function(event) {
+            event.stopPropagation();
+          });
+      }
+      loginForm.fadeIn();
+      $('#js_login_username').focus();
+      return false;
+    });
+  })();
 });

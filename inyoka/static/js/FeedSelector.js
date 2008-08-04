@@ -9,6 +9,8 @@
 */
 
 (function() {
+  if (navigator.appName.toLowerCase() == 'konqueror')
+    return
 
   var FEED_COUNTS = [10, 20, 30, 50, 75, 100];
   var FORUM_URL = 'http://forum.' + $BASE_DOMAIN_NAME + '/';

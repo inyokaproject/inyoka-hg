@@ -72,17 +72,21 @@ $(function () {
         .data('original_height', this.clientHeight);
     }
   });
-  $('.codeblock_resizer').click(function () {
-    $codeblock = $(this).prev();
-    if (!$codeblock.hasClass('codeblock_expanded')) {
-      $codeblock.addClass('codeblock_expanded');
-      $codeblock.animate({'height': $codeblock[0].scrollHeight}, 500);
-      this.innerHTML = this.title = 'verkleinern';
-    } else {
-      $codeblock.removeClass('codeblock_expanded');
-      $codeblock.animate({'height': $codeblock.data('original_height')}, 500);
-      this.innerHTML = this.title = 'vergrößern';
-    }
-  });
+  (function() {
+    if (navigator.appName.toLowerCase() == 'konqueror')
+      return
+    $('.codeblock_resizer').click(function () {
+      $codeblock = $(this).prev();
+      if (!$codeblock.hasClass('codeblock_expanded')) {
+        $codeblock.addClass('codeblock_expanded');
+        $codeblock.animate({'height': $codeblock[0].scrollHeight}, 500);
+        this.innerHTML = this.title = 'verkleinern';
+      } else {
+        $codeblock.removeClass('codeblock_expanded');
+        $codeblock.animate({'height': $codeblock.data('original_height')}, 500);
+        this.innerHTML = this.title = 'vergrößern';
+      }
+    });
+  })();
 });
 
