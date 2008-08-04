@@ -504,17 +504,17 @@ def deactivate_user(user):
     This deactivates a user, removes all personal information and creates a
     random anonymous name.
     """
-    def _set_anonymous_name():
-        """Sets the user's name to a random string"""
-        new_name = generate_word()
-        try:
-            User.objects.get(username__iexact=new_name)
-        except User.DoesNotExist:
-            user.username = new_name
-        else:
-            _set_anonymous_name()
-
-    _set_anonymous_name()
+    #def _set_anonymous_name():
+    #    """Sets the user's name to a random string"""
+    #    new_name = generate_word()
+    #    try:
+    #        User.objects.get(username__iexact=new_name)
+    #    except User.DoesNotExist:
+    #        user.username = new_name
+    #    else:
+    #        _set_anonymous_name()
+    #
+    #_set_anonymous_name()
     user.is_active = 0
     user.avatar = user.coordinates_long = user.coordinates_lat = None
     user.icq = user.jabber = user.msn = user.aim = user.yim = \
