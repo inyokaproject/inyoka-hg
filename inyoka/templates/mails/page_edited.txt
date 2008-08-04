@@ -1,6 +1,6 @@
-Hallo {{ username|e }},
+Hallo {{ username }},
 
-der Benutzer „{{ rev.user.username }}“ hat die Wiki-Seite „{{ rev.page.title|e }}“ verändert.
+der Benutzer „{{ rev.user.username }}“ hat die Wiki-Seite „{{ rev.page.title }}“ verändert.
 {% if rev.note %}
 Es wurde folgende Änderungsnotiz angegeben: „{{ rev.note }}“
 {% endif %}

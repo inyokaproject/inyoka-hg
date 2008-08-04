@@ -374,8 +374,18 @@ def logout(request):
 @templated('portal/search.html')
 def search(request):
     """Search dialog for the Xapian search engine."""
+    def _add_field_choices():
+        """Add dynamic field choices to the reported topic formular"""
+        f.fields['forums'].choices = [('all', u'Alle Foren'),
+            ('support', u'Alle Support-Foren')
+        ] + [(o.slug, o.name) for o in Forum.query.all()]
+
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
-    f = SearchForm(request.REQUEST)
+    if 'query' in request.REQUEST:
+        f = SearchForm(request.REQUEST)
+    else:
+        f = SearchForm()
+    _add_field_choices()
     if f.is_valid():
         d = f.cleaned_data
         show_all = request.GET.get('show_all') == 'true'
@@ -386,55 +396,54 @@ def search(request):
             'planet': 'p'
         }.get(d['area'])
         query = d['query']
+
         if d['area'] == 'topic':
             query += ' topic:"%s"' % request.GET['topic_id']
         elif d['area'] == 'current_forum':
             query += ' forum:"%s"' % request.GET['forum_id']
+
+        if d['forums'] and d['forums'] not in ('support', 'all'):
+            query += ' category:"%s"' % d['forums']
+
         results = search_system.query(request.user,
             query,
             page=d['page'] or 1, per_page=d['per_page'] or 20,
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=area,
-            exclude=not show_all and settings.SEARCH_DEFAULT_EXCLUDE or [],
+            exclude=d['forums'] == 'support' and settings.SEARCH_DEFAULT_EXCLUDE or [],
             sort=d['sort']
         )
         if len(results.results ) > -1:
-            normal = u'<a href="%(href)s" class="pageselect">%(page)s</a>'
-            active = u'<span class="pageselect active">%(page)d</span>'
-            ellipsis = u'<span class="ellipsis"> … </span>'
-            pagination = [u'<div class="pagination">']
-            show = [1, 2, results.page - 1, results.page]
-            last_page = 0
+            normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
+            disabled = u'<span class="disabled next">%(text)s</span>'
+            active = u'<span class="pageselect active">%(text)s</span>'
+            pagination = [u'<div class="pagination pagination_right">']
             add = pagination.append
+
             def _link(page):
                 return href('portal', 'search', page=page, query=d['query'],
                             area=d['area'], per_page=results.per_page,
                             sort=d['sort'])
-            for page in show:
-                if page - last_page > 1:
-                    add(ellipsis)
-                elif page - last_page < 1:
-                    continue
-                if page == results.page:
-                    add(active % {'page': page})
-                elif page < results.page_count:
-                    add(normal % {'href': _link(page), 'page': page})
-                last_page = page
 
-            if results.page < results.page_count:
-                add(normal % {
-                    'href': _link(results.page + 1),
-                    'page': u'Weiter'
-                })
+            add(((results.page == 1) and disabled or normal) % {
+                'href': _link(results.page - 1),
+                'text': u'« Zurück',
+            })
+            add(active % {
+                'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
+            })
+            add(((results.page < results.page_count) and normal or disabled) % {
+                'href': _link(results.page + 1),
+                'text': u'Weiter »'
+            })
+            add(u'<div style="clear: both"></div></div>')
 
-            pagination.append(u'<div style="clear: both"></div></div>')
             return TemplateResponse('portal/search_results.html', {
                 'query':            d['query'],
                 'highlight':        results.highlight_string,
                 'area':             d['area'],
                 'results':          results,
-                'show_all':         show_all,
                 'pagination':       u''.join(pagination),
                 'sort':             d['sort']
             })
@@ -443,6 +452,7 @@ def search(request):
                 escape(d['query']))
 
     return {
+        'area': request.GET.get('area') or 'all',
         'searchform': f
     }
 
@@ -468,6 +478,7 @@ def profile(request, username):
         'user':     user,
         'groups':   user.groups.all(),
         'wikipage': content,
+        'User':     User,
     }
 
 
@@ -801,6 +812,12 @@ def privmsg_new(request, username=None):
                         recipients = None
                         flash(u'Du kannst dir selber keine Nachrichten '
                               u'schicken.', False)
+                        break
+                    elif user in (User.objects.get_system_user(),
+                                  User.objects.get_anonymous_user()):
+                        recipients = None
+                        flash(u'Diesem Systemuser kannst du keine Nachrichten'
+                              u' schicken!', False)
                         break
                     else:
                         recipients.add(user)

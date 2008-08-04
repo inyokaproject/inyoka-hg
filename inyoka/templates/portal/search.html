@@ -9,6 +9,8 @@
 #}
 
 {%- extends 'portal/overall.html' %}
+{% from 'macros.html' import render_form %}
+{% set navi_type = 'tabbar' %}
 {% set styles = ['datetimefield.css'] %}
 {% set scripts = ['DateTime.js'] %}
 {% set title_trace = ['Suche'] %}
@@ -19,54 +21,59 @@
   <h2>Neue Suchabfrage</h2>
 {% endblock %}
 
+{% macro search_tab(id, description) %}
+  <li id="{{ id }}"{% if area == id %} class="active"{% endif %}>
+    <a href="?area={{ id }}">{{ description }}</a>
+  </li>
+{% endmacro %}
+
 {% block portal_content %}
   <h3>Suche</h3>
-  <form action="{{ href('portal', 'search') }}" method="get" class="search_ext">
-    <div class="search_sidebar">
-      <h3>Suchoptionen</h3>
-      <ul>
-        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('titel', 'Titel');">Titelsuche</a></li>
-        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('author', 'Benutzername');">Autorensuche</a></li>
-        <li><a href="/nojs/" onclick="javascript:return addSearchTerm('tag', 'Tag');">Tagsuche</a></li>
-      </ul>
-      <input type="checkbox" name="collapse" value="true" id="search_collapse" />
-      <label for="search_collapse">Forenbeiträge nach Themen gruppieren</label>{# TODO: this must stay the same when submitted #}
-    </div>
-    <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
-    Die Suche berücksichtigt keine Groß- und Kleinschreibung und mehrere
-    Suchausdrücke können mit <strong>UND</strong>, <strong>ODER</strong> sowie
-    <strong>UND&nbsp;NICHT</strong> kombiniert werden, wobei gegebenenfalls
-    eine Klammer zu setzen ist. Komplexere Suchabfragen sind über
-    die Auswahl rechts möglich.</p>
+  <p>Hier kannst du nach Informationen im gesamten ubuntuusers Portal suchen.
+  Die Suche berücksichtigt keine Groß- und Kleinschreibung und mehrere
+  Suchausdrücke können mit <strong>UND</strong>, <strong>ODER</strong> sowie
+  <strong>UND&nbsp;NICHT</strong> kombiniert werden, wobei gegebenenfalls
+  eine Klammer zu setzen ist.</p>
+  <span class="search">Suche in:</span>
+  <ul class="areas">
+   {{ search_tab('all', 'Überall') }}
+   {{ search_tab('forum', 'Forum') }}
+   {{ search_tab('wiki', 'Wiki') }}
+   {{ search_tab('ikhaya', 'Ikhaya') }}
+   {{ search_tab('planet', 'Planet') }}
+  </ul>
+  <form action="{{ href('portal', 'search') }}" method="get" class="search_form">
     <dl>
       <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
-      <dt>{{ searchform.area.label_tag() }}</dt><dd>{{ searchform.area }}</dd>
       <dt><label for="id_date_begin">Zeitraum:</label></dt>
       <dd>{{ searchform.date_begin }}<span> bis </span>{{ searchform.date_end }}<br />
         <span class="help_text">z.B. <code>2008-12-31</code> oder
         <code>2008-12-31 17:00</code></span></dd>
       <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
     </dl>
+    {%- if area in ('all', 'forum') %}
+    <dl class="search_fields" id="forum_fields">
+      {{ render_form(searchform, ['forums'], inline=true) }}
+    </dl>
+    {%- endif %}
     <div class="actions">
+      {{ searchform.area }}
       <input type="submit" value="Suchen" />
     </div>
   </form>
   <script type="text/javascript">
-    /*<![CDATA[*/
-    addSearchTerm = function(label, value) {
-      var query = $('#id_query');
-      var val = query.val();
-      val += ((val.length > 0 && val.charAt(val.length - 1) != ' ')
-              ? ' ' : '') + label + ':"' + value + '"';
-      var q = query.val(val).focus()[0];
-
-      if (typeof q.selectionStart != 'undefined') {
-        q.selectionStart = val.length - value.length -  1;
-        q.selectionEnd = val.length - 1;
+    $('ul.areas li').click(function() {
+      var id = $(this).attr('id');
+      $('ul.areas li').removeClass('active');
+      if (id != 'all') {
+        $('dl.search_fields').hide();
+        $('#' + id + '_fields').show();
+      } else {
+        $('dl.search_fields').show();
       }
-      // TODO: Internet Explorer Support
+      $(this).addClass('active');
+      $('#id_area').val(id);
       return false;
-    }
-    /*]]>*/
+    })
   </script>
 {% endblock %}

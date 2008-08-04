@@ -173,7 +173,8 @@ class LostPasswordForm(forms.Form):
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Der angegebene Benutzername und die angegebene '
-                    u'E-Mail-Adresse stimmen nicht überein!'
+                    u'E-Mail-Adresse stimmen nicht überein! Es reicht, eines'
+                    u' von beidem anzugeben.'
                 )
         elif 'username' in data and data['username']:
             try:
@@ -300,7 +301,7 @@ class UserCPProfileForm(forms.Form):
     interests = forms.CharField(label='Interessen', required=False,
                                 max_length=100)
     website = forms.URLField(label='Webseite', required=False)
-    launchpad = forms.CharField(label=u'Launchpad Nickname', required=False,
+    launchpad = forms.CharField(label=u'Launchpad-Benutzername', required=False,
                                 max_length=50)
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', label=u'GPG-Schlüssel',
                  max_length=10, required=False, help_text=u'''
@@ -356,14 +357,16 @@ class UserCPProfileForm(forms.Form):
 
 class SearchForm(forms.Form):
     """The search formular"""
-    query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput(attrs={'size':'100'}))
+    query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput)
     area = forms.ChoiceField(label='Bereich:', choices=SEARCH_AREA_CHOICES,
-                             required=False)
+                             required=False, widget=forms.HiddenInput)
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     per_page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
     date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
+        required=False)
+    forums = forms.ChoiceField(label=u'Foren', initial='support',
         required=False)
 
 

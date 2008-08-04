@@ -623,6 +623,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attach_form':  attach_form,
         'attachments':  list(attachments),
         'posts':        posts,
+        'storage':      storage,
     }
 
 

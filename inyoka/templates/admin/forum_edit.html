@@ -30,7 +30,7 @@
 <h3>{{ title_trace[0] }}</h3>
 
 <form action="" method="post" class="forum">
-  {{ render_form(form, ['name', 'slug','description', 'parent', 'position']) }}
+  {{ render_form(form, ['name', 'slug','description', 'parent', 'position', 'newtopic_default_text']) }}
   <h3>Willkommensnachricht</h3>
   {{ render_form(form, ['welcome_msg_subject', 'welcome_msg_text']) }}
   <p>

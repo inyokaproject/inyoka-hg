@@ -9,6 +9,7 @@
 #}
 
 {%- extends 'portal/overall.html' %}
+{% set navi_type = 'tabbar' %}
 {% set title = 'Suche' %}
 {% set active_app = area %}
 
@@ -24,15 +25,7 @@
     „{{ query|e }}“. Solltest du nicht fündig geworden sein kannst du eine
     <a href="/search/">neue Suche</a> mit veränderten Suchwörtern starten.
   </p>
-  {%- if not show_all %}
-  <div class="message">
-    Aus Gründen der Übersichtlichkeit wurden manche Beiträge ausgeblendet:
-    <a href="{{ href('portal', 'search', query=query, area=area, show_all="true",
-      sort=sort)|e }}">
-      Alles anzeigen
-    </a>
-  </div>
-  {%- endif %}
+  {{ pagination }}
   <ul class="search_results">
     {%- for doc in results.results %}
     <li>
@@ -56,6 +49,7 @@
     </li>
     {%- endfor %}
   </ul>
-
+  <br />
   {{ pagination }}
+  <br clear="both" />
 {% endblock %}

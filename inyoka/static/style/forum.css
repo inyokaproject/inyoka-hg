@@ -217,7 +217,7 @@ table.topic td.author img.teamicon {
   float: right;
 }
 
-table.topic td.author p.member_title {
+table.topic td.author div.member_title {
   line-height: 1.2em;
   font-size: 0.6em;
   margin-bottom: 10px;
@@ -236,7 +236,7 @@ table.topic td.post div.text {
 
 table.topic td.post div.postinfo {
     font-size: 0.9em;
-    background: #F4F4F4 url(../img/table-header-alternative.png); 
+    background: url(../img/table-header-alternative.png); 
     margin: -10px -10px 10px -10px;
     padding: 6px 10px;
     border-bottom: 1px solid #CCC;
@@ -254,6 +254,10 @@ table.topic td.post div.signature {
 table.topic td.post div.signature p {
     padding: 0 0 5px 0;
     margin: 0;
+}
+
+table.topic td.post div.signature a {
+    color: #666;
 }
 
 

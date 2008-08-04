@@ -36,6 +36,8 @@
   <span class="linklist">
     {%- if not USER.is_authenticated or can_reply and not topic.locked %}
     <a href="{{ topic|url('reply') }}" class="action action_reply">antworten</a> |
+    {%- elif can_moderate and topic.locked %}
+    <a href="{{ topic|url('reply') }}" class="action action_reply adminlink">antworten</a> |
     {%- endif %}
     {% if USER.is_authenticated %}
       {%- if is_subscribed %}
@@ -123,7 +125,7 @@
       {%- set attachments = post.attachments %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         {% if not loop.first and post.author_id == USER.id %}
-        <td class="author" style="background-color:#FFF6E0">
+        <td class="author" style="background-color: #F6F4EF">
         {% else %}
         <td class="author">
         {% endif %}
@@ -133,11 +135,11 @@
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
             {% endif %}
             {% if post.author.member_title %}
-            <p class="member_title">{{ post.author.member_title }}</p>
+            <div class="member_title">{{ post.author.member_title }}</div>
             {% endif %}
             {% if not loop.first and post.author == topic.author%}
             {# TODO: different class?! #}
-            <p class="member_title">(Threadstarter)</p>
+            <div class="member_title">(Threadstarter)</div>
             {% endif %}
           </p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
@@ -150,7 +152,7 @@
           {%- endif %}
         </td>
         {% if not loop.first and post.author_id == USER.id %}
-        <td class="post" style="background-color:#FFFBF0">
+        <td class="post" style="background-color: #F8F6F1">
         {% else %}
         <td class="post">
         {% endif %}

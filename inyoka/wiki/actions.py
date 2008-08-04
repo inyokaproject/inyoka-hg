@@ -452,7 +452,8 @@ def do_edit(request, name):
         'form':         form,
         'preview':      preview,
         'edit_time':    edit_time.strftime('%s'),
-        'rev':          current_rev_id
+        'rev':          current_rev_id,
+        'storage':      storage,
     }
 
 

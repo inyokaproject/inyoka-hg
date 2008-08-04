@@ -47,6 +47,8 @@ class ConfigurationForm(forms.Form):
         label=u'Unter welcher Wikiseite sollen neue Seiten erstellt werden?')
     team_icon_width = forms.IntegerField(min_value=1, required=False)
     team_icon_height = forms.IntegerField(min_value=1, required=False)
+    license_note = forms.CharField(required=False, label=u'Lizenzhinweis',
+                                   widget=forms.Textarea(attrs={'rows': 2}))
 
     def clean_global_message(self):
         return cleanup_html(self.cleaned_data.get('global_message', ''))
@@ -278,7 +280,7 @@ class EditGroupForm(forms.Form):
     permissions = forms.MultipleChoiceField(label=u'Privilegien',
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'permission'}),
         required=False)
-    forum_privileges = forms.MultipleChoiceField(label=u'Forum Privilegien',
+    forum_privileges = forms.MultipleChoiceField(label=u'Forumsprivilegien',
                                                  required=False)
     icon = forms.ImageField(label=u'Team-Icon', required=False)
     delete_icon = forms.BooleanField(label=u'Team-Icon löschen', required=False)
@@ -323,6 +325,9 @@ class EditForumForm(forms.Form):
         required=False)
     welcome_msg_text = forms.CharField(label=u'Text', required=False,
                                        widget=forms.Textarea(attrs={'rows': 3}))
+    newtopic_default_text = forms.CharField(label=u'Standardtext für neue Themen',
+                                            widget=forms.Textarea(attrs={'rows': 3}),
+                                            required=False)
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
