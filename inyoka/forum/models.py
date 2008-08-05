@@ -940,7 +940,8 @@ class Attachment(object):
                 if img.format == 'PNG' and img.info.get('interlace'):
                     # PIL raises an IOError if the PNG is interlaced
                     # so we need that workaround for now...
-                    return fallback
+                    return u'<a href="%s" type="%s">%s herunterladen</a>' % (
+                        url, self.mimetype, self.name)
 
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
