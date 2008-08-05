@@ -960,7 +960,7 @@ class Attachment(object):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return file(self.filename, mode)
+        return file(self.filename.encode('utf-8'), mode)
 
     def get_absolute_url(self):
         return href('media', self.file)
