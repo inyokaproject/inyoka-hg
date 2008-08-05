@@ -122,6 +122,7 @@
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
+      {%- set attachments = post.attachments %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
         {% if post.author_id == USER.id %}
         <td class="author" style="background-color: #F6F4EF">
@@ -184,28 +185,29 @@
           <div class="text">
             {{ post.rendered_text }}
           </div>
-          {%- set attachments = post.grouped_attachments %}
           {%- if attachments %}
           <hr />
           <dl class="attachments">
-            {% for group, list, class in attachments %}
-            {% if group %}
-            <dt>{{ group }}</dt>
-            <ul class="attr_list{% if class %} {{ class }}{% endif %}">
-              {% for att in list %}
-              <li>{{ att.html_representation }}</li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            {% for att in list %}
+            {%- for group in attachments|groupby('mimetype') %}
+            {%- if group.grouper[:5] == 'image' and USER.settings.show_thumbnails %}
+            <dt>Bilder (Vorschau)</dt>
+            <dd>
+              <ul class="image_list">
+                {%- for att in group.list %}
+                <li>{{ att.html_representation }}</li>
+                {%- endfor %}
+              </ul>
+            </dd>
+            {%- else %}
+            {%- for att in group.list %}
             <dt>{{ att.name|e }} ({{ att.size|filesizeformat(true) }})</dt>
             {%- if att.comment %}
             <dd class="comment">{{ att.comment|e }}</dd>
-            {% endif %}
+            {%- endif %}
             <dd>{{ att.html_representation }}</dd>
             {%- endfor %}
             {%- endif %}
-            {% endfor %}
+            {%- endfor %}
           </dl>
           {%- endif %}
           {%- if post.author.signature and not USER.settings['hide_signatures'] %}
