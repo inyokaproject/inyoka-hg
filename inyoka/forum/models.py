@@ -19,7 +19,6 @@ from time import time
 from StringIO import StringIO
 from mimetypes import guess_type
 from datetime import datetime
-from itertools import groupby
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
@@ -708,23 +707,6 @@ class Post(object):
         new_topic.forum.invalidate_topic_cache()
         old_topic.forum.invalidate_topic_cache()
 
-    @property
-    def grouped_attachments(self):
-        #XXX: damn workaround for the PIL bug with interlaced files...
-        def expr(v):
-            if v.mimetype.startswith('image'):
-                img = Image.open(StringIO(v.contents))
-                if img.format == 'PNG' and img.info.get('interlace'):
-                    # PIL raises an IOError if the PNG is interlaced
-                    # so we need that workaround for now...
-                    return u'Bilder (keine Vorschau möglich)'
-                return u'Bilder (Vorschau)'
-            return u''
-        attachments = sorted(self.attachments, key=expr)
-        grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
-                   for x in groupby(attachments, expr)]
-        return grouped
-
     def __unicode__(self):
         return '%s - %s' % (
             self.topic.title,
@@ -937,11 +919,6 @@ class Attachment(object):
             if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
                 img = Image.open(StringIO(self.contents))
-                if img.format == 'PNG' and img.info.get('interlace'):
-                    # PIL raises an IOError if the PNG is interlaced
-                    # so we need that workaround for now...
-                    return u'<a href="%s" type="%s">%s herunterladen</a>' % (
-                        url, self.mimetype, self.name)
 
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
