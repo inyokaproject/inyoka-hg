@@ -104,19 +104,19 @@
           </p>
         </td>
         {% if topic.author_id == USER.id %}
-        <td class="view_count" style="background-color:#FFFBF0">
+        <td class="view_count" style="background-color: #F8F6F1">
         {% else %}
         <td class="view_count">
         {% endif %}
          {{ topic.view_count }}</td>
         {% if topic.author_id == USER.id %}
-        <td class="post_count" style="background-color:#FFFBF0">
+        <td class="post_count" style="background-color: #F8F6F1">
         {% else %}
         <td class="post_count">
         {% endif %}
          {{ topic.post_count - 1 }}</td>
         {% if topic.author_id == USER.id %}
-        <td class="last_post" style="background-color:#FFFBF0">
+        <td class="last_post" style="background-color: #F8F6F1">
         {% else %}
         <td class="last_post">
         {% endif %}
