@@ -203,7 +203,7 @@ $(document).ready(function() {
 
   $('#user_error_report_link').click(function() {
       $('#user_error_report').fadeIn('slow');
-      $('#id_title')[0].focus();
+      $('#id_uer_title')[0].focus();
       $('#user_error_report input[@name="hide"]').click(function() {
         $('#user_error_report').fadeOut('slow');
         return false;
