@@ -20,7 +20,7 @@
     open so that we can eventually switch to Postgres if there are good reasons
     for it.
 
-    Additionally Jinja 1.2 or higher is required as well as xapian for the
+    Additionally Jinja 2.0 or higher is required as well as xapian for the
     full text search facilities.  For the planet application the feedparser
     library must be installed.  Additionally chardet is recommended so that
     it can better guess broken encodings of feeds.  For the pastebin, wiki and
