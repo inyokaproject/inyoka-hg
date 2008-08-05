@@ -670,7 +670,7 @@ def user_edit(request, username):
                         u'diesem Namen existiert bereits'])
         if form.is_valid():
             #: set the user attributes, avatar and forum privileges
-            for key in ('is_active', 'date_joined',
+            for key in ('status', 'date_joined', 'banned_until',
                         'website', 'interests', 'location', 'jabber', 'icq',
                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
@@ -691,9 +691,6 @@ def user_edit(request, username):
 
             if data['new_password']:
                 user.set_password(data['new_password'])
-
-            if data['banned'] != user.banned:
-                user.banned = data['banned']
 
             # permissions
             permissions = 0

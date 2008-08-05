@@ -212,7 +212,7 @@ def activate(request, action='', username='', activation_key=''):
         return HttpResponseRedirect(href('portal'))
     else:
         if check_activation_key(user, activation_key):
-            user.is_active = True
+            user.status = 1
             user.save()
             flash(u'Du wurdest erfolgreich aktiviert und kannst dich nun '
                   u'einloggen.', True)
@@ -232,7 +232,7 @@ def resend_activation_mail(request, username):
               u'haben, sind die alten Aktivierungslink nicht mehr gültig, '
               u'du erhältst deshalb eine weitere Mail mit einem neuen Link.')
 
-    if user.is_active:
+    if user.status > 0:
         flash(u'Das Benutzerkonto von „%s“ ist schon aktiviert worden!' %
               escape(user.username), False)
         return HttpResponseRedirect(href('portal'))

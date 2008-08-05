@@ -559,6 +559,23 @@ def fix_suggestion_owner_to_be_null(m):
     ''')
 
 
+def new_user_status(m):
+    """
+    Replace `user.is_active` by `user.status`. rename user.banned to
+    banned_until, because the status of being banned is now saved as `status`.
+    Set status to 2 if user is banned.
+    """
+    m.engine.execute('''
+        ALTER TABLE portal_user
+            CHANGE COLUMN is_active status tinyint(1) NOT NULL DEFAULT 0,
+            CHANGE COLUMN banned banned_until datetime default NULL;
+        UPDATE portal_user
+            SET status = 2
+            WHERE banned_until;
+    ''')
+
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -572,6 +589,6 @@ MIGRATIONS = [
     add_permissions, add_post_pub_date_index, drop_comment_title_column,
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
-    new_team_icon_system, fix_suggestion_owner_to_be_null
+    new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
     # add_forum_atime_column
 ]

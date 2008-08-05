@@ -7,7 +7,8 @@
     permission system and our own administration center.
 
     :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs,
-                                       Benjamin Wiegand, Christoph Hack.
+                                       Benjamin Wiegand, Christoph Hack,
+                                       Marian Sigler.
     :license: GNU GPL.
 """
 import os
@@ -52,6 +53,13 @@ PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
 ])]
 PERMISSION_NAMES = dict((i, desc) for i, name, desc in PERMISSIONS)
 PERMISSION_MAPPING = dict((name, i) for i, name, desc in PERMISSIONS)
+
+USER_STATUSES = {
+    0: 'inactive', #not yet activated
+    1: 'normal',
+    2: 'banned',
+    3: 'deleted', #deleted itself
+}
 
 
 class UserBanned(Exception):
@@ -205,9 +213,9 @@ class UserManager(models.Manager):
         user = self.create_user(username, email, password)
         if not send_mail:
             # save the user as an active one
-            user.is_active = True
+            user.status = 1
         else:
-            user.is_active = False
+            user.status = 0
             send_activation_mail(user)
         user.save()
         return user
@@ -228,8 +236,8 @@ class UserManager(models.Manager):
         """
         user = User.objects.get(username__iexact=username)
 
-        if user.banned is not None:
-            if not (user.banned.utctimetuple()[:3] ==
+        if user.is_banned:
+            if not (user.banned_until.utctimetuple()[:3] ==
                     datetime.utcnow().utctimetuple()[:3]):
                 raise UserBanned()
 
@@ -266,7 +274,7 @@ class User(models.Model):
         validator_list=[validators.isAlphaNumeric])
     email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
-    is_active = models.BooleanField('Aktiv', default=True)
+    status = models.IntegerField('Aktiv', default=0)
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)
     date_joined = models.DateTimeField('Anmeldedatum', default=datetime.utcnow)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True,
@@ -274,7 +282,7 @@ class User(models.Model):
     new_password_key = models.CharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
-    banned = models.DateTimeField('Gesperrt', null=True)
+    banned_until = models.DateTimeField('Gesperrt bis', null=True)
 
     # profile attributes
     post_count = models.IntegerField(u'Beiträge', default=0)
@@ -332,7 +340,9 @@ class User(models.Model):
 
     is_anonymous = property(lambda x: x.id == 1)
     is_authenticated = property(lambda x: not x.is_anonymous)
-    is_banned = property(lambda x: x.banned is not None)
+    is_active = property(lambda x: x.status == 1)
+    is_banned = property(lambda x: x.status == 2)
+    is_deleted = property(lambda x: x.status == 3)
 
     def inc_post_count(self):
         """Increment the post count in a safe way."""
@@ -515,7 +525,7 @@ def deactivate_user(user):
     #        _set_anonymous_name()
     #
     #_set_anonymous_name()
-    user.is_active = 0
+    user.status = 3
     user.avatar = user.coordinates_long = user.coordinates_lat = None
     user.icq = user.jabber = user.msn = user.aim = user.yim = \
         user.signature = user.gpgkey = user.location = \

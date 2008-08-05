@@ -210,8 +210,14 @@ class EditUserForm(forms.Form):
     confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
         required=False, widget=forms.PasswordInput(render_value=False))
     email = forms.CharField(label=u'E-Mail', required=False)
-    is_active = forms.BooleanField(label=u'Aktiv', required=False)
-    banned = forms.DateTimeField(label=u'Sperrung', required=False)
+    status = forms.ChoiceField(label=u'Status', required=False,
+                                   choices=enumerate([
+                                       u'noch nicht aktiviert',
+                                       u'aktiv',
+                                       u'gebannt',
+                                       u'hat sich selbst gelöscht']))
+    banned_until = forms.DateTimeField(label=u'Automatisch entsperren', required=False,
+                       help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
     date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
 
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
@@ -267,12 +273,32 @@ class EditUserForm(forms.Form):
             if data['new_password'] == data['confirm_password']:
                 return data['confirm_password']
             raise forms.ValidationError(
-                u'Das Passwort muss mit der Paswortbestätigung übereinstimmen!'
+                u'Das Passwort muss mit der Passwortbestätigung übereinstimmen!'
             )
         else:
             raise forms.ValidationError(
                 u'Du musst ein Passwort und eine Passwortbestätigung angeben!'
             )
+
+    def clean_banned_until(self):
+        """
+        Keep the user from setting banned_until if status is not banned.
+        This is to avoid confusion because this was previously possible.
+        """
+        data = self.cleaned_data
+        if data['banned_until'] is None:
+            return
+        if data['status'] not in (2, '2'):
+            raise forms.ValidationError(
+                u'Der Benutzer ist gar nicht gebannt'
+            )
+        if data['banned_until'] < datetime.datetime.now():
+            #XXX: timezone does not work. but those few hours … :)
+            raise forms.ValidationError(
+                u'Der Zeitpunkt liegt in der Vergangenheit'
+            )
+        return data['banned_until']
+
 
 
 class EditGroupForm(forms.Form):

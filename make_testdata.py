@@ -175,7 +175,7 @@ def make_users():
         u.interests = word(markup=False)
         u.website = u'http://%s.de' % word(markup=False)
         if not randint(0, 3):
-            u.is_active = False
+            u.status = 0
         u.save()
         users.append(u)
         pb.update(percent)

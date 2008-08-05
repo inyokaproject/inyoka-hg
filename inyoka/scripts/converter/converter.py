@@ -311,7 +311,7 @@ def convert_users():
             'username':         unescape(row.username[:30]),
             'email':            row.user_email[:50] or '',
             'password':         'md5$%s' % row.user_password,
-            'is_active':        row.user_active,
+            'status':           row.user_active,
             'last_login':       datetime.fromtimestamp(row.user_lastvisit),
             'date_joined':      datetime.fromtimestamp(row.user_regdate),
             'post_count':       row.user_posts,
@@ -354,7 +354,7 @@ def convert_users():
     # ban users ;) Really q&d
     for ban in conn.execute(ban_table.select(ban_table.c.ban_userid != 0)):
         cursor = connection.cursor()
-        cursor.execute("UPDATE portal_user SET is_active=0 WHERE id=%i" % ban[1])
+        cursor.execute("UPDATE portal_user SET status=2 WHERE id=%i" % ban[1])
 
 
 def convert_forum():

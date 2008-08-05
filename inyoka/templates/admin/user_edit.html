@@ -27,7 +27,7 @@
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
   <h3>Benutzer bearbeiten</h3>
   <dl>
-    {{ render_form(form, ['username', 'is_active'], inline=true) }}
+    {{ render_form(form, ['username', 'status'], inline=true) }}
     <dt>{{ form.member_title.label }}</dt>
     <dd>{{ form.member_title }}{% if joined_groups %} 
       <div class="group_titles">
@@ -36,10 +36,10 @@
       {% endfor %}
       </div>
     {%- endif %}</dd>
-    {{ render_form(form, ['new_password', 'confirm_password', 'email', 'banned'], inline=true) }}
-    <dd class="note_link bann_user_event">
+    {{ render_form(form, ['new_password', 'confirm_password', 'email', 'banned_until'], inline=true) }}
+    {#    <dd class="note_link bann_user_event">
       Benutzer sperren
-    </dd>
+      </dd>#}
     <dt>Gruppenzugehörigkeiten editieren:</dt>
     <dd>
       <table class="user_groups">
@@ -105,14 +105,14 @@
     {{ not_joined_groups|sort|jsonencode }}
   );
 
-  var banned = $('input[@name="banned"]');
-  var bann_user_event = $('.bann_user_event');
+/*  var banned_until = $('input[@name="banned_until"]');
+//  var bann_user_event = $('.bann_user_event');
 
-  if (banned.val()) {
-    bann_user_event.text('Sperrung aufheben');
-    banned = new DateTimeField('input[@name="banned"]', false, true);
+  if (banned_until.val()) {
+//    bann_user_event.text('Sperrung aufheben');
+    banned_until = new DateTimeField('input[@name="banned_until"]', false, true);
   } else {
-    banned.hide()
+    banned_until.hide()
   }
 
   bann_user_event
@@ -127,7 +127,7 @@
         banned = new DateTimeField('input[@name="banned"]', false, true);
         bann_user_event.text('Sperrung aufheben');
       }
-    });
+    });*/
 
 
   var date_joined = null;

@@ -19,7 +19,7 @@ def get_expired_users():
     current_datetime = datetime.fromtimestamp(time.time())
     delta_to_activate = timedelta(hours=settings.ACTIVATION_HOURS)
 
-    for user in User.objects.filter(is_active=False):
+    for user in User.objects.filter(status=0):
         if (current_datetime - user.date_joined) > delta_to_activate:
             yield user
 
@@ -29,7 +29,7 @@ def get_inactive_users():
     current_datetime = datetime.fromtimestamp(time.time())
     delta = timedelta(days=settings.USER_INACTIVE_DAYS)
 
-    for user in User.objects.filter(is_active=True):
+    for user in User.objects.filter(status=1):
         if not (current_datetime - user.last_login) > delta:
             continue
 
