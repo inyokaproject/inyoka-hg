@@ -397,7 +397,7 @@ def do_edit(request, name):
                             escape(href('wiki', page.name)),
                             escape(page.name),
                             action
-                        ))
+                        ), True)
                 else:
                     page = Page.objects.create(user=request.user,
                                                remote_addr=remote_addr,
@@ -407,7 +407,7 @@ def do_edit(request, name):
                           u'erfolgreich angelegt.' % (
                         escape(href('wiki', page.name)),
                         escape(page.name)
-                    ))
+                    ), True)
 
                 # send notifications
                 for s in Subscription.objects.filter(wiki_page=page,
@@ -440,7 +440,7 @@ def do_edit(request, name):
     if merged_this_request:
         flash(u'Während du die Seite geöffnet hattest wurde sie von '
               u'einem anderen Benutzer ebenfalls bearbeitet.  Bitte '
-              u'kontrolliere ob das Zusammenführen der Änderungen '
+              u'kontrolliere, ob das Zusammenführen der Änderungen '
               u'zufriedenstellend funktioniert hat.')
 
     # update session info
@@ -676,7 +676,7 @@ def do_attach(request, name):
     """
     page = Page.objects.get_by_name(name)
     if page.rev.attachment_id is not None:
-        flash(u'Anhänge in Anhänge sind nicht erlaubt!')
+        flash(u'Anhänge in Anhängen sind nicht erlaubt!', False)
         return HttpResponseRedirect(url_for(page))
     attachments = Page.objects.get_attachment_list(name)
     attachments = [Page.objects.get_by_name(i) for i in attachments]
@@ -712,7 +712,7 @@ def do_attach(request, name):
         if ap is not None and (ap.rev.attachment is None or
                                not d.get('override', False)):
             flash(u'Es existiert bereits eine Seite oder ein Anhang mit ' +
-                  'diesem Namen.')
+                  'diesem Namen.', False)
             return context
         remote_addr = request.META.get('REMOTE_ADDR')
         if ap is None:
@@ -733,7 +733,7 @@ def do_attach(request, name):
         attachments = Page.objects.get_attachment_list(name, nocache=True)
         attachments = [Page.objects.get_by_name(i) for i in attachments]
         context['attachments'] = attachments
-        flash(u'Der Dateianhang wurde erfolgreich gespeichert.')
+        flash(u'Der Dateianhang wurde erfolgreich gespeichert.', True)
         if ap.metadata.get('weiterleitung'):
             url = href('wiki', ap, redirect='no')
         else:
@@ -769,7 +769,7 @@ def do_attach_edit(request, name):
                         note=d.get('note', u''),
                         attachment_filename=attachment_filename,
                         attachment=attachment)
-            flash(u'Der Dateianhang wurde erfolgreich bearbeitet.')
+            flash(u'Der Dateianhang wurde erfolgreich bearbeitet.', True)
             return HttpResponseRedirect(url_for(page))
     return {
         'form': form,
@@ -781,7 +781,7 @@ def do_prune(request, name):
     """Clear the page cache."""
     page = Page.objects.get_by_name(name)
     page.prune()
-    flash(u'Der Seitencache wurde geleert.')
+    flash(u'Der Seitencache wurde geleert.', True)
     return HttpResponseRedirect(page.get_absolute_url())
 
 
