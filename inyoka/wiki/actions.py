@@ -307,6 +307,11 @@ def do_edit(request, name):
     except Page.DoesNotExist:
         page = None
         if not has_privilege(request.user, name, 'create'):
+            if has_privilege(request.user, u'%s/%s' % (
+                                           storage['wiki_newpage_template'],
+                                           name),
+                             'create'):
+                return HttpResponseRedirect(href('wiki', storage['wiki_newpage_template'], name, action=edit))
             return AccessDeniedResponse()
         current_rev_id = ''
     else:
