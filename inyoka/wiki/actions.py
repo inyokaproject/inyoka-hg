@@ -163,13 +163,21 @@ def do_missing_page(request, name, _page=None):
             Like ``similar`` but contains a list of pages that refer to this
             page with links.
     """
+    can_create = has_privilege(request.user, name, 'create')
+    if can_create:
+        create_link = href('wiki', name, action='edit')
+    else:
+        new_name = u'%s/%s' % (storage['wiki_newpage_root'], name)
+        if has_privilege(request.user, new_name, 'create'):
+            create_link = href('wiki', new_name, action='edit')
+        else:
+            create_link = None
+
     return {
         'page':         _page,
         'page_name':    name,
-        'create_link':  href('wiki', storage['wiki_newpage_root'],
-                             name, action='edit'),
+        'create_link':  create_link,
         'title':        get_pagetitle(name),
-        'can_create':   has_privilege(request.user, name, 'create'),
         'similar': [{
             'name':     x,
             'title':    get_pagetitle(x)

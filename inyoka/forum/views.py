@@ -981,7 +981,7 @@ def delete_post(request, post_id):
     else:
         if request.method == 'POST':
             if 'cancel' in request.POST:
-                flash(u'Das löschen wurde abgebrochen.')
+                flash(u'Das Löschen wurde abgebrochen.')
             else:
                 session.delete(post)
                 session.commit()

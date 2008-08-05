@@ -25,7 +25,7 @@ from inyoka.utils.html import escape, cleanup_html
 from inyoka.planet.models import Blog, Entry
 
 
-HTML_MIMETYPES = set(['text/html', 'application/xml+xhtml'])
+HTML_MIMETYPES = set(['text/html', 'application/xml+xhtml', 'application/xhtml+xml'])
 _par_re = re.compile(r'\n{2,}')
 
 
@@ -63,7 +63,6 @@ def sync():
                 debug(' no guid found, skipping')
                 continue
 
-            # if an entry for this guid exists already we skip the entry
             try:
                 old_entry = Entry.objects.get(guid=guid)
             except Entry.DoesNotExist:

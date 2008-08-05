@@ -12,7 +12,7 @@
     names of the privileges on the frontend.  Internally the names of the
     privileges are mapped to integer flags.
 
-    All previlege functions consume either the privilege flags or the internal
+    All privilege functions consume either the privilege flags or the internal
     short name of the privilege.  The shortnames are specified in the
     `privilege_map` dict and different from the user interface which uses
     translated versions of the variables.
