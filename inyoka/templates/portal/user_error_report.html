@@ -1,6 +1,6 @@
 {#
     portal/user_error_report
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~
 
     Enables a user to report an error
 
@@ -9,16 +9,16 @@
 #}
 
 {%- extends 'portal/overall.html' %}
-{% set title_trace = ['Fehler melden'] %}
+{% set title_trace = ['Ticket schreiben'] %}
 {% set active_app = 'bugs' %}
 {% from 'macros.html' import render_form %}
 
 {% block appheader %}
   <h1>Inyoka</h1>
-  <h2>Fehler melden</h2>
+  <h2>Ticket schreiben</h2>
 {% endblock %}
 {% block portal_content %}
-  <h3>Fehler in Inyoka melden</h3>
+  <h3>Ticket für Inyoka schreiben</h3>
   {%- if spam %}
   <div>Dein Eintrag wurde als Spam eingestuft. Wenn es keiner war, schreib ein Anliegen bitte per E-Mail an "webteam", dann das a mit dem lustigen Kringel drumrum, und dann diese Domain (ubuntuusers.de)</div>
   {%- else %}
@@ -32,7 +32,7 @@
       {%- if not show_url_field %}
       {{- form.url }}
       {%- endif -%}
-      <input type="submit" value="Fehlermeldung abschicken" /></p>
+      <input type="submit" value="Ticket abschicken" /></p>
   </form>
   {%- endif %}
 

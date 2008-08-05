@@ -17,8 +17,9 @@ from md5 import md5
 from PIL import Image
 from time import time
 from StringIO import StringIO
-from mimetypes import guess_type
 from datetime import datetime
+from mimetypes import guess_type
+from itertools import groupby
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
@@ -707,6 +708,23 @@ class Post(object):
         new_topic.forum.invalidate_topic_cache()
         old_topic.forum.invalidate_topic_cache()
 
+    @property
+    def grouped_attachments(self):
+        #XXX: damn workaround for some PIL bugs... (e.g interlaced png)
+        def expr(v):
+            if v.mimetype.startswith('image') and v.mimetype in SUPPORTED_IMAGE_TYPES:
+                img = Image.open(StringIO(v.contents))
+                if img.format == 'PNG' and img.info.get('interlace'):
+                    # PIL raises an IOError if the PNG is interlaced
+                    # so we need that workaround for now...
+                    return u'Bilder (keine Vorschau möglich)'
+                return u'Bilder (Vorschau)'
+            return u''
+        attachments = sorted(self.attachments, key=expr)
+        grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
+                   for x in groupby(attachments, expr)]
+        return grouped
+
     def __unicode__(self):
         return '%s - %s' % (
             self.topic.title,
@@ -919,6 +937,10 @@ class Attachment(object):
             if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
                 img = Image.open(StringIO(self.contents))
+                if img.format == 'PNG' and img.info.get('interlace'):
+                    return u'<a href="%s" type="%s">%s anschauen</a>' % (
+                        url, self.mimetype, self.name)
+
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
                 img.save(img_path, img.format)
@@ -938,7 +960,7 @@ class Attachment(object):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return file(self.filename, mode)
+        return file(self.filename.encode('utf-8'), mode)
 
     def get_absolute_url(self):
         return href('media', self.file)

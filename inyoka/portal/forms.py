@@ -404,7 +404,7 @@ class UserErrorReportForm(forms.Form):
     text = forms.CharField(label=u'ausführliche Beschreibung',
                            widget=forms.Textarea(attrs={'rows': 3}))
     url = forms.URLField(widget=forms.HiddenInput, label=u'Adresse der Seite,'
-                                               u' auf der der Fehler auftrat')
+                                            u' auf die sich das Ticket bezieht')
 
     def clean_url(self):
         if not is_safe_domain(self.cleaned_data['url']):

@@ -483,27 +483,35 @@ dl.attachments dd a img.preview {
   border-bottom: 1px solid #000;
 }
 
-ul.image_list {
+ul.attr_list {
   list-style: none;
 }
 
-ul.image_list li {
+ul.attr_list li {
   display: inline;
   margin-bottom: 5px;
   padding: 0px;
 }
 
-ul.image_list a img {
+ul.attr_list a img {
   border: 1px solid #ccc;
   background-color: #f2f2f2;
   padding: 5px;
   margin: 0 10px;
 }
 
-ul.image_list a:hover img {
+ul.attr_list a:hover img {
   border-color: #9d520f;
   background-color: #e5d0a7;
   opacity: 0.9;
+}
+
+ul.attr_list.broken {
+  list-style disc;
+}
+
+ul.attr_list.broken li {
+  display: block;
 }
 
 div.code, pre {

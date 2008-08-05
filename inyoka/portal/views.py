@@ -1188,7 +1188,7 @@ def user_error_report(request):
                 reporter = reporter,
             )
 
-            flash(u'Vielen Dank, deine Fehlermeldung wurde gespeichert! '\
+            flash(u'Vielen Dank, dein Ticket wurde gespeichert! '\
                   u'Wir werden uns so schnell wie möglich darum kümmern.',
                   True)
             return HttpResponseRedirect(data['url'])
