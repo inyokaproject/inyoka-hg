@@ -54,6 +54,7 @@ class WikiSearchAdapter(SearchAdapter):
             user=rev.user_id,
             date=rev.change_date,
             auth=rev.page.name,
-            text=rev.text.value
+            text=rev.text.value,
+            category=rev.attachment_id and '__attachment__' or None
         )
 search.register(WikiSearchAdapter())
