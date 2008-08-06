@@ -566,9 +566,11 @@ def new_user_status(m):
     Set status to 2 if user is banned.
     """
     m.engine.execute('''
+        BEGIN;
         ALTER TABLE portal_user
             CHANGE COLUMN is_active status tinyint(1) NOT NULL DEFAULT 0,
             CHANGE COLUMN banned banned_until datetime default NULL;
+        COMMIT;
         UPDATE portal_user
             SET status = 2
             WHERE banned_until;
