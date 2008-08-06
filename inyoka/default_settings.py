@@ -144,6 +144,9 @@ MIDDLEWARE_CLASSES = (
     'inyoka.middlewares.security.SecurityMiddleware'
 )
 
+# Only upload via memory and just 2.5mb, until we kick django
+FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
+
 TEMPLATE_DIRS = (
     join(BASE_PATH, 'templates'),
 )
