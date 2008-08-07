@@ -1,3 +1,7 @@
+#class InyokaIsOffline(NotImplementedError):
+#    pass
+#raise InyokaIsOffline()
+
 import site, os, sys
 interpreter = 'python%d.%d' % sys.version_info[:2]
 root = os.path.dirname(__file__)
