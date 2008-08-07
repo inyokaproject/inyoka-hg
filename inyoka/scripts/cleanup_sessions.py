@@ -10,6 +10,8 @@
     :license: GNU GPL.
 """
 from datetime import datetime, timedelta
+# fix import error for now
+from inyoka import application
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.sessions import SESSION_DELTA
 #from django.contrib.sessions.models import Session
