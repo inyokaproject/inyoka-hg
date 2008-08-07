@@ -48,7 +48,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      PlanetFeedSelectorForm, WikiFeedSelectorForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
-from inyoka.portal.user import User, Group, deactivate_user, UserBanned
+from inyoka.portal.user import User, Group, deactivate_user, UserBanned, \
+     reactivate_user, TooLateException, InvalidDataException
 from inyoka.portal.utils import check_login, calendar_entries_for_month, \
     check_activation_key, send_activation_mail, send_new_user_password
 from inyoka.utils.antispam import is_spam
@@ -672,7 +673,8 @@ def usercp_deactivate(request):
     """
     This page allows the user to deactivate his account.
     """
-    #TODO: we should additionally send an email with a link etc
+    #XXX: this is "banned safe", so we could allow banned users to also delete 
+    #     their accounts, eg by prompting for the username here
     if request.method == 'POST':
         form = DeactivateUserForm(request.POST)
         if form.is_valid():
@@ -680,6 +682,7 @@ def usercp_deactivate(request):
             if request.user.check_password(data['password_confirmation']):
                 deactivate_user(request.user)
                 User.objects.logout(request)
+                flash('Dein Account wurde deaktiviert', True)
                 return HttpResponseRedirect(href('portal'))
             else:
                 form.errors['password_confirmation'] = [u'Das eingegebene'
@@ -704,6 +707,23 @@ def usercp_userpage(request):
           % escape(href('portal', 'usercp')))
     return HttpResponseRedirect(href('wiki', 'Benutzer',
         request.user.username, action='edit'))
+
+
+@templated('portal/usercp/reactivate.html')
+def usercp_reactivate(request):
+    if request.method == 'POST' and request.POST.get('userdata'):
+        try:
+            user = reactivate_user(request.POST.get('userdata'))
+        except TooLateException:
+            return {'failed':
+                    u'Seit der Löschung ist mehr als ein Monat vergangen!'}
+        except InvalidDataException:
+            return {'failed':
+                    u'Die eingebenen Daten sind ungültig!'}
+        else:
+            send_new_user_password(user)
+            return {'success': True, 'user': user}
+
 
 
 @templated('portal/privmsg/index.html')

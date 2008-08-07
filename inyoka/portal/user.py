@@ -14,8 +14,11 @@
 import os
 import cPickle
 from datetime import datetime
-from sha import sha
-from md5 import md5
+try:
+    from hashlib import md5, sha1
+except ImportError:
+    from md5 import md5
+    from sha import sha as sha1
 from os import path
 from PIL import Image
 from StringIO import StringIO
@@ -28,6 +31,7 @@ from inyoka.utils.mail import send_mail
 from inyoka.utils.html import escape
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
+from inyoka.utils.templating import render_template
 
 
 UNUSABLE_PASSWORD = '!'
@@ -77,7 +81,7 @@ def get_hexdigest(salt, raw_password):
     """
     if isinstance(raw_password, unicode):
         raw_password = raw_password.encode('utf-8')
-    return sha(str(salt) + raw_password).hexdigest()
+    return sha1(str(salt) + raw_password).hexdigest()
 
 
 def check_password(raw_password, enc_password, convert_user=None):
@@ -237,8 +241,9 @@ class UserManager(models.Manager):
         user = User.objects.get(username__iexact=username)
 
         if user.is_banned:
-            if not (user.banned_until.utctimetuple()[:3] ==
-                    datetime.utcnow().utctimetuple()[:3]):
+            if user.banned_until is None or \
+               (user.banned_until.utctimetuple()[:3] !=
+                datetime.utcnow().utctimetuple()[:3]):
                 raise UserBanned()
 
         if user.check_password(password, auto_convert=True):
@@ -511,26 +516,66 @@ class User(models.Model):
 
 def deactivate_user(user):
     """
-    This deactivates a user, removes all personal information and creates a
-    random anonymous name.
+    This deactivates a user and removes all personal information.
+    To avoid abuse he is sent an email allowing him to reactivate the
+    within the next month.
     """
-    #def _set_anonymous_name():
-    #    """Sets the user's name to a random string"""
-    #    new_name = generate_word()
-    #    try:
-    #        User.objects.get(username__iexact=new_name)
-    #    except User.DoesNotExist:
-    #        user.username = new_name
-    #    else:
-    #        _set_anonymous_name()
-    #
-    #_set_anonymous_name()
+
+    userdata = {
+        'id': user.id,
+        'email': user.email,
+        'status': user.status,
+        'time': datetime.now(),
+    }
+    dump = cPickle.dumps(userdata)
+    hash = sha1(dump + settings.SECRET_KEY).digest()
+    userdata = '\n'.join((dump, hash)).encode('base64')
+
+    subject = u'Deaktivierung deines Accounts „%s“ auf ubuntuusers.de' % \
+                  user.username
+    text = render_template('mails/account_deactivate.txt', {
+        'user': user,
+        'userdata': userdata,
+    })
+    user.email_user(subject, text, settings.INYOKA_SYSTEM_USER_EMAIL)
+
     user.status = 3
-    user.avatar = user.coordinates_long = user.coordinates_lat = None
-    user.icq = user.jabber = user.msn = user.aim = user.yim = \
-        user.signature = user.gpgkey = user.location = \
-        user.occupation = user.interests = user.website = ''
+    if not user.is_banned:
+        user.email = 'user%d@ubuntuusers.de.invalid' % user.id
+    user.set_unusable_password()
+    user.groups.remove(*user.groups.all())
+    user.avatar = user.coordinates_long = user.coordinates_lat = \
+        user.new_password_key = user._primary_group = None
+    user.icq = user.jabber = user.msn = user.aim = user.yim = user.skype = \
+        user.wengophone = user.sip = user.location = user.signature = \
+        user.gpgkey = user.location = user.occupation = user.interests = \
+        user.website = user.launchpad = user.member_title = ''
     user.save()
+
+
+class TooLateException(Exception):
+    pass
+class InvalidDataException(Exception):
+    pass
+
+def reactivate_user(userdata):
+    if '\n' not in userdata:
+        raise InvalidDataException()
+    dump, hash = userdata.decode('base64').rsplit('\n', 1)
+    if sha1(dump + settings.SECRET_KEY).digest() != hash:
+        raise InvalidDataException()
+    userdata = cPickle.loads(dump)
+    if (datetime.now() - userdata['time']).days > 33:
+        raise TooLateException()
+    user = User.objects.get(id=userdata['id'])
+    user.email = userdata['email']
+    user.status = userdata['status']
+    if user.banned_until and user.banned_until < datetime.now():
+        user.status = 1
+        user.banned_until = None
+    user.save()
+    return user
+
 
 
 from inyoka.wiki.parser import parse, render, RenderContext

@@ -1,0 +1,36 @@
+{#
+    portal/usercp/reactivate.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    On this page the user can reactivate his account.
+
+    :copyright: 2008 Marian Sigler
+    :license: GNU GPL.
+#}
+
+{%- extends 'portal/usercp/overall.html' %}
+{% set title_trace = ['Benutzer wiederherstellen'] %}
+{% set selected = 'deactivate' %}
+
+{% block appheader %}
+  <h1><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></h1>
+  <h2><a href="{{ href('portal', 'reactivate') }}">Benutzer wiederherstellen</a></h2>
+{% endblock %}
+{% block portal_content %}
+  <h3>Benutzer reaktivieren</h3>
+{% if not failed and not success %}
+  <p>
+    Hier kannst du deinen Benutzer wiederherstellen, wenn er gelöscht wurde. Bitte beachte, dass das nur einen Monat nach der Löschung möglich ist.
+  </p>
+  <form method="post" action="">
+    <p>Bitte gib die Zeichenkette, die in der E-Mail enthalten war, hier ein:</p>
+    <p><textarea name="userdata"></textarea></p>
+    <p><input type="submit" value="Benutzer reaktivieren" /></p>
+    </p>
+  </form>
+{% elif success %}
+<p>Der Benutzer {{ user.username }} wurde wiederhergestellt. Dir wurde eine E-Mail geschickt, mit der du dir ein neues Passwort setzen kannst.</p>
+{% elif failed %}
+  <p>{{ failed }}</p>
+{% endif %}
+{% endblock %}
