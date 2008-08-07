@@ -8,6 +8,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import time
+import inyoka.application
 from inyoka.conf import settings
 settings.DATABASE_DEBUG = False
 from sqlalchemy.sql import desc
