@@ -23,7 +23,7 @@ from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
 
-_word_re = re.compile(r'\b[\w:\.][\w:\.]{2,20}\b', re.U)
+_word_re = re.compile(r'\b[\w:\.][\w:\.]{,20}\b', re.U)
 
 _token_re = re.compile(r'''(?x)
     (?P<operator>[()-])     |
