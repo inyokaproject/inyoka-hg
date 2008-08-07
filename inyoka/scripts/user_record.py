@@ -9,6 +9,7 @@
 """
 from time import time
 from datetime import datetime, timedelta
+import inyoka.utils.http
 from inyoka.utils.sessions import SESSION_DELTA
 from inyoka.utils.storage import storage
 from inyoka.portal.models import SessionInfo
