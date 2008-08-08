@@ -24,7 +24,7 @@ def ikhaya_article(args, match, article_id):
     # because there /\d+/ is for the pagination.
     try:
         article = Article.objects.get(id=int(article_id))
-    except Article.DoesNotExist:
+    except (Article.DoesNotExist, ValueError):
         return
     return href('ikhaya', article.slug)
 

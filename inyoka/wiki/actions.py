@@ -131,7 +131,11 @@ def do_metaexport(request, name):
     of backlinks etc.  Like the `do_show` action this requires read access to
     the page.
     """
-    page = Page.objects.get_by_name(name)
+    try:
+        page = Page.objects.get_by_name(name)
+    except Page.DoesNotExist:
+        return HttpResponse(u'', content_type='text/plain; charset=utf-8',
+                            status=404)
     metadata = []
     for key, values in page.metadata.iteritems():
         for value in values:

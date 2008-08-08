@@ -10,7 +10,7 @@
 
 
 <form action="{{ post|url('delete')|e }}" method="post">
-  <p>Möchtest du den Beitrag <a href="{{ post|url('show')|e }}">{{ post.id }}</a> unwiederruflich löschen?</p>
+  <p>Möchtest du den Beitrag <a href="{{ post|url('show')|e }}">{{ post.id }}</a> unwiderruflich löschen?</p>
   <p>
     <input type="submit" value="Löschen" />
     <input type="submit" name="cancel" value="Abbrechen" />

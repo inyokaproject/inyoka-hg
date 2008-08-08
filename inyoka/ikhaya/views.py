@@ -209,7 +209,11 @@ def suggestionlist(request):
 def suggestion_delete(request, suggestion):
     if request.method == 'POST':
         if not 'cancel' in request.POST:
-            s = Suggestion.objects.get(id=suggestion)
+            try:
+                s = Suggestion.objects.get(id=suggestion)
+            except Suggestion.DoesNotExist:
+                flash('Diesen Vorschlag gibt es nicht.', False)
+                return HttpResponseRedirect(href('ikhaya', 'suggestions'))
             if request.POST.get('note'):
                 args = {
                     'title':    s.title,
@@ -225,8 +229,13 @@ def suggestion_delete(request, suggestion):
             flash(u'Der Vorschlag wurde nicht gelöscht.')
         return HttpResponseRedirect(href('ikhaya', 'suggestions'))
     else:
+        try:
+            s = Suggestion.objects.get(id=suggestion)
+        except Suggestion.DoesNotExist:
+            flash('Diesen Vorschlag gibt es nicht.', False)
+            return HttpResponseRedirect(href('ikhaya', 'suggestions'))
         flash(render_template('ikhaya/delete_suggestion.html',
-              {'s': Suggestion.objects.get(id=suggestion)}))
+              {'s': s}))
         return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
 def suggestion_assign_to(request, suggestion, username):
