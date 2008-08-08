@@ -552,6 +552,7 @@ class Post(object):
 
     @staticmethod
     def url_for_post(id, paramstr=None):
+        #XXX: shouldn't we use post.position here?
         row = dbsession.execute(select(
             [func.count(post_table.c.id), topic_table.c.slug], and_(
                 topic_table.c.id == post_table.c.topic_id,
@@ -584,9 +585,12 @@ class Post(object):
 
     def edit(self, request, text):
         """
-        Changes the text of the post. If the post is already stored in the
-        database, it creates a post revision containing the old text.
+        Change the text of the post. If the post is already stored in the
+        database, create a post revision containing the old text.
+        If the text has not changed, return.
         """
+        if self.text == text:
+            return
         if self.id:
             rev = PostRevision()
             rev.post = self
@@ -595,6 +599,17 @@ class Post(object):
             self.has_revision = True
         self.text = text
         self.rendered_text = self.render_text(request)
+
+    @property
+    def page(self):
+        """
+        this returns None if page is 1, use post.page or 1 if you need number
+        """
+        page = self.position // POSTS_PER_PAGE + 1
+        if page == 1:
+            return None
+        return page
+
 
     def deregister(self):
         """
@@ -725,6 +740,28 @@ class Post(object):
         grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
                    for x in groupby(attachments, expr)]
         return grouped
+
+    def check_ownpost_limit(self, type='edit'):
+        if type == 'edit':
+            if self.topic.last_post_id == self.id:
+                t = settings.FORUM_OWNPOST_EDIT_LIMIT[0]
+            else:
+                t = settings.FORUM_OWNPOST_EDIT_LIMIT[1]
+        elif type == 'delete':
+            if self.topic.last_post_id == self.id:
+                t = settings.FORUM_OWNPOST_DELETE_LIMIT[0]
+            else:
+                t = settings.FORUM_OWNPOST_DELETE_LIMIT[1]
+        else:
+            raise KeyError("invalid type: choose one of (edit, delete)")
+
+        if t == 0:
+            return False
+        if t == -1:
+            return True
+        delta = datetime.now() - self.pub_date
+        delta = delta.days * 86400 + delta.seconds
+        return delta < t
 
     def __unicode__(self):
         return '%s - %s' % (

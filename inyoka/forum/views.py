@@ -288,6 +288,10 @@ def viewtopic(request, topic_slug, page=1):
     can_mod = check_privilege(privileges, 'moderate')
     can_reply = check_privilege(privileges, 'reply')
     can_vote = check_privilege(privileges, 'vote')
+    can_edit = lambda post: post.author_id == request.user.id and \
+        can_reply and post.check_ownpost_limit('edit')
+    can_delete = lambda post: can_reply and post.author_id == request.user.id \
+        and post.check_ownpost_limit('delete')
 
     return {
         'topic':             t,
@@ -299,11 +303,11 @@ def viewtopic(request, topic_slug, page=1):
         'show_vote_results': request.GET.get('action') == 'vote_results',
         'can_vote':          polls and bool([True for p in polls if p.can_vote]),
         'can_moderate':      can_mod,
-        'can_edit':          lambda post: can_mod or (post.author_id ==
-                                          request.user.id and can_reply),
+        'can_edit':          can_edit,
         'can_reply':         can_reply,
         'can_vote':          can_vote,
-        'team_icon_url':     team_icon
+        'can_delete':        can_delete,
+        'team_icon_url':     team_icon,
     }
 
 
@@ -384,8 +388,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if post:
         if not (check_privilege(privileges, 'moderate') or
                 (post.author_id == request.user.id and
-                 check_privilege(privileges, 'reply'))):
-            return abort_access_denied(request)
+                 check_privilege(privileges, 'reply') and
+                 post.check_ownpost_limit('edit'))):
+            flash(u'Du darfst diesen Beitrag nicht bearbeiten!', False)
+            return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+                                             post.page))
     elif topic:
         if topic.locked:
             if not check_privilege(privileges, 'moderate'):
@@ -973,11 +980,18 @@ def delete_post(request, post_id):
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
-        return abort_access_denied(request)
+    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE) and not\
+       (post.author_id==request.user.id and post.check_ownpost_limit('delete')):
+        flash(u'Du darfst diesen Beitrag nicht löschen!', False)
+        return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+                                         post.page))
     if post.id == post.topic.first_post.id:
-        flash(u'Der erste Beitrag eines Themas darf nicht gelöscht werden.',
+        if post.topic.post_count == 1:
+            return HttpResponseRedirect(href('forum', 'topic',
+                                             post.topic.slug, 'delete'))
+        flash(u'Der erste Beitrag eines Themas darf nicht gelöscht werden!',
               success=False)
+
     else:
         if request.method == 'POST':
             if 'cancel' in request.POST:
@@ -990,7 +1004,8 @@ def delete_post(request, post_id):
                       success=True)
         else:
             flash(render_template('forum/post_delete.html', {'post': post}))
-    return HttpResponseRedirect(url_for(post.topic))
+    return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+                                     post.page))
 
 
 @templated('forum/revisions.html')
