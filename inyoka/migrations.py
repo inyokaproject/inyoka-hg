@@ -577,6 +577,18 @@ def new_user_status(m):
     ''')
 
 
+def add_post_has_revision(m):
+    """
+    Add a column `has_revision` to posts. This is to only show the
+    'show revisions' link when there actually are revisions.
+    """
+    m.engine.execute('''
+        BEGIN;
+        ALTER TABLE forum_post
+            ADD COLUMN `has_revision` TINYINT(1) NOT NULL DEFAULT 0 AFTER rendered_text;
+        COMMIT;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -592,5 +604,6 @@ MIGRATIONS = [
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
     new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
+    add_post_has_revision,
     # add_forum_atime_column
 ]

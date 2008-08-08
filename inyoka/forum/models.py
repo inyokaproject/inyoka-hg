@@ -592,6 +592,7 @@ class Post(object):
             rev.post = self
             rev.store_date = datetime.utcnow()
             rev.text = self.text
+            self.has_revision = True
         self.text = text
         self.rendered_text = self.render_text(request)
 
