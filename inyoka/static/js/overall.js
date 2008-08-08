@@ -137,8 +137,6 @@ $(document).ready(function() {
     $(document).click(function() {
       if (areaPopup.is(':visible'))
         areaPopup.hide();
-      if (loginForm && loginForm.is(':visible'))
-        loginForm.slideUp();
     });
   })();
 

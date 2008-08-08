@@ -248,6 +248,12 @@
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
       </div>
     </form>
+    <script type="text/javascript">
+      $(document).click(function() {
+        if (loginForm && loginForm.is(':visible'))
+          loginForm.slideUp();
+      });
+    </script>
     {%- endif %}
   </body>
 </html>
