@@ -13,7 +13,7 @@ import re
 from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
-from sqlalchemy.orm import eagerload, mapper
+from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 from inyoka.conf import settings
@@ -49,7 +49,7 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
     check_privilege
 from inyoka.forum.database import post_table, topic_table, forum_table, \
-    poll_option_table, attachment_table, user_table
+    poll_option_table, attachment_table
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -1309,44 +1309,6 @@ def newposts(request, page=1):
         'pagination': pagination,
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id)
-    }
-
-@templated('forum/authorsearch.html')
-def authorsearch(request, page=1, user=None):
-    '''
-    Until we've found a better solution ego- and authorsearch only display
-    posts instead of topics.
-    '''
-    egosearch = user is None
-    if egosearch:
-        user = request.user
-        url = href('forum', 'egosearch')
-        title = u'Eigene Beiträge'
-    else:
-        user = User.objects.get(username__iexact=user)
-        url = href('forum', 'author', user.username)
-        title = u'Beiträge von %s' % escape(user.username)
-
-    forum_ids = [f.id for f in filter_invisible(request.user,
-                                                 Forum.query.all())]
-#    posts = Post.query.filter_by(author_id=user.id) \
-#                .filter(topic_table.c.forum_id.in_(forum_ids)) \
-#                .options(eagerload('topic')).order_by(post_table.c.id.desc())
-
-    posts = session.query(mapper(Post, select([post_table.c.id, post_table.c.topic_id, post_table.c.hidden, post_table.c.pub_date, topic_table.c.slug, topic_table.c.title, topic_table.c.hidden.label('topic_hidden'), topic_table.c.author_id, user_table.c.username, forum_table.c.slug.label('forum_slug'), forum_table.c.name], (post_table.c.topic_id == topic_table.c.id) & (topic_table.c.author_id == user_table.c.id) & (topic_table.c.forum_id == forum_table.c.id) & (topic_table.c.forum_id.in_(forum_ids)) & (post_table.c.author_id == user.id) non_primary=True))
-
-    flash(u'Bis wir eine Möglichkeit gefunden haben, die Datenbankabfrage '
-          u'schneller zu machen, kann hier nur nach Beiträgen gesucht werden. '
-          u'Die <a href="%s">normale Suche</a> kann nach Themen suchen, ist '
-          u'aber nicht ganz aktuell.' % href('portal', 'search', area='forum',
-          sort='date', query='author:"%s"' % user.username))
-
-    pagination = Pagination(request, posts, page, TOPICS_PER_PAGE, url)
-    return {
-        'posts':        list(pagination.objects),
-        'pagination':   pagination.generate(),
-        'title':        title,
-        'user':         user,
     }
 
 
