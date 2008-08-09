@@ -75,7 +75,7 @@
 
       </tr>
       {%- else %}
-      <tr{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+      <tr{% if can_moderate and (topic.hidden or topic.reported) %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
         {% if topic.author_id == USER.id %}
         <td class="icon" style="background-color: #F6F4EF">
         {% else %}
@@ -91,8 +91,8 @@
           <p class="topic_title">
             {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
             {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-            {%- if topic.hidden %} [Verborgen] {% endif -%}
-            {%- if topic.reported %} [Gemeldet] {% endif -%}
+            {%- if can_moderate and topic.hidden %} [Verborgen] {% endif -%}
+            {%- if can_moderate and topic.reported %} [Gemeldet] {% endif -%}
             <a href="{{ topic|url }}">{{- topic.title|e -}}</a>
 
           </p>
