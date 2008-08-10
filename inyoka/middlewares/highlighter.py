@@ -8,7 +8,7 @@
 
     Keep in mind that this middleware does not stem the searchwords thus the
     number of highlighed words can (and will) be different from the number of
-    matches in the original document.  To improve that this highilghter
+    matches in the original document.  To improve that this highlighter
     accepts some more word characters after the match to complete the
     highlighted word.  So ``'complet'`` highlighlights both ``'completion'``
     and ``'complete'`` but not ``'autocomplete'``.
