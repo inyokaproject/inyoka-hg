@@ -41,10 +41,10 @@
     {% endif %}) und <a href="{{ diff.new_rev|url|e }}">der Revision
     {{ diff.new_rev.change_date|specificdatetimeformat|escape }}</a> (erstellt von
     {% if diff.new_rev.user %}
-      <a href="{{ diff.new_rev.user|url|e }}">{{ diff.old_rev.user.username|e
+      <a href="{{ diff.new_rev.user|url|e }}">{{ diff.new_rev.user.username|e
     }}</a>
     {%- else %}
-      {{ diff.old_rev.remote_addr|e }}
+      {{ diff.new_rev.remote_addr|e }}
     {% endif %}).
   </p>
   <p>
