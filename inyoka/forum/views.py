@@ -1277,7 +1277,7 @@ def markread(request, slug=None):
         for row in category_ids:
             Forum.query.get(row[0]).mark_read(user)
         user.save()
-        flash(u'Allen Foren wurden als gelesen markiert.')
+        flash(u'Alle Foren wurden als gelesen markiert.')
     return HttpResponseRedirect(href('forum'))
 
 
