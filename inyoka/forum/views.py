@@ -1174,6 +1174,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     updated=post.pub_date,
                     **kwargs
                 )
+            cache.set(feed, cache_key, 600)
 
     else:
         must_create = False
@@ -1248,9 +1249,9 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     updated=post.pub_date,
                     **kwargs
                 )
+            cache.set(cache_key, feed, 600)
 
     feed.truncate(count)
-    cache.set(cache_key, feed, 600)
     return feed.get_atom_response()
 
 
