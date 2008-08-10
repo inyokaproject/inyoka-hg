@@ -1,6 +1,8 @@
-#class InyokaIsOffline(NotImplementedError):
-#    pass
-#raise InyokaIsOffline()
+if 0:
+    def application(environ, start_response):
+        start_response('200 OK', [('Content-Type', 'text/plain')])
+        yield 'Inyoka ist wegen einer Aktualisierung kurzzeitig offline.'
+
 
 import site, os, sys
 interpreter = 'python%d.%d' % sys.version_info[:2]
