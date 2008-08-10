@@ -17,6 +17,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ (title_trace|default([]) + ['ubuntuusers.de'])|join(' › ') }}</title>
     {%- block html_head %}
+    {%- if deny_robots %}
+    <meta name="robots" content="{% if deny_robots == true %}noindex, nofollow{% else %}{{ deny_robots }}{% endif %}" />
+    {%- endif %}
     {#- This way the local stylesheets can override styles without problems. #}
     {%- set styles = ['main.css', 'markup.css'] + styles|default([]) -%}
     {%- for style in styles %}
