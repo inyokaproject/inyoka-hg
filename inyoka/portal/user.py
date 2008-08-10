@@ -34,7 +34,7 @@ from inyoka.utils.storage import storage
 from inyoka.utils.templating import render_template
 
 
-UNUSABLE_PASSWORD = '!'
+UNUSABLE_PASSWORD = '!$!'
 _ANONYMOUS_USER = _SYSTEM_USER = None
 DEFAULT_GROUP_ID = 1 # group id for all registered users
 PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
@@ -522,6 +522,7 @@ def deactivate_user(user):
     """
 
     userdata = {
+        'action': 'reactivate_user',
         'id': user.id,
         'email': user.email,
         'status': user.status,
@@ -565,6 +566,10 @@ def reactivate_user(userdata):
     if sha1(dump + settings.SECRET_KEY).digest() != hash:
         raise InvalidDataException()
     userdata = cPickle.loads(dump)
+    if 'action' not in userdata and userdata['action'] != 'user_reactivate':
+        #legacy support, can be removed at septemer 15th
+        if userdata['time'] > datetime(2008,8,11):
+            raise InvalidDataException()
     if (datetime.now() - userdata['time']).days > 33:
         raise TooLateException()
     user = User.objects.get(id=userdata['id'])

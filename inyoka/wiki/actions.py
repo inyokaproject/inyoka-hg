@@ -555,7 +555,8 @@ def do_log(request, name):
     return {
         'page':         page,
         'revisions':    list(pagination.objects),
-        'pagination':   pagination
+        'pagination':   pagination,
+        'deny_robots':  True,
     }
 
 
