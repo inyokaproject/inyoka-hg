@@ -17,6 +17,7 @@ from datetime import datetime, date
 from django.forms.models import model_to_dict
 from django import forms
 from inyoka.conf import settings
+from inyoka.utils import decode_confirm_data
 from inyoka.utils.text import get_random_password, human_number, normalize_pagename
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
 from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
@@ -35,6 +36,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
+from inyoka.utils.user import deactivate_user, reactivate_user
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -48,8 +50,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      PlanetFeedSelectorForm, WikiFeedSelectorForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
-from inyoka.portal.user import User, Group, deactivate_user, UserBanned, \
-     reactivate_user, TooLateException, InvalidDataException
+from inyoka.portal.user import User, Group, UserBanned
 from inyoka.portal.utils import check_login, calendar_entries_for_month, \
     check_activation_key, send_activation_mail, send_new_user_password
 from inyoka.utils.antispam import is_spam
@@ -682,7 +683,7 @@ def usercp_deactivate(request):
             if request.user.check_password(data['password_confirmation']):
                 deactivate_user(request.user)
                 User.objects.logout(request)
-                flash('Dein Account wurde deaktiviert', True)
+                flash('Dein Account wurde deaktiviert.', True)
                 return HttpResponseRedirect(href('portal'))
             else:
                 form.errors['password_confirmation'] = [u'Das eingegebene'
@@ -707,23 +708,6 @@ def usercp_userpage(request):
           % escape(href('portal', 'usercp')))
     return HttpResponseRedirect(href('wiki', 'Benutzer',
         request.user.username, action='edit'))
-
-
-@templated('portal/usercp/reactivate.html')
-def usercp_reactivate(request):
-    if request.method == 'POST' and request.POST.get('userdata'):
-        try:
-            user = reactivate_user(request.POST.get('userdata'))
-        except TooLateException:
-            return {'failed':
-                    u'Seit der Löschung ist mehr als ein Monat vergangen!'}
-        except InvalidDataException:
-            return {'failed':
-                    u'Die eingebenen Daten sind ungültig!'}
-        else:
-            send_new_user_password(user)
-            return {'success': True, 'user': user}
-
 
 
 @templated('portal/privmsg/index.html')
@@ -1228,3 +1212,29 @@ def user_error_report(request):
         'form': form,
         'show_url_field': show_url_field,
     }
+
+@templated('portal/confirm.html')
+def confirm(request, action=None):
+
+    ACTIONS = {
+        'reactivate_user': reactivate_user,
+    }
+
+    data = request.REQUEST.get('data')
+    if not data:
+        # print the form
+        return {'action': action}
+
+    try:
+        data = decode_confirm_data(data)
+    except ValueError:
+        return {
+            'failed': u'Die eingebenen Daten sind ungültig!',
+            'action': action
+        }
+
+    if 'action' not in data:
+        # legacy support, can be removed after september 15th
+        data['action'] = 'reactivate_user'
+
+    return ACTIONS[data.pop('action')](**data)
