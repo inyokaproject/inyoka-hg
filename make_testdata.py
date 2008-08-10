@@ -18,6 +18,9 @@ from jinja2.constants import LOREM_IPSUM_WORDS
 from inyoka.conf import settings
 settings.DEBUG = settings.DATABASE_DEBUG = False # for nice progressbar output ;)
 
+# circular imports rocks!
+import inyoka.application
+
 from inyoka.portal.user import User, Group
 from inyoka.forum.models import Forum, Topic, Post, Privilege
 from inyoka.forum.acl import join_flags, PRIVILEGES
