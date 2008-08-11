@@ -169,6 +169,12 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def get(self, pk=None, **kwargs):
+        if isinstance(pk, basestring) and not kwargs:
+            try:
+                normalized = normalize_username(pk)
+            except ValueError:
+                raise User.DoesNotExist()
+            return User.objects.get(username__iexact=normalized)
         if pk is None:
             pk = kwargs.pop('id__exact', None)
         if pk is not None:
@@ -237,7 +243,7 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        user = User.objects.get(username__iexact=username)
+        user = User.objects.get(username)
 
         if user.is_banned:
             if user.banned_until is None or \
@@ -498,7 +504,7 @@ class User(models.Model):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('portal', 'user', self.username),
+            'show': ('portal', 'user', self.username.replace(' ', '_')),
             'privmsg': ('portal', 'privmsg', 'new', self.username)
         }[action])
 
@@ -519,3 +525,4 @@ from inyoka.portal.utils import send_activation_mail
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
 from inyoka.forum.models import ReadStatus
+from inyoka.utils.user import normalize_username
