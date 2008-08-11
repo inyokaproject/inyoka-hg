@@ -1,0 +1,39 @@
+{#
+    portal/confirm.html
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The user can confirm various actions here. With the action flag the messages can be customized.
+
+    :copyright: 2008 Marian Sigler
+    :license: GNU GPL.
+#}
+
+{% extends 'portal/overall.html' %}
+{% set title_trace = ['Bestätigen'] %}
+
+{% if action == 'reactivate_user' %}
+{% set text = 'Hier kannst du deinen Benutzer wiederherstellen, wenn er gelöscht wurde. Bitte beachte, dass das nur einen Monat nach der Löschung möglich ist.' %}
+{% set title_trace = ['Benutzer wiederherstellen'] %}
+{% set url = href('portal', 'confirm', 'reactivate_user') %}
+{% endif %}
+
+{% block appheader %}
+<h1>{{ app or 'Portal' }}</h1>
+<h2>{% if url %}<a href="{{ url }}">{{ title_trace[-1] }}</a>{% else %}{{ title_trace[-1] }}{% endif %}</h2>
+{% endblock %}
+
+
+{%- block portal_content %}
+{%- if success %}
+  <p class="success">{{ success }}</p>
+{%- elif failed %}
+  <p class="fail">{{ failed }}</p>
+{%- else %}
+  {%- if text %}<p>{{ text }}</p>{% endif %}
+  <form method="post" action="">
+    <p>Bitte gib die Zeichenkette, die in der E-Mail enthalten war, hier ein:</p>
+    <p><textarea name="data" cols="80" rows="5"></textarea></p>
+    <p><input type="submit" value="Absenden" /></p>
+  </form>
+{% endif %}
+{% endblock %}

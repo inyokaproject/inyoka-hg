@@ -10,10 +10,19 @@
     :copyright: 2008 by Christopher Grebs, Marian Sigler.
     :license: GNU GPL
 """
-import re
-from md5 import md5
-import random, string
+import random, string, re
+try:
+    from hashlib import md5, sha1
+except ImportError:
+    from md5 import md5
+    from sha import sha as sha1
+from datetime import datetime
 from inyoka.conf import settings
+from inyoka.portal.user import User
+from inyoka.portal.utils import send_new_user_password
+from inyoka.utils import encode_confirm_data
+from inyoka.utils.html import escape
+from inyoka.utils.templating import render_template
 from inyoka.utils.urls import href
 
 
@@ -101,3 +110,68 @@ def send_new_user_password(user):
     })
     send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
+
+
+def deactivate_user(user):
+    """
+    This deactivates a user and removes all personal information.
+    To avoid abuse he is sent an email allowing him to reactivate the
+    within the next month.
+    """
+
+    userdata = {
+        'action': 'reactivate_user',
+        'id': user.id,
+        'email': user.email,
+        'status': user.status,
+        'time': datetime.now(),
+    }
+
+    userdata = encode_confirm_data(userdata)
+
+    subject = u'Deaktivierung deines Accounts „%s“ auf ubuntuusers.de' % \
+                  user.username
+    text = render_template('mails/account_deactivate.txt', {
+        'user': user,
+        'userdata': userdata,
+    })
+    user.email_user(subject, text, settings.INYOKA_SYSTEM_USER_EMAIL)
+
+    user.status = 3
+    if not user.is_banned:
+        user.email = 'user%d@ubuntuusers.de.invalid' % user.id
+    user.set_unusable_password()
+    user.groups.remove(*user.groups.all())
+    user.avatar = user.coordinates_long = user.coordinates_lat = \
+        user.new_password_key = user._primary_group = None
+    user.icq = user.jabber = user.msn = user.aim = user.yim = user.skype = \
+        user.wengophone = user.sip = user.location = user.signature = \
+        user.gpgkey = user.location = user.occupation = user.interests = \
+        user.website = user.launchpad = user.member_title = ''
+    user.save()
+
+
+def reactivate_user(id, email, status, time):
+    if (datetime.now() - time).days > 33:
+        return {'failed':
+                u'Seit der Löschung ist mehr als ein Monat vergangen!'}
+    user = User.objects.get(id=id)
+    if not user.is_deleted:
+        return {
+            'failed': u'Der Benutzer %s ist nicht gelöscht' %
+                escape(user.username),
+            'action': 'reactivate_user',
+        }
+    user.email = email
+    user.status = status
+    if user.banned_until and user.banned_until < datetime.now():
+        user.status = 1
+        user.banned_until = None
+    user.save()
+    send_new_user_password(user)
+    return {
+        'success': u'Der Benutzer %s wurde wiederhergestellt. Dir wurde '
+                   u'eine E-Mail geschickt, mit der du dir ein neues Passwort '
+                   u'setzen kannst.' % escape(user.username),
+        'action': 'reactivate_user',
+    }
