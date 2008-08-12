@@ -38,7 +38,7 @@ def build_map():
         ii = isinstance
         if ii(ast, _ast.Call) and ii(ast.func, _ast.Attribute) and \
            ii(ast.func.value, _ast.Name) and ast.func.value.id == 'cache' and \
-           ast.func.attr in ('set', 'set_many') and ast.args:
+           ast.func.attr in ('get', 'get_many') and ast.args:
             if ii(ast.args[0], _ast.Str):
                 yield ast.args[0].s, ast.func.lineno
             elif ii(ast.args[0], _ast.BinOp):
@@ -97,12 +97,13 @@ def build_map():
 
 if __name__ == '__main__':
     map = build_map()
-    for call, options in map.iteritems():
-        prefix, shortname, lineno, desc = options[0]
+    for call, occur in map.iteritems():
         print '%s  ::' % call
-        print '    Prefix: %s' % prefix
-        print '    Module: %s' % shortname
-        print '    Linenumber: %d' % lineno
-        print '    Description: %s' % desc
-        print '-----------------------------'
-        print
+        for x in occur:
+            prefix, shortname, lineno, desc = x
+            print '    Prefix: %s' % prefix
+            print '    Module: %s' % shortname
+            print '    Linenumber: %d' % lineno
+            print '    Description: %s' % desc
+            print '-----------------------------'
+        print '***************************************'

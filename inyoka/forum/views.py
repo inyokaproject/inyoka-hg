@@ -1139,8 +1139,8 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         if topic.hidden:
             raise PageNotFound
 
-        cache_key = u'forum/feeds/topic/%d/%s' % (topic.id, mode)
-        feed = cache.get(cache_key.encode('utf-8'))
+        cache_key = 'forum/feeds/topic/%d/%s' % (topic.id, mode)
+        feed = cache.get(cache_key)
         if feed is None:
             posts = topic.posts.order_by(Post.pub_date.desc())[:100]
 
@@ -1174,7 +1174,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     updated=post.pub_date,
                     **kwargs
                 )
-            cache.set(feed, cache_key.encode('utf-8'), 600)
+            cache.set(feed, cache_key, 600)
 
     else:
         must_create = False
@@ -1185,8 +1185,8 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
             if not have_privilege(anonymous, forum, CAN_READ):
                 return abort_access_denied(request)
 
-            cache_key = u'forum/feeds/forum/%d/%s' % (forum.id, mode)
-            feed = cache.get(cache_key.encode('utf-8'))
+            cache_key = 'forum/feeds/forum/%d/%s' % (forum.id, mode)
+            feed = cache.get(cache_key)
             if feed is None:
                 topics = forum.get_latest_topics()
                 feed = FeedBuilder(
@@ -1198,8 +1198,8 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 must_create = True
 
         else:
-            cache_key = u'forum/feeds/forum/*/%s' % (mode)
-            feed = cache.get(cache_key.encode('utf-8'))
+            cache_key = 'forum/feeds/forum/*/%s' % (mode)
+            feed = cache.get(cache_key)
             if feed is None:
                 topics = Topic.query.order_by(Topic.id.desc())[:100]
                 feed = FeedBuilder(
@@ -1249,8 +1249,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     updated=post.pub_date,
                     **kwargs
                 )
-            cache_key = cache_key.encode('utf-8')
-            cache.set(cache_key, feed, 600)
+            cache.set(cache_key.encode('utf-8'), feed, 600)
 
     feed.truncate(count)
     return feed.get_atom_response()
