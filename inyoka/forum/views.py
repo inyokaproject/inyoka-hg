@@ -1200,11 +1200,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
 
         else:
             cache_key = 'forum/feeds/forum/*/%s' % (mode)
-<<<<<<< local
-            feed = cache.get(cache_key.encode('utf-8'))
-=======
             feed = cache.get(cache_key)
->>>>>>> other
             if feed is None:
                 topics = Topic.query.order_by(Topic.id.desc())[:100]
                 feed = FeedBuilder(
