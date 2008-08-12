@@ -264,3 +264,46 @@ class Trac(object):
             'author':   self.username,
             'ts':       old_ts
         })
+
+
+class TBLoggerHandler(Handler):
+    def __init__(self):
+        Handler.__init__(self)
+        if settings.TRAC_PASSWORD:
+            mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            mgr.add_password(None, 'http://dev.tux21b.org/tb/', settings.TRAC_USERNAME,
+                settings.TRAC_PASSWORD)
+            auth_handler = urllib2.HTTPBasicAuthHandler(mgr)
+        self.opener = urllib2.build_opener(auth_handler)
+        self.opener.addheaders = [('User-Agent', USER_AGENT)]
+
+    def emit(self, record):
+        Thread(target=self.submit, args=(record,)).start()
+
+    def submit(self, record):
+        data = self.analyseForTicket(record)
+        data = url_encode(data)
+        request = urllib2.Request('http://dev.tux21b.org/tb/new/', data)
+        self.opener.open(request).read()
+
+    def analyseForTicket(self, record):
+        summary = record.levelname + ':'
+        description = description_formatter.format(record)
+        exception_message = get_exception_message(record.exc_info)
+        if exception_message:
+            summary += ' ' + exception_message
+            description += '\n\n=== Traceback ===\n\n{{{\n%s\n}}}' % \
+                           record.exc_text
+        else:
+            words = (record.getMessage()).split()
+            words.reverse()
+            while words and len(summary) < 140:
+                summary += ' ' + words.pop()
+            if words:
+                summary += '...'
+
+        return {
+            'title':      summary,
+            'traceback':  description,
+        }
+

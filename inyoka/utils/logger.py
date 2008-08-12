@@ -16,8 +16,11 @@ logger = logging.getLogger('inyoka')
 
 
 if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
-    from inyoka.utils.tracreporter import TracHandler
-    logging_handler = TracHandler()
+    #from inyoka.utils.tracreporter import TracHandler
+    #logging_handler = TracHandler()
+    #logging_handler.setLevel(logging.ERROR)
+    from inyoka.utils.tracereporter import TBLoggerHandler
+    logging_handler = TBLoggerHandler()
     logging_handler.setLevel(logging.ERROR)
 else:
     logging_handler = logging.StreamHandler()
