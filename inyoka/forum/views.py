@@ -1140,7 +1140,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
         if topic.hidden:
             raise PageNotFound
 
-        cache_key = 'forum/feeds/topic/%d/%s' % (topic.id, mode)
+        cache_key = 'forum/feeds/topic/%d/%s' % (topic.id, str(mode))
         feed = cache.get(cache_key)
         if feed is None:
             posts = topic.posts.order_by(Post.pub_date.desc())[:100]
@@ -1186,7 +1186,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
             if not have_privilege(anonymous, forum, CAN_READ):
                 return abort_access_denied(request)
 
-            cache_key = 'forum/feeds/forum/%d/%s' % (forum.id, mode)
+            cache_key = 'forum/feeds/forum/%d/%s' % (forum.id, str(mode))
             feed = cache.get(cache_key)
             if feed is None:
                 topics = forum.get_latest_topics()
@@ -1199,7 +1199,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 must_create = True
 
         else:
-            cache_key = 'forum/feeds/forum/*/%s' % (mode)
+            cache_key = 'forum/feeds/forum/*/%s' % str(mode)
             feed = cache.get(cache_key)
             if feed is None:
                 topics = Topic.query.order_by(Topic.id.desc())[:100]
