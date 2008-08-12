@@ -169,7 +169,8 @@ class LostPasswordForm(forms.Form):
         if 'username' in data and 'email' in data \
             and data['username'] and data['email']:
             try:
-                self.user = User.objects.get(data['username'], email=data['email'])
+                normalized = normalize_username(data['username'])
+                self.user = User.objects.get(username_iexact=normalized, email=data['email'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Der angegebene Benutzername und die angegebene '
