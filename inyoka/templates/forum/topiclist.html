@@ -16,8 +16,6 @@
   {% for parent in forum.parents %}
     {% do navigation_trace.append((parent|url, parent.name)) %}
   {% endfor %}
-{% else %}
-  {% set navigation_trace = ((href('forum'), 'Forum'),) %}
 {% endif %}
 
 {% block forum_content %}
