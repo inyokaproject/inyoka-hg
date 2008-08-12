@@ -80,6 +80,11 @@ STATIC_ROOT = join(BASE_PATH, 'static')
 STATIC_URL = 'http://static.%s' % BASE_DOMAIN_NAME
 ADMIN_MEDIA_PREFIX = STATIC_URL + '/_admin/'
 
+# trac data
+TRAC_URL = None
+TRAC_USERNAME = None
+TRAC_PASSWORD = None
+
 # system settings
 INYOKA_SYSTEM_USER = u'ubuntuusers.de'
 INYOKA_SYSTEM_USER_EMAIL = 'system@' + BASE_DOMAIN_NAME

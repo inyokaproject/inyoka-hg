@@ -89,6 +89,7 @@ def do_show(request, name):
     try:
         if rev is None or not rev.isdigit():
             page = Page.objects.get_by_name(name)
+            rev = None
         else:
             page = Page.objects.get_by_name_and_rev(name, rev)
     except Page.DoesNotExist:
@@ -118,8 +119,9 @@ def do_show(request, name):
                         escape(url_for(page)),
                         escape(page.title)))
     return {
-        'page':     page,
-        'tags':     page.metadata['tag'],
+        'page':         page,
+        'tags':         page.metadata['tag'],
+        'deny_robots':  rev is not None,
     }
 
 
@@ -471,6 +473,7 @@ def do_edit(request, name):
         'edit_time':    edit_time.strftime('%s'),
         'rev':          current_rev_id,
         'storage':      storage,
+        'deny_robots':  True,
     }
 
 
@@ -552,7 +555,8 @@ def do_log(request, name):
     return {
         'page':         page,
         'revisions':    list(pagination.objects),
-        'pagination':   pagination
+        'pagination':   pagination,
+        'deny_robots':  True,
     }
 
 
@@ -576,8 +580,9 @@ def do_diff(request, name):
                         escape(url_for(diff.page)),
                         escape(diff.page.title)))
     return {
-        'diff':     diff,
-        'page':     diff.page
+        'diff':         diff,
+        'page':         diff.page,
+        'deny_robots':  True,
     }
 
 
@@ -597,7 +602,8 @@ def do_backlinks(request, name):
                         escape(url_for(page)),
                         escape(page.title)))
     return {
-        'page': page
+        'page': page,
+        'deny_robots':  True,
     }
 
 
@@ -752,6 +758,7 @@ def do_attach(request, name):
                      u' „<a href="%s">%s</a>“' % (
                         escape(url_for(page)),
                         escape(page.title)))
+    context['deny_robots'] = 'noindex'
     return context
 
 
@@ -803,7 +810,8 @@ def do_manage(request, name):
         ``'wiki/action_manage.html'``
     """
     return {
-        'page':     Page.objects.get_by_name(name)
+        'page':         Page.objects.get_by_name(name),
+        'deny_robots':  True,
     }
 
 

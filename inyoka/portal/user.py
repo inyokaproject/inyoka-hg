@@ -31,10 +31,9 @@ from inyoka.utils.mail import send_mail
 from inyoka.utils.html import escape
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
-from inyoka.utils.templating import render_template
 
 
-UNUSABLE_PASSWORD = '!'
+UNUSABLE_PASSWORD = '!$!'
 _ANONYMOUS_USER = _SYSTEM_USER = None
 DEFAULT_GROUP_ID = 1 # group id for all registered users
 PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
@@ -170,6 +169,12 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def get(self, pk=None, **kwargs):
+        if isinstance(pk, basestring) and not kwargs:
+            try:
+                normalized = normalize_username(pk)
+            except ValueError:
+                raise User.DoesNotExist()
+            return User.objects.get(username__iexact=normalized)
         if pk is None:
             pk = kwargs.pop('id__exact', None)
         if pk is not None:
@@ -238,7 +243,7 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        user = User.objects.get(username__iexact=username)
+        user = User.objects.get(username)
 
         if user.is_banned:
             if user.banned_until is None or \
@@ -499,7 +504,7 @@ class User(models.Model):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('portal', 'user', self.username),
+            'show': ('portal', 'user', self.username.replace(' ', '_')),
             'privmsg': ('portal', 'privmsg', 'new', self.username)
         }[action])
 
@@ -514,72 +519,10 @@ class User(models.Model):
             self.new_password_key = None
 
 
-def deactivate_user(user):
-    """
-    This deactivates a user and removes all personal information.
-    To avoid abuse he is sent an email allowing him to reactivate the
-    within the next month.
-    """
-
-    userdata = {
-        'id': user.id,
-        'email': user.email,
-        'status': user.status,
-        'time': datetime.now(),
-    }
-    dump = cPickle.dumps(userdata)
-    hash = sha1(dump + settings.SECRET_KEY).digest()
-    userdata = '\n'.join((dump, hash)).encode('base64')
-
-    subject = u'Deaktivierung deines Accounts „%s“ auf ubuntuusers.de' % \
-                  user.username
-    text = render_template('mails/account_deactivate.txt', {
-        'user': user,
-        'userdata': userdata,
-    })
-    user.email_user(subject, text, settings.INYOKA_SYSTEM_USER_EMAIL)
-
-    user.status = 3
-    if not user.is_banned:
-        user.email = 'user%d@ubuntuusers.de.invalid' % user.id
-    user.set_unusable_password()
-    user.groups.remove(*user.groups.all())
-    user.avatar = user.coordinates_long = user.coordinates_lat = \
-        user.new_password_key = user._primary_group = None
-    user.icq = user.jabber = user.msn = user.aim = user.yim = user.skype = \
-        user.wengophone = user.sip = user.location = user.signature = \
-        user.gpgkey = user.location = user.occupation = user.interests = \
-        user.website = user.launchpad = user.member_title = ''
-    user.save()
-
-
-class TooLateException(Exception):
-    pass
-class InvalidDataException(Exception):
-    pass
-
-def reactivate_user(userdata):
-    if '\n' not in userdata:
-        raise InvalidDataException()
-    dump, hash = userdata.decode('base64').rsplit('\n', 1)
-    if sha1(dump + settings.SECRET_KEY).digest() != hash:
-        raise InvalidDataException()
-    userdata = cPickle.loads(dump)
-    if (datetime.now() - userdata['time']).days > 33:
-        raise TooLateException()
-    user = User.objects.get(id=userdata['id'])
-    user.email = userdata['email']
-    user.status = userdata['status']
-    if user.banned_until and user.banned_until < datetime.now():
-        user.status = 1
-        user.banned_until = None
-    user.save()
-    return user
-
-
 
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.utils import send_activation_mail
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
 from inyoka.forum.models import ReadStatus
+from inyoka.utils.user import normalize_username

@@ -11,6 +11,15 @@
 {% from 'forum/_forum.html' import topic_icon with context %}
 {% set title_trace = [title] %}
 
+{% set navigation_trace = [] %}
+{% for parent in forum.parents %}
+  {% do navigation_trace.append((parent|url, parent.name)) %}
+{% endfor %}
+{% set navigation_trace = [
+    (forum|url, forum.name),
+  ] %}
+
+
 {% block forum_content %}
   <table class="forum">
     <thead>
