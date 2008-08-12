@@ -1249,7 +1249,8 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     updated=post.pub_date,
                     **kwargs
                 )
-            cache.set(cache_key.encode('utf-8'), feed, 600)
+            cache_key = cache_key.encode('utf-8')
+            cache.set(cache_key, feed, 600)
 
     feed.truncate(count)
     return feed.get_atom_response()
