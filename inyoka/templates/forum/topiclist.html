@@ -11,10 +11,14 @@
 {% from 'forum/_forum.html' import topic_icon with context %}
 {% set title_trace = [title] %}
 
-{% set navigation_trace = [] %}
-{% for parent in forum.parents %}
-  {% do navigation_trace.append((parent|url, parent.name)) %}
-{% endfor %}
+{% if forum %}
+  {% set navigation_trace = [] %}
+  {% for parent in forum.parents %}
+    {% do navigation_trace.append((parent|url, parent.name)) %}
+  {% endfor %}
+{% else %}
+  {% set navigation_trace = ((href('forum'), 'Forum'),) %}
+{% endif %}
 {% set navigation_trace = [
     (forum|url, forum.name),
   ] %}
