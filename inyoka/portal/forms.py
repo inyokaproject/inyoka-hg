@@ -170,7 +170,7 @@ class LostPasswordForm(forms.Form):
             and data['username'] and data['email']:
             try:
                 normalized = normalize_username(data['username'])
-                self.user = User.objects.get(username_iexact=normalized, email=data['email'])
+                self.user = User.objects.get(username__iexact=normalized, email=data['email'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Der angegebene Benutzername und die angegebene '
