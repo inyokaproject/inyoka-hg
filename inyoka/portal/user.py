@@ -172,9 +172,11 @@ class UserManager(models.Manager):
         if isinstance(pk, basestring) and not kwargs:
             try:
                 return User.objects.get(username__iexact=pk)
-                normalized = normalize_username(pk)
-            except ValueError:
-                raise User.DoesNotExist()
+            except User.DoesNotExist:
+                try:
+                    normalized = normalize_username(pk)
+                except ValueError:
+                    raise User.DoesNotExist()
             return User.objects.get(username__iexact=normalized)
         if pk is None:
             pk = kwargs.pop('id__exact', None)
