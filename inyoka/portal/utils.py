@@ -115,7 +115,8 @@ def send_activation_mail(user):
     """send an activation mail"""
     from inyoka.utils.mail import send_mail
     message = render_template('mails/activation_mail.txt', {
-        'username':         user.username.replace(' ', '_'),
+        'username':         user.username,
+        'username_':         user.username.replace(' ', '_'),
         'email':            user.email,
         'activation_key':   gen_activation_key(user)
     })

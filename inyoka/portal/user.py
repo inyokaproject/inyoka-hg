@@ -171,6 +171,7 @@ class UserManager(models.Manager):
     def get(self, pk=None, **kwargs):
         if isinstance(pk, basestring) and not kwargs:
             try:
+                return User.objects.get(username__iexact=pk)
                 normalized = normalize_username(pk)
             except ValueError:
                 raise User.DoesNotExist()
