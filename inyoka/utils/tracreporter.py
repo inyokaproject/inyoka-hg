@@ -289,7 +289,7 @@ class TBLoggerHandler(Handler):
 
     def analyseForTicket(self, record):
         return {
-            'title':        '%s: %s' % (record.levelname, record.getMessage())
+            'title':        '%s: %s' % (record.levelname, record.getMessage()),
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
         }
