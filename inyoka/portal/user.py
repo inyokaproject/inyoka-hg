@@ -185,7 +185,7 @@ class UserManager(models.Manager):
             kwargs['pk'] = pk
         user = models.Manager.get(self, **kwargs)
         if pk is not None:
-            cache.set('portal/user/%d' % pk, user, 300)
+            cache.set('portal/user/%d' % int(pk), user, 300)
         return user
 
     def create_user(self, username, email, password=None):
