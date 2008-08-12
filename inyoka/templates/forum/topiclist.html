@@ -19,10 +19,6 @@
 {% else %}
   {% set navigation_trace = ((href('forum'), 'Forum'),) %}
 {% endif %}
-{% set navigation_trace = [
-    (forum|url, forum.name),
-  ] %}
-
 
 {% block forum_content %}
   <table class="forum">
