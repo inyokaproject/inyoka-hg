@@ -7,6 +7,7 @@
     This file checks for a new user record.
     It should be executed periodically by a cron.
 """
+import inyoka.application
 from time import time
 from datetime import datetime, timedelta
 import inyoka.utils.http
