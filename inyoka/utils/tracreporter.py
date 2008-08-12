@@ -67,7 +67,7 @@ comment_formatter = SimpleFormatter("""\
 '''New occourrence''' on %(asctime)s in `%(module)s:%(lineno)s`\
  (revision: %(revision)s)""")
 
-title_formatter = SimpleFormatter('%(levelname)s: %(message)s at %(module)s:%(lineno)s (r%(revision)s)')
+summary_formatter = SimpleFormatter('%(message)s at %(module)s:%(lineno)s (r%(revision)s)')
 
 def get_record_hash(record):
     # if the record is a traceback, hash the traceback only
@@ -289,7 +289,8 @@ class TBLoggerHandler(Handler):
 
     def analyseForTicket(self, record):
         return {
-            'title':      title_formatter.format(record),
-            'traceback':  record.exc_text,
+            'title':        '%s: %s' % (record.levelname, record.getMessage())
+            'summary':      summary_formatter.format(record),
+            'traceback':    record.exc_text,
         }
 
