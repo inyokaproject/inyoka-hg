@@ -25,8 +25,6 @@ def encode_confirm_data(data):
 
 
 def decode_confirm_data(data):
-    if '\n' not in data:
-        raise ValueError
     dump, hash = data.decode('base64').rsplit('\n', 1)
     if sha1(dump + settings.SECRET_KEY).digest() != hash:
         raise ValueError

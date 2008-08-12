@@ -510,13 +510,13 @@ class User(models.Model):
 
     def login(self, request):
         self.last_login = datetime.utcnow()
-        self.save()
         request.session['uid'] = self.id
         request.session.pop('_sk', None)
         request.user = self
         # invalidate the new_password_key
         if self.new_password_key:
             self.new_password_key = None
+        self.save()
 
 
 

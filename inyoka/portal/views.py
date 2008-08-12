@@ -37,7 +37,8 @@ from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
 from inyoka.utils.user import deactivate_user, reactivate_user, \
-     normalize_username
+     normalize_username, send_new_email_confirmation, set_new_email, \
+     reset_email
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -518,9 +519,13 @@ def usercp_profile(request):
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
                         'skype', 'wengophone', 'sip',
                         'signature', 'location', 'occupation',
-                        'interests', 'website', 'email', 'gpgkey',
+                        'interests', 'website', 'gpgkey',
                         'launchpad'):
                 setattr(user, key, data[key] or '')
+            if data['email'] != user.email:
+                send_new_email_confirmation(user, data['email'])
+                flash(u'Dir wurde eine E-Mail geschickt, in der du deine neue '
+                      u'E-Mail-Adresse bestätigen kannst.')
             if data['coordinates']:
                 user.coordinates_lat, user.coordinates_long = \
                     data['coordinates']
@@ -1227,6 +1232,8 @@ def confirm(request, action=None):
 
     ACTIONS = {
         'reactivate_user': reactivate_user,
+        'set_new_email': set_new_email,
+        'reset_email': reset_email,
     }
 
     data = request.REQUEST.get('data')
@@ -1246,4 +1253,7 @@ def confirm(request, action=None):
         # legacy support, can be removed after september 15th
         data['action'] = 'reactivate_user'
 
-    return ACTIONS[data.pop('action')](**data)
+    r = ACTIONS[data.pop('action')](**data)
+    if isinstance(r, dict) and action:
+        r['action'] = action
+    return r

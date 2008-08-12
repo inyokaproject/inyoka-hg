@@ -12,14 +12,18 @@
 {% set title_trace = ['Bestätigen'] %}
 
 {% if action == 'reactivate_user' %}
-{% set text = 'Hier kannst du deinen Benutzer wiederherstellen, wenn er gelöscht wurde. Bitte beachte, dass das nur einen Monat nach der Löschung möglich ist.' %}
 {% set title_trace = ['Benutzer wiederherstellen'] %}
-{% set url = href('portal', 'confirm', 'reactivate_user') %}
+{% set text = 'Hier kannst du deinen Benutzer wiederherstellen, wenn er gelöscht wurde. Bitte beachte, dass das nur einen Monat nach der Löschung möglich ist.' %}
+{% elif action == 'set_new_email' %}
+{% set title_trace = ['E-Mail-Adresse bestätigen'] %}
+{% elif action == 'reset_email' %}
+{% set title_trace = ['E-Mail-Adresse zurücksetzen'] %}
+{% set text = 'Hier kannst du deine E-Mail-Adresse zurücksetzen, wenn sie unbeabsichtigt geändert wurde.' %}
 {% endif %}
 
 {% block appheader %}
 <h1>{{ app or 'Portal' }}</h1>
-<h2>{% if url %}<a href="{{ url }}">{{ title_trace[-1] }}</a>{% else %}{{ title_trace[-1] }}{% endif %}</h2>
+<h2>{% if action %}<a href="{{ href('portal', 'confirm', action) }}">{{ title_trace[-1] }}</a>{% else %}{{ title_trace[-1] }}{% endif %}</h2>
 {% endblock %}
 
 

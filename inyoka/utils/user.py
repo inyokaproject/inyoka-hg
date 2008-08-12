@@ -22,6 +22,7 @@ from inyoka.portal.user import User
 from inyoka.portal.utils import send_new_user_password
 from inyoka.utils import encode_confirm_data
 from inyoka.utils.html import escape
+from inyoka.utils.mail import send_mail
 from inyoka.utils.templating import render_template
 from inyoka.utils.urls import href
 
@@ -153,14 +154,14 @@ def deactivate_user(user):
 
 def reactivate_user(id, email, status, time):
     if (datetime.now() - time).days > 33:
-        return {'failed':
-                u'Seit der Löschung ist mehr als ein Monat vergangen!'}
+        return {
+            'failed': u'Seit der Löschung ist mehr als ein Monat vergangen!',
+        }
     user = User.objects.get(id=id)
     if not user.is_deleted:
         return {
-            'failed': u'Der Benutzer %s ist nicht gelöscht' %
+            'failed': u'Der Benutzer %s wurde schon wiederhergestellt!' %
                 escape(user.username),
-            'action': 'reactivate_user',
         }
     user.email = email
     user.status = status
@@ -173,5 +174,64 @@ def reactivate_user(id, email, status, time):
         'success': u'Der Benutzer %s wurde wiederhergestellt. Dir wurde '
                    u'eine E-Mail geschickt, mit der du dir ein neues Passwort '
                    u'setzen kannst.' % escape(user.username),
-        'action': 'reactivate_user',
+    }
+
+
+def send_new_email_confirmation(user, email):
+    """Send the user an email where he can confirm his new email address"""
+    data = {
+        'action': 'set_new_email',
+        'id': user.id,
+        'email': email,
+        'time': datetime.now()
+    }
+
+    text = render_template('mails/new_email_confirmation.txt', {
+        'user': user,
+        'data': encode_confirm_data(data),
+    })
+    send_mail('ubuntuusers.de – E-Mail-Adresse bestätigen', text,
+              settings.INYOKA_SYSTEM_USER_EMAIL, [email])
+
+
+def set_new_email(id, email, time):
+    """
+    Save the new email address the user has confirmed, and send an email to
+    his old address where he can reset it to protect against abuse.
+    """
+    if (datetime.now() - time).days > 8:
+        return {'failed': u'Link zu alt!'}
+    user = User.objects.get(id=id)
+
+    data = {
+        'action': 'reset_email',
+        'id': user.id,
+        'email': user.email,
+        'time': datetime.now(),
+    }
+    text = render_template('mails/reset_email.txt', {
+        'user': user,
+        'new_email': email,
+        'data': encode_confirm_data(data),
+    })
+    user.email_user('ubuntuusers.de – E-Mail-Adresse geändert', text,
+                    settings.INYOKA_SYSTEM_USER_EMAIL)
+
+    user.email = email
+    user.save()
+    return {
+        'success': u'Deine neue E-Mail-Adresse wurde gespeichert!'
+    }
+
+
+def reset_email(id, email, time):
+    if (datetime.now() - time).days > 33:
+        return {'failed': u'Link zu alt!'}
+
+    user = User.objects.get(id=id)
+    user.email = email
+    user.save()
+
+    return {
+        'success': u'Deine E-Mail-Adresse wurde zurückgesetzt.'
     }
