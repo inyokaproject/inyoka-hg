@@ -532,21 +532,32 @@ def usercp_profile(request):
             if data['delete_avatar']:
                 user.delete_avatar()
             if data['avatar']:
-                avatar_resized = user.save_avatar(data['avatar'])
-                if avatar_resized:
-                    ava_mh, ava_mw = storage.get_many(('max_avatar_height',
-                        'max_avatar_width')).itervalues()
-                    flash(u'Der von dir hochgeladene Avatar wurde auf '
-                          u'%sx%s Pixel skaliert. Dadurch könnten '
-                          u'Qualitätseinbußen aufgetreten sein. '
-                          u'Bitte beachte dies.'
-                          % (ava_mh, ava_mw))
+                try:
+                    avatar_resized = user.save_avatar(data['avatar'])
+                    if avatar_resized:
+                        ava_mh, ava_mw = storage.get_many(('max_avatar_height',
+                            'max_avatar_width')).itervalues()
+                        flash(u'Der von dir hochgeladene Avatar wurde auf '
+                              u'%sx%s Pixel skaliert. Dadurch könnten '
+                              u'Qualitätseinbußen aufgetreten sein. '
+                              u'Bitte beachte dies.'
+                              % (ava_mh, ava_mw))
+                except KeyError:
+                    # the image format is not supported though
+                    form.errors['avatar'] = [u'Das von dir benutzte Dateiformat '
+                                             u'wird nicht unterstützt, bitte '
+                                             u'wähle ein anderes für deinen '
+                                             u'Avatar.']
             for key in ('show_email', 'show_jabber'):
                 user.settings[key] = data[key]
             user.save()
-            flash(u'Deine Profilinformationen wurden erfolgreich '
-                  u'aktualisiert.', True)
-            return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
+
+            if form.errors:
+                flash(u'Es sind Fehler aufgetreten, bitte behebe diese', False)
+            else:
+                flash(u'Deine Profilinformationen wurden erfolgreich '
+                      u'aktualisiert.', True)
+                return HttpResponseRedirect(href('portal', 'usercp', 'profile'))
         else:
             flash(u'Es traten Fehler bei der Bearbeitung des Formulars '
                   u'auf. Bitte behebe sie.', False)
