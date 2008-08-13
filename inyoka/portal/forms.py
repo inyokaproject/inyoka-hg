@@ -47,7 +47,7 @@ SEARCH_SORT_CHOICES = (
 
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
-    username = forms.CharField(label='Benutzername')
+    username = forms.CharField(label='Benutzername oder E-Mail-Adresse')
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False))
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
@@ -159,44 +159,27 @@ class LostPasswordForm(forms.Form):
     It's similar to the register form and uses
     a hidden and a visible image CAPTCHA too.
     """
-    username = forms.CharField(label=u'Benutzername', required=False)
-    email = EmailField(label=u'E-Mail', required=False)
+    username = forms.CharField(label=u'Benutzername oder E-Mail-Adresse')
     captcha = CaptchaField(label='CAPTCHA')
     hidden_captcha = HiddenCaptchaField(required=False)
 
     def clean(self):
         data = super(LostPasswordForm, self).clean()
-        if 'username' in data and 'email' in data \
-            and data['username'] and data['email']:
+        if '@' in data['username']:
             try:
-                normalized = normalize_username(data['username'])
-                self.user = User.objects.get(username__iexact=normalized, email=data['email'])
+                self.user = User.objects.get(email=data['username'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
-                    u'Der angegebene Benutzername und die angegebene '
-                    u'E-Mail-Adresse stimmen nicht überein! Es reicht, eines'
-                    u' von beidem anzugeben.'
+                    u'Einen Benutzer mit der E-Mail-Adresse „%s“ '
+                    u'gibt es nicht!' % data['username']
                 )
-        elif 'username' in data and data['username']:
+        else:
             try:
                 self.user = User.objects.get(data['username'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
                     u'Einen Benutzer „%s“ gibt es nicht!' % data['username']
                 )
-        elif 'email' in data and data['email']:
-            try:
-                self.user = User.objects.get(email=data['email'])
-            except User.DoesNotExist:
-                raise forms.ValidationError(
-                    u'Einen Benutzer mit der E-Mail-Adresse „%s“ '
-                    u'gibt es nicht!' % data['email']
-                )
-        else:
-            raise forms.ValidationError(
-                u'Bitte entweder einen Benutzernamen oder eine E-Mail-Adresse '
-                u'angeben!'
-            )
 
 
 class SetNewPasswordForm(forms.Form):

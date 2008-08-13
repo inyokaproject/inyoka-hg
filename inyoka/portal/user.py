@@ -239,7 +239,8 @@ class UserManager(models.Manager):
 
     def authenticate(self, username, password):
         """
-        Authenticate a user with `username` and `password`.
+        Authenticate a user with `username` (which can also be the email
+        address) and `password`.
 
         :Raises:
             User.DoesNotExist
@@ -247,7 +248,10 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        user = User.objects.get(username)
+        if '@' in username:
+            user = User.objects.get(email__iexact=username)
+        else:
+            user = User.objects.get(username)
 
         if user.is_banned:
             if user.banned_until is None or \
