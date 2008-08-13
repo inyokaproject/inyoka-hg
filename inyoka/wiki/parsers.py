@@ -185,7 +185,8 @@ class TemplateParser(Parser):
             return nodes.error_box(u'Parameterfehler', 'Das erste Argument '
                                    u'muss der Name des Templates sein.')
         try:
-            page = Page.objects.get_by_name(self.template)
+            page = Page.objects.get_by_name(self.template,
+                                            raise_on_deleted=True)
         except Page.DoesNotExist:
             return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
                                    u'Template existiert nicht.')

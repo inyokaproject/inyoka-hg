@@ -434,7 +434,7 @@ class TemplateSyntaxError(Exception):
         Exception.__init__(self, message)
 
     def get_node(self):
-        return Data(u"\n\n'''Syntax Fehler:''' %s\n\n" % self.message)
+        return Data(u"\n\n'''Syntaxfehler:''' %s\n\n" % self.message)
 
 
 class Context(object):
@@ -687,7 +687,11 @@ class Value(Expr):
             return True
         missing = object()
         a = self.__float__(missing)
-        b = self.__float__(missing)
+        if isinstance(other, Value):
+            #XXX: is it possible that it's a `Value`?
+            b = other.__float__(missing)
+        else:
+            b = other
         if a is missing or b is missing:
             return False
         return a == b
