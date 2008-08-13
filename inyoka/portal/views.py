@@ -544,13 +544,17 @@ def usercp_profile(request):
                               % (ava_mh, ava_mw))
                 except KeyError:
                     # the image format is not supported though
-                    form.errors['avatar'] = [u'Das von dir benutzte Dateiformat '
+                    form._errors['avatar'] = forms.util.ValidationError(
+                                             u'Das von dir benutzte Dateiformat '
                                              u'wird nicht unterstützt, bitte '
                                              u'wähle ein anderes für deinen '
-                                             u'Avatar.']
+                                             u'Avatar.'
+                                             ).messages
+
             for key in ('show_email', 'show_jabber'):
                 user.settings[key] = data[key]
             user.save()
+
 
             if form.errors:
                 flash(u'Es sind Fehler aufgetreten, bitte behebe diese', False)
@@ -574,7 +578,7 @@ def usercp_profile(request):
              if k.startswith('show_'))
         ))
         form = UserCPProfileForm(initial=values)
-
+    
     storage_keys = storage.get_many(('max_avatar_width',
         'max_avatar_height', 'max_signature_length'))
 
