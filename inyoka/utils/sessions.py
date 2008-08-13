@@ -44,19 +44,21 @@ def set_session_info(request, action, category=None):
         args = (None, 'anonymous', None)
     args += (datetime.utcnow(), action, request.build_absolute_uri(),
              category, key)
-    cursor = connection.cursor()
-    cursor.execute('''
-        insert into portal_sessioninfo (subject_text, subject_type,
-               subject_link, last_change, action, action_link,
-               category, `key`)
-        values (%s, %s, %s, %s, %s, %s, %s, %s)
-            on duplicate key
-        update subject_text = %s, subject_type = %s, subject_link = %s,
-               last_change = %s, action = %s, action_link = %s,
-               category = %s;
-    ''', args + args[:-1])
-    cursor.close()
-    transaction.commit()
+    try:
+        cursor = connection.cursor()
+        cursor.execute('''
+            insert into portal_sessioninfo (subject_text, subject_type,
+                   subject_link, last_change, action, action_link,
+                   category, `key`)
+            values (%s, %s, %s, %s, %s, %s, %s, %s)
+                on duplicate key
+            update subject_text = %s, subject_type = %s, subject_link = %s,
+       last_change = %s, action = %s, action_link = %s,
+          category = %s;
+        ''', args + args[:-1])
+    finally:
+        cursor.close()
+        transaction.commit()
 
 
 class SurgeProtectionMixin(object):
