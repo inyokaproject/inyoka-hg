@@ -261,7 +261,7 @@ def viewtopic(request, topic_slug, page=1):
 
         try:
             s = Subscription.objects.get(user=request.user,
-                                     topic_id=t.id)
+                                         topic_id=t.id)
             subscribed = True
             s.notified = False
             s.save()

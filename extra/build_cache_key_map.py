@@ -31,21 +31,61 @@ def build_map():
     calls. This is just for documentation :-)
     """
     searchpath = [(INYOKA_ROOT, 'inyoka')]
-
+    #XXX: I have no idea if I need to check for namespaces...
+    assign_mapper = {}
 
 
     def walk_ast(ast):
         ii = isinstance
+        if ii(ast, _ast.Assign):
+            # concern of assigns
+            targets = filter(
+                lambda x: not ii(x, (_ast.Attribute, _ast.Subscript)),
+                ast.targets
+            )
+
+            if ii(ast.value, _ast.Str):
+                assign_mapper.update(dict((x.id,ast.value.s) for x in \
+                                     targets))
+            elif ii(ast.value, _ast.BinOp):
+                check = False
+                if ii(ast.value.left, _ast.Name) and \
+                   not ii(ast.value.right, _ast.Attribute) and \
+                   not ii(ast.value.left, _ast.Name):
+                    s = ast.value.right.s
+                    check = True
+                elif ii(ast.value.right, _ast.Name) and \
+                     not ii(ast.value.left, _ast.List) and \
+                     not ii(ast.value.right, _ast.Name):
+                    s = ast.value.left.s
+                    check = True
+                elif ii(ast.value.right, _ast.Subscript):
+                    # obj = 'string%s' % obj.call()
+                    # I have no idea how many combinations exists, so I
+                    # leave that...
+                    check = False
+                if check:
+                    assign_mapper.update(dict((x.id,s) for x in \
+                                         targets))
+
         if ii(ast, _ast.Call) and ii(ast.func, _ast.Attribute) and \
            ii(ast.func.value, _ast.Name) and ast.func.value.id == 'cache' and \
            ast.func.attr in ('get', 'get_many') and ast.args:
             if ii(ast.args[0], _ast.Str):
-                yield ast.args[0].s, ast.func.lineno
+                yield 'key "%s"' % ast.args[0].s, ast.func.lineno
             elif ii(ast.args[0], _ast.BinOp):
                 op = ast.args[0]
-                yield '%s %s %s' % (op.left.s, '%', op.right.id), ast.func.lineno
+                if ii(op.left, _ast.Name):
+                    id, value = op.left.id, op.right.s
+                else:
+                    id, value = op.right.id, op.left.s
+                yield 'key "%s" %s %s' % (value, '%', id), ast.func.lineno
             else:
-                yield 'object %s' % ast.args[0].id, ast.func.lineno
+                id = ast.args[0].id
+                if id in assign_mapper:
+                    yield 'object `%s` ("%s")' % (id, assign_mapper[id]), ast.func.lineno
+                else:
+                    yield 'object `%s`' % ast.args[0].id, ast.func.lineno
 
         for field in ast._fields or ():
             value = getattr(ast, field)
