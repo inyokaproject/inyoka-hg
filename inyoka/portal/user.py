@@ -169,15 +169,15 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def get(self, pk=None, **kwargs):
-        if isinstance(pk, basestring) and not kwargs:
+        if isinstance(pk, basestring):
             try:
-                return User.objects.get(username__iexact=pk)
+                return User.objects.get(username__iexact=pk, **kwargs)
             except User.DoesNotExist:
                 try:
                     normalized = normalize_username(pk)
                 except ValueError:
                     raise User.DoesNotExist()
-            return User.objects.get(username__iexact=normalized)
+                return User.objects.get(username__iexact=normalized, **kwargs)
         if pk is None:
             pk = kwargs.pop('id__exact', None)
         if pk is not None:
