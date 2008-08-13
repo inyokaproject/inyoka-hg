@@ -729,12 +729,17 @@ class Post(object):
         #XXX: damn workaround for some PIL bugs... (e.g interlaced png)
         def expr(v):
             if v.mimetype.startswith('image') and v.mimetype in SUPPORTED_IMAGE_TYPES:
-                img = Image.open(StringIO(v.contents))
-                if img.format == 'PNG' and img.info.get('interlace'):
-                    # PIL raises an IOError if the PNG is interlaced
-                    # so we need that workaround for now...
+                try:
+                    img = Image.open(StringIO(v.contents))
+                    if img.format == 'PNG' and img.info.get('interlace'):
+                        # PIL raises an IOError if the PNG is interlaced
+                        # so we need that workaround for now...
+                        return u'Bilder (keine Vorschau möglich)'
+                except IOError:
                     return u'Bilder (keine Vorschau möglich)'
+
                 return u'Bilder (Vorschau)'
+
             return u''
         attachments = sorted(self.attachments, key=expr)
         grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
