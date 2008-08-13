@@ -293,4 +293,3 @@ class TBLoggerHandler(Handler):
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
         }
-

@@ -688,7 +688,7 @@ def usercp_deactivate(request):
     """
     This page allows the user to deactivate his account.
     """
-    #XXX: this is "banned safe", so we could allow banned users to also delete 
+    #XXX: this is "banned safe", so we could allow banned users to also delete
     #     their accounts, eg by prompting for the username here
     if request.method == 'POST':
         form = DeactivateUserForm(request.POST)
