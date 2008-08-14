@@ -275,7 +275,7 @@ class AccessControlList(BaseStorage):
 
             for group in groups:
                 pattern = re.compile(r'^%s$' % re.escape(group).
-                                     replace('\\*', '.*?'))
+                                     replace('\\*', '.*?'), re.I)
                 for subject in subjects:
                     yield pattern, subject, add_privs, del_privs
 
