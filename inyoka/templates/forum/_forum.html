@@ -50,6 +50,13 @@
   {%- if topic.locked %}gesperrtes {% endif -%}
   {%- if topic.hidden %}verstecktes {% endif -%}
   {%- if can_moderate and topic.reported %}gemeldetes {% endif -%}
+  Thema" title="
+  {%- if not is_read %}ungelesenes {% endif -%}
+  {%- if topic.solved %}gelöstes {% endif -%}
+  {#- TODO: watched -#}
+  {%- if topic.locked %}gesperrtes {% endif -%}
+  {%- if topic.hidden %}verstecktes {% endif -%}
+  {%- if can_moderate and topic.reported %}gemeldetes {% endif -%}
   Thema" />
 
 {%- endmacro %}
