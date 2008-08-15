@@ -30,10 +30,12 @@ def set_session_info(request, action, category=None):
     # the user has no cookie support and that would fill our session
     # table with dozens of entries
     if request.session.new:
+        transaction.rollback()
         return
 
     if request.user.is_authenticated:
         if request.user.settings.get('hide_profile', False):
+            transaction.rollback()
             return
         key = 'user:%s' % request.user.id
         # XXX: Find a better way to detect whether a user is in the team
@@ -56,8 +58,10 @@ def set_session_info(request, action, category=None):
        last_change = %s, action = %s, action_link = %s,
           category = %s;
         ''', args + args[:-1])
-    finally:
         cursor.close()
+    except:
+        transaction.rollback()
+    else:
         transaction.commit()
 
 
