@@ -44,7 +44,7 @@ def show_page(request, name):
     """Dispatch action calls."""
     normalized_name = normalize_pagename(name)
     if not normalized_name:
-        return missing_resource(request, name)
+        return missing_resource(request)
     action = request.GET.get('action')
     if normalized_name != name or action == 'show':
         args = request.GET.copy()
