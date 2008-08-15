@@ -125,6 +125,9 @@ class CaptchaField(forms.Field):
             return True
         solution = current_request.session.get('captcha_solution')
         h = md5.new(settings.SECRET_KEY)
+        if isinstance(value, unicode):
+            # md5 don't like to have non-ascii containing unicode strings
+            value = value.encode('utf-8')
         h.update(value)
         if h.digest() == solution:
             return True
