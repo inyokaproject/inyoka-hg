@@ -121,11 +121,13 @@ class EditFileForm(forms.Form):
         if data is None and not self._file:
             raise forms.ValidationError(u'Bitte eine Datei auswählen')
         if data:
-            filename = data.filename
+            filename = data.name
             changed = filename != (self._file and self._file.identifier or None)
-            if changed and list(StaticFile.objects.filter(identifier=filename)):
-                raise forms.ValidationError(u'Eine Datei mit diesem Namen '
-                                            u'existiert bereits.')
+            if changed:
+                exists = bool(StaticFile.objects.filter(identifier__iexact=filename))
+                if exists:
+                    raise forms.ValidationError(u'Eine Datei mit diesem Namen '
+                                                u'existiert bereits.')
         return data
 
 

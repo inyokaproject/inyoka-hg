@@ -211,7 +211,8 @@ def file_edit(request, file=None):
                 file.identifier = data['file'].name
             file.is_ikhaya_icon = data['is_ikhaya_icon']
             file.save()
-            flash(u'Die statische Datei wurde geändert.', True)
+            flash(u'Die statische Datei wurde %s.'
+                  % (new and u'erstellt' or u'geändert'), True)
             if new:
                 return HttpResponseRedirect(file.get_absolute_url('edit'))
     else:
