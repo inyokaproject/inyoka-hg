@@ -112,15 +112,9 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 
 
 @templated('ikhaya/detail.html', modifier=context_modifier)
-def detail(request, year, month, day, slug):
+def detail(request, slug):
     """Shows a single article."""
-    # I was not able to form that into one sql-statement
-    article = Article.objects.select_related().filter(
-        pub_date__year=int(year),
-        pub_date__month=int(month),
-        pub_date__day=int(day),
-        slug=slug
-    )[0]
+    article = Article.objects.select_related().get(slug=slug)
     set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
                      u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None

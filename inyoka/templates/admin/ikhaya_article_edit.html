@@ -47,7 +47,6 @@
   {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id', 'icon_id'], inline=true) }}
   <dt>{{ form.pub_date.label }}</dt>
   <dd>{{ form.pub_date }} <span class="note_link pub_date_ui_switcher">Datum auswählen</span></dd>
-  {% if form.errors.pub_date %}<dd>{{ form.errors.pub_date }}</dd>{% endif %}
   {{ render_form(form, ['slug', 'public', 'comments_enabled'], inline=true) }}
   </dl>
   <p>
