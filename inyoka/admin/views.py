@@ -397,8 +397,8 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
 
 
 @require_permission('article_edit')
-def ikhaya_article_delete(request, article):
-    article = Article.objects.get(slug=article)
+def ikhaya_article_delete(request, article_id):
+    article = Article.objects.get(id=int(article_id))
     if request.method == 'POST':
         if 'unpublish' in request.POST:
             article.public = False

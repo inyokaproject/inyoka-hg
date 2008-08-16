@@ -40,12 +40,12 @@ users = []
 page_names = []
 forums = []
 
-GROUPS_COUNT = 10
-USERS_COUNT = 20
+GROUPS_COUNT = 30
+USERS_COUNT = 120
 FORUMS_COUNT = 10
 MAX_TOPIC_COUNT = 20
 MAX_TOPIC_POST_COUNT = 10
-IKHAYA_ARTICLE_COUNT = 5
+IKHAYA_ARTICLE_COUNT = 10
 WIKI_PAGES_COUNT = 50
 
 
@@ -242,7 +242,7 @@ def make_ikhaya():
     for percent, name in izip(percentize(IKHAYA_ARTICLE_COUNT), create_names(IKHAYA_ARTICLE_COUNT, title)):
         c = Category(name=name)
         c.save()
-        for name in create_names(5, title):
+        for name in create_names(30, title):
             dt = randtime()
             a = Article(
                 pub_date=dt.date(),

@@ -40,6 +40,11 @@ class ArticleManager(models.Manager):
                 q = q.filter(pub_date__qt=datetime.utcnow())
         return q
 
+    def delete(self):
+        #XXX: it's not possible to delete an ikhaya article
+        #     we first need to delete referenced comments...
+        super(ArticleManager, self).delete()
+
 
 class SuggestionManager(models.Manager):
 
@@ -87,7 +92,7 @@ class Article(models.Model):
     published = ArticleManager(public=True)
     drafts = ArticleManager(public=False)
 
-    pub_date = models.DateField('Datum', unique=True)
+    pub_date = models.DateField('Datum')
     pub_time = models.TimeField('Zeit')
     updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
     author = models.ForeignKey(User, related_name='article_set',
@@ -99,7 +104,7 @@ class Article(models.Model):
     intro = models.TextField('Einleitung')
     text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')
-    slug = models.CharField('Slug', max_length=100, blank=True, unique=True)
+    slug = models.CharField('Slug', max_length=100, blank=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
     comment_count = models.IntegerField(default=0)
     comments_enabled = models.BooleanField('Kommentare erlaubt', default=True)
@@ -167,7 +172,7 @@ class Article(models.Model):
         return href(*{
             'show': ('ikhaya', stamp, self.slug),
             'edit': ('admin', 'ikhaya', 'articles', 'edit', self.id),
-            'delete': ('admin', 'ikhaya', 'articles', 'delete', stamp, self.slug)
+            'delete': ('admin', 'ikhaya', 'articles', 'delete', self.id)
         }[action])
 
     def __unicode__(self):

@@ -599,7 +599,8 @@ def split_ikhaya_slug(m):
 
     m.engine.execute('''
         alter table ikhaya_article
-            add column pub_time time not null after pub_date;
+            add column pub_time time not null after pub_date,
+            modify column slug varchar(100) not null;
     ''')
 
     for article in select_blocks(article_table.select(), 100):
@@ -613,10 +614,12 @@ def split_ikhaya_slug(m):
     m.engine.execute('''
         begin;
         alter table ikhaya_article
-            modify column pub_date date not null unique;
+            modify column pub_date date not null;
         commit;
         alter table ikhaya_article
+            drop index slug,
             add unique (pub_date, slug);
+        create index viewarticle on ikhaya_article(slug, pub_date);
     ''')
 
 
@@ -634,7 +637,6 @@ MIGRATIONS = [
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
     new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
-    add_post_has_revision,
-    # split_ikhaya_slug – this works not nice with duplicate slugs (but different date).
+    add_post_has_revision, split_ikhaya_slug
     # add_forum_atime_column
 ]
