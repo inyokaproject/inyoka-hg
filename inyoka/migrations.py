@@ -536,7 +536,7 @@ def new_team_icon_system(m):
     # ensure `MEDIA/portal/teamicons` exists.
     media_path = path.join(settings.MEDIA_ROOT, 'portal', 'team_icons')
     if not exists(media_path):
-        os.mkdir(media_path)
+        os.makedirs(media_path)
 
     # set new storage items
     _set_storage(m, {
