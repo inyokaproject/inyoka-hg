@@ -121,7 +121,7 @@ def detail(request, year, month, day, slug):
     if articleq:
         article = articleq[0]
     else:
-        return PageNotFound()
+        raise PageNotFound()
     set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
                      u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None
