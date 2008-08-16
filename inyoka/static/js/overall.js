@@ -9,6 +9,8 @@
  */
 
 $(document).ready(function() {
+  var loginForm = null;
+
   // preload images
   (function() {
     var container = $('<div>')
@@ -137,6 +139,8 @@ $(document).ready(function() {
     $(document).click(function() {
       if (areaPopup.is(':visible'))
         areaPopup.hide();
+      if (loginForm && loginForm.is(':visible'))
+        loginForm.slideUp();
     });
   })();
 
@@ -211,9 +215,6 @@ $(document).ready(function() {
 
   // the javascript powered login form
   (function() {
-    if (navigator.appName.toLowerCase() == 'konqueror')
-      return
-    var loginForm = null;
     $('#login_link').click(function() {
       if (loginForm == null) {
         loginForm = $('#js_login_form')

@@ -688,10 +688,12 @@ class Value(Expr):
         missing = object()
         a = self.__float__(missing)
         if isinstance(other, Value):
-            #XXX: is it possible that it's a `Value`?
             b = other.__float__(missing)
         else:
-            b = other
+            try:
+                b = float(other)
+            except TypeError:
+                return False
         if a is missing or b is missing:
             return False
         return a == b
@@ -759,17 +761,21 @@ class Value(Expr):
                 return True
         return False
 
+    @property
     def is_string(self):
         return not isinstance(self.value, (tuple, list, dict))
 
+    @property
     def is_number(self):
         invalid = object()
         rv = self.__float__(invalid)
         return rv is not invalid
 
+    @property
     def is_array(self):
         return isinstance(self.value, (tuple, list))
 
+    @property
     def is_object(self):
         return isinstance(self.value, dict)
 

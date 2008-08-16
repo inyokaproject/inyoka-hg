@@ -241,7 +241,7 @@
     {%- if not USER.is_authenticated %}
     <form action="{{ href('portal', 'login', next=CURRENT_URL) }}" method="post" id="js_login_form">
       <div>
-        <label for="js_login_username">Benutzername oder E-Mail-Adresse</label>
+        <label for="js_login_username">Benutzername</label>
         <input name="username" id="js_login_username" />
         <label for="js_login_password">Passwort</label>
         <input type="password" name="password" id="js_login_password" />
@@ -251,12 +251,6 @@
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
       </div>
     </form>
-    <script type="text/javascript">
-      $(document).click(function() {
-        if (loginForm && loginForm.is(':visible'))
-          loginForm.slideUp();
-      });
-    </script>
     {%- endif %}
   </body>
 </html>
