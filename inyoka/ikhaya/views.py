@@ -115,10 +115,13 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 def detail(request, year, month, day, slug):
     """Shows a single article."""
     # I was not able to form that into one sql-statement
-    article = Article.objects.select_related().filter(
+    articleq = Article.objects.select_related().filter(
         pub_date=date(int(year), int(month), int(day)),
-        slug=slug
-    )[0]
+        slug=slug)
+    if articleq:
+        article = articleq[0]
+    else:
+        return PageNotFound()
     set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
                      u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None
