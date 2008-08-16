@@ -902,7 +902,9 @@ class Attachment(object):
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
-            name = shorten_filename(name.encode('utf-8'))
+            if isinstance(name, unicode):
+                name = name.encode('utf-8')
+            name = shorten_filename(name)
             new_fo = open(path.join(new_abs_path, name), 'w')
             try:
                 new_fo.write(old_fo.read())
