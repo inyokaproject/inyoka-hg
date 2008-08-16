@@ -157,10 +157,11 @@ class Article(models.Model):
         return Comment.objects.filter(article=self)
 
     def get_absolute_url(self, action='show'):
+        stamp = self.pub_date.strftime('%Y/%m/%d')
         return href(*{
-            'show': ('ikhaya', self.slug),
-            'edit': ('admin', 'ikhaya', 'articles', 'edit', self.slug),
-            'delete': ('admin', 'ikhaya', 'articles', 'delete', self.slug)
+            'show': ('ikhaya', stamp, self.slug),
+            'edit': ('admin', 'ikhaya', 'articles', 'edit', self.id),
+            'delete': ('admin', 'ikhaya', 'articles', 'delete', stamp, self.slug)
         }[action])
 
     def __unicode__(self):
@@ -177,8 +178,7 @@ class Article(models.Model):
 
     def save(self):
         """
-        This increases the edit count by 1, generates a new slug and updates
-        the xapian database
+        This increases the edit count by 1 annd updates the xapian database.
         """
         suffix_id = False
         if not self.updated or self.updated < self.pub_date:
@@ -191,13 +191,9 @@ class Article(models.Model):
                 self.icon = self.category.icon
 
             # new article
-            slug_words = slugify(self.subject).split('-')
-            slug = '%s/%s' % (
-                self.pub_date.strftime('%Y/%m/%d'),
-                '-'.join(slug_words)
-            )
+            slug = slugify(self.subject)
 
-            if slug_words[-1].isdigit():
+            if slug[-1].isdigit():
                 suffix_id = True
             else:
                 try:

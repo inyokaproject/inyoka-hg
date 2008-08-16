@@ -590,6 +590,20 @@ def add_post_has_revision(m):
     ''')
 
 
+def split_ikhaya_slug(m):
+    """
+    This migration seperates the ikhaya slug column and deletes
+    datetime values from it.
+    """
+    article_table = Table('ikhaya_article', m.metadata, autoload=True)
+
+    for article in select_blocks(article_table.select(), 100):
+        m.engine.execute(article_table.update(
+            article_table.c.id == article.id, values={
+                'slug': article.slug.split('/')[-1]
+        }))
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -604,6 +618,6 @@ MIGRATIONS = [
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
     new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
-    add_post_has_revision,
+    add_post_has_revision, split_ikhaya_slug
     # add_forum_atime_column
 ]
