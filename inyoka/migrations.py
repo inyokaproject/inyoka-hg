@@ -598,9 +598,15 @@ def split_ikhaya_slug(m):
     article_table = Table('ikhaya_article', m.metadata, autoload=True)
 
     m.engine.execute('''
+        begin;
         alter table ikhaya_article
             add column pub_time time not null after pub_date,
             modify column slug varchar(100) not null;
+        commit;
+        alter table ikhaya_article
+            drop index slug,
+            add unique (pub_date, slug);
+        create index viewarticle on ikhaya_article(slug, pub_date);
     ''')
 
     for article in select_blocks(article_table.select(), 100):
@@ -612,14 +618,8 @@ def split_ikhaya_slug(m):
         }))
 
     m.engine.execute('''
-        begin;
         alter table ikhaya_article
             modify column pub_date date not null;
-        commit;
-        alter table ikhaya_article
-            drop index slug,
-            add unique (pub_date, slug);
-        create index viewarticle on ikhaya_article(slug, pub_date);
     ''')
 
 
