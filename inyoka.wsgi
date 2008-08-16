@@ -15,4 +15,5 @@ sys.path.insert(0, '/nfs/www/de')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'inyoka_settings'
 
 from inyoka.application import InyokaHandler
+from inyoka.wiki import parser
 application = InyokaHandler()
