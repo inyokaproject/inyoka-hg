@@ -8,7 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
-from datetime import datetime
+from datetime import datetime, date
 
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
@@ -112,13 +112,17 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 
 
 @templated('ikhaya/detail.html', modifier=context_modifier)
-def detail(request, slug):
+def detail(request, year, month, day, slug):
     """Shows a single article."""
-    article = Article.objects.select_related().get(slug=slug)
+    # I was not able to form that into one sql-statement
+    article = Article.objects.select_related().filter(
+        pub_date=date(int(year), int(month), int(day)),
+        slug=slug
+    )[0]
     set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
                      u'</a>“' % (url_for(article), escape(article.subject)))
     preview = None
-    if article.hidden or article.pub_date > datetime.utcnow():
+    if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_edit'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')

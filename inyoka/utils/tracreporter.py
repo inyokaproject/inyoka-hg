@@ -270,6 +270,7 @@ class Trac(object):
 class TBLoggerHandler(Handler):
     def __init__(self):
         Handler.__init__(self)
+        auth_handler = None
         if settings.TRAC_PASSWORD:
             mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
             mgr.add_password(None, 'http://dev.tux21b.org/tb/', settings.TRAC_USERNAME,

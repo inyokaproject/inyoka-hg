@@ -18,6 +18,7 @@ from inyoka.utils.text import slugify
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.cache import cache
+from inyoka.utils.dates import date_time_to_datetime
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.local import current_request
 
@@ -86,7 +87,8 @@ class Article(models.Model):
     published = ArticleManager(public=True)
     drafts = ArticleManager(public=False)
 
-    pub_date = models.DateTimeField('Datum')
+    pub_date = models.DateField('Datum', unique=True)
+    pub_time = models.TimeField('Zeit')
     updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
     author = models.ForeignKey(User, related_name='article_set',
                                verbose_name='Autor')
@@ -101,6 +103,10 @@ class Article(models.Model):
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
     comment_count = models.IntegerField(default=0)
     comments_enabled = models.BooleanField('Kommentare erlaubt', default=True)
+
+    @property
+    def pub_datetime(self):
+        return date_time_to_datetime(self.pub_date, self.pub_time)
 
     def _simplify(self, text, key):
         """Remove markup of a text that belongs to this Article"""
@@ -149,7 +155,7 @@ class Article(models.Model):
         Article that are not published or whose pub_date is in the future
         aren't shown for a normal user.
         """
-        return not self.public or self.pub_date > datetime.utcnow()
+        return not self.public or self.pub_datetime > datetime.utcnow()
 
     @property
     def comments(self):
@@ -157,10 +163,11 @@ class Article(models.Model):
         return Comment.objects.filter(article=self)
 
     def get_absolute_url(self, action='show'):
+        stamp = self.pub_date.strftime('%Y/%m/%d')
         return href(*{
-            'show': ('ikhaya', self.slug),
-            'edit': ('admin', 'ikhaya', 'articles', 'edit', self.slug),
-            'delete': ('admin', 'ikhaya', 'articles', 'delete', self.slug)
+            'show': ('ikhaya', stamp, self.slug),
+            'edit': ('admin', 'ikhaya', 'articles', 'edit', self.id),
+            'delete': ('admin', 'ikhaya', 'articles', 'delete', stamp, self.slug)
         }[action])
 
     def __unicode__(self):
@@ -177,12 +184,11 @@ class Article(models.Model):
 
     def save(self):
         """
-        This increases the edit count by 1, generates a new slug and updates
-        the xapian database
+        This increases the edit count by 1 annd updates the xapian database.
         """
         suffix_id = False
-        if not self.updated or self.updated < self.pub_date:
-            self.updated = self.pub_date
+        if not self.updated or self.updated < self.pub_datetime:
+            self.updated = self.pub_datetime
         else:
             self.updated = datetime.utcnow()
         if not self.slug:
@@ -191,13 +197,9 @@ class Article(models.Model):
                 self.icon = self.category.icon
 
             # new article
-            slug_words = slugify(self.subject).split('-')
-            slug = '%s/%s' % (
-                self.pub_date.strftime('%Y/%m/%d'),
-                '-'.join(slug_words)
-            )
+            slug = slugify(self.subject)
 
-            if slug_words[-1].isdigit():
+            if slug.split('-')[-1].isdigit():
                 suffix_id = True
             else:
                 try:
@@ -242,6 +244,7 @@ class Article(models.Model):
         verbose_name = 'Artikel'
         verbose_name_plural = 'Artikel'
         ordering = ['-pub_date', 'author']
+        unique_together = ('pub_date', 'slug')
 
 
 class Suggestion(models.Model):

@@ -30,12 +30,12 @@
   
     <p class="meta_detail">
       geschrieben von <a href="{{ article.author|url }}">
-      {{ article.author.username|e}}</a> {{ article.pub_date|specificdatetimeformat(true) }} 
+      {{ article.author.username|e}}</a> {{ article.pub_datetime|specificdatetimeformat(true) }} 
       in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-      {% if USER.can('article_edit') %} – <a href="{{ href('admin', 'ikhaya', 'articles', 'edit', article.slug) }}" class="adminlink">bearbeiten</a>{% endif %}
+      {% if USER.can('article_edit') %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
     {%- if article.comments_enabled %}
       <a name="comments"></a>

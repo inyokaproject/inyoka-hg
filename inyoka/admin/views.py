@@ -304,7 +304,7 @@ def ikhaya_articles(request, page=1):
 
 @require_permission('article_edit')
 @templated('admin/ikhaya_article_edit.html')
-def ikhaya_article_edit(request, article=None, suggestion_id=None):
+def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
     """
     Display an interface to let the user create or edit an article.
     If `suggestion_id` is given, the new ikhaya article is based on a special
@@ -320,8 +320,10 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
         form.fields['icon_id'].choices = [(u'', u'')] + icons
         form.fields['category_id'].choices = categories
 
-    if article:
-        article = Article.objects.get(slug=article)
+    if article_id:
+        article = Article.objects.get(id=int(article_id))
+    else:
+        article = None
 
     if request.method == 'POST':
         form = EditArticleForm(request.POST)
@@ -330,8 +332,10 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
             if form.is_valid():
                 data = form.cleaned_data
                 data['author'] = data['author'] or request.user
-                data['pub_date'] = get_user_timezone().localize(
-                    data['pub_date']).astimezone(pytz.utc).replace(tzinfo=None)
+                dt = get_user_timezone().localize(data['pub_date']) \
+                    .astimezone(pytz.utc).replace(tzinfo=None)
+                data['pub_date'], data['pub_time'] = dt.date(), dt.time()
+
                 if not data.get('icon_id'):
                     data['icon_id'] = None
                 if not article:
@@ -362,7 +366,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                             request.POST.get('text'))).render(ctx, 'html')
     else:
         initial = {}
-        if article:
+        if article_id:
             initial = {
                 'subject': article.subject,
                 'intro': article.intro,
@@ -370,7 +374,7 @@ def ikhaya_article_edit(request, article=None, suggestion_id=None):
                 'author': article.author,
                 'category_id': article.category.id,
                 'icon_id': article.icon and article.icon.id or None,
-                'pub_date': datetime_to_timezone(article.pub_date).replace(tzinfo=None),
+                'pub_date': datetime_to_timezone(article.pub_datetime).replace(tzinfo=None),
                 'public': article.public,
                 'slug': article.slug,
                 'comments_enabled': article.comments_enabled,
