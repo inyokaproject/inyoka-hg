@@ -692,7 +692,7 @@ class Value(Expr):
         else:
             try:
                 b = float(other)
-            except TypeError:
+            except (ValueError, TypeError):
                 return False
         if a is missing or b is missing:
             return False
