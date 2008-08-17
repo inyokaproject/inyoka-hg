@@ -1284,7 +1284,7 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
-@templated('forum/newposts.html')
+@templated('forum/topiclist.html')
 def newposts(request, page=1):
     """
     Return a list of the latest posts.
@@ -1310,6 +1310,7 @@ def newposts(request, page=1):
     return {
         'topics':     list(pagination.objects),
         'pagination': pagination,
+        'title':      u'Neue Beiträge',
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id)
     }
