@@ -38,14 +38,17 @@
   <p>
     Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern, die
     {{ record_time|specificdatetimeformat(true) }} gleichzeitig online waren.<br />
-    Insgesamt sind {{ global_registered_users }} Benutzer auf ubuntuusers.de registriert.
+    Insgesamt sind {{ global_registered_users }} Benutzer auf ubuntuusers.de registriert.<br />
+  </p>
+  <p>
+    <strong>Legende:</strong> Benutzer mit einem <img src="{{ href('static', 'img', 'team.png') }}" alt="Team-Icon" /> Icon gehören zum Ubuntuusers.de Team.
   </p>
   {%- if sessions.sessions %}
   <ul>
     {%- for session in sessions.sessions %}
     <li>
       {%- if session.link %}
-      <a href="{{ session.link }}" class="{{ session.type }}">{{ (session.text or 'Gast')|e }}</a>
+      <a href="{{ session.link }}" class="{{ session.type }}" title="{{ session.type|capitalize }}">{{ (session.text or 'Gast')|e }}</a>
       {%- else %}
       <span class="{{ session.type }}">{{ (session.text or 'Gast')|e }}</span>
       {%- endif %}
