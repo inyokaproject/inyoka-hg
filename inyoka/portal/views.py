@@ -1192,7 +1192,9 @@ def user_error_report(request):
                 spam_test = data['title'].lower() + data['text'].lower()
                 spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
                               '<a href=', 'gay', 'female', 'nude', 'teen',
-                              'wwrkckjbWRKcKjbtrama', 'rolex', 'viagra')
+                              'wwrkckjbWRKcKjbtrama', 'rolex', 'viagra',
+                              'money', 'exchange', 'http://rapidshare.com',
+                              'anxiety', 'medic', 'schufa')
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}
