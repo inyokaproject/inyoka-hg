@@ -93,7 +93,7 @@
         </ul>
         <ul class="navi_global">
           {%- if USER.is_authenticated %}
-          <li><a href="{{ href('portal', 'logout') }}">Logout [{{ USER.username|e }}]</a></li>
+          <li><a href="{{ href('portal', 'logout', next=CURRENT_URL) }}">Logout [{{ USER.username|e }}]</a></li>
           <li><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></li>
           <li>
             {%- if pm_count -%}

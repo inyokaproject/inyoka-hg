@@ -366,13 +366,14 @@ def login(request):
 def logout(request):
     """Simple logout view that flashes if the process was done
     successfull or not (e.g if the user wasn't logged in)."""
+    redirect = is_safe_domain(request.GET.get('next', '')) and \
+               request.GET['next'] or href('portal')
     if request.user.is_authenticated:
         User.objects.logout(request)
         flash(u'Du hast dich erfolgreich abgemeldet.', True)
     else:
         flash(u'Du warst nicht eingeloggt', False)
-    return HttpResponseRedirect(request.GET.get('next') or
-                                href('portal'))
+    return HttpResponseRedirect(redirect)
 
 
 @templated('portal/search.html')
