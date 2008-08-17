@@ -214,18 +214,22 @@ class RecentChanges(Macro):
                 rv += '?' + url_encode(parameters)
             return rv
 
+        def pagebuffer_sorter(x, y):
+            pb = pagebuffer
+            return cmp(pb[x][-1].change_date, pb[y][-1].change_date)
+
         cache_key = 'wiki/recent_changes/%d-%d' % (max_days, page_num)
         data = cache.get(cache_key)
         if data is None:
             #XXX: for every user url one query is send. select_related(depth=4+)
             #     doesn't fix that.... for now it's not that bad (because of caching),
             #     but should be optimized.
-            revisions = Revision.objects.filter(change_date__gt=(
-                datetime.utcnow()-timedelta(days=max_days))).select_related()
-            sitems = Sortable(revisions, context.request.GET, '-change_date',
-                columns=['change_date'])
-            pagination = Pagination(context.request, sitems.get_objects(),
+            revisions = Revision.objects.filter(
+                change_date__gt=(datetime.utcnow()-timedelta(days=max_days))
+            ).select_related()
+            pagination = Pagination(context.request, revisions,
                                     page_num, self.per_page, link_func)
+
             for revision in pagination.objects:
                 d = revision.change_date
                 key = (d.year, d.month, d.day)
@@ -234,13 +238,7 @@ class RecentChanges(Macro):
                     days_found.add(key)
                 days[-1][1].append(revision)
 
-            table = nodes.Table(children=[
-                nodes.TableRow([
-                    nodes.TableHeader([
-                        nodes.Text('Sortieren nach: '),
-                        nodes.HTML(sitems.get_html('change_date',
-                            u'Änderungsdatum')),
-            ], colspan=3)])], class_='recent_changes')
+            table = nodes.Table(class_='recent_changes')
 
             for day, changes in days:
                 table.children.append(nodes.TableRow([
@@ -250,17 +248,21 @@ class RecentChanges(Macro):
                 ]))
 
                 pagebuffer = OrderedDict()
+                changes = sorted(changes, key=lambda x: x.change_date)
 
                 for rev in changes:
                     if not rev.page in pagebuffer:
                         pagebuffer[rev.page] = []
                     pagebuffer[rev.page].append(rev)
 
-                for page in pagebuffer:
+                _pagebuffer = sorted(pagebuffer, cmp=pagebuffer_sorter, reverse=True)
+
+                for page in _pagebuffer:
                     revs = pagebuffer[page]
+
                     if len(revs) > 1:
-                        stamps = (format_time(revs[-1].change_date),
-                                  format_time(revs[0].change_date))
+                        stamps = (format_time(revs[0].change_date),
+                                  format_time(revs[-1].change_date))
                         stamp = u'%s' % (stamps[0]==stamps[-1] and stamps[0] or \
                                 u'%s - %s' % stamps)
                     else:
