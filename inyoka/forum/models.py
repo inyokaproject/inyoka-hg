@@ -432,6 +432,16 @@ class Topic(object):
             'topic_count': forum_table.c.topic_count -1,
             'post_count': forum_table.c.post_count -1,
         }))
+
+        dbsession.execute(forum_table.update(and_(
+                forum_table.c.id.in_(ids),
+                forum_table.c.last_post_id==self.last_post_id),
+            values={
+                'last_post_id': select([func.max(post_table.c.id)], and_(
+                            post_table.c.topic_id != self.id,
+                            topic_table.c.id == post_table.c.topic_id))
+        }))
+
         dbsession.commit()
         self.forum = forum
         dbsession.flush([self])
