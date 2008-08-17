@@ -163,9 +163,9 @@ class LostPasswordForm(forms.Form):
     captcha = CaptchaField(label='CAPTCHA')
     hidden_captcha = HiddenCaptchaField(required=False)
 
-    def clean(self):
+    def clean_username(self):
         data = super(LostPasswordForm, self).clean()
-        if '@' in data['username']:
+        if 'username' in data and '@' in data['username']:
             try:
                 self.user = User.objects.get(email=data['username'])
             except User.DoesNotExist:
