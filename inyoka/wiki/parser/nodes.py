@@ -1531,7 +1531,7 @@ class Box(Element):
             style.append(self.style)
         yield build_html_tag(u'div',
             id=self.id,
-            style=u' '.join(style),
+            style=style and u' '.join(style) or None,
             classes=(self.class_,)
         )
         if self.title is not None:

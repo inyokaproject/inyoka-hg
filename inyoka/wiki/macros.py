@@ -369,7 +369,7 @@ class TableOfContents(TreeMacro):
             stack[-1].children.append(nodes.ListItem([link]))
         head = nodes.Layer(children=[nodes.Text(u'Inhaltsverzeichnis')],
                            class_='head')
-        result = nodes.Layer(class_='toc', children = [head, result])
+        result = nodes.Layer(class_='toc', children=[head, result])
         return result
 
 
@@ -585,13 +585,14 @@ class TagCloud(Macro):
             if active_tag:
                 return TagList(active_tag, _raw=True). \
                        build_node(context, format)
-        container = nodes.Layer(class_='tagcloud')
+
+        result = nodes.Layer(class_='tagcloud')
         for tag in Page.objects.get_tagcloud(self.max):
             if tag['count'] == 1:
                 title = 'eine Seite'
             else:
                 title = '%s Seiten' % human_number(tag['count'], 'feminine')
-            container.children.extend((
+            result.children.extend((
                 nodes.Link('?' + url_encode({
                         'tag':  tag['name']
                     }), [nodes.Text(tag['name'])],
@@ -600,6 +601,11 @@ class TagCloud(Macro):
                 ),
                 nodes.Text(' ')
             ))
+
+        head = nodes.Headline(2, children=[nodes.Text(u'Tag-Wolke')],
+                              class_='head')
+        container = nodes.Layer(children=[head, result])
+
         return container
 
 
@@ -633,7 +639,11 @@ class TagList(Macro):
                     style='font-size: %s%%' % tag['size']
                 )
                 result.children.append(nodes.ListItem([link]))
-        return result
+        head = nodes.Headline(2, children=[
+            nodes.Text(u'Seiten mit Tag „%s“' % self.active_tag)
+        ], class_='head')
+        container = nodes.Layer(children=[head, result])
+        return container
 
 
 class Include(Macro):
