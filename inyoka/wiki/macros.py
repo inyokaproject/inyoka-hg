@@ -37,7 +37,8 @@ from inyoka.utils.css import filter_style
 from inyoka.utils.urls import is_external_target
 from inyoka.utils.text import human_number, join_pagename, normalize_pagename, \
     get_pagetitle
-from inyoka.utils.dates import parse_iso8601, format_datetime, format_time
+from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
+    datetime_to_timezone
 from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
@@ -231,7 +232,7 @@ class RecentChanges(Macro):
                                     page_num, self.per_page, link_func)
 
             for revision in pagination.objects:
-                d = revision.change_date
+                d = datetime_to_timezone(revision.change_date)
                 key = (d.year, d.month, d.day)
                 if key not in days_found:
                     days.append((date(*key), []))
