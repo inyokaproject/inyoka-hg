@@ -259,13 +259,13 @@ def viewtopic(request, topic_slug, page=1):
         t.mark_read(request.user)
         request.user.save()
 
-        try:
-            s = Subscription.objects.get(user=request.user,
-                                         topic_id=t.id)
+        s = Subscription.objects.filter(user=request.user,
+                                        topic_id=t.id)
+        if s:
             subscribed = True
-            s.notified = False
-            s.save()
-        except Subscription.DoesNotExist:
+            s[0].notified = False
+            s[0].save()
+        else:
             subscribed = False
 
     post_objects = pagination.objects.all()
