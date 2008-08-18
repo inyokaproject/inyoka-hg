@@ -560,11 +560,17 @@ def forum_edit(request, id=None):
             data = form.cleaned_data
             slug = data['slug']
             if Forum.query.filter(and_(Forum.slug==slug, Forum.id!=id)).first():
-                form.errors['slug'] = (
-                    (u'Bitte einen anderen Slug angeben,'
-                     u'„%s“ ist schon vergeben.'
-                     % escape(data['slug'])))
-                errors = True
+                form.errors['slug'] = ErrorList(
+                    [u'Bitte einen anderen Slug angeben, „%s“ ist schon '
+                     u'vergeben.' % escape(slug)])
+            if int(data['parent']) != -1:
+                parent = Forum.query.get(int(data['parent']))
+                if not parent:
+                    form.errors['parent'] = ErrorList(
+                        [u'Forum %s existiert nicht'
+                         % escape(data['parent'])])
+
+        if form.is_valid():
             if not id:
                 forum = Forum()
             forum.name = data['name']
@@ -573,12 +579,7 @@ def forum_edit(request, id=None):
             forum.slug = slug
             forum.description = data['description']
             if int(data['parent']) != -1:
-                parent = Forum.query.get(int(data['parent']))
-                if not parent:
-                    form.errors['parent'] = (u'Forum %s existiert nicht'
-                                             % escape(data['parent']),)
-                else:
-                    forum.parent = parent
+                forum.parent = parent
 
             if data['welcome_msg_subject']:
                 # subject and text are bound to each other, validation
@@ -602,8 +603,8 @@ def forum_edit(request, id=None):
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
                       escape(forum.name), not id and 'angelegt' or 'editiert'))
                 return HttpResponseRedirect(href('admin', 'forum'))
-            else:
-                flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
 
     else:
         if id is None:
@@ -671,8 +672,9 @@ def user_edit(request, username):
                 except User.DoesNotExist:
                     user.username = data['username']
                 else:
-                    form.errors['username'] = ErrorList([u'Ein Benutzer mit '
-                        u'diesem Namen existiert bereits'])
+                    form.errors['username'] = ErrorList(
+                        [u'Ein Benutzer mit diesem Namen existiert bereits'])
+
         if form.is_valid():
             #: set the user attributes, avatar and forum privileges
             for key in ('status', 'date_joined', 'banned_until',
