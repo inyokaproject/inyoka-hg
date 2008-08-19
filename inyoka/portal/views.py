@@ -1195,7 +1195,8 @@ def user_error_report(request):
                               '<a href=', 'gay', 'female', 'nude', 'teen',
                               'wwrkckjbWRKcKjbtrama', 'rolex', 'viagra',
                               'money', 'exchange', 'http://rapidshare.com',
-                              'anxiety', 'medic', 'schufa')
+                              'anxiety', 'medic', 'schufa', 'clavamox',
+                              'nice site', 'siemens')
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}
