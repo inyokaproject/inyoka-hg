@@ -387,11 +387,12 @@ class UserErrorReportForm(forms.Form):
                             widget=forms.TextInput(attrs={'size':50}))
     text = forms.CharField(label=u'ausführliche Beschreibung',
                            widget=forms.Textarea(attrs={'rows': 3}))
-    url = forms.URLField(widget=forms.HiddenInput, label=u'Adresse der Seite,'
-                                            u' auf die sich das Ticket bezieht')
+    url = forms.URLField(widget=forms.HiddenInput, required=False,
+                         label=u'Adresse der Seite, auf die sich das Ticket bezieht')
 
     def clean_url(self):
-        if not is_safe_domain(self.cleaned_data['url']):
+        data = self.cleaned_data
+        if data.get('url') and not is_safe_domain(self.cleaned_data['url']):
             raise forms.ValidationError(u'Ungültige URL')
         return self.cleaned_data['url']
 
