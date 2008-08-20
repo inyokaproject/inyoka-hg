@@ -14,8 +14,9 @@
 from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
-from django.forms.models import model_to_dict
 from django import forms
+from django.forms.models import model_to_dict
+from django.forms.util import ErrorList
 from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data
 from inyoka.utils.text import get_random_password, human_number, normalize_pagename
@@ -643,15 +644,18 @@ def usercp_password(request):
         if form.is_valid():
             data = form.cleaned_data
             user = request.user
-            if user.check_password(data['old_password']):
-                user.set_password(data['new_password'])
-                user.save()
-                flash(u'Dein Passwort wurde erfolgreich geändert',
-                      success=True)
-                return HttpResponseRedirect(href('portal', 'usercp'))
-            else:
-                form.errors['old_password'] = [u'Das eingegebene Passwort '
-                                    u'stimmt nicht mit deinem Alten überein']
+            if not user.check_password(data['old_password']):
+                form.errors['old_password'] = ErrorList(
+                    [u'Das eingegebene Passwort stimmt nicht mit deinem '
+                     u'alten Passwort überein.'])
+        if form.is_valid():
+            user.set_password(data['new_password'])
+            user.save()
+            flash(u'Dein Passwort wurde erfolgreich geändert',
+                  success=True)
+            return HttpResponseRedirect(href('portal', 'usercp'))
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
     else:
         if 'random' in request.GET:
             random_pw = get_random_password()
@@ -710,14 +714,18 @@ def usercp_deactivate(request):
         form = DeactivateUserForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            if request.user.check_password(data['password_confirmation']):
-                deactivate_user(request.user)
-                User.objects.logout(request)
-                flash('Dein Account wurde deaktiviert.', True)
-                return HttpResponseRedirect(href('portal'))
-            else:
-                form.errors['password_confirmation'] = [u'Das eingegebene'
-                                                     u' Passwort war falsch.']
+            check = data['password_confirmation']
+            if not request.user.check_password(check):
+                form.errors['password_confirmation'] = ErrorList(
+                    [u'Das eingegebe Passwort war falsch'])
+
+        if form.is_valid():
+            deactivate_user(request.user)
+            User.objects.logout(request)
+            flash('Dein Account wurde deaktiviert.', True)
+            return HttpResponseRedirect(href('portal'))
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
     else:
         form = DeactivateUserForm()
     return {
