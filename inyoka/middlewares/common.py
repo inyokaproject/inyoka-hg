@@ -76,7 +76,7 @@ class CommonServicesMiddleware(CommonMiddleware):
             powered_by += '/rev-%s' % INYOKA_REVISION
         response['X-Powered-By'] = powered_by
         response['X-Sucks'] = 'PHP --- every version'
-        response['Cache-Control'] = 'no-cache'
+        #response['Cache-Control'] = 'no-cache'
 
         # clean up after the local manager
         self._local_manager.cleanup()
