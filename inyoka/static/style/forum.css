@@ -161,13 +161,11 @@ table.forum thead td p.description {
 }
 
 .status_solved:before {
-    color: #090;
-    content: "✔";
+    content: url('http://static.ubuntuusers.de/img/forum_solved.png');
 }
 
 .status_unsolved:before {
-    color: #C00;
-    content: "✘";
+    content: url('http://static.ubuntuusers.de/img/forum_unsolved.png');
 }
 
 table.topic {
