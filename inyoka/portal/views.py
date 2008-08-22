@@ -1212,7 +1212,8 @@ def user_error_report(request):
                               'anxiety', 'medic', 'schufa', 'clavamox',
                               'nice site', 'siemens', 'clamavox', 'blinddate',
                               'buying', 'free', 'honda', 'chrysler', 'diplom',
-                              'industry', 'price', '_______', 'credit', )
+                              'industry', 'price', '_______', 'credit',
+                              'just joined',)
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}
