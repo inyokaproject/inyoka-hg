@@ -57,17 +57,12 @@ def execute_script(con, name):
         f.close()
 
 
-def select_blocks(query, block_size=1000, start_with=0, max_fails=10):
+def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
     """Execute a query blockwise to prevent lack of ram"""
-    # get the table
-    table = list(query._table_iterator())[0]
-    # get the tables primary key (a little bit hackish)
-    key_name = list(table.primary_key)[0].name
-    key = table.c[key_name]
     range = (start_with, start_with + block_size)
     failed = 0
     while failed < max_fails:
-        result = query.where(key.between(*range)).execute()
+        result = query.where(pk.between(*range)).execute()
         i = 0
         for i, row in enumerate(result):
             yield row
@@ -277,7 +272,7 @@ def split_post_table(m):
     post_table = Table('forum_post', m.metadata, autoload=True)
     post_text_table = Table('forum_post_text', m.metadata, autoload=True)
 
-    for post in select_blocks(post_table.select()):
+    for post in select_blocks(post_table.select(), post_table.c.id):
         m.engine.execute(post_text_table.insert(values={
             'id':               post.id,
             'text':             post.text,
@@ -411,7 +406,7 @@ def update_post_table(m):
         ALTER TABLE forum_post ADD `text` longtext, ADD `rendered_text` longtext;
     ''')
 
-    for post in select_blocks(post_text_table.select()):
+    for post in select_blocks(post_text_table.select(), post_table.c.id):
         m.engine.execute(post_table.update(post_table.c.id == post.id, values={
             'text':          post.text,
             'rendered_text': post.rendered_text,
@@ -436,7 +431,7 @@ def add_position_column(m):
             add index viewtopic (topic_id, position);
     ''')
 
-    for topic in select_blocks(topic_table.select()):
+    for topic in select_blocks(topic_table.select(), topic_table.c.id):
         m.engine.execute('''set @rownum:=0;''')
         m.engine.execute('''
             update forum_post set position=(@rownum:=@rownum+1)
@@ -609,7 +604,7 @@ def split_ikhaya_slug(m):
         create index viewarticle on ikhaya_article(slug, pub_date);
     ''')
 
-    for article in select_blocks(article_table.select(), 100):
+    for article in select_blocks(article_table.select(), article_table.c.id, 100):
         m.engine.execute(article_table.update(
             article_table.c.id == article.id, values={
                 'pub_time': article.pub_date.time(),
