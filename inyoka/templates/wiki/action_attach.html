@@ -54,7 +54,7 @@
     <ul class="attachments">
     {%- for attachment in attachments %}
       <li>
-        <a href="{{ attachment|url }}">{{ attachment.title|e }}</a> {{ attachment.rev.attachment.get_file_size()|filesizeformat(true) }}
+        <a href="{{ attachment|url }}">{{ attachment.title|e }}</a> {{ attachment.rev.attachment.file.size|filesizeformat(true) }}
         (zuletzt geändert am {{ attachment.rev.change_date|datetimeformat }}
         von {% if attachment.rev.user -%}
         <a href="{{ attachment.rev.user|url|e }}">{{
