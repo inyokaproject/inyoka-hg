@@ -91,7 +91,9 @@ class HighlighterMiddleware(object):
                 del args['highlight']
                 if args:
                     plain_url += '?' + args.urlencode()
-            else:
+            # no referrer based highlighting for users with disabled
+            # highlighting.
+            elif not request.user.settings.get('highlight_search', True):
                 referrer = request.META.get('HTTP_REFERER')
                 if not referrer or '?' not in referrer:
                     return
@@ -102,6 +104,8 @@ class HighlighterMiddleware(object):
                 search_words = args.get('q') or args.get('query')
                 if request.GET:
                     plain_url += '?' + request.GET.urlencode()
+            else:
+                return
             if search_words:
                 request.highlight_searchwords = search_words.lower().split()
                 flash(u'Suchergebnisse werden hervorgehoben. Suchwörter '

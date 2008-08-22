@@ -32,7 +32,7 @@
       <h2>
         <img src="{{ href('static', 'img/icons/small/%s.png' % doc.component|lower) }}"
           alt="{{ doc.component }}" title="{{ doc.component }}" />
-        <a href="{{ doc.url }}{% if doc.highlight %}?highlight={{ highlight|urlencode|e }}{% endif %}">
+        <a href="{{ doc.url }}{% if doc.highlight and highlight %}?highlight={{ highlight|urlencode|e }}{% endif %}">
           {{ doc.title }}
         </a>
       </h2>

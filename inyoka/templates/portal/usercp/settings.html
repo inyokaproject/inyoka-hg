@@ -37,6 +37,9 @@
         <span class="note"> {{ form.show_thumbnails.help_text }}</span>
         {{ form.errors.show_thumbnails }}</dd></dl>
     </dd>
+    <dd>{{ form.highlight_search }} <label for="id_highlight_search">{{ form.highlight_search.label }}</label><br />
+        <span class="note"> {{ form.highlight_search.help_text }}</span>
+        {{ form.errors.highlight_search }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />

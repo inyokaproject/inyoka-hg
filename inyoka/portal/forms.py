@@ -244,6 +244,9 @@ class UserCPSettingsForm(forms.Form):
     show_thumbnails = forms.BooleanField(required=False,
         label='Bilder-Vorschau ebenfalls aktivieren',
         help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
+    highlight_search = forms.BooleanField(required=False,
+        label='Sucherwörter hervorheben',
+        help_text='Sucherwörter werden in gelber Farbe hervorgehoben')
 
     def clean_notify(self):
         data = self.cleaned_data['notify']

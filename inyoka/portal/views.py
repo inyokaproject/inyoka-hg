@@ -445,9 +445,14 @@ def search(request):
             })
             add(u'<div style="clear: both"></div></div>')
 
+            # only highlight for users with that setting enabled.
+            highlight = None
+            if request.user.settings.get('highlight_search', True):
+                highlight = results.highlight_string
+
             return TemplateResponse('portal/search_results.html', {
                 'query':            d['query'],
-                'highlight':        results.highlight_string,
+                'highlight':        highlight,
                 'area':             d['area'],
                 'results':          results,
                 'pagination':       u''.join(pagination),
@@ -624,7 +629,8 @@ def usercp_settings(request):
             'hide_profile': settings.get('hide_profile', False),
             'autosubscribe': settings.get('autosubscribe', False),
             'show_preview': settings.get('show_preview', False),
-            'show_thumbnails': settings.get('show_thumbnails', False)
+            'show_thumbnails': settings.get('show_thumbnails', False),
+            'highlight_search': settings.get('highlight_search', True)
         }
         form = UserCPSettingsForm(values)
     return {
