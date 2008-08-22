@@ -12,7 +12,7 @@
     For development purposes we also set up virtual url dispatching modules for
     static and media.
 
-    :copyright: Copyright 2007 by Armin Ronacher.
+    :copyright: Copyright 2007-2008 by Armin Ronacher.
     :license: GNU GPL.
 """
 from django.db import connection
@@ -22,6 +22,7 @@ from inyoka.conf import settings
 from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseForbidden
 from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
+from inyoka.utils.flashing import has_flashed_messages
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -76,7 +77,10 @@ class CommonServicesMiddleware(CommonMiddleware):
             powered_by += '/rev-%s' % INYOKA_REVISION
         response['X-Powered-By'] = powered_by
         response['X-Sucks'] = 'PHP --- every version'
-        #response['Cache-Control'] = 'no-cache'
+
+        # update the cache control
+        if request.user.is_authenticated or has_flashed_messages():
+            response['Cache-Control'] = 'no-cache'
 
         # clean up after the local manager
         self._local_manager.cleanup()

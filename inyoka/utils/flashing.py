@@ -70,6 +70,12 @@ def get_flashed_messages():
     return flash_buffer
 
 
+def has_flashed_messages():
+    """True if the request has flashed messages."""
+    session = getattr(current_request, 'session', None)
+    return bool(session and session.get('flmsg'))
+
+
 class FlashMessage(object):
     __slots__ = ('text', 'success')
 
