@@ -611,8 +611,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attachments = Attachment.query.filter_by(post_id=post.id)
 
     if not newtopic:
-        posts = list(topic.posts.order_by(post_table.c.position.desc())[:15])
-
+        posts = list(topic.posts.filter(post_table.c.hidden == 0) \
+                                .order_by(post_table.c.position.desc())[:15])
     return {
         'form':         form,
         'poll_form':    poll_form,

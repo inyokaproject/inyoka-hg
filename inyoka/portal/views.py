@@ -1210,7 +1210,9 @@ def user_error_report(request):
                               'wwrkckjbWRKcKjbtrama', 'rolex', 'viagra',
                               'money', 'exchange', 'http://rapidshare.com',
                               'anxiety', 'medic', 'schufa', 'clavamox',
-                              'nice site', 'siemens')
+                              'nice site', 'siemens', 'clamavox', 'blinddate',
+                              'buying', 'free', 'honda', 'chrysler', 'diplom',
+                              'industry', 'price', '_______', 'credit', )
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}
