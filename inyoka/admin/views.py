@@ -207,7 +207,7 @@ def file_edit(request, file=None):
             if not file:
                 file = StaticFile()
             if data['file']:
-                file.save_file_file(data['file'].name, data['file'].read())
+                file.file.save(data['file'].name, data['file'])
                 file.identifier = data['file'].name
             file.is_ikhaya_icon = data['is_ikhaya_icon']
             file.save()

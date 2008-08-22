@@ -483,7 +483,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 att_name = (d.get('filename') or d['attachment'].name)
                 attachment = Attachment.create(
                     att_name, d['attachment'].read(),
-                    request.FILES['attachment']['content-type'],
+                    request.FILES['attachment'].content_type,
                     attachments, override=d['override']
                 )
                 if not attachment:
