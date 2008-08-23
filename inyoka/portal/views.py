@@ -44,6 +44,7 @@ from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category, Suggestion
+from inyoka.forum.acl import filter_invisible
 from inyoka.forum.models import Forum, SAUser, Topic, Post
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
@@ -1055,6 +1056,7 @@ def usermap(request):
 
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
+    anonymous_user = User.objects.get_anonymous_user()
     for fapp in ('forum', 'ikhaya', 'planet', 'wiki'):
         if app in (fapp, None):
             globals()['%s_form' % fapp] = request.POST \
@@ -1065,9 +1067,9 @@ def feedselector(request, app=None):
         else:
             globals()['%s_form' % fapp] = None
     if forum_form is not None:
-        #TODO: filter those readable by anonymous
+        forums = filter_invisible(anonymous_user, Forum.query.all())
         forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
-            [(f.slug, f.name) for f in Forum.query.all()]
+            [(f.slug, f.name) for f in forums]
     if ikhaya_form is not None:
         ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
