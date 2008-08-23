@@ -720,8 +720,8 @@ def user_edit(request, username):
                             user=user,
                             forum=Forum.query.get(int(forum_id))
                         )
-                        dbsession.save(privilege)
                     privilege.bits = join_flags(*value)
+                    dbsession.save(privilege)
                     dbsession.flush()
 
             # group editing
@@ -944,8 +944,8 @@ def group_edit(request, name=None):
                         privilege = Privilege(
                             group=group,
                             forum=Forum.query.get(int(forum_id)))
-                        dbsession.save(privilege)
                     privilege.bits = join_flags(*value)
+                    dbsession.save(privilege)
                     dbsession.flush()
 
             # save changes to the database
