@@ -970,10 +970,14 @@ class Page(models.Model):
                 # integers which are guaranteed to be integers
                 cur.execute('''
                     update wiki_text set html_render_instructions = null
-                     where id in (
+                    where id in (
                         select text_id from wiki_revision
-                         where id = (select max(id) from wiki_revision
-                                     where page_id in (%s)))
+                        join (
+                            select page_id, max(id) as id
+                            from wiki_revision
+                            where page_id in (%s)
+                            group by page_id
+                        ) as d1 using (id));
                 ''' % ', '.join(map(str, related_pages)))
         finally:
             cur.close()
