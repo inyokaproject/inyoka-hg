@@ -1064,14 +1064,14 @@ def feedselector(request, app=None):
                     (auto_id='id_%s_%%s' % fapp)
         else:
             globals()['%s_form' % fapp] = None
-    if forum_form:
+    if forum_form is not None:
         #TODO: filter those readable by anonymous
         forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
             [(f.slug, f.name) for f in Forum.query.all()]
-    if ikhaya_form:
+    if ikhaya_form is not None:
         ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
-    if wiki_form:
+    if wiki_form is not None:
         wiki_pages = cache.get('feedselector/wiki/pages')
         if not wiki_pages:
             wiki_pages = WikiPage.objects.all()
