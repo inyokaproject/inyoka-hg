@@ -26,7 +26,7 @@ def ikhaya_article(args, match, article_id):
         article = Article.objects.get(id=int(article_id))
     except (Article.DoesNotExist, ValueError):
         return
-    return href('ikhaya', article.slug)
+    return article.get_absolute_url()
 
 @legacy.url(r'^/ikhaya/([^\d].*)/?$')
 def ikhaya(args, match, url):
