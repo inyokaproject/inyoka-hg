@@ -103,7 +103,7 @@ class Entry(models.Model):
             self.title
         )
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return self.url
 
     @property

@@ -478,7 +478,7 @@ def profile(request, username):
 
     try:
         if username != user.username.replace(' ', '_'):
-            return HttpResponseRedirect(user.get_absolute_url())
+            return HttpResponseRedirect(url_for(user))
     except ValueError:
         raise PageNotFound()
 
@@ -1203,7 +1203,8 @@ def user_error_report(request):
         form = UserErrorReportForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            if not request.user.is_authenticated:
+            user = request.user
+            if not user.is_authenticated:
                 spam_test = data['title'].lower() + data['text'].lower()
                 spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
                               '<a href=', 'gay', 'female', 'nude', 'teen',
@@ -1220,17 +1221,17 @@ def user_error_report(request):
                 if is_spam(spam_test):
                     return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
-            if request.user.id != 1:
+            if user.id != 1:
                 text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
-                    request.user.get_absolute_url(),
-                    escape(request.user.username),
-                    request.user.get_absolute_url('privmsg'),
+                    url_for(user),
+                    escape(user.username),
+                    url_for(user, 'privmsg'),
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
             except KeyError:
                 pass
-            reporter = request.user.id == 1 and '' or request.user.username
+            reporter = user.id == 1 and '' or user.username
             text += u'\n\n%s' % data['text']
             trac = Trac()
             trac.submit_new_ticket(

@@ -398,7 +398,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if not check_privilege(privileges, 'moderate'):
                 flash(u'Du kannst auf in diesem Thema nicht antworten, da es '
                       u'von einem Moderator geschlossen wurde.', False)
-                return HttpResponseRedirect(topic.get_absolute_url())
+                return HttpResponseRedirect(url_for(topic))
         else:
             if not check_privilege(privileges, 'reply'):
                 return abort_access_denied(request)
@@ -638,24 +638,24 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 @simple_check_login
 def change_status(request, topic_slug, solved=None, locked=None):
     """Change the status of a topic and redirect to it"""
-    t = Topic.query.filter_by(slug=topic_slug).first()
-    if not t:
+    topic = Topic.query.filter_by(slug=topic_slug).first()
+    if not topic:
         raise PageNotFound
-    if not have_privilege(request.user, t.forum, CAN_READ):
+    if not have_privilege(request.user, topic.forum, CAN_READ):
         abort_access_denied(request)
     if solved is not None:
-        t.solved = solved
+        topic.solved = solved
         session.commit()
         flash(u'Das Thema wurde als %s markiert' % (solved and u'gelöst' or \
                                                     u'ungelöst'), True)
     if locked is not None:
-        t.locked = locked
+        topic.locked = locked
         session.commit()
         flash(u'Das Thema wurde %s' % (locked and u'gesperrt' or
                                        u'entsperrt'))
-    t.forum.invalidate_topic_cache()
+    topic.forum.invalidate_topic_cache()
 
-    return HttpResponseRedirect(t.get_absolute_url())
+    return HttpResponseRedirect(url_for(topic))
 
 
 @transaction.autocommit
@@ -742,31 +742,31 @@ unsubscribe_topic = _generate_unsubscriber(Topic,
 @templated('forum/report.html')
 def report(request, topic_slug):
     """Change the report_status of a topic and redirect to it"""
-    t = Topic.query.filter_by(slug=topic_slug).first()
-    if not t:
-        raise PageNotFound
-    if not have_privilege(request.user, t.forum, CAN_READ):
+    topic = Topic.query.filter_by(slug=topic_slug).first()
+    if not topic:
+        raise PageNotFound()
+    if not have_privilege(request.user, topic.forum, CAN_READ):
         return abort_access_denied(request)
-    if t.reported:
+    if topic.reported:
         flash(u'Dieses Thema wurde bereits gemeldet; die Moderatoren werden '
               u'sich in Kürze darum kümmern.')
-        return HttpResponseRedirect(t.get_absolute_url())
+        return HttpResponseRedirect(url_for(topic))
 
     if request.method == 'POST':
         form = ReportTopicForm(request.POST)
         if form.is_valid():
-            d = form.cleaned_data
-            t.reported = d['text']
-            t.reporter_id = request.user.id
+            data = form.cleaned_data
+            topic.reported = data['text']
+            topic.reporter_id = request.user.id
             session.commit()
             cache.delete('forum/reported_topic_count')
             flash(u'Dieses Thema wurde den Moderatoren gemeldet. '
                   u'Sie werden sich sobald wie möglich darum kümmern', True)
-            return HttpResponseRedirect(t.get_absolute_url())
+            return HttpResponseRedirect(url_for(topic))
     else:
         form = ReportTopicForm()
     return {
-        'topic': t,
+        'topic': topic,
         'form':  form
     }
 
@@ -826,14 +826,14 @@ def movetopic(request, topic_slug):
         form.fields['forum_id'].choices = [(f.id, f.name) for f in
             sorted(forums, key=lambda x: x.name)]
 
-    t = Topic.query.filter_by(slug=topic_slug).first()
-    if not t:
+    topic = Topic.query.filter_by(slug=topic_slug).first()
+    if not topic:
         raise PageNotFound
-    if not have_privilege(request.user, t.forum, CAN_MODERATE):
+    if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
     forums = filter_invisible(request.user, Forum.query.filter(and_(
-        Forum.c.parent_id != None, Forum.c.id != t.forum_id)))
+        Forum.c.parent_id != None, Forum.c.id != topic.forum_id)))
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
@@ -843,35 +843,36 @@ def movetopic(request, topic_slug):
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            f = mapping.get(int(data['forum_id']))
-            if f is None:
+            forum = mapping.get(int(data['forum_id']))
+            if forum is None:
                 return abort_access_denied(request)
-            t.move(f)
+            topic.move(forum)
             session.commit()
             # send a notification to the topic author to inform him about
             # the new forum.
             nargs = {
-                'username':   t.author.username,
-                'topic':      t,
+                'username':   topic.author.username,
+                'topic':      topic,
                 'mod':        request.user.username,
-                'forum_name': f.name
+                'forum_name': forum.name
             }
-            if 'topic_move' in t.author.settings.get('notifications',
-                                                     ('topic_move',)):
-                send_notification(t.author, 'topic_moved',
-                    u'Dein Thema „%s“ wurde verschoben' % t.title, nargs)
+            if 'topic_move' in topic.author.settings.get('notifications',
+                                                         ('topic_move',)):
+                send_notification(topic.author, 'topic_moved',
+                    u'Dein Thema „%s“ wurde verschoben'
+                    % topic.title, nargs)
 
-            subscriptions = Subscription.objects.filter(topic_id=t.id)
+            subscriptions = Subscription.objects.filter(topic_id=topic.id)
             for subscription in subscriptions:
                 send_notification(subscription.user, 'topic_moved',
-                    u'Das Thema „%s“ wurde verschoben' % t.title, nargs)
-            return HttpResponseRedirect(t.get_absolute_url())
+                    u'Das Thema „%s“ wurde verschoben' % topic.title, nargs)
+            return HttpResponseRedirect(url_for(topic))
     else:
         form = MoveTopicForm()
         _add_field_choices()
     return {
         'form':  form,
-        'topic': t
+        'topic': topic
     }
 
 
@@ -924,7 +925,7 @@ def splittopic(request, topic_slug):
 
             session.commit()
 
-            return HttpResponseRedirect(new_topic.get_absolute_url())
+            return HttpResponseRedirect(url_for(new_topic))
     else:
         form = SplitTopicForm()
         _add_field_choices()
@@ -1245,7 +1246,7 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     url=url_for(topic),
                     author={
                         'name': topic.author.username,
-                        'uri': topic.author.get_absolute_url(),
+                        'uri': url_for(topic.author),
                     },
                     published=post.pub_date,
                     updated=post.pub_date,

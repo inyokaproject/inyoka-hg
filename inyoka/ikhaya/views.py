@@ -322,12 +322,12 @@ def feed(request, category_slug=None, mode='short', count=20):
                                 u'xhtml">%s</div>' % article.rendered_intro
         kwargs['author'] = {
             'name': article.author.username,
-            'uri':  article.author.get_absolute_url()
+            'uri':  url_for(article.author)
         }
 
         feed.add(
             title=article.subject,
-            url=article.get_absolute_url(),
+            url=url_for(article),
             updated=article.updated,
             published=article.pub_date,
             **kwargs

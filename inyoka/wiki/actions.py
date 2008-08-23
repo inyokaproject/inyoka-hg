@@ -798,7 +798,7 @@ def do_prune(request, name):
     page = Page.objects.get_by_name(name)
     page.prune()
     flash(u'Der Seitencache wurde geleert.', True)
-    return HttpResponseRedirect(page.get_absolute_url())
+    return HttpResponseRedirect(url_for(page))
 
 
 @templated('wiki/action_manage.html', modifier=context_modifier)

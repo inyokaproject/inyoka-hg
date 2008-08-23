@@ -1165,7 +1165,7 @@ class Attachment(models.Model):
         """
         return file(self.file.path, mode)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return self.file.url
 
 
@@ -1244,7 +1244,7 @@ class Revision(models.Model):
         """
         return self.text.render(page=self.page.name)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('wiki', self.page.name, rev=self.id)
 
     def revert(self, note=None, user=None, remote_addr=None):

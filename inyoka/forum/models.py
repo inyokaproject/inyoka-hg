@@ -1017,7 +1017,7 @@ class Attachment(object):
         """
         return file(self.filename.encode('utf-8'), mode)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('media', self.file)
 
 
@@ -1133,7 +1133,7 @@ class WelcomeMessage(object):
 # set up the mappers for sqlalchemy
 class SAUser(object):
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('portal', 'user', self.username)
 
     @property
@@ -1184,7 +1184,7 @@ class SAGroup(object):
             return None
         return href('media', self.icon)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('portal', 'groups', self.name)
 
     def __unicode__(self):
