@@ -27,9 +27,9 @@ metadata = MetaData(bind=engine)
 session = scoped_session(lambda: create_session(engine,
     autoflush=True, transactional=True))
 
+
 if settings.DEBUG:
     import logging
-    logging.basicConfig()
-    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-    handler = logging.FileHandler('db.log')
-    logging.getLogger('sqlalchemy.engine').addHandler(handler)
+    engine_logger = logging.getLogger('sqlalchemy.engine')
+    engine_logger.setLevel(logging.INFO)
+    engine_logger.addHandler(logging.FileHandler('db.log'))

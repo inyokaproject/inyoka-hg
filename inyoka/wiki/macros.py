@@ -33,6 +33,7 @@ from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision
+from inyoka.wiki.templates import expand_page_template
 from inyoka.utils.css import filter_style
 from inyoka.utils.urls import is_external_target
 from inyoka.utils.text import human_number, join_pagename, normalize_pagename, \
@@ -705,18 +706,7 @@ class Template(Macro):
         self.context = items
 
     def build_node(self):
-        if self.template is None:
-            return nodes.error_box(u'Parameterfehler', 'Das erste Argument '
-                                   u'muss der Name des Templates sein.')
-        try:
-            page = Page.objects.get_by_name(self.template)
-        except Page.DoesNotExist:
-            return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
-                                   u'Template „%s“ existiert nicht.' %
-                                   self.template)
-        document = page.rev.text.parse(self.context)
-        return nodes.Container(document.children +
-                               [nodes.MetaData('X-Attach', (self.template,))])
+        return expand_page_template(self.template, self.context, True)
 
 
 class Picture(Macro):

@@ -161,6 +161,9 @@ class BaseNode(object):
     #: tags are inline tags and can only contain inline tags.
     is_block_tag = False
 
+    #: this is true if the element is a paragraph node
+    is_paragraph = False
+
     #: this is true of this element can contain paragraphs.
     allows_paragraphs = False
 
@@ -314,7 +317,7 @@ class MetaData(Node):
     Holds invisible metadata.  Never rendered.
     """
 
-    is_block_tag = True
+    is_block_tag = False
     allowed_in_signatures = True
 
     def __init__(self, key, values):
@@ -473,10 +476,37 @@ class Container(Node):
     """
     is_container = True
 
+    #: this is true if the container is plain (unstyled)
+    is_plain = True
+
     def __init__(self, children=None):
         if children is None:
             children = []
         self.children = children
+
+    def get_fragment_nodes(self, inline_paragraph=False):
+        """
+        This function returns a tuple in the form ``(children, is_block)``.
+        If the container holds exactly one unstyled paragraph the elements
+        in that paragraph are used if `inline_paragraph` is set to `True`.
+
+        The `is_block` item in the tuple is `True` if the children returned
+        required a block tag as container.
+        """
+        if inline_paragraph:
+            if len(self.children) == 1 and self.children[0].is_paragraph and \
+               self.children[0].is_plain:
+                return self.children[0].children, False
+        is_block_tag = False
+        for child in self.children:
+            if child.is_block_tag:
+                is_block_tag = True
+                break
+        return self.children, is_block_tag
+
+    @property
+    def is_block_tag(self):
+        return self.get_fragment_nodes()[1]
 
     @property
     def text(self):
@@ -523,6 +553,10 @@ class Element(Container):
         self.id = id
         self.style = style
         self.class_ = class_
+
+    @property
+    def is_plain(self):
+        return self.id is self.style is self.class_ is None
 
     @property
     def text(self):
@@ -767,6 +801,7 @@ class Paragraph(Element):
     (except of block level stuff)
     """
     is_block_tag = True
+    is_paragraph = True
     allowed_in_signatures = True
     is_linebreak_node = True
 

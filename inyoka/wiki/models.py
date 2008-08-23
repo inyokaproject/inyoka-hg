@@ -733,11 +733,12 @@ class Text(models.Model):
         if not self.html_render_instructions:
             self.update_html_render_instructions()
 
-    def update_html_render_instructions(self):
-        """Puts the render instructions for this text in the database."""
+    def update_html_render_instructions(self, nosave=False):
+        """Puts the render instructions for this text in the database and saves."""
         self.html_render_instructions = pickle.dumps(self.parse().
             compile('html'), protocol=0).encode('base64')
-        self.save()
+        if not nosave:
+            self.save()
 
     def __unicode__(self):
         return self.render()
@@ -948,19 +949,34 @@ class Page(models.Model):
         if self.id is None:
             cache.delete('wiki/object_list')
         models.Model.save(self)
+
+        related_pages = set()
         cur = connection.cursor()
-        # XXX: this should also delete the page text cache.  But for that
-        # we have to look up the latest revisions and the text.
-        cur.execute('''
-            select distinct p.name
-              from wiki_page p, wiki_metadata m
-             where (m.key = 'X-Link' or m.key = 'X-Attach')
-               and m.value = %s and m.page_id = p.id
-        ''', [self.name])
-        for row in cur.fetchall():
-            cache.delete('wiki/page/' + row[0])
-        cur.close()
-        cache.delete('wiki/page/' + self.name)
+        try:
+            cur.execute('''
+                select distinct p.name, p.id
+                  from wiki_page p, wiki_metadata m
+                 where (m.key = 'X-Link' or m.key = 'X-Attach')
+                   and m.value = %s and m.page_id = p.id
+            ''', [self.name])
+            for row in cur.fetchall():
+                cache.delete('wiki/page/' + row[0])
+                related_pages.add(row[1])
+            cache.delete('wiki/page/' + self.name)
+
+            if related_pages:
+                # too lazy to do proper escaping here but that is not a
+                # problem because the only variable part is a list of
+                # integers which are guaranteed to be integers
+                cur.execute('''
+                    update wiki_text set html_render_instructions = null
+                     where id in (
+                        select text_id from wiki_revision
+                         where id = (select max(id) from wiki_revision
+                                     where page_id in (%s)))
+                ''' % ', '.join(map(str, related_pages)))
+        finally:
+            cur.close()
 
         if self.rev is not None:
             self.rev.save()

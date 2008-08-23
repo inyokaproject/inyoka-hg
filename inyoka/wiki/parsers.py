@@ -22,6 +22,7 @@ from inyoka.conf import settings
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr
 from inyoka.wiki.models import Page
+from inyoka.wiki.templates import expand_page_template
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.text import join_pagename, normalize_pagename
 from pygments.util import ClassNotFound
@@ -181,19 +182,7 @@ class TemplateParser(Parser):
         self.context = items
 
     def build_node(self):
-        if self.template is None:
-            return nodes.error_box(u'Parameterfehler', 'Das erste Argument '
-                                   u'muss der Name des Templates sein.')
-        try:
-            page = Page.objects.get_by_name(self.template,
-                                            raise_on_deleted=True)
-        except Page.DoesNotExist:
-            return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
-                                   u'Template existiert nicht.')
-        return nodes.Container([
-            page.rev.text.parse(self.context),
-            nodes.MetaData('X-Attach', (self.template,))
-        ])
+        return expand_page_template(self.template, self.context, True)
 
 
 #: list of all parsers this wiki can handle

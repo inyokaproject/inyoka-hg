@@ -46,7 +46,8 @@ def debug_repr(obj):
         obj.__class__.__module__.rsplit('.', 1)[-1],
         obj.__class__.__name__,
         ', '.join('%s=%r' % (key, value)
-        for key, value in sorted(getattr(obj, '__dict__', {}).items()))
+        for key, value in sorted(getattr(obj, '__dict__', {}).items())
+        if not key.startswith('_'))
     )
 
 

@@ -38,6 +38,33 @@ def process(source, context=()):
     return Parser(source).parse().to_markup(Context(context))
 
 
+def expand_page_template(template, context, macro_behavior=False):
+    """A helper for the template macro and wiki-parser."""
+    from inyoka.wiki.models import Page
+    from inyoka.wiki.parser import nodes
+    if template is None:
+        if not macro_behavior:
+            raise ValueError('no template given')
+        return nodes.error_box(u'Parameterfehler', 'Das erste Argument '
+                               u'muss der Name des Templates sein.')
+    try:
+        page = Page.objects.get_by_name(template, raise_on_deleted=True)
+    except Page.DoesNotExist:
+        if not macro_behavior:
+            raise
+        return nodes.error_box(u'Fehlende Vorlage', u'Das gewünschte '
+                               u'Template „%s“ existiert nicht.' %
+                               template)
+    doc = page.rev.text.parse(context)
+    children, is_block_tag = doc.get_fragment_nodes(True)
+
+    # children is a reference to a list in a node.  We don't want to
+    # alter that here as a side effect so we create a copy.
+    if macro_behavior:
+        children = children + [nodes.MetaData('X-Attach', (template,))]
+    return nodes.Container(children)
+
+
 def ruleset(*args):
     return args
 
