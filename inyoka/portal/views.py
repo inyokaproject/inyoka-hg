@@ -585,7 +585,7 @@ def usercp_profile(request):
              if k.startswith('show_'))
         ))
         form = UserCPProfileForm(initial=values)
-    
+
     storage_keys = storage.get_many(('max_avatar_width',
         'max_avatar_height', 'max_signature_length'))
 

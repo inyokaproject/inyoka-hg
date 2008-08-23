@@ -81,6 +81,8 @@ def replace_entities(string):
     >>> replace_entities('foo &amp; bar &raquo; foo')
     ...
     """
+    if string is None:
+        return u''
     def handle_match(m):
         name = m.group(1)
         if name in html_entities:
@@ -101,6 +103,8 @@ def replace_entities(string):
 
 def striptags(string):
     """Remove HTML tags from a string."""
+    if string is None:
+        return u''
     return replace_entities(u' '.join(_strip_re.sub('', string).split()))
 
 
