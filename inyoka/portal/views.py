@@ -1104,7 +1104,7 @@ def feedselector(request, app=None):
                        data['mode'], data['count']))
 
             elif app == 'wiki':
-                if data['page'] == '*':
+                if data['page'] == '*' or not data['page']:
                     return HttpResponseRedirect(href('wiki', '_feed',
                            data['count']))
                 else:
