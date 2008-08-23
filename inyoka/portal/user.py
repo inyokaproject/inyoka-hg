@@ -469,7 +469,7 @@ class User(models.Model):
     def avatar_url(self):
         if not self.avatar:
             return href('static', 'img', 'portal', 'no_avatar.png')
-        return self.get_avatar_url()
+        return self.avatar.url
 
     def save_avatar(self, img):
         """
@@ -505,7 +505,7 @@ class User(models.Model):
 
     def delete_avatar(self):
         """Delete the avatar from the file system."""
-        fn = self.get_avatar_filename()
+        fn = self.avatar.name
         if path.exists(fn):
             os.remove(fn)
         self.avatar = None
