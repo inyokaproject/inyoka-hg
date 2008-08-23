@@ -261,7 +261,7 @@ class StaticFile(models.Model):
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
-            return self.get_file_url()
+            return self.file.url
         return href(*{
             'edit': ('admin', 'files', 'edit', self.identifier),
             'delete': ('admin', 'files', 'delete', self.identifier)

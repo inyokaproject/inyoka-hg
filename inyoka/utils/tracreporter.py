@@ -283,6 +283,7 @@ class TBLoggerHandler(Handler):
         Thread(target=self.submit, args=(record,)).start()
 
     def submit(self, record):
+        return
         data = self.analyseForTicket(record)
         data = url_encode(data)
         request = urllib2.Request('http://dev.tux21b.org/tb/new/', data)

@@ -478,7 +478,7 @@ def profile(request, username):
 
     try:
         if username != user.username.replace(' ', '_'):
-            return HttpResponseRedirect(user.get_absolute_url())
+            return HttpResponseRedirect(url_for(user))
     except ValueError:
         raise PageNotFound()
 
@@ -585,7 +585,7 @@ def usercp_profile(request):
              if k.startswith('show_'))
         ))
         form = UserCPProfileForm(initial=values)
-    
+
     storage_keys = storage.get_many(('max_avatar_width',
         'max_avatar_height', 'max_signature_length'))
 
@@ -1064,14 +1064,14 @@ def feedselector(request, app=None):
                     (auto_id='id_%s_%%s' % fapp)
         else:
             globals()['%s_form' % fapp] = None
-    if forum_form:
+    if forum_form is not None:
         #TODO: filter those readable by anonymous
         forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
             [(f.slug, f.name) for f in Forum.query.all()]
-    if ikhaya_form:
+    if ikhaya_form is not None:
         ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
-    if wiki_form:
+    if wiki_form is not None:
         wiki_pages = cache.get('feedselector/wiki/pages')
         if not wiki_pages:
             wiki_pages = WikiPage.objects.all()
@@ -1104,7 +1104,7 @@ def feedselector(request, app=None):
                        data['mode'], data['count']))
 
             elif app == 'wiki':
-                if data['page'] == '*':
+                if data['page'] == '*' or not data['page']:
                     return HttpResponseRedirect(href('wiki', '_feed',
                            data['count']))
                 else:
@@ -1203,7 +1203,8 @@ def user_error_report(request):
         form = UserErrorReportForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            if not request.user.is_authenticated:
+            user = request.user
+            if not user.is_authenticated:
                 spam_test = data['title'].lower() + data['text'].lower()
                 spam_words = ('porn', 'eroti', 'sex', 'casino', 'poker',
                               '<a href=', 'gay', 'female', 'nude', 'teen',
@@ -1213,24 +1214,24 @@ def user_error_report(request):
                               'nice site', 'siemens', 'clamavox', 'blinddate',
                               'buying', 'free', 'honda', 'chrysler', 'diplom',
                               'industry', 'price', '_______', 'credit',
-                              'just joined',)
+                              'just joined', 'future',)
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}
                 if is_spam(spam_test):
                     return {'spam': True}
             text =u"'''URL:''' %s" % data['url']
-            if request.user.id != 1:
+            if user.id != 1:
                 text += (u" [[BR]]\n'''Benutzer:''' [%s %s] ([%s PN])" % (
-                    request.user.get_absolute_url(),
-                    escape(request.user.username),
-                    request.user.get_absolute_url('privmsg'),
+                    url_for(user),
+                    escape(user.username),
+                    url_for(user, 'privmsg'),
                 ))
             try:
                 text += u" [[BR]]\n'''User-Agent:''' {{{%s}}}" % request.META['HTTP_USER_AGENT']
             except KeyError:
                 pass
-            reporter = request.user.id == 1 and '' or request.user.username
+            reporter = user.id == 1 and '' or user.username
             text += u'\n\n%s' % data['text']
             trac = Trac()
             trac.submit_new_ticket(

@@ -99,6 +99,8 @@ def get_resolver(host):
     """Get the subdomain and resolver for that server name or (None, None)."""
     if host.endswith(settings.BASE_DOMAIN_NAME):
         subdomain = host[:-len(settings.BASE_DOMAIN_NAME)].rstrip('.')
+        if subdomain == 'www':
+            return subdomain, None
         if subdomain in settings.SUBDOMAIN_MAP:
             name = settings.SUBDOMAIN_MAP[subdomain]
             if name not in _resolvers:

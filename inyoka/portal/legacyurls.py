@@ -8,7 +8,7 @@
     :copyright: Copyright 2008 by Marian Sigler.
     :license: GNU GPL.
 """
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.flashing import flash
 from inyoka.utils.legacyurls import LegacyDispatcher
 from inyoka.ikhaya.models import Article
@@ -26,7 +26,7 @@ def ikhaya_article(args, match, article_id):
         article = Article.objects.get(id=int(article_id))
     except (Article.DoesNotExist, ValueError):
         return
-    return href('ikhaya', article.slug)
+    return url_for(article)
 
 @legacy.url(r'^/ikhaya/([^\d].*)/?$')
 def ikhaya(args, match, url):

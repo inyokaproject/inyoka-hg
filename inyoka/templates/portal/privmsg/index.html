@@ -39,8 +39,8 @@
         {% elif folder.id != 'archive' %}
         <a class="pn_archive" href="?action=archive">Archivieren</a> |
         {% endif %}
-        <a class="pn_reply" href="{{ message.get_absolute_url('reply') }}">Antworten</a> |
-        <a class="pn_forward" href="{{ message.get_absolute_url('forward') }}">Weiterleiten</a> 
+        <a class="pn_reply" href="{{ message|url('reply') }}">Antworten</a> |
+        <a class="pn_forward" href="{{ message|url('forward') }}">Weiterleiten</a> 
       </div>
     </div>
     <br/>

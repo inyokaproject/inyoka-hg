@@ -45,8 +45,13 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain
+        # redirect www.* to the equivalent without www.
         request.subdomain, resolver = get_resolver(request.get_host())
         if not resolver:
+            if request.subdomain == 'www':
+                url = 'http://%s%s' % (settings.BASE_DOMAIN_NAME,
+                    request.get_full_path())
+                return HttpResponsePermanentRedirect(url)
             main_url = 'http://%s/' % settings.BASE_DOMAIN_NAME
             return HttpResponsePermanentRedirect(main_url)
 
@@ -79,7 +84,8 @@ class CommonServicesMiddleware(CommonMiddleware):
         response['X-Sucks'] = 'PHP --- every version'
 
         # update the cache control
-        if request.user.is_authenticated or has_flashed_messages():
+        if hasattr(request, 'user') and request.user.is_authenticated \
+           or has_flashed_messages():
             response['Cache-Control'] = 'no-cache'
 
         # clean up after the local manager

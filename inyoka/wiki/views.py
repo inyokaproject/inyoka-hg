@@ -211,7 +211,7 @@ def feed(request, page_name=None, count=20):
             kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
                                  u'%s</div>' % text)
             author = rev.user \
-                and {'name': rev.user.username, 'uri': rev.user.get_absolute_url()} \
+                and {'name': rev.user.username, 'uri': url_for(rev.user)} \
                 or u'Anonymous'
             feed.add(
                 title=u'%s (%s)' % (

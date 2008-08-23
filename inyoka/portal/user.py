@@ -152,7 +152,7 @@ class Group(models.Model):
             os.remove(fn)
         self.icon = None
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('portal', 'group', self.name)
 
     def __unicode__(self):

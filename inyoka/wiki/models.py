@@ -553,7 +553,7 @@ class PageManager(models.Manager):
             node = 'Erstellt'
         if attachment is not None:
             att = Attachment()
-            att.save_file_file(attachment_filename, attachment)
+            att.file.save(attachment_filename, attachment)
             att.save()
             attachment = att
         page.save()
@@ -1086,7 +1086,7 @@ class Page(models.Model):
             attachment = rev and rev.attachment or None
         elif attachment is not None:
             att = Attachment()
-            att.save_file_file(attachment_filename, attachment)
+            att.file.save(attachment_filename, attachment)
             att.save()
             attachment = att
         if change_date is None:
@@ -1129,17 +1129,17 @@ class Attachment(models.Model):
     @property
     def size(self):
         """The size of the attachment in bytes."""
-        return self.get_file_size()
+        return self.file.size()
 
     @property
     def filename(self):
         """The filename of the attachment on the filesystem."""
-        return self.get_file_filename()
+        return self.file.path
 
     @property
     def mimetype(self):
         """The mimetype of the attachment."""
-        return guess_type(self.get_file_filename())[0] or \
+        return guess_type(self.file.path)[0] or \
                'application/octet-stream'
 
     @property
@@ -1179,10 +1179,10 @@ class Attachment(models.Model):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return file(self.get_file_filename(), mode)
+        return file(self.file.path, mode)
 
-    def get_absolute_url(self):
-        return self.get_file_url()
+    def get_absolute_url(self, action=None):
+        return self.file.url
 
 
 class Revision(models.Model):
@@ -1260,7 +1260,7 @@ class Revision(models.Model):
         """
         return self.text.render(page=self.page.name)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, action=None):
         return href('wiki', self.page.name, rev=self.id)
 
     def revert(self, note=None, user=None, remote_addr=None):

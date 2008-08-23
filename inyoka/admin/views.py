@@ -207,14 +207,14 @@ def file_edit(request, file=None):
             if not file:
                 file = StaticFile()
             if data['file']:
-                file.save_file_file(data['file'].name, data['file'].read())
+                file.file.save(data['file'].name, data['file'])
                 file.identifier = data['file'].name
             file.is_ikhaya_icon = data['is_ikhaya_icon']
             file.save()
             flash(u'Die statische Datei wurde %s.'
                   % (new and u'erstellt' or u'geändert'), True)
             if new:
-                return HttpResponseRedirect(file.get_absolute_url('edit'))
+                return HttpResponseRedirect(url_for(file, 'edit'))
     else:
         initial = {}
         if file:
@@ -345,7 +345,7 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                         Suggestion.objects.delete([suggestion_id])
                     flash(u'Der Artikel „%s“ wurde erstellt.'
                           % escape(article.subject), True)
-                    return HttpResponseRedirect(article.get_absolute_url('edit'))
+                    return HttpResponseRedirect(url_for(article, 'edit'))
                 else:
                     changed = False
                     for k in data:
@@ -1049,7 +1049,7 @@ def event_edit(request, id=None):
                 event.location_long = data['location_long']
             event.save()
             flash(u'Die Veranstaltung wurde gespeichert.', True)
-            return HttpResponseRedirect(event.get_absolute_url())
+            return HttpResponseRedirect(url_for(event))
         else:
             event = None
     else:
