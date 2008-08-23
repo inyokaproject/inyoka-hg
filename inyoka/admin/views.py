@@ -721,6 +721,8 @@ def user_edit(request, username):
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
+                    if not isinstance(value, list):
+                        value = [value]
                     privilege.bits = join_flags(*value)
                     dbsession.flush()
 
