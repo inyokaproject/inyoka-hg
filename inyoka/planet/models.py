@@ -31,7 +31,7 @@ class Blog(models.Model):
     def icon_url(self):
         if not self.icon:
             return href('static', 'img', 'planet', 'anonymous.png')
-        return self.get_icon_url()
+        return self.icon.url
 
     def update_search(self):
         """
