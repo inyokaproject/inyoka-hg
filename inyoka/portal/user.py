@@ -527,7 +527,6 @@ class User(models.Model):
         self.save()
 
 
-
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.portal.utils import send_activation_mail
 from inyoka.utils.captcha import generate_word

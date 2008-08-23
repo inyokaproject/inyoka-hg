@@ -707,7 +707,7 @@ def user_edit(request, username):
 
             #: forum privileges
             privileges = Privilege.query
-            for key, value in request.POST.iteritems():
+            for key, value in request.POST.lists():
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     privilege = privileges.filter(and_(
@@ -721,8 +721,6 @@ def user_edit(request, username):
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
-                    if not isinstance(value, list):
-                        value = [value]
                     privilege.bits = join_flags(*value)
                     dbsession.flush()
 
@@ -934,7 +932,7 @@ def group_edit(request, name=None):
             group.save()
 
             #: forum privileges
-            for key, value in request.POST.iteritems():
+            for key, value in request.POST.lists():
                 if key.startswith('forum_privileges-'):
                     forum_id = key.split('-', 1)[1]
                     privilege = Privilege.query.filter(and_(
@@ -947,7 +945,6 @@ def group_edit(request, name=None):
                             group=group,
                             forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
-
                     privilege.bits = join_flags(*value)
                     dbsession.flush()
 
