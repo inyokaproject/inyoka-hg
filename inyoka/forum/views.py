@@ -99,7 +99,7 @@ def index(request, category=None):
             categories = list(query.filter(forum_table.c.parent_id == None) \
                               .order_by(forum_table.c.position))
 
-        cache.set(key, categories)
+        cache.set(key, categories, 120)
 
     hidden_categories = []
     if request.user.is_authenticated:
@@ -133,7 +133,7 @@ def forum(request, slug, page=1):
         if not f or f.parent_id is None:
             raise PageNotFound()
 
-        cache.set(key, f)
+        cache.set(key, f, 60)
 
     privs = get_forum_privileges(request.user, f.id)
     if not check_privilege(privs, 'read'):
@@ -166,7 +166,7 @@ def forum(request, slug, page=1):
         }
 
         if page < CACHE_PAGES_COUNT:
-            cache.set(key, ctx)
+            cache.set(key, ctx, 60)
 
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
