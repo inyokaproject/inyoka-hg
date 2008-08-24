@@ -494,6 +494,7 @@ def change_forum_post_position_column(m):
     ''')
 
 
+# XXX: unused
 def add_forum_atime_column(m):
     m.engine.execute('''
         alter table forum_post
@@ -618,6 +619,25 @@ def split_ikhaya_slug(m):
     ''')
 
 
+def add_wiki_revision_foreign_keys(m):
+    """Adds foreign keys to the wiki revision table which we forgot to do
+    earlier for reasons I don't know.
+    """
+    m.engine.execute('''
+        alter table wiki_revision
+            add constraint text_id_fk
+                foreign key text_id_fk (text_id)
+                references wiki_text (id)
+                on delete restrict
+                on update restrict,
+            add constraint user_id_fk
+                foreign key user_id_fk (user_id)
+                references portal_user (id)
+                on delete restrict
+                on update restrict;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -632,6 +652,5 @@ MIGRATIONS = [
     add_new_page_root_storage, add_ikhaya_comment_deleted_column,
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
     new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
-    add_post_has_revision, split_ikhaya_slug
-    # add_forum_atime_column
+    add_post_has_revision, split_ikhaya_slug, add_wiki_revision_foreign_keys
 ]

@@ -968,17 +968,23 @@ class Page(models.Model):
                 # too lazy to do proper escaping here but that is not a
                 # problem because the only variable part is a list of
                 # integers which are guaranteed to be integers
+                # XXX: two queries because of a possible mysql bug.
+                # moving the first select into a subselect in the
+                # where of the update() disables optimizing in mysql
                 cur.execute('''
-                    update wiki_text set html_render_instructions = null
-                    where id in (
-                        select text_id from wiki_revision
-                        join (
+                    select distinct text_id from wiki_revision
+                      join (
                             select page_id, max(id) as id
                             from wiki_revision
                             where page_id in (%s)
                             group by page_id
-                        ) as d1 using (id));
+                        ) as d1 using (id);
                 ''' % ', '.join(map(str, related_pages)))
+                cur.execute('''
+                    update wiki_text
+                       set html_render_instructions = null
+                     where id in (%s)
+                ''' % ', '.join(str(x[0]) for x in cur.fetchall()))
         finally:
             cur.close()
 
