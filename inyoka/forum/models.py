@@ -106,6 +106,9 @@ class ForumMapperExtension(MapperExtension):
 
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forum/%d' % instance.id)
+        #XXX: since it's not possible to save the forum_id in the view
+        # we store it twice, once with id and once with slug
+        cache.delete('forum/forum/%s' % instance.slug)
 
 
 class TopicMapperExtension(MapperExtension):
