@@ -221,9 +221,7 @@ class PostMapperExtension(MapperExtension):
             'post_count': forum_table.c.post_count + 1,
             'last_post_id': instance.id
         }))
-        for page in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d'
-                         % (instance.topic.forum_id, page))
+        instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
 
     def before_delete(self, mapper, connection, instance):
@@ -401,8 +399,8 @@ class Forum(object):
         dbsession.flush([user])
 
     def invalidate_topic_cache(self):
-        for page in range(CACHE_PAGES_COUNT):
-            cache.delete('forum/topics/%d/%d' % (self.id, page))
+        for page in xrange(CACHE_PAGES_COUNT):
+            cache.delete('forum/topics/%d/%d' % (self.id, page+1))
 
     def __unicode__(self):
         return self.name
@@ -649,8 +647,7 @@ class Post(object):
                 self.topic.forum.last_post = None
         self.topic.post_count -= 1
         dbsession.commit()
-        for idx in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
+        self.topic.forum.invalidate_topic_cache()
 
     @staticmethod
     def split(posts, old_topic, new_topic):
