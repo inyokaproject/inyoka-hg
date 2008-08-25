@@ -33,14 +33,14 @@
         {{ message.rendered_text }}
       </div>
       <div class="linklist pn_actions">
-        <a class="pn_delete" href="?action=delete">Nachricht löschen</a> |
-        {% if folder.id == 'trash' %}
-        <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
-        {% elif folder.id != 'archive' %}
-        <a class="pn_archive" href="?action=archive">Archivieren</a> |
-        {% endif %}
         <a class="pn_reply" href="{{ message|url('reply') }}">Antworten</a> |
         <a class="pn_forward" href="{{ message|url('forward') }}">Weiterleiten</a> 
+        {%- if folder.id == 'trash' %}
+        <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
+        {%- elif folder.id != 'archive' %}
+        <a class="pn_archive" href="?action=archive">Archivieren</a> |
+        {%- endif %}
+        <a class="pn_delete" href="?action=delete">Nachricht löschen</a> |
       </div>
     </div>
     <br/>

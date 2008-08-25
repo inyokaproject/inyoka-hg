@@ -106,6 +106,9 @@ class ForumMapperExtension(MapperExtension):
 
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forum/%d' % instance.id)
+        #XXX: since it's not possible to save the forum_id in the view
+        # we store it twice, once with id and once with slug
+        cache.delete('forum/forum/%s' % instance.slug)
 
 
 class TopicMapperExtension(MapperExtension):
@@ -148,6 +151,9 @@ class TopicMapperExtension(MapperExtension):
                 'first_post_id': None,
                 'last_post_id':  None,
         }))
+        connection.execute('''
+            delete from portal_subscription where topic_id = %s;
+        ''', [instance.id])
 
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
@@ -218,9 +224,7 @@ class PostMapperExtension(MapperExtension):
             'post_count': forum_table.c.post_count + 1,
             'last_post_id': instance.id
         }))
-        for page in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d'
-                         % (instance.topic.forum_id, page))
+        instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
 
     def before_delete(self, mapper, connection, instance):
@@ -398,8 +402,8 @@ class Forum(object):
         dbsession.flush([user])
 
     def invalidate_topic_cache(self):
-        for page in range(CACHE_PAGES_COUNT):
-            cache.delete('forum/topics/%d/%d' % (self.id, page))
+        for page in xrange(CACHE_PAGES_COUNT):
+            cache.delete('forum/topics/%d/%d' % (self.id, page+1))
 
     def __unicode__(self):
         return self.name
@@ -646,8 +650,7 @@ class Post(object):
                 self.topic.forum.last_post = None
         self.topic.post_count -= 1
         dbsession.commit()
-        for idx in xrange(1, 5):
-            cache.delete('forum/topics/%d/%d' % (self.topic.id, idx))
+        self.topic.forum.invalidate_topic_cache()
 
     @staticmethod
     def split(posts, old_topic, new_topic):
@@ -724,6 +727,12 @@ class Post(object):
                 ).order_by(topic_table.c.id.asc()).first()
                 old_topic.first_post = post
         else:
+            if old_topic.has_poll:
+                new_topic.has_poll = True
+                dbsession.execute('''
+                    update forum_poll set topic_id = %s where topic_id = %s;
+                ''', [new_topic.id, old_topic.id])
+                dbsession.commit()
             dbsession.delete(old_topic)
 
         dbsession.commit()

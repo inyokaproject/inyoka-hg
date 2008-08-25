@@ -94,13 +94,13 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         link = ()
 
     if not request.user.can('article_edit'):
-        articles = articles.filter(pub_date__lte=datetime.utcnow(),
+        articles = articles.filter(pub_date__lte=datetime.utcnow().date(),
                                    public=True)
     link = href('ikhaya', *link)
     set_session_info(request, u'sieht sich die <a href="%s">'
                               u'Artikelübersicht</a> an' % link)
 
-    articles = articles.order_by('-pub_date').select_related()
+    articles = articles.order_by('-pub_date', '-pub_time').select_related()
 
     pagination = Pagination(request, articles, page, 15, link)
 

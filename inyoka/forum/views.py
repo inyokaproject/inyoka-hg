@@ -99,7 +99,7 @@ def index(request, category=None):
             categories = list(query.filter(forum_table.c.parent_id == None) \
                               .order_by(forum_table.c.position))
 
-        cache.set(key, categories)
+        cache.set(key, categories, 120)
 
     hidden_categories = []
     if request.user.is_authenticated:
@@ -133,7 +133,7 @@ def forum(request, slug, page=1):
         if not f or f.parent_id is None:
             raise PageNotFound()
 
-        cache.set(key, f)
+        cache.set(key, f, 60)
 
     privs = get_forum_privileges(request.user, f.id)
     if not check_privilege(privs, 'read'):
@@ -166,7 +166,7 @@ def forum(request, slug, page=1):
         }
 
         if page < CACHE_PAGES_COUNT:
-            cache.set(key, ctx)
+            cache.set(key, ctx, 60)
 
     set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                      u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
@@ -292,7 +292,7 @@ def viewtopic(request, topic_slug, page=1):
         can_reply and post.check_ownpost_limit('edit')
     can_delete = lambda post: can_reply and post.author_id == request.user.id \
         and post.check_ownpost_limit('delete')
-
+    voted_all = not (polls and bool([True for p in polls if p.can_vote]))
     return {
         'topic':             t,
         'forum':             t.forum,
@@ -301,7 +301,7 @@ def viewtopic(request, topic_slug, page=1):
         'pagination':        pagination,
         'polls':             polls,
         'show_vote_results': request.GET.get('action') == 'vote_results',
-        'can_vote':          polls and bool([True for p in polls if p.can_vote]),
+        'voted_all':         voted_all,
         'can_moderate':      can_mod,
         'can_edit':          can_edit,
         'can_reply':         can_reply,
@@ -948,11 +948,18 @@ def hide_post(request, post_id):
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
-    post.hidden = True
-    session.commit()
-    flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
-          u'gemacht.' % (url_for(post), escape(post.author.username)),
-          success=True)
+    if post.id == post.topic.first_post.id:
+        if post.topic.post_count == 1:
+            return HttpResponseRedirect(href('forum', 'topic',
+                                             post.topic.slug, 'hide'))
+        flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
+              u'werden', success=False)
+    else:
+        post.hidden = True
+        session.commit()
+        flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
+              u'gemacht.' % (url_for(post), escape(post.author.username)),
+              success=True)
     return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
@@ -1097,7 +1104,6 @@ def delete_topic(request, topic_slug):
                 }
                 send_notification(subscription.user, 'topic_deleted',
                     u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
-            Subscription.objects.delete_list(sids)
             session.delete(topic)
             session.commit()
             flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
@@ -1273,7 +1279,8 @@ def markread(request, slug=None):
             raise PageNotFound()
         forum.mark_read(user)
         user.save()
-        flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name)
+        flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name,
+              True)
         return HttpResponseRedirect(url_for(forum))
     else:
         category_ids = session.execute(select([forum_table.c.id],
@@ -1281,7 +1288,7 @@ def markread(request, slug=None):
         for row in category_ids:
             Forum.query.get(row[0]).mark_read(user)
         user.save()
-        flash(u'Alle Foren wurden als gelesen markiert.')
+        flash(u'Alle Foren wurden als gelesen markiert.', True)
     return HttpResponseRedirect(href('forum'))
 
 

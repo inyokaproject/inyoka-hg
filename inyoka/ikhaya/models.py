@@ -248,7 +248,7 @@ class Article(models.Model):
     class Meta:
         verbose_name = 'Artikel'
         verbose_name_plural = 'Artikel'
-        ordering = ['-pub_date', 'author']
+        ordering = ['-pub_date', '-pub_time', 'author']
         unique_together = ('pub_date', 'slug')
 
 
