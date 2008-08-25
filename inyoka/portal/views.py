@@ -1217,7 +1217,9 @@ def user_error_report(request):
                               'buying', 'free', 'honda', 'chrysler', 'diplom',
                               'industry', 'price', '_______', 'credit',
                               'just joined', 'future', 'cherokee',
-                              'phentermine', 'pill', 'diet', 'management',)
+                              'phentermine', 'pill', 'diet', 'management',
+                              'pestered', 'liberty', 'is good', 'wife',
+                              'beach')
                 for w in spam_words:
                     if w in spam_test:
                         return {'spam': True}

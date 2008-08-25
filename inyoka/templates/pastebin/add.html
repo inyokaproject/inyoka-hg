@@ -22,11 +22,11 @@
     <dl>
       <dt>Funktion:</dt>
       <dd>
-        Dies ist ein No Paste Service, wo du Fehlermeldungen, Logs, Konfigurationsdateien oder
-        Quelltexte pasten kannst, um Forenthreads oder IRC-Channels nicht unnötig unleserlich zu
-        machen. Dazu kopierst du den zu pastenden Text in das Textfeld und wählst die passende
-        Sprache aus. Dann kopierst du die URL in den Thread bzw. Channel. Genaueres zu unserem
-        No Paste Service findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
+        Dies ist eine Ablage, wo du Fehlermeldungen, Logs, Konfigurationsdateien oder
+        Quelltexte speichern kannst, um Forenthreads oder IRC-Channels nicht unnötig unleserlich zu
+        machen. Dazu kopierst du den Text in das Textfeld und wählst die passende
+        Sprache aus. Dann kopierst du die URL in das Thema bzw. den Channel. Genaueres zu unserer
+        Ablage („No Paste Service“) findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
       </dd>
       {{ render_form(form, ['title', 'language', 'code'], inline=True) }}
       {%- if not USER.is_authenticated %}
