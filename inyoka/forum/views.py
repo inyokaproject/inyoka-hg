@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_, select
+from sqlalchemy.sql import and_, or_, select, not_
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for
@@ -47,7 +47,7 @@ from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
-    check_privilege
+    check_privilege, DISALLOW_ALL
 from inyoka.forum.database import post_table, topic_table, forum_table, \
     poll_option_table, attachment_table
 
@@ -1297,27 +1297,72 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    # TODO: This shows hidden topics to everyone
     forum_ids = [f[0] for f in select([forum_table.c.id]).execute()]
+    # get read status data
+    data = request.user._readstatus.data
+
+    def any(l):
+        #TODO: Remove this when python version is 2.5+
+        for e in l:
+            if bool(e):
+                return True
+        return False
+
+    #: sql where clause
+    where = None
+
+    # filter old topics with id < "last read post in this forum"
+    if any(e[0] for e in data.itervalues()):
+        ids = filter(lambda id: data[id][0] is not None, data.keys())
+        where = or_(*[
+            (
+                (topic_table.c.forum_id == id) &
+                (topic_table.c.last_post_id > data[id][0])
+            ) for id in ids
+        ] + [
+            # don't filter in forums where "last read post" isn't set
+            not_(topic_table.c.forum_id.in_(ids))
+        ])
+
+    # get single topics that are marked as "read"
+    read_topics = []
+    for id in forum_ids:
+        read_topics.extend(data.get(id, [None, []])[1])
+
+    # filter read topics
+    if read_topics:
+        cond = not_(topic_table.c.last_post_id.in_(read_topics))
+        if where:
+            where &= cond
+        else:
+            where = cond
+
+    topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
+                                 eagerload('last_post.author')) \
+        .filter(topic_table.c.sticky == False) \
+        .order_by(topic_table.c.last_post_id.desc())
+
+    # get the forums the user is not allowed to see
+    forbidden_forums = []
     privs = get_privileges(request.user, forum_ids)
-    all_topics = cache.get('forum/lasttopics')
-    if not all_topics:
-        all_topics = list(Topic.query.options(eagerload('author'), \
-            eagerload('last_post'), eagerload('last_post.author')) \
-            .filter(topic_table.c.sticky == False) \
-            .order_by((topic_table.c.sticky, topic_table.c.last_post_id.desc()))[:80])
-        cache.set('forum/lasttopics', all_topics)
-    topics = []
-    for topic in all_topics:
-        if topic.last_post_id < request.user.forum_last_read:
-            break
-        if check_privilege(privs.get(topic.forum_id, {}), CAN_READ):
-            topics.append(topic)
-    pagination = Pagination(request, topics, page, 20,
+    for id in forum_ids:
+        if privs.get(id, DISALLOW_ALL) & CAN_READ == 0:
+            forbidden_forums.append(id)
+
+    # don't show topics of forums where the user doesn't have CAN_READ
+    # permission
+    if forbidden_forums:
+        topics = topics.filter(topic_table.c.forum_id.in_(forbidden_forums))
+
+    if where:
+        topics = topics.filter(where)
+
+    pagination = Pagination(request, topics, page, 25,
         href('forum', 'newposts'))
+
     return {
         'topics':     list(pagination.objects),
-        'pagination': pagination,
+        'pagination': pagination.generate('right'),
         'title':      u'Neue Beiträge',
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id)
