@@ -27,7 +27,13 @@
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
   <h3>Benutzer bearbeiten</h3>
   <dl>
-    {{ render_form(form, ['username', 'status'], inline=true) }}
+    {{ render_form(form, ['username'], inline=true) }}
+    <dt>{{ form.status.label }}</dt>
+    <dd>{{ form.status }} {{ form.errors.status }}<br />
+      <span class="note">
+        Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte mal eingeloggt.
+      </span>
+    </dd>
     <dt>{{ form.member_title.label }}</dt>
     <dd>{{ form.member_title }}{% if joined_groups %} 
       <div class="group_titles">
