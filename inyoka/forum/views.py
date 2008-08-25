@@ -1104,7 +1104,6 @@ def delete_topic(request, topic_slug):
                 }
                 send_notification(subscription.user, 'topic_deleted',
                     u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
-            Subscription.objects.delete_list(sids)
             session.delete(topic)
             session.commit()
             flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,

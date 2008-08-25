@@ -151,6 +151,9 @@ class TopicMapperExtension(MapperExtension):
                 'first_post_id': None,
                 'last_post_id':  None,
         }))
+        connection.execute('''
+            delete from portal_subscription where topic_id = %s;
+        ''', [instance.id])
 
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
@@ -724,6 +727,12 @@ class Post(object):
                 ).order_by(topic_table.c.id.asc()).first()
                 old_topic.first_post = post
         else:
+            if old_topic.has_poll:
+                new_topic.has_poll = True
+                dbsession.execute('''
+                    update forum_poll set topic_id = %s where topic_id = %s;
+                ''', [new_topic.id, old_topic.id])
+                dbsession.commit()
             dbsession.delete(old_topic)
 
         dbsession.commit()
