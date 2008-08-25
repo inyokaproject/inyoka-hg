@@ -1279,7 +1279,8 @@ def markread(request, slug=None):
             raise PageNotFound()
         forum.mark_read(user)
         user.save()
-        flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name)
+        flash(u'Das Forum „%s“ wurde als gelesen markiert.' % forum.name,
+              True)
         return HttpResponseRedirect(url_for(forum))
     else:
         category_ids = session.execute(select([forum_table.c.id],
@@ -1287,7 +1288,7 @@ def markread(request, slug=None):
         for row in category_ids:
             Forum.query.get(row[0]).mark_read(user)
         user.save()
-        flash(u'Alle Foren wurden als gelesen markiert.')
+        flash(u'Alle Foren wurden als gelesen markiert.', True)
     return HttpResponseRedirect(href('forum'))
 
 
