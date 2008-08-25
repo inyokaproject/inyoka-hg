@@ -839,11 +839,15 @@ MIGRATIONS = [
     change_forum_post_position_column, add_wiki_text_html_render_instructions,
     new_team_icon_system, fix_suggestion_owner_to_be_null, new_user_status,
     add_post_has_revision, split_ikhaya_slug,
-    add_wiki_revision_foreign_keys,
-    fix_forum_poll_foreign_keys, fix_forum_post_foreign_keys,
-    fix_forum_privilege_foreign_keys, fix_forum_topic_foreign_keys,
-    fix_forum_voter_foreign_keys, fix_ikhaya_article_foreign_keys,
-    fix_ikhaya_comment_foreign_keys, fix_ikhaya_suggestion_foreign_keys,
-    fix_pastebin_entry_foreign_keys, fix_planet_entry_foreign_keys,
-    fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
+
+    # These migrations are not working properly. We need some cleanup
+    # code that checks for orphaned-data before we apply a required
+    # foreign key.
+#    add_wiki_revision_foreign_keys,
+#    fix_forum_poll_foreign_keys, fix_forum_post_foreign_keys,
+#    fix_forum_privilege_foreign_keys, fix_forum_topic_foreign_keys,
+#    fix_forum_voter_foreign_keys, fix_ikhaya_article_foreign_keys,
+#    fix_ikhaya_comment_foreign_keys, fix_ikhaya_suggestion_foreign_keys,
+#    fix_pastebin_entry_foreign_keys, fix_planet_entry_foreign_keys,
+#    fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
 ]
