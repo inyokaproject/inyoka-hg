@@ -948,11 +948,18 @@ def hide_post(request, post_id):
         raise PageNotFound
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
-    post.hidden = True
-    session.commit()
-    flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
-          u'gemacht.' % (url_for(post), escape(post.author.username)),
-          success=True)
+    if post.id == post.topic.first_post.id:
+        if post.topic.post_count == 1:
+            return HttpResponseRedirect(href('forum', 'topic',
+                                             post.topic.slug, 'hide'))
+        flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
+              u'werden', success=False)
+    else:
+        post.hidden = True
+        session.commit()
+        flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
+              u'gemacht.' % (url_for(post), escape(post.author.username)),
+              success=True)
     return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
