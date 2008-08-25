@@ -14,7 +14,7 @@
 {% set title_trace = [folder.name] %}
 
 {% block portal_content %}
-   {% if message %}
+   {%- if message %}
     <div class="prvmsg">
       <img class="avatar" src="{{ message.author.avatar_url|e }}" alt="Avatar von {{ message.author.username|e }}" />
       <dl class="prvmsg_header">
@@ -34,17 +34,17 @@
       </div>
       <div class="linklist pn_actions">
         <a class="pn_reply" href="{{ message|url('reply') }}">Antworten</a> |
-        <a class="pn_forward" href="{{ message|url('forward') }}">Weiterleiten</a> 
+        <a class="pn_forward" href="{{ message|url('forward') }}">Weiterleiten</a> |
         {%- if folder.id == 'trash' %}
         <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
         {%- elif folder.id != 'archive' %}
         <a class="pn_archive" href="?action=archive">Archivieren</a> |
         {%- endif %}
-        <a class="pn_delete" href="?action=delete">Nachricht löschen</a> |
+        <a class="pn_delete" href="?action=delete">Nachricht löschen</a>
       </div>
     </div>
     <br/>
-  {% endif %}
+  {%- endif %}
 
  <table class="pms">
     <tbody>
@@ -55,11 +55,11 @@
         <th class="date">Datum</th>
         <th class="actions">Aktionen</th>
       </tr>
-      {% for entry in entries %}
+      {%- for entry in entries %}
       <tr{% if message == entry.message %} class="active_pn"{% endif %}>
         <td>{% if not entry.read %}<strong>{% endif -%}
         <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
-        {% if not entry.read %}</strong>{% endif %}</td>
+        {%- if not entry.read %}</strong>{% endif %}</td>
         <td><a href="{{ entry.message.author|url }}">
           {{ entry.message.author|e }}</a></td>
         <td>
@@ -73,22 +73,22 @@
           {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
         <td>{{ entry.message.pub_date|datetimeformat }}</td>
         <td class="actions">
-          {% if not entry.is_own_message %}
+          {%- if not entry.is_own_message %}
           <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
-          {% endif %}
+          {%- endif %}
           <a href="{{ entry|url('forward') }}" title="Weiterleiten"><img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" /></a>
-          {% if not entry.in_archive %}
+          {%- if not entry.in_archive %}
           <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
-          {% endif %}
+          {%- endif %}
           <a href="{{ entry|url }}?action=delete" title="Löschen"><img src="{{ href('static', 'img/icons/small/delete.png') }}" alt="Löschen" /></a>
         </td>
       </tr>
-      {% else %}
+      {%- else %}
       <tr>
         <td colspan="5">Derzeit befinden sich noch keine Nachrichten
         in diesem Ordner.</td>
       </tr>
-      {% endfor %}
+      {%- endfor %}
     </tbody>
     <tfoot>
       <tr><td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>

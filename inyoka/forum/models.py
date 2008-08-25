@@ -997,7 +997,7 @@ class Attachment(object):
             # handle and cache thumbnails
             ff = self.file.encode('utf-8')
             img_path = path.join(settings.MEDIA_ROOT,
-                'forum/thumbnails/%s' % ff.split('/')[-1])
+                'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
                 img = Image.open(StringIO(self.contents))
