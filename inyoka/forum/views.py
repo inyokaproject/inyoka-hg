@@ -498,9 +498,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         elif 'delete_attachment' in request.POST:
             id = int(request.POST['delete_attachment'])
-            attachment = filter(lambda a: a.id==id, attachments)
-            if attachment:
-                attachment[0].delete()
+            attachment = filter(lambda a: a.id==id, attachments)[0]
+            attachment.delete()
             session.commit()
             attachments.remove(attachment)
             att_ids.remove(attachment.id)
