@@ -101,12 +101,12 @@
       {%- elif poll.end_time %} und wird {{ poll.end_time|dateformat(true) }} enden{% endif -%}
     .</div>
     {%- endfor %}
-    {%- if can_vote %}
+    {%- if can_vote and not voted_all %}
     <p>
-      <input type="submit" name="vote" value="Abstimmen" />
       {%- if show_vote_results %}
       <a href="?">Ergebnisse verbergen</a>
       {%- else %}
+      <input type="submit" name="vote" value="Abstimmen" />
       <a href="?action=vote_results">Ergebnisse anzeigen</a>
       {%- endif %}
     </p>
