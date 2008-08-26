@@ -1007,8 +1007,8 @@ class Attachment(object):
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
                 img.save(img_path, img.format)
-            thumb_url = href('media', 'forum/thumbnails/%s'
-                             % self.file.split('/')[-1])
+            thumb_url = href('media', 'forum/thumbnails/%s-%s'
+                             % (self.id, self.file.split('/')[-1]))
             return u'<a href="%s"><img class="preview" src="%s" ' \
                    u'alt="%s"></a>' % (url, thumb_url, self.comment)
 
