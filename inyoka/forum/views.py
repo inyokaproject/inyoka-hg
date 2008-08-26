@@ -849,7 +849,12 @@ def first_unread_post(request, topic_slug):
         else:
             query = query.where(p.id > post_id)
 
-    post_id = query.order_by(p.id).limit(1).execute().fetchone()[0]
+    try:
+        post_id = query.order_by(p.id).limit(1).execute().fetchone()[0]
+    except TypeError:
+        # something strange happened :/
+        # just redirect to the begin of the topic
+        return HttpResponseRedirect(href('forum', 'topic', topic_slug))
     return HttpResponseRedirect(Post.url_for_post(post_id))
 
 
