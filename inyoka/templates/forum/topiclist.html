@@ -45,7 +45,7 @@
             {%- if topic.reported %} [Gemeldet] {% endif %}
             <a href="{{ topic|url }}">{{ topic.title|e }}</a>
             {%- if not topic.get_read_status(USER) %}
-            <a href="{{ topic|url('first_unread') }}">
+            <a href="{{ topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">
               <img src="{{ href('static', 'img/forum/goto.png') }}" alt="Zeige ungelesene Beiträge" />
             </a>
             {%- endif %}
