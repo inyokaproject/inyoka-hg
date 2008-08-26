@@ -44,6 +44,11 @@
             {%- if topic.hidden %} [Verborgen] {% endif %}
             {%- if topic.reported %} [Gemeldet] {% endif %}
             <a href="{{ topic|url }}">{{ topic.title|e }}</a>
+            {%- if not topic.get_read_status(USER) %}
+            <a href="{{ topic|url('first_unread') }}">
+              <img src="{{ href('static', 'img/forum/goto.png') }}" alt="Zeige ungelesene Beiträge" />
+            </a>
+            {%- endif %}
           </p>
           <p class="description">
             von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
@@ -56,13 +61,13 @@
         <td class="post_count">{{ topic.post_count - 1 }}</td>
         <td class="view_count">{{ topic.view_count }}</td>
         <td class="last_post">
-          {% if topic.last_post %}
+          {%- if topic.last_post %}
             <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
             <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
-          {% else %}
+          {%- else %}
             –
-          {% endif %}
+          {%- endif %}
         </td>
       </tr>
     {%- else %}

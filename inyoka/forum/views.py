@@ -817,6 +817,42 @@ def post(request, post_id):
     return HttpResponseRedirect(url)
 
 
+def first_unread_post(request, topic_slug):
+    """
+    Redirect the user to the first unread post in a special topic.
+    """
+    t = topic_table.c
+    p = post_table.c
+    try:
+        topic_id, forum_id = select([t.id, t.forum_id],
+            t.slug == topic_slug).execute().fetchone()
+    except TypeError:
+        # there's no topic with such a slug
+        raise PageNotFound()
+
+    data = request.user._readstatus.data.get(forum_id, [None, []])
+    query = select([p.id], p.topic_id == topic_id)
+
+    if data[0] is not None:
+        query = query.where(p.id > data[0])
+
+    if data[1]:
+        try:
+            #: the id of the latest read post in this topic
+            post_id = max(p[0] for p in select([p.id],
+                    (p.topic_id == topic_id) &
+                    (p.id.in_(data[1]))
+                ).execute().fetchall()
+            )
+        except ValueError:
+            pass
+        else:
+            query = query.where(p.id > post_id)
+
+    post_id = query.order_by(p.id).limit(1).execute().fetchone()[0]
+    return HttpResponseRedirect(Post.url_for_post(post_id))
+
+
 @templated('forum/movetopic.html')
 def movetopic(request, topic_slug):
     """Move a topic into another forum"""

@@ -366,8 +366,6 @@ class Forum(object):
         """
         if user.is_anonymous:
             return
-        if not hasattr(user, '_readstatus'):
-            user._readstatus = ReadStatus(user.forum_read_status)
         if user._readstatus.mark(self):
             user.forum_read_status = user._readstatus.serialize()
 
@@ -466,7 +464,8 @@ class Topic(object):
             return href('forum', 'topic', self.slug)
         if action in ('reply', 'delete', 'hide', 'restore', 'split', 'move',
                       'solve', 'unsolve', 'lock', 'unlock', 'report',
-                      'report_done', 'subscribe', 'unsubscribe'):
+                      'report_done', 'subscribe', 'unsubscribe',
+                      'first_unread'):
             return href('forum', 'topic', self.slug, action)
 
     def get_pagination(self, threshold=3):
