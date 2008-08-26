@@ -575,7 +575,7 @@ def new_user_status(m):
 
 def add_post_has_revision(m):
     """
-    Add a column `has_revision` to posts. This is to only show the
+        Add a column `has_revision` to posts. This is to only show the
     'show revisions' link when there actually are revisions.
     """
     m.engine.execute('''
@@ -886,7 +886,7 @@ def fix_planet_entry_foreign_keys(m):
             delete planet_entry.* from planet_entry
                 left join planet_blog
                     on planet_entry.blog_id = planet_blog.id
-                where planet_blog.is is null;
+                where planet_blog.id is null;
         commit;
 
         alter table planet_entry
