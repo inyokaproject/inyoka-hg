@@ -634,19 +634,19 @@ def add_wiki_revision_foreign_keys(m):
                 left join portal_user
                     on wiki_revision.user_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table wiki_revision
-                add constraint wiki_revision_text_id_fk
-                    foreign key wiki_revision_text_id_fk (text_id)
-                    references wiki_text (id)
-                    on delete restrict
-                    on update restrict,
-                add constraint wiki_revision_user_id_fk
-                    foreign key wiki_revision_user_id_fk (user_id)
-                    references portal_user (id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table wiki_revision
+            add constraint wiki_revision_text_id_fk
+                foreign key wiki_revision_text_id_fk (text_id)
+                references wiki_text (id)
+                on delete restrict
+                on update restrict,
+            add constraint wiki_revision_user_id_fk
+                foreign key wiki_revision_user_id_fk (user_id)
+                references portal_user (id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -664,21 +664,22 @@ def fix_forum_poll_foreign_keys(m):
                 left join forum_poll
                     on forum_polloption.poll_id = forum_poll.id
                 where forum_poll.id is null;
-
-            alter table forum_poll
-                add constraint forum_poll_topic_id_fk
-                    foreign key forum_poll_topic_id_fk(topic_id)
-                    references forum_topic(id)
-                    on delete restrict
-                    on update restrict;
-
-            alter table forum_polloption
-                add constraint forum_polloption_poll_id_fk
-                    foreign key forum_polloption_poll_id_fk(poll_id)
-                    references forum_poll(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table forum_poll
+            add constraint forum_poll_topic_id_fk
+                foreign key forum_poll_topic_id_fk(topic_id)
+                references forum_topic(id)
+                on delete restrict
+                on update restrict;
+
+        alter table forum_polloption
+            add constraint forum_polloption_poll_id_fk
+                foreign key forum_polloption_poll_id_fk(poll_id)
+                references forum_poll(id)
+                on delete restrict
+                on update restrict;
+
         create index poll_topic_id on forum_poll(topic_id);
     ''')
 
@@ -697,19 +698,19 @@ def fix_forum_post_foreign_keys(m):
                 left join portal_user
                     on forum_post.author_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table forum_post
-                add constraint forum_post_author_id_fk
-                    foreign key forum_post_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint forum_post_topic_id_fk
-                    foreign key forum_post_topic_id_fk(topic_id)
-                    references forum_topic(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table forum_post
+            add constraint forum_post_author_id_fk
+                foreign key forum_post_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint forum_post_topic_id_fk
+                foreign key forum_post_topic_id_fk(topic_id)
+                references forum_topic(id)
+                on delete restrict
+                on update restrict;
     ''' % STASH_ID)
 
 
@@ -723,19 +724,19 @@ def fix_forum_privilege_foreign_keys(m):
                     on forum_privilege.forum_id = forum_forum.id
                 where portal_user.id is null or
                       forum_forum.id is null;
-
-            alter table forum_privilege
-                add constraint forum_privilege_user_id_fk
-                    foreign key forum_privilege_user_id_fk(user_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint forum_privilege_forum_id_fk
-                    foreign key forum_privilege_forum_id_fk(forum_id)
-                    references forum_forum(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table forum_privilege
+            add constraint forum_privilege_user_id_fk
+                foreign key forum_privilege_user_id_fk(user_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint forum_privilege_forum_id_fk
+                foreign key forum_privilege_forum_id_fk(forum_id)
+                references forum_forum(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -751,24 +752,24 @@ def fix_forum_topic_foreign_keys(m):
                     on forum_topic.forum_id = forum_forum.id
                 where user1.id = null or user1.id = null
                       or forum_forum.id is null;
-
-            alter table forum_topic
-                add constraint forum_topic_author_id_fk
-                    foreign key forum_topic_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint forum_topic_reporter_id_fk
-                    foreign key forum_topic_reporter_id_fk(reporter_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint forum_topic_forum_id_fk
-                    foreign key forum_topic_forum_id_fk(forum_id)
-                    references forum_forum(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table forum_topic
+            add constraint forum_topic_author_id_fk
+                foreign key forum_topic_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint forum_topic_reporter_id_fk
+                foreign key forum_topic_reporter_id_fk(reporter_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint forum_topic_forum_id_fk
+                foreign key forum_topic_forum_id_fk(forum_id)
+                references forum_forum(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 def fix_forum_voter_foreign_keys(m):
@@ -778,14 +779,14 @@ def fix_forum_voter_foreign_keys(m):
                 left join portal_user
                     on portal_voter.voter_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table forum_voter
-                add constraint forum_voter_voter_id_fk
-                    foreign key forum_voter_voter_id_fk(voter_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table forum_voter
+            add constraint forum_voter_voter_id_fk
+                foreign key forum_voter_voter_id_fk(voter_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -802,19 +803,19 @@ def fix_ikhaya_article_foreign_keys(m):
                 left join ikhaya_category
                     on ikhaya_article.category_id = ikhaya_category.id
                 where ikhaya_category.id is null;
-
-            alter table ikhaya_article
-                add constraint ikhaya_article_author_id_fk
-                    foreign key ikhaya_article_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint ikhaya_article_category_id_fk
-                    foreign key ikhaya_article_category_id_fk(category_id)
-                    references ikhaya_category(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table ikhaya_article
+            add constraint ikhaya_article_author_id_fk
+                foreign key ikhaya_article_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint ikhaya_article_category_id_fk
+                foreign key ikhaya_article_category_id_fk(category_id)
+                references ikhaya_category(id)
+                on delete restrict
+                on update restrict;
     ''' % CATEGORY_ID)
 
 
@@ -825,14 +826,14 @@ def fix_ikhaya_comment_foreign_keys(m):
                 left join portal_user
                     on ikhaya_comment.author_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table ikhaya_comment
-                add constraint ikhaya_comment_author_id_fk
-                    foreign key ikhaya_comment_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table ikhaya_comment
+            add constraint ikhaya_comment_author_id_fk
+                foreign key ikhaya_comment_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -845,19 +846,19 @@ def fix_ikhaya_suggestion_foreign_keys(m):
                 left join portal_user as user2
                     on ikhaya_suggestion.author_id = user2.id
                 where user1.id is null or user2.id is null;
-
-            alter table ikhaya_suggestion
-                add constraint ikhaya_suggestion_owner_id_fk
-                    foreign key ikhaya_suggestion_owner_id_fk(owner_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict,
-                add constraint ikhaya_suggestion_author_id_fk
-                    foreign key ikhaya_suggestion_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table ikhaya_suggestion
+            add constraint ikhaya_suggestion_owner_id_fk
+                foreign key ikhaya_suggestion_owner_id_fk(owner_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict,
+            add constraint ikhaya_suggestion_author_id_fk
+                foreign key ikhaya_suggestion_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -868,14 +869,14 @@ def fix_pastebin_entry_foreign_keys(m):
                 left join portal_user
                     on pastebin_entry.author_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table pastebin_entry
-                add constraint pastebin_entry_author_id_fk
-                    foreign key pastebin_entry_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table pastebin_entry
+            add constraint pastebin_entry_author_id_fk
+                foreign key pastebin_entry_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -886,14 +887,14 @@ def fix_planet_entry_foreign_keys(m):
                 left join planet_blog
                     on planet_entry.blog_id = planet_blog.id
                 where planet_blog.is is null;
-
-            alter table planet_entry
-                add constraint planet_entry_blog_id_fk
-                    foreign key planet_entry_blog_id_fk(blog_id)
-                    references planet_blog(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table planet_entry
+            add constraint planet_entry_blog_id_fk
+                foreign key planet_entry_blog_id_fk(blog_id)
+                references planet_blog(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 def fix_portal_event_foreign_keys(m):
@@ -903,14 +904,14 @@ def fix_portal_event_foreign_keys(m):
                 left join portal_user
                     on portal_event.author_id = portal_user.id
                 where portal_user.id is null;
-
-            alter table portal_event
-                add constraint portal_event_author_id_fk
-                    foreign key portal_event_author_id_fk(author_id)
-                    references portal_user(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table portal_event
+            add constraint portal_event_author_id_fk
+                foreign key portal_event_author_id_fk(author_id)
+                references portal_user(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
@@ -923,14 +924,14 @@ def fix_portal_privatemessageentry_foreign_keys(m):
                     on portal_privatemessageentry.message_id =
                        portal_privatemessage.id
                 where portal_privatemessage.id is null;
-
-            alter table portal_privatemessageentry
-                add constraint portal_messageentry_message_id_fk
-                    foreign key portal_messageentry_message_id_fk(message_id)
-                    references portal_privatemessage(id)
-                    on delete restrict
-                    on update restrict;
         commit;
+
+        alter table portal_privatemessageentry
+            add constraint portal_messageentry_message_id_fk
+                foreign key portal_messageentry_message_id_fk(message_id)
+                references portal_privatemessage(id)
+                on delete restrict
+                on update restrict;
     ''')
 
 
