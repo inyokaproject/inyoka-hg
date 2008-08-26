@@ -31,11 +31,12 @@ def highlight_code(code, lang=None, filename=None, mimetype=None):
         for var, guesser in guessers:
             if var is not None:
                 try:
-                    lexer = guesser(var, stripnl=False)
+                    lexer = guesser(var, stripnl=False, startinline=True)
                     break
                 except ClassNotFound: continue
 
-        if lexer is None: lexer = TextLexer(stripnl=False)
+        if lexer is None:
+            lexer = TextLexer(stripnl=False)
     except LookupError:
         lexer = TextLexer(stripnl=False)
     return highlight(code, lexer, _pygments_formatter)

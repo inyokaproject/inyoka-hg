@@ -366,8 +366,6 @@ class Forum(object):
         """
         if user.is_anonymous:
             return
-        if not hasattr(user, '_readstatus'):
-            user._readstatus = ReadStatus(user.forum_read_status)
         if user._readstatus.mark(self):
             user.forum_read_status = user._readstatus.serialize()
 
@@ -466,7 +464,8 @@ class Topic(object):
             return href('forum', 'topic', self.slug)
         if action in ('reply', 'delete', 'hide', 'restore', 'split', 'move',
                       'solve', 'unsolve', 'lock', 'unlock', 'report',
-                      'report_done', 'subscribe', 'unsubscribe'):
+                      'report_done', 'subscribe', 'unsubscribe',
+                      'first_unread'):
             return href('forum', 'topic', self.slug, action)
 
     def get_pagination(self, threshold=3):
@@ -997,7 +996,7 @@ class Attachment(object):
             # handle and cache thumbnails
             ff = self.file.encode('utf-8')
             img_path = path.join(settings.MEDIA_ROOT,
-                'forum/thumbnails/%s' % ff.split('/')[-1])
+                'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
                 img = Image.open(StringIO(self.contents))
@@ -1008,8 +1007,8 @@ class Attachment(object):
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
                 img.save(img_path, img.format)
-            thumb_url = href('media', 'forum/thumbnails/%s'
-                             % self.file.split('/')[-1])
+            thumb_url = href('media', 'forum/thumbnails/%s-%s'
+                             % (self.id, self.file.split('/')[-1]))
             return u'<a href="%s"><img class="preview" src="%s" ' \
                    u'alt="%s"></a>' % (url, thumb_url, self.comment)
 

@@ -2,9 +2,9 @@
   <tr class="entry category-{{ forum.parent_id }}">
     <td class="icon">
       {% if forum.get_read_status(REQUEST.user) %}
-        <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="" />
+        <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="Forum Lesen" />
       {% else %}
-        <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="" />
+        <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="Ungelesene Beiträge anzeigen" />
       {% endif %}
     </td>
     <td class="forum">

@@ -72,29 +72,32 @@
         <td colspan="5">
           Dieses Thema wurde von einem Moderator gelöscht.
         </td>
-
       </tr>
       {%- else %}
       <tr{% if can_moderate and (topic.hidden or topic.reported) %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
-        {% if topic.author_id == USER.id %}
+        {%- if topic.author_id == USER.id %}
         <td class="icon" style="background-color: #F6F4EF">
-        {% else %}
+        {%- else %}
         <td class="icon">
-        {% endif %}
+        {%- endif %}
           {{ topic_icon(topic) }}
         </td>
-        {% if topic.author_id == USER.id %}
+        {%- if topic.author_id == USER.id %}
         <td class="topic" style="background-color: #F8F6F1">
-        {% else %}
+        {%- else %}
         <td class="topic">
-        {% endif %}
+        {%- endif %}
           <p class="topic_title">
             {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
             {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
             {%- if can_moderate and topic.hidden %} [Verborgen] {% endif -%}
             {%- if can_moderate and topic.reported %} [Gemeldet] {% endif -%}
-            <a href="{{ topic|url }}">{{- topic.title|e -}}</a>
-
+            <a href="{{ topic|url }}">{{ topic.title|e }}</a>
+            {%- if not topic.get_read_status(USER) %}
+            <a href="{{ topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">
+              <img src="{{ href('static', 'img/forum/goto.png') }}" alt="Zeige ungelesene Beiträge" />
+            </a>
+            {%- endif %}
           </p>
           <p class="description">
             von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
@@ -103,37 +106,37 @@
             ]{% endif -%}
           </p>
         </td>
-        {% if topic.author_id == USER.id %}
+        {%- if topic.author_id == USER.id %}
         <td class="view_count" style="background-color: #F8F6F1">
-        {% else %}
+        {%- else %}
         <td class="view_count">
-        {% endif %}
+        {%- endif %}
          {{ topic.view_count }}</td>
-        {% if topic.author_id == USER.id %}
+        {%- if topic.author_id == USER.id %}
         <td class="post_count" style="background-color: #F8F6F1">
-        {% else %}
+        {%- else %}
         <td class="post_count">
-        {% endif %}
+        {%- endif %}
          {{ topic.post_count - 1 }}</td>
-        {% if topic.author_id == USER.id %}
+        {%- if topic.author_id == USER.id %}
         <td class="last_post" style="background-color: #F8F6F1">
-        {% else %}
+        {%- else %}
         <td class="last_post">
-        {% endif %}
-          {% if topic.last_post_id %}
+        {%- endif %}
+          {%- if topic.last_post_id %}
           <a href="{{ topic.last_post|url}}" class="date">{{
               topic.last_post.pub_date|datetimeformat }}</a><br />
           von <a href="{{ topic.last_post.author|url}}">{{ topic.last_post.author }}</a>
         {%- else %}---{% endif %}</td>
       </tr>
       {%- endif %}
-    {% else %}
+    {%- else %}
       <tr>
 
         <td colspan="5">
           Es existieren noch keine Themen. <a href="{{ forum|url('newtopic') }}">Erstelle</a> doch das Erste!</td>
       </tr>
-    {% endfor %}
+    {%- endfor %}
     </tbody>
     <thead>
       <tr>
