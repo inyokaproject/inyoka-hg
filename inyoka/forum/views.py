@@ -904,6 +904,7 @@ def movetopic(request, topic_slug):
 
             subscriptions = Subscription.objects.filter(topic_id=topic.id)
             for subscription in subscriptions:
+                nargs['username'] = subscription.user.username
                 send_notification(subscription.user, 'topic_moved',
                     u'Das Thema „%s“ wurde verschoben' % topic.title, nargs)
             return HttpResponseRedirect(url_for(topic))
