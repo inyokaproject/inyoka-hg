@@ -712,7 +712,10 @@ class Link(Element):
                         Span([Text(url[22:])], class_='longlinkcollapse'),
                     ]
             else:
-                children = [Text(url)]
+                text = url
+                if text.startswith('mailto:'):
+                    text = text[7:]
+                children = [Text(text)]
             if title == None:
                 title = url
         Element.__init__(self, children, id, style, class_)
