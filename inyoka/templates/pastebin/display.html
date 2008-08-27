@@ -32,7 +32,7 @@
       <ul><li><a href="{{ entry|url('raw') }}">Eintrag als Text anzeigen</a></li></ul>
     </dd>
     {%- if entry.referrer_list %}
-    <dt>Seiten, die auf diesen Paste verweisen:</dt>
+    <dt>Seiten, die auf diesen Eintrag verweisen:</dt>
     <dd><ul>
     {%- for link in entry.referrer_list %}
       <li>{{ link|urlize(60) }}</li>
