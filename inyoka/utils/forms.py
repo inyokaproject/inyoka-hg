@@ -20,6 +20,7 @@ from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
 from inyoka.utils.mail import may_be_valid_mail, is_blocked_host
 from inyoka.utils.jabber import may_be_valid_jabber
+from inyoka.utils.flashing import flash
 
 
 DATETIME_INPUT_FORMATS = (
@@ -124,9 +125,11 @@ class CaptchaField(forms.Field):
         if current_request.user.is_authenticated and self.only_anonymous:
             return True
         solution = current_request.session.get('captcha_solution')
+        if not solution:
+            flash(u'Du musst Cookies aktivieren!', False)
         h = md5.new(settings.SECRET_KEY)
         if isinstance(value, unicode):
-            # md5 don't like to have non-ascii containing unicode strings
+            # md5 doesn't like to have non-ascii containing unicode strings
             value = value.encode('utf-8')
         h.update(value)
         if h.digest() == solution:
