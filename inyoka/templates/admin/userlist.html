@@ -1,0 +1,43 @@
+{#
+    admin/userlist.html
+    ~~~~~~~~~~~~~~~~~~~
+
+    user administration interface.
+
+    :copyright: 2008 by Benjamin Wiegand.
+    :license: GNU GPL.
+#}
+{%- extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'users/special_rights'), 'Benutzer mit Sonderrechten'),
+] %}
+{% set scripts = ['jQuery.autocomplete.js'] %}
+
+{% block appheader %}
+<h1>Administration</h1>
+<h2>Benutzer mit Sonderrechten</h2>
+{% endblock %}
+
+
+{% block admin_content %}
+  <p>{{ count }} Benutzer haben Sonderrechte:</p>
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Benutzername</th>
+      <th>Wohnort</th>
+      <th>Anmeldungsdatum</th>
+      <th>Beiträge</th>
+    </tr>
+    {%- for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>
+        <a href="{{ href('admin', 'users', 'edit', user.username) }}">{{ user.username|e }}</a></td>
+      <td>{{ user.location }}</td>
+      <td>{{ user.date_joined.strftime('%d.%m.%Y') }}</td>
+      <td>{{ user.post_count }}</td>
+    </tr>
+    {%- endfor %}
+  </table>
+{% endblock %}
