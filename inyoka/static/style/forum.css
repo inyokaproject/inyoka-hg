@@ -356,6 +356,10 @@ table.poll td.sum {
   font-weight: bold;
 }
 
+table.poll td.percentage, table.poll td.votes {
+  white-space: nowrap;
+}
+
 div.forum_offset_pagination {
     float: none;
     margin: 0;

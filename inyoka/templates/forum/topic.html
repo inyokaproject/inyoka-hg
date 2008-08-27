@@ -89,9 +89,9 @@
         </td>
         {%- if not (poll.can_vote and can_vote) or show_vote_results %}
         <td class="vote_bar"><div style="width: {{ (option.percentage * 3) or 2 }}px;"></div></td>
-        {% set bc, ac = (option.percentage|string).split('.') %}
-        <td>{{ bc }}{% if ac|int %}.{{ ac[:2] }}{% endif %} %</td>
-        <td>[ {{ option.votes }} ]</td>
+        {%- set bc, ac = (option.percentage|string).split('.') %}
+        <td class="percentage">{{ bc }}{% if ac|int %}.{{ ac[:2] }}{% endif %} %</td>
+        <td class="votes">[ {{ option.votes }} ]</td>
         {%- endif %}
       </tr>
       {%- endfor %}
@@ -115,31 +115,31 @@
   {%- endif %}
 
   <table class="topic">
-   <tbody>
+    <tbody>
     {%- for post in posts %}
-      {% if post.hidden and not can_moderate %}
+      {%- if post.hidden and not can_moderate %}
       <tr class="deleted">
         <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
-        {% if post.author_id == USER.id %}
+        {%- if post.author_id == USER.id %}
         <td class="author" style="background-color: #F6F4EF">
-        {% else %}
+        {%- else %}
         <td class="author">
-        {% endif %}
+        {%- endif %}
           <p class="username">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
             {%- if post.author.primary_group.icon %}
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
-            {% endif %}
-            {% if post.author.member_title %}
+            {%- endif %}
+            {%- if post.author.member_title %}
             <div class="member_title">{{ post.author.member_title }}</div>
-            {% endif %}
-            {% if not loop.first and post.author == topic.author%}
+            {%- endif %}
+            {%- if not loop.first and post.author == topic.author %}
             {# TODO: different class?! #}
             <div class="member_title">(Threadstarter)</div>
-            {% endif %}
+            {%- endif %}
           </p>
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
@@ -150,14 +150,14 @@
           <p>Wohnort: {{ post.author.location|e }}</p>
           {%- endif %}
         </td>
-        {% if post.author_id == USER.id %}
+        {%- if post.author_id == USER.id %}
         <td class="post" style="background-color: #F8F6F1">
-        {% else %}
+        {%- else %}
         <td class="post">
-        {% endif %}
+        {%- endif %}
           <div class="postinfo">
             <div class="linklist">
-              {% if can_delete(post) %}
+              {%- if can_delete(post) %}
               <a href="{{ post|url('delete') }}" class="action action_delete">löschen</a> |
               {%- endif %}
               {%- if can_moderate %}
@@ -190,24 +190,24 @@
           {%- if attachments %}
           <hr />
           <dl class="attachments">
-          {% for group, list, class in attachments %}
-          {% if group %}
+          {%- for group, list, class in attachments %}
+          {%- if group %}
             <dt>{{ group }}</dt>
             <ul class="attr_list{% if class %} {{ class }}{% endif %}">
-            {% for att in list %}
+            {%- for att in list %}
               <li>{{ att.html_representation }}</li>
-            {% endfor %}
+            {%- endfor %}
             </ul>
-          {% else %}
-          {% for att in list %}
+          {%- else %}
+          {%- for att in list %}
             <dt>{{ att.name|e }} ({{ att.size|filesizeformat(true) }})</dt>
             {%- if att.comment %}
             <dd class="comment">{{ att.comment|e }}</dd>
-            {% endif %}
+            {%- endif %}
             <dd>{{ att.html_representation }}</dd>
           {%- endfor %}
           {%- endif %}
-          {% endfor %}
+          {%- endfor %}
           </dl>
           {%- endif %}
           {%- if post.author.signature and not USER.settings['hide_signatures'] %}
@@ -226,7 +226,7 @@
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
       {{ topic_actions() }}<br />
-      {% if can_moderate %}
+      {%- if can_moderate %}
       <span class="linklist">
         <a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> | 
         <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
@@ -242,7 +242,7 @@
         <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a> 
         {%- endif %}
       </span>
-      {% endif %}
+      {%- endif %}
     </div>
   </div>
       <div class="pathbar">

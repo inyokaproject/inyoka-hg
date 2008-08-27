@@ -182,7 +182,7 @@
         </td>
         <td class="post">
           <div class="postinfo">
-            <img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" />
+            <a href="{{ post|url }}"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date|specificdatetimeformat }}
           </div>
           {{ post.rendered_text }}

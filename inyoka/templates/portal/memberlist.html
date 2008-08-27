@@ -41,7 +41,7 @@
       <td>{{ user.date_joined.strftime('%d.%m.%Y') }}</td>
       <td>{{ user.post_count }}</td>
     </tr>
-    {% endfor -%}
+    {%- endfor %}
   </table>
   {{ pagination.generate() }}
 {% endblock %}
