@@ -201,6 +201,10 @@ form.search_result {
   margin-right: auto;
 }
 
+form.search_result #id_query {
+  width: 100%;
+}
+
 form.search_result ul {
   list-style: none;
   padding: 0;
@@ -211,8 +215,12 @@ form.search_result ul li {
   float: left;
 }
 
-form.search_result input[type="submit"] {
+form.search_result div.submit {
   float: right;
+}
+
+form.search_result #advanced {
+  display: none;
 }
 
 hr.divider {

@@ -458,11 +458,12 @@ def search(request):
             return TemplateResponse('portal/search_results.html', {
                 'query':            d['query'],
                 'highlight':        highlight,
-                'area':             d['area'],
+                'area':             request.GET.get('area') or 'all',
                 'results':          results,
                 'pagination':       u''.join(pagination),
                 'sort':             d['sort'],
-                'searchform':       f
+                'searchform':       f,
+                'advanced':         request.GET.get('advanced')
             })
         else:
             flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %
