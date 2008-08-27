@@ -60,9 +60,8 @@ UBUNTU_VERSIONS = {
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
-    'kubuntu-kde4': u'Kubuntu (KDE 4)',
+    'kubuntu-kde4': u'Kubuntu (KDE 4)',
     'xubuntu': 'Xubuntu',
-    'edubuntu': 'Edubuntu',
     'server': 'Server',
 }
 CACHE_PAGES_COUNT = 5
@@ -1012,7 +1011,7 @@ class Attachment(object):
             return u'<a href="%s"><img class="preview" src="%s" ' \
                    u'alt="%s"></a>' % (url, thumb_url, self.comment)
 
-        elif self.mimetype.startswith('text/') and len(self.contents)<250:
+        elif self.mimetype.startswith('text/') and len(self.contents) < 250:
             return highlight_code(self.contents.decode('utf-8'),
                 mimetype=self.mimetype)
         else:
