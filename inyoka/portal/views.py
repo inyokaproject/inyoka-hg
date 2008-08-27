@@ -80,7 +80,7 @@ def index(request):
     """
     ikhaya_latest = Article.published.all()[:10]
     events = Event.objects.order_by('date').filter(
-        date__gt=datetime.utcnow())[:4]
+        date__gte=datetime.utcnow())[:4]
     set_session_info(request, u'ist am Portal', 'Portal')
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
