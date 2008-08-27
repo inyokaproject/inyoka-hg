@@ -108,7 +108,8 @@ def config(request):
 
             flash(u'Die Einstellungen wurden gespeichert.', True)
     else:
-        form = ConfigurationForm(initial=storage.get_many(keys))
+        form = ConfigurationForm(initial=storage.get_many(keys +
+                                                ['global_message']))
     return {
         'form': form,
         'team_icon_url': team_icon and href('media', team_icon) or None
