@@ -247,6 +247,9 @@ class UserCPSettingsForm(forms.Form):
     highlight_search = forms.BooleanField(required=False,
         label='Sucherwörter hervorheben',
         help_text='Sucherwörter werden in gelber Farbe hervorgehoben')
+    mark_read_on_logout = forms.BooleanField(required=False,
+        label=u'Automatisch alle Foren beim Abmelden als gelesen markieren')
+
 
     def clean_notify(self):
         data = self.cleaned_data['notify']
@@ -278,7 +281,7 @@ class UserCPProfileForm(forms.Form):
     show_jabber = forms.BooleanField(required=False)
     signature = forms.CharField(widget=forms.Textarea, label='Signatur',
                                required=False)
-    coordinates = forms.CharField(label='Koordinaten (Länge, Breite)',
+    coordinates = forms.CharField(label='Koordinaten (Breite, Länge)',
                                   required=False, help_text=u'''
     Probleme beim bestimmen der Koordinaten?
     <a href="http://www.fallingrain.com/world/">Suche einfach deinen Ort</a>

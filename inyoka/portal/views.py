@@ -371,6 +371,10 @@ def logout(request):
     redirect = is_safe_domain(request.GET.get('next', '')) and \
                request.GET['next'] or href('portal')
     if request.user.is_authenticated:
+        if request.user.settings.get('mark_read_on_logout'):
+            for row in Forum.query.filter(Forum.parent_id == None):
+                row.mark_read(request.user)
+            request.user.save()
         User.objects.logout(request)
         flash(u'Du hast dich erfolgreich abgemeldet.', True)
     else:
@@ -631,7 +635,8 @@ def usercp_settings(request):
             'autosubscribe': settings.get('autosubscribe', False),
             'show_preview': settings.get('show_preview', False),
             'show_thumbnails': settings.get('show_thumbnails', False),
-            'highlight_search': settings.get('highlight_search', True)
+            'highlight_search': settings.get('highlight_search', True),
+            'mark_read_on_logout': settings.get('mark_read_on_logout', False)
         }
         form = UserCPSettingsForm(values)
     return {

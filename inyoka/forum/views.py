@@ -1324,10 +1324,8 @@ def markread(request, slug=None):
               True)
         return HttpResponseRedirect(url_for(forum))
     else:
-        category_ids = session.execute(select([forum_table.c.id],
-            forum_table.c.parent_id == None)).fetchall()
-        for row in category_ids:
-            Forum.query.get(row[0]).mark_read(user)
+        for row in Forum.query.filter(Forum.parent_id == None):
+            row.mark_read(user)
         user.save()
         flash(u'Alle Foren wurden als gelesen markiert.', True)
     return HttpResponseRedirect(href('forum'))
