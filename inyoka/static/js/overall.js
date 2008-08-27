@@ -9,6 +9,11 @@
  */
 
 $(document).ready(function() {
+  // konqueror fix
+  with ($.browser) {
+    safari = safari || !!navigator.appName.match(/konqueror/i)
+  };
+
   var loginForm = null;
 
   // preload images
