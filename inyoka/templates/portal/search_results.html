@@ -20,12 +20,14 @@
 
 {% block portal_content %}
   <h3>Suche</h3>
-  <p>
-    In der nachfolgenden Tabelle sind die Suchergebnisse für die Abfrage
-    „{{ query|e }}“. Solltest du nicht fündig geworden sein kannst du eine
-    <a href="/search/">neue Suche</a> mit veränderten Suchwörtern starten.
-  </p>
-  {{ pagination }}
+  <form action="{{ href('portal', 'search') }}" method="GET" class="search_result">
+    <p>{{ searchform.query }}</p>
+    <input type="submit" value="Suchen" />
+    {{ searchform.area }}
+    <br style="clear: both;" />
+  </form>
+  <hr class="divider" />
+  {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">
     {%- for doc in results.results %}
     <li>
@@ -48,10 +50,10 @@
       </p>
     </li>
     {%- else %}
-    <li><strong>Es wurden keine passenden Ergebnisse gefunden.</strong></li>
+    <li class="no_results">Es wurden keine passenden Ergebnisse gefunden.</li>
     {%- endfor %}
   </ul>
   <br />
-  {{ pagination }}
+  {% if results.results %}{{ pagination }}{% endif %}
   <br clear="both" />
 {% endblock %}

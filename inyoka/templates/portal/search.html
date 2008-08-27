@@ -42,7 +42,7 @@
    {{ search_tab('ikhaya', 'Ikhaya') }}
    {{ search_tab('planet', 'Planet') }}
   </ul>
-  <form action="{{ href('portal', 'search') }}" method="get" class="search_form">
+  <form action="{{ href('portal', 'search') }}" method="get" class="search_index">
     <dl>
       <dt>{{ searchform.query.label_tag() }}</dt><dd>{{ searchform.query }}</dd>
       <dt><label for="id_date_begin">Zeitraum:</label></dt>
@@ -57,7 +57,7 @@
     </dl>
     {%- endif %}
     <div class="actions">
-      {{ searchform.area }}
+      <input name="area" id="area" type="hidden" />
       <input type="submit" value="Suchen" />
     </div>
   </form>
@@ -72,7 +72,7 @@
         $('dl.search_fields').show();
       }
       $(this).addClass('active');
-      $('#id_area').val(id);
+      $('#area').val(id);
       return false;
     })
   </script>

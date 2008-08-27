@@ -347,9 +347,10 @@ class UserCPProfileForm(forms.Form):
 
 class SearchForm(forms.Form):
     """The search formular"""
-    query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput)
+    query = forms.CharField(label='Suchbegriffe:',
+        widget=forms.TextInput(attrs={'size': 60}))
     area = forms.ChoiceField(label='Bereich:', choices=SEARCH_AREA_CHOICES,
-                             required=False, widget=forms.HiddenInput)
+                             required=False, widget=forms.RadioSelect)
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     per_page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
