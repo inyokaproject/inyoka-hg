@@ -42,9 +42,9 @@ from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import PRIVILEGES_DETAILS, join_flags, split_flags
-from inyoka.forum.models import Forum, Privilege, WelcomeMessage
+from inyoka.forum.models import Forum, Privilege, WelcomeMessage, SAUser
 from inyoka.forum.database import forum_table, privilege_table, \
-    user_group_table
+    user_group_table, user_table
 from inyoka.wiki.parser import parse, RenderContext
 
 
@@ -643,6 +643,19 @@ def users(request):
         else:
             return HttpResponseRedirect(href('admin', 'users', 'edit', name))
     return {}
+
+
+@require_permission('user_edit')
+@templated('admin/userlist.html')
+def users_with_special_rights(request):
+    query = SAUser.query.filter(privilege_table.c.user_id == user_table.c.id) \
+                        .filter(privilege_table.c.user_id != None) \
+                        .group_by(user_table.c.id)
+    users = list(query)
+    return {
+        'users': users,
+        'count': len(users),
+    }
 
 
 @require_permission('user_edit')

@@ -706,15 +706,15 @@ def fix_forum_post_foreign_keys(m):
         begin;
             update forum_topic set post_count = (
                     select count(forum_post.id)
-                        from forum_post 
+                        from forum_post
                          where forum_topic.id = forum_post.topic_id
                 ), first_post_id = (
                     select min(forum_post.id)
-                        from forum_post 
+                        from forum_post
                          where forum_topic.id = forum_post.topic_id
                 ), last_post_id = (
                     select max(forum_post.id)
-                        from forum_post 
+                        from forum_post
                          where forum_topic.id = forum_post.topic_id
                 )
                 where forum_topic.id = %d;
