@@ -23,7 +23,6 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from django.db import models, connection
-from django.core import validators
 from inyoka.conf import settings
 from inyoka.utils.decorators import deferred
 from inyoka.utils.cache import cache
@@ -288,8 +287,7 @@ class User(models.Model):
     """User model that contains all informations about an user."""
     objects = UserManager()
 
-    username = models.CharField('Benutzername', max_length=30, unique=True,
-        validator_list=[validators.isAlphaNumeric])
+    username = models.CharField('Benutzername', max_length=30, unique=True)
     email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50)
     password = models.CharField('Passwort', max_length=128)
     status = models.IntegerField('Aktiv', default=0)
