@@ -10,17 +10,19 @@
     :license: GNU GPL.
 """
 import md5
+import time
 from urlparse import urlparse
 from inyoka.conf import settings
 from inyoka.portal.user import User
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password
-from inyoka.utils.http import PageNotFound
+from inyoka.utils.http import PageNotFound, HttpResponseRedirect
 from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha
 from inyoka.utils.templating import render_template
 from inyoka.utils.xmlrpc import xmlrpc
+from inyoka.utils.urls import href
 
 
 def on_get_current_user(request):
@@ -98,6 +100,14 @@ def on_toggle_sidebar(request):
     return True
 
 
+def hide_global_message(request):
+    if request.user.is_authenticated:
+        request.user.settings['global_message_hidden'] = time.time()
+        request.user.save()
+        return True
+    return False
+
+
 dispatcher = SimpleDispatcher(
     get_current_user=on_get_current_user,
     get_usermap_markers=on_get_usermap_markers,
@@ -105,5 +115,5 @@ dispatcher = SimpleDispatcher(
     get_captcha=on_get_captcha,
     get_calendar_entry=on_get_calendar_entry,
     toggle_sidebar=on_toggle_sidebar,
-    xmlrpc=xmlrpc
+    xmlrpc=xmlrpc, hide_global_message=hide_global_message
 )

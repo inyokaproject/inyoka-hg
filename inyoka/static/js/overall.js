@@ -32,6 +32,9 @@ $(document).ready(function() {
   $.each($('div.message'), function(i, elm) {
     $(elm).prepend($('<a href="#" class="hide" />')
       .click(function() {
+        if ($(this).parent().hasClass('global')) {
+          $.post('/?__service__=portal.hide_global_message');
+        }
         $(this).parent().slideUp('slow');
         return false;
       })

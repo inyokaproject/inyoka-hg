@@ -166,7 +166,7 @@
                 {%- endif %}
                 {%- if post.hidden %}
                   <a href="{{ post|url('restore') }}" class="action action_restore adminlink">wiederherstellen</a> |
-                  {%- if not can_delete %}
+                  {%- if not can_delete(post) %}
                     <a href="{{ post|url('delete') }}" class="action action_delete adminlink">endgültig löschen</a> |
                   {%- endif %}
                 {%- else %}

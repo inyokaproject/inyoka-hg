@@ -10,6 +10,7 @@
 """
 import os
 import pytz
+import time
 from os import path
 from PIL import Image
 from StringIO import StringIO
@@ -66,10 +67,9 @@ def index(request):
 @templated('admin/configuration.html')
 def config(request):
     keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
-            'max_signature_lines', 'get_ubuntu_link', 'global_message',
+            'max_signature_lines', 'get_ubuntu_link', 'license_note',
             'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template',
-            'wiki_newpage_root', 'team_icon_height', 'team_icon_width',
-            'license_note']
+            'wiki_newpage_root', 'team_icon_height', 'team_icon_width']
 
     team_icon = storage['team_icon']
 
@@ -79,6 +79,11 @@ def config(request):
             data = form.cleaned_data
             for k in keys:
                 storage[k] = data[k]
+
+            if data['global_message'] != storage['global_message']:
+                storage['global_message'] = data['global_message']
+                storage['global_message_time'] = time.time()
+
             if data['team_icon']:
                 img_data = data['team_icon'].read()
                 icon = Image.open(StringIO(img_data))

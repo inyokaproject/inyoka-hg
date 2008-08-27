@@ -93,6 +93,10 @@ def populate_context_defaults(context):
 
     # we don't have to use cache here because storage does this for us
     global_message = storage['global_message']
+    if global_message and request:
+        if request.user.settings.get('global_message_hidden', 0) > \
+                float(storage['global_message_time']):
+            global_message = None
 
     if request:
         context.update(
