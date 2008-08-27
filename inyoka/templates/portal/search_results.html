@@ -4,11 +4,12 @@
 
     This page displays the search results.
 
-    :copyright: 2007 by Christoph Hack.
+    :copyright: 2007 - 2008 by Christoph Hack, Benjamin Wiegand.
     :license: GNU GPL.
 #}
 
 {%- extends 'portal/overall.html' %}
+{% from 'macros.html' import render_form %}
 {% set navi_type = 'tabbar' %}
 {% set title = 'Suche' %}
 {% set active_app = area %}
@@ -22,10 +23,49 @@
   <h3>Suche</h3>
   <form action="{{ href('portal', 'search') }}" method="GET" class="search_result">
     <p>{{ searchform.query }}</p>
-    <input type="submit" value="Suchen" />
+    <div class="submit">
+      <input type="submit" id="expand" name="advanced" value=Erweitert />
+      <input type="submit" value="Suchen" />
+    </div>
     {{ searchform.area }}
     <br style="clear: both;" />
+    <div id="advanced"{% if advanced %} style="display: block;"{% endif %}>
+      <dl>
+        <dt><label for="id_date_begin">Zeitraum:</label></dt>
+        <dd>{{ searchform.date_begin }}<span> bis </span>{{ searchform.date_end }}<br />
+          <span class="help_text">z.B. <code>2008-12-31</code> oder
+          <code>2008-12-31 17:00</code></span></dd>
+        <dt>{{ searchform.sort.label_tag() }}</dt><dd>{{ searchform.sort }}</dd>
+      </dl>
+      {%- if not (advanced and area not in ('all', 'forum')) %}
+      <dl class="search_fields" id="forum_fields">
+        {{ render_form(searchform, ['forums'], inline=true) }}
+      </dl>
+      {%- endif %}
+    </div>
   </form>
+  <script>
+    $('#expand').click(function() {
+      $('#advanced').toggle();
+      return false;
+    })
+    $('input[name="area"]').each(function(i, elm) {
+      console.log(this);
+      $(this).change(function() {
+        console.log('a');
+        change_area($(this).val());
+      })
+    })
+    function change_area(id) {
+      if (id != 'all') {
+        $('dl.search_fields').hide();
+        $('#' + id + '_fields').show();
+      } else {
+        $('dl.search_fields').show();
+      }
+    }
+    change_area('{{ area }}');
+  </script>
   <hr class="divider" />
   {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">
