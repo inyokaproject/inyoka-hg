@@ -63,6 +63,7 @@ UBUNTU_DISTROS = {
     'kubuntu-kde4': u'Kubuntu (KDE 4)',
     'xubuntu': 'Xubuntu',
     'server': 'Server',
+    'edubuntu': 'Edubuntu',
 }
 CACHE_PAGES_COUNT = 5
 
