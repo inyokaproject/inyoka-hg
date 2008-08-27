@@ -742,8 +742,9 @@ def fix_forum_privilege_foreign_keys(m):
                     on forum_privilege.user_id = portal_user.id
                 left join forum_forum
                     on forum_privilege.forum_id = forum_forum.id
-                where portal_user.id is null or
-                      forum_forum.id is null;
+                where (portal_user.id is null or
+                       forum_forum.id is null) and
+                      forum_privilege.group_id is null;
         commit;
 
         alter table forum_privilege
