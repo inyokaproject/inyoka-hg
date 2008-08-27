@@ -753,10 +753,12 @@ def usercp_userpage(request):
     Redirect page that shows a small flash message that
     the user was redirected
     """
-    flash(u'Du wurdest in unser Wiki umgeleitet um deine Benutzerseite zu editieren. '
-          u'Klicke <a href="%s" title="Kontrollzentrum">hier</a> um wieder zurück '
-          u'ins Kontrollzentrum zu gelangen'
-          % escape(href('portal', 'usercp')))
+    usercp = escape(href('portal', 'usercp'))
+    flash(u'Du wurdest vom <a href="%s" title="Kontrollzentrum">Kontrollzentrum</a> '
+          u'in unser Wiki umgeleitet, um deine Benutzerseite zu editieren.<br />'
+          u'Um <a href="%s" title="Kontrollzentrum">zurück</a> zu kommen '
+          u'kannst du einfach auf den Link oder auf „Zurück“ in deinem Browser klicken.'
+          % (usercp, usercp))
     return HttpResponseRedirect(href('wiki', 'Benutzer',
         request.user.username, action='edit'))
 
