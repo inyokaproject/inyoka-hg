@@ -33,7 +33,7 @@ $(document).ready(function() {
     $(elm).prepend($('<a href="#" class="hide" />')
       .click(function() {
         if ($(this).parent().hasClass('global')) {
-          $.post('/?__service__=portal.hide_global_message');
+          $.post('/?__service__=portal.hide_global_message', {});
         }
         $(this).parent().slideUp('slow');
         return false;
