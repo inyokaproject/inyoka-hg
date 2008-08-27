@@ -686,7 +686,11 @@ def fix_forum_poll_foreign_keys(m):
 
 def fix_forum_post_foreign_keys(m):
     # the topic where everything without a topic lands
-    STASH_ID = 195689
+    r = m.engine.execute('''
+        insert into forum_topic (forum_id, author_id, title, sticky, slug, view_count, post_count, solved, locked, hidden, has_poll)
+            values (43, 3134, 'Waisenposts', 1, 'waisenposts', 0, 0, 0, 0, 0, 0);
+    ''')
+    STASH_ID = int(r.lastrowid)
     m.engine.execute('''
         begin;
             update forum_post set forum_post.topic_id = %d
@@ -698,6 +702,22 @@ def fix_forum_post_foreign_keys(m):
                 left join portal_user
                     on forum_post.author_id = portal_user.id
                 where portal_user.id is null;
+        commit;
+        begin;
+            update forum_topic set post_count = (
+                    select count(forum_post.id)
+                        from forum_post 
+                         where forum_topic.id = forum_post.topic_id
+                ), first_post_id = (
+                    select min(forum_post.id)
+                        from forum_post 
+                         where forum_topic.id = forum_post.topic_id
+                ), last_post_id = (
+                    select max(forum_post.id)
+                        from forum_post 
+                         where forum_topic.id = forum_post.topic_id
+                )
+                where forum_topic.id = %d;
         commit;
 
         alter table forum_post
@@ -711,7 +731,7 @@ def fix_forum_post_foreign_keys(m):
                 references forum_topic(id)
                 on delete restrict
                 on update restrict;
-    ''' % STASH_ID)
+    ''' % (STASH_ID, STASH_ID))
 
 
 def fix_forum_privilege_foreign_keys(m):
