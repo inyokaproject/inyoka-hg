@@ -737,7 +737,7 @@ def user_edit(request, username):
                     )).first()
                     if privilege is None and bits != 0:
                         privilege = Privilege(
-                            user_id=user.id,
+                            user=user,
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
@@ -966,7 +966,7 @@ def group_edit(request, name=None):
                     )).first()
                     if not privilege and bits != 0:
                         privilege = Privilege(
-                            group_id=group.id,
+                            group=group,
                             forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
                     if bits != 0:
