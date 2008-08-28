@@ -728,20 +728,24 @@ def user_edit(request, username):
             privileges = Privilege.query
             for key, value in request.POST.lists():
                 if key.startswith('forum_privileges-'):
+                    bits = join_flags(*value)
                     forum_id = key.split('-', 1)[1]
                     privilege = privileges.filter(and_(
                         privilege_table.c.forum_id==forum_id,
                         privilege_table.c.group_id==None,
                         privilege_table.c.user_id==user.id
                     )).first()
-                    if privilege is None:
+                    if privilege is None and bits != 0:
                         privilege = Privilege(
-                            user=user,
+                            user_id=user.id,
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
-                    privilege.bits = join_flags(*value)
-                    dbsession.flush()
+                    if bits != 0:
+                        privilege.bits = bits
+                        dbsession.flush()
+                    elif privilege is not None:
+                        dbsession.delete(privilege)
 
             # group editing
             groups_joined = [groups[gn] for gn in
@@ -766,8 +770,8 @@ def user_edit(request, username):
 
             # save the user object back to the database as well as other
             # database changes
-            user.save()
             dbsession.commit()
+            user.save()
             cache.delete('user_permissions/%s' % user.id)
 
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
@@ -953,19 +957,23 @@ def group_edit(request, name=None):
             #: forum privileges
             for key, value in request.POST.lists():
                 if key.startswith('forum_privileges-'):
+                    bits = join_flags(*value)
                     forum_id = key.split('-', 1)[1]
                     privilege = Privilege.query.filter(and_(
                         privilege_table.c.forum_id==forum_id,
                         privilege_table.c.user_id==None,
                         privilege_table.c.group_id==group.id
                     )).first()
-                    if not privilege:
+                    if not privilege and bits != 0:
                         privilege = Privilege(
-                            group=group,
+                            group_id=group.id,
                             forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
-                    privilege.bits = join_flags(*value)
-                    dbsession.flush()
+                    if bits != 0:
+                        privilege.bits = bits
+                        dbsession.flush()
+                    elif privilege is not None:
+                        dbsession.delete(privilege)
 
             # save changes to the database
             dbsession.commit()
