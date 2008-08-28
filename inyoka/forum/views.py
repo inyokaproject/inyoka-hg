@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_, or_, select, not_
+from sqlalchemy.sql import and_, or_, select, not_, exists, func
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for
@@ -1410,15 +1410,15 @@ def newposts(request, page=1):
 
 @templated('forum/topiclist.html')
 def topiclist(request, page=1, action='newposts', hours=24, user=None):
-    hours = int(hours)
-
-    forum_ids = [f.id for f in filter_invisible(request.user,
-                                                 Forum.query.all())]
+    page = int(page)
     topics = Topic.query.order_by(topic_table.c.last_post_id.desc()) \
-                  .filter(topic_table.c.forum_id.in_(forum_ids)) \
-                  .options(eagerload('forum'))
+                  .options(eagerload('forum'),
+                           eagerload('author'),
+                           eagerload('last_post'),
+                           eagerload('last_post.author'))
 
     if action == 'last':
+        hours = int(hours)
         if hours > 24:
             raise PageNotFound()
         topics = topics.filter(and_(
@@ -1439,11 +1439,23 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         user = user and User.objects.get(username=user) or request.user
         if user == User.objects.get_anonymous_user():
             raise PageNotFound()
-        # disabled, we are using xapian until we found a better solution
-        return HttpResponseRedirect(href('portal', 'search', area='forum',
-                sort='date', query='author:"%s"' % user.username))
-        topics = topics.filter(topic_table.c.id.in_(post_table.c.topic_id)) \
-                       .filter(post_table.c.author_id == user.id)
+        topic_ids = select([topic_table.c.id],
+            exists([post_table.c.topic_id],
+                (post_table.c.author_id == user.id) &
+                (post_table.c.topic_id == topic_table.c.id)
+            )
+        ).order_by(topic_table.c.last_post_id.desc()).offset((page - 1) * TOPICS_PER_PAGE).limit(TOPICS_PER_PAGE + 1)
+        topic_ids = [i[0] for i in topic_ids.execute().fetchall()]
+        next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
+        topic_ids = topic_ids[:30]
+        topics = list(topics.filter(topic_table.c.id.in_(topic_ids)))
+        pagination = []
+        normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
+        disabled = u'<span class="disabled next">%(text)s</span>'
+        active = u'<span class="pageselect active">%(text)s</span>'
+        pagination = [u'<div class="pagination pagination_right">']
+        add = pagination.append
+
         if user != request.user:
             title = u'Beiträge von %s' % escape(user.username)
             url = href('forum', 'author', user.username)
@@ -1451,15 +1463,34 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             title = u'Eigene Beiträge'
             url = href('forum', 'egosearch')
 
-    # TODO: eagerload('last_post'), eagerload('last_post.author') raises
-    #       an error.
-    topics = topics.options(eagerload('author'), eagerload('last_post'), eagerload('last_post.author'))
+        def _link(page):
+            return '%s%d' % (url, page)
 
-    pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
+        add(((page == 1) and disabled or normal) % {
+            'href': _link(page - 1),
+            'text': u'« Zurück',
+        })
+        add(active % {
+            'text': u'Seite %d' % page
+        })
+        add((next_page and normal or disabled) % {
+            'href': _link(page + 1),
+            'text': u'Weiter »'
+        })
+        add(u'<div style="clear: both"></div></div>')
+        pagination = u''.join(pagination)
+
+    if action != 'author':
+        forum_ids = [f.id for f in filter_invisible(request.user,
+                                                    Forum.query.all())]
+        topics = topics.filter(topic_table.c.forum_id.in_(forum_ids))
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
+        topics = pagination.objects
+        pagination = pagination.generate()
 
     return {
-        'topics':       list(pagination.objects),
-        'pagination':   pagination.generate(),
+        'topics':       list(topics),
+        'pagination':   pagination,
         'title':        title,
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(post_id=post_id)
