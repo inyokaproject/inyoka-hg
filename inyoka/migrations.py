@@ -955,6 +955,12 @@ def fix_portal_privatemessageentry_foreign_keys(m):
     ''')
 
 
+def add_egosearch_index(m):
+    m.engine.execute('''
+        alter table forum_post add index egosearch (topic_id,author_id);
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -976,4 +982,5 @@ MIGRATIONS = [
     fix_ikhaya_comment_foreign_keys, fix_ikhaya_suggestion_foreign_keys,
     fix_pastebin_entry_foreign_keys, fix_planet_entry_foreign_keys,
     fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
+    add_egosearch_index,
 ]
