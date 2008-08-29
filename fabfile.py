@@ -15,6 +15,11 @@ def staging():
 def production():
     set(fab_hosts = ['dongo.ubuntu-eu.org', 'jok.ubuntu-eu.org'])
 
+
+
+
+
+
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
     set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
