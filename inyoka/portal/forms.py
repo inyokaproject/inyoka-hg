@@ -349,7 +349,7 @@ class SearchForm(forms.Form):
     """The search formular"""
     query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput)
     area = forms.ChoiceField(label='Bereich:', choices=SEARCH_AREA_CHOICES,
-                             required=False, widget=forms.RadioSelect)
+                      required=False, widget=forms.RadioSelect, initial='all')
     page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     per_page = forms.IntegerField(required=False, widget=forms.HiddenInput)
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
@@ -357,6 +357,8 @@ class SearchForm(forms.Form):
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
         required=False)
     forums = forms.ChoiceField(label=u'Foren', initial='support',
+        required=False)
+    show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
         required=False)
 
 

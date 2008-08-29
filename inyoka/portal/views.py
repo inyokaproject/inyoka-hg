@@ -60,6 +60,13 @@ from inyoka.portal.utils import check_login, calendar_entries_for_month, \
 from inyoka.utils.antispam import is_spam
 
 
+SEARCH_AREAS = {
+    'wiki': 'w',
+    'forum': 'f',
+    'ikhaya': 'i',
+    'planet': 'p'
+}
+
 
 def not_found(request, err_message=None):
     """
@@ -385,94 +392,85 @@ def logout(request):
 @templated('portal/search.html')
 def search(request):
     """Search dialog for the Xapian search engine."""
-    def _add_field_choices():
-        """Add dynamic field choices to the reported topic formular"""
-        f.fields['forums'].choices = [('all', u'Alle Foren'),
-            ('support', u'Alle Support-Foren')
-        ] + [(o.slug, o.name) for o in Forum.query.all()]
-
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
+    area = request.GET.get('area') or 'all'
+
     if 'query' in request.REQUEST:
         f = SearchForm(request.REQUEST)
     else:
         f = SearchForm()
-    _add_field_choices()
+    f.fields['forums'].choices = [('all', u'Alle Foren'),
+        ('support', u'Alle Support-Foren')
+    ] + [(o.slug, o.name) for o in Forum.query.all()]
+
     if f.is_valid():
         d = f.cleaned_data
-        show_all = request.GET.get('show_all') == 'true'
-        area = {
-            'wiki': 'w',
-            'forum': 'f',
-            'ikhaya': 'i',
-            'planet': 'p'
-        }.get(d['area'])
+
         query = d['query']
 
-        if d['area'] == 'topic':
-            query += ' topic:"%s"' % request.GET['topic_id']
-        elif d['area'] == 'current_forum':
-            query += ' forum:"%s"' % request.GET['forum_id']
-
-        if d['forums'] and d['forums'] not in ('support', 'all'):
+        exclude = []
+        if area in ('forum', 'all') and d['forums'] not in ('support', 'all'):
             query += ' category:"%s"' % d['forums']
+        elif d['forums'] == 'support':
+            exclude = settings.SEARCH_DEFAULT_EXCLUDE
+
+        if not d['show_wiki_attachments']:
+            exclude.append('C__attachment__')
 
         results = search_system.query(request.user,
             query,
-            page=d['page'] or 1, per_page=d['per_page'] or 20,
+            page=d['page'] or 1,
+            per_page=d['per_page'] or 20,
             date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
-            component=area,
-            exclude=d['forums'] == 'support' and settings.SEARCH_DEFAULT_EXCLUDE or [],
+            component=SEARCH_AREAS.get(d['area']),
+            exclude=exclude,
             sort=d['sort']
         )
-        if len(results.results ) > -1:
-            normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
-            disabled = u'<span class="disabled next">%(text)s</span>'
-            active = u'<span class="pageselect active">%(text)s</span>'
-            pagination = [u'<div class="pagination pagination_right">']
-            add = pagination.append
+        normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
+        disabled = u'<span class="disabled next">%(text)s</span>'
+        active = u'<span class="pageselect active">%(text)s</span>'
+        pagination = [u'<div class="pagination pagination_right">']
+        add = pagination.append
 
-            def _link(page):
-                return href('portal', 'search', page=page, query=d['query'],
-                            area=d['area'], per_page=results.per_page,
-                            sort=d['sort'])
+        def _link(page):
+            return href('portal', 'search', page=page, query=d['query'],
+                        area=d['area'], per_page=results.per_page,
+                        sort=d['sort'])
 
-            add(((results.page == 1) and disabled or normal) % {
-                'href': _link(results.page - 1),
-                'text': u'« Zurück',
-            })
-            add(active % {
-                'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
-            })
-            add(((results.page < results.page_count) and normal or disabled) % {
-                'href': _link(results.page + 1),
-                'text': u'Weiter »'
-            })
-            add(u'<div style="clear: both"></div></div>')
+        add(((results.page == 1) and disabled or normal) % {
+            'href': _link(results.page - 1),
+            'text': u'« Zurück',
+        })
+        add(active % {
+            'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
+        })
+        add(((results.page < results.page_count) and normal or disabled) % {
+            'href': _link(results.page + 1),
+            'text': u'Weiter »'
+        })
+        add(u'<div style="clear: both"></div></div>')
 
-            # only highlight for users with that setting enabled.
-            highlight = None
-            if request.user.settings.get('highlight_search', True):
-                highlight = results.highlight_string
+        # only highlight for users with that setting enabled.
+        highlight = None
+        if request.user.settings.get('highlight_search', True):
+            highlight = results.highlight_string
 
-            return TemplateResponse('portal/search_results.html', {
-                'query':            d['query'],
-                'highlight':        highlight,
-                'area':             request.GET.get('area') or 'all',
-                'results':          results,
-                'pagination':       u''.join(pagination),
-                'sort':             d['sort'],
-                'searchform':       f,
-                'advanced':         request.GET.get('advanced')
-            })
-        else:
-            flash(u'Die Suche nach „%s“ lieferte keine Ergebnisse.' %
-                escape(d['query']))
-
-    return {
-        'area': request.GET.get('area') or 'all',
-        'searchform': f
-    }
+        rv = {
+            'query':            d['query'],
+            'highlight':        highlight,
+            'results':          results,
+            'pagination':       u''.join(pagination),
+            'sort':             d['sort'],
+        }
+    else:
+        rv = {}
+    rv.update({
+        'area':         area,
+        'searchform':   f,
+        'advanced':     request.GET.get('advanced')
+    })
+    return rv
 
 
 @check_login(message=u'Du musst eingeloggt sein, um ein Benutzerprofil zu '
