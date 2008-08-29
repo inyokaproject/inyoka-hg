@@ -16,10 +16,6 @@ def production():
     set(fab_hosts = ['dongo.ubuntu-eu.org', 'jok.ubuntu-eu.org'])
 
 
-
-
-
-
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
     set(fab_hosts = [x.strip() for x in raw_input('Servers: ').split(',')])
@@ -34,7 +30,7 @@ def bootstrap():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
-    run('cd virtualenv/inyoka; hg pull -u; touch inyoka.wsgi')
+    run('cd virtualenv/inyoka; hg pull -u')
 
 def easy_install():
     """Run easy_install on the server"""
@@ -47,10 +43,3 @@ def easy_uninstall():
     require('fab_hosts', provided_by = [test, staging, production])
     prompt('ez', 'egg to uninstall')
     run('cd virtualenv/lib/python$(python_version)/site-packages; $(python_interpreter) ~/virtualenv/inyoka/easy_uninstall.py $(ez)')
-
-def migrate():
-    """Migrate the database to the newest version."""
-    print 'broken currently'
-    return
-    require('fab_hosts', provided_by = [test, staging, production])
-    run('source ~/virtualenv/bin/activate; cd virtualenv/inyoka; make migrate')
