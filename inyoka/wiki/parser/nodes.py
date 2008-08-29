@@ -453,10 +453,6 @@ class Image(Node):
         self.class_ = class_
         self.style = style
 
-    @property
-    def text(self):
-        return self.alt
-
     def generate_markup(self, w):
         w.markup('[[Bild("%s")]]' % self.href)
 

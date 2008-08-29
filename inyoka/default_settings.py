@@ -144,6 +144,11 @@ SECRET_KEY = 'b)l0ju3erxs)od$g&l_0i1za^l+2dwgxuay(nwv$q4^*c#tdwt'
 # if memcache servers are defined the caching system is initialized
 # with the werkzeug memcache layer, otherwise the null cache.
 MEMCACHE_SERVERS = []
+# a prefix that is automatically added on every cache operation to the key.
+# You won't notice anything of it at all but it makes it possible to run more
+# than one application on a single memcached server without the risk of cache
+# key collision.
+CACHE_PREFIX = 'ubuntu_de/'
 
 MIDDLEWARE_CLASSES = (
     'inyoka.middlewares.common.CommonServicesMiddleware',
