@@ -409,10 +409,11 @@ def search(request):
         query = d['query']
 
         exclude = []
-        if area in ('forum', 'all') and d['forums'] not in ('support', 'all'):
+        if area in ('forum', 'all') and d['forums'] and \
+                d['forums'] not in ('support', 'all'):
             query += ' category:"%s"' % d['forums']
         elif d['forums'] == 'support':
-            exclude = settings.SEARCH_DEFAULT_EXCLUDE
+            exclude = list(settings.SEARCH_DEFAULT_EXCLUDE)
 
         if not d['show_wiki_attachments']:
             exclude.append('C__attachment__')
