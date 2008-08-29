@@ -71,6 +71,7 @@ urlpatterns = patterns('inyoka.forum.views',
     (r'^egosearch/$', 'topiclist', {'action': 'author'}),
     (r'^egosearch/(?P<page>\d+)/$', 'topiclist', {'action': 'author'}),
     (r'^author/(?P<user>[^/]+)/$', 'topiclist', {'action': 'author'}),
+    (r'^topic_author/(?P<user>[^/]+)/$', 'topiclist', {'action': 'topic_author'}),
     (r'^author/(?P<user>[^/]+)/(?P<page>\d+)/$', 'topiclist', {'action': 'author'}),
     (r'^category/(?P<slug>[^/]+)/welcome/$', 'welcome'),
     (r'^forum/(?P<slug>[^/]+)/welcome/$', 'welcome')

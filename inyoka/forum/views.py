@@ -1437,16 +1437,25 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         topics = topics.filter(Topic.solved == False)
         title = u'Ungelöste Themen'
         url = href('forum', 'unsolved')
+    elif action == 'topic_author':
+        user = User.objects.get(username=user)
+        topics = topics.filter(Topic.author_id == user.id)
+        url = href('forum', 'topic_author', user.username)
+        title = u'Themen von %s' % (escape(user.username))
     elif action == 'author':
         user = user and User.objects.get(username=user) or request.user
         if user == User.objects.get_anonymous_user():
             raise PageNotFound()
+        # get the ids of the topics the user has written posts in
+        # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
         topic_ids = select([topic_table.c.id],
             exists([post_table.c.topic_id],
                 (post_table.c.author_id == user.id) &
                 (post_table.c.topic_id == topic_table.c.id)
             )
-        ).order_by(topic_table.c.last_post_id.desc()).offset((page - 1) * TOPICS_PER_PAGE).limit(TOPICS_PER_PAGE + 1)
+        ).order_by(topic_table.c.last_post_id.desc()) \
+         .offset((page - 1) * TOPICS_PER_PAGE) \
+         .limit(TOPICS_PER_PAGE + 1)
         topic_ids = [i[0] for i in topic_ids.execute().fetchall()]
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
         topic_ids = topic_ids[:30]

@@ -135,6 +135,7 @@
             <ul class="dropdown"><li><a href="{{ href('portal', 'search') }}">Erweiterte Suche</a></li><li><ul>
               {%- if USER.is_authenticated %}
               <li><a href="{{ href('forum', 'egosearch') }}">Eigene Beiträge</a></li>
+              <li><a href="{{ href('forum', 'topic_author', USER.username)|e }}">Eigene Themen</a></li>
               {%- endif %}
               <li><a href="{{ href('forum', 'newposts') }}">Neue Beiträge</a></li>
               <li><a href="{{ href('forum', 'unanswered') }}">Unbeantwortete Themen</a></li>
