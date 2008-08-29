@@ -969,6 +969,10 @@ p.badges img:hover {
   background-repeat: no-repeat;
 }
 
+.message ul {
+  list-style: none;
+}
+
 .content .message {
   margin: 0.0em;
   margin-bottom: 1.0em;
