@@ -423,22 +423,20 @@ table.syntaxtable td.linenos {
 }
 
 .header h1 {
-  background-image: url(../img/logo.png);
-  background-repeat: no-repeat;
-  background-position: 15px 15px;
-  padding: 5px;
   margin: 0;
-  width:320px;
   float:left
 }
 
 .header h1 a {
+  background-repeat: no-repeat;
+  background-position: 15px 15px;
   display: block;
   width: 257px;
   height: 90px;
   padding: 0;
   margin: 0;
   text-decoration: none;
+  background-image: url(../img/logo.png);
 }
 
 .header h1 span {
@@ -463,9 +461,9 @@ table.syntaxtable td.linenos {
 
 .tabbar li a {
   display: block;
-  color: #673B1A;
+  color: #673B1A !important;
   font-weight: bold;
-  text-decoration: none;
+  text-decoration: none !important;
   padding-bottom: 28px;
   width: 80px;
   background-repeat: no-repeat;
@@ -477,12 +475,12 @@ table.syntaxtable td.linenos {
   color: black;
 }
 
-.tabbar li.portal a { background-image: url(../img/icons/portal.png); }
-.tabbar li.forum a  { background-image: url(../img/icons/forum.png); }
-.tabbar li.wiki a   { background-image: url(../img/icons/wiki.png); }
-.tabbar li.ikhaya a { background-image: url(../img/icons/ikhaya.png); }
-.tabbar li.planet a { background-image: url(../img/icons/planet.png); }
-.tabbar li.community a   { background-image: url(../img/icons/community.png); }
+.tabbar li.portal a { background-image: url(../img/icons/portal.png) !important; }
+.tabbar li.forum a  { background-image: url(../img/icons/forum.png) !important; }
+.tabbar li.wiki a   { background-image: url(../img/icons/wiki.png) !important; }
+.tabbar li.ikhaya a { background-image: url(../img/icons/ikhaya.png) !important; }
+.tabbar li.planet a { background-image: url(../img/icons/planet.png) !important; }
+.tabbar li.community a   { background-image: url(../img/icons/community.png) !important; }
 
 .tabbar li.active {
   background-image: url(../img/tabbar_border.png);
@@ -669,8 +667,8 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .appheader h1 a {
-  color: #a48f65;
-  text-decoration: none;
+  color: #a48f65 !important;
+  text-decoration: none !important;
 }
 
 .appheader h2 a {
@@ -1171,7 +1169,7 @@ ul.dropdown ul {
 }
 
 ul.dropdown:hover ul {
-  display: block
+  display: block;
 }
 
 ul.dropdown:hover > li:first-child {
@@ -1194,7 +1192,6 @@ ul.dropdown:hover > li:first-child a {
 
 div.dropdown {
   float: right;
-  height: 20px;
   width: 140px;
   margin-left: 2px;
   margin-right: 4px;
