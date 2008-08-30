@@ -1192,6 +1192,7 @@ ul.dropdown:hover > li:first-child a {
 
 div.dropdown {
   float: right;
+  height: 20px;
   width: 140px;
   margin-left: 2px;
   margin-right: 4px;
