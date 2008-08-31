@@ -57,7 +57,7 @@ class Blog(models.Model):
     def save_icon(self, img):
         """Save the icon to the file system."""
         icon = Image.open(StringIO(img.read()))
-        actual_path = self.get_icon_filename()
+        actual_path = self.icon.name
         ext = path.splitext(img.name)[1][1:]
         fn = 'planet/icons/icon_%d.%s' % (self.id, ext)
         if not actual_path:
