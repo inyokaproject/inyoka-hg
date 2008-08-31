@@ -315,6 +315,11 @@ table.usercp_subscriptions th.delete_abbos {
   cursor: pointer;
 }
 
+table.usercp_subscriptions th.delete_abbos:before {
+  content: url(../img/extlink.gif);
+  margin-right: 5px;
+}
+
 /* Private Messages **********************************************************/
 
 div.prvmsg {

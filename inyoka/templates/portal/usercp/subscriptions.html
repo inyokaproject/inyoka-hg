@@ -59,10 +59,18 @@
 </form>
 <script type="text/javascript">
   /* <![CDATA[ */
+  var all_checked = false;
   $('table.usercp_subscriptions th.delete_abbos').click(function() {
     $('input[@name="delete"]').each(function() {
-      this.checked = true;
+      if (all_checked)
+        this.checked = false;
+      else
+        this.checked = true;
     });
+    if (all_checked)
+      all_checked = false;
+    else
+      all_checked = true;
   });
   /* ]]> */
 </script>
