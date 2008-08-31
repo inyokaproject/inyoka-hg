@@ -89,7 +89,7 @@ class Pagination(object):
         result = []
         add = result.append
         pages = max(0, self.total - 1) // self.per_page + 1
-        params = dict((k, v[0]) for k, v in self.parameters.iteritems())
+        params = dict((k, v) for k, v in self.parameters.iteritems())
         half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
