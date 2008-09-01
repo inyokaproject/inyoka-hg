@@ -49,7 +49,7 @@ class Blog(models.Model):
 
     def delete_icon(self):
         """Delete the icon from the file system."""
-        fn = self.get_icon_filename()
+        fn = self.icon.name
         if path.exists(fn):
             os.remove(fn)
         self.icon = None
@@ -96,6 +96,7 @@ class Entry(models.Model):
     updated = models.DateTimeField()
     author = models.CharField(max_length=50)
     author_homepage = models.URLField(blank=True, null=True)
+    hidden = models.BooleanField()
 
     def __unicode__(self):
         return u'%s / %s' % (

@@ -51,7 +51,7 @@ def index(request, page=1):
     The index function just returns the 30 latest entries of the planet.
     The page number is optional.
     """
-    pagination = Pagination(request, Entry.objects.all(), page, 30,
+    pagination = Pagination(request, Entry.objects.filter(hidden=False), page, 30,
         href('planet'))
     set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
                      href('planet'), 'Planet')
@@ -122,7 +122,7 @@ def feed(request, mode='short', count=20):
         rights=href('portal', 'lizenz'),
     )
 
-    for entry in Entry.objects.all()[:count]:
+    for entry in Entry.objects.filter(hidden=False)[:count]:
         kwargs = {}
         if mode == 'full':
             kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
