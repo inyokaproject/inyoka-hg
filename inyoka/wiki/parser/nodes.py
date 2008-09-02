@@ -1238,11 +1238,11 @@ class Small(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.markup(u"~-")
-        w.start_escaping('-~')
+        w.markup(u"~-(")
+        w.start_escaping(')-~')
         Element.generate_markup(self, w)
         w.stop_escaping()
-        w.markup(u"-~")
+        w.markup(u")-~")
 
     def prepare_html(self):
         yield build_html_tag(u'small', id=self.id, style=self.style,
@@ -1260,11 +1260,11 @@ class Big(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.markup(u"~+")
-        w.start_escaping('+~')
+        w.markup(u"~+(")
+        w.start_escaping(')+~')
         Element.generate_markup(self, w)
         w.stop_escaping()
-        w.markup(u"+~")
+        w.markup(u")+~")
 
     def prepare_html(self):
         yield build_html_tag(u'big', id=self.id, style=self.style,
@@ -1282,11 +1282,11 @@ class Sub(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.markup(u',,')
-        w.start_escaping(',,')
+        w.markup(u',,(')
+        w.start_escaping('),,')
         Element.generate_markup(self, w)
         w.stop_escaping()
-        w.markup(u',,')
+        w.markup(u'),,')
 
     def prepare_html(self):
         yield build_html_tag(u'sub', id=self.id, style=self.style,
@@ -1310,11 +1310,11 @@ class Sup(Element):
     allowed_in_signatures = True
 
     def generate_markup(self, w):
-        w.markup(u'^^')
-        w.start_escaping('^^')
+        w.markup(u'^^(')
+        w.start_escaping(')^^')
         Element.generate_markup(self, w)
         w.stop_escaping()
-        w.markup(u'^^')
+        w.markup(u')^^')
 
     def prepare_html(self):
         yield build_html_tag(u'sup', id=self.id, style=self.style,

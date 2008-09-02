@@ -131,10 +131,10 @@ class Lexer(object):
             rule('`', enter='code'),
             rule('__', enter='underline'),
             rule(r'--\(', enter='stroke'),
-            rule('~-', enter='small'),
-            rule(r'~\+', enter='big'),
-            rule(r',,', enter='sub'),
-            rule(r'\^\^', enter='sup'),
+            rule('~-\(', enter='small'),
+            rule(r'~\+\(', enter='big'),
+            rule(r',,\(', enter='sub'),
+            rule(r'\^\^\(', enter='sup'),
             rule(r'\(\(', enter='footnote'),
             rule(r'\[\[([\w_]+)', bygroups('macro_name'),
                  enter='macro'),
@@ -218,19 +218,19 @@ class Lexer(object):
             include('inline_with_links')
         ),
         'small': ruleset(
-            rule('-~', leave=1),
+            rule('\)-~', leave=1),
             include('inline_with_links')
         ),
         'big': ruleset(
-            rule(r'\+~', leave=1),
+            rule(r'\)\+~', leave=1),
             include('inline_with_links')
         ),
         'sub': ruleset(
-            rule(r',,', leave=1),
+            rule(r'\),,', leave=1),
             include('inline_with_links')
         ),
         'sup': ruleset(
-            rule(r'\^\^', leave=1),
+            rule(r'\)\^\^', leave=1),
             include('inline_with_links')
         ),
         'footnote': ruleset(

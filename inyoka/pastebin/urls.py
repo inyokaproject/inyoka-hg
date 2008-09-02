@@ -15,7 +15,6 @@ urlpatterns = patterns('inyoka.pastebin.views',
     (r'^(\d+)/$', 'display'),
     (r'^raw/(\d+)/$', 'raw'),
     (r'^browse/$', 'browse'),
-    (r'^browse/(?P<page>\d+)/$', 'browse')
 )
 
 
