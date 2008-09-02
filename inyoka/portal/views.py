@@ -781,6 +781,28 @@ def privmsg(request, folder=None, entry_id=None, page=1):
                                                  entry.id))
             except KeyError:
                 raise PageNotFound
+
+    entries = PrivateMessageEntry.objects.filter(
+        user=request.user,
+        folder=PRIVMSG_FOLDERS[folder][0]
+    ).order_by('-id')
+
+    if request.method == 'POST':
+        # POST is only send by the "delete marked messages" button
+        form = PrivateMessageForm(request.POST)
+        form.fields['delete'].choices = [(pm.id, u'') for pm in entries]
+        if form.is_valid():
+            d = form.cleaned_data
+            print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            print "delete %s" % d['delete']
+            PrivateMessageEntry.delete_list(d['delete'])
+            if len(d['delete']) == 1:
+                flash(u'Es wurde eine Nachricht gelöscht.', success=True)
+            else:
+                flash(u'Es wurden %s Nachrichten gelöscht.'
+                      % human_number(len(d['delete'])), success=True)
+            entries = filter(lambda s: str(s.id) not in d['delete'], entries)
+
     message = None
     if entry_id is not None:
         entry = PrivateMessageEntry.objects.get(user=request.user,
@@ -809,10 +831,6 @@ def privmsg(request, folder=None, entry_id=None, page=1):
                 message = None
     else:
         message = None
-    entries = PrivateMessageEntry.objects.filter(
-        user=request.user,
-        folder=PRIVMSG_FOLDERS[folder][0]
-    ).order_by('-id')
     link = href('portal', 'privmsg', folder, 'page')
     pagination = Pagination(request, entries, page, 10, link)
     return {

@@ -47,56 +47,81 @@
   {%- endif %}
 
  <table class="pms">
-    <tbody>
+    <thead>
       <tr>
         <th class="subject">Betreff</th>
         <th class="author">Von</th>
         <th class="recipients">An</th>
         <th class="date">Datum</th>
         <th class="actions">Aktionen</th>
+        <th class="delete">Löschen</th>
       </tr>
-      {%- for entry in entries %}
-      <tr{% if message == entry.message %} class="active_pn"{% endif %}>
-        <td>{% if not entry.read %}<strong>{% endif -%}
-        <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
-        {%- if not entry.read %}</strong>{% endif %}</td>
-        <td><a href="{{ entry.message.author|url }}">
-          {{ entry.message.author|e }}</a></td>
-        <td>
-          {%- if entry.message.recipients|length == 0 %}
-            <a href="{{ entry.message.author|url }}">
-              {{ entry.message.author|e }}</a>
-          {% else %}
-            <a href="{{ entry.message.recipients[0]|url }}">
-              {{ entry.message.recipients[0]|e }}</a>
-          {%- endif %}
-          {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
-        <td>{{ entry.message.pub_date|datetimeformat }}</td>
-        <td class="actions">
-          {%- if not entry.is_own_message %}
-          <a href="{{ entry|url('reply') }}" title="Antworten"><img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" /></a>
-          {%- endif %}
-          <a href="{{ entry|url('forward') }}" title="Weiterleiten"><img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" /></a>
-          {%- if not entry.in_archive %}
-          <a href="{{ entry|url }}?action=archive" title="Archivieren"><img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" /></a>
-          {%- endif %}
-          <a href="{{ entry|url }}?action=delete" title="Löschen"><img src="{{ href('static', 'img/icons/small/delete.png') }}" alt="Löschen" /></a>
-        </td>
-      </tr>
-      {%- else %}
-      <tr>
-        <td colspan="5">Derzeit befinden sich noch keine Nachrichten
-        in diesem Ordner.</td>
-      </tr>
-      {%- endfor %}
-    </tbody>
-    <tfoot>
-      <tr><td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>
-        <td colspan="4">
-          <div style="float: right;">
-            {{ pagination }}
-          </div></td>
-      </tr>
-    </tfoot>
+    </thead>
+    <form action="" method="post">
+      <tbody>
+        {%- for entry in entries %}
+        <tr{% if message == entry.message %} class="active_pn"{% endif %}>
+          <td>{% if not entry.read %}<strong>{% endif -%}
+          <a href="{{ entry|url }}">{{ entry.message.subject|e }}</a>
+          {%- if not entry.read %}</strong>{% endif %}</td>
+          <td><a href="{{ entry.message.author|url }}">
+            {{ entry.message.author|e }}</a></td>
+          <td>
+            {%- if entry.message.recipients|length == 0 %}
+              <a href="{{ entry.message.author|url }}">
+                {{ entry.message.author|e }}</a>
+            {% else %}
+              <a href="{{ entry.message.recipients[0]|url }}">
+                {{ entry.message.recipients[0]|e }}</a>
+            {%- endif %}
+            {%- if entry.message.recipients|length > 1 %}, ...{% endif %}</td>
+          <td>{{ entry.message.pub_date|datetimeformat }}</td>
+          <td class="actions">
+            {%- if not entry.is_own_message %}
+            <a href="{{ entry|url('reply') }}" class="pn_reply" title="Antworten" />
+            {%- endif %}
+            <a href="{{ entry|url('forward') }}" class="pn_forward" title="Weiterleiten" />
+            {%- if not entry.in_archive %}
+            <a href="{{ entry|url }}?action=archive" class="pn_archive" title="Archivieren" />
+            {%- endif %}
+          </td>
+          <td class="pn_delete"><input type="checkbox" name="delete" value="{{ entry.id }}" /></td>
+        </tr>
+        {%- else %}
+        <tr>
+          <td colspan="5">Derzeit befinden sich noch keine Nachrichten
+          in diesem Ordner.</td>
+        </tr>
+        {%- endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>
+          <td><p><input type="submit" value="Markierte Nachrichten löschen" class="linkbutton" /></p></td>
+          <td colspan="4">
+            <div style="float: right;">
+              {{ pagination }}
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+    </form>
   </table>
+<script type="text/javascript">
+  /* <![CDATA[ */
+  var all_checked = false;
+  $('table.pms th.delete').click(function() {
+    $('input[@name="delete"]').each(function() {
+      if (all_checked)
+        this.checked = false;
+      else
+        this.checked = true;
+    });
+    if (all_checked)
+      all_checked = false;
+    else
+      all_checked = true;
+  });
+  /* ]]> */
+</script>
 {% endblock %}

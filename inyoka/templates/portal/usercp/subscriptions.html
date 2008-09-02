@@ -22,36 +22,42 @@
 <h3>Abonnements <span class="note">(<a href="{{ href('portal', 'usercp', 'settings') }}">erweiterte Einstellungen</a>)</span></h3>
 <form class="usercp_form" method="post" action="">
   <table class="usercp_subscriptions">
-    <tr>
-      <th class="first">Name</th>
-      <th class="second delete_abbos">Abonnement löschen</th>
-    </tr>
-    {%- for sub in subscriptions %}
-    <tr>
-      <td class="first">
-        {%- if sub.topic -%}
-        Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
-        {%- elif sub.wiki_page -%}
-        Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>
-        {%- elif sub.forum -%}
-        Forum: <a href="{{ sub.forum|url }}">{{ sub.forum.name|e }}</a>
-        {%- endif -%}
-      </td>
-      <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>
-    </tr>
-    {%- else %}
-    <tr>
-      <td colspan="2">
-        Du hast bisher noch keine Themen oder Artikel abonniert
-      </td>
-    </tr>
-    {%- endfor %}
-    <tr>
-      <td colspan="2">
-        {{ pagination }}
-        <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abonnements auf einer Seite anzeigen</a>
-      </td>
-    </tr>
+    <thead>
+      <tr>
+        <th class="first">Name</th>
+        <th class="second delete_abbos">Abonnement löschen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for sub in subscriptions %}
+      <tr>
+        <td class="first">
+          {%- if sub.topic -%}
+          Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
+          {%- elif sub.wiki_page -%}
+          Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>
+          {%- elif sub.forum -%}
+          Forum: <a href="{{ sub.forum|url }}">{{ sub.forum.name|e }}</a>
+          {%- endif -%}
+        </td>
+        <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>
+      </tr>
+      {%- else %}
+      <tr>
+        <td colspan="2">
+          Du hast bisher noch keine Themen oder Artikel abonniert
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">
+          {{ pagination }}
+          <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abonnements auf einer Seite anzeigen</a>
+        </td>
+      </tr>
+    </tfoot>
   </table>
   <div>
     <input type="submit" value="Änderungen bestätigen" />

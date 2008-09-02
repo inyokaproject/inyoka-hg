@@ -57,7 +57,8 @@ class SubscriptionManager(models.Manager):
         cursor.close()
         return row is not None
 
-    def delete_list(self, ids):
+    @classmethod
+    def delete_list(cls, ids):
         if not ids:
             return
         cur = connection.cursor()
@@ -185,6 +186,30 @@ class PrivateMessageEntry(models.Model):
             return href('portal', 'privmsg', 'new', reply_to=self.message_id)
         elif action == 'forward':
             return href('portal', 'privmsg', 'new', forward=self.message_id)
+
+    @classmethod
+    def delete_list(cls, ids):
+        if not ids:
+            return
+        cur = connection.cursor()
+
+        trash = PRIVMSG_FOLDERS['trash'][0]
+        query = u'''
+            update portal_privatemessageentry
+               set folder = null
+            where id in (%(ids)s) and folder = %(trash)s;
+
+            update portal_privatemessageentry
+               set folder = %(trash)s
+            where id in (%(ids)s) and folder != %(trash)s;
+        ''' % {'ids':    ','.join(['%s']*len(ids)),
+               'trash': trash}
+
+        params = [int(i) for i in ids] * 2
+
+        cur.execute(query, params)
+        cur.close()
+        connection._commit()
 
     def delete(self):
         if self.folder == PRIVMSG_FOLDERS['trash'][0]:

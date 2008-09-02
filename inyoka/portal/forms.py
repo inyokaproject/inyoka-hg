@@ -390,6 +390,11 @@ class SubscriptionForm(forms.Form):
     delete = forms.MultipleChoiceField()
 
 
+class PrivateMessageForm(forms.Form):
+    #: this is a list of integers of the pms that should get deleted
+    delete = forms.MultipleChoiceField()
+
+
 class UserErrorReportForm(forms.Form):
     title = forms.CharField(label='kurze Beschreibung', max_length=50,
                             widget=forms.TextInput(attrs={'size':50}))

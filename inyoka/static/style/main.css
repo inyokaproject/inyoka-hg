@@ -109,6 +109,29 @@ input.disabled, input.disabled:active {
   border: 1px solid #ccc!important;
 }
 
+/* TODO: This doesn't relly look like our other buttons... maybe someone
+ *       can improve that --entequak
+ */
+input.linkbutton {
+  border: none;
+  border-color: #fff;
+  font-weight: normal;
+  background-color: #fff;
+  color: #956205;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
+}
+
+input.linkbutton:active {
+  border: none;
+  background-color: #fff;
+  border-color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
 textarea {
   border: 1px solid #AAA;
   width:100%;
