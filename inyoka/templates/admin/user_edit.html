@@ -33,6 +33,9 @@
       <span class="note">
         Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte mal eingeloggt.
       </span>
+      {%- if activation_link %}
+      <div class="note">Aktivierungslink: <a href="{{ activation_link }}">{{ activation_link }}</a></div>
+      {%- endif %}
     </dd>
     <dt>{{ form.member_title.label }}</dt>
     <dd>{{ form.member_title }}{% if joined_groups %} 

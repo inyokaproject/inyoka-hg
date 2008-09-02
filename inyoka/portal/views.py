@@ -306,12 +306,12 @@ def set_new_password(request, username, new_password_key):
             flash(u'Ungültiger Bestätigungskey!', False)
             return HttpResponseRedirect(href())
         form = SetNewPasswordForm(initial={
-            'username': username,
+            'username': user.username,
             'new_password_key': new_password_key,
         })
     return {
         'form': form,
-        'username': username,
+        'username': user.username,
     }
 
 
@@ -483,7 +483,7 @@ def profile(request, username):
     user = User.objects.get(username)
 
     try:
-        if username != user.username.replace(' ', '_'):
+        if username != user.urlsafe_username:
             return HttpResponseRedirect(url_for(user))
     except ValueError:
         raise PageNotFound()

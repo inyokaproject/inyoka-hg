@@ -823,6 +823,11 @@ def user_edit(request, username):
 
     forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
 
+    if user.is_active:
+        activation_link = None
+    else:
+        activation_link = user.get_absolute_url('activate')
+
     return {
         'user': user,
         'form': form,
@@ -833,6 +838,7 @@ def user_edit(request, username):
         'avatar_height': storage_data['max_avatar_height'],
         'avatar_width': storage_data['max_avatar_width'],
         'permissions': sorted(permissions, key=lambda p: p[1]),
+        'activation_link': activation_link,
     }
 
 

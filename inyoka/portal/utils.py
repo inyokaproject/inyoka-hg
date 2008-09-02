@@ -115,10 +115,7 @@ def send_activation_mail(user):
     """send an activation mail"""
     from inyoka.utils.mail import send_mail
     message = render_template('mails/activation_mail.txt', {
-        'username':         user.username,
-        'username_':         user.username.replace(' ', '_'),
-        'email':            user.email,
-        'activation_key':   gen_activation_key(user)
+        'user': user,
     })
     send_mail('Aktivierung des Benutzers %s'
               % user.username,
@@ -132,10 +129,10 @@ def send_new_user_password(user):
     user.new_password_key = new_password_key
     user.save()
     message = render_template('mails/new_user_password.txt', {
-        'username':         user.username.replace(' ', '_'),
+        'username':         user.username,
         'email':            user.email,
         'new_password_url': href('portal', 'lost_password',
-                                 user.username, new_password_key),
+                                 user.urlsafe_username, new_password_key),
     })
     send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
               message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])

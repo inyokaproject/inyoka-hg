@@ -1,15 +1,15 @@
-Hallo {{ username }},
+Hallo {{ user.username }},
 
 Herzlich Willkommen bei ubuntuusers.de!
 
 
-Es wurde ein Benutzerkonto registriert, und diese E-Mail-Adresse ({{ email }}) für die Bestätigung ausgewählt.
+Es wurde ein Benutzerkonto registriert, und diese E-Mail-Adresse ({{ user.email }}) für die Bestätigung ausgewählt.
 
 Das oben angesprochene Benutzerkonto ist im Moment inaktiv. Du kannst es erst benutzen, wenn du es durch Klicken auf folgenden Link aktiviert hast:
-{{ href('portal', 'register', 'activate', username_, activation_key) }}
+{{ user.get_absolute_url('activate') }}
 
 Solltest du dieses Benutzerkonto nicht registriert haben, kannst du es unter folgendem Link wieder löschen:
-{{ href('portal', 'register', 'delete', username_, activation_key) }}
+{{ user.get_absolute_url('activate_delete') }}
 
 Aus Sicherheitsgründen schicken wir Dir Dein Passwort in dieser E-Mail nicht mit und speichern dieses auch nicht im Klartext in unserer Datenbank. Wenn Du es vergisst, können wir Dir also nur ein neues schicken.
 
