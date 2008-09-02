@@ -196,16 +196,16 @@ class PrivateMessageEntry(models.Model):
         trash = PRIVMSG_FOLDERS['trash'][0]
         query = u'''
             update portal_privatemessageentry
-               set folder = null
-            where id in (%(ids)s) and folder = %(trash)s;
-
-            update portal_privatemessageentry
-               set folder = %(trash)s
-            where id in (%(ids)s) and folder != %(trash)s;
+                set folder = case
+                        when folder = %(trash)s
+                        then null
+                        else %(trash)s
+                        end
+                where id in (%(ids)s)
         ''' % {'ids':    ','.join(['%s']*len(ids)),
                'trash': trash}
 
-        params = [int(i) for i in ids] * 2
+        params = [int(i) for i in ids]
 
         cur.execute(query, params)
         cur.close()
