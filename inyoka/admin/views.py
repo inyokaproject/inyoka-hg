@@ -1069,13 +1069,17 @@ def event_edit(request, id=None):
                 event = Event()
             data = form.cleaned_data
             event.name = data['name']
-            d = get_user_timezone().localize(
-                date_time_to_datetime(
-                    data['date'],
-                    data['time'] or time(0)
-                )).astimezone(pytz.utc).replace(tzinfo=None)
-            event.date = d.date()
-            event.time = data['time'] and d.time() or None
+            if data['date'] and data['time']:
+                d = get_user_timezone().localize(
+                    date_time_to_datetime(
+                        data['date'],
+                        data['time'] or time(0)
+                    )).astimezone(pytz.utc).replace(tzinfo=None)
+                event.date = d.date()
+                event.time = d.time()
+            else:
+                event.date = data['date']
+                event.time = None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
