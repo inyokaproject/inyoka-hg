@@ -450,10 +450,12 @@ class Event(models.Model):
 class SearchQueueManager(models.Manager):
     def append(self, component, doc_id):
         """Append an item to the queue for later indexing."""
-        item = self.model()
-        item.component = component
-        item.doc_id = doc_id
-        item.save()
+        # XXX: This is a race condition and two queries
+        if not self.filter(component=component, doc_id=doc_id):
+            item = self.model()
+            item.component = component
+            item.doc_id = doc_id
+            item.save()
 
     def select_blocks(self, block_size=100):
         """
