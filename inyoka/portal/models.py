@@ -354,11 +354,13 @@ class Event(models.Model):
                                       blank=True, null=True)
 
     def get_absolute_url(self, action='show'):
+        if action == 'copy':
+            return href('admin', 'events', 'new', copy_from=self.id)
         return href(*{
-            'show': ('portal', 'calendar', self.slug),
-            'edit': ('admin', 'events', 'edit', self.id),
+            'show':   ('portal', 'calendar', self.slug),
+            'edit':   ('admin', 'events', 'edit', self.id),
             'delete': ('admin', 'events', 'delete', self.id),
-            'new': ('admin', 'events', 'new'),
+            'new':    ('admin', 'events', 'new'),
         }[action])
 
     @property

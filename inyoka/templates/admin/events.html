@@ -33,8 +33,9 @@
     <td class="name"><a href="{{ event|url }}">{{ event.name|e }}</a></td>
     <td class="date">{{ event.date|e }}</td>
     <td class="actions">
-      <a href="{{ event|url('edit') }}">Bearbeiten</a>
-      <a href="{{ event|url('delete') }}">Löschen</a>
+      <a href="{{ event|url('edit') }}" class="event_edit" title="Editieren" />
+      <a href="{{ event|url('delete') }}" class="event_delete" title="Löschen" />
+      <a href="{{ event|url('copy') }}" class="event_copy" title="Kopieren" />
     </td>
   </tr>
   {%- else %}

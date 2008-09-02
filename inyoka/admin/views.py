@@ -1048,6 +1048,14 @@ def events(request, show_all=False):
 @templated('admin/event_edit.html')
 def event_edit(request, id=None):
     mode = (id is None) and 'new' or 'edit'
+    base_event = None
+    if request.GET.get('copy_from'):
+        try:
+            base_event = Event.objects.get(id=int(request.GET['copy_from']))
+        except Event.DoesNotExist:
+            flash(u'Das Event mit der ID %d existiert nicht und kann '
+                  u'daher nicht als Basis des Kopiervorgangs benutzt werden',
+                  False)
 
     if request.method == 'POST':
         form = EditEventForm(request.POST)
@@ -1097,7 +1105,20 @@ def event_edit(request, id=None):
                 'location_long': event.location_long,
             });
         else:
-            form = EditEventForm()
+            if base_event:
+                be = base_event
+                form = EditEventForm({
+                    'name': be.name,
+                    'date': be.date,
+                    'time': be.time,
+                    'description': be.description,
+                    'location_town': be.location_town,
+                    'location': be.location,
+                    'location_lat': be.location_lat,
+                    'location_long': be.location_long
+                })
+            else:
+                form = EditEventForm()
             event = None
     return {
         'form': form,
