@@ -1114,10 +1114,13 @@ def event_delete(request, id):
     except Event.DoesNotExist:
         raise PageNotFound
     if request.method == 'POST':
-        if request.POST['confirm']:
+        if 'confirm' in request.POST:
             event.delete()
             flash(u'Die Veranstaltung „%s“ wurde gelöscht.'
                   % escape(event.name), True)
+        else:
+            flash(u'Löschen der Veranstaltung „%s“ wurde abgebrochen'
+                  % escape(event.name))
         return HttpResponseRedirect(href('admin', 'events'))
     else:
         return {'event': event}
