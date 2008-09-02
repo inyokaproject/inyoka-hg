@@ -51,7 +51,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
      NOTIFICATION_CHOICES, ForumFeedSelectorForm, IkhayaFeedSelectorForm, \
-     PlanetFeedSelectorForm, WikiFeedSelectorForm
+     PlanetFeedSelectorForm, WikiFeedSelectorForm, PrivateMessageIndexForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, UserBanned
@@ -789,12 +789,10 @@ def privmsg(request, folder=None, entry_id=None, page=1):
 
     if request.method == 'POST':
         # POST is only send by the "delete marked messages" button
-        form = PrivateMessageForm(request.POST)
+        form = PrivateMessageIndexForm(request.POST)
         form.fields['delete'].choices = [(pm.id, u'') for pm in entries]
         if form.is_valid():
             d = form.cleaned_data
-            print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-            print "delete %s" % d['delete']
             PrivateMessageEntry.delete_list(d['delete'])
             if len(d['delete']) == 1:
                 flash(u'Es wurde eine Nachricht gelöscht.', success=True)
@@ -802,6 +800,9 @@ def privmsg(request, folder=None, entry_id=None, page=1):
                 flash(u'Es wurden %s Nachrichten gelöscht.'
                       % human_number(len(d['delete'])), success=True)
             entries = filter(lambda s: str(s.id) not in d['delete'], entries)
+            return HttpResponseRedirect(href('portal', 'privmsg',
+                                             PRIVMSG_FOLDERS[folder][1]))
+
 
     message = None
     if entry_id is not None:
@@ -813,15 +814,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
             entry.save()
             cache.delete('portal/pm_count/%s' % request.user.id)
         action = request.GET.get('action')
-        if action == 'delete':
-            folder = entry.folder
-            entry.delete()
-            if not entry.read:
-                cache.delete('portal/pm_count/%s' % request.user_id)
-            flash(u'Die Nachricht wurde erfolgreich gelöscht.', True)
-            return HttpResponseRedirect(href('portal', 'privmsg',
-                                             PRIVMSG_FOLDERS[folder][1]))
-        elif action == 'archive':
+        if action == 'archive':
             if entry.archive():
                 flash(u'Die Nachricht wurde in dein Archiv verschoben.', True)
                 message = None
@@ -919,7 +912,8 @@ def privmsg_new(request, username=None):
                             'sender':   request.user,
                             'subject':  d['subject'],
                             'entry':    entry,
-                       })
+                        })
+                        continue
                         send_notification(recipient, 'new_pm', u'Neue private '
                                           u'Nachricht von %s: %s' %
                                           (request.user.username, d['subject']), {

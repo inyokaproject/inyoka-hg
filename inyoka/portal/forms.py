@@ -390,7 +390,7 @@ class SubscriptionForm(forms.Form):
     delete = forms.MultipleChoiceField()
 
 
-class PrivateMessageForm(forms.Form):
+class PrivateMessageIndexForm(forms.Form):
     #: this is a list of integers of the pms that should get deleted
     delete = forms.MultipleChoiceField()
 
