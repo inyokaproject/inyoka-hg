@@ -823,7 +823,7 @@ def user_edit(request, username):
 
     forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
 
-    if user.is_active:
+    if user.status > 0:
         activation_link = None
     else:
         activation_link = user.get_absolute_url('activate')
