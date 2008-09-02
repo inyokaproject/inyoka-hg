@@ -28,7 +28,7 @@ class Entry(models.Model):
     class Meta:
         verbose_name = 'Eintrag'
         verbose_name_plural = 'Einträge'
-        ordering = ('-pub_date',)
+        ordering = ('-id',)
 
     @deferred
     def referrer_list(self):
