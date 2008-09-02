@@ -15,7 +15,7 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from sqlalchemy import and_, select
-from datetime import datetime, date
+from datetime import datetime, date, time
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
 from inyoka.conf import settings
@@ -1062,10 +1062,12 @@ def event_edit(request, id=None):
             data = form.cleaned_data
             event.name = data['name']
             d = get_user_timezone().localize(
-                date_time_to_datetime(data['date'], data['time'])) \
-                .astimezone(pytz.utc).replace(tzinfo=None)
+                date_time_to_datetime(
+                    data['date'],
+                    data['time'] or time(0)
+                )).astimezone(pytz.utc).replace(tzinfo=None)
             event.date = d.date()
-            event.time = d.time()
+            event.time = data['time'] and d.time() or None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']

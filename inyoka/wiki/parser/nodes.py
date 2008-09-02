@@ -712,7 +712,7 @@ class Link(Element):
                 if text.startswith('mailto:'):
                     text = text[7:]
                 children = [Text(text)]
-            if title == None:
+            if title is None:
                 title = url
         Element.__init__(self, children, id, style, class_)
         self.title = title

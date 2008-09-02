@@ -396,7 +396,7 @@ class Event(models.Model):
 
     def friendly_title(self, with_date=True, with_html_link=False):
         if with_date:
-            if self.time == None:
+            if self.time is None:
                 s_date = ' ' + natural_date(self.date, prefix=True)
             else:
                 s_date = ' ' + format_specific_datetime(date_time_to_datetime(
@@ -418,7 +418,7 @@ class Event(models.Model):
 
     @property
     def natural_datetime(self):
-        if self.time == None:
+        if self.time is None:
             return ' ' + natural_date(self.date, prefix=True)
         else:
             return ' ' + format_specific_datetime(date_time_to_datetime(

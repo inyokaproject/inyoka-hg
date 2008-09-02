@@ -393,9 +393,3 @@ class EditEventForm(forms.Form):
     location_long = forms.DecimalField(label=u'Koordinaten (Breite)',
                                       required=False,
                                       min_value=-90, max_value=90)
-
-    def clean_time(self):
-        data = self.cleaned_data
-        if not data['time']:
-            data['time'] = datetime.time(0)
-        return data['time']
