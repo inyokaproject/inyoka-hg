@@ -913,7 +913,6 @@ def privmsg_new(request, username=None):
                             'subject':  d['subject'],
                             'entry':    entry,
                         })
-                        continue
                         send_notification(recipient, 'new_pm', u'Neue private '
                                           u'Nachricht von %s: %s' %
                                           (request.user.username, d['subject']), {
