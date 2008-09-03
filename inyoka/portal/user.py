@@ -516,7 +516,7 @@ class User(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('portal', 'user', self.urlsafe_username),
-            'privmsg': ('portal', 'privmsg', 'new', 
+            'privmsg': ('portal', 'privmsg', 'new',
                         self.urlsafe_username),
             'activate': ('portal', 'register', 'activate',
                          self.urlsafe_username,
