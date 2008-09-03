@@ -170,6 +170,7 @@ class TopicMapperExtension(MapperExtension):
 
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
+        cache.delete('forum/index')
 
 
 class PostMapperExtension(MapperExtension):
