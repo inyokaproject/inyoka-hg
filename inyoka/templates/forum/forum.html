@@ -37,7 +37,7 @@
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
           {{ pagination_right }}
-          <p class="actions">
+          <p class="actions linklist">
             <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
             {% if USER.is_authenticated %}
               | {%- if is_subscribed %}

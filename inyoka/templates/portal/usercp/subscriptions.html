@@ -10,13 +10,13 @@
 #}
 
 {%- extends 'portal/usercp/overall.html' %}
-{% set title_trace = ['Benachrichtigungen'] %}
+{% set title_trace = ['Abonnements'] %}
 {% set selected = 'subscriptions' %}
 
 
 {% block appheader %}
   <h1><a href="{{ href('portal', 'usercp') }}">Kontrollzentrum</a></h1>
-  <h2><a href="{{ href('portal', 'usercp', 'subscriptions') }}">Benachrichtigungen</a></h2>
+  <h2><a href="{{ href('portal', 'usercp', 'subscriptions') }}">Abonnements</a></h2>
 {% endblock %}
 {% block portal_content %}
 <h3>Abonnements <span class="note">(<a href="{{ href('portal', 'usercp', 'settings') }}">erweiterte Einstellungen</a>)</span></h3>
@@ -32,6 +32,7 @@
       {%- for sub in subscriptions %}
       <tr>
         <td class="first">
+          {%- if sub.notified %}<img src="{{ href('static', 'img', 'icons', 'new.png') }}" alt="neu" title="Änderungen seit letztem Besuch" /> {% endif %}
           {%- if sub.topic -%}
           Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
           {%- elif sub.wiki_page -%}
@@ -52,9 +53,25 @@
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="2">
+        <td colspan="2" class="linklist">
+          {%- if one_page %}
+          {%- if notified_only %}
+          <a href="{{ href('portal', 'usercp', 'subscriptions', 'notified') }}">Abonnements auf mehrere Seiten aufteilen</a> |
+          <a href="{{ href('portal', 'usercp', 'subscriptions', '0') }}">Alle Abonnements anzeigen</a>
+          {%- else %}
+          <a href="{{ href('portal', 'usercp', 'subscriptions') }}">Abonnements auf mehrere Seiten aufteilen</a> |
+          <a href="{{ href('portal', 'usercp', 'subscriptions', 'notified', '0') }}">Nur Abonnements mit Änderungen anzeigen </a>
+          {%- endif %}
+          {%- else %}
           {{ pagination }}
-          <a href="{{ href('portal', 'usercp', 'subscriptions', 'all') }}">Alle Abonnements auf einer Seite anzeigen</a>
+          {%- if notified_only %}
+          <a href="{{ href('portal', 'usercp', 'subscriptions', 'notified', '0') }}">Alle Abonnements auf einer Seite anzeigen</a> |
+          <a href="{{ href('portal', 'usercp', 'subscriptions') }}">Alle Abonnements anzeigen</a>
+          {%- else %}
+          <a href="{{ href('portal', 'usercp', 'subscriptions', '0') }}">Alle Abonnements auf einer Seite anzeigen</a> |
+          <a href="{{ href('portal', 'usercp', 'subscriptions', 'notified') }}">Nur Abonnements mit Änderungen anzeigen </a>
+          {%- endif %}
+          {%- endif %}
         </td>
       </tr>
     </tfoot>
