@@ -1294,7 +1294,7 @@ dbsession.mapper(Topic, topic_table, properties={
     'polls': relation(Poll, backref='topic', cascade='save-update'),
     'posts': relation(Post, backref='topic', cascade='all, delete-orphan',
                       primaryjoin=topic_table.c.id == post_table.c.topic_id,
-                      lazy='dynamic'),
+                      lazy='dynamic', passive_deletes=True),
     }, extension=TopicMapperExtension()
 )
 dbsession.mapper(Post, post_table, properties={
