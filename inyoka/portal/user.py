@@ -469,6 +469,11 @@ class User(models.Model):
             return href('static', 'img', 'portal', 'no_avatar.png')
         return self.avatar.url
 
+    @property
+    def urlsafe_username(self):
+        '''return the username with space replaced by _ for urls'''
+        return self.username.replace(' ', '_')
+
     def save_avatar(self, img):
         """
         Save `img` to the file system.
@@ -510,8 +515,15 @@ class User(models.Model):
 
     def get_absolute_url(self, action='show'):
         return href(*{
-            'show': ('portal', 'user', self.username.replace(' ', '_')),
-            'privmsg': ('portal', 'privmsg', 'new', self.username)
+            'show': ('portal', 'user', self.urlsafe_username),
+            'privmsg': ('portal', 'privmsg', 'new', 
+                        self.urlsafe_username),
+            'activate': ('portal', 'register', 'activate',
+                         self.urlsafe_username,
+                         gen_activation_key(self)),
+            'activate_delete': ('portal', 'register', 'delete',
+                                self.urlsafe_username,
+                                gen_activation_key(self)),
         }[action])
 
     def login(self, request):
@@ -526,7 +538,7 @@ class User(models.Model):
 
 
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.portal.utils import send_activation_mail
+from inyoka.portal.utils import send_activation_mail, gen_activation_key
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
 from inyoka.forum.models import ReadStatus

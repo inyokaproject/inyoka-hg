@@ -121,7 +121,6 @@ class Entry(models.Model):
         super(Entry, self).save()
         self.update_search()
 
-
     def delete(self):
         # update search
         self.update_search()
