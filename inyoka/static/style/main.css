@@ -110,7 +110,8 @@ input.disabled, input.disabled:active {
 }
 
 input.linkbutton {
-  border: none;height: 1.2em;
+  height: 1.2em;
+  border: none;
   border-color: #F8F8F8;
   border-bottom: #956205 1px solid;
   font-weight: normal;
