@@ -109,14 +109,12 @@ input.disabled, input.disabled:active {
   border: 1px solid #ccc!important;
 }
 
-/* TODO: This doesn't relly look like our other buttons... maybe someone
- *       can improve that --entequak
- */
 input.linkbutton {
-  border: none;
-  border-color: #fff;
+  border: none;height: 1.2em;
+  border-color: #F8F8F8;
+  border-bottom: #956205 1px solid;
   font-weight: normal;
-  background-color: #fff;
+  background-color: #F8F8F8;
   color: #956205;
   cursor: pointer;
   padding: 0;
@@ -126,8 +124,9 @@ input.linkbutton {
 
 input.linkbutton:active {
   border: none;
-  background-color: #fff;
-  border-color: #fff;
+  background-color: #F8F8F8;
+  border-color: #F8F8F8;
+  border-bottom: #956205 1px solid;
   margin: 0;
   padding: 0;
 }
