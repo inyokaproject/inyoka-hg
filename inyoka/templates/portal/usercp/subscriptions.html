@@ -24,14 +24,15 @@
   <table class="usercp_subscriptions">
     <thead>
       <tr>
-        <th class="first">Name</th>
-        <th class="second delete_abbos">Abonnement löschen</th>
+        <th class="checkboxes"><input type="checkbox" name="select" value="all" title="Alle aus-/abwählen" /></th>
+        <th class="items">Name</th>
       </tr>
     </thead>
     <tbody>
       {%- for sub in subscriptions %}
       <tr>
-        <td class="first">
+        <td class="checkboxes"><input type="checkbox" name="select" value="{{ sub.id }}" /></td>
+        <td class="items">
           {%- if sub.notified %}<img src="{{ href('static', 'img', 'icons', 'new.png') }}" alt="neu" title="Änderungen seit letztem Besuch" /> {% endif %}
           {%- if sub.topic -%}
           Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
@@ -41,7 +42,6 @@
           Forum: <a href="{{ sub.forum|url }}">{{ sub.forum.name|e }}</a>
           {%- endif -%}
         </td>
-        <td class="second"><input type="checkbox" name="delete" value="{{ sub.id }}" /></td>
       </tr>
       {%- else %}
       <tr>
@@ -77,23 +77,20 @@
     </tfoot>
   </table>
   <div>
-    <input type="submit" value="Änderungen bestätigen" />
+    <input type="submit" name="delete" value="Ausgewählte Abonnements löschen" />
+    <input type="submit" name="mark_read" value="Ausgewählte Abonnements als gelesen markieren" />
   </div>
 </form>
 <script type="text/javascript">
   /* <![CDATA[ */
-  var all_checked = false;
-  $('table.usercp_subscriptions th.delete_abbos').click(function() {
-    $('input[@name="delete"]').each(function() {
-      if (all_checked)
-        this.checked = false;
-      else
+  $('input[name=select][value=all]').click(function() {
+    var check_all = $('input[name=select][value=all]')[0].checked
+    $('input[@name="select"]').each(function() {
+      if (check_all)
         this.checked = true;
+      else
+        this.checked = false;
     });
-    if (all_checked)
-      all_checked = false;
-    else
-      all_checked = true;
   });
   /* ]]> */
 </script>

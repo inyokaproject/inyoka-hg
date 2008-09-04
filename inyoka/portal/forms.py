@@ -386,8 +386,8 @@ class DeactivateUserForm(forms.Form):
 
 
 class SubscriptionForm(forms.Form):
-    #: this is a list of integers of the subscriptions that should get deleted
-    delete = forms.MultipleChoiceField()
+    #: this is a list of integers of the subscriptions
+    select = forms.MultipleChoiceField()
 
 
 class PrivateMessageIndexForm(forms.Form):

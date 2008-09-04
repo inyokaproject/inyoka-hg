@@ -294,15 +294,17 @@ div.usercp_control ul li a:hover img {
   opacity: 1;
 }
 
-table.usercp_subscriptions td.first, th.first {
-  width: 75%;
+table.usercp_subscriptions td.items, 
+table.usercp_subscriptions th.items {
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
+  padding-left: 0;
 }
-
-table.usercp_subscriptions td.second, th.second {
-  width: 25%;
-  text-align: center;
+table.usercp_subscriptions td.checkboxes, 
+table.usercp_subscriptions th.checkboxes {
+  text-align: left;
+  width: 1em;
+  padding-left: .75em;
 }
 
 table.usercp_subscriptions div.pagination {
@@ -311,16 +313,7 @@ table.usercp_subscriptions div.pagination {
   margin-top: 5px;
 }
 
-table.usercp_subscriptions th.delete_abbos {
-  cursor: pointer;
-}
-
-table.usercp_subscriptions th.delete_abbos:before {
-  content: url(../img/extlink.gif);
-  margin-right: 5px;
-}
-
-table.usercp_subscriptions td.first img {
+table.usercp_subscriptions img {
   position: relative;
   top: 2px;
   margin-top: -2px;

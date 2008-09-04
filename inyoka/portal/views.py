@@ -704,16 +704,33 @@ def usercp_subscriptions(request, page=1, notified_only=False):
 
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
-        form.fields['delete'].choices = [(s.id, u'') for s in pagination.objects]
-        if form.is_valid():
-            d = form.cleaned_data
-            Subscription.objects.delete_list(d['delete'])
-            if len(d['delete']) == 1:
-                flash(u'Es wurde ein Abonnement gelöscht.', success=True)
-            else:
-                flash(u'Es wurden %s Abonnements gelöscht.'
-                      % human_number(len(d['delete'])), success=True)
-            pagination.objects = filter(lambda s: str(s.id) not in d['delete'], pagination.objects)
+
+        if 'delete' in request.POST:
+            form.fields['select'].choices = [(s.id, u'') for s in pagination.objects]
+            if form.is_valid():
+                d = form.cleaned_data
+                Subscription.objects.delete_list(request.user.id, d['select'])
+                if len(d['select']) == 1:
+                    flash(u'Es wurde ein Abonnement gelöscht.', success=True)
+                else:
+                    flash(u'Es wurden %s Abonnements gelöscht.'
+                          % human_number(len(d['select'])), success=True)
+                pagination.objects = filter(lambda s: str(s.id) not in d['select'], pagination.objects)
+
+        if 'mark_read' in request.POST:
+            form.fields['select'].choices = [(s.id, u'') for s in pagination.objects]
+            if form.is_valid():
+                d = form.cleaned_data
+                Subscription.objects.mark_read_list(request.user.id, d['select'])
+                if len(d['select']) == 1:
+                    flash(u'Ein Abonnement wurde als gelesen markiert.', success=True)
+                else:
+                    flash(u'%s Abonnements wurden als gelesen markiert.'
+                          % human_number(len(d['select'])).capitalize(), success=True)
+                for s in pagination.objects:
+                    if str(s.id) in d['select']:
+                        s.notified = False
+                    pagination.objects.sort(key=lambda s: s.notified, reverse=True)
 
     return {
         'subscriptions':    pagination.objects,
@@ -802,7 +819,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
         form.fields['delete'].choices = [(pm.id, u'') for pm in entries]
         if form.is_valid():
             d = form.cleaned_data
-            PrivateMessageEntry.delete_list(d['delete'])
+            PrivateMessageEntry.delete_list(request.user.id, d['delete'])
             if len(d['delete']) == 1:
                 flash(u'Es wurde eine Nachricht gelöscht.', success=True)
             else:
