@@ -109,10 +109,13 @@
         <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
       </dd>
       {%- endif %}
-      {%- if can_sticky and (isnewtopic or isfirstpost) %}
       <dt class="collapse">Optionen:</dt>
+      {%- if can_sticky and (isnewtopic or isfirstpost) %}
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
+      <dd>{{ form.is_plaintext }} <label for="id_is_plaintext">Beitrag soll Plaintext sein</label>
+          <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
+      </dd>
     </dl>
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="
@@ -145,21 +148,27 @@
         .append('<h2 id="preview" class="title">Vorschau<\/h2>')
         .append(output);
 
+      var after_rendering = function(data) {
+        output.html(data);
+        preview.slideDown('fast');
+        $('body, input, textarea').css('cursor', 'auto');
+        if (document.location.href.match(/#preview/))
+          document.location.href = document.location.href;
+        else
+          document.location += '#preview';
+      };
+
       $('form input[@name="preview"]').click(function() {
         $('body, input, textarea').css('cursor', 'progress');
         preview.hide();
-        $.post('/?__service__=wiki.render_preview', {
-          text: editor.val()
-        }, function(data) {
-          output.html(data);
-          preview.slideDown('fast');
-          $('body, input, textarea').css('cursor', 'auto');
-          if (document.location.href.match(/#preview/)) {
-            document.location.href = document.location.href;
-          } else {
-            document.location.href += '#preview';
-          }
-        });
+        var is_plaintext = $('input[@name="is_plaintext"]')[0].checked;
+        if (is_plaintext) {
+          after_rendering(editor.val());
+        } else {
+          $.post('/?__service__=wiki.render_preview', {
+            text: editor.val()
+          }, after_rendering);
+        }
         return false;
       }).parent().parent().parent().append(preview);
     })();
@@ -185,7 +194,7 @@
             <a href="{{ post|url }}"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date|specificdatetimeformat }}
           </div>
-          {{ post.rendered_text }}
+          {{ post.get_text() }}
         </td>
       </tr>
       {%- endfor %}

@@ -184,7 +184,7 @@
             Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
           <div class="text">
-            {{ post.rendered_text }}
+            {{ post.get_text() }}
           </div>
           {%- set attachments = post.grouped_attachments %}
           {%- if attachments %}
