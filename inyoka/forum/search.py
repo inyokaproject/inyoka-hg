@@ -72,6 +72,6 @@ class ForumSearchAdapter(SearchAdapter):
             'group': post.topic.forum.name,
             'group_url': url_for(post.topic.forum),
             'highlight': True,
-            'text': striptags(post.rendered_text)
+            'text': striptags(post.get_text())
         }
 search.register(ForumSearchAdapter())
