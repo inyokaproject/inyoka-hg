@@ -80,7 +80,7 @@
             <div class="postinfo">
               Verfasst {{ post.pub_date.strftime('%d.%m.%Y %H:%M') }}
             </div>
-            {{ post.get_text() }}
+            {{ post.rendered_text }}
           </td>
         </tr>
       {% endfor %}

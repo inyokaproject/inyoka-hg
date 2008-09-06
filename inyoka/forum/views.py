@@ -271,7 +271,7 @@ def viewtopic(request, topic_slug, page=1):
     post_objects = pagination.objects.all()
 
     for post in post_objects:
-        if not post.rendered_text and not post.is_plaintext:
+        if not post.rendered_text:
             try:
                 post.rendered_text = post.render_text(force_existing=True)
                 session.commit()
@@ -527,7 +527,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             post = Post(topic=topic, author_id=request.user.id)
             if newtopic:
                 post.position = 0
-        post.edit(request, d['text'], d['is_plaintext'])
+        post.edit(request, d['text'])
         session.commit()
 
         if attachments:
@@ -595,9 +595,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     # the user wants to see a preview
     elif 'preview' in request.POST:
         ctx = RenderContext(request)
-        tt = request.POST.get('text', '')
-        preview = request.POST.get('is_plaintext', False) and tt or \
-                  tt.render(ctx, 'html')
+        preview = parse(request.POST.get('text', '')).render(ctx, 'html')
 
     # the user is going to edit an existing post/topic
     elif post:
@@ -607,7 +605,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             'ubuntu_version': topic.ubuntu_version,
             'sticky': topic.sticky,
             'text': post.text,
-            'is_plaintext': post.is_plaintext,
         })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
@@ -1214,10 +1211,10 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                 kwargs = {}
                 if mode == 'full':
                     kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                        u'xhtml">%s</div>' % post.get_text()
+                                        u'xhtml">%s</div>' % post.rendered_text
                     kwargs['content_type'] = 'xhtml'
                 if mode == 'short':
-                    summary = truncate_html_words(post.get_text(), 100)
+                    summary = truncate_html_words(post.rendered_text, 100)
                     kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
                                         u'xhtml">%s</div>' % summary
                     kwargs['summary_type'] = 'xhtml'
@@ -1284,15 +1281,15 @@ def feed(request, component='forum', slug=None, mode='short', count=20):
                     # this should not happen, but it does...
                     continue
 
-                if post.rendered_text is None and not post.is_plaintext:
+                if post.rendered_text is None:
                     post.render_text()
-                text = post.get_text()
+                rendered_text = post.rendered_text
                 if mode == 'full':
                     kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                        u'xhtml">%s</div>' % text
+                                        u'xhtml">%s</div>' % rendered_text
                     kwargs['content_type'] = 'xhtml'
                 if mode == 'short':
-                    summary = truncate_html_words(text, 100)
+                    summary = truncate_html_words(rendered_text, 100)
                     kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
                                         u'xhtml">%s</div>' % summary
                     kwargs['summary_type'] = 'xhtml'

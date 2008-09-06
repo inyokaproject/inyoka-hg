@@ -21,7 +21,7 @@ from inyoka.wiki.parser import RenderContext, parse
 def render_posts():
     context = RenderContext(None)
     for post in select_blocks(post_table.select(), max_fails=100):
-        if not post.rendered_text and not post.is_plaintext:
+        if not post.rendered_text:
             text = parse(post.text, wiki_force_existing=True) \
                 .render(context, 'html')
             session.execute(post_table.update(post_table.c.id == post.id, values={

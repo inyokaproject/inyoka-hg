@@ -27,12 +27,11 @@ class NewPostForm(SurgeProtectionMixin, forms.Form):
     Allows the user to create a new post.  It provides the following fields:
     `text`
         The text for the post.
-    `is_plaintext`
-        The text is never rendered through our syntax parser
+    `att_ids`
+        A list of new attachments attached to this post.
     It's generally used together with `AddAttachmentForm`.
     """
     text = forms.CharField(widget=forms.Textarea)
-    is_plaintext = forms.BooleanField(required=False)
 
     def clean_text(self):
         text = self.cleaned_data.get('text', '')
@@ -56,7 +55,6 @@ class EditPostForm(forms.Form):
     ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
                                                 required=False)
     ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
-    is_plaintext = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         self.is_first_post = kwargs.pop('is_first_post', False)
@@ -84,8 +82,6 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
         The ubuntu version the user has.
     `ubuntu_distro`
         The ubuntu distribution the user has.
-    `is_plaintext`
-        The post is never rendered through our syntax parser
     It's used together with `AddAttachmentForm` in general.
     """
     title = forms.CharField(widget=forms.TextInput(attrs={'size':60}),
@@ -95,7 +91,6 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
                                                 required=False)
     ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
     sticky = forms.BooleanField(required=False)
-    is_plaintext = forms.BooleanField(required=False)
 
     def clean_text(self):
         text = self.cleaned_data.get('text', '')
