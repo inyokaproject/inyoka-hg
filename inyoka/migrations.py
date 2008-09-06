@@ -980,6 +980,13 @@ def forum_plaintext(m):
     ''')
 
 
+def add_negative_privileges(m):
+    m.engine.execute('''
+        alter table forum_privilege
+            change column `bits` `positive` integer default 0,
+            add column `negative` integer default 0;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1003,4 +1010,5 @@ MIGRATIONS = [
     fix_pastebin_entry_foreign_keys, fix_planet_entry_foreign_keys,
     fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
     add_egosearch_index, add_planet_hidden, forum_plaintext,
+    add_negative_privileges,
 ]

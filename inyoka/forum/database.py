@@ -106,7 +106,8 @@ privilege_table = Table('forum_privilege', metadata,
     Column('group_id', Integer, nullable=True),
     Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=True),
     Column('forum_id', Integer, ForeignKey('forum_forum.id'), nullable=False),
-    Column('bits', Integer, nullable=True),
+    Column('positive', Integer, nullable=True),
+    Column('negative', Integer, nullable=True),
 )
 
 user_table = Table('portal_user', metadata, autoload=True)

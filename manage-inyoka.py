@@ -76,7 +76,7 @@ def action_create_superuser(username='', email='', password=''):
         privilege = Privilege(
             user=user,
             forum=forum,
-            bits=bits
+            positive=bits
         )
         session.save(privilege)
     session.commit()
