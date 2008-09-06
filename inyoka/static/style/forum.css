@@ -214,11 +214,14 @@ table.topic td.author img.avatar {
     background-color: white;
 }
 
+table.topic td.author p.username {
+	position: relative;
+}
+
 table.topic td.author img.teamicon {
-  position: relative;
-  left: 5px;
-  margin-top: -17px;
-  float: right;
+  position: absolute;
+  top: 0px;
+  right: 0px;
 }
 
 table.topic td.author div.member_title {
