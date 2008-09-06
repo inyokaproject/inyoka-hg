@@ -42,11 +42,17 @@ from inyoka.portal.user import User, Group, PERMISSION_NAMES
 from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
-from inyoka.forum.acl import PRIVILEGES_DETAILS, join_flags, split_flags
+from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
+    PRIVILEGES_DETAILS
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage, SAUser
 from inyoka.forum.database import forum_table, privilege_table, \
     user_group_table, user_table
 from inyoka.wiki.parser import parse, RenderContext
+
+tmp = dict(PRIVILEGES_DETAILS)
+PRIVILEGE_DICT = dict((bits, tmp[key]) for  bits, key in
+                    REVERSED_PRIVILEGES_BITS.iteritems())
+del tmp
 
 
 def not_found(request, err_message=None):
@@ -726,23 +732,35 @@ def user_edit(request, username):
 
             #: forum privileges
             privileges = Privilege.query
-            for key, value in request.POST.lists():
-                if key.startswith('forum_privileges-'):
-                    bits = join_flags(*value)
-                    forum_id = key.split('-', 1)[1]
+            for key, value in request.POST.iteritems():
+                if key.startswith('forum_privileges_'):
+                    positive = 0
+                    negative = 0
+                    for bit in value.split(','):
+                        try:
+                            bit = int(bit)
+                        except ValueError:
+                            continue
+                        if bit > 0:
+                            positive |= bit
+                        else:
+                            negative |= bit * -1
+
+                    forum_id = key.split('_')[2]
                     privilege = privileges.filter(and_(
                         privilege_table.c.forum_id==forum_id,
                         privilege_table.c.group_id==None,
                         privilege_table.c.user_id==user.id
                     )).first()
-                    if privilege is None and bits != 0:
+                    if privilege is None and (positive or negative):
                         privilege = Privilege(
                             user=user,
                             forum=Forum.query.get(int(forum_id))
                         )
                         dbsession.save(privilege)
-                    if bits != 0:
-                        privilege.bits = bits
+                    if negative or positive:
+                        privilege.positive = positive
+                        privilege.negative = negative
                         dbsession.flush()
                     elif privilege is not None:
                         dbsession.delete(privilege)
@@ -801,7 +819,8 @@ def user_edit(request, username):
         forum_privileges.append((
             forum.id,
             forum.name,
-            list(split_flags(privilege and privilege.bits or None))
+            list(split_bits(privilege and privilege.positive or None)),
+            list(split_bits(privilege and privilege.negative or None))
         ))
 
     groups_joined = groups_joined or user.groups.all()
@@ -831,8 +850,8 @@ def user_edit(request, username):
     return {
         'user': user,
         'form': form,
+        'forum_privileges': PRIVILEGE_DICT,
         'user_forum_privileges': forum_privileges,
-        'forum_privileges': PRIVILEGES_DETAILS,
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined],
         'avatar_height': storage_data['max_avatar_height'],
@@ -961,22 +980,34 @@ def group_edit(request, name=None):
             group.save()
 
             #: forum privileges
-            for key, value in request.POST.lists():
-                if key.startswith('forum_privileges-'):
-                    bits = join_flags(*value)
-                    forum_id = key.split('-', 1)[1]
+            for key, value in request.POST.iteritems():
+                if key.startswith('forum_privileges_'):
+                    negative = 0
+                    positive = 0
+                    for bit in value.split(','):
+                        try:
+                            bit = int(bit)
+                        except ValueError:
+                            continue
+                        if bit > 0:
+                            positive |= bit
+                        else:
+                            negative |= bit
+
+                    forum_id = key.split('_')[2]
                     privilege = Privilege.query.filter(and_(
                         privilege_table.c.forum_id==forum_id,
                         privilege_table.c.user_id==None,
                         privilege_table.c.group_id==group.id
                     )).first()
-                    if not privilege and bits != 0:
+                    if privilege is None and (positive or negative):
                         privilege = Privilege(
                             group=group,
                             forum=Forum.query.get(int(forum_id)))
                         dbsession.save(privilege)
-                    if bits != 0:
-                        privilege.bits = bits
+                    if negative or positive:
+                        privilege.positive = positive
+                        privilege.negative = negative
                         dbsession.flush()
                     elif privilege is not None:
                         dbsession.delete(privilege)
@@ -999,7 +1030,6 @@ def group_edit(request, name=None):
                   % (href('admin', 'groups', escape(group.name)),
                      escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
-            return HttpResponseRedirect(href('admin', 'groups'))
     else:
         form = form_class(initial=not new and {
             'name': group.name,
@@ -1019,12 +1049,13 @@ def group_edit(request, name=None):
         forum_privileges.append((
             forum.id,
             forum.name,
-            list(split_flags(privilege and privilege.bits or None))
+            list(split_bits(privilege and privilege.positive or None)),
+            list(split_bits(privilege and privilege.negative or None))
         ))
 
     return {
         'group_forum_privileges': forum_privileges,
-        'forum_privileges': PRIVILEGES_DETAILS,
+        'forum_privileges': PRIVILEGE_DICT,
         'group_name': '' or not new and group.name,
         'form': form,
         'is_new': new,

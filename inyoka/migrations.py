@@ -975,6 +975,25 @@ def add_blog_active_flag(m):
     ''')
 
 
+def forum_plaintext(m):
+    """This migration adds a new `plaintext` column to
+    the forum_post table so we can use plaintext for users
+    who won't use our coool syntax"""
+    m.engine.execute('''
+        alter table forum_post
+            add column is_plaintext bool not null default 0 after has_revision,
+            modify column rendered_text longtext null default null;
+    ''')
+
+
+def add_negative_privileges(m):
+    m.engine.execute('''
+        alter table forum_privilege
+            change column `bits` `positive` integer default 0,
+            add column `negative` integer default 0;
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -996,5 +1015,6 @@ MIGRATIONS = [
     fix_ikhaya_comment_foreign_keys, fix_ikhaya_suggestion_foreign_keys,
     fix_pastebin_entry_foreign_keys, fix_planet_entry_foreign_keys,
     fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
-    add_egosearch_index, add_planet_hidden,
+    add_egosearch_index, add_planet_hidden, forum_plaintext,
+    add_negative_privileges,
 ]

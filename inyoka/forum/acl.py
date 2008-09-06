@@ -14,7 +14,6 @@ from inyoka.utils.database import session
 
 
 PRIVILEGES_DETAILS = [
-    ('void', 'darf nix'),
     ('read', 'kann lesen'),
     ('vote', 'kann abstimmen'),
     ('create', 'kann Themen erstellen'),
@@ -25,16 +24,16 @@ PRIVILEGES_DETAILS = [
     ('moderate', 'kann moderieren')
 ]
 
-PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS[1:]]
+PRIVILEGES = [x[0] for x in PRIVILEGES_DETAILS]
 PRIVILEGES_BITS = dict((PRIVILEGES[i-1], 2**i)
-                       for i in xrange(1, len(PRIVILEGES_DETAILS)))
+                       for i in xrange(1, len(PRIVILEGES_DETAILS) + 1))
 REVERSED_PRIVILEGES_BITS = dict((y,x) for x,y in PRIVILEGES_BITS.iteritems())
 
 #: create some constants for easy access
 g = globals()
 for desc, bits in PRIVILEGES_BITS.iteritems():
     g['CAN_%s' % desc.upper()] = bits
-PRIVILEGES_BITS['void'] = DISALLOW_ALL = 0
+DISALLOW_ALL = 0
 
 
 def join_flags(*flags):
@@ -54,18 +53,16 @@ def join_flags(*flags):
     return result
 
 
-def split_flags(mask=None):
+def split_bits(mask=None):
     """
-    Return an iterator with all flags splitted
+    Return an iterator with all bits splitted
     from the `mask`.
-    The flags are represented by a small string
-    as defined in PRIVILEGES_DETAILS
     """
     if mask is None:
         return
     for desc, bits in PRIVILEGES_BITS.iteritems():
         if mask & bits != 0:
-            yield desc
+            yield bits
 
 
 def get_forum_privileges(user, forum_id):
@@ -78,13 +75,39 @@ def get_privileges(user, forum_ids):
     if not forum_ids:
         return {}
     p, ug = privilege_table.c, user_group_table.c
-    cur = session.execute(select([p.forum_id, p.bits],
-        p.forum_id.in_(forum_ids) & ((p.user_id == user.id) |
-        p.group_id.in_(select([ug.group_id], ug.user_id == user.id)) |
-        (p.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID)))))
+    # select all privileges belonging to the user or to a group the user's in
+    cur = list(session.execute(
+        select([p.forum_id, p.positive, p.negative, p.user_id],
+            p.forum_id.in_(forum_ids) & (
+                (p.user_id == user.id) |
+                p.group_id.in_(
+                    select([ug.group_id], ug.user_id == user.id)
+                ) |
+                (p.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
+            )
+        )
+    ))
+
+    def join_bits(result, rows):
+        """
+        Join the positive bits of all forums and subtract the negative ones of
+        them.
+        """
+        negative = dict(map(lambda a: (a, set()), forum_ids))
+        for forum_id, p, n, _ in rows:
+            result[forum_id] |= p
+            negative[forum_id].add(n)
+        for forum_id, bits in negative.iteritems():
+            for bit in bits:
+                if result[forum_id] & bit:
+                    result[forum_id] -= bit
+        return result
+
     result = dict(map(lambda a: (a, DISALLOW_ALL), forum_ids))
-    for forum_id, bits in cur:
-        result[forum_id] |= bits
+    # first join the group privileges
+    result = join_bits(result, filter(lambda row: not row.user_id, cur))
+    # now join the user privileges (this allows to override group privileges)
+    result = join_bits(result, filter(lambda row: row.user_id, cur))
     return result
 
 
