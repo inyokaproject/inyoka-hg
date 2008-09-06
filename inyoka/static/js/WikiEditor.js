@@ -184,6 +184,7 @@
         return false;
       })(editor).appendTo(result);
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
+      codebox[0].style.display = 'none'; //hide box in safari
       var tds = [$('<td>Rohtext</td>').click(function() {
         editor.insertTag('{{{\n%s\n}}}', 'Code')
       })];
