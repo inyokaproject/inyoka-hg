@@ -700,7 +700,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
     if subscriptionkw in ('forum', 'topic'):
         subscriptionkw = subscriptionkw + '_id'
     @simple_check_login
-    def subscriber(request, **kwargs):
+    def unsubscriber(request, **kwargs):
         """ If the user has already subscribed to this %s, this view removes it.
         """ % obj_slug
         slug = kwargs[obj_slug]
@@ -716,7 +716,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
             s.delete()
             flash(flasher)
         return HttpResponseRedirect(url_for(x))
-    return subscriber
+    return unsubscriber
 
 subscribe_forum = _generate_subscriber(Forum,
     'slug', 'forum',
@@ -1053,6 +1053,10 @@ def delete_post(request, post_id):
                 flash(u'Das Löschen wurde abgebrochen.')
             else:
                 session.delete(post)
+                session.commit()
+                last_post = Post.query.filter_by(topic_id=post.topic_id) \
+                                      .order_by('-id').first()
+                post.topic.last_post_id = last_post.id
                 session.commit()
                 flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde gelöscht.'
                       % (url_for(post), escape(post.author.username)),

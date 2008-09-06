@@ -246,8 +246,9 @@
         <input name="username" id="js_login_username" />
         <label for="js_login_password">Passwort</label>
         <input type="password" name="password" id="js_login_password" />
-        <label for="js_login_permanent">dauerhaft?</label>
+        <label for="js_login_permanent" title="Wähle dies nicht aus, wenn du dich von einem öffentlichen Computer aus anmeldest">dauerhaft?</label>
         <input type="checkbox" name="permanent" id="js_login_permanent" />
+        <a href="{{ href('portal', 'lost_password') }}">Passwort vergessen?</a>
         <input type="submit" value="Login" class="submit" />
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
       </div>

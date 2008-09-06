@@ -58,15 +58,37 @@ class SubscriptionManager(models.Manager):
         return row is not None
 
     @classmethod
-    def delete_list(cls, ids):
+    def delete_list(cls, user_id, ids):
         if not ids:
             return
         cur = connection.cursor()
 
         query = '''
             delete from portal_subscription
-             where id in (%(id_list)s)
-        ''' % {'id_list': ','.join(['%s'] * len(ids))}
+             where id in (%(id_list)s) and user_id = %(user_id)d
+        ''' % {'id_list': ','.join(['%s'] * len(ids)),
+               'user_id': int(user_id)}
+
+        params = [int(i) for i in ids]
+
+        cur.execute(query, params)
+        cur.close()
+        connection._commit()
+
+    @classmethod
+    def mark_read_list(cls, user_id, ids):
+        if not ids:
+            return
+        cur = connection.cursor()
+
+        query = '''
+            update portal_subscription
+            set notified = 0
+            where id in (%(id_list)s) and user_id = %(user_id)d
+            ''' % {
+                'id_list': ','.join(['%s'] * len(ids)),
+                'user_id': int(user_id)
+            }
 
         params = [int(i) for i in ids]
 
@@ -188,22 +210,28 @@ class PrivateMessageEntry(models.Model):
             return href('portal', 'privmsg', 'new', forward=self.message_id)
 
     @classmethod
-    def delete_list(cls, ids):
+    def delete_list(cls, user_id, ids):
         if not ids:
             return
         cur = connection.cursor()
 
         trash = PRIVMSG_FOLDERS['trash'][0]
         query = u'''
-            update portal_privatemessageentry
-                set folder = case
-                        when folder = %(trash)s
+            update portal_privatemessageentry p
+                set p.folder = case
+                        when p.folder = %(trash)s
                         then null
                         else %(trash)s
+                        end,
+                    p.read = case
+                        when p.folder = %(trash)s
+                        then true
+                        else p.read
                         end
-                where id in (%(ids)s)
+                where p.id in (%(ids)s) and p.user_id = %(user_id)s;
         ''' % {'ids':    ','.join(['%s']*len(ids)),
-               'trash': trash}
+               'trash': trash,
+               'user_id': user_id}
 
         params = [int(i) for i in ids]
 
