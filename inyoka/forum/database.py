@@ -66,9 +66,9 @@ post_table = Table('forum_post', metadata,
     Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=False),
     Column('hidden', Boolean, default=False, nullable=False),
     Column('text', Text(), nullable=False),
-    Column('rendered_text', Text(), nullable=True),
+    Column('rendered_text', Text(), nullable=False),
     Column('has_revision', Boolean, default=False, nullable=False),
-    Column('is_plaintext', Boolean, default=False, nullable=False),
+    #Column('atime', DateTime, nullable=True),
 )
 
 post_revision_table = Table('forum_postrevision', metadata,
