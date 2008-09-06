@@ -153,6 +153,12 @@ table.forum thead td p.description {
     font-size: 0.85em;
 }
 
+.topic_box.discussion_info {
+    padding: 5px 10px;
+    background-color: #F0D9AA;
+    border-color: #E0B771;
+}
+
 .status_solved:before, 
 .status_unsolved:before {
     font-size: 1.2em;
