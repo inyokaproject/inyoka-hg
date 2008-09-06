@@ -174,7 +174,7 @@ class Renderer(object):
 
     def __init__(self, obj):
         if isinstance(obj, str):
-            self.node = None
+            self.node, self.format, self.instructions = None, None, None
             if obj[0] == '!':
                 pos = obj.index('\0')
                 self.format = obj[1:pos]

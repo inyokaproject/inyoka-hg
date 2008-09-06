@@ -715,11 +715,17 @@ class Text(models.Model):
         This renders the markup of the text as html or any other
         format supported.
 
-        If no request is given the current request is used.
+        If no request is given the current request is used or None
+        if no request exists (e.g while generate snapshot).
         """
         if context is None:
             if request is None:
-                request = current_request._get_current_object()
+                try:
+                    request = current_request._get_current_object()
+                except RuntimeError:
+                    # no request exists, that happens if we're generating
+                    # the snapshot.
+                    request = None
             context = parser.RenderContext(request, page)
         if template_context is not None or format != 'html':
             return self.parse(template_context).render(context, format)
