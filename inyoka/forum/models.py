@@ -176,8 +176,7 @@ class TopicMapperExtension(MapperExtension):
 class PostMapperExtension(MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
-        if not instance.is_plaintext:
-            instance.rendered_text = instance.render_text()
+        instance.rendered_text = instance.render_text()
         if instance.position is None:
         # XXX: race-conditions and other stupid staff... :/
         # require a mysql update to work properly!
@@ -315,6 +314,7 @@ class Forum(object):
     def get_children_filtered(self, user):
         """Same as children, but check for acls if a user is given"""
         return filter_invisible(user, self.children)
+
 
     def get_latest_topics(self, count=None):
         """
@@ -538,11 +538,6 @@ class Post(object):
         node = parse(self.text, wiki_force_existing=force_existing)
         return node.render(context, format)
 
-    def get_text(self):
-        if self.is_plaintext:
-            return self.text
-        return self.rendered_text
-
     def update_search(self):
         """
         This updates the xapian search index.
@@ -589,13 +584,13 @@ class Post(object):
         ''' % ', '.join(('("f", %s)',) * len(ids)), ids)
         dbsession.commit()
 
-    def edit(self, request, text, is_plaintext=False):
+    def edit(self, request, text):
         """
         Change the text of the post. If the post is already stored in the
         database, create a post revision containing the old text.
         If the text has not changed, return.
         """
-        if self.text == text and self.is_plaintext == is_plaintext:
+        if self.text == text:
             return
         if self.id:
             rev = PostRevision()
@@ -604,13 +599,7 @@ class Post(object):
             rev.text = self.text
             self.has_revision = True
         self.text = text
-        if not is_plaintext:
-            self.rendered_text = self.render_text(request)
-        else:
-            # cleanup that column so that we save some bytes in the database
-            self.rendered_text = None
-        print "set is_plaintext to %s" % is_plaintext
-        self.is_plaintext = is_plaintext
+        self.rendered_text = self.render_text(request)
 
     @property
     def page(self):
@@ -621,6 +610,7 @@ class Post(object):
         if page == 1:
             return None
         return page
+
 
     def deregister(self):
         """
@@ -817,8 +807,6 @@ class PostRevision(object):
 
     @property
     def rendered_text(self):
-        if self.post.is_plaintext:
-            return self.text
         request = current_request._get_current_object()
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, 'html')
@@ -1113,7 +1101,9 @@ class WelcomeMessage(object):
     explaining extra rules.  The message will be displayed only once for
     each user.
     """
-
+    #title = models.CharField(max_length=120)
+    #text = models.TextField('Nachricht')
+    #rendered_text = models.TextField('Gerenderte Nachricht')
     def __init__(self, title, text):
         self.title = title
         self.text = text
