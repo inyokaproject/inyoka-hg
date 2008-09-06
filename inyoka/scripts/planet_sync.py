@@ -46,7 +46,7 @@ def sync():
     touched anymore.
     """
     debug('debugging enabled')
-    for blog in Blog.objects.all():
+    for blog in Blog.objects.filter(active=True):
         debug('syncing blog %s' % blog.name)
 
         # parse the feed. feedparser.parse will never given an exception

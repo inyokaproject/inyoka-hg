@@ -151,14 +151,14 @@ def pages_edit(request, page=None):
                 )
                 flash(u'Die Seite „<a href="%s">%s</a>“ '
                       u'wurde erfolgreich erstellt.' % (
-                        url_for(page), escape(page.title)))
+                        url_for(page), escape(page.title)), True)
             else:
                 page.key = key
                 page.title = title
                 page.content = content
                 flash(u'Die Seite „<a href="%s">%s</a>“ '
                       u'wurde erfolgreich editiert.' % (
-                        url_for(page), escape(page.title)))
+                        url_for(page), escape(page.title)), True)
             page.save()
             return HttpResponseRedirect(href('admin', 'pages'))
 
@@ -179,7 +179,7 @@ def pages_delete(request, page_key):
         else:
             page.delete()
             flash(u'Die Seite „%s“ wurde erfolgreich gelöscht'
-                  % escape(page.title))
+                  % escape(page.title), True)
     else:
         flash(render_template('admin/pages_delete.html', {
                 'page': page}))
@@ -269,11 +269,11 @@ def planet_edit(request, blog=None):
             if new:
                 flash(u'Der Blog „<a href="%s">%s</a>“ '
                       u'wurde erfolgreich erstellt.' % (
-                        url_for(blog), escape(blog.name)))
+                        url_for(blog), escape(blog.name)), True)
             else:
                 flash(u'Der Blog „<a href="%s">%s</a>“ '
                       u'wurde erfolgreich editiert.' % (
-                        url_for(blog), escape(blog.name)))
+                        url_for(blog), escape(blog.name)), True)
             return HttpResponseRedirect(href('admin', 'planet'))
     else:
         if not new:
@@ -418,7 +418,7 @@ def ikhaya_article_delete(request, article_id):
         else:
             article.delete()
             flash(u'Der Artikel „%s“ wurde erfolgreich gelöscht'
-                  % escape(article.subject))
+                  % escape(article.subject), True)
     else:
         flash(render_template('admin/ikhaya_article_delete.html',
               {'article': article}))
@@ -607,7 +607,7 @@ def forum_edit(request, id=None):
                     keys.append('forum/forum/' + old_slug)
                 cache.delete_many(*keys)
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
-                      escape(forum.name), not id and 'angelegt' or 'editiert'))
+                      escape(forum.name), not id and 'angelegt' or 'editiert'), True)
                 return HttpResponseRedirect(href('admin', 'forum'))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
@@ -855,7 +855,7 @@ def user_new(request):
                 password=data['password'],
                 send_mail=data['authenticate']
             )
-            flash(u'Der Bentuzer „%s“ wurde erfolgreich erstellt'
+            flash(u'Der Benutzer „%s“ wurde erfolgreich erstellt'
                   % escape(data['username']), True)
             flash(u'Du kannst nun weitere Details bearbeiten')
             return HttpResponseRedirect(href('admin', 'users', 'edit',

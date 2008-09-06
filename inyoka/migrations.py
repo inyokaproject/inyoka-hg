@@ -968,6 +968,12 @@ def add_planet_hidden(m):
             add column hidden tinyint(1) not null default 0;
     ''')
 
+def add_blog_active_flag(m):
+    m.engine.execute('''
+        ALTER TABLE planet_blog
+            ADD COLUMN active tinyint(1) not null default 1;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,

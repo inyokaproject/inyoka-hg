@@ -42,7 +42,7 @@ def context_modifier(request, context):
     This function is called of ``templated`` automatically to copy the list of
     blogs into the context.
     """
-    context['blogs'] = list(Blog.objects.all())
+    context['blogs'] = list(Blog.objects.filter(active=True))
 
 
 @templated('planet/index.html', modifier=context_modifier)

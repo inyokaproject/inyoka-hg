@@ -26,6 +26,7 @@ class Blog(models.Model):
     feed_url = models.URLField()
     icon = models.ImageField(upload_to='planet/icons', blank=True)
     last_sync = models.DateTimeField(blank=True, null=True)
+    active = models.BooleanField(default=True)
 
     @property
     def icon_url(self):
