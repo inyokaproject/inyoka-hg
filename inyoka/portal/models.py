@@ -370,10 +370,8 @@ class Event(models.Model):
     slug = models.SlugField(unique=True) # this may change !!
     changed = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    event_start = models.DateTimeField()
-    event_stop = models.DateTimeField(blank=True, null=True)
-    #date = models.DateField()
-    #time = models.TimeField(blank=True, null=True) # None -> whole day
+    date = models.DateField()
+    time = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField(blank=True)
     author = models.ForeignKey(User)
     location = models.CharField(max_length=25, blank=True)
