@@ -50,8 +50,13 @@
       {%- endfor %}
     </tbody>
   </table>
-  <div>
-    <input type="submit" value="Ausgewählte Themen als bearbeitet markieren" />
+  <div class="linklist">
+    <input type="submit" value="Ausgewählte Themen als bearbeitet markieren" /> |
+    {%- if subscribed %}
+    <a href="{{ href('forum', 'reported_topics', 'unsubscribe') }}">Themenmeldungen abbestellen</a>
+    {%- else %}
+    <a href="{{ href('forum', 'reported_topics', 'subscribe') }}">Themenmeldungen abonnieren</a>
+    {%- endif %}
   </div>
 </form>
 {% endblock %}

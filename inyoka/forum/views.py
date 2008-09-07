@@ -764,9 +764,17 @@ def report(request, topic_slug):
             topic.reported = data['text']
             topic.reporter_id = request.user.id
             session.commit()
+
+            users = (User.objects.get(id=int(i)) for i in
+                    storage['reported_topics_subscribers'].split(',') if i)
+            for user in users:
+                send_notification(user, 'new_reported_topic',
+                                  u'Thema gemeldet: %s' % topic.title,
+                                  {'topic': topic})
+
             cache.delete('forum/reported_topic_count')
             flash(u'Dieses Thema wurde den Moderatoren gemeldet. '
-                  u'Sie werden sich sobald wie möglich darum kümmern', True)
+                  u'Sie werden sich sobald wie möglich darum kümmern.', True)
             return HttpResponseRedirect(url_for(topic))
     else:
         form = ReportTopicForm()
@@ -808,10 +816,31 @@ def reportlist(request):
     visible_topics = filter(lambda t: have_privilege(request.user, t.forum,
                             CAN_MODERATE), topics)
 
+    subscribed = str(request.user.id) in \
+            storage['reported_topics_subscribers'].split(',')
+
     return {
-        'topics':   visible_topics,
-        'form':     form
+        'topics':     visible_topics,
+        'form':       form,
+        'subscribed': subscribed,
     }
+
+def reported_topics_subscription(request, mode):
+    users = set(int(i) for i in storage['reported_topics_subscribers'].split(',') if i)
+
+    if mode == 'subscribe':
+        users.add(request.user.id)
+        flash(u'Du wirst ab sofort benachrichtigt, wenn ein Thema gemeldet wird.', True)
+    elif mode == 'unsubscribe':
+        try:
+            users.remove(request.user.id)
+        except KeyError:
+            pass
+        flash(u'Du wirst nicht mehr benachrichtigt, wenn ein Thema gemeldet wird.', True)
+
+    storage['reported_topics_subscribers'] = ','.join(str(i) for i in users)
+
+    return HttpResponseRedirect(href('forum', 'reported_topics'))
 
 
 def post(request, post_id):
