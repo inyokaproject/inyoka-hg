@@ -35,9 +35,11 @@ class ArticleManager(models.Manager):
         if not self._all:
             q = q.filter(public=self._public)
             if self._public:
-                q = q.filter(pub_date__lt=datetime.utcnow().date())
+                q = q.filter(pub_date__lte=datetime.utcnow().date(),
+                             pub_time__lte=datetime.utcnow().time())
             else:
-                q = q.filter(pub_date__qt=datetime.utcnow().date())
+                q = q.filter(pub_date__gte=datetime.utcnow().date(),
+                             pub_time__gt=datetime.utcnow().time())
         return q
 
     def delete(self):
