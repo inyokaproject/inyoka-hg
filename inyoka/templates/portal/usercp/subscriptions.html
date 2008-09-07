@@ -46,7 +46,11 @@
       {%- else %}
       <tr>
         <td colspan="2">
+          {%- if notified_only %}
+          Keine Themen oder Artikel mit Änderungen
+          {%- else %}
           Du hast bisher noch keine Themen oder Artikel abonniert
+          {%- endif %}
         </td>
       </tr>
       {%- endfor %}
