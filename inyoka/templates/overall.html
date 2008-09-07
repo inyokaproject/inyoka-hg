@@ -70,7 +70,7 @@
 
     <div class="body">
       <div class="appheader">
-        <a href="{{ href('portal', 'error_report', url=CURRENT_URL) }}" id="user_error_report_link">Ticket schreiben</a><br/>
+        <a href="{{ href('wiki', 'ubuntuusers/Fehler melden') }}" id="user_error_report_link">Fehler melden</a><br/>
         {%- if not hide_quicklinks %}
         <ul class="mod_navi">
           {%- if USER.can('manage_topics') %}
@@ -226,19 +226,6 @@
       </ul>
     </div>{# .footer #}
    </div></div></div></div></div>
-   <div id="user_error_report">
-     <p>Hier kannst du Fehler, Funktions- sowie Verbesserungs-Vorschläge <strong style="color:#FF1111"> in der Portalsoftware</strong> melden. Bitte verwende diese Formular nicht für Fragen o.ä., dafür gibts ein <a href="http://forum.ubuntuusers.de/forum/56/" title="Rund um Inyoka">eigenes Forum</a>.</p>
-      <form method="post" action="{{ href('portal', 'error_report') }}">
-        <p><label for="id_uer_title">Worum gehts (kurz, aber bitte trotzdem aussagekräftig):</label> <input id="id_uer_title" size="50" name="title"/></p>
-        <p>Details (dein Name und die Adresse der Seite wird automatisch mitgespeichert):</p>
-        <p><textarea style="width: 100%;" rows="3" cols="100" name="text"></textarea></p>
-        <p>
-          <input type="hidden" name="url" value="{{ CURRENT_URL }}" />
-          <input type="submit" value="Ticket speichern" />
-          <input type="submit" name="hide" value="Ausblenden" />
-        </p>
-      </form>
-    </div>
     {%- if not USER.is_authenticated %}
     <form action="{{ href('portal', 'login', next=CURRENT_URL) }}" method="post" id="js_login_form">
       <div>
