@@ -5,14 +5,14 @@
 
     Database models for the planet.
 
-    :copyright: 2007 by Benjamin Wiegand, maix, Christoph Hac, Christoph Hack.
+    :copyright: 2007 - 2008 by Benjamin Wiegand, maix, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 import os
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from django.db import models
+from django.db import models, connection
 from inyoka.conf import settings
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
@@ -26,6 +26,7 @@ class Blog(models.Model):
     feed_url = models.URLField()
     icon = models.ImageField(upload_to='planet/icons', blank=True)
     last_sync = models.DateTimeField(blank=True, null=True)
+    active = models.BooleanField(default=True)
 
     @property
     def icon_url(self):
@@ -159,5 +160,13 @@ class PlanetSearchAdapter(SearchAdapter):
             date=entry.pub_date,
             category=entry.blog.name
         )
+
+    def get_doc_ids(self):
+        cur = connection.cursor()
+        cur.execute('select id from planet_entry')
+        for row in cur.fetchall():
+            yield row[0]
+        cur.close()
+
 
 search.register(PlanetSearchAdapter())

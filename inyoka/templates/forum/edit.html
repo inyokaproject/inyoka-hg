@@ -109,10 +109,13 @@
         <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
       </dd>
       {%- endif %}
-      {%- if can_sticky and (isnewtopic or isfirstpost) %}
       <dt class="collapse">Optionen:</dt>
+      {%- if can_sticky and (isnewtopic or isfirstpost) %}
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
+      <dd>{{ form.is_plaintext }} <label for="id_is_plaintext">Beitrag soll Plaintext sein</label>
+          <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
+      </dd>
     </dl>
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="

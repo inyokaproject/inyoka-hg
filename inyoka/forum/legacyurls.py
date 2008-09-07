@@ -258,10 +258,13 @@ def activation(args, match):
             return
         return href('portal', 'register', 'resend', user.username, legacy=True)
 
-@legacy.url('^/search/(unfixed|newposts|egowatch|egosearch|unanswered|last\d+)')
+@legacy.url(r'^/search/(unfixed|newposts|egowatchnotified|egowatch|'
+            r'egosearch|unanswered|last\d+)/')
 def specialsearches(args, match, search_id):
     if search_id == 'egowatch':
         return href('portal', 'usercp', 'subscriptions')
+    if search_id == 'egowatchnotified':
+        return href('portal', 'usercp', 'subscriptions', 'notified')
     if search_id == 'unfixed':
         search_id = 'unsolved'
     return href('forum', search_id)

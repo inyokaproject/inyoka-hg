@@ -57,12 +57,6 @@ $(document).ready(function() {
         .appendTo(navigation);
   })();
 
-  // make the calendar button show some events
-  $('.container.calendar a.calendar_link').click(function() {
-    $('.calendar.overview').slideToggle('fast');
-    return false;
-  });
-
   // create a link to hide a toc
   $('.toc .head').append(
     $('<a> [-]</a>').toggle(function() {

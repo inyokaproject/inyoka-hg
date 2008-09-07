@@ -66,9 +66,9 @@ post_table = Table('forum_post', metadata,
     Column('topic_id', Integer, ForeignKey('forum_topic.id'), nullable=False),
     Column('hidden', Boolean, default=False, nullable=False),
     Column('text', Text(), nullable=False),
-    Column('rendered_text', Text(), nullable=False),
+    Column('rendered_text', Text(), nullable=True),
     Column('has_revision', Boolean, default=False, nullable=False),
-    #Column('atime', DateTime, nullable=True),
+    Column('is_plaintext', Boolean, default=False, nullable=False),
 )
 
 post_revision_table = Table('forum_postrevision', metadata,
@@ -106,7 +106,8 @@ privilege_table = Table('forum_privilege', metadata,
     Column('group_id', Integer, nullable=True),
     Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=True),
     Column('forum_id', Integer, ForeignKey('forum_forum.id'), nullable=False),
-    Column('bits', Integer, nullable=True),
+    Column('positive', Integer, nullable=True),
+    Column('negative', Integer, nullable=True),
 )
 
 user_table = Table('portal_user', metadata, autoload=True)

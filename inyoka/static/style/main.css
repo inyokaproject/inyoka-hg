@@ -83,6 +83,10 @@ input {
   font-size: 1em;
 }
 
+input[type="radio"] {
+  border: 0;
+}
+
 input[type="submit"], input[type="button"], input[type="reset"] {
   border-color: #777;
   background-color: #eee;

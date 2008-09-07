@@ -8,13 +8,15 @@
     :copyright: Copyright 2008 by Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
+from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
-from inyoka.forum.models import Post, Forum
+from inyoka.forum.models import Post, Forum, post_table
 from inyoka.utils.urls import url_for
 from inyoka.utils.html import striptags
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
+from inyoka.utils.database import select_blocks
 
 
 class ForumSearchAuthDecider(object):
@@ -74,4 +76,10 @@ class ForumSearchAdapter(SearchAdapter):
             'highlight': True,
             'text': striptags(post.rendered_text)
         }
+
+    def get_doc_ids(self):
+        for row in select_blocks(select([post_table.c.id]), post_table.c.id):
+            yield row[0]
+
+
 search.register(ForumSearchAdapter())

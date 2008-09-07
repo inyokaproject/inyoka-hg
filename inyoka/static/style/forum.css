@@ -153,6 +153,12 @@ table.forum thead td p.description {
     font-size: 0.85em;
 }
 
+.topic_box.discussion_info {
+    padding: 5px 10px;
+    background-color: #F0D9AA;
+    border-color: #E0B771;
+}
+
 .status_solved:before, 
 .status_unsolved:before {
     font-size: 1.2em;
@@ -208,11 +214,14 @@ table.topic td.author img.avatar {
     background-color: white;
 }
 
+table.topic td.author p.username {
+	position: relative;
+}
+
 table.topic td.author img.teamicon {
-  position: relative;
-  left: 5px;
-  margin-top: -17px;
-  float: right;
+  position: absolute;
+  top: 0px;
+  right: 0px;
 }
 
 table.topic td.author div.member_title {
