@@ -877,7 +877,7 @@ def convert_ikhaya():
                     img_style.extend(['width: %spx' % width, 'height: %spx' % height])
 
             img_code = '<img src="%s" alt="%s" style="%s" />' % (
-                dynamic_images[id].get_file_url(), desc or id, ';'.join(img_style)
+                dynamic_images[id].file.url, desc or id, ';'.join(img_style)
             )
             if desc:
                 return ''.join([

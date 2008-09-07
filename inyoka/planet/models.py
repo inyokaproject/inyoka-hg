@@ -118,8 +118,8 @@ class Entry(models.Model):
         """
         PlanetSearchAdapter.queue(self.id)
 
-    def save(self):
-        super(Entry, self).save()
+    def save(self, force_insert=False, force_update=False):
+        super(Entry, self).save(force_insert, force_update)
         self.update_search()
 
     def delete(self):

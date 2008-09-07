@@ -65,7 +65,8 @@ table.ikhaya_articles tbody tr.not_published a {
 
 /* Event Administration styles */
 
-table.events td.actions {
+table.events td.actions,
+table.events td.date {
   margin-top: .2em;
   text-align: center;
 }
