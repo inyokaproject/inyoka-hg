@@ -1291,9 +1291,9 @@ class Revision(models.Model):
         new_rev.save()
         return new_rev
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self):
         """Save the revision and invalidate the cache."""
-        models.Model.save(self, force_insert, force_update)
+        models.Model.save(self)
         cache.delete('wiki/page/' + self.page.name)
 
     def prepare_for_caching(self):

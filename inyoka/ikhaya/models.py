@@ -77,9 +77,9 @@ class Category(models.Model):
             'edit': ('admin', 'ikhaya', 'categories', 'edit', self.slug)
         }[action])
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self):
         self.slug = slugify(self.name)
-        super(Category, self).save(force_insert, force_update)
+        super(Category, self).save()
         cache.delete('ikhaya/categories')
 
     class Meta:
@@ -187,7 +187,7 @@ class Article(models.Model):
         """
         IkhayaSearchAdapter.queue(self.id)
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self):
         """
         This increases the edit count by 1 annd updates the xapian database.
         """
@@ -222,7 +222,7 @@ class Article(models.Model):
                     random.random()
                 )[:50]
 
-        super(Article, self).save(force_insert, force_update)
+        super(Article, self).save()
         self.update_search()
 
         # now that we have the article id we can put it into the slug
@@ -306,8 +306,8 @@ class Comment(models.Model):
             cache.set(key, instructions)
         return render(instructions, context)
 
-    def save(self, force_insert=False, force_update=False):
-        super(Comment, self).save(force_insert, force_update)
+    def save(self):
+        super(Comment, self).save()
         if self.id:
             cache.delete('ikhaya/comment/%d' % self.id)
         self.article.comment_count += 1

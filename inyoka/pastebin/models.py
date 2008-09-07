@@ -57,9 +57,9 @@ class Entry(models.Model):
             'raw': ('pastebin', 'raw', self.id)
         }[action])
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self):
         self.rendered_code = highlight_code(
             self.code,
             self.lang
         )
-        super(Entry, self).save(force_insert, force_update)
+        super(Entry, self).save()
