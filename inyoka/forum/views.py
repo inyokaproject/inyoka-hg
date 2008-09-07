@@ -17,7 +17,7 @@ from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, or_, select, not_, exists, func
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 from inyoka.conf import settings
-from inyoka.utils.urls import global_not_found, href, url_for
+from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
 from inyoka.utils.sessions import set_session_info
@@ -667,7 +667,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
 def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
     """
     Generates a subscriber-function to deal with objects of type `obj`
-    which have the slug `slug` and are registered in the subscribtion by
+    which have the slug `slug` and are registered in the subscription by
     `subscriptionkw` and have the flashing-test `flasher`
     """
     if subscriptionkw in ('forum', 'topic'):
@@ -689,7 +689,11 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
             # there's no such subscription yet, create a new one
             Subscription(user=request.user,**{subscriptionkw : x.id}).save()
             flash(flasher)
-        return HttpResponseRedirect(url_for(x))
+        # redirect the user to the page he last watched
+        if request.GET.get('continue', False) and is_safe_domain(request.GET['continue']):
+            return HttpResponseRedirect(request.GET['continue'])
+        else:
+            return HttpResponseRedirect(url_for(x))
     return subscriber
 
 
@@ -697,7 +701,7 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
 def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
     """
     Generates an unsubscriber-function to deal with objects of type `obj`
-    which have the slug `slug` and are registered in the subscribtion by
+    which have the slug `slug` and are registered in the subscription by
     `subscriptionkw` and have the flashing-test `flasher`
     """
     if subscriptionkw in ('forum', 'topic'):
@@ -718,7 +722,11 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
             # there's already a subscription for this forum, remove it
             s.delete()
             flash(flasher)
-        return HttpResponseRedirect(url_for(x))
+        # redirect the user to the page he last watched
+        if request.GET.get('continue', False) and is_safe_domain(request.GET['continue']):
+            return HttpResponseRedirect(request.GET['continue'])
+        else:
+            return HttpResponseRedirect(url_for(x))
     return unsubscriber
 
 subscribe_forum = _generate_subscriber(Forum,

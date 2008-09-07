@@ -41,9 +41,9 @@
     {%- endif %}
     {% if USER.is_authenticated %}
       {%- if is_subscribed %}
-      <a href="{{ topic|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a> |
+      <a href="{{ href('forum', 'topic', topic.slug, 'unsubscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abbestellen</a> |
       {%- else %}
-      <a href="{{ topic|url('subscribe') }}" class="action action_subscribe">abonnieren</a>  |
+      <a href="{{ href('forum', 'topic', topic.slug, 'subscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abonnieren</a>  |
       {%- endif %}
       {%- if topic.solved %}
       <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a>  |
