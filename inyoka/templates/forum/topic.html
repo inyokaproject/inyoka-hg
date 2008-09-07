@@ -67,8 +67,14 @@
       <strong>Ubuntu-Version:</strong>
         {{ topic.get_ubuntu_version() }}<br />
         {{ topic_actions() }}
-      </div>
     </div>
+  </div>
+
+  {%- if discussion_for %}
+  <div class="topic_box discussion_info">
+    Dieses Thema ist die Diskussion des Artikels <strong><a href="{{ discussion_for|url }}">{{ discussion_for.name|e }}</a></strong>.
+  </div>
+  {%- endif %}
 
   {%- if polls %}
   <form action="" method="post" class="poll">

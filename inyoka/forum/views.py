@@ -211,6 +211,11 @@ def viewtopic(request, topic_slug, page=1):
     except OperationalError:
         pass
 
+    try:
+        discussion_for = Page.objects.get(topic_id=t.id)
+    except Page.DoesNotExist:
+        discussion_for = None
+
     posts = t.posts.options(eagerload('author'), eagerload('attachments')) \
                    .order_by(post_table.c.position)
 
@@ -308,6 +313,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_vote':          can_vote,
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
+        'discussion_for':    discussion_for,
     }
 
 
