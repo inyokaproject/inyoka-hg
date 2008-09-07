@@ -111,7 +111,7 @@ class Group(models.Model):
     def icon_url(self):
         if not self.icon:
             return None
-        return self.get_icon_url()
+        return self.icon.url
 
     def save_icon(self, img):
         """
@@ -146,7 +146,7 @@ class Group(models.Model):
 
     def delete_icon(self):
         """Deletes the icon from the file system."""
-        fn = self.get_icon_filename()
+        fn = self.icon.path
         if path.exists(fn):
             os.remove(fn)
         self.icon = None
