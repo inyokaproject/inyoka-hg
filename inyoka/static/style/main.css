@@ -1078,57 +1078,6 @@ div.not_found img {
 	color: HighlightText;
 }
 
-/* temporary error reporting foobar */
-
-#user_error_report {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    color: white;
-    padding: 0.5em 0 1em 0;
-    border-top: 8px solid #444;
-    background-color: #222;
-}
-
-#user_error_report p {
-    margin: 0.5em 1em;
-}
-
-#user_error_report_link {
-    text-decoration: none;
-    background: url(../img/icons/bug.png) no-repeat;
-    padding-left: 20px;
-    float:right;
-    position: relative;
-    top: -0.5em;
-}
-
-#user_error_report input,
-#user_error_report textarea {
-    background-color: #111;
-    color: white;
-    border: 1px solid #444;
-    font-family: sans-serif;
-}
-
-#user_error_report textarea {
-    background-image: url(../img/portal/errorreport_warning.png);
-    background-repeat: repeat-x;
-}
-
-#user_error_report input.disabled,
-#user_error_report input:active {
-    background-color: black!important;
-}
-
-#user_error_report :link,
-#user_error_report :visited {
-    text-decoration: none;
-    color: #956205;
-}
-
 #js_login_form {
     display: none;
     text-align: right;
