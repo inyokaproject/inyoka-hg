@@ -5,9 +5,10 @@
 
     Search interfaces for the wiki.
 
-    :copyright: Copyright 2008 by Christoph Hack.
+    :copyright: Copyright 2008 by Christoph Hack, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+from django.db import connection
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
 from inyoka.wiki.models import Revision
 from inyoka.utils.urls import url_for, href
@@ -57,4 +58,13 @@ class WikiSearchAdapter(SearchAdapter):
             text=rev.text.value,
             category=rev.attachment_id and '__attachment__' or None
         )
+
+    def get_doc_ids(self):
+        cur = connection.cursor()
+        cur.execute('select id from wiki_page')
+        for row in cur.fetchall():
+            yield row[0]
+        cur.close()
+
+
 search.register(WikiSearchAdapter())

@@ -33,3 +33,19 @@ if settings.DEBUG:
     engine_logger = logging.getLogger('sqlalchemy.engine')
     engine_logger.setLevel(logging.INFO)
     engine_logger.addHandler(logging.FileHandler('db.log'))
+
+
+def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
+    """Execute a query blockwise to prevent lack of ram"""
+    range = (start_with, start_with + block_size)
+    failed = 0
+    while failed < max_fails:
+        result = query.where(pk.between(*range)).execute()
+        i = 0
+        for i, row in enumerate(result):
+            yield row
+        if i == 0:
+            failed += 1
+        else:
+            failed = 0
+        range = range[1] + 1, range[1] + block_size

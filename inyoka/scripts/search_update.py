@@ -4,19 +4,17 @@
     inyoka.scripts.search_update
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Update the whole search index by reindexing all tuples from all
-    Models providing a ``update_search`` method.  Normally you must not
-    call this script, but it could be useful for fixing troubles
-    with broken search indexes.
+    This scripts updates the search index by (re)indexing the documents
+    of `portal_searchqueue`.
 
-    If you only want to reindex a single application, make sure that the
-    application is in your INSTALLED_APPS setting and run this script
-    with the name of the application as an additional argument.
+    If the search index is not existent when starting this script, it
+    automatically gets created; afterwards the index is completely generated
+    for all documents of all components.
 
-
-    :copyright: 2007 by Christoph Hack.
+    :copyright: 2007 - 2008 by Christoph Hack, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+from xapian import DatabaseOpeningError
 import inyoka.utils.http
 from inyoka import application
 from django.db.models import get_app, get_models
@@ -31,7 +29,7 @@ import inyoka.wiki.search
 import inyoka.ikhaya.models
 
 
-def update(limit=None):
+def update():
     """
     Update the next items from the queue.  You should call this
     function regularly (e.g. as cron).
@@ -47,17 +45,20 @@ def update(limit=None):
 
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
-    if app is not None:
-        app = get_app(app)
-    for model in get_models(app):
-        if not hasattr(model, 'update_search'):
-            continue
-        entries = model.objects.all()
-        for entry in entries:
-            entry.update_search()
+    for comp, adapter in search.adapters.iteritems():
+        for i, doc_id in enumerate(adapter.get_doc_ids()):
+            search.index(comp, doc_id)
+            if i % 100 == 0:
+                search.flush()
+        search.flush()
 
 
 if __name__ == '__main__':
-    import sys
-    argv = len(sys.argv) > 1 and sys.argv[1] or None
-    update(argv)
+    try:
+        search.get_connection()
+    except DatabaseOpeningError:
+        print 'Search index does not exist, creating a new one'
+        search.get_connection(True)
+        print 'Starting to reindex everything'
+        reindex()
+    update()
