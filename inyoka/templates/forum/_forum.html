@@ -1,11 +1,11 @@
 {% macro render_forum(forum) %}
   <tr class="entry category-{{ forum.parent_id }}">
     <td class="icon">
-      {% if forum.get_read_status(REQUEST.user) %}
-        <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="Forum Lesen" />
-      {% else %}
-        <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="Ungelesene Beiträge anzeigen" />
-      {% endif %}
+      {%- if forum.get_read_status(REQUEST.user) %}
+      <img src="{{ href('static', 'img', 'forum/forum.png') }}" alt="Forum gelesen" />
+      {%- else %}
+      <img src="{{ href('static', 'img', 'forum/forum_unread.png') }}" alt="Neue Beiträge im Forum" />
+      {%- endif %}
     </td>
     <td class="forum">
       <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
@@ -16,6 +16,9 @@
       {%- if forum.children %}
       <p class="subforums">Unterforen:
       {%- for subforum in forum.children %}
+        {%- if not subforum.get_read_status(REQUEST.user) %}
+        <img src="{{ href('static', 'img/forum/subforum_unread.png') }}" alt="Neue Beiträge im Forum" />
+        {%- endif %}
         <a href="{{ subforum|url }}">{{ subforum.name|e }}</a>{% if not loop.last %}, {% endif %}
       {%- endfor %}
       </p>
