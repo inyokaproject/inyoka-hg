@@ -341,13 +341,13 @@ class User(models.Model):
                                        blank=True, null=True,
                                        db_column='primary_group_id')
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         """
         Save method that pickles `self.settings` before and cleanup
         the cache after saving the model.
         """
         self._settings = cPickle.dumps(self.settings)
-        super(User, self).save()
+        super(User, self).save(force_insert, force_update)
         cache.delete('portal/user/%s/signature' % self.id)
         cache.delete('portal/user/%s' % self.id)
 
