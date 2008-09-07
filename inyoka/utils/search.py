@@ -435,3 +435,6 @@ class SearchAdapter(object):
 
     def recv(self, docid):
         raise NotImplementedError('recv')
+
+    def get_doc_ids(self):
+        raise NotImplementedError('get_doc_ids')

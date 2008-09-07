@@ -357,4 +357,12 @@ class IkhayaSearchAdapter(SearchAdapter):
                                 article.simplified_text)
         }
 
+    def get_doc_ids(self):
+        cur = connection.cursor()
+        cur.execute('select id from ikhaya_article')
+        for row in cur.fetchall():
+            yield row[0]
+        cur.close()
+
+
 search.register(IkhayaSearchAdapter())
