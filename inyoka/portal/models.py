@@ -401,7 +401,7 @@ class Event(models.Model):
             cache.set(key, instructions)
         return render(instructions, context)
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False):
         i = 0
         while True:
             slug = self.date.strftime('%Y/%m/%d/') + slugify(self.name) + \
@@ -415,7 +415,7 @@ class Event(models.Model):
                     break
                 i += 1
         self.slug = slug
-        super(self.__class__, self).save()
+        super(self.__class__, self).save(force_insert, force_update)
         cache.delete('ikhaya/event/%s' % self.id)
 
     def __repr__(self):
