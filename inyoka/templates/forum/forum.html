@@ -10,6 +10,24 @@
 {%- extends 'forum/page.html' %}
 {% from 'forum/_forum.html' import render_forum, topic_icon with context %}
 
+{% macro generate_subscription_link(do='subscribe') %}
+  {{ href('forum', 'forum', forum.slug, do, continue=CURRENT_URL)|e }}
+{% endmacro %}
+
+{% macro forum_actions() %}
+  <p class="actions linklist">
+    <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
+    {% if USER.is_authenticated %}
+      | {%- if is_subscribed %}
+      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe">abbestellen</a>
+      {%- else %}
+      <a href="{{ generate_subscription_link() }}" class="action action_subscribe">abonnieren</a>
+      {%- endif %}
+      | <a href="{{ forum|url('markread') }}">als gelesen markieren</a>
+    {%- endif %}
+  </p>
+{% endmacro %}
+
 {% set title_trace = [forum.name|e] %}
 {% set name = 'Forum „%s“ - ' % forum.name|e %}
 {% set feeds = [
@@ -37,17 +55,7 @@
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
           {{ pagination_right }}
-          <p class="actions linklist">
-            <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
-            {% if USER.is_authenticated %}
-              | {%- if is_subscribed %}
-              <a href="{{ href('forum', 'forum', forum.slug, 'unsubscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abbestellen</a>
-              {%- else %}
-              <a href="{{ href('forum', 'forum', forum.slug, 'subscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abonnieren</a>
-              {%- endif %}
-              | <a href="{{ forum|url('markread') }}">als gelesen markieren</a>
-            {%- endif %}
-          </p>
+          {{ forum_actions() }}
         </td>
 
       </tr>
@@ -145,17 +153,7 @@
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
           {{ pagination_right }}
-          <p class="actions">
-            <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
-            {% if USER.is_authenticated %}
-              | {%- if is_subscribed %}
-              <a href="{{ forum|url('unsubscribe') }}" class="action action_subscribe">abbestellen</a>
-              {%- else %}
-              <a href="{{ forum|url('subscribe') }}" class="action action_subscribe">abonnieren</a>
-              {%- endif %}
-              | <a href="{{ forum|url('markread') }}">als gelesen markieren</a>
-            {%- endif %}
-          </p>
+          {{ forum_actions() }}
         </td>
       </tr>
     </thead>
