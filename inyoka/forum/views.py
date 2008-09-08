@@ -41,7 +41,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, WelcomeMessage
+    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -599,8 +599,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif 'preview' in request.POST:
         ctx = RenderContext(request)
         tt = request.POST.get('text', '')
-        preview = request.POST.get('is_plaintext', False) and tt or \
-                  tt.render(ctx, 'html')
+        preview = request.POST.get('is_plaintext', False) and \
+            fix_plaintext(tt) or parse(tt).render(ctx, 'html')
 
     # the user is going to edit an existing post/topic
     elif post:
