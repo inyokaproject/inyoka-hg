@@ -68,6 +68,12 @@ UBUNTU_DISTROS = {
 CACHE_PAGES_COUNT = 5
 
 
+def fix_plaintext(text):
+    text = text.replace('\n', '<br />')
+    text = escape(text)
+    return text
+
+
 class SearchMapperExtension(MapperExtension):
     """
     Simple MapperExtension that listen on some events
@@ -540,7 +546,7 @@ class Post(object):
 
     def get_text(self):
         if self.is_plaintext:
-            return self.text
+            return fix_plaintext(self.text)
         return self.rendered_text
 
     def update_search(self):
@@ -609,7 +615,6 @@ class Post(object):
         else:
             # cleanup that column so that we save some bytes in the database
             self.rendered_text = None
-        print "set is_plaintext to %s" % is_plaintext
         self.is_plaintext = is_plaintext
 
     @property
@@ -818,7 +823,7 @@ class PostRevision(object):
     @property
     def rendered_text(self):
         if self.post.is_plaintext:
-            return self.text
+            return fix_plaintext(self.text)
         request = current_request._get_current_object()
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, 'html')
