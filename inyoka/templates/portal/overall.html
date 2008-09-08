@@ -43,7 +43,7 @@
       <li><a href="{{ href('wiki', 'Verwaltung', 'Spenden') }}">Spenden</a></li>
       <li><a href="{{ href('portal', 'kontakt') }}">Kontakt</a></li>
       <li><a href="{{ href('portal', 'search') }}">Suche</a></li>
-      <li><a href="{% if USER.is_authenticated %}{{ href('pastebin') }}{% else %}{{ href('pastebin', 'browse') }}{% endif %}">No Paste Service</a></li>
+      <li><a href="{% if USER.is_authenticated %}{{ href('pastebin') }}{% else %}{{ href('pastebin', 'browse') }}{% endif %}">Ablage</a></li>
       <li><a href="{{ href('portal', 'whoisonline') }}">Wer ist online?</a></li>
     </ul>
     <h3 class="navi_forum">{{ feed_button(href('portal', 'feeds', 'forum')) }}<a href="{{ href('forum') }}">Forum</a></h3>
