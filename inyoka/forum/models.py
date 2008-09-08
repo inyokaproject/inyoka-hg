@@ -69,8 +69,8 @@ CACHE_PAGES_COUNT = 5
 
 
 def fix_plaintext(text):
-    text = text.replace('\n', '<br />')
     text = escape(text)
+    text = text.replace('\n', '<br />')
     return text
 
 
