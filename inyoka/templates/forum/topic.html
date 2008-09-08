@@ -70,9 +70,16 @@
     </div>
   </div>
 
-  {%- if discussion_for %}
+  {%- if discussions %}
   <div class="topic_box discussion_info">
-    Dieses Thema ist die Diskussion des Artikels <strong><a href="{{ discussion_for|url }}">{{ discussion_for.name|e }}</a></strong>.
+    Dieses Thema ist die Diskussion
+    {%- if discussions|count == 1 %} des Artikels
+    {%- else %} der Artikel
+    {%- endif %}
+    {%- for article in discussions %}
+    <strong><a href="{{ article|url }}">{{ article.name|e }}</a></strong>
+    {%- if not loop.last %},{% endif %}
+    {%- endfor %}.
   </div>
   {%- endif %}
 
