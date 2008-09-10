@@ -57,9 +57,20 @@
         });
         return false;
       }).parent().parent().parent().append(preview);
-      $('#id_recipient').autocomplete("/?__service__=admin.get_user_autocompletion", {
-        delay: 40, maxItemsToShow: 15, cacheLength: 10});
     })();
+    $("#id_recipient").after($('<span class="usersearch"> Suche: </span>')
+        .append($('<input type="text" id="privmsg_search_user" />').autocomplete("/?__service__=admin.get_user_autocompletion", {
+            delay: 40, maxItemsToShow: 15, cacheLength: 10}))
+        .append($('<span> Hinzufügen</span>').click(function () {
+            sep = ""
+            if( $('#id_recipient').val() != "" ) {
+                sep = "; "
+            }
+            $('#id_recipient').val(
+                $('#id_recipient').val()
+                + sep + $('#privmsg_search_user').val());
+            $('#privmsg_search_user').val("");
+        })));
     /* ]]> */
   </script>
 {% endblock %}
