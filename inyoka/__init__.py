@@ -131,7 +131,7 @@ def _bootstrap():
         for line in rv.splitlines():
             p = line.split(':', 1)
             if len(p) == 2 and p[0].lower().strip() == 'changeset':
-                hg_node = p[1].strip().split(':')[0]
+                hg_node = p[1].strip()
                 break
     INYOKA_REVISION = hg_node
 
