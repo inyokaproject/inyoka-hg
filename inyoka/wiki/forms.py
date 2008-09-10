@@ -13,6 +13,8 @@ from inyoka.wiki.utils import has_conflicts
 from inyoka.wiki.acl import test_changes_allowed
 from inyoka.wiki.parser import parse, StackExhaused
 from inyoka.utils.sessions import SurgeProtectionMixin
+from inyoka.utils.urls import href
+from inyoka.forum.models import Topic
 
 
 class PageEditForm(SurgeProtectionMixin, forms.Form):
@@ -88,10 +90,26 @@ class AddAttachmentForm(forms.Form):
 
 class EditAttachmentForm(forms.Form):
     """
-    A formular for editing existing Attachments.  For a more detailed
+    A form for editing existing Attachments.  For a more detailed
     description, have a look at the AddAttachmentForm.
     """
     attachment = forms.FileField(required=False)
     text = forms.CharField(label='Description', widget=forms.Textarea,
                            required=False)
     note = forms.CharField(max_length=512, required=False)
+
+
+class ManageDiscussionForm(forms.Form):
+    """Let the user set an existing thread as discussion of a page"""
+    topic = forms.CharField(label='Slug des Themas', max_length=50,
+        help_text=u'Den Slug eines Themas findest du in der URL (z. B. <var>'
+        u'beispiel</var> bei <em>%s</em>)' % href('forum', 'topic', 'beispiel'))
+
+    def clean_topic(self):
+        d = self.cleaned_data
+        topic = Topic.query.filter_by(slug=d['topic']).first()
+        if topic is None:
+            raise forms.ValidationError(u'Dieses Thema existiert nicht!')
+        return topic
+
+

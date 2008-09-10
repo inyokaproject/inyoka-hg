@@ -40,5 +40,8 @@
     <li><a href="?action=attach">Dateianhänge verwalten</a></li>
     {%- endif %}
     <li><a href="?action=prune">Cache leeren</a></li>
+    {%- if can.edit %}
+    <li><a href="?action=manage_discussion">Diskussion verknüpfen</a></li>
+    {%- endif %}
   </ul>
 {% endblock %}

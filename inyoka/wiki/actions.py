@@ -37,11 +37,13 @@ from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
 from inyoka.utils.storage import storage
 from inyoka.wiki.models import Page, Revision
-from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, EditAttachmentForm
+from inyoka.wiki.forms import PageEditForm, AddAttachmentForm, \
+    EditAttachmentForm, ManageDiscussionForm
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
+from inyoka.forum.models import Topic
 
 
 def context_modifier(request, context):
@@ -849,21 +851,43 @@ def do_unsubscribe(request, page_name):
               u'nicht mehr benachrichtigt.', True)
     return HttpResponseRedirect(url_for(p))
 
+@require_privilege('edit')
+@does_not_exist_is_404
+@templated('wiki/action_manage_discussion.html')
+def do_manage_discussion(request, name):
+    page = Page.objects.get(name=name)
+    if request.method == 'POST':
+        form = ManageDiscussionForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            page.topic_id = data['topic'].id
+            page.save()
+            return HttpResponseRedirect(url_for(data['topic']))
+    elif page.topic_id is None:
+        form = ManageDiscussionForm()
+    else:
+        topic = Topic.query.get(page.topic_id)
+        form = ManageDiscussionForm(initial={'topic': topic.slug})
+    return {
+        'page': page,
+        'form': form,
+    }
 
 PAGE_ACTIONS = {
-    'show':         do_show,
-    'metaexport':   do_metaexport,
-    'log':          do_log,
-    'diff':         do_diff,
-    'revert':       do_revert,
-    'rename':       do_rename,
-    'edit':         do_edit,
-    'delete':       do_delete,
-    'backlinks':    do_backlinks,
-    'export':       do_export,
-    'attach':       do_attach,
-    'prune':        do_prune,
-    'manage':       do_manage,
-    'subscribe':    do_subscribe,
-    'unsubscribe':  do_unsubscribe
+    'show':              do_show,
+    'metaexport':        do_metaexport,
+    'log':               do_log,
+    'diff':              do_diff,
+    'revert':            do_revert,
+    'rename':            do_rename,
+    'edit':              do_edit,
+    'delete':            do_delete,
+    'backlinks':         do_backlinks,
+    'export':            do_export,
+    'attach':            do_attach,
+    'prune':             do_prune,
+    'manage':            do_manage,
+    'subscribe':         do_subscribe,
+    'unsubscribe':       do_unsubscribe,
+    'manage_discussion': do_manage_discussion,
 }
