@@ -59,7 +59,7 @@
       }).parent().parent().parent().append(preview);
     })();
     (function() {
-        search_field = $('<span class="usersearch"> Suche: </span>')
+        var search_field = $('<span class="usersearch"> Suche: </span>')
             .append($('<input type="text" id="privmsg_search_user" />').autocomplete("/?__service__=admin.get_user_autocompletion", {
                 delay: 40, maxItemsToShow: 15, cacheLength: 10}))
             .append($(' <input style="margin-left: 1ex" type="button" value="Hinzufügen" />').click(function () {
@@ -72,7 +72,7 @@
                     + sep + $('#privmsg_search_user').val());
                 $('#privmsg_search_user').val("");
             }));
-        search_link = $('<a style="text-decoration: none; padding-left: 1ex;" id="privmsg_search_user_link">Suchen…</a>').click(function () {
+        var search_link = $('<a style="text-decoration: none; padding-left: 1ex;" id="privmsg_search_user_link">Suchen…</a>').click(function () {
             $('#privmsg_search_user_link').after(search_field);
             $('#privmsg_search_user_link').remove();
         });
