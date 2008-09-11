@@ -345,8 +345,12 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                              normalize_pagename(article_name)))
         forum_slug = settings.WIKI_DISCUSSION_FORUM
         flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
-              u'Wenn du willst, kannst du hier eine neue anlegen.' %
-                                                (escape(article_name)))
+              u'Wenn du willst, kannst du hier eine neue anlegen, oder '
+              u'<a href="%s">ein bestehendes Thema als Diskussion auswählen</a>.' % (
+                  escape(article_name),
+                  href('wiki', normalize_pagename(article_name),
+                       action='manage_discussion'),
+              ))
     if topic_slug:
         try:
             topic = Topic.query.filter_by(slug=topic_slug).one()
