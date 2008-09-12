@@ -98,6 +98,7 @@ class EditArticleForm(forms.Form):
                   u'(empfohlen).')
     comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt',
                                           required=False)
+    checksum = forms.CharField(widget=forms.HiddenInput, required=False)
 
 
 class EditCategoryForm(forms.Form):

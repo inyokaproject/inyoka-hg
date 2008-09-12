@@ -347,6 +347,7 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 dt = get_user_timezone().localize(data['pub_date']) \
                     .astimezone(pytz.utc).replace(tzinfo=None)
                 data['pub_date'], data['pub_time'] = dt.date(), dt.time()
+                checksum = data.pop('checksum')
 
                 if not data.get('icon_id'):
                     data['icon_id'] = None
@@ -360,15 +361,24 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                     return HttpResponseRedirect(url_for(article, 'edit'))
                 else:
                     changed = False
+                    db_checksum = article.checksum
                     for k in data:
                         if article.__getattribute__(k) != data[k]:
                             article.__setattr__(k, data[k])
                             changed = True
                     if changed:
                         article.updated = datetime.utcnow()
-                        article.save()
-                        flash(u'Der Artikel „%s“ wurde geändert.'
-                              % escape(article.subject), True)
+                        if db_checksum == checksum:
+                            article.save()
+                            flash(u'Der Artikel „%s“ wurde gespeichert.'
+                                  % escape(article.subject), True)
+                            return HttpResponseRedirect(url_for(article))
+                        else:
+                            form.errors['__all__'] = ErrorList(
+                                form.errors.get('__all__', []) + [
+                                    u'Der Artikel wurde seit Beginn des '
+                                    u'Bearbeitens verändert!'
+                                ])
                     else:
                         flash(u'Der Artikel „%s“ wurde nicht verändert'
                               % escape(article.subject))
@@ -390,6 +400,7 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 'public': article.public,
                 'slug': article.slug,
                 'comments_enabled': article.comments_enabled,
+                'checksum': article.checksum,
             }
         elif suggestion_id:
             suggestion = Suggestion.objects.get(id=suggestion_id)
