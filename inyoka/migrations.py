@@ -998,6 +998,13 @@ def add_reported_topics_storage(m):
         'reported_topics_subscribers': '',
     })
 
+def add_group_is_public_flag(m):
+    '''re-add the is_public flag to groups'''
+    m.engine.execute('''
+        ALTER TABLE portal_group
+            ADD COLUMN `is_public` tinyint(1) NOT NULL DEFAULT 1 AFTER name;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1022,4 +1029,5 @@ MIGRATIONS = [
     fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
     add_egosearch_index, add_planet_hidden, forum_plaintext,
     add_negative_privileges, add_reported_topics_storage,
+    add_group_is_public_flag,
 ]

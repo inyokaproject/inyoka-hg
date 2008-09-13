@@ -1018,7 +1018,7 @@ div.not_found img {
   float: right;
 }
 
-.hidden * { /* this is for hidden topics, etc.  use .hide to really hide stuff */
+.hidden *, .hidden { /* this is for hidden topics, etc.  use .hide to really hide stuff */
   color: #888 !important;
 } 
 

@@ -951,6 +951,7 @@ def group_edit(request, name=None):
         if form.is_valid():
             data = form.cleaned_data
             group.name = data['name']
+            group.is_public = data['is_public']
 
             if data['delete_icon']:
                 group.delete_icon()
@@ -1037,15 +1038,19 @@ def group_edit(request, name=None):
                 ]
                 cache.delete_many(*keys)
 
-            flash(u'Die Gruppe „<a href="%ss">%s</a>“ wurde erfolgreich %s'
+            flash(u'Die Gruppe „<a href="%s">%s</a>“ wurde erfolgreich %s'
                   % (href('admin', 'groups', escape(group.name)),
                      escape(group.name), new and 'erstellt' or 'editiert'),
                   True)
+            if new:
+                return HttpResponseRedirect(group.get_absolute_url('edit'))
     else:
         form = form_class(initial=not new and {
             'name': group.name,
             'permissions': filter(lambda p: p & group.permissions, PERMISSION_NAMES.keys())
-        } or {})
+        } or {
+            'is_public': True,
+        })
         _add_choices(form)
 
     # collect forum privileges

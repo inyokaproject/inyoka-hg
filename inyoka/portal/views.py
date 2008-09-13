@@ -499,9 +499,13 @@ def profile(request, username):
         escape(url_for(user)),
         escape(user.username),
     ))
+    if request.user.can('group_edit') or request.user.can('user_edit'):
+        groups = user.groups.all()
+    else:
+        groups = user.groups.filter(is_public=True)
     return {
         'user':     user,
-        'groups':   user.groups.all(),
+        'groups':   groups,
         'wikipage': content,
         'User':     User,
     }
@@ -1053,7 +1057,11 @@ def grouplist(request, page=1):
 
     `page` represents the current page in the pagination.
     """
-    table = Sortable(Group.objects.all(), request.GET, 'name',
+    if request.user.can('group_edit') or request.user.can('user_edit'):
+        groups = Group.objects.all()
+    else:
+        groups = Group.objects.filter(is_public=True)
+    table = Sortable(groups, request.GET, 'name',
                      columns=['id', 'name'])
     pagination = Pagination(request, table.get_objects(), page, 15)
     set_session_info(request, u'schaut sich die Gruppenliste an.',
@@ -1071,6 +1079,8 @@ def grouplist(request, page=1):
 def group(request, name, page=1):
     """Shows the informations about the group named `name`."""
     group = Group.objects.get(name__iexact=name)
+    if not (group.is_public or request.user.can('group_edit') or request.user.can('user_edit')):
+        raise PageNotFound
     users = group.user_set
 
     table = Sortable(users, request.GET, 'id',

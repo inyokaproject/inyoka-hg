@@ -306,6 +306,7 @@ class EditUserForm(forms.Form):
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
+    is_public = forms.BooleanField(label=u'Öffentlich', required=False)
     permissions = forms.MultipleChoiceField(label=u'Privilegien',
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'permission'}),
         required=False)
@@ -320,7 +321,7 @@ class EditGroupForm(forms.Form):
 class CreateGroupForm(EditGroupForm):
 
     def clean_name(self):
-        """Validates that the name is alphanimeric and is not already in use."""
+        """Validates that the name is alphanumeric and is not already in use."""
 
         data = self.cleaned_data
         if 'name' in data:

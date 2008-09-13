@@ -36,20 +36,25 @@
 <form enctype="multipart/form-data" action="" method="post">
   <dl>
     {{ render_form(form, ['name'], inline=true) }}
+    <dd>
+      {{ form.is_public }} <label for="id_is_public">Öffentlich</label>
+      <span class="help_text">wird in der Gruppenübersicht und im Benutzerprofil angezeigt</span>
+      {{- form.is_public.errors }}
+    </dd>
     <dl>
       <dt>Team-Icon:</dt>
-      {% if group.icon %}<dd><img class="admin_teamicon" src="{{ group.icon_url }}" alt="Team Icon" /></dd>{% endif %}
+      {% if group.icon %}<dd><img class="admin_teamicon" src="{{ group.icon_url }}" alt="Team-Icon" /></dd>{% endif %}
       <dd>{{ form.icon }}</dd>
       {%- if team_icon_height >= 0 and team_icon_width >= 0 %}
       <dd class="note">
-        Beachte, dass das Team Icon maximal <strong>{{ team_icon_width }} x {{ team_icon_height }}</strong> Pixel groß sein darf.<br />
+        Beachte, dass das Team-Icon maximal <strong>{{ team_icon_width }} x {{ team_icon_height }}</strong> Pixel groß sein darf.<br />
         Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
         Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
       </dd>
       {%- endif %}
       <dd>{{ form.import_icon_from_global }} <label for="id_import_icon_from_global">Globales Team-Icon importieren</label></dd>
       {%- if group.icon %}
-      <dd>{{ form.delete_icon }} <label for="id_delete_icon">Team Icon löschen</label></dd>
+      <dd>{{ form.delete_icon }} <label for="id_delete_icon">Team-Icon löschen</label></dd>
       {%- endif %}
       {%- if form.errors.avatar or form.errors.delete_avatar %}<dd>{{ form.errors.avatar }}{{ form.errors.delete_avatar }}</dd>{% endif %}
     </dl>

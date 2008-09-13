@@ -24,6 +24,9 @@
       <strong>{{ count }}</strong> Mitglieder:
     {%- endtrans %}
   </p>
+  {%- if not group.is_public %}
+  <p>Diese Gruppe ist für normale Benutzer nicht sichtbar und die Mitgliedschaft wird nicht im Benutzerprofil angezeigt.</p>
+  {%- endif %}
   <table>
     <tr>
       <th>{{ table.get_html('id', '#') }}</th>
