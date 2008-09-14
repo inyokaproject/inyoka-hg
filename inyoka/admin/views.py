@@ -1047,7 +1047,8 @@ def group_edit(request, name=None):
     else:
         form = form_class(initial=not new and {
             'name': group.name,
-            'permissions': filter(lambda p: p & group.permissions, PERMISSION_NAMES.keys())
+            'permissions': filter(lambda p: p & group.permissions, PERMISSION_NAMES.keys()),
+            'is_public': group.is_public,
         } or {
             'is_public': True,
         })

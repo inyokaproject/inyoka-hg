@@ -1059,8 +1059,10 @@ def grouplist(request, page=1):
     """
     if request.user.can('group_edit') or request.user.can('user_edit'):
         groups = Group.objects.all()
+        user_groups = request.user.groups.all()
     else:
         groups = Group.objects.filter(is_public=True)
+        user_groups = request.user.groups.filter(is_public=True)
     table = Sortable(groups, request.GET, 'name',
                      columns=['id', 'name'])
     pagination = Pagination(request, table.get_objects(), page, 15)
@@ -1068,8 +1070,8 @@ def grouplist(request, page=1):
                      'Gruppenliste')
     return {
         'groups':      list(pagination.objects),
-        'group_count': Group.objects.count(),
-        'user_groups': request.user.groups.count(),
+        'group_count': len(groups),
+        'user_groups': user_groups,
         'pagination':  pagination,
         'table':       table
     }

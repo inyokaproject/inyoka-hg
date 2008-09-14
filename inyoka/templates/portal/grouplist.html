@@ -22,7 +22,7 @@
       <strong>{{ count }}</strong> Gruppe
     {%- pluralize -%}
       <strong>{{ count }}</strong> Gruppen
-    {%- endtrans %} von denen du in <strong>{{ user_groups }}</strong> Mitglied bist (fett gedruckt).
+    {%- endtrans %} von denen du in <strong>{{ user_groups.count() }}</strong> Mitglied bist (fett gedruckt).
   </p>
   <table>
     <tr>
@@ -33,9 +33,9 @@
     <tr>
       <td>{{ group.id }}</td>
       <td{% if not group.is_public %} class="hidden"{% endif %}>
-        {%- if group in USER.groups.all() %}<strong>{% endif -%}
+        {%- if group in user_groups %}<strong>{% endif -%}
         <a href="{{ group|url }}">{{ group.name|e }}</a>
-        {%- if group in USER.groups.all() %}</strong>{% endif -%}
+        {%- if group in user_groups %}</strong>{% endif -%}
       </td>
     </tr>
     {%- endfor %}
