@@ -153,7 +153,7 @@
             {%- if post.author.member_title %}
             <div class="member_title">{{ post.author.member_title }}</div>
             {%- endif %}
-            {%- if not loop.first and post.author == topic.author %}
+            {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
             {# TODO: different class?! #}
             <div class="member_title">(Threadstarter)</div>
             {%- endif %}

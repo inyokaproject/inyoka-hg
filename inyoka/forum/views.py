@@ -310,7 +310,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_vote':          can_vote,
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
-        'discussions':        discussions,
+        'discussions':       discussions,
     }
 
 
