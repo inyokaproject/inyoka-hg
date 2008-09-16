@@ -17,7 +17,7 @@ def on_get_user_autocompletion(request):
     q = request.GET.get('q', '')
     if len(q) < 3:
         return
-    qs = list(User.objects.filter(username__startswith=q)[:11])
+    qs = list(User.objects.filter(username__istartswith=q)[:11])
     usernames = [x.username for x in qs]
     if len(qs) > 10:
         usernames[10] = '…'
