@@ -1,12 +1,12 @@
 from inyoka.default_settings import *
+from os.path import join
 
 DATABASE_NAME = 'ubuntuusers'
 DATABASE_USER = 'root'
 
-XAPIAN_DATABASE = '/path/to/our_inyoka.xapdb'
-
 # debug settings
 DEBUG = ENABLE_DEBUGGER = True
+ENABLE_TRAC_LOGGING = False
 
 # url settings
 BASE_DOMAIN_NAME = 'ubuntuusers.local:8080'
