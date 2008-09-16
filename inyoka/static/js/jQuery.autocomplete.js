@@ -77,6 +77,9 @@ $.autocomplete = function(input, options) {
       // track last key pressed
       lastKeyPressCode = e.keyCode;
       switch(e.keyCode) {
+	  	case 8:
+			if(options.onDelete && $input.val() == "") options.onDelete();
+			break;
         case 38: // up
           e.preventDefault();
           moveSelect(-1);
@@ -108,6 +111,7 @@ $.autocomplete = function(input, options) {
       // track whether the field has focus
       hasFocus = false;
       hideResults();
+	  if(options.onBlur) options.onBlur();
 	  });
 
 	hideResultsNow();
@@ -316,6 +320,7 @@ $.autocomplete = function(input, options) {
 	function requestData(q) {
 		if (!options.matchCase) q = q.toLowerCase();
 		var data = options.cacheLength ? loadFromCache(q) : null;
+		//var data = null; //nocache
 		// recieve the cached data
 		if (data)
 			receiveData(q, data);

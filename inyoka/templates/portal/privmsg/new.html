@@ -10,7 +10,7 @@
 {%- extends 'portal/privmsg/overall.html' %}
 {% from 'macros.html' import render_form %}
 {% set styles = ['editor.css'] %}
-{% set scripts = ['WikiEditor.js', 'jQuery.autocomplete.js'] %}
+{% set scripts = ['WikiEditor.js', 'jQuery.autocomplete.js', 'jQuery.tokenfield.js'] %}
 {% set title_trace = ['Neue Nachricht'] %}
 {% set selected = 'new' %}
 
@@ -59,24 +59,8 @@
       }).parent().parent().parent().append(preview);
     })();
     (function() {
-        var search_field = $('<span class="usersearch"> Suche: </span>')
-            .append($('<input type="text" id="privmsg_search_user" />').autocomplete("/?__service__=admin.get_user_autocompletion", {
-                delay: 40, maxItemsToShow: 15, cacheLength: 10}))
-            .append($(' <input style="margin-left: 1ex" type="button" value="Hinzufügen" />').click(function () {
-                sep = ""
-                if( $('#id_recipient').val() != "" ) {
-                    sep = "; "
-                }
-                $('#id_recipient').val(
-                    $('#id_recipient').val()
-                    + sep + $('#privmsg_search_user').val());
-                $('#privmsg_search_user').val("");
-            }));
-        var search_link = $('<a style="text-decoration: none; padding-left: 1ex;" id="privmsg_search_user_link">Suchen…</a>').click(function () {
-            $('#privmsg_search_user_link').after(search_field);
-            $('#privmsg_search_user_link').remove();
-        });
-        $("#id_recipient").after(search_link);
+       $("#id_recipient").wrap($('<div class="tf_tokenfield"><div>')).token_field("/?__service__=admin.get_user_autocompletion", {
+                delay: 40, maxItemsToShow: 15, cacheLength: 10});
     })();
     /* ]]> */
   </script>
