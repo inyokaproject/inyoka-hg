@@ -1571,7 +1571,7 @@ def welcome(request, slug, path=None):
         raise PageNotFound()
     goto_url = path or url_for(forum)
     if request.method == 'POST':
-        accepted = request.POST.get('accept', False)
+        accepted = request.POST.get('accept', False) and True
         forum.read_welcome(request.user, accepted)
         session.commit()
         if accepted:
