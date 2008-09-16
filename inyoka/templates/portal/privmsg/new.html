@@ -60,7 +60,7 @@
     })();
     (function() {
        $("#id_recipient").wrap($('<div class="tf_tokenfield"><div>')).token_field("/?__service__=admin.get_user_autocompletion", {
-                delay: 40, maxItemsToShow: 15, cacheLength: 10});
+                delay: 40, maxItemsToShow: 15, cacheLength: 10, minChars: 3});
     })();
     /* ]]> */
   </script>
