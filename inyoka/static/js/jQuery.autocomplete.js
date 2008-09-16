@@ -76,6 +76,7 @@ $.autocomplete = function(input, options) {
     .keydown(function(e) {
       // track last key pressed
       lastKeyPressCode = e.keyCode;
+      flushCache(); // no cache
       switch(e.keyCode) {
 	  	case 8:
 			if(options.onDelete && $input.val() == "") options.onDelete();
@@ -319,8 +320,8 @@ $.autocomplete = function(input, options) {
 
 	function requestData(q) {
 		if (!options.matchCase) q = q.toLowerCase();
-		var data = options.cacheLength ? loadFromCache(q) : null;
-		//var data = null; //nocache
+		//var data = options.cacheLength ? loadFromCache(q) : null;
+		var data = null; //nocache
 		// recieve the cached data
 		if (data)
 			receiveData(q, data);
