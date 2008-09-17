@@ -9,6 +9,10 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import random
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
 from datetime import datetime
 from django.db import models, connection
 from inyoka.portal.user import User
@@ -175,6 +179,11 @@ class Article(models.Model):
             'delete': ('admin', 'ikhaya', 'articles', 'delete', self.id)
         }[action])
 
+    @property
+    def checksum(self):
+        return md5(''.join(x.encode('utf8') for x in
+            (self.subject, self.intro, self.text))).hexdigest()
+
     def __unicode__(self):
         return u'%s - %s' % (
             self.pub_date.strftime('%d.%m.%Y'),
@@ -189,7 +198,7 @@ class Article(models.Model):
 
     def save(self, force_insert=False, force_update=False):
         """
-        This increases the edit count by 1 annd updates the xapian database.
+        This increases the edit count by 1 and updates the xapian database.
         """
         suffix_id = False
         if not self.updated or self.updated < self.pub_datetime:

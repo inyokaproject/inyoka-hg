@@ -102,6 +102,7 @@ def check_password(raw_password, enc_password, convert_user=None):
 
 class Group(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
+    is_public = models.BooleanField(u'Öffentliches Profil')
     _default_group = None
     permissions = models.IntegerField('Berechtigungen', default=0)
     icon = models.ImageField('Teamicon', upload_to='portal/team_icons',
@@ -152,6 +153,8 @@ class Group(models.Model):
         self.icon = None
 
     def get_absolute_url(self, action=None):
+        if action == 'edit':
+            return href('admin', 'groups', 'edit', self.name)
         return href('portal', 'group', self.name)
 
     def __unicode__(self):

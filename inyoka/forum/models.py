@@ -391,7 +391,7 @@ class Forum(object):
         else:
             status.discard(self.id)
         user.forum_welcome = ','.join(str(i) for i in status)
-        dbsession.flush([user])
+        user.save()
 
     def invalidate_topic_cache(self):
         for page in xrange(CACHE_PAGES_COUNT):

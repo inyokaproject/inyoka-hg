@@ -82,7 +82,7 @@ class SurgeProtectionMixin(object):
         # only perform surge protection tests if the form is valid up
         # to that point.  This is important because otherwise form
         # errors would trigger the surge protection!
-        if self.is_valid:
+        if self.is_valid():
             identifier = self.source_protection_identifier or \
                          self.__class__.__module__.split('.')[1]
             storage = current_request.session.setdefault('sp', {})

@@ -97,7 +97,7 @@ USE_ETAGS = True
 EMAIL_SUBJECT_PREFIX = u'ubuntuusers: '
 
 # path to the xapian database
-XAPIAN_DATABASE = ''
+XAPIAN_DATABASE = join(BASE_PATH, 'inyoka.xapdb')
 
 # imagemagick path. leave empty for auto detection
 IMAGEMAGICK_PATH = ''

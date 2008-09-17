@@ -28,9 +28,9 @@
     (topic|url, topic.title)
   ] %}
 
-{% block search_areas %}
-  <option value="topic" selected="selected">Dieses Thema</option>
-{% endblock %}
+{% macro generate_subscription_link(do='subscribe') %}
+  {{ href('forum', 'topic', topic.slug, do, continue=CURRENT_URL)|e }}
+{% endmacro %}
 
 {% macro topic_actions() %}
   <span class="linklist">
@@ -41,9 +41,9 @@
     {%- endif %}
     {% if USER.is_authenticated %}
       {%- if is_subscribed %}
-      <a href="{{ href('forum', 'topic', topic.slug, 'unsubscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abbestellen</a> |
+      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe">abbestellen</a> |
       {%- else %}
-      <a href="{{ href('forum', 'topic', topic.slug, 'subscribe', continue=CURRENT_URL)|e }}" class="action action_subscribe">abonnieren</a>  |
+      <a href="{{ generate_subscription_link() }}" class="action action_subscribe">abonnieren</a>  |
       {%- endif %}
       {%- if topic.solved %}
       <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a>  |
@@ -54,6 +54,10 @@
       {% endif %}
   </span>
 {% endmacro %}
+
+{% block search_areas %}
+  <option value="topic" selected="selected">Dieses Thema</option>
+{% endblock %}
 
 {% block forum_content %}
   <div class="topic_box">
@@ -149,7 +153,7 @@
             {%- if post.author.member_title %}
             <div class="member_title">{{ post.author.member_title }}</div>
             {%- endif %}
-            {%- if not loop.first and post.author == topic.author %}
+            {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
             {# TODO: different class?! #}
             <div class="member_title">(Threadstarter)</div>
             {%- endif %}

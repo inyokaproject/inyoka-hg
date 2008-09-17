@@ -10,7 +10,7 @@
 {%- extends 'portal/privmsg/overall.html' %}
 {% from 'macros.html' import render_form %}
 {% set styles = ['editor.css'] %}
-{% set scripts = ['WikiEditor.js', 'jQuery.autocomplete.js'] %}
+{% set scripts = ['WikiEditor.js', 'jQuery.autocomplete.js', 'jQuery.tokenfield.js'] %}
 {% set title_trace = ['Neue Nachricht'] %}
 {% set selected = 'new' %}
 
@@ -57,8 +57,11 @@
         });
         return false;
       }).parent().parent().parent().append(preview);
-      $('#id_recipient').autocomplete("/?__service__=admin.get_user_autocompletion", {
-        delay: 40, maxItemsToShow: 15, cacheLength: 10});
+    })();
+    (function() {
+       $("#id_recipient").wrap($('<div class="tf_tokenfield"><div>')).token_field("/?__service__=admin.get_user_autocompletion", {
+                delay: 40, maxItemsToShow: 15, cacheLength: 10, minChars: 3});
+		$("#id_recipient").parent().parent().parent().children("p.note").remove()
     })();
     /* ]]> */
   </script>

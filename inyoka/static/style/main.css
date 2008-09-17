@@ -1018,7 +1018,7 @@ div.not_found img {
   float: right;
 }
 
-.hidden * { /* this is for hidden topics, etc.  use .hide to really hide stuff */
+.hidden *, .hidden { /* this is for hidden topics, etc.  use .hide to really hide stuff */
   color: #888 !important;
 } 
 
@@ -1189,4 +1189,34 @@ div.dropdown {
   background-color: #EEE;
   padding: 0 .66em;
   margin: 0;
+}
+.tf_tokenfield {
+    border: 1px solid #AAAAAA;
+    display: table;
+    display: inline-block;
+}
+.tf_tokenfield .tf_token {
+    display: table;
+    display: inline-block;
+    background-color: #F6F6F6;
+    border: 1px solid #AAAAAA;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    margin: 1px;
+    padding-left: .5ex;
+    padding-right: .5ex;
+}
+.tf_tokenfield .tf_token span {
+    display: table;
+    display: inline-block;
+    width: 15px;
+    cursor: default;
+    background-image: url('../img/forum/delete.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin-left: .5ex;
+}
+.tf_tokenfield input {
+    border: none;
 }

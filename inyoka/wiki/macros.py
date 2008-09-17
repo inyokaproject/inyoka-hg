@@ -697,6 +697,7 @@ class Template(Macro):
     def __init__(self, args, kwargs):
         if not args:
             self.template = None
+            self.context = []
             return
         items = kwargs.items()
         for idx, arg in enumerate(args[1:]):

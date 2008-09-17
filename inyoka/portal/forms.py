@@ -381,7 +381,7 @@ class PrivateMessageForm(forms.Form):
 
 
 class DeactivateUserForm(forms.Form):
-    """Form for the user control pannel -- deactivate_user view."""
+    """Form for the user control panel -- deactivate_user view."""
     password_confirmation = forms.CharField(widget=forms.PasswordInput)
 
 

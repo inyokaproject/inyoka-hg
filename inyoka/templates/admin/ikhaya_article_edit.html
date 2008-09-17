@@ -40,6 +40,7 @@
 {% endif %}
 
 <form action="" method="post" class="ikhaya">
+  {{ form.errors.__all__ }}
   {%- if article.icon %}
   <div class="icon"><img src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" /></div>
   {%- endif %}
@@ -51,6 +52,7 @@
   {{ render_form(form, ['slug', 'public', 'comments_enabled'], inline=true) }}
   </dl>
   <p>
+    {{ form.checksum }}
     <input type="submit" value="Speichern" name="send" />
     <input type="submit" value="Vorschau" name="preview" />
     {%- if article %}

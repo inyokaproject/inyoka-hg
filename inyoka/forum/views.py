@@ -310,7 +310,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_vote':          can_vote,
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
-        'discussions':        discussions,
+        'discussions':       discussions,
     }
 
 
@@ -345,8 +345,12 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                              normalize_pagename(article_name)))
         forum_slug = settings.WIKI_DISCUSSION_FORUM
         flash(u'Zu dem Artikel „%s“ existiert noch keine Diskussion. '
-              u'Wenn du willst, kannst du hier eine neue anlegen.' %
-                                                (escape(article_name)))
+              u'Wenn du willst, kannst du hier eine neue anlegen, oder '
+              u'<a href="%s">ein bestehendes Thema als Diskussion auswählen</a>.' % (
+                  escape(article_name),
+                  href('wiki', normalize_pagename(article_name),
+                       action='manage_discussion'),
+              ))
     if topic_slug:
         try:
             topic = Topic.query.filter_by(slug=topic_slug).one()
@@ -1567,7 +1571,7 @@ def welcome(request, slug, path=None):
         raise PageNotFound()
     goto_url = path or url_for(forum)
     if request.method == 'POST':
-        accepted = request.POST.get('accept', False)
+        accepted = request.POST.get('accept', False) and True
         forum.read_welcome(request.user, accepted)
         session.commit()
         if accepted:

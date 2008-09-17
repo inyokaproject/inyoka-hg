@@ -214,6 +214,7 @@
         return false;
       })(editor).appendTo(result);
       var colorbox = $('<ul class="colorbox" />').appendTo(result).hide();
+      colorbox[0].style.display = 'none'; //hide box in safari
       $.each(COLORS, function() {
         var color = this;
         $('<li />')
@@ -238,6 +239,7 @@
         return false;
       })(editor).appendTo(result);
       var smileybox = $('<ul class="smileybox" />').appendTo(result).hide();
+      smileybox[0].style.display = 'none'; //hide box in safari
       $.getJSON('/?__service__=wiki.get_smilies', function(smilies) {
         $.each(smilies, function() {
           var code = this[0], src = this[1];
