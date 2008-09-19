@@ -537,6 +537,7 @@ class User(models.Model):
             'activate_delete': ('portal', 'register', 'delete',
                                 self.urlsafe_username,
                                 gen_activation_key(self)),
+            'admin': ('admin', 'users', 'edit', self.urlsafe_username),
         }[action])
 
     def login(self, request):
