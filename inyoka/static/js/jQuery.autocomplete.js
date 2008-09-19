@@ -76,7 +76,6 @@ $.autocomplete = function(input, options) {
     .keydown(function(e) {
       // track last key pressed
       lastKeyPressCode = e.keyCode;
-      flushCache(); // no cache
       switch(e.keyCode) {
 	  	case 8:
 			if(options.onDelete && $input.val() == "") options.onDelete();
@@ -93,7 +92,7 @@ $.autocomplete = function(input, options) {
         case 13: // return
           if (selectCurrent()) {
             // make sure to blur off the current field
-            $input.get(0).blur();
+            //$input.get(0).blur(); // commented cout because we do not want that
             e.preventDefault();
           }
           break;
@@ -104,6 +103,12 @@ $.autocomplete = function(input, options) {
           break;
       }
     })
+      .keypress(function(e){
+          if((e.charCode || e.keyCode) == options.splitTokenKey && options.onSplitToken) {
+  				    e.preventDefault();
+  				    options.onSplitToken();
+  			}
+      })
 	  .focus(function(){
       // track whether the field has focus, we shouldn't process any results if the field no longer has focus
       hasFocus = true;
@@ -187,6 +192,7 @@ $.autocomplete = function(input, options) {
 		$input.val(v);
 		hideResultsNow();
 		if (options.onItemSelect) setTimeout(function() { options.onItemSelect(li) }, 1);
+		$input.focus();
 	};
 
 	// selects a portion of the input string
@@ -320,10 +326,9 @@ $.autocomplete = function(input, options) {
 
 	function requestData(q) {
 		if (!options.matchCase) q = q.toLowerCase();
-		//var data = options.cacheLength ? loadFromCache(q) : null;
-		var data = null; //nocache
+		var data = options.cacheLength ? loadFromCache(q) : null;
 		// recieve the cached data
-		if (data)
+		if (data != null && data.length >= options.limit)
 			receiveData(q, data);
 		// if an AJAX url has been supplied, try loading the data now
 		else if ((typeof options.url == "string") && (options.url.length > 0))
@@ -479,8 +484,11 @@ $.fn.autocomplete = function(url, options, data) {
 	options.selectFirst = options.selectFirst || true;
 	options.selectOnly = options.selectOnly || false;
 	options.maxItemsToShow = options.maxItemsToShow || -1;
+	options.limit = options.limit || -1;
 	options.autoFill = options.autoFill || true;
 	options.width = parseInt(options.width, 10) || 0;
+	if(options.splitToken) options.splitTokenKey = options.splitToken.charCodeAt(0);
+	else options.splitTokenKey = -1;
 
 	this.each(function() {
 		var input = this;
