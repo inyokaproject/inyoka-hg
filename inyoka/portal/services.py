@@ -13,7 +13,7 @@ import md5
 import time
 from urlparse import urlparse
 from inyoka.conf import settings
-from inyoka.portal.user import User
+from inyoka.portal.user import User, Group
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect
@@ -24,7 +24,6 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.xmlrpc import xmlrpc
 from inyoka.utils.urls import href
 
-
 def on_get_current_user(request):
     """Get the current user."""
     user = request.user
@@ -34,6 +33,27 @@ def on_get_current_user(request):
         'email':            getattr(user, 'email', None),
     }
 
+def on_get_user_list(request):
+    q = request.GET.get('q', '')
+    if len(q) < 3:
+        return
+    qs = list(User.objects.filter(username__istartswith=q, 
+                                  status__exact=1)[:11])
+    usernames = [x.username for x in qs]
+    if len(qs) > 10:
+        usernames[10] = '...'
+    return usernames
+    
+def on_get_group_list(request):
+    q = request.GET.get('q', '')
+    #if len(q) < 3:
+    #    return
+    qs = list(Group.objects.filter(name__istartswith=q, 
+                                  is_public__exact=True)[:11])
+    groupnames = [x.name for x in qs]
+    if len(qs) > 10:
+        groupnames[10] = '...'
+    return groupnames
 
 def on_get_usermap_markers(request):
     """Return markers for the usermap."""
@@ -110,6 +130,8 @@ def hide_global_message(request):
 
 dispatcher = SimpleDispatcher(
     get_current_user=on_get_current_user,
+    get_user_autocompletion=on_get_user_list,
+    get_group_autocompletion=on_get_group_list,
     get_usermap_markers=on_get_usermap_markers,
     get_random_password=on_get_random_password,
     get_captcha=on_get_captcha,
