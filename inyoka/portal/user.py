@@ -363,6 +363,16 @@ class User(models.Model):
     is_banned = property(lambda x: x.status == 2)
     is_deleted = property(lambda x: x.status == 3)
 
+    @property
+    def status_info(self):
+        """return user.status in words"""
+        return [
+            u'hat sich noch nicht aktiviert',
+            u'ist aktiv',
+            u'wurde gesperrt',
+            u'hat seinen Account gelöscht',
+        ][self.status]
+
     def inc_post_count(self):
         """Increment the post count in a safe way."""
         cur = connection.cursor()

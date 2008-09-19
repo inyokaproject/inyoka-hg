@@ -917,6 +917,11 @@ def privmsg_new(request, username=None):
                         flash(u'Diesem Systemuser kannst du keine Nachrichten'
                               u' schicken!', False)
                         break
+                    elif not user.is_active:
+                        recipients = None
+                        flash(u'Der Benutzer %s %s.' % (
+                            user.username, user.status_info), False)
+                        break
                     else:
                         recipients.add(user)
             except User.DoesNotExist:
