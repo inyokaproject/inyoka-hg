@@ -77,9 +77,9 @@ $.autocomplete = function(input, options) {
       // track last key pressed
       lastKeyPressCode = e.keyCode;
       switch(e.keyCode) {
-	  	case 8:
-			if(options.onDelete && $input.val() == "") options.onDelete();
-			break;
+        case 8:
+          if(options.onDelete && $input.val() == "") options.onDelete();
+          break;
         case 38: // up
           e.preventDefault();
           moveSelect(-1);
@@ -89,10 +89,18 @@ $.autocomplete = function(input, options) {
           moveSelect(1);
           break;
         case 9:  // tab
+          if (tabCurrent()) {
+            e.preventDefault();
+            active = -1;
+            if (timeout) clearTimeout(timeout);
+            lastKeyPressCode = null;
+            onChange();
+          }
+          break;
         case 13: // return
           if (selectCurrent()) {
             // make sure to blur off the current field
-            //$input.get(0).blur(); // commented cout because we do not want that
+            //$input.get(0).blur(); // commented out because we do not want that
             e.preventDefault();
           }
           break;
@@ -159,6 +167,37 @@ $.autocomplete = function(input, options) {
 		// 	lis[active].scrollIntoView(false);
 		// }
 
+	};
+
+	function tabCurrent() {
+		var li = $("li.ac_over", results)[0];
+		if (!li) {
+			var $li = $("li", results);
+			if (options.selectOnly) {
+				if ($li.length == 1) li = $li[0];
+			} else if (options.selectFirst) {
+				li = $li[0];
+			}
+		}
+		if (li) {
+			tabItem(li);
+			return true;
+		} else {
+			return false;
+		}
+	};
+
+	function tabItem(li) {
+		if (!li) {
+			li = document.createElement("li");
+			li.extra = [];
+			li.selectValue = "";
+		}
+		var v = $.trim(li.selectValue ? li.selectValue : li.innerHTML);
+		$input.val(v);
+    input = $input[0]
+    input.selectionStart = input.selectionEnd = input.textLength
+		$input.focus();
 	};
 
 	function selectCurrent() {

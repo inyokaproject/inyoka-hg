@@ -43,7 +43,7 @@ def on_get_user_list(request):
     if len(qs) > 10:
         usernames[10] = '...'
     return usernames
-    
+
 def on_get_group_list(request):
     q = request.GET.get('q', '')
     #if len(q) < 3:
