@@ -1192,11 +1192,11 @@ div.dropdown {
 }
 .tf_tokenfield {
     border: 1px solid #AAAAAA;
-    display: table;
+    display: inline-table;
     display: inline-block;
 }
 .tf_tokenfield .tf_token {
-    display: table;
+    display: inline-table;
     display: inline-block;
     background-color: #F6F6F6;
     border: 1px solid #AAAAAA;
@@ -1208,7 +1208,7 @@ div.dropdown {
     padding-right: .5ex;
 }
 .tf_tokenfield .tf_token span {
-    display: table;
+    display: inline-table;
     display: inline-block;
     width: 15px;
     cursor: default;

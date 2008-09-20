@@ -659,12 +659,15 @@ def users(request):
     if request.method == 'POST':
         name = request.POST.get('user')
         try:
-            user = User.objects.get(username=name)
+            if '@' in name:
+                user = User.objects.get(email__iexact=name)
+            else:
+                user = User.objects.get(name)
         except User.DoesNotExist:
             flash(u'Der Benutzer „%s“ existiert nicht.'
                   % escape(name))
         else:
-            return HttpResponseRedirect(href('admin', 'users', 'edit', name))
+            return HttpResponseRedirect(user.get_absolute_url('admin'))
     return {}
 
 
@@ -686,11 +689,14 @@ def users_with_special_rights(request):
 def user_edit(request, username):
     #: check if the user exists
     try:
-        user = User.objects.get(username=username)
+        if '@' in username:
+            user = User.objects.get(email__iexact=username)
+        else:
+            user = User.objects.get(username)
     except User.DoesNotExist:
-        flash(u'Der Benutzer „%s“ existiert nicht.'
-              % escape(username))
-        return HttpResponseRedirect(href('admin', 'users'))
+        raise PageNotFound
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
 
     groups = dict((g.name, g) for g in Group.objects.all())
     groups_joined, groups_not_joined = ([], [])

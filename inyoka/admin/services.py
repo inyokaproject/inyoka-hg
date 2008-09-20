@@ -12,7 +12,7 @@
 from inyoka.portal.user import User
 from inyoka.utils.services import SimpleDispatcher
 
-
+# The autocompletion for the privmsg is at portal/services.py
 def on_get_user_autocompletion(request):
     q = request.GET.get('q', '')
     if len(q) < 3:

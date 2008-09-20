@@ -1,0 +1,1 @@
+Das Thema {{ topic.title }} wurde von {{ USER.username }} gemeldet. Details: {{ href('forum', 'reported_topics') }}

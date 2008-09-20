@@ -31,7 +31,7 @@
     <dt>{{ form.status.label }}</dt>
     <dd>{{ form.status }} {{ form.errors.status }}<br />
       <span class="note">
-        Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte mal eingeloggt.
+        Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte Mal eingeloggt.
       </span>
       {%- if activation_link %}
       <div class="note">Aktivierungslink: <a href="{{ activation_link }}">{{ activation_link }}</a></div>

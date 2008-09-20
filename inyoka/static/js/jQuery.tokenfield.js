@@ -23,11 +23,11 @@ $.token_field = function(input, options) {
 				$token.insertBefore($input);
 			}
 		}
-	}
+	};
 	
 	function createToken(token) {
 		var $token = $("<span class=" + options.tokenClass + ">" + token + "</span>");
-		$token.append($('<span class="tf_tok_delete">&nbsp;</span>').click(function () {
+		$token.append($('<span class="tf_tok_delete">&nbsp;&nbsp;&nbsp;</span>').click(function () {
 			delindex = token_elements_list.indexOf(token);
 			token_list.splice(delindex, 1);
 			token_elements_list.splice(delindex, 1);
@@ -35,26 +35,26 @@ $.token_field = function(input, options) {
 			$hidden_field.val(token_list.join(options.splitToken));
 		}));
 		return $token;
-	}
+	};
 	this.handleItemSelect = function() {
 		createTokens($input.val());
 		$input.val("");
 		$hidden_field.val(token_list.join(options.splitToken));
-	}
+	};
 	this.handleBlur = function() {
 		if($input.val() != "") {
 			createTokens($input.val());
 			$input.val("");
 			$hidden_field.val(token_list.join(options.splitToken));
 		}
-	}
+	};
 	this.handleDelete = function() {
 		if(token_list.length > 0) {
 			token_list.pop();
 			token_elements_list.pop().remove();
 			$hidden_field.val(token_list.join(options.splitToken));
 		}
-	}
+	};
 };
 $.fn.token_field = function(url, options, data) {
 	options = options || {};
@@ -73,10 +73,13 @@ $.fn.token_field = function(url, options, data) {
 		}
 		options.onBlur = function() {
 			setTimeout(function() {
-				token_field.handleBlur()
+				token_field.handleBlur();
 			},100);
 		}
-		$(input).autocomplete(url, options, data)
+		options.onSplitToken = function() {
+			token_field.handleBlur();
+		}
+		$(input).autocomplete(url, options, data);
 	});
 };
 })(jQuery);
