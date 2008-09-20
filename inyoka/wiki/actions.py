@@ -260,8 +260,8 @@ def do_rename(request, name):
                 for attachment in Page.objects.get_attachment_list(name):
                     ap = Page.objects.get_by_name(attachment)
                     old_attachment_name = ap.name
-                    ap.name = join_pagename(page.trace[-1],
-                                            normalize_pagename(ap.short_title))
+                    ap.name = normalize_pagename(join_pagename(page.trace[-1],
+                                                              ap.short_title))
                     ap.edit(note=u'Umbenannt von %s' % old_attachment_name,
                             remote_addr=request.META.get('REMOTE_ADDR'))
 
