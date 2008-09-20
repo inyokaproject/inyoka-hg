@@ -70,7 +70,6 @@ def action_create_superuser(username='', email='', password=''):
     user._permissions = permissions
     user.save()
     bits = dict(PRIVILEGES_DETAILS).keys()
-    bits.remove('void')
     bits = join_flags(*bits)
     for forum in Forum.query.all():
         privilege = Privilege(
