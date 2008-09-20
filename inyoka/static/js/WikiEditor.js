@@ -142,11 +142,11 @@
   var toolbar = function() {
     return [
     dropdown('headline', 'Überschrift', [
-        item('=', 'Überschrift Stufe 1'),
-        item('==', 'Überschrift Stufe 2'),
-        item('===', 'Überschrift Stufe 3'),
-        item('====', 'Überschrift Stufe 4'),
-        item('=====', 'Überschrift Stufe 5')
+        item('=', 'Überschrift: Stufe 1'),
+        item('==', 'Überschrift: Stufe 2'),
+        item('===', 'Überschrift: Stufe 3'),
+        item('====', 'Überschrift: Stufe 4'),
+        item('=====', 'Überschrift: Stufe 5')
       ],
       function(evt) {
         var delim = evt.target.value;
@@ -282,6 +282,20 @@
         item('[[LetzteÄnderungen(%s)]]', 'Letzte Änderungen'),
         item('[[VerwaisteSeiten(%s)]]', 'Verwaiste Seiten'),
         item('[[NeueSeiten(%s)]]', 'Neue Seiten'),
+      ],
+      function(evt) {
+        if (evt.target.value.length > 0)
+          this.insertTag(evt.target.value, '');
+        evt.target.selectedIndex = 0;
+    }, ['wiki']),
+    dropdown('template', 'Vorlage', [
+        item('[[Vorlage(Tasten, %s)]]', 'Tasten'),
+        item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
+        item('{{{#!vorlage Hinweis\n%s\n}}}', 'Hinweis'),
+        item('{{{#!vorlage Warnung\n%s\n}}}', 'Warnung'),
+        item('[[Vorlage(Fremd, Paket, "%s")]]', 'Fremdpakete-Warnung'),
+        item('[[Vorlage(Fremd, Quelle, "%s")]]', 'Fremdquelle-Warnung'),
+        item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info'),
       ],
       function(evt) {
         if (evt.target.value.length > 0)
