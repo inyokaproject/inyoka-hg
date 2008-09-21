@@ -15,6 +15,7 @@ except ImportError:
     from md5 import new as md5
 from datetime import datetime
 from django.db import models, connection
+from django.db.models import Q
 from inyoka.portal.user import User
 from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext
@@ -39,9 +40,11 @@ class ArticleManager(models.Manager):
         if not self._all:
             q = q.filter(public=self._public)
             if self._public:
-                q = q.filter(pub_date__lte=datetime.utcnow().date())
+                q = q.filter(Q(pub_date__lt=datetime.utcnow().date())|
+                             Q(pub_date = datetime.utcnow().date(), pub_time__lte = datetime.utcnow().time()))
             else:
-                q = q.filter(pub_date__gte=datetime.utcnow().date())
+                q = q.filter(Q(pub_date__gt=datetime.utcnow().date())|
+                             Q(pub_date = datetime.utcnow().date(), pub_time__gte = datetime.utcnow().time()))
         return q
 
     def delete(self):
