@@ -26,7 +26,7 @@
     Dann schreibe Deinen Beitrag hier!
   </p>
   <form action="" method="post">
-    {{ render_form(form, ['title', 'intro', 'text']) }}
+    {{ render_form(form, ['title', 'intro', 'text', 'notes']) }}
     <p>
       <input type="submit" value="Abschicken" />
     </p>
@@ -35,6 +35,7 @@
     /* <![CDATA[ */
     var text = new WikiEditor('textarea[@name="text"]');
     var intro = new WikiEditor('textarea[@name="intro"]');
+    var notes = new WikiEditor('textarea[@name="notes"]');
     /* ]]> */
   </script>
   </div>

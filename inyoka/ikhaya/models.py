@@ -271,6 +271,7 @@ class Suggestion(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     intro = models.TextField()
+    notes = models.TextField()
     owner = models.ForeignKey(User, related_name='owned_suggestion_set',
                               null=True, blank=True)
 
@@ -291,6 +292,16 @@ class Suggestion(models.Model):
         instructions = cache.get(key)
         if instructions is None:
             instructions = parse(self.intro).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
+
+    @property
+    def rendered_notes(self):
+        context = RenderContext(current_request)
+        key = 'ikhaya/suggestion_notes/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.notes).compile('html')
             cache.set(key, instructions)
         return render(instructions, context)
 

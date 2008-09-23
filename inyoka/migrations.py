@@ -1005,6 +1005,14 @@ def add_group_is_public_flag(m):
             ADD COLUMN `is_public` tinyint(1) NOT NULL DEFAULT 1 AFTER name;
     ''')
 
+def add_notes_to_article_suggestion(m):
+    '''add a ``notes`` field to ikhaya article suggestion'''
+    m.engine.execute('''
+        ALTER TABLE ikhaya_suggestion
+            ADD COLUMN notes LONGTEXT COLLATE utf8_unicode_ci NOT NULL
+                AFTER intro;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1029,5 +1037,5 @@ MIGRATIONS = [
     fix_portal_event_foreign_keys, fix_portal_privatemessageentry_foreign_keys,
     add_egosearch_index, add_planet_hidden, forum_plaintext,
     add_negative_privileges, add_reported_topics_storage,
-    add_group_is_public_flag,
+    add_group_is_public_flag, add_notes_to_article_suggestion,
 ]
