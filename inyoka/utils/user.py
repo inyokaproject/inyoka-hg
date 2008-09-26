@@ -7,7 +7,8 @@
 
     Some parts are ported from the django auth-module.
 
-    :copyright: 2008 by Christopher Grebs, Marian Sigler.
+    :copyright: 2008 by Christopher Grebs, Marian Sigler,
+        Benjamin Wiegand.
     :license: GNU GPL
 """
 import random, string, re
@@ -18,8 +19,6 @@ except ImportError:
     from sha import sha as sha1
 from datetime import datetime
 from inyoka.conf import settings
-from inyoka.portal.user import User
-from inyoka.portal.utils import send_new_user_password
 from inyoka.utils import encode_confirm_data
 from inyoka.utils.html import escape
 from inyoka.utils.mail import send_mail
@@ -84,154 +83,29 @@ def check_activation_key(user, key):
     return key == gen_activation_key(user)
 
 
-def send_activation_mail(user):
-    """send an activation mail"""
-    from inyoka.utils.mail import send_mail
-    from inyoka.utils.templating import render_template
-    message = render_template('mails/activation_mail.txt', {
-        'username':         user.username,
-        'email':            user.email,
-        'activation_key':   gen_activation_key(user)
-    })
-    send_mail('ubuntuusers.de - Aktivierung des Benutzers %s'
-              % user.username,
-              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-
-
-def send_new_user_password(user):
-    from inyoka.utils.mail import send_mail
-    from inyoka.utils.templating import render_template
-    new_password_key = ''.join(random.choice(string.lowercase + string.digits) for _ in range(24))
-    user.new_password_key = new_password_key
-    user.save()
-    message = render_template('mails/new_user_password.txt', {
-        'username':         user.username,
-        'email':            user.email,
-        'new_password_url': href('portal', 'lost_password', user.username, new_password_key),
-    })
-    send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
-              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-
-
-def deactivate_user(user):
+def get_hexdigest(salt, raw_password):
     """
-    This deactivates a user and removes all personal information.
-    To avoid abuse he is sent an email allowing him to reactivate the
-    within the next month.
+    Returns a string of the hexdigest of the given plaintext password and salt
+    using the sha1 algorithm.
     """
-
-    userdata = {
-        'action': 'reactivate_user',
-        'id': user.id,
-        'email': user.email,
-        'status': user.status,
-        'time': datetime.now(),
-    }
-
-    userdata = encode_confirm_data(userdata)
-
-    subject = u'Deaktivierung deines Accounts „%s“ auf ubuntuusers.de' % \
-                  user.username
-    text = render_template('mails/account_deactivate.txt', {
-        'user': user,
-        'userdata': userdata,
-    })
-    user.email_user(subject, text, settings.INYOKA_SYSTEM_USER_EMAIL)
-
-    user.status = 3
-    if not user.is_banned:
-        user.email = 'user%d@ubuntuusers.de.invalid' % user.id
-    user.set_unusable_password()
-    user.groups.remove(*user.groups.all())
-    user.avatar = user.coordinates_long = user.coordinates_lat = \
-        user.new_password_key = user._primary_group = None
-    user.icq = user.jabber = user.msn = user.aim = user.yim = user.skype = \
-        user.wengophone = user.sip = user.location = user.signature = \
-        user.gpgkey = user.location = user.occupation = user.interests = \
-        user.website = user.launchpad = user.member_title = ''
-    user.save()
+    if isinstance(raw_password, unicode):
+        raw_password = raw_password.encode('utf-8')
+    return sha1(str(salt) + raw_password).hexdigest()
 
 
-def reactivate_user(id, email, status, time):
-    if (datetime.now() - time).days > 33:
-        return {
-            'failed': u'Seit der Löschung ist mehr als ein Monat vergangen!',
-        }
-    user = User.objects.get(id=id)
-    if not user.is_deleted:
-        return {
-            'failed': u'Der Benutzer %s wurde schon wiederhergestellt!' %
-                escape(user.username),
-        }
-    user.email = email
-    user.status = status
-    if user.banned_until and user.banned_until < datetime.now():
-        user.status = 1
-        user.banned_until = None
-    user.save()
-    send_new_user_password(user)
-    return {
-        'success': u'Der Benutzer %s wurde wiederhergestellt. Dir wurde '
-                   u'eine E-Mail geschickt, mit der du dir ein neues Passwort '
-                   u'setzen kannst.' % escape(user.username),
-    }
-
-
-def send_new_email_confirmation(user, email):
-    """Send the user an email where he can confirm his new email address"""
-    data = {
-        'action': 'set_new_email',
-        'id': user.id,
-        'email': email,
-        'time': datetime.now()
-    }
-
-    text = render_template('mails/new_email_confirmation.txt', {
-        'user': user,
-        'data': encode_confirm_data(data),
-    })
-    send_mail('ubuntuusers.de – E-Mail-Adresse bestätigen', text,
-              settings.INYOKA_SYSTEM_USER_EMAIL, [email])
-
-
-def set_new_email(id, email, time):
+def check_password(raw_password, enc_password, convert_user=None):
     """
-    Save the new email address the user has confirmed, and send an email to
-    his old address where he can reset it to protect against abuse.
+    Returns a boolean of whether the raw_password was correct.  Handles
+    encryption formats behind the scenes.
     """
-    if (datetime.now() - time).days > 8:
-        return {'failed': u'Link zu alt!'}
-    user = User.objects.get(id=id)
-
-    data = {
-        'action': 'reset_email',
-        'id': user.id,
-        'email': user.email,
-        'time': datetime.now(),
-    }
-    text = render_template('mails/reset_email.txt', {
-        'user': user,
-        'new_email': email,
-        'data': encode_confirm_data(data),
-    })
-    user.email_user('ubuntuusers.de – E-Mail-Adresse geändert', text,
-                    settings.INYOKA_SYSTEM_USER_EMAIL)
-
-    user.email = email
-    user.save()
-    return {
-        'success': u'Deine neue E-Mail-Adresse wurde gespeichert!'
-    }
-
-
-def reset_email(id, email, time):
-    if (datetime.now() - time).days > 33:
-        return {'failed': u'Link zu alt!'}
-
-    user = User.objects.get(id=id)
-    user.email = email
-    user.save()
-
-    return {
-        'success': u'Deine E-Mail-Adresse wurde zurückgesetzt.'
-    }
+    if isinstance(raw_password, unicode):
+        raw_password = raw_password.encode('utf-8')
+    salt, hsh = enc_password.split('$')
+    # compatibility with old md5 passwords
+    if salt == 'md5':
+        result = hsh == md5(raw_password).hexdigest()
+        if result and convert_user and convert_user.is_authenticated:
+            convert_user.set_password(raw_password)
+            convert_user.save()
+        return result
+    return hsh == get_hexdigest(salt, raw_password)

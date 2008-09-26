@@ -37,9 +37,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
-from inyoka.utils.user import deactivate_user, reactivate_user, \
-     normalize_username, send_new_email_confirmation, set_new_email, \
-     reset_email
+from inyoka.utils.user import normalize_username, check_activation_key
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -54,9 +52,10 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      PlanetFeedSelectorForm, WikiFeedSelectorForm, PrivateMessageIndexForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
-from inyoka.portal.user import User, Group, UserBanned
-from inyoka.portal.utils import check_login, calendar_entries_for_month, \
-    check_activation_key, send_activation_mail, send_new_user_password
+from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
+    reactivate_user, set_new_email, send_new_email_confirmation, \
+    set_new_email, reset_email, send_activation_mail, send_new_user_password
+from inyoka.portal.utils import check_login, calendar_entries_for_month
 from inyoka.utils.antispam import is_spam
 
 
@@ -1263,13 +1262,11 @@ def open_search(request, app):
 
 @templated('portal/confirm.html')
 def confirm(request, action=None):
-
     ACTIONS = {
         'reactivate_user': reactivate_user,
         'set_new_email': set_new_email,
         'reset_email': reset_email,
     }
-
     data = request.REQUEST.get('data')
     if not data:
         # print the form
