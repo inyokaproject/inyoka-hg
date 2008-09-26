@@ -437,7 +437,7 @@ def search(request):
         def _link(page):
             return href('portal', 'search', page=page, query=d['query'],
                         area=d['area'], per_page=results.per_page,
-                        sort=d['sort'])
+                        sort=d['sort'], forums=d['forums'])
 
         add(((results.page == 1) and disabled or normal) % {
             'href': _link(results.page - 1),
