@@ -12,6 +12,7 @@
     :license: GNU GPL.
 """
 import os
+import random
 import cPickle
 from datetime import datetime
 try:
@@ -28,8 +29,11 @@ from inyoka.utils.decorators import deferred
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
 from inyoka.utils.html import escape
+from inyoka.utils.user import normalize_username, get_hexdigest,\
+    check_password, gen_activation_key
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
+from inyoka.utils.templating import render_template
 
 
 UNUSABLE_PASSWORD = '!$!'
@@ -72,32 +76,154 @@ class UserBanned(Exception):
     """
 
 
-def get_hexdigest(salt, raw_password):
-    """
-    Returns a string of the hexdigest of the given plaintext password and salt
-    using the sha1 algorithm.
-    """
-    if isinstance(raw_password, unicode):
-        raw_password = raw_password.encode('utf-8')
-    return sha1(str(salt) + raw_password).hexdigest()
+def reactivate_user(id, email, status, time):
+    if (datetime.now() - time).days > 33:
+        return {
+            'failed': u'Seit der Löschung ist mehr als ein Monat vergangen!',
+        }
+    user = User.objects.get(id=id)
+    if not user.is_deleted:
+        return {
+            'failed': u'Der Benutzer %s wurde schon wiederhergestellt!' %
+                escape(user.username),
+        }
+    user.email = email
+    user.status = status
+    if user.banned_until and user.banned_until < datetime.now():
+        user.status = 1
+        user.banned_until = None
+    user.save()
+    send_new_user_password(user)
+    return {
+        'success': u'Der Benutzer %s wurde wiederhergestellt. Dir wurde '
+                   u'eine E-Mail geschickt, mit der du dir ein neues Passwort '
+                   u'setzen kannst.' % escape(user.username),
+    }
 
 
-def check_password(raw_password, enc_password, convert_user=None):
+def deactivate_user(user):
     """
-    Returns a boolean of whether the raw_password was correct.  Handles
-    encryption formats behind the scenes.
+    This deactivates a user and removes all personal information.
+    To avoid abuse he is sent an email allowing him to reactivate the
+    within the next month.
     """
-    if isinstance(raw_password, unicode):
-        raw_password = raw_password.encode('utf-8')
-    salt, hsh = enc_password.split('$')
-    # compatibility with old md5 passwords
-    if salt == 'md5':
-        result = hsh == md5(raw_password).hexdigest()
-        if result and convert_user and convert_user.is_authenticated:
-            convert_user.set_password(raw_password)
-            convert_user.save()
-        return result
-    return hsh == get_hexdigest(salt, raw_password)
+
+    userdata = {
+        'action': 'reactivate_user',
+        'id': user.id,
+        'email': user.email,
+        'status': user.status,
+        'time': datetime.now(),
+    }
+
+    userdata = encode_confirm_data(userdata)
+
+    subject = u'Deaktivierung deines Accounts „%s“ auf ubuntuusers.de' % \
+                  user.username
+    text = render_template('mails/account_deactivate.txt', {
+        'user': user,
+        'userdata': userdata,
+    })
+    user.email_user(subject, text, settings.INYOKA_SYSTEM_USER_EMAIL)
+
+    user.status = 3
+    if not user.is_banned:
+        user.email = 'user%d@ubuntuusers.de.invalid' % user.id
+    user.set_unusable_password()
+    user.groups.remove(*user.groups.all())
+    user.avatar = user.coordinates_long = user.coordinates_lat = \
+        user.new_password_key = user._primary_group = None
+    user.icq = user.jabber = user.msn = user.aim = user.yim = user.skype = \
+        user.wengophone = user.sip = user.location = user.signature = \
+        user.gpgkey = user.location = user.occupation = user.interests = \
+        user.website = user.launchpad = user.member_title = ''
+    user.save()
+
+
+def send_new_email_confirmation(user, email):
+    """Send the user an email where he can confirm his new email address"""
+    data = {
+        'action': 'set_new_email',
+        'id': user.id,
+        'email': email,
+        'time': datetime.now()
+    }
+
+    text = render_template('mails/new_email_confirmation.txt', {
+        'user': user,
+        'data': encode_confirm_data(data),
+    })
+    send_mail('ubuntuusers.de – E-Mail-Adresse bestätigen', text,
+              settings.INYOKA_SYSTEM_USER_EMAIL, [email])
+
+
+def set_new_email(id, email, time):
+    """
+    Save the new email address the user has confirmed, and send an email to
+    his old address where he can reset it to protect against abuse.
+    """
+    if (datetime.now() - time).days > 8:
+        return {'failed': u'Link zu alt!'}
+    user = User.objects.get(id=id)
+
+    data = {
+        'action': 'reset_email',
+        'id': user.id,
+        'email': user.email,
+        'time': datetime.now(),
+    }
+    text = render_template('mails/reset_email.txt', {
+        'user': user,
+        'new_email': email,
+        'data': encode_confirm_data(data),
+    })
+    user.email_user('ubuntuusers.de – E-Mail-Adresse geändert', text,
+                    settings.INYOKA_SYSTEM_USER_EMAIL)
+
+    user.email = email
+    user.save()
+    return {
+        'success': u'Deine neue E-Mail-Adresse wurde gespeichert!'
+    }
+
+
+def reset_email(id, email, time):
+    if (datetime.now() - time).days > 33:
+        return {'failed': u'Link zu alt!'}
+
+    user = User.objects.get(id=id)
+    user.email = email
+    user.save()
+
+    return {
+        'success': u'Deine E-Mail-Adresse wurde zurückgesetzt.'
+    }
+
+def send_activation_mail(user):
+    """send an activation mail"""
+    message = render_template('mails/activation_mail.txt', {
+        'username':         user.username,
+        'email':            user.email,
+        'activation_key':   gen_activation_key(user)
+    })
+    send_mail('ubuntuusers.de - Aktivierung des Benutzers %s'
+              % user.username,
+              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
+
+
+def send_new_user_password(user):
+    new_password_key = ''.join(random.choice(string.lowercase + string.digits)
+                               for _ in range(24))
+    user.new_password_key = new_password_key
+    user.save()
+    message = render_template('mails/new_user_password.txt', {
+        'username':         user.username,
+        'email':            user.email,
+        'new_password_url': href('portal', 'lost_password',
+                                 user.urlsafe_username, new_password_key),
+    })
+    send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
+              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
 
 
 class Group(models.Model):
@@ -388,7 +514,6 @@ class User(models.Model):
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
-        import random
         salt = get_hexdigest(str(random.random()), str(random.random()))[:5]
         hsh = get_hexdigest(salt, raw_password)
         self.password = '%s$%s' % (salt, hsh)
@@ -527,18 +652,19 @@ class User(models.Model):
         self.avatar = None
 
     def get_absolute_url(self, action='show'):
-        return href(*{
-            'show': ('portal', 'user', self.urlsafe_username),
-            'privmsg': ('portal', 'privmsg', 'new',
-                        self.urlsafe_username),
-            'activate': ('portal', 'register', 'activate',
-                         self.urlsafe_username,
-                         gen_activation_key(self)),
-            'activate_delete': ('portal', 'register', 'delete',
-                                self.urlsafe_username,
-                                gen_activation_key(self)),
-            'admin': ('admin', 'users', 'edit', self.urlsafe_username),
-        }[action])
+        if action == 'show':
+            return href('portal', 'user', self.urlsafe_username)
+        elif action == 'privmsg':
+            return href('portal', 'privmsg', 'new',
+                        self.urlsafe_username)
+        elif action == 'activate':
+            return href('portal', 'register', 'activate',
+                        self.urlsafe_username, gen_activation_key(self))
+        elif action == 'activate_delete':
+            return href('portal', 'register', 'delete',
+                        self.urlsafe_username, gen_activation_key(self))
+        elif action == 'admin':
+            return href('admin', 'users', 'edit', self.urlsafe_username)
 
     def login(self, request):
         self.last_login = datetime.utcnow()
@@ -552,8 +678,6 @@ class User(models.Model):
 
 
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.portal.utils import send_activation_mail, gen_activation_key
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
 from inyoka.forum.models import ReadStatus
-from inyoka.utils.user import normalize_username

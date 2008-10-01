@@ -79,65 +79,6 @@ def abort_access_denied(request):
     return AccessDeniedResponse()
 
 
-def gen_activation_key(user):
-    """
-    Create a new activation key.
-    It's a md5 hash from the user id, the username,
-    the users email and our secret key.
-
-    :Parameters:
-        user
-            An user object from the user the key
-            will be generated for.
-    """
-    return md5('%d%s%s%s' % (
-        user.id, user.username.encode('utf-8'),
-        settings.SECRET_KEY,
-        user.email.encode('utf-8')
-    )).hexdigest()
-
-
-def check_activation_key(user, key):
-    """
-    Check if an activation key is correct
-
-    :Parameters:
-        user
-            An user object a new key will be generated for.
-            (For checking purposes)
-        key
-            The key that needs to be checked for the *user*.
-    """
-    return key == gen_activation_key(user)
-
-
-def send_activation_mail(user):
-    """send an activation mail"""
-    from inyoka.utils.mail import send_mail
-    message = render_template('mails/activation_mail.txt', {
-        'user': user,
-    })
-    send_mail('Aktivierung des Benutzers %s'
-              % user.username,
-              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-
-
-def send_new_user_password(user):
-    from inyoka.utils.mail import send_mail
-    new_password_key = ''.join(random.choice(string.lowercase + string.digits)
-                               for _ in range(24))
-    user.new_password_key = new_password_key
-    user.save()
-    message = render_template('mails/new_user_password.txt', {
-        'username':         user.username,
-        'email':            user.email,
-        'new_password_url': href('portal', 'lost_password',
-                                 user.urlsafe_username, new_password_key),
-    })
-    send_mail(u'ubuntuusers.de – Neues Passwort für %s' % user.username,
-              message, settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-
-
 def calendar_entries_for_month(year, month):
     """
     Return a list with all days in a month and the calendar entries grouped
