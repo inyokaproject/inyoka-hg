@@ -23,7 +23,8 @@ def _set_cache(obj):
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
-        _set_cache(MemcachedCache(settings.MEMCACHE_SERVERS))
+        from inyoka.utils.local import local
+        _set_cache(MemcachedCache(settings.MEMCACHE_SERVERS, local=local))
     else:
         _set_cache(SimpleCache())
 
