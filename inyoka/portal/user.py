@@ -202,7 +202,7 @@ def reset_email(id, email, time):
 def send_activation_mail(user):
     """send an activation mail"""
     message = render_template('mails/activation_mail.txt', {
-        'username':         user.username,
+        'user':             user,
         'email':            user.email,
         'activation_key':   gen_activation_key(user)
     })
