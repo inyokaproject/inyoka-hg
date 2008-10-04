@@ -23,15 +23,11 @@ from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseForbidd
 from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
 from inyoka.utils.flashing import has_flashed_messages
+from inyoka.utils.local import local, local_manager
 
 
 class CommonServicesMiddleware(CommonMiddleware):
     """Hook in as first middleware for common tasks."""
-
-    def __init__(self):
-        from inyoka.utils.local import local, local_manager
-        self._local = local
-        self._local_manager = local_manager
 
     def process_request(self, request):
         # check for disallowed user agents
@@ -41,7 +37,7 @@ class CommonServicesMiddleware(CommonMiddleware):
                     return HttpResponseForbidden('<h1>Forbidden</h1>')
 
         # populate the request
-        self._local.request = request
+        local.request = request
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain
@@ -89,7 +85,7 @@ class CommonServicesMiddleware(CommonMiddleware):
             response['Cache-Control'] = 'no-cache'
 
         # clean up after the local manager
-        self._local_manager.cleanup()
+        local_manager.cleanup()
         session.remove()
 
         if settings.DEBUG:
