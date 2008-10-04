@@ -87,9 +87,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         # clean up after the local manager
         local_manager.cleanup()
         session.remove()
-        # XXX: wtf? why isn't cleanup() cleaning up all the stuff!?!
-        if hasattr(local, 'cache'):
-            local.cache = {}
 
         if settings.DEBUG:
             import sys
