@@ -19,7 +19,6 @@ except ImportError:
     from sha import sha as sha1
 from datetime import datetime
 from inyoka.conf import settings
-from inyoka.utils import encode_confirm_data
 from inyoka.utils.html import escape
 from inyoka.utils.mail import send_mail
 from inyoka.utils.templating import render_template

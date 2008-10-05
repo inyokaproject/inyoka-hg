@@ -27,6 +27,7 @@ from PIL import Image
 from StringIO import StringIO
 from django.db import models, connection
 from inyoka.conf import settings
+from inyoka.utils import encode_confirm_data
 from inyoka.utils.decorators import deferred
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
