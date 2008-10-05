@@ -63,10 +63,13 @@ img.cat {
   font-size: 0.8em;
 }
 
-.container.countdown {
+.countdown {
   text-align: center;
   border: none !important;
-  margin: auto
+  margin: 0 auto .5em;
+}
+.countdown img {
+  max-width: 12em;
 }
 
 .container.calendar {
