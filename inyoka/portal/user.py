@@ -14,6 +14,7 @@
 import os
 import random
 import cPickle
+import string
 from datetime import datetime
 try:
     from hashlib import md5, sha1
