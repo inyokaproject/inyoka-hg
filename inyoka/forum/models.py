@@ -55,7 +55,8 @@ UBUNTU_VERSIONS = {
     '6.10': 'Edgy Eft',
     '7.04': 'Feisty Fawn',
     '7.10': 'Gutsy Gibbon',
-    '8.04': 'Hardy Heron'
+    '8.04': 'Hardy Heron',
+    '8.10': 'Intrepid Ibex',
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
