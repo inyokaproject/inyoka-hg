@@ -13,6 +13,7 @@
 """
 import os
 import random
+import string
 import cPickle
 from datetime import datetime
 try:
