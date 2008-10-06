@@ -63,6 +63,15 @@ img.cat {
   font-size: 0.8em;
 }
 
+.countdown {
+  text-align: center;
+  border: none !important;
+  margin: 0 auto .5em;
+}
+.countdown img {
+  max-width: 12em;
+}
+
 .container.calendar {
   background-image: url(../img/caption_blue.png);
   background-repeat: repeat-x;

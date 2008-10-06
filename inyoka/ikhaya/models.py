@@ -15,6 +15,7 @@ except ImportError:
     from md5 import new as md5
 from datetime import datetime
 from django.db import models, connection
+from django.db.models import Q
 from inyoka.portal.user import User
 from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext
@@ -39,9 +40,11 @@ class ArticleManager(models.Manager):
         if not self._all:
             q = q.filter(public=self._public)
             if self._public:
-                q = q.filter(pub_date__lte=datetime.utcnow().date())
+                q = q.filter(Q(pub_date__lt=datetime.utcnow().date())|
+                             Q(pub_date = datetime.utcnow().date(), pub_time__lte = datetime.utcnow().time()))
             else:
-                q = q.filter(pub_date__gte=datetime.utcnow().date())
+                q = q.filter(Q(pub_date__gt=datetime.utcnow().date())|
+                             Q(pub_date = datetime.utcnow().date(), pub_time__gte = datetime.utcnow().time()))
         return q
 
     def delete(self):
@@ -268,6 +271,7 @@ class Suggestion(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     intro = models.TextField()
+    notes = models.TextField()
     owner = models.ForeignKey(User, related_name='owned_suggestion_set',
                               null=True, blank=True)
 
@@ -288,6 +292,16 @@ class Suggestion(models.Model):
         instructions = cache.get(key)
         if instructions is None:
             instructions = parse(self.intro).compile('html')
+            cache.set(key, instructions)
+        return render(instructions, context)
+
+    @property
+    def rendered_notes(self):
+        context = RenderContext(current_request)
+        key = 'ikhaya/suggestion_notes/%s' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.notes).compile('html')
             cache.set(key, instructions)
         return render(instructions, context)
 

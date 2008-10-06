@@ -824,15 +824,11 @@ def reportlist(request):
         form = ReportListForm()
         _add_field_choices()
 
-    privileges = get_privileges(request.user, [x.forum_id for x in topics])
-    visible_topics = filter(lambda t: have_privilege(request.user, t.forum,
-                            CAN_MODERATE), topics)
-
     subscribed = str(request.user.id) in \
             storage['reported_topics_subscribers'].split(',')
 
     return {
-        'topics':     visible_topics,
+        'topics':     list(topics),
         'form':       form,
         'subscribed': subscribed,
     }

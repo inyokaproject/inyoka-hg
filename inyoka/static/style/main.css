@@ -578,14 +578,17 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
   margin-bottom: 0.8em;
 }
 
+.navi_sidebar .noh3 {
+  padding-top: 0.5em;
+}
+
 .navi_sidebar h3 {
   font-weight: bold;
   border-bottom: solid 1px #888;
   font-size: 1.1em;
   margin-bottom: 0.4em;
   color: #444;
-  padding: 0.5em;
-  padding-left: 28px;
+  padding: 0.5em 0.5em 0.5em 28px;
   background-repeat: no-repeat;
   background-position: left center;
 }

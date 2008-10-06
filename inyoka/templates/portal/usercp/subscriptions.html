@@ -24,7 +24,7 @@
   <table class="usercp_subscriptions">
     <thead>
       <tr>
-        <th class="checkboxes"><input type="checkbox" name="select" value="all" title="Alle aus-/abwählen" /></th>
+        <th class="checkboxes"><input type="checkbox" id="check_all" title="Alle aus-/abwählen" /></th>
         <th class="items">Name</th>
       </tr>
     </thead>
@@ -87,13 +87,10 @@
 </form>
 <script type="text/javascript">
   /* <![CDATA[ */
-  $('input[name=select][value=all]').click(function() {
-    var check_all = $('input[name=select][value=all]')[0].checked
+  $('#check_all').click(function() {
+    var checked = this.checked
     $('input[@name="select"]').each(function() {
-      if (check_all)
-        this.checked = true;
-      else
-        this.checked = false;
+      this.checked = checked;
     });
   });
   /* ]]> */

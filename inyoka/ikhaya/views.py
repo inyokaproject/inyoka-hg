@@ -189,8 +189,9 @@ def suggest(request):
         form = SuggestArticleForm(request.POST)
         if form.is_valid():
             d = form.cleaned_data
-            Suggestion(author=request.user, pub_date=datetime.utcnow(), title=
-                       d['title'], text=d['text'], intro=d['intro']).save()
+            Suggestion(author=request.user, pub_date=datetime.utcnow(),
+                       title=d['title'], text=d['text'], intro=d['intro'],
+                       notes=d['notes']).save()
             cache.delete('ikhaya/suggestion_count')
             flash(u'Dein Artikelvorschlag wurde versendet, das Ikhaya-Team '
                   u'wird sich sobald wie möglich darum kümmern.',
