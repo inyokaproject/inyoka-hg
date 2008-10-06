@@ -142,7 +142,7 @@ class TopicMapperExtension(MapperExtension):
         parent_ids.append(instance.forum_id)
         connection.execute(forum_table.update(
             forum_table.c.id.in_(parent_ids), values={
-            'topic_count': forum_table.c.post_count + 1,
+            'topic_count': forum_table.c.topic_count + 1,
         }))
 
     def before_delete(self, mapper, connection, instance):
