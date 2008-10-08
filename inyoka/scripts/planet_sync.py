@@ -24,6 +24,11 @@ from inyoka.conf import settings
 from inyoka.utils.html import escape, cleanup_html
 from inyoka.planet.models import Blog, Entry
 
+# set a default timeout. Otherwise fetching some feeds might cause the script
+# to block forever
+import socket
+socket.setdefaulttimeout(20.0)
+
 
 HTML_MIMETYPES = set(['text/html', 'application/xml+xhtml', 'application/xhtml+xml'])
 _par_re = re.compile(r'\n{2,}')
