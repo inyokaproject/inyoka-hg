@@ -43,6 +43,7 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
+from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 
 
@@ -116,10 +117,11 @@ def do_show(request, name):
             s.notified = False
             s.save()
 
-    set_session_info(request, u'betrachtet Wiki-Artikel „<a '
-                     u'href="%s">%s</a>“' % (
-                        escape(url_for(page)),
-                        escape(page.title)))
+    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        set_session_info(request, u'betrachtet Wiki-Artikel „<a '
+                         u'href="%s">%s</a>“' % (
+                            escape(url_for(page)),
+                            escape(page.title)))
     return {
         'page':         page,
         'tags':         page.metadata['tag'],
@@ -456,16 +458,18 @@ def do_edit(request, name):
               u'kontrolliere, ob das Zusammenführen der Änderungen '
               u'zufriedenstellend funktioniert hat.')
 
-    # update session info
-    if page is not None:
-        session_page = u'<a href="%s">%s</a>' % (
-            escape(url_for(page)),
-            escape(page.title)
-        )
-    else:
-        session_page = escape(get_pagetitle(name))
-    set_session_info(request, u'bearbeitet den Wiki-Artikel %s' %
-                     session_page)
+    if page and has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        # update session info
+        if page is not None:
+            session_page = u'<a href="%s">%s</a>' % (
+                escape(url_for(page)),
+                escape(page.title)
+            )
+        else:
+            session_page = escape(get_pagetitle(name))
+
+        set_session_info(request, u'bearbeitet den Wiki-Artikel %s' %
+                         session_page)
 
     return {
         'name':         name,
@@ -548,11 +552,13 @@ def do_log(request, name):
 
     pagination = Pagination(request, page.revisions.all(), pagination_page,
                             20, link_func)
-    set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
-                     u'href="%s">%s</a>“' % (
-                        escape(url_for(page)),
-                        escape(page.title)),
-                    "%s' Revisionen" % escape(page.title))
+
+    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
+                         u'href="%s">%s</a>“' % (
+                            escape(url_for(page)),
+                            escape(page.title)),
+                        "%s' Revisionen" % escape(page.title))
 
     return {
         'page':         page,
@@ -577,10 +583,12 @@ def do_diff(request, name):
     diff = Page.objects.compare(name, old_rev, new_rev)
     if request.GET.get('format') == 'udiff':
         return HttpResponse(diff.udiff, mimetype='text/plain; charset=utf-8')
-    set_session_info(request, u'vergleicht zwei Revisionen des Wiki-Artikels '
-                     u' „<a href="%s">%s</a>“' % (
-                        escape(url_for(diff.page)),
-                        escape(diff.page.title)))
+
+    if has_privilege(User.ANONYMOUS_USER, name, 'read'):
+        set_session_info(request, u'vergleicht zwei Revisionen des Wiki-Artikels '
+                         u' „<a href="%s">%s</a>“' % (
+                            escape(url_for(diff.page)),
+                            escape(diff.page.title)))
     return {
         'diff':         diff,
         'page':         diff.page,
@@ -599,10 +607,12 @@ def do_backlinks(request, name):
     sense to track pages that link to a deleted page.
     """
     page = Page.objects.get_by_name(name)
-    set_session_info(request, u'vergleicht die Backlinks des Wiki-Artikels '
-                     u' „<a href="%s">%s</a>“' % (
-                        escape(url_for(page)),
-                        escape(page.title)))
+
+    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        set_session_info(request, u'vergleicht die Backlinks des Wiki-Artikels '
+                         u' „<a href="%s">%s</a>“' % (
+                            escape(url_for(page)),
+                            escape(page.title)))
     return {
         'page': page,
         'deny_robots':  True,
@@ -756,10 +766,12 @@ def do_attach(request, name):
         else:
             url = href('wiki', ap)
         return HttpResponseRedirect(url)
-    set_session_info(request, u'verwaltet die Anhänge des Wiki-Artikels '
-                     u' „<a href="%s">%s</a>“' % (
-                        escape(url_for(page)),
-                        escape(page.title)))
+
+    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        set_session_info(request, u'verwaltet die Anhänge des Wiki-Artikels '
+                         u' „<a href="%s">%s</a>“' % (
+                            escape(url_for(page)),
+                            escape(page.title)))
     context['deny_robots'] = 'noindex'
     return context
 

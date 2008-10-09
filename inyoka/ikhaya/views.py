@@ -122,13 +122,16 @@ def detail(request, year, month, day, slug):
         article = articleq[0]
     else:
         raise PageNotFound()
-    set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
-                     u'</a>“' % (url_for(article), escape(article.subject)))
+
+
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_edit'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
+    else:
+        set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
+                         u'</a>“' % (url_for(article), escape(article.subject)))
     if article.comments_enabled and request.method == 'POST':
         form = EditCommentForm(request.POST)
         if 'preview' in request.POST:

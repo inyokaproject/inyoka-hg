@@ -679,7 +679,12 @@ class User(models.Model):
             self.new_password_key = None
         self.save()
 
+# I have no idea why a simple `property` did not work – maybe
+# this is the only right way to do something like that? --entequak
+User.SYSTEM_USER = User.objects.get_system_user()
+User.ANONYMOUS_USER = User.objects.get_anonymous_user()
 
+# circ imports
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href

@@ -113,6 +113,8 @@ def get_privileges(user, forum_ids):
 
 def have_privilege(user, obj, privilege):
     """Check if a user has a privilege on a forum or a topic."""
+    if isinstance(privilege, basestring):
+        privilege = PRIVILEGES_BITS[privilege]
     if hasattr(obj, 'forum_id'):
         # obj is a topic
         forum_id = obj.forum_id

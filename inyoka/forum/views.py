@@ -73,15 +73,15 @@ def index(request, category=None):
     """
     if category:
         key = 'forum/category/%s' % category
-        set_session_info(request, (u'sieht sich die Forenübersicht der '
-                                   u'Kategorie „%s“ an' % category),
-                         u'Kategorieübersicht')
+        session_info = ((u'sieht sich die Forenübersicht der '
+                            u'Kategorie „%s“ an' % category),
+                        u'Kategorieübersicht')
     else:
         key = 'forum/index'
-        set_session_info(request, u'sieht sich die Forenübersicht an.',
-                         u'Forenübersicht')
-    categories = cache.get(key)
+        session_info = (u'sieht sich die Forenübersicht an.',
+                        u'Forenübersicht')
 
+    categories = cache.get(key)
     if categories is None:
         query = Forum.query.options(eagerload('_children'),
                                     eagerload('_children.last_post'),
@@ -90,6 +90,9 @@ def index(request, category=None):
             category = query.get(category)
             if not category or category.parent_id != None:
                 raise PageNotFound
+
+            if have_privilege(User.ANONYMOUS_USER, category, 'read'):
+                set_session_info(request, session_info)
             categories = [category]
 
             fmsg = category.find_welcome(request.user)
@@ -98,6 +101,8 @@ def index(request, category=None):
         else:
             categories = list(query.filter(forum_table.c.parent_id == None) \
                               .order_by(forum_table.c.position))
+            # forum-overview can be set without any acl check ;)
+            set_session_info(request, session_info)
 
         cache.set(key, categories, 120)
 
@@ -168,9 +173,10 @@ def forum(request, slug, page=1):
         if page < CACHE_PAGES_COUNT:
             cache.set(key, ctx, 60)
 
-    set_session_info(request, u'sieht sich das Forum „<a href="%s">'
-                     u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
-                     'besuche das Forum')
+    if have_privilege(User.ANONYMOUS_USER, f, 'read'):
+        set_session_info(request, u'sieht sich das Forum „<a href="%s">'
+                         u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
+                         'besuche das Forum')
 
     ctx.update({
         'forum':         f,
@@ -254,8 +260,11 @@ def viewtopic(request, topic_slug, page=1):
 
     pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
                      total=t.post_count, rownum_column=post_table.c.position)
-    set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
-        u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
+
+    if have_privilege(User.ANONYMOUS_USER, t, 'read'):
+        set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
+            u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
+
     subscribed = False
     if request.user.is_authenticated:
         t.mark_read(request.user)
