@@ -103,10 +103,13 @@ class ManageDiscussionForm(forms.Form):
     """Let the user set an existing thread as discussion of a page"""
     topic = forms.CharField(label='Slug des Themas', max_length=50,
         help_text=u'Den Slug eines Themas findest du in der URL (z. B. <var>'
-        u'beispiel</var> bei <em>%s</em>)' % href('forum', 'topic', 'beispiel'))
+        u'beispiel</var> bei <em>%s</em>)' %
+        href('forum', 'topic', 'beispiel'), required=False)
 
     def clean_topic(self):
         d = self.cleaned_data
+        if not d.get('topic'):
+            return None
         topic = Topic.query.filter_by(slug=d['topic']).first()
         if topic is None:
             raise forms.ValidationError(u'Dieses Thema existiert nicht!')

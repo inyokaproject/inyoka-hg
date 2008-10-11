@@ -872,9 +872,14 @@ def do_manage_discussion(request, name):
         form = ManageDiscussionForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            page.topic_id = data['topic'].id
-            page.save()
-            return HttpResponseRedirect(url_for(data['topic']))
+            if data['topic']:
+                page.topic_id = data['topic'].id
+                page.save()
+                return HttpResponseRedirect(url_for(data['topic']))
+            else:
+                page.topic_id = None
+                page.save()
+                return HttpResponseRedirect(url_for(page))
     elif page.topic_id is None:
         form = ManageDiscussionForm()
     else:
