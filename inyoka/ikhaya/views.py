@@ -93,7 +93,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         articles = Article.objects.all()
         link = ()
 
-    if not request.user.can('article_edit'):
+    if not request.user.can('article_read'):
         articles = articles.filter(pub_date__lte=datetime.utcnow().date(),
                                    public=True)
     link = href('ikhaya', *link)
@@ -126,7 +126,7 @@ def detail(request, year, month, day, slug):
 
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
-        if not request.user.can('article_edit'):
+        if not request.user.can('article_read'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
     else:

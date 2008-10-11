@@ -293,13 +293,13 @@ def planet_edit(request, blog=None):
     }
 
 
-@require_permission('article_edit', 'category_edit', 'event_edit')
+@require_permission('article_read', 'category_edit', 'event_edit')
 @templated('admin/ikhaya.html')
 def ikhaya(request):
     return {}
 
 
-@require_permission('article_edit')
+@require_permission('article_read')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
     sortable = Sortable(Article.objects.all(), request.GET, '-pub_date',
