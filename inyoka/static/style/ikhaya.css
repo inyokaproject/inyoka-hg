@@ -41,6 +41,8 @@ ul.articles {
 
 h3.title {
   margin-bottom: 1.2em;
+  border-bottom: 1px solid #e0c99d;
+  color: #444;
 }
 h3.title a {
   color: #673B1A;
