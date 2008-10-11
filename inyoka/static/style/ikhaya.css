@@ -39,11 +39,18 @@ ul.articles {
   background-position:-8px 0px;;
 }
 
-h3.title {
-  margin-bottom: 1.2em;
-  border-bottom: 1px solid #e0c99d;
+h2, h3, h4 {
   color: #444;
 }
+
+h2, h3 {
+  border-bottom: 1px solid #e0c99d;
+}
+
+h3.title {
+  margin-bottom: 1.2em;
+}
+
 h3.title a {
   color: #673B1A;
 }
