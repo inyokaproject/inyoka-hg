@@ -4,7 +4,7 @@
 
     Show a single ikhaya article.
 
-    :copyright: 2007 by Benjamin Wiegand.
+    :copyright: 2007 - 2008 by Benjamin Wiegand.
     :license: GNU GPL.
 #}
 {%- extends 'ikhaya/page.html' %}
@@ -14,99 +14,149 @@
 {% set styles = ['editor.css']%}
 {% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
 
+{% macro user_column(user) %}
+  <td class="author"
+  {%- if user.id == USER.id %} style="background-color: #F6F4EF"
+  {%- endif %}>
+    <p class="username">
+      <a href="{{ user|url }}">{{ user.username|e }}</a>
+      {#
+      {%- if user.primary_group.icon %}
+      <img class="teamicon" src="{{ user.primary_group.icon_url }}" alt="Teamicon" />
+      {%- endif %}
+      #}
+      {%- if user.member_title %}
+      <div class="member_title">{{ user.member_title }}</div>
+      {%- endif %}
+    </p>
+    {%- if user.avatar and not USER.settings['hide_avatars'] %}
+    <img class="avatar" src="{{ user.avatar_url }}" alt="Avatar von {{ user.username|e }}" />
+    {%- endif %}
+  </td>
+{% endmacro %}
+
 {% block ikhaya_content %}
   <div class="article">
     <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
     {%- if article.icon -%}
     <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
     {%- endif -%}
-    <div class="intro">
-      {{ article.rendered_intro }}
-    </div>
-    <hr class="intro_text_splitter" />
-    <div class="text">
-      {{ article.rendered_text }}
-    </div>
-  
-    <p class="meta_detail">
+    <p class="meta">
       geschrieben von <a href="{{ article.author|url }}">
       {{ article.author.username|e}}</a> {{ article.pub_datetime|specificdatetimeformat(true) }} 
       in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 
       {%- if article.edit_count %}
       — {{ article.edit_count }} Mal bearbeitet
       {%- endif %}
-      {% if USER.can('article_edit') %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
+      {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
+    <div class="intro">
+      {{ article.rendered_intro }}
+    </div>
+    <div class="text">
+      {{ article.rendered_text }}
+    </div>
     {%- if article.comments_enabled %}
       <a name="comments"></a>
-      <ul class="comments">
+      <table class="comments">
         {%- for comment in comments %}
-        <li class="comment" id="comment_{{ loop.index }}">
-          <div class="counter">{{ loop.index }}</div>
-          <div class="comment">
-            von <a name="comment_{{ comment.id }}" href="{{ comment.author|url }}">{{ comment.author.username|e }}</a> {{ comment.pub_date|specificdatetimeformat(true) }}
-            {%- if USER.is_authenticated %} — <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="reply">Antworten</a>
-              {%- if USER.can('comment_edit') %}
-              <a href="{{ article|url }}?moderate={{ comment.id }}#new_comment" class="adminlink">Moderieren</a>
-              {% endif %}
-            {%- endif %}
-            {{ comment.rendered_text }}
-          </div>
-        </li>
+        {%- if comment.deleted and not can_admin_comment %}
+        <tr class="deleted">
+          <td colspan="2">Dieser Kommentar wurde von einem Moderator gelöscht.</td>
+        </tr>
         {%- else %}
-        <li>
-          Es wurde noch kein Kommentar geschrieben.
-        </li>  
-        {%- endfor %}
-      </ul>
-      {%- if USER.is_authenticated %}
-      <form action="{{ article|url }}#new_comment" method="post" id="new_comment">
-        {{ render_form(form, ['text']) }}
-        {% if form.data.comment_id and USER.can('comment_edit') %}
-        {{ form.comment_id }}
-        <p>{{ form.deleted }} {{ form.deleted.label_tag() }}</p>
-        {% endif %}
-        <p>
-          <input type="submit" name="preview" value="Vorschau" />
-          <input type="submit" value="Speichern" />
-        </p>
-        {%- if preview %}
-        <div class="preview_wrapper">
-          <h2 class="title">Vorschau</h2>
-          <div id="preview" class="preview">{{ preview }}</div>
-        </div>
+        <tr id="comment_{{ loop.index }}"{% if comment.deleted %} class="hidden"{% endif %}>
+          {{ user_column(comment.author) }}
+          {%- if comment.author_id == USER.id %}
+          <td class="comment" style="background-color: #F8F6F1">
+          {%- else %}
+          <td class="comment">
+          {%- endif %}
+            <div class="commentinfo">
+              <div class="linklist">
+                {%- if can_admin_comment %}
+                <a href="{{ comment|url('edit') }}" class="adminlink action action_edit">bearbeiten</a> |
+                {%- if comment.deleted %}
+                <a href="{{ comment|url('restore') }}" class="adminlink action action_restore">wiederherstellen
+                {%- else %}
+                <a href="{{ comment|url('hide') }}" class="adminlink action action_hide">verbergen
+                {%- endif -%}
+                </a> |
+                {%- endif %}
+                {%- if can_post_comment %}
+                <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
+                {%- endif %}
+              </div>
+              <a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Kommentar" /></a>
+              Verfasst: {{ comment.pub_date|datetimeformat }}
+            </div>
+            <div class="text">
+              {{ comment.rendered_text }}
+            </div>
+          </td>
+        </tr>
         {%- endif %}
-      </form>
-      <script type="text/javascript">
-        /* <![CDATA[ */
-        var text = new WikiEditor('textarea[@name="text"]', 'forum');
-        (function() {
-          var
-            editor = $('textarea[@name="text"]'),
-            output = $('<div class="preview" />')
-          var preview = $('<div class="preview_wrapper"  />')
-            .hide()
-            .append('<h2 class="title">Vorschau<\/h2>')
-            .append(output);
+        {%- endfor %}
+        {%- if can_post_comment %}
+        <tr>
+          {{ user_column(USER) }}
+          <td>
+            <form action="{{ article|url }}#new_comment" method="post" id="new_comment">
+              {{ form.text }}
+              <div class="note">{{ form.fields.text.help_text }}</div>
+              {% if form.data.comment_id and USER.can('comment_edit') %}
+              {{ form.comment_id }}
+              {% endif %}
+              <p>
+                <input type="submit" name="preview" value="Vorschau" />
+                <input type="submit" value="Speichern" />
+              </p>
+              {%- if preview %}
+              <div class="preview_wrapper">
+                <h2 class="title">Vorschau</h2>
+                <div id="preview" class="preview">{{ preview }}</div>
+              </div>
+              {%- endif %}
+            </form>
+            <script type="text/javascript">
+              /* <![CDATA[ */
+              var text = new WikiEditor('textarea[@name="text"]', 'forum');
+              (function() {
+                var
+                  editor = $('textarea[@name="text"]'),
+                  output = $('<div class="preview" />')
+                var preview = $('<div class="preview_wrapper"  />')
+                  .hide()
+                  .append('<h2 class="title">Vorschau<\/h2>')
+                  .append(output);
 
-          $('form input[@name="preview"]').click(function() {
-            $('body, input, textarea').css('cursor', 'progress');
-            preview.hide();
-            $.post('/?__service__=wiki.render_preview', {
-              text: editor.val()
-            }, function(data) {
-              output.html(data);
-              makeCommentLinks(output);
-              preview.slideDown('fast');
-              $('body, input, textarea').css('cursor', 'auto');
-            });
-            return false;
-          }).parent().parent().parent().append(preview);
-        })();
-
-        /* ]]> */
-      </script>
-      {%- endif %}
+                $('form input[@name="preview"]').click(function() {
+                  $('body, input, textarea').css('cursor', 'progress');
+                  preview.hide();
+                  $.post('/?__service__=wiki.render_preview', {
+                    text: editor.val()
+                  }, function(data) {
+                    output.html(data);
+                    makeCommentLinks(output);
+                    preview.slideDown('fast');
+                    $('body, input, textarea').css('cursor', 'auto');
+                  });
+                  return false;
+                }).parent().parent().parent().append(preview);
+              })();
+              /* ]]> */
+            </script>
+          </td>
+        </tr>
+        {%- endif %}
+      </table>
     {%- endif %}
   </div>
+  <script type="text/javascript">
+    /* <![CDATA[ */
+    $(function() {
+      makeCommentLinks($('table.comments td.comment'));
+    })
+    /* ]]> */
+  </script>
 {% endblock %}

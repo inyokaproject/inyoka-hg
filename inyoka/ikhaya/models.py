@@ -315,13 +315,13 @@ class Comment(models.Model):
     deleted = models.BooleanField(null=False, default=False)
 
     def get_absolute_url(self, action='show'):
-        return href('ikhaya', self.article.slug,
+        if action in ['hide', 'restore', 'edit']:
+            return href('ikhaya', 'comment', self.id, action)
+        stamp = self.article.pub_date.strftime('%Y/%m/%d')
+        return href('ikhaya', stamp, self.article.slug,
                     _anchor='comment_%s' % self.id)
     @property
     def rendered_text(self):
-        if self.deleted:
-            return u'<p class="deleted">Dieses Kommentar wurde von der ' \
-                    u'Moderation gelöscht</p>'
         context = RenderContext(current_request)
         key = 'ikhaya/comment/%s' % self.id
         instructions = cache.get(key)
@@ -331,15 +331,16 @@ class Comment(models.Model):
         return render(instructions, context)
 
     def save(self, force_insert=False, force_update=False):
+        if self.id is None:
+            self.article.comment_count += 1
+            self.article.save()
         super(Comment, self).save(force_insert, force_update)
         if self.id:
             cache.delete('ikhaya/comment/%d' % self.id)
-        self.article.comment_count += 1
-        self.article.save()
 
 
 class ArticleSearchAuthDecider(object):
-    """Decides whetever a user can display a search result or not."""
+    """Decides whether a user can display a search result or not."""
 
     def __init__(self, user):
         self.now = datetime.utcnow()
