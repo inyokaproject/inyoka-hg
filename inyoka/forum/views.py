@@ -1512,10 +1512,12 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         ).order_by(topic_table.c.last_post_id.desc()) \
          .offset((page - 1) * TOPICS_PER_PAGE) \
          .limit(TOPICS_PER_PAGE + 1)
+
         topic_ids = [i[0] for i in topic_ids.execute().fetchall()]
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
         topic_ids = topic_ids[:30]
-        topics = list(topics.filter(topic_table.c.id.in_(topic_ids)))
+        topics = filter(lambda x: have_privilege(request.user, x, 'read'),
+                        list(topics.filter(topic_table.c.id.in_(topic_ids))))
         pagination = []
         normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
         disabled = u'<span class="disabled next">%(text)s</span>'
