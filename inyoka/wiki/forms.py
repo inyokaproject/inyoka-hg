@@ -114,5 +114,3 @@ class ManageDiscussionForm(forms.Form):
         if topic is None:
             raise forms.ValidationError(u'Dieses Thema existiert nicht!')
         return topic
-
-

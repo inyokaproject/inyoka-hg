@@ -26,6 +26,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import date_time_to_datetime
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.local import current_request
+from inyoka.utils.decorators import deferred
 
 
 class ArticleManager(models.Manager):
@@ -116,7 +117,7 @@ class Article(models.Model):
     comment_count = models.IntegerField(default=0)
     comments_enabled = models.BooleanField('Kommentare erlaubt', default=True)
 
-    @property
+    @deferred
     def pub_datetime(self):
         return date_time_to_datetime(self.pub_date, self.pub_time)
 
@@ -342,9 +343,12 @@ class ArticleSearchAuthDecider(object):
 
     def __init__(self, user):
         self.now = datetime.utcnow()
-        self.priv = user.can('article_edit')
+        self.priv = user.can('article_read')
 
     def __call__(self, auth):
+        if not isinstance(auth[1], datetime):
+            # this is a workaround for old data in search-index.
+            auth[1] = datetime(auth[1].year, auth[1].month, auth[1].day)
         return self.priv or ((not auth[0]) and auth[1] <= self.now)
 
 
@@ -359,8 +363,8 @@ class IkhayaSearchAdapter(SearchAdapter):
             uid=article.id,
             title=article.subject,
             user=article.author_id,
-            date=article.pub_date,
-            auth=(article.hidden, article.pub_date),
+            date=article.pub_datetime,
+            auth=(article.hidden, article.pub_datetime),
             category=article.category.slug,
             text=[article.text, article.intro]
         )
@@ -370,7 +374,7 @@ class IkhayaSearchAdapter(SearchAdapter):
         return {
             'title': article.subject,
             'user': article.author,
-            'date': article.pub_date,
+            'date': article.pub_datetime,
             'url': url_for(article),
             'component': u'Ikhaya',
             'group': article.category.name,

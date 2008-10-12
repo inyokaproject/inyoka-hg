@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Creating basic database tables..."
-DBNAME=$(python -c 'from django.conf import settings; print settings.DATABASE_NAME')
+DBNAME=$(python -c 'import inyoka.application; from inyoka.conf import settings; print settings.DATABASE_NAME')
 django-admin.py dbshell <<EOF
 	drop database ${DBNAME};
 	create database ${DBNAME};

@@ -60,3 +60,4 @@ clean-files:
 	find . -name '*~' -exec rm -f {} +
 	find . -name '*.orig' -exec rm -f {} +
 	find . -name '*.orig.*' -exec rm -f {} +
+	find . -name '*.py.fej' -exec rm -f {} +
