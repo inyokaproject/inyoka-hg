@@ -35,7 +35,7 @@
     :license: GNU GPL.
 """
 import math
-from inyoka.utils.http import PageNotFound
+from inyoka.utils.http import PageNotFound, HttpResponseRedirect
 from inyoka.utils.html import escape
 from werkzeug import url_encode
 
@@ -72,6 +72,12 @@ class Pagination(object):
             self.link_base = link
         else:
             self.generate_link = link
+
+        self.needs_redirect_to = None
+        if self.total/per_page < 1 and page > 1:
+            url = self.generate_link(1, dict(request.GET.lists()))
+            self.needs_redirect_to = lambda: HttpResponseRedirect(url)
+            print self.needs_redirect_to, url
 
     def generate_link(self, page, params):
         if page == 1:

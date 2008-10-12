@@ -1046,6 +1046,10 @@ def memberlist(request, page=1):
     }, request.GET)
     pagination = Pagination(request, filterable.get_objects(), page, 15,
         href('portal', 'users'))
+
+    if pagination.needs_redirect_to:
+        return pagination.needs_redirect_to()
+
     set_session_info(request, u'schaut sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {

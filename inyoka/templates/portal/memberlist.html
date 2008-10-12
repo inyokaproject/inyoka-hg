@@ -41,6 +41,10 @@
       <td>{{ user.date_joined.strftime('%d.%m.%Y') }}</td>
       <td>{{ user.post_count }}</td>
     </tr>
+    {% else %}
+    <tr>
+      <td colspan="5">Es wurden keine Benutzer gefunden!</td>
+    </tr>
     {%- endfor %}
   </table>
   {{ pagination.generate() }}
