@@ -31,12 +31,10 @@ ul.articles {
 
 .article {
   border: solid 1px #ccc;
-  margin: 0.0em;
-  margin-bottom: 1.0em;
-  padding: 0 1em;
   background-image:url(../img/ikhaya/article1px.jpg);
   background-repeat:repeat-x;
   background-position:-8px 0px;;
+  margin-bottom: 1em;
 }
 
 h2, h3, h4 {
@@ -48,11 +46,12 @@ h2, h3 {
 }
 
 h3.title {
-  margin-bottom: 1.2em;
+  margin: 0.7em 0 1em 1em;
 }
 
 h3.title a {
   color: #673B1A;
+  text-decoration: none;
 }
 
 p {
@@ -60,32 +59,20 @@ p {
 }
 
 div.intro {
-  font-size: 0.95em;
-  color: #777;
-  margin: 20px 0;
-  font-weight: bold;
+  font-size: 0.9em;
+  margin: 0 1.5em;
+  font-style: italic;
 }
 
-hr.intro_text_splitter {
-  color: #fff;
-  background-color: #fff;
-  border-bottom: 1px dotted #888;
-  margin: 0 30px 1.0em 30px;
+.article div.text {
+  margin: 0 0.5em;
 }
 
-p.meta,
-p.meta_detail {
+p.meta {
   color: #777;
   font-size: 0.9em;
-  margin-bottom: 0.1em;
+  margin: 0 1em 0.1em 1em !important;
   padding: 5px;
-}
-
-p.meta_detail {
-  border-top: 1px solid #b2b2b2;
-  border-bottom: 1px solid #999;
-  background-image: url('../img/ikhaya/metabg.png');
-  margin: 2em -1em !important;
 }
 
 img.icon {
@@ -95,27 +82,125 @@ img.icon {
   margin:0px 0px 10px 10px;
 }
 
-ul.comments > li.comment {
-  border-style: solid;
-  border-color: #CCC;
-  border-width: 0 0 1px 0;
-  padding: 1em 0;
-  list-style: none;
+table.comments {
+    table-layout: fixed;
+    margin: 0;
+    border: 0;
 }
 
-ul.comments {
-  font-size: 0.9em;
+/* deleted comment */
+table.comments tr.deleted {
+    text-align: center;
+    background-color: #eee;
+    color: #444;
+    font-style: italic;
 }
 
-ul.comments > li.comment div.counter {
-  float: left;
-  font-weight: bold;
-  color: #666;
-  font-size: 2em;
+/* author column of comments */
+table.comments td.author {
+    vertical-align: top;
+    background: #eeeeee;
+    border-right: 1px solid #cccccc;
+    width: 150px;
 }
 
-ul.comments li.comment div.comment {
-    margin-left: 2em;
+table.comments td.author p {
+    margin: 2px 0 5px 0;
+    font-size: 0.8em;
+    text-align: left;
+}
+
+table.comments td.author p.username a {
+    margin: 3px 0 10px 0;
+    font-size: 1.1em;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+table.comments td.author img.avatar {
+    margin: 10px 0 0 0;
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+table.comments td.author p.username {
+	position: relative;
+}
+
+table.comments td.author img.teamicon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+table.comments td.author div.member_title {
+  line-height: 1.2em;
+  font-size: 0.6em;
+  margin-bottom: 10px;
+}
+
+/* text column of comments */
+table.comments td.comment {
+    font-size: 0.9em;
+    padding: 10px;
+    vertical-align: top;
+}
+
+table.comments td.comment div.text {
+    overflow: auto;
+}
+
+table.comments td.comment div.commentinfo {
+    font-size: 0.9em;
+    background: url(../img/table-header-alternative.png); 
+    margin: -10px -10px 10px -10px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #CCC;
+}
+
+table.comments td.comment div.signature { 
+    margin: 20px 0 -5px 0;
+    padding: 5px 0 0 0;
+    border-top: 1px solid #AAA;
+    color: #666;
+    font-size: .9em;
+    line-height: 140%;
+}
+
+table.comments td.comment div.signature p {
+    padding: 0 0 5px 0;
+    margin: 0;
+}
+
+table.comments td.comment div.signature a {
+    color: #666;
+}
+
+
+/* actions of a comment */
+table.comments td.comment div.linklist {
+    float: right;
+}
+
+.action {
+    background-repeat: no-repeat;
+    padding-left: 20px;
+}
+.action_restore {
+    background-image: url('../img/forum/restore.png');
+}
+.action_delete {
+    background-image: url('../img/forum/delete.png');
+}
+.action_hide {
+    background-image: url('../img/forum/hide.png');
+}
+.action_edit {
+    background-image: url('../img/forum/comment_edit.png');
+}
+.action_quote {
+    background-image: url('../img/forum/quote.png');
 }
 
 a.comment_link:hover {
@@ -128,9 +213,4 @@ a.comment_link:hover {
   border: 1px solid #222;
   padding: 0.5em;
   margin: 0 4em 0 0;
-}
-
-p.deleted {
-    font-style: italic;
-    color: #555;
 }

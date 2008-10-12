@@ -140,11 +140,9 @@
       </tr>
       {%- else %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
-        {%- if post.author_id == USER.id %}
-        <td class="author" style="background-color: #F6F4EF">
-        {%- else %}
-        <td class="author">
-        {%- endif %}
+        <td class="author"
+        {%- if post.author_id == USER.id %} style="background-color: #F6F4EF"
+        {%- endif %}>
           <p class="username">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
             {%- if post.author.primary_group.icon %}

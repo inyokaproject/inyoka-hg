@@ -33,7 +33,7 @@
       {%- if article.icon %}
       <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
       {%- endif %}
-      {{ article.rendered_intro }}
+      <div class="text">{{ article.rendered_intro }}</div>
       <p class="meta">
         geschrieben von <a href="{{ article.author|url }}">{{ article.author.username|e }}</a>
         {{ article.pub_datetime|specificdatetimeformat(true) }}

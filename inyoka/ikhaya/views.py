@@ -5,7 +5,7 @@
 
     Views for Ikhaya.
 
-    :copyright: 2007 by Benjamin Wiegand, Christoph Hack.
+    :copyright: 2007 - 2008 by Benjamin Wiegand, Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime, date
@@ -114,16 +114,9 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 @templated('ikhaya/detail.html', modifier=context_modifier)
 def detail(request, year, month, day, slug):
     """Shows a single article."""
-    # I was not able to form that into one sql-statement
-    articleq = Article.objects.select_related().filter(
+    article = Article.objects.select_related().get(
         pub_date=date(int(year), int(month), int(day)),
         slug=slug)
-    if articleq:
-        article = articleq[0]
-    else:
-        raise PageNotFound()
-
-
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_read'):
@@ -142,22 +135,20 @@ def detail(request, year, month, day, slug):
             if data['comment_id'] and request.user.can('comment_edit'):
                 c = Comment.objects.get(id=data['comment_id'])
                 c.text = data['text']
-                c.deleted = data['deleted']
-                flash(u'Das Kommentar wurde erfolgreich bearbeitet.')
+                flash(u'Das Kommentar wurde erfolgreich bearbeitet.', True)
             else:
                 c = Comment(text=data['text'])
                 c.article = article
                 c.author = request.user
                 c.pub_date = datetime.utcnow()
-                flash(u'Dein Kommentar wurde erstellt.')
+                flash(u'Dein Kommentar wurde erstellt.', True)
             c.save()
             return HttpResponseRedirect(url_for(article))
     elif request.GET.get('moderate'):
         comment = Comment.objects.get(id=int(request.GET.get('moderate')))
-        form = EditCommentForm({
+        form = EditCommentForm(initial={
             'comment_id':   comment.id,
             'text':         comment.text,
-            'deleted':      comment.deleted
         })
     else:
         form = EditCommentForm()
@@ -165,7 +156,43 @@ def detail(request, year, month, day, slug):
         'article':  article,
         'comments': list(article.comment_set.select_related()),
         'form': form,
-        'preview': preview
+        'preview': preview,
+        'can_post_comment': request.user.is_authenticated,
+        'can_admin_comment': request.user.can('comment_edit'),
+        'can_edit_article': request.user.can('article_edit'),
+    }
+
+
+def change_comment(boolean, text):
+    @require_permission('comment_edit')
+    def do(request, comment_id):
+        c = Comment.objects.get(id=comment_id)
+        c.deleted = boolean
+        c.save()
+        flash(text, True)
+        return HttpResponseRedirect(url_for(c))
+    return do
+
+hide_comment = change_comment(True, u'Der Kommentar wurde verborgen.')
+restore_comment = change_comment(False, u'Der Kommentar wurde wiederhergestellt.')
+
+
+@require_permission('comment_edit')
+@templated('ikhaya/edit_comment.html')
+def edit_comment(request, comment_id):
+    comment = Comment.objects.get(id=comment_id)
+    if request.method == 'POST':
+        form = EditCommentForm(request.POST)
+        if form.is_valid():
+            comment.text = form.cleaned_data['text']
+            comment.save()
+            flash('Der Kommentar wurde gespeichert', True)
+            return HttpResponseRedirect(comment.get_absolute_url())
+    else:
+        form = EditCommentForm(initial={'text': comment.text})
+    return {
+        'comment':  comment,
+        'form':     form,
     }
 
 
