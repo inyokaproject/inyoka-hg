@@ -256,6 +256,8 @@ table.topic td.post div.signature {
     color: #666;
     font-size: .9em;
     line-height: 140%;
+    max-height: 5.6em;
+    overflow: hidden;
 }
 
 table.topic td.post div.signature p {
