@@ -23,7 +23,7 @@ from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseForbidd
 from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
 from inyoka.utils.flashing import has_flashed_messages
-from inyoka.utils.local import local, local_manager
+from inyoka.utils.local import local, local_manager, request_cache
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -38,6 +38,14 @@ class CommonServicesMiddleware(CommonMiddleware):
 
         # populate the request
         local.request = request
+        # create local cache object if it does not exist
+        # (so that our cache is not overwriting it every time...)
+        try:
+            obj = request_cache._get_current_object()
+        except RuntimeError:
+            local.cache = {}
+            #gives damn UnboundLocalError – python's parser is damn buggy...
+            #request_cache = {}
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain

@@ -56,9 +56,11 @@ class InyokaMemcachedCache(MemcachedCache):
 
         # calculate key hash to get local-cached multi-key
         # values.
+        if not hasattr(local, 'cache'):
+            local.cache = {}
+
         kh = hash(u''.join(key_mapping.keys()))
         if kh in local.cache:
-            print "use thread local cache for %s" % kh
             return local.cache[kh]
 
         # the keys call here is important because otherwise cmemcache
@@ -73,7 +75,6 @@ class InyokaMemcachedCache(MemcachedCache):
             for key in keys:
                 if key not in rv:
                     rv[key] = None
-
         local.cache[kh] = rv
         return rv
 
