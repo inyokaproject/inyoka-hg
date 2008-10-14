@@ -40,6 +40,44 @@ class InyokaMemcachedCache(MemcachedCache):
             local.cache[key] = value
             return value
 
+    def get_dict(self, *keys):
+        key_mapping = {}
+        have_encoded_keys = False
+        for idx, key in enumerate(keys):
+            if isinstance(key, unicode):
+                encoded_key = key.encode('utf-8')
+                have_encoded_keys = True
+            else:
+                encoded_key = key
+            if self.key_prefix:
+                encoded_key = self.key_prefix + encoded_key
+            if _test_memcached_key(key):
+                key_mapping[encoded_key] = key
+
+        # calculate key hash to get local-cached multi-key
+        # values.
+        kh = hash(u''.join(key_mapping.keys()))
+        if kh in local.cache:
+            print "use thread local cache for %s" % kh
+            return local.cache[kh]
+
+        # the keys call here is important because otherwise cmemcache
+        # does ugly things.  What exaclty I don't know, i think it does
+        # Py_DECREF but quite frankly i don't care.
+        d = rv = self._client.get_multi(key_mapping.keys())
+        if have_encoded_keys or self.key_prefix:
+            rv = {}
+            for key, value in d.iteritems():
+                rv[key_mapping[key]] = value
+        if len(rv) < len(keys):
+            for key in keys:
+                if key not in rv:
+                    rv[key] = None
+
+        local.cache[kh] = rv
+        return rv
+
+
 def _set_cache(obj):
     cache.__class__ = obj.__class__
     cache.__dict__ = obj.__dict__
