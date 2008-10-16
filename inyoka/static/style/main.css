@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /**
  * style.main
  * ~~~~~~~~~~
@@ -404,6 +405,13 @@ span.highlight {
   color: #597A00;
 }
 
+a .longlinkcollapse:nth-child(2) {
+  display: none;
+}
+
+a .longlinkcollapse:nth-child(1)::after  {
+  content: "…";
+}
 /* This is used in the UserCP-Subscriptions page */
 h3 .note {
   font-size: 0.7em;
@@ -1085,6 +1093,36 @@ div.not_found img {
 	color: HighlightText;
 }
 
+.tf_tokenfield {
+    border: 1px solid #AAAAAA;
+    display: inline-table;
+    display: inline-block;
+}
+.tf_tokenfield .tf_token {
+    display: inline-table;
+    display: inline-block;
+    background-color: #F6F6F6;
+    border: 1px solid #AAAAAA;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    margin: 1px;
+    padding-left: .5ex;
+    padding-right: .5ex;
+}
+.tf_tokenfield .tf_token span {
+    display: inline-table;
+    display: inline-block;
+    width: 15px;
+    cursor: default;
+    background-image: url('../img/forum/delete.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin-left: .5ex;
+}
+.tf_tokenfield input {
+    border: none;
+}
 /* Temporary error reporting link */
 #user_error_report_link {
     text-decoration: none;
@@ -1192,34 +1230,4 @@ div.dropdown {
   background-color: #EEE;
   padding: 0 .66em;
   margin: 0;
-}
-.tf_tokenfield {
-    border: 1px solid #AAAAAA;
-    display: inline-table;
-    display: inline-block;
-}
-.tf_tokenfield .tf_token {
-    display: inline-table;
-    display: inline-block;
-    background-color: #F6F6F6;
-    border: 1px solid #AAAAAA;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    margin: 1px;
-    padding-left: .5ex;
-    padding-right: .5ex;
-}
-.tf_tokenfield .tf_token span {
-    display: inline-table;
-    display: inline-block;
-    width: 15px;
-    cursor: default;
-    background-image: url('../img/forum/delete.png');
-    background-repeat: no-repeat;
-    background-position: center center;
-    margin-left: .5ex;
-}
-.tf_tokenfield input {
-    border: none;
 }
