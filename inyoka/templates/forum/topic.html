@@ -12,7 +12,6 @@
 #}
 {%- extends 'forum/page.html' %}
 
-{% set scripts = ['Hyphenator.js'] + scripts|default([]) %}
 {% set title_trace = [topic.title|e] %}
 {% set name = 'Thema „%s“ - ' % topic.title|e %}
 {% set feeds = [
@@ -199,7 +198,7 @@
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date|datetimeformat }}
           </div>
-          <div class="text hyphenate">
+          <div class="text">
             {{ post.get_text() }}
           </div>
           {%- set attachments = post.grouped_attachments %}
@@ -269,8 +268,4 @@
         {%- endfor %}</p>
         <div style="clear:both;"></div>
       </div>{# .pathbar #}
-  <script type="text/javascript">
-    //$(".hyphenate pre").addClass("donthyphenate");
-    //Hyphenator.run();
-  </script>
 {% endblock %}
