@@ -237,7 +237,7 @@ table.topic td.post {
     vertical-align: top;
 }
 
-table.topic td.post {
+table.topic td.post div.text {
     overflow: auto;
 }
 
