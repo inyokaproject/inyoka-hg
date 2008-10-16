@@ -405,11 +405,11 @@ span.highlight {
   color: #597A00;
 }
 
-a .longlinkcollapse:nth-child(2) {
+a .longlink_collapse {
   display: none;
 }
 
-a .longlinkcollapse:nth-child(1)::after  {
+a .longlink_show::after  {
   content: "…";
 }
 /* This is used in the UserCP-Subscriptions page */
