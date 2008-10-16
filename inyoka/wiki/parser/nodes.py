@@ -696,17 +696,10 @@ class Link(Element):
                  style=None, class_=None, shorten=False):
         if not children:
             if shorten and len(url) > 40:
-                if url.startswith('http://'):
-                    children = [
-                        Span([Text('http://')], class_='longlinkcollapse'),
-                        Text(url[7:22]),
-                        Span([Text(url[22:])], class_='longlinkcollapse'),
-                    ]
-                else:
-                    children = [
-                        Text(url[:22]),
-                        Span([Text(url[22:])], class_='longlinkcollapse'),
-                    ]
+                children = [
+                    Span([Text(url[:22])], class_='longlinkcollapse'),
+                    Span([Text(url[22:])], class_='longlinkcollapse'),
+                ]
             else:
                 text = url
                 if text.startswith('mailto:'):
