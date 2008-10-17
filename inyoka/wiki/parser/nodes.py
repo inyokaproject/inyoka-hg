@@ -332,6 +332,10 @@ class Newline(Node):
 
     allowed_in_signatures = True
     is_linebreak_node = True
+    
+    @property
+    def text(self):
+        return '\n'
 
     def generate_markup(self, w):
         w._break()

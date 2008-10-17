@@ -71,10 +71,6 @@
       {{ form.signature }}
       <script type="text/javascript">
         var editor = new WikiEditor('textarea[@name="signature"]');
-        editor.textarea.css("height","4.2em");
-        editor.textarea.css("overflow","hidden");
-        $("#button-shrink").parent().remove();
-        $("#button-enlarge").parent().remove();
       </script>
     </p>
     {{ form.errors.signature }}
