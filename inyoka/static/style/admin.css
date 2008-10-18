@@ -156,7 +156,7 @@ img.admin_teamicon {
 }
 
 #forum_rights {
-  display: table;
+  display: table-row;
 }
 
 #forum_rights ul.forums {
