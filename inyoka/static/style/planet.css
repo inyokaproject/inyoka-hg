@@ -21,6 +21,10 @@ div.articles div.article {
   margin: 1.5em 0 1.5em 0;
   padding: 0;
   background: url(../img/planet/bubble-left.png) repeat-y 136px top;
+  position: relative;
+  top: 0px;
+  left: 0px;
+
 }
 
 div.articles div.article div.author {
@@ -29,7 +33,9 @@ div.articles div.article div.author {
   margin: 30px 0 0 0;
   padding: 0 20px 30px 0;
   text-align: center;
-  position: relative;
+  position: absolute;
+  top: 0px;
+  left: 0px;
   width: 120px;
 }
 
