@@ -221,7 +221,7 @@ def validate_signature(signature):
     if sig_len >= 0 and len(text) > sig_len:
         raise SignatureError(u'Deine Signatur ist mit %d Zeichen um '
                              u'%d Zeichen zu lang' % (len(text),
-                             sig_len - len(text)))
+                             len(text) - sig_len))
     if sig_lines >= 0 and len(text.splitlines()) > sig_lines:
         raise SignatureError(u'Deine Signatur darf maximal aus %d '
                              u'Zeilen bestehen' % sig_lines)
