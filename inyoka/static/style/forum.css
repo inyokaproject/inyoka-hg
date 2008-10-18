@@ -192,6 +192,8 @@ table.topic td.author {
     background: #eeeeee;
     border-right: 1px solid #cccccc;
     width: 150px;
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 table.topic td.author p {
