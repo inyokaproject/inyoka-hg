@@ -10,7 +10,7 @@
     :license: GNU GPL.
 """
 
-import os, subprocess
+import sys, os, subprocess
 
 import virtualenv
 
@@ -97,7 +97,11 @@ def after_install(options, home_dir):
 """
 
 def main():
-    print virtualenv.create_bootstrap_script(EXTRA_TEXT, python_version='2.4')
+    if len(sys.argv) == 2:
+        print virtualenv.create_bootstrap_script(EXTRA_TEXT, python_version=sys.argv[1])
+    else:
+        print >>sys.stderr, "Specify the python version you want to use as"\
+                            " first parameter (eg. 2.4)"
 
 if __name__ == '__main__':
     main()
