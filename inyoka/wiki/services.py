@@ -35,7 +35,7 @@ def on_render_preview(request):
             page = Page.objects.get_by_name(request.REQUEST['page'])
         except Page.DoesNotExist:
             page = None
-    context = RenderContext(wiki_page=page)
+    context = RenderContext(request, page)
     html = parse(request.REQUEST.get('text', '')).render(context, 'html')
     return HttpResponse(html)
 
