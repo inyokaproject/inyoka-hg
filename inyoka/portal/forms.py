@@ -67,9 +67,9 @@ class RegisterForm(forms.Form):
     username = forms.CharField(label='Benutzername', max_length=30)
     email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
-        u'es vergessen haben solltest. ubuntuusers.de <a href="%s">'
-        u'garantiert</a>, dass sie nicht weitergegeben wird.'
-        % href('portal', 'datenschutz'))
+        u'es vergessen haben solltest. Sie ist für andere Benutzer nicht '
+        u'sichtbar. ubuntuusers.de <a href="%s">garantiert</a>, dass sie '
+        u'nicht weitergegeben wird.' % href('portal', 'datenschutz'))
     password = forms.CharField(label='Passwort',
         widget=forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Passwortbestätigung',
