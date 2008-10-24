@@ -11,7 +11,11 @@
       var positive = forum[2];
       var negative = forum[3];;
       mapping[id] = positive.concat($.map(negative, function(o) { return o * -1}));
-      list.append($('<li />').text(name).attr('id', 'forum_' + id).click(function(evt) {
+      var li = $('<li />').text(name).attr('id', 'forum_' + id)
+      if (positive != '' || negative != '') {
+        li.css('color', 'red');
+      };
+      list.append(li.click(function(evt) {
         var id = $(this).attr('id').split('_')[1];
         if (evt.ctrlKey) {
           var pos = $.inArray(id, selected_forums);
