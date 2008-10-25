@@ -33,7 +33,7 @@ IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
 
 
 def fetch_page(name):
-    return urllib2.urlopen(os.path.join(URL, quote(name))).read()
+    return urllib2.urlopen(os.path.join(URL, quote(name.encode('utf8')))).read()
 
 
 def save_file(url):
@@ -60,11 +60,12 @@ def handle_src(match):
 
 
 def handle_img(match):
-    return u'href="%s"' % save_file(href('wiki', '_image', target=url_unquote(match.groups()[0])))
+    return u'href="%s"' % save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))))
 
 
 def fix_path(pth):
     return pth.replace(' ', '_')
+
 
 def create_snapshot():
     # remove the snapshot folder and recreate it
@@ -94,7 +95,11 @@ def create_snapshot():
                     os.mkdir(pth)
 
         f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
-        content = fetch_page(name).decode('utf8')
+        try:
+            content = fetch_page(name).decode('utf8')
+        except:
+            continue
+
         content = TAB_RE.sub('', content)
         content = META_RE.sub('', content)
         content = NAVI_RE.sub('', content)

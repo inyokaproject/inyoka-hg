@@ -41,6 +41,12 @@
     {%- if article.icon -%}
     <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
     {%- endif -%}
+    <div class="intro">
+      {{ article.rendered_intro }}
+    </div>
+    <div class="text">
+      {{ article.rendered_text }}
+    </div>
     <p class="meta">
       geschrieben von <a href="{{ article.author|url }}">
       {{ article.author.username|e}}</a> {{ article.pub_datetime|specificdatetimeformat(true) }} 
@@ -50,12 +56,6 @@
       {%- endif %}
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
-    <div class="intro">
-      {{ article.rendered_intro }}
-    </div>
-    <div class="text">
-      {{ article.rendered_text }}
-    </div>
     {%- if article.comments_enabled %}
       <a name="comments"></a>
       <table class="comments">
