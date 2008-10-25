@@ -63,6 +63,9 @@ def handle_img(match):
     return u'href="%s"' % save_file(href('wiki', '_image', target=url_unquote(match.groups()[0])))
 
 
+def fix_path(pth):
+    return pth.replace(' ', '_')
+
 def create_snapshot():
     # remove the snapshot folder and recreate it
     try:
@@ -82,15 +85,15 @@ def create_snapshot():
         if rev.attachment:
             # page is an attachment
             continue
-        if page.trace > 1:
+        if len(page.trace) > 1:
             # page is a subpage
             # create subdirectories
             for part in page.trace[:-1]:
-                pth = path.join(FOLDER, *part.split('/'))
+                pth = path.join(FOLDER, *fix_path(part).split('/'))
                 if not path.exists(pth):
                     os.mkdir(pth)
 
-        f = file(path.join(FOLDER, page.name.replace(' ', '_')), 'w+')
+        f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
         content = fetch_page(name).decode('utf8')
         content = TAB_RE.sub('', content)
         content = META_RE.sub('', content)
