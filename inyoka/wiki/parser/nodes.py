@@ -699,11 +699,8 @@ class Link(Element):
     def __init__(self, url, children=None, title=None, id=None,
                  style=None, class_=None, shorten=False):
         if not children:
-            if shorten and len(url) > 40:
-                children = [
-                    Span([Text(url[:22])], class_='longlink_show'),
-                    Span([Text(url[22:])], class_='longlink_collapse'),
-                ]
+            if shorten and len(url) > 50:
+                children = [Text(url[:36] + '...' + url[-14:])]
             else:
                 text = url
                 if text.startswith('mailto:'):
