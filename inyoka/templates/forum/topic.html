@@ -143,7 +143,7 @@
         <td class="author"
         {%- if post.author_id == USER.id %} style="background-color: #F6F4EF"
         {%- endif %}>
-          <p class="username">
+          <p class="username{% if not post.author.is_active %} inactive{% endif %}">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
             {%- if post.author.primary_group.icon %}
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />

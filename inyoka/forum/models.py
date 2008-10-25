@@ -1146,6 +1146,7 @@ class WelcomeMessage(object):
 
 # set up the mappers for sqlalchemy
 class SAUser(object):
+    is_active = property(lambda x: x.status == 1)
 
     def get_absolute_url(self, action=None):
         return href('portal', 'user', self.username)
