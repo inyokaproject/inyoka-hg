@@ -90,7 +90,7 @@ def create_snapshot():
                 if not path.exists(pth):
                     os.mkdir(pth)
 
-        f = file(path.join(FOLDER, page.name + '.html'), 'w+')
+        f = file(path.join(FOLDER, page.name.replace(' ', '_')), 'w+')
         content = fetch_page(name).decode('utf8')
         content = TAB_RE.sub('', content)
         content = META_RE.sub('', content)
