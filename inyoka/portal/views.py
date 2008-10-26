@@ -798,6 +798,7 @@ def usercp_userpage(request):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg(request, folder=None, entry_id=None, page=1):
+    page = int(page)
     set_session_info(request, u'sieht sich seine privaten Nachrichten an')
     if folder is None:
         if entry_id is None:
@@ -856,7 +857,10 @@ def privmsg(request, folder=None, entry_id=None, page=1):
     else:
         message = None
     link = href('portal', 'privmsg', folder, 'page')
-    pagination = Pagination(request, entries, page, 10, link)
+
+    pagination = Pagination(request, entries, page or 1, page and 10
+        or entries.count(), link)
+
     return {
         'entries': list(pagination.objects),
         'pagination': pagination.generate(),
@@ -864,7 +868,8 @@ def privmsg(request, folder=None, entry_id=None, page=1):
             'name': PRIVMSG_FOLDERS[folder][2],
             'id': PRIVMSG_FOLDERS[folder][1]
         },
-        'message': message
+        'message': message,
+        'one_page': page == 0,
     }
 
 

@@ -103,6 +103,13 @@
             </div>
           </td>
         </tr>
+        <tr>
+          {% if one_page %}
+          <td><p><a href="{{ href('portal', 'privmsg', folder.id) }}">Nachrichten auf mehrere Seiten aufteilen</a></p></td>
+          {% else %}
+          <td><p><a href="{{ href('portal', 'privmsg', folder.id, 'page', '0') }}">Alle Nachrichten auf einer Seite anzeigen</a></p></td>
+          {% endif %}
+        </tr>
       </tfoot>
     </form>
   </table>
