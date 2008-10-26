@@ -30,6 +30,7 @@ TAB_RE = re.compile(r'(<div class="navi_tabbar navigation">).+?(</div>)', re.DOT
 META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
 NAVI_RE = re.compile(r'(<ul class="navi_global">).+?(</ul>)', re.DOTALL)
 IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
+LINK_RE = re.compile(r'href="%s' % href('wiki'))
 
 
 def fetch_page(name):
@@ -64,7 +65,7 @@ def handle_img(match):
 
 
 def fix_path(pth):
-    return pth.replace(' ', '_')
+    return pth.replace(' ', '_').lower()
 
 
 def create_snapshot():
@@ -100,11 +101,14 @@ def create_snapshot():
         except:
             continue
 
-        content = TAB_RE.sub('', content)
+        content = TAB_RE.sub(u'''<div class="message">
+<strong>Hinweis:</strong> Da unsere Server überlastet sind, haben wir das Wiki auf eine statische Version umgestellt; es kann deswegen zur Zeit nicht bearbeitet werden.
+</div>''', content)
         content = META_RE.sub('', content)
         content = NAVI_RE.sub('', content)
         content = IMG_RE.sub(handle_img, content)
         content = SRC_RE.sub(handle_src, content)
+        content = LINK_RE.sub('href="/', content)
         f.write(content.encode('utf8'))
         f.close()
         pages.append(page.name)
