@@ -74,7 +74,7 @@ class Pagination(object):
             self.generate_link = link
 
         self.needs_redirect_to = None
-        if self.total/per_page < 1 and page > 1:
+        if self.total and self.total/per_page < 1 and page > 1:
             url = self.generate_link(1, dict(request.GET.lists()))
             self.needs_redirect_to = lambda: HttpResponseRedirect(url)
             print self.needs_redirect_to, url
@@ -94,7 +94,9 @@ class Pagination(object):
         was_ellipsis = False
         result = []
         add = result.append
-        pages = max(0, self.total - 1) // self.per_page + 1
+        pages = 1
+        if self.total:
+            pages = max(0, self.total - 1) // self.per_page + 1
         params = dict((k, v) for k, v in self.parameters.iteritems())
         half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
