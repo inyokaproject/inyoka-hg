@@ -89,7 +89,7 @@ def after_install(options, home_dir):
     easy_install('wsgiref', home_dir)
     easy_install('MySQL-python', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
-    easy_install('http://code.djangoproject.com/svn/django/trunk/', home_dir)
+    easy_install('http://www.djangoproject.com/download/1.0/tarball/', home_dir)
     easy_install('python-memcached', home_dir)
     easy_install('cssutils', home_dir)
     xapian_install(os.path.abspath(home_dir))
