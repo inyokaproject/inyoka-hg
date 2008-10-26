@@ -344,7 +344,9 @@ class ArticleSearchAuthDecider(object):
     def __call__(self, auth):
         if not isinstance(auth[1], datetime):
             # this is a workaround for old data in search-index.
+            auth = list(auth)
             auth[1] = datetime(auth[1].year, auth[1].month, auth[1].day)
+            auth = tuple(auth)
         return self.priv or ((not auth[0]) and auth[1] <= self.now)
 
 
