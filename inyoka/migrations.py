@@ -1013,6 +1013,12 @@ def add_notes_to_article_suggestion(m):
                 AFTER intro;
     ''')
 
+def add_comment_rendered_text_column(m):
+    m.engine.execute('''
+        ALTER TABLE ikhaya_comment
+            ADD COLUMN rendered_text LONGTEXT NOT NULL
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1038,4 +1044,5 @@ MIGRATIONS = [
     add_egosearch_index, add_planet_hidden, forum_plaintext,
     add_negative_privileges, add_reported_topics_storage,
     add_group_is_public_flag, add_notes_to_article_suggestion,
+    add_comment_rendered_text_column
 ]

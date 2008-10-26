@@ -132,7 +132,7 @@ def detail(request, year, month, day, slug):
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
         elif form.is_valid():
             data = form.cleaned_data
-            if data['comment_id'] and request.user.can('comment_edit'):
+            if data.get('comment_id') and request.user.can('comment_edit'):
                 c = Comment.objects.get(id=data['comment_id'])
                 c.text = data['text']
                 flash(u'Das Kommentar wurde erfolgreich bearbeitet.', True)

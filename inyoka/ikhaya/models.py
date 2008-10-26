@@ -313,6 +313,7 @@ class Comment(models.Model):
     author = models.ForeignKey(User)
     pub_date = models.DateTimeField()
     deleted = models.BooleanField(null=False, default=False)
+    rendered_text = models.TextField()
 
     def get_absolute_url(self, action='show'):
         if action in ['hide', 'restore', 'edit']:
@@ -320,20 +321,14 @@ class Comment(models.Model):
         stamp = self.article.pub_date.strftime('%Y/%m/%d')
         return href('ikhaya', stamp, self.article.slug,
                     _anchor='comment_%s' % self.id)
-    @property
-    def rendered_text(self):
-        context = RenderContext(current_request)
-        key = 'ikhaya/comment/%s' % self.id
-        instructions = cache.get(key)
-        if instructions is None:
-            instructions = parse(self.text).compile('html')
-            cache.set(key, instructions)
-        return render(instructions, context)
 
     def save(self, force_insert=False, force_update=False):
         if self.id is None:
             self.article.comment_count += 1
             self.article.save()
+        context = RenderContext(current_request)
+        node = parse(self.text, wiki_force_existing=False)
+        self.rendered_text = node.render(context, 'html')
         super(Comment, self).save(force_insert, force_update)
         if self.id:
             cache.delete('ikhaya/comment/%d' % self.id)
