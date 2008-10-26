@@ -88,5 +88,58 @@ $(function () {
       }
     });
   })();
+
+
+  function doSubscription(kind, type, slug, tag) {
+    if (kind == "subscribe") {
+      var url = "/?__service__=forum.subscribe";
+    } else if (kind == "unsubscribe") {
+      var url = "/?__service__=forum.unsubscribe";
+    }
+
+    var new_kind = kind=='subscribe' ? 'unsubscribe' : 'subscribe';
+
+    $.post(url, {
+      type: type,
+      slug: slug
+    }, function(data) {
+      //TODO: so something...
+    });
+
+    // Bind new events and change button's text.
+    $(tag).text(kind=='subscribe' ? 'abbestellen' : 'abonnieren');
+    $(tag).removeClass(kind+'_'+type).addClass(new_kind+'_'+type);
+    $(tag).unbind('click.subscribe');
+    $(tag).bind('click.subscribe', function() { doSubscription(new_kind, type, slug, tag) });
+
+    return false;
+  };
+
+  (function() {
+    $('a.action_subscribe.unsubscribe_topic').bind('click.subscribe', function() {
+      doSubscription('unsubscribe', 'topic', $(this).attr('id'), $(this));
+      return false;
+    });
+
+    $('a.action_subscribe.subscribe_topic').bind('click.subscribe', function() {
+      doSubscription('subscribe', 'topic', $(this).attr('id'), $(this));
+      return false;
+    });
+
+    $('a.action_subscribe.unsubscribe_forum').bind('click.subscribe', function() {
+      doSubscription('unsubscribe', 'forum', $(this).attr('id'), $(this));
+      return false;
+    });
+
+    $('a.action_subscribe.subscribe_forum').bind('click.subscribe', function() {
+      doSubscription('subscribe', 'forum', $(this).attr('id'), $(this));
+      return false;
+    });
+  })();
+
+
+
 });
+
+
 

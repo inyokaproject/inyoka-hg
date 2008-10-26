@@ -10,8 +10,11 @@
     :license: GNU GPL.
 """
 from sqlalchemy.orm import eagerload
-from inyoka.forum.models import Topic, Post
-from inyoka.forum.acl import get_forum_privileges, check_privilege
+from django.db import transaction
+from inyoka.forum.models import Topic, Post, Forum
+from inyoka.forum.acl import get_forum_privileges, check_privilege, \
+    have_privilege
+from inyoka.portal.models import Subscription
 from inyoka.utils.services import SimpleDispatcher
 
 
@@ -58,9 +61,61 @@ def on_toggle_categories(request):
     request.user.save()
     return True
 
+@transaction.autocommit
+def on_subscribe(request):
+    type = request.POST['type']
+    slug = request.POST['slug']
+    obj = None
+
+    if type == 'forum':
+        obj = Forum
+    elif type == 'topic':
+        obj = Topic
+
+    col = str((type in ('forum', 'topic') and type+'_id' or type))
+
+    x = obj.query.filter(obj.slug==slug).one()
+    if not have_privilege(request.user, x, 'read'):
+        #XXX: we should raise here, because it's nearly impossible
+        #     to cach that in JS.
+        return abort_access_denied(request)
+    try:
+        s = Subscription.objects.get(user=request.user, **{col: x.id})
+    except Subscription.DoesNotExist:
+        Subscription(user=request.user, **{col: x.id}).save()
+
+
+@transaction.autocommit
+def on_unsubscribe(request):
+    type = request.POST['type']
+    slug = request.POST['slug']
+    obj = None
+
+    if type == 'forum':
+        obj = Forum
+    elif type == 'topic':
+        obj = Topic
+
+    col = str((type in ('forum', 'topic') and type+'_id' or type))
+
+    x = obj.query.filter(obj.slug==slug).one()
+    if not have_privilege(request.user, x, 'read'):
+        #XXX: we should raise here, because it's nearly impossible
+        #     to catch that in JS.
+        return abort_access_denied(request)
+    try:
+        s = Subscription.objects.get(user=request.user, **{col: x.id})
+    except Subscription.DoesNotExist:
+        pass
+    else:
+        # there's already a subscription for this forum, remove it
+        s.delete()
+
 
 dispatcher = SimpleDispatcher(
     get_topic_autocompletion=on_get_topic_autocompletion,
     get_post=on_get_post,
-    toggle_categories=on_toggle_categories
+    toggle_categories=on_toggle_categories,
+    subscribe=on_subscribe,
+    unsubscribe=on_unsubscribe
 )
