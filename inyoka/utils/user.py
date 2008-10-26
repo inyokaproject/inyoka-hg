@@ -61,11 +61,11 @@ def gen_activation_key(user):
             An user object from the user the key
             will be generated for.
     """
-    return md5('%d%s%s%s' % (
+    return md5(('%d%s%s%s' % (
         user.id, user.username,
         settings.SECRET_KEY,
         user.email
-    )).hexdigest()
+    )).encode('utf8')).hexdigest()
 
 
 def check_activation_key(user, key):
