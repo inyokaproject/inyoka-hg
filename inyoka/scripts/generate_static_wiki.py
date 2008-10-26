@@ -80,7 +80,6 @@ def create_snapshot():
     attachment_folder = path.join(FOLDER, '_')
     os.mkdir(attachment_folder)
 
-    pages = []
     for name in Page.objects.get_page_list(existing_only=True):
         page = Page.objects.get(name=name)
         rev = page.revisions.all()[0]
@@ -111,7 +110,6 @@ def create_snapshot():
         content = LINK_RE.sub('href="/', content)
         f.write(content.encode('utf8'))
         f.close()
-        pages.append(page.name)
 
 
 if __name__ == '__main__':
