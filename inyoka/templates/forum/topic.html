@@ -41,7 +41,7 @@
     {%- endif %}
     {% if USER.is_authenticated %}
       {%- if is_subscribed %}
-      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe unsubscribe_topic" id="{{ topic.slug }}">abbestellen</a> |
+      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe subscribe_topic" id="{{ topic.slug }}">abbestellen</a> |
       {%- else %}
       <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_topic" id="{{ topic.slug }}">abonnieren</a>  |
       {%- endif %}
