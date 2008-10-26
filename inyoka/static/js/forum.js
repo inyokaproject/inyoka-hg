@@ -100,7 +100,9 @@ $(function () {
     }, function(data) {
       //TODO: so something...
       // Bind new events and change button's text.
+      $(tag).fadeOut('fast');
       $(tag).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
+      $(tag).fadeIn('fast');
     });
 
     return false;
@@ -108,13 +110,11 @@ $(function () {
 
   (function() {
     $('a.action_subscribe.subscribe_topic').click(function() {
-      alert("Topic");
       doSubscription('topic', $(this).attr('id'), $(this));
       return false;
     });
 
     $('a.action_subscribe.subscribe_forum').click(function() {
-      alert("Forum");
       doSubscription('forum', $(this).attr('id'), $(this));
       return false;
     });
