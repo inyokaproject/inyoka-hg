@@ -859,7 +859,7 @@ def privmsg(request, folder=None, entry_id=None, page=1):
     link = href('portal', 'privmsg', folder, 'page')
 
     pagination = Pagination(request, entries, page or 1, page and 10
-        or entries.count(), link)
+        or len(entries), link)
 
     return {
         'entries': list(pagination.objects),
