@@ -57,7 +57,7 @@
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
     {%- if article.comments_enabled %}
-      <a name="comments"></a>
+      <h3 id="comments">Kommentare:</h3>
       <table class="comments">
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}

@@ -66,10 +66,10 @@
   <h3>Neues von ubuntuusers.de</h3>
   <div class="articles">
     {%- for article in ikhaya_latest %}
-    <div class="article" onclick="document.location.href='{{ article|url }}'">
-      <div class="meta">{{ article.pub_datetime|datetimeformat }}
+    <div class="article">
+      <div class="meta"><a href="{{ article|url }}">{{ article.pub_datetime|datetimeformat }}</a>
         {%- if article.comments_enabled %}
-          <br /><span class="comments">
+          <br /><a href="{{ article|url('comments') }}" class="comments">
           {%- if article.comment_count == 0 %} Keine Kommentare
           {%- elif article.comment_count == 1 %} Ein Kommentar
           {%- else %} {{ article.comment_count|hnumber|capitalize }} Kommentare

@@ -177,6 +177,8 @@ class Article(models.Model):
 
     def get_absolute_url(self, action='show'):
         stamp = self.pub_date.strftime('%Y/%m/%d')
+        if action == 'comments':
+            return href('ikhaya', stamp, self.slug, _anchor='comments')
         return href(*{
             'show': ('ikhaya', stamp, self.slug),
             'edit': ('admin', 'ikhaya', 'articles', 'edit', self.id),
