@@ -701,8 +701,9 @@ class Link(Element):
         if not children:
             if shorten and len(url) > 40:
                 children = [
-                    Span([Text(url[:22])], class_='longlink_show'),
-                    Span([Text(url[22:])], class_='longlink_collapse'),
+                    Span([Text(url[:36])], class_='longlink_show'),
+                    Span([Text(url[36:-14])], class_='longlink_collapse'),
+                    Span([Text(url[-14:])]),
                 ]
             else:
                 text = url
