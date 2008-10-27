@@ -405,13 +405,6 @@ span.highlight {
   color: #597A00;
 }
 
-a .longlink_collapse {
-  display: none;
-}
-
-a .longlink_show::after  {
-  content: "…";
-}
 /* This is used in the UserCP-Subscriptions page */
 h3 .note {
   font-size: 0.7em;
