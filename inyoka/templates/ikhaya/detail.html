@@ -13,11 +13,11 @@
 {% set title_trace = [article.subject|e] %}
 {% set styles = ['editor.css']%}
 {% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
-{% set feed = href('ikhaya', 'feeds/comments/%s/20') %}
+{% set feed = 'feeds/comments/%s/%%s/20'|format(article.id) %}
 {% set feeds = [
-  ('Kommentare - Nur Überschrift', href('ikhaya', 'feeds/comments/title/20')),
-  ('Kommentare - Nur Einleitung', href('ikhaya', 'feeds/comments/short/20')),
-  ('Kommentare - Ganzer Beitrag', href('ikhaya', 'feeds/comments/full/20')),
+  ('Kommentare - Nur Überschrift', href('ikhaya', feed|format('title'))),
+  ('Kommentare - Nur Einleitung', href('ikhaya', feed|format('short'))),
+  ('Kommentare - Ganzer Beitrag', href('ikhaya', feed|format('full'))),
   ] %}
 
 
