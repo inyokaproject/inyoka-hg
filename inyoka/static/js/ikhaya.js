@@ -17,7 +17,6 @@ function makeCommentLinks(elm) {
     var html = $.map($('#comment_' + id + ' td.comment p'), function(e) {
       return $(e).html()
     }).join('<br />');
-    console.log(this.offsetLeft);
     this.tooltip = $('<div class="tooltip"></div>').html(html)
       .css({
         'left': $(this).position().left,
