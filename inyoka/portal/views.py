@@ -312,7 +312,7 @@ def set_new_password(request, username, new_password_key):
         })
     return {
         'form': form,
-        'username': user.username,
+        'username': username,
     }
 
 
