@@ -9,12 +9,13 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime, date
-
+from django.utils.text import truncate_html_words
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
-     HttpResponseRedirect, HttpResponse, PageNotFound
+     HttpResponseRedirect, HttpResponse, PageNotFound, \
+     does_not_exist_is_404
 from inyoka.utils.html import escape
-from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
@@ -28,6 +29,10 @@ from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
 
+
+IKHAYA_DESCRIPTION = u'Ikhaya ist der Nachrichtenblog der ubuntuusers-' \
+    u'Community. Hier werden Nachrichten und Berichte rund um Ubuntu, Linux' \
+    u' und OpenSource-Software veröffentlicht.'
 
 def not_found(request, err_message=None):
     """
@@ -292,78 +297,98 @@ def suggestion_assign_to(request, suggestion, username):
     return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
 
-def feed(request, category_slug=None, mode='short', count=20):
+@atom_feed('ikhaya/feeds/articles/%(slug)s/%(mode)s/%(count)s')
+def article_feed(request, slug=None, mode='short', count=20):
     """
     Shows the ikhaya entries that match the given criteria in an atom feed.
     """
-
-    if not mode in ('full', 'short', 'title'):
-        raise PageNotFound()
-
-    count = int(count)
-    if count not in (10, 20, 30, 50, 75, 100):
-        raise PageNotFound()
-
-    key = 'ikhaya/feeds/%s/%s/%s' % (category_slug, mode, count)
-    content = cache.get(key)
-    if content is not None:
-        content_type='application/atom+xml; charset=utf-8'
-        return HttpResponse(content, content_type=content_type)
-
-    if category_slug:
-        feed = FeedBuilder(
-            title=u'ubuntuusers Ikhaya – %s' % category_slug,
-            url=href('ikhaya', 'category', category_slug),
-            feed_url=request.build_absolute_uri(),
-            id=href('ikhaya', 'category', category_slug),
-            subtitle=u'Ikhaya ist der Nachrichtenblog der '
-                     u'ubuntuusers-Community. Hier werden Nachrichten und '
-                     u'Berichte rund um Ubuntu, Linux und OpenSource-Software '
-                     u'veröffentlicht.',
-            rights=href('portal', 'lizenz'),
-        )
-    else:
-        feed = FeedBuilder(
-            title=u'ubuntuusers Ikhaya',
-            url=href('ikhaya'),
-            feed_url=request.build_absolute_uri(),
-            id=href('ikhaya'),
-            subtitle=u'Ikhaya ist der Nachrichtenblog der '
-                     u'ubuntuusers-Community. Hier werden Nachrichten und '
-                     u'Berichte rund um Ubuntu, Linux und OpenSource-Software '
-                     u'veröffentlicht.',
-            rights=href('portal', 'lizenz'),
-        )
-
     articles = Article.published.all()
-    if category_slug:
-        articles = articles.filter(category__slug=category_slug)
+
+    if slug:
+        articles = Article.published.filter(category__slug=slug)
+        title = u'ubuntuusers Ikhaya – %s' % slug
+        url = href('ikhaya', 'category', slug)
+    else:
+        title = u'ubuntuusers Ikhaya'
+        url = href('ikhaya')
+
+    feed = FeedBuilder(
+        subtitle=IKHAYA_DESCRIPTION,
+        rights=href('portal', 'lizenz'),
+        feed_url=request.build_absolute_uri(),
+        id=url,
+        url=url,
+        title=title
+    )
 
     for article in articles[:count]:
         kwargs = {}
         if mode == 'full':
-            kwargs['content'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                u'xhtml">%s\n%s</div>' % (
-                                    article.rendered_intro,
-                                    article.rendered_text
-                                )
+            kwargs['content'] = u'%s\n%s' % (article.rendered_intro,
+                                             article.rendered_text)
             kwargs['content_type'] = 'xhtml'
         if mode == 'short':
-            kwargs['summary'] = u'<div xmlns="http://www.w3.org/1999/' \
-                                u'xhtml">%s</div>' % article.rendered_intro
-        kwargs['author'] = {
-            'name': article.author.username,
-            'uri':  url_for(article.author)
-        }
+            kwargs['summary'] = article.rendered_intro
+            kwargs['summary_type'] = 'xhtml'
 
         feed.add(
             title=article.subject,
             url=url_for(article),
             updated=article.updated,
             published=article.pub_date,
+            author={
+                'name': article.author.username,
+                'uri':  url_for(article.author)
+            },
             **kwargs
         )
+    return feed
 
-    response = feed.get_atom_response()
-    cache.set(key, response.content, 600)
-    return response
+
+@atom_feed('ikhaya/feeds/comments/%(id)s/%(mode)s/%(count)s')
+@does_not_exist_is_404
+def comment_feed(request, id=None, mode='short', count=20):
+    """
+    Shows the ikhaya comments that match the given criteria in an atom feed.
+    """
+    comments = Comment.objects.select_related().filter(article__public=True) \
+                      .order_by('-id')
+    if id:
+        article = Article.published.get(id=id)
+        comments = comments.filter(article=article.id)
+        title = u'ubuntuusers Ikhaya-Kommentare – %s' % article.subject
+        url = url_for(article)
+    else:
+        title = u'ubuntuusers Ikhaya-Kommentare'
+        url = href('ikhaya')
+
+    feed = FeedBuilder(
+         subtitle=IKHAYA_DESCRIPTION,
+        rights=href('portal', 'lizenz'),
+        feed_url=request.build_absolute_uri(),
+        id=url,
+        url=url,
+        title=title
+    )
+
+    for comment in comments[:count]:
+        kwargs = {}
+        if mode == 'full':
+            kwargs['content'] = comment.rendered_text
+            kwargs['content_type'] = 'xhtml'
+        if mode == 'short':
+            kwargs['summary'] = truncate_html_words(comment.rendered_text, 100)
+            kwargs['summary_type'] = 'xhtml'
+
+        feed.add(
+            title=u'Re: %s' % comment.article.subject,
+            url=url_for(comment),
+            updated=comment.pub_date,
+            published=comment.pub_date,
+            author={
+                'name': comment.author.username,
+                'uri':  url_for(comment.author)
+            },
+            **kwargs
+        )
+    return feed
