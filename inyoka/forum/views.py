@@ -1220,14 +1220,13 @@ def topic_feed(request, slug=None, mode='short', count=20):
 
     topic = Topic.query.filter_by(slug=slug).first()
 
-    if topic is None:
+    if topic is None or topic.hidden:
         raise PageNotFound()
     if not have_privilege(anonymous, topic.forum, CAN_READ):
         return abort_access_denied(request)
-    if topic.hidden:
-        raise PageNotFound()
 
-    posts = topic.posts.order_by(Post.pub_date.desc())[:100]
+    posts = topic.posts.options(eagerload('author')) \
+                       .order_by(Post.id.desc())[:100]
 
     feed = FeedBuilder(
         title=u'ubuntuusers Thema – „%s“' % topic.title,
@@ -1273,7 +1272,10 @@ def forum_feed(request, slug=None, mode='short', count=20):
         title = u'ubuntuusers Forum – „%s“' % forum.name
         url = url_for(forum)
     else:
-        topics = Topic.query.order_by(Topic.id.desc())[:100]
+        allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.all())]
+        topics = Topic.query.order_by(Topic.id.desc()).options(
+            eagerload('first_post'), eagerload('author')
+        ).filter(Topic.forum_id.in_(allowed_forums))[:count]
         title = u'ubuntuusers Forum'
         url = href('forum')
 
@@ -1289,8 +1291,6 @@ def forum_feed(request, slug=None, mode='short', count=20):
         post = topic.first_post
 
         #XXX: this way there might be less than `count` items
-        if not have_privilege(anonymous, topic.forum, CAN_READ):
-            continue
         if topic.hidden:
             continue
 

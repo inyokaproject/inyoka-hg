@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.html import escape
-from inyoka.utils.http import HttpResponse
+from inyoka.utils.http import HttpResponse, PageNotFound
 from inyoka.utils.cache import cache
 
 
