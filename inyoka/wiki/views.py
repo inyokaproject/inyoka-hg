@@ -208,8 +208,8 @@ def feed(request, page_name=None, count=20):
                     rev.page.name, rev.deleted and u'gelöscht' or u'geändert',
                     rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
 
-            kwargs['summary'] = (u'<div xmlns="http://www.w3.org/1999/xhtml">'
-                                 u'%s</div>' % text)
+            kwargs['summary'] = text
+            kwargs['summary_type'] = 'xhtml'
             author = rev.user \
                 and {'name': rev.user.username, 'uri': url_for(rev.user)} \
                 or u'Anonymous'
