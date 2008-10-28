@@ -85,7 +85,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         if INYOKA_REVISION:
             powered_by += '/rev-%s' % INYOKA_REVISION
         response['X-Powered-By'] = powered_by
-#        response['X-Sucks'] = 'PHP --- every version'
+        response['X-Philosophy'] = 'Don\'t be hasty, open a ticket, get some holiday and let us relax. We\'re on it.'
 
         # update the cache control
         if hasattr(request, 'user') and request.user.is_authenticated \
