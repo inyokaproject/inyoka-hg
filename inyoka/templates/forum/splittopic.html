@@ -78,7 +78,7 @@
           </td>
           <td>
             <div class="postinfo">
-              Verfasst {{ post.pub_date.strftime('%d.%m.%Y %H:%M') }}
+              Verfasst {{ post.pub_date|datetimeformat }}
             </div>
             {{ post.get_text() }}
           </td>
