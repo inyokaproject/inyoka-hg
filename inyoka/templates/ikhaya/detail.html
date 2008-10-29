@@ -13,6 +13,13 @@
 {% set title_trace = [article.subject|e] %}
 {% set styles = ['editor.css']%}
 {% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
+{% set feed = 'feeds/comments/%s/%%s/20'|format(article.id) %}
+{% set feeds = [
+  ('Kommentare - Nur Überschrift', href('ikhaya', feed|format('title'))),
+  ('Kommentare - Nur Einleitung', href('ikhaya', feed|format('short'))),
+  ('Kommentare - Ganzer Beitrag', href('ikhaya', feed|format('full'))),
+  ] %}
+
 
 {% macro user_column(user) %}
   <td class="author"
@@ -57,8 +64,7 @@
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>
     {%- if article.comments_enabled %}
-      <h3 id="comments">Kommentare:</h3>
-      <table class="comments">
+      <table id="comments" class="comments">
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}
         <tr class="deleted">

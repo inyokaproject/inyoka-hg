@@ -9,7 +9,8 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.html import escape
-from inyoka.utils.http import HttpResponse
+from inyoka.utils.http import HttpResponse, PageNotFound
+from inyoka.utils.cache import cache
 
 
 # XXX: this module is in a slightly modified version part of
@@ -19,7 +20,8 @@ from inyoka.utils.http import HttpResponse
 
 def _make_text_block(name, content, content_type=None):
     if content_type == 'xhtml':
-        return u'<%s type="xhtml">%s</%s>\n' % (
+        return u'<%s type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">' \
+               u'%s</div></%s>\n' % (
             name,
             content,
             name,
@@ -36,6 +38,37 @@ def _make_text_block(name, content, content_type=None):
         escape(content),
         name,
     )
+
+
+def atom_feed(cache_key=None):
+    def decorator(f):
+        def func(*args, **kwargs):
+            if kwargs.get('mode') not in ('full', 'short', 'title'):
+                raise PageNotFound()
+
+            kwargs['count'] = int(kwargs['count'])
+            if kwargs['count'] not in (10, 20, 30, 50, 75, 100):
+                raise PageNotFound()
+
+            if cache_key is not None:
+                key = cache_key % kwargs
+                content = cache.get(key)
+                if content is not None:
+                    content_type = 'application/atom+xml; charset=utf-8'
+                    return HttpResponse(content, content_type=content_type)
+
+            rv = f(*args, **kwargs)
+            if not hasattr(rv, 'get_atom_response'):
+                # ret is a HttpResponse object
+                return rv
+
+            response = rv.get_atom_response()
+
+            if cache_key is not None:
+                cache.set(key, response.content, 600)
+            return response
+        return func
+    return decorator
 
 
 class FeedBuilder(object):
