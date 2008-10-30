@@ -302,10 +302,10 @@ def article_feed(request, slug=None, mode='short', count=20):
     """
     Shows the ikhaya entries that match the given criteria in an atom feed.
     """
-    articles = Article.published.all()
+    articles = Article.published.select_related()
 
     if slug:
-        articles = Article.published.filter(category__slug=slug)
+        articles = articles.filter(category__slug=slug)
         title = u'ubuntuusers Ikhaya – %s' % slug
         url = href('ikhaya', 'category', slug)
     else:
