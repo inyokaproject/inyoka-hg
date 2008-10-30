@@ -26,7 +26,7 @@ from inyoka.utils.dates import group_by_day
 from inyoka.utils.urls import global_not_found
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
-from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.feeds import FeedBuilder, atom_feed
 
 
 def not_found(request, err_message=None):
@@ -96,22 +96,9 @@ def suggest(request):
     }
 
 
+@atom_feed('planet/feed/%(mode)s/%(count)s')
 def feed(request, mode='short', count=20):
     """show the feeds for the planet"""
-
-    if not mode in ('full', 'short', 'title'):
-        raise PageNotFound
-
-    count = int(count)
-    if count not in (10, 20, 30, 50, 75, 100):
-        raise PageNotFound
-
-    key = 'planet/feeds/%s/%d' % (mode, count)
-    content = cache.get(key)
-    if content is not None:
-        content_type='application/atom+xml; charset=utf-8'
-        return HttpResponse(content, content_type=content_type)
-
     feed = FeedBuilder(
         title=u'ubuntuusers Planet',
         url=href('planet'),
@@ -149,7 +136,4 @@ def feed(request, mode='short', count=20):
             published=entry.pub_date,
             **kwargs
         )
-
-    response = feed.get_atom_response()
-    cache.set(key, response.content, 600)
-    return response
+    return feed
