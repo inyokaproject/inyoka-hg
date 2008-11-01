@@ -335,7 +335,7 @@ def article_feed(request, slug=None, mode='short', count=20):
             title=article.subject,
             url=url_for(article),
             updated=article.updated,
-            published=article.pub_date,
+            published=article.pub_datetime,
             author={
                 'name': article.author.username,
                 'uri':  url_for(article.author)
