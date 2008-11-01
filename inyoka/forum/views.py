@@ -925,7 +925,7 @@ def movetopic(request, topic_slug):
         return abort_access_denied(request)
 
     forums = filter_invisible(request.user, Forum.query.filter(and_(
-        Forum.c.parent_id != None, Forum.c.id != topic.forum_id)))
+        forum_table.c.parent_id != None, forum_table.c.id != topic.forum_id)))
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
@@ -976,7 +976,7 @@ def splittopic(request, topic_slug):
     def _add_field_choices():
         """Add dynamic field choices to the split topic formular"""
         form.fields['forum'].choices = [(f.id, f.name) for f in
-            Forum.query.filter(Forum.c.parent_id != None)]
+            Forum.query.filter(forum_table.c.parent_id != None)]
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in old_posts]
 
@@ -997,9 +997,9 @@ def splittopic(request, topic_slug):
             data = form.cleaned_data
 
             if data['select_following']:
-                posts = old_posts.filter(Post.c.id >= data['start'])
+                posts = old_posts.filter(post_table.c.id >= data['start'])
             else:
-                posts = old_posts.filter(Post.c.id.in_(data['select']))
+                posts = old_posts.filter(post_table.c.id.in_(data['select']))
 
             posts = list(posts)
 
@@ -1101,14 +1101,15 @@ def delete_post(request, post_id):
             if 'cancel' in request.POST:
                 flash(u'Das Löschen wurde abgebrochen.')
             else:
+                author = post.author
                 session.delete(post)
                 session.commit()
                 last_post = Post.query.filter_by(topic_id=post.topic_id) \
                                       .order_by('-id').first()
                 post.topic.last_post_id = last_post.id
                 session.commit()
-                flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde gelöscht.'
-                      % (url_for(post), escape(post.author.username)),
+                flash(u'Der Beitrag von <a href="%s">%s</a> wurde gelöscht.'
+                      % (url_for(author), escape(author.username)),
                       success=True)
         else:
             flash(render_template('forum/post_delete.html', {'post': post}))

@@ -12,6 +12,7 @@
 from __future__ import division
 import os
 import cPickle
+import operator
 from os import path
 from md5 import md5
 from PIL import Image
@@ -199,11 +200,12 @@ class PostMapperExtension(MapperExtension):
             instance.pub_date = datetime.utcnow()
 
     def after_insert(self, mapper, connection, instance):
-        connection.execute(user_table.update(
-            user_table.c.id==instance.author_id, values={
-            'post_count': user_table.c.post_count + 1
-        }))
-        cache.delete('portal/user/%d' % instance.author_id)
+        if instance.topic.forum.user_count_posts:
+            connection.execute(user_table.update(
+                user_table.c.id==instance.author_id, values={
+                'post_count': user_table.c.post_count + 1
+            }))
+            cache.delete('portal/user/%d' % instance.author_id)
         values = {
             'post_count': topic_table.c.post_count + 1,
             'last_post_id': instance.id
@@ -232,11 +234,14 @@ class PostMapperExtension(MapperExtension):
         forums.append(instance.topic.forum)
         parent_ids = list(p.id for p in forums)
         parent_ids.append(instance.topic.forum_id)
+
         # degrade user post count
-        connection.execute(user_table.update(
-            user_table.c.id == instance.author_id, values={
-                'post_count': user_table.c.post_count - 1}
-        ))
+        if instance.topic.forum.user_count_posts:
+            connection.execute(user_table.update(
+                user_table.c.id == instance.author_id, values={
+                    'post_count': user_table.c.post_count - 1}
+            ))
+            cache.delete('portal/user/%d' % instance.author_id)
 
         if instance.id == instance.topic.last_post_id:
             new_last_post = Post.query.filter(and_(
@@ -427,7 +432,7 @@ class Topic(object):
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count -1,
-            'post_count': forum_table.c.post_count -1,
+            'post_count': forum_table.c.post_count -1, #TODO
         }))
 
         dbsession.execute(forum_table.update(and_(
@@ -440,6 +445,7 @@ class Topic(object):
         }))
 
         dbsession.commit()
+        old_forum = self.forum
         self.forum = forum
         dbsession.flush([self])
         dbsession.commit()
@@ -447,12 +453,37 @@ class Topic(object):
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count + 1,
-            'post_count': forum_table.c.post_count + 1,
+            'post_count': forum_table.c.post_count + 1, #TODO
         }))
         dbsession.commit()
         forum.invalidate_topic_cache()
         self.forum.invalidate_topic_cache()
         self.reindex()
+
+        if old_forum.user_count_posts != forum.user_count_posts:
+            if forum.user_count_posts and not old_forum.user_count_posts:
+                op = operator.add
+            elif not forum.user_count_posts and old_forum.user_count_posts:
+                op = operator.sub
+
+            dbsession.execute(user_table.update(
+                user_table.c.id.in_(select([post_table.c.author_id], post_table.c.topic_id == self.id)),
+                values={'post_count': op(
+                    user_table.c.post_count,
+                    select(
+                        [func.count()],
+                        ((post_table.c.topic_id == self.id) &
+                         (post_table.c.author_id == user_table.c.id)),
+                        post_table)
+                    )
+                }
+            ))
+            dbsession.commit()
+
+            q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
+            for x in dbsession.execute(q).fetchall():
+                cache.delete('portal/user/%d' % x[0])
+
 
     def get_absolute_url(self, action='show'):
         if action in ('show',):
@@ -715,6 +746,32 @@ class Post(object):
 
                 old_topic.forum.last_post_id = last_post and last_post.id \
                                                or None
+
+            o = old_topic.forum.user_count_posts
+            n = new_topic.forum.user_count_posts
+            if o != n:
+                if n and not o:
+                    op = operator.add
+                elif not n and o:
+                    op = operator.sub
+
+                user_table.update(
+                    user_table.c.id.in_(select([post_table.c.author_id], post_table.c.topic_id == self.id)),
+                    values={'post_count': op(
+                        user_table.c.post_count,
+                        select(
+                            [func.count()],
+                            ((post_table.c.topic_id==self.id) & (post_table.c.author_id==user_table.c.id)),
+                            post_table)
+                        )
+                    }
+                )
+                dbsession.commit()
+
+                q = select([post_table.c.author_id], post_table.c.topic_id == 8, distinct=True)
+                for x in dbsession.execute(q).fetchall():
+                    cache.delete('portal/user/%d' % x[0])
+
         dbsession.commit()
 
         if not remove_topic:
@@ -1325,3 +1382,5 @@ dbsession.mapper(Poll, poll_table, properties={
 dbsession.mapper(PollOption, poll_option_table)
 dbsession.mapper(PollVote, poll_vote_table)
 dbsession.mapper(WelcomeMessage, forum_welcomemessage_table)
+
+

@@ -969,10 +969,13 @@ def add_planet_hidden(m):
     ''')
 
 def add_blog_active_flag(m):
-    m.engine.execute('''
-        ALTER TABLE planet_blog
-            ADD COLUMN active tinyint(1) not null default 1;
-    ''')
+    '''add an active flag to planet blogs. due to problems with merging we have to check if the column already exists.'''
+    q = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'planet_blog' AND table_schema = 'ubuntuusers' AND column_name = 'active'"
+    if not m.engine.execute(q).fetchone()[0]:
+        m.engine.execute('''
+            ALTER TABLE planet_blog
+                ADD COLUMN active tinyint(1) not null default 1;
+        ''')
 
 
 def forum_plaintext(m):
@@ -1019,6 +1022,23 @@ def add_comment_rendered_text_column(m):
             ADD COLUMN rendered_text LONGTEXT NOT NULL
     ''')
 
+def add_user_count_posts_flag(m):
+    '''
+    Add a flag to forums whether posts in it shall be considered
+    for user.post_count.
+
+    You can use the following query to calculate the new post counts:
+
+    UPDATE portal_user u SET post_count =
+    (SELECT COUNT(*) FROM forum_post p, forum_topic t, forum_forum f
+                     WHERE p.topic_id = t.id AND t.forum_id = f.id AND
+                           f.user_count_posts = 1 AND p.author_id = u.id);
+    '''
+    m.engine.execute('''
+        ALTER TABLE forum_forum
+            ADD COLUMN `user_count_posts` TINYINT(1) NOT NULL DEFAULT 1;
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1044,5 +1064,6 @@ MIGRATIONS = [
     add_egosearch_index, add_planet_hidden, forum_plaintext,
     add_negative_privileges, add_reported_topics_storage,
     add_group_is_public_flag, add_notes_to_article_suggestion,
-    add_comment_rendered_text_column
+    add_comment_rendered_text_column, add_blog_active_flag,
+    add_user_count_posts_flag,
 ]
