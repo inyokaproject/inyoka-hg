@@ -90,34 +90,37 @@ $(function () {
   })();
 
 
-  function doSubscription(type, slug, tag) {
-    var action = $(tag).text()=='abbestellen' ? 'unsubscribe' : 'subscribe';
+  function doSubscription(type, slug, tags) {
+    // Get the matching string for replacement. Since the two buttons (top and bottom)
+    // are in the same macro we just need to check for one buttons text at all.
+    var action = $(tags[0]).text()=='abbestellen' ? 'unsubscribe' : 'subscribe';
     var url = "/?__service__=forum." + action;
 
     $.post(url, {
       type: type,
       slug: slug
     }, function(data) {
-      //TODO: so something...
       // Bind new events and change button's text.
-      $(tag).fadeOut('fast');
-      $(tag).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
-      $(tag).fadeIn('fast');
+      $(tags).fadeOut('fast');
+      $(tags).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
+      $(tags).fadeIn('fast');
     });
 
     return false;
   };
 
   (function() {
-    $('a.action_subscribe.subscribe_topic').click(function() {
-      doSubscription('topic', $(this).attr('id'), $(this));
-      return false;
-    });
+    $('a.action_subscribe.subscribe_topic').each(function() {
+      $(this).click(function() {
+        doSubscription('topic', $(this).attr('id'), $('a.action_subscribe.subscribe_topic'));
+        return false;
+    })});
 
-    $('a.action_subscribe.subscribe_forum').click(function() {
-      doSubscription('forum', $(this).attr('id'), $(this));
-      return false;
-    });
+    $('a.action_subscribe.subscribe_forum').each(function() {
+      $(this).click(function() {
+        doSubscription('forum', $(this).attr('id'), $('a.action_subscribe.subscribe_forum'));
+        return false;
+    })});
   })();
 
 
