@@ -432,7 +432,7 @@ class Topic(object):
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count -1,
-            'post_count': forum_table.c.post_count -1, #TODO
+            'post_count': forum_table.c.post_count - self.post_count,
         }))
 
         dbsession.execute(forum_table.update(and_(
@@ -453,7 +453,7 @@ class Topic(object):
         ids.append(self.forum.id)
         dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
             'topic_count': forum_table.c.topic_count + 1,
-            'post_count': forum_table.c.post_count + 1, #TODO
+            'post_count': forum_table.c.post_count + self.post_count,
         }))
         dbsession.commit()
         forum.invalidate_topic_cache()
