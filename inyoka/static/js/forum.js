@@ -4,7 +4,7 @@
 
     JavaScript for the forum.
 
-    :copyright: 2007 by Marian Sigler, Armin Ronacher, Christopher Grebs.
+    :copyright: 2007-2008 by Marian Sigler, Armin Ronacher, Christopher Grebs.
     :license: GNU GPL.
 */
 
