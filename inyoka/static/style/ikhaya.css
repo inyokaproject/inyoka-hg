@@ -222,3 +222,8 @@ a.comment_link:hover {
   padding: 0.5em;
   margin: 0 4em 0 0;
 }
+
+/* Bugfixes */
+div.box {
+  clear: none !important;
+}
