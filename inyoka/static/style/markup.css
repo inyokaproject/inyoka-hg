@@ -12,7 +12,7 @@ a.missing {
   color: #999;
 }
 
-a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug {
+a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser {
   background-repeat: no-repeat;
   padding-left: 16px;
 }
@@ -51,6 +51,10 @@ a.interwiki-ubuntu {
 
 a.interwiki-bug {
   background-image: url(../img/interwiki/bug.png);
+}
+
+a.interwiki-lpuser {
+  background-image: url(../img/interwiki/lpuser.png);
 }
 
 #page table {
