@@ -804,7 +804,7 @@ class Paragraph(Element):
 
     @property
     def text(self):
-        return Element.text.__get__(self) + '\n\n'
+        return Element.text.__get__(self).strip() + '\n\n'
 
     def generate_markup(self, w):
         Element.generate_markup(self, w)
