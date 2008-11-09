@@ -267,6 +267,7 @@ div.usercp_control ul {
 
 div.usercp_control ul li {
   display: inline;
+  display: inline-block;
 }
 
 div.usercp_control ul li span {

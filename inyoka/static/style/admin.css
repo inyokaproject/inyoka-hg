@@ -11,6 +11,7 @@ div.admin_control ul {
 
 div.admin_control ul li {
   display: inline;
+  display: inline-block;
 }
 
 div.admin_control ul li span {
