@@ -91,7 +91,6 @@ def index(request):
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
         'get_ubuntu_description'))
-    intrepid_days = (date(2008,10,30) - datetime.now().date()).days
     return {
         'ikhaya_latest':            list(ikhaya_latest),
         'sessions':                 get_sessions(),
@@ -100,7 +99,6 @@ def index(request):
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
         'calendar_events':          events,
-        'intrepid_countdown':       href('media', 'intrepid-countdown', str(intrepid_days) + '.png'),
     }
 
 
