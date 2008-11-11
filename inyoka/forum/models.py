@@ -58,6 +58,7 @@ UBUNTU_VERSIONS = {
     '7.10': 'Gutsy Gibbon',
     '8.04': 'Hardy Heron',
     '8.10': 'Intrepid Ibex',
+    '9.04': 'Jaunty Jackalope'
 }
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
