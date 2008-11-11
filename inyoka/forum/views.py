@@ -184,6 +184,7 @@ def forum(request, slug, page=1):
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                               forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
+        'can_create': check_privilege(privs, 'create'),
     })
     return ctx
 

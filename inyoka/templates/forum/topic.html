@@ -193,7 +193,11 @@
               {%- elif can_moderate %}
                 <a href="{{ post|url('edit') }}" class="action action_edit adminlink">bearbeiten</a> |
               {%- endif %}
-              <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
+              {%- if not USER.is_authenticated or can_reply and not topic.locked %}
+                <a href="{{ post|url('quote') }}" class="action action_quote">zitieren</a>
+              {%- elif can_moderate and topic.locked %}
+                <a href="{{ post|url('quote') }}" class="action action_quote adminlink">zitieren</a>
+		          {%- endif %}
             </div>
             <a href="{{ post|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
             Verfasst: {{ post.pub_date|datetimeformat }}

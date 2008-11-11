@@ -16,9 +16,11 @@
 
 {% macro forum_actions() %}
   <p class="actions linklist">
-    <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> 
+    {% if can_create %}
+      <a href="{{ forum|url('newtopic') }}" class="action action_reply">Neues Thema</a> |
+    {%- endif %}
     {% if USER.is_authenticated %}
-      | {%- if is_subscribed %}
+      {%- if is_subscribed %}
       <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe subscribe_forum" id="{{ forum.slug }}">abbestellen</a>
       {%- else %}
       <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_forum" id="{{ forum.slug }}">abonnieren</a>
