@@ -1297,31 +1297,3 @@ def confirm(request, action=None):
     if isinstance(r, dict) and action:
         r['action'] = action
     return r
-
-
-def memusage(request):
-    """A debug view for finding memory leaks..."""
-    if not request.user.can('admin_panel'):
-        return HttpResponse('Access Denied', mimetype='text/plain',
-                            status=403)
-    from guppy import hpy
-    import os, time
-    pid = request.REQUEST.get('pid')
-    if pid is not None and int(pid) != os.getpid():
-        return HttpResponse('Wrong PID %d' % os.getpid(),
-                            mimetype='text/plain')
-    heapy = hpy()
-    h = heapy.heap()
-    out = [
-        'Memory Usage of PID %d at %s'  % (os.getpid(), time.asctime()),
-        'heap():',
-        str(h),
-        '\nh.byrcs:',
-        str(h.byrcs),
-        '\nbyrcs[0].byid:',
-        str(h.byrcs[0].byid),
-        '\nget_rp():',
-        str(h.get_rp())
-    ]
-    heapy.setref()
-    return HttpResponse('\n\n'.join(out), mimetype='text/plain')

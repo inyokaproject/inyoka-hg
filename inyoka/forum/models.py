@@ -1383,5 +1383,3 @@ dbsession.mapper(Poll, poll_table, properties={
 dbsession.mapper(PollOption, poll_option_table)
 dbsession.mapper(PollVote, poll_vote_table)
 dbsession.mapper(WelcomeMessage, forum_welcomemessage_table)
-
-
