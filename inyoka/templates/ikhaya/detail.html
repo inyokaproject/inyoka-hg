@@ -104,7 +104,7 @@
         {%- endif %}
         {%- endfor %}
         {%- if can_post_comment %}
-        <tr>
+        <tr id="new_comment">
           {{ user_column(USER) }}
           <td>
             <form action="{{ article|url }}#new_comment" method="post" id="new_comment">
@@ -162,6 +162,15 @@
     /* <![CDATA[ */
     $(function() {
       makeCommentLinks($('table.comments td.comment'));
+      var comment_count = $('#comments tr').not($('#new_comment')).length;
+      $('#comments').hide().before(
+        $('<a class="show_comments">')
+          .text('Kommentare anzeigen (' + comment_count + ')')
+          .click(function() {
+            $('#comments').show();
+            $(this).remove();
+          })
+      );
     })
     /* ]]> */
   </script>
