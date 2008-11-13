@@ -164,7 +164,7 @@ def _bootstrap():
             str(h.get_rp())
         ]
         heapy.setref()
-        logger.debug(u'\n\n'.join(out))
+        logger.critical(u'\n\n'.join(out))
         return SIG_DFL
     signal(SIGUSR1, _sigusr1_handler)
 
