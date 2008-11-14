@@ -513,14 +513,7 @@ class Lexer(object):
                         escaped = False
                     else:
                         escaped = True
-                        # never ever hide backslashes that are followed by
-                        # another backslash only known issue: 'foo\\\\nfoo' 
-                        # is not displayed properly any more
-                        try:
-                            if string[pos + 1] != '\\':
-                                char = ''
-                        except IndexError:
-                            char = ''
+                        char = ''
                 else:
                     if escaped:
                         char = '\\' + char
