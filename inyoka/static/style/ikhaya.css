@@ -54,13 +54,6 @@ h3.title a {
   text-decoration: none;
 }
 
-h3#comments {
-  margin: 1.5em 0 1em 1em;
-  color: #000;
-  font-size: 1.4em;
-/*  border-bottom: none; XXX: I'm not sure what looks better --entequak */
-}
-
 p {
   margin-bottom: 0.5em;
 }
