@@ -503,13 +503,11 @@ class Lexer(object):
                 if char == '\\':
                     if escaped:
                         # this is a fix for the problem that two backslashes
-                        # inside a code block are displayed as one though text
-                        # inside code blocks shouldn't be altered.
-                        if state == 'pre_data':
-                            if string[pos - 1] == '\\':
-                                char = '\\\\'
-                            else:
-                                char = ''
+                        # inside are displayed as one, even in code blocks
+                        if string[pos - 1] == '\\':
+                            char = '\\\\'
+                        else:
+                            char = ''
                         escaped = False
                     else:
                         escaped = True
