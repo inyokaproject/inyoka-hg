@@ -37,7 +37,7 @@
   /* <![CDATA[ */
   (function () {
     $('#user_query').autocomplete("/?__service__=admin.get_user_autocompletion", {
-      delay: 40, maxItemsToShow: 15, cacheLength: 10});
+      delay: 40, maxItemsToShow: 10, limit: 10, minChars: 3});
   })();
   /* ]]> */
 </script>
