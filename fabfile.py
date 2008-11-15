@@ -38,8 +38,7 @@ def bootstrap():
     local("$(python_interpreter) make-bootstrap.py > '%s'" % bootstrap)
     put(bootstrap, 'bootstrap.py')
     run('unset PYTHONPATH; $(python_interpreter) bootstrap.py --no-site-packages $(target_dir)')
-    run("""ln -s $(target_dir)/inyoka/inyoka $(target_dir)/lib/python`$(python_interpreter)
- -V 2>&1|grep -o '[0-9].[0-9]'`/site-packages""".strip('\\'))
+    run("ln -s $(target_dir)/inyoka/inyoka $(target_dir)/lib/python`$(python_interpreter) -V 2>&1|grep -o '[0-9].[0-9]'`/site-packages")
 
 def deploy():
     """Update Inyoka and touch the wsgi file"""
