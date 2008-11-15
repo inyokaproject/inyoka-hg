@@ -1,8 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
     Inyoka Bootstrap Creation Script
-    ~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Creates a bootstrap script for inyoka.
 
@@ -17,7 +16,7 @@ import virtualenv
 EXTRA_TEXT = """
 import tempfile, shutil
 
-xapian_version = '1.0.6'
+xapian_version = '1.0.9'
 pil_version = '1.1.6'
 
 def easy_install(package, home_dir, optional_args=None):
@@ -89,7 +88,7 @@ def after_install(options, home_dir):
     easy_install('wsgiref', home_dir)
     easy_install('MySQL-python', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
-    easy_install('http://www.djangoproject.com/download/1.0/tarball/', home_dir)
+    easy_install('http://www.djangoproject.com/download/1.0.1/tarball/', home_dir)
     easy_install('python-memcached', home_dir)
     easy_install('cssutils', home_dir)
     xapian_install(os.path.abspath(home_dir))
@@ -97,11 +96,7 @@ def after_install(options, home_dir):
 """
 
 def main():
-    if len(sys.argv) == 2:
-        print virtualenv.create_bootstrap_script(EXTRA_TEXT, python_version=sys.argv[1])
-    else:
-        print >>sys.stderr, "Specify the python version you want to use as"\
-                            " first parameter (eg. 2.4)"
+    print virtualenv.create_bootstrap_script(EXTRA_TEXT)
 
 if __name__ == '__main__':
     main()
