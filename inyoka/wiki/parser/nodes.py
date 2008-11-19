@@ -699,7 +699,7 @@ class Link(Element):
     def __init__(self, url, children=None, title=None, id=None,
                  style=None, class_=None, shorten=False):
         if not children:
-            if shorten and len(url) > 40:
+            if shorten and len(url) > 50:
                 children = [
                     Span([Text(url[:36])], class_='longlink_show'),
                     Span([Text(url[36:-14])], class_='longlink_collapse'),
