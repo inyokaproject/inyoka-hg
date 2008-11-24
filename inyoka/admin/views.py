@@ -907,8 +907,11 @@ def user_new(request):
 @require_permission('user_edit')
 def resend_activation_mail(request):
     user = User.objects.get(request.GET.get('user'))
-    send_activation_mail(user)
-    flash(u'Die Aktivierungsmail wurde erneut versandt.')
+    if user.status != 0:
+        flash(u'Der Benutzer ist schon aktiviert.')
+    else:
+        send_activation_mail(user)
+        flash(u'Die Aktivierungsmail wurde erneut versandt.', True)
     return HttpResponseRedirect(request.GET.get('next') or href('admin', 'users'))
 
 @require_permission('group_edit')
