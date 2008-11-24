@@ -34,6 +34,7 @@
         Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte Mal eingeloggt.
       </span>
       {%- if activation_link %}
+      <div class="note"><a href="{{ href('admin', 'users', 'resend_activation_mail', user=user, next=CURRENT_URL) }}">Aktivierungsmail erneut senden.</a></div>
       <div class="note">Aktivierungslink: <a href="{{ activation_link }}">{{ activation_link }}</a></div>
       {%- endif %}
     </dd>

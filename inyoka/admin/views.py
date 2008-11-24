@@ -38,7 +38,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
-from inyoka.portal.user import User, Group, PERMISSION_NAMES
+from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
@@ -904,6 +904,12 @@ def user_new(request):
         'form': form
     }
 
+@require_permission('user_edit')
+def resend_activation_mail(request):
+    user = User.objects.get(request.GET.get('user'))
+    send_activation_mail(user)
+    flash(u'Die Aktivierungsmail wurde erneut versandt.')
+    return HttpResponseRedirect(request.GET.get('next') or href('admin', 'users'))
 
 @require_permission('group_edit')
 @templated('admin/groups.html')
