@@ -37,3 +37,7 @@ ul.pastes li span.number {
 ul.pastes li.date {
     color: #777;
 }
+
+div.code, pre {
+    max-height: none;
+}
