@@ -14,6 +14,7 @@ import tempfile
 set(
     fab_user = 'ubuntu_de',
     inyoka_repo = 'http://hg.ubuntu-eu.org/ubuntu-de-inyoka/',
+    target_dir = '~/virtualenv',
 )
 
 def test():
