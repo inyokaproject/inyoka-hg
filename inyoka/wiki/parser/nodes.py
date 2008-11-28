@@ -1683,7 +1683,10 @@ class TableCell(Element):
         yield u'</%s>' % self._html_tag
 
     def prepare_docbook(self):
-        yield u'<entry>'
+        yield build_html_tag('entry',
+            morerows=(self.rowspan and self.rowspan - 1) or None,
+            align=self.align,
+        )
         for item in Element.prepare_docbook(self):
             yield item
         yield u'</entry>'

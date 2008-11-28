@@ -65,6 +65,21 @@
     </p>
     {%- if article.comments_enabled %}
       <table id="comments" class="comments">
+        <script type="text/javascript">
+          /* <![CDATA[ */
+          if (document.location.href.slice(-9) != '#comments') {
+            $('#comments').hide().before(
+              $('<a class="show_comments">')
+                .text('Kommentare anzeigen ({{ article.comment_count }})')
+                .click(function() {
+                  $('#comments').show();
+                  $(this).remove();
+                })
+            );
+          }
+          /* ]]> */
+        </script>
+
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}
         <tr class="deleted">
@@ -162,15 +177,6 @@
     /* <![CDATA[ */
     $(function() {
       makeCommentLinks($('table.comments td.comment'));
-      var comment_count = $('#comments tr').not($('#new_comment')).length;
-      $('#comments').hide().before(
-        $('<a class="show_comments">')
-          .text('Kommentare anzeigen (' + comment_count + ')')
-          .click(function() {
-            $('#comments').show();
-            $(this).remove();
-          })
-      );
     })
     /* ]]> */
   </script>

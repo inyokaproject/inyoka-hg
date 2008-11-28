@@ -12,15 +12,33 @@
 import os
 import re
 import shutil
+import urllib2
+import urlparse
 from os import path
 from datetime import datetime
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
 from inyoka.utils.templating import jinja_env
 
-INTERNAL_LINK_REGEX = re.compile('<ulink url="/([^"]*)')
+NESTED1 = re.compile('<ulink url="([^"]*)"><mediaobject><imageobject><imagedata')
+NESTED2 = re.compile('/></imageobject></mediaobject></ulink>')
 INTERNAL_IMG_REGEX = re.compile('<imagedata fileref="%s\?target=([^"]*)' %
                                 href('wiki', '_image'))
+THUMBNAIL_REGEX = re.compile('<imagedata fileref="%s\?([^"]*)"' %
+                             href('wiki', '_image'))
+
+
+def handle_thumbnail(m):
+    d = {}
+    for s in m.groups()[0].split('&'):
+        k, v = s.split('=')
+        d[k] = v
+    r = u'<imagedata fileref="../attachments/%s"' % urllib2.unquote(d['target'])
+    if 'width' in d:
+        r += u' width="%s"' % d['width']
+    if 'height' in d:
+        r += u' height="%s"' % d['height']
+    return r
 
 
 def create_snapshot(folder):
@@ -38,8 +56,10 @@ def create_snapshot(folder):
     os.mkdir(attachment_folder)
 
     tpl = jinja_env.get_template('snapshot/docbook_page.xml')
-    pages = []
     for page in Page.objects.all():
+        if not (page.name == 'Startseite' or page.name.startswith('Wiki')):
+            continue
+        print page.name
         rev = page.revisions.all()[0]
         if page.trace > 1:
             # page is a subpage
@@ -60,26 +80,15 @@ def create_snapshot(folder):
             content = rev.text.render(format='docbook')
 
             # perform some replacements to make links and images work
-            #: this contains a string pointing to the snapshots root directory
-            content = INTERNAL_LINK_REGEX.sub(r'<ulink url="pages/\1.xml',
-                                              content)
-            content = INTERNAL_IMG_REGEX.sub(r'<imagedata fileref="attachments'
+            content = INTERNAL_IMG_REGEX.sub(r'<imagedata fileref="../attachments'
                                              r'/\1', content)
+            content = THUMBNAIL_REGEX.sub(handle_thumbnail, content)
+            # XXX: Images inside links don't work, this fixes this
             f.write(tpl.render({
                 'page': page,
                 'content': content
             }).encode('utf-8'))
             f.close()
-            pages.append(page.name)
-
-    # create book index page
-    tpl = jinja_env.get_template('snapshot/docbook_book.xml')
-    f = file(path.join(folder, 'snapshot.xml'), 'w+')
-    f.write(tpl.render({
-        'today': datetime.utcnow(),
-        'pages': pages
-    }))
-    f.close()
 
 
 if __name__ == '__main__':
