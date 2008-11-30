@@ -37,6 +37,10 @@ ul.articles {
   margin-bottom: 1em;
 }
 
+.article hr {
+    clear: right;
+}
+
 h2, h3, h4 {
   color: #444;
 }
