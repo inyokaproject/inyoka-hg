@@ -67,7 +67,7 @@
       <table id="comments" class="comments">
         <script type="text/javascript">
           /* <![CDATA[ */
-          if (document.location.href.slice(-9) != '#comments') {
+          if (document.location.href.search('#comment') == -1) {
             $('#comments').hide().before(
               $('<a class="show_comments">')
                 .text('Kommentare anzeigen ({{ article.comment_count }})')
