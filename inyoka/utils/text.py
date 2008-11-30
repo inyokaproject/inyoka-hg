@@ -180,11 +180,11 @@ def create_excerpt(text, terms, length=350):
             excerpt += u'...'
     excerpt = escape(excerpt)
 
-    # highlight the terms in the excerpt
-    for term in terms:
-        r = re.compile('(%s)' % term, re.IGNORECASE)
-        excerpt = r.sub(r'<strong>\1</strong>', excerpt)
 
+    # highlight the terms in the excerpt
+    r = re.compile('(%s)' % '|'.join(terms))
+    excerpt = ''.join(i % 2 != 0 and '<strong>%s</strong>' % part or part
+                      for i, part in enumerate(r.split(excerpt)))
     return excerpt
 
 
