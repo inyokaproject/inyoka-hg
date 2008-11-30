@@ -55,7 +55,11 @@ $(document).click(function() {
   DateTimeField = function(editor, auto_show, only_date) {
     var self = this;
     // check whether the browser implements its own date time editor
-    if (editor.type == 'datetime') return false;
+    if (editor.type == 'datetime') {
+      var parts = editor.defaultValue.split(' ');
+      editor.value = parts[0] + 'T' + parts[1] + 'Z';
+      return false;
+    }
     this.input = $(editor).click(function() {
       $('table.datetime').each(function() {
         if (self.container[0] !== this)

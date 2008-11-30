@@ -47,7 +47,7 @@
   <dl>
   {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id', 'icon_id'], inline=true) }}
   <dt>{{ form.pub_date.label }}</dt>
-  <dd>{{ form.pub_date }} <span class="note_link pub_date_ui_switcher">Datum auswählen</span></dd>
+  <dd>{{ form.pub_date }}</dd>
   {% if form.errors.pub_date %}<dd>{{ form.errors.pub_date }}</dd>{% endif %}
   {{ render_form(form, ['slug', 'public', 'comments_enabled'], inline=true) }}
   </dl>
@@ -84,12 +84,6 @@
       intro.textarea.val(value.substr(0, value.length - 2));
       intro_skipped = true;
     }
-  });
-
-  pub_date = new DateTimeField('input[@name="pub_date"]', auto_show=true);
-
-  $('input[@name="pub_date"]').focus(function() {
-    pub_date.show();
   });
 
   /* Preview implementation */
