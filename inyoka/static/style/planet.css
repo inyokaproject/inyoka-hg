@@ -81,6 +81,7 @@ div.articles div.article p {
 div.articles div.article div.meta {
   background: url(../img/planet/bubble-bottom.png) repeat-x left bottom;
   margin-right: 20px;
+  clear: right;
 }
 
 div.articles div.article div.meta p {
