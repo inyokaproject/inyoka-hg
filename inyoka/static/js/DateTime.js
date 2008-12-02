@@ -57,7 +57,7 @@ $(document).click(function() {
     // check whether the browser implements its own date time editor
     if (editor.type == 'datetime') {
       var parts = editor.defaultValue.split(' ');
-      editor.value = parts[0] + 'T' + parts[1] + 'Z';
+      editor.value = parts[0] + 'T' + parts[1].slice(0, -3) + 'Z';
       return false;
     }
     this.input = $(editor).click(function() {
