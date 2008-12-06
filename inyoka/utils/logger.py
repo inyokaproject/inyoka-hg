@@ -10,6 +10,7 @@
 """
 import logging
 from inyoka.conf import settings
+from inyoka.utils.tracreporter import MemoryLogger
 
 
 logger = logging.getLogger('inyoka')
@@ -29,3 +30,4 @@ else:
     ))
     logging_handler.setLevel(logging.DEBUG)
 logger.addHandler(logging_handler)
+memlogger = MemoryLogger()

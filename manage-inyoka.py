@@ -95,5 +95,16 @@ def action_runcp(hostname='0.0.0.0', port=8080):
         server.stop()
 
 
+def _dowse():
+    try:
+        from dozer import Dozer
+        app = Dozer(make_app())
+    except ImportError:
+        app = make_app()
+
+    return app
+action_dozer = script.make_runserver(_dowse, '', 8080, use_reloader=True)
+
+
 if __name__ == '__main__':
     script.run()
