@@ -51,6 +51,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         # it's a request to a unknown subdomain
         # redirect www.* to the equivalent without www.
         request.subdomain, resolver = get_resolver(request.get_host())
+
         if not resolver:
             if request.subdomain == 'www':
                 url = 'http://%s%s' % (settings.BASE_DOMAIN_NAME,
