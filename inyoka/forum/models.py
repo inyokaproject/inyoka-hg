@@ -769,7 +769,7 @@ class Post(object):
                 )
                 dbsession.commit()
 
-                q = select([post_table.c.author_id], post_table.c.topic_id == 8, distinct=True)
+                q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
                 for x in dbsession.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
 
