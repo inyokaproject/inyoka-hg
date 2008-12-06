@@ -44,7 +44,7 @@ def bootstrap():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('fab_hosts', provided_by = [test, staging, production])
-    run('cd $(target_dir)/inyoka; hg pull -u')
+    run('cd $(target_dir)/inyoka; hg pull -u $(inyoka_repo)')
 
 def easy_install():
     """Run easy_install on the server"""
