@@ -21,7 +21,7 @@ class MemoryProfilerMiddleware(object):
     """
 
     def process_response(self, request, response):
-        #if request.subdomain and request.subdomain not in ('static', 'media') and \
-        #    socket.gethostname() == 'jok':
-        #    memlogger.log(request.build_absolute_uri(), request.method)
+        if request.subdomain and request.subdomain not in ('static', 'media') and \
+            socket.gethostname() == 'jok':
+            memlogger.log(request.build_absolute_uri(), request.method)
         return response

@@ -87,13 +87,13 @@ from django.db import models, connection
 from inyoka.conf import settings
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
+from inyoka.wiki.utils import MultiMap
 from inyoka.utils.decorators import deferred
 from inyoka.utils.dates import format_specific_datetime, format_datetime
 from inyoka.utils.urls import href
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
-from inyoka.utils.collections import MultiMap
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape

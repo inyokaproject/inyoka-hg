@@ -8,6 +8,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from __future__ import division
 import os
 import urllib2
 import csv
@@ -15,8 +16,9 @@ import re
 import traceback
 import time
 from Cookie import SimpleCookie
-from threading import Thread
+from threading import Thread, Event
 from xmlrpclib import ServerProxy
+from collections import deque
 from inyoka.conf import settings
 from inyoka.utils.urls import url_encode
 from inyoka import INYOKA_REVISION
@@ -305,27 +307,36 @@ class TBLoggerHandler(Handler):
         }
 
 
-class MemoryLogger(object):
+class MemoryLogger(Thread):
+
+    def __init__(self):
+        Thread.__init__(self)
+        self.canceled = Event()
+        self.queue = deque([])
 
     def log(self, url, method):
-        Thread(target=self.submit, args=(url, method)).start()
-
-    def submit(self, url, method):
-        if hpy is None:
-            return
-
+        h = None
+        if hpy:
+            heapy = hpy()
+            h = heapy.heap()
         pid = os.getpid()
-        heapy = hpy()
-        h = heapy.heap()
-        data = {
-            'url': url,
-            'method': method,
-            'pid': os.getpid(),
-            'time': time.asctime(),
-            'size': (h.size / 1024 / 1024), # in MB
-            #'heap': str(h),
-            #'h.byrcs': str(h.byrcs),
-            #'byrcs[0].byid': str(h.byrcs[0].byid),
-            #'get_rp': str(h.get_rp())
-        }
-        xmlrpc_server.push_url(data)
+        self.queue.append((url, method, os.getpid(), time.asctime(),
+                           (h.size / 1024, 1024)))
+
+    def run(self):
+        while not self.canceled.isSet():
+            try:
+                item = self.queue.popleft()
+            except IndexError:
+                # empty queue
+                time.sleep(2)
+                continue
+            data = {
+                'url': item[0],
+                'method': item[1],
+                'pid': item[2],
+                'time': item[3],
+                'size': item[4],
+            }
+            xmlrpc_server.push_url(data)
+            time.sleep(0.1)
