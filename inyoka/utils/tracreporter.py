@@ -311,7 +311,6 @@ class MemoryLogger(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-        self.canceled = Event()
         self.queue = deque([])
 
     def log(self, url, method):
@@ -324,7 +323,7 @@ class MemoryLogger(Thread):
                            (h.size / 1024, 1024)))
 
     def run(self):
-        while not self.canceled.isSet():
+        while True:
             if len(self.queue) > 0:
                 # do the work
                 while self.queue:
