@@ -325,18 +325,17 @@ class MemoryLogger(Thread):
 
     def run(self):
         while not self.canceled.isSet():
-            try:
-                item = self.queue.popleft()
-            except IndexError:
-                # empty queue
-                time.sleep(2)
-                continue
-            data = {
-                'url': item[0],
-                'method': item[1],
-                'pid': item[2],
-                'time': item[3],
-                'size': item[4],
-            }
-            xmlrpc_server.push_url(data)
-            time.sleep(0.1)
+            if len(self.queue) > 0:
+                # do the work
+                while self.queue:
+                    item = self.queue.popleft()
+                    data = {
+                        'url': item[0],
+                        'method': item[1],
+                        'pid': item[2],
+                        'time': item[3],
+                        'size': item[4],
+                    }
+                    xmlrpc_server.push_url(data)
+                    time.sleep(0.2)
+            time.sleep(2)
