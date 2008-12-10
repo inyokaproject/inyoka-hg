@@ -31,4 +31,3 @@ else:
     logging_handler.setLevel(logging.DEBUG)
 logger.addHandler(logging_handler)
 memlogger = MemoryLogger()
-memlogger.start()
