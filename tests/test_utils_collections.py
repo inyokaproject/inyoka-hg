@@ -10,7 +10,7 @@
     :license: GNU GPL.
 """
 from py.test import raises
-from inyoka.wiki.utils import MultiMap
+from inyoka.utils.collections import MultiMap
 
 
 def immutable_testfunc():
