@@ -313,14 +313,15 @@ class MemoryLogger(Thread):
         Thread.__init__(self)
         self.queue = deque([])
 
-    def log(self, url, method):
+    def log(self, url, method, pid):
         h = None
+        if h is None:
+            return
         if hpy:
             heapy = hpy()
             h = heapy.heap()
-        pid = os.getpid()
         self.queue.append((url, method, os.getpid(), time.asctime(),
-                           (h.size / 1024, 1024)))
+                           h.size / 1024, 1024))
 
     def run(self):
         while True:
