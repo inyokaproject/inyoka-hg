@@ -56,7 +56,10 @@ def sync():
 
         # parse the feed. feedparser.parse will never given an exception
         # but the bozo bit might be defined.
-        feed = feedparser.parse(blog.feed_url)
+        try:
+            feed = feedparser.parse(blog.feed_url)
+        except UnicodeDecodeError:
+            continue
         blog_author = feed.get('author') or blog.name
         blog_author_detail = feed.get('author_detail')
 
