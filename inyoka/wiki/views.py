@@ -153,9 +153,9 @@ def get_image_resource(request):
                                        request.GET.get('force') == 'yes'))
     else:
         target = Page.objects.attachment_for_page(target)
-        target = href('media', target)
     if not target:
         raise PageNotFound()
+    target = href('media', target)
     return HttpResponseRedirect(target)
 
 
