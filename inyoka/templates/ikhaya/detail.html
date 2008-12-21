@@ -110,7 +110,7 @@
                 <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
                 {%- endif %}
               </div>
-              {{ loop.index }}.<a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Kommentar" /></a>
+              <a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><strong>{{ loop.index }}.</strong></a>
               Verfasst: {{ comment.pub_date|datetimeformat }}
             </div>
             <div class="text">
