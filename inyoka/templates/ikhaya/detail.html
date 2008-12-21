@@ -65,6 +65,7 @@
     </p>
     {%- if article.comments_enabled %}
       <table id="comments" class="comments">
+{#
         <script type="text/javascript">
           /* <![CDATA[ */
           if (document.location.href.search('#comment') == -1) {
@@ -79,6 +80,7 @@
           }
           /* ]]> */
         </script>
+#}
 
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}
@@ -108,7 +110,7 @@
                 <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
                 {%- endif %}
               </div>
-              <a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Kommentar" /></a>
+              {{ loop.index }}.<a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Kommentar" /></a>
               Verfasst: {{ comment.pub_date|datetimeformat }}
             </div>
             <div class="text">
