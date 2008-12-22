@@ -65,7 +65,6 @@
     </p>
     {%- if article.comments_enabled %}
       <table id="comments" class="comments">
-{#
         <script type="text/javascript">
           /* <![CDATA[ */
           if (document.location.href.search('#comment') == -1) {
@@ -80,8 +79,6 @@
           }
           /* ]]> */
         </script>
-#}
-
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}
         <tr class="deleted">
