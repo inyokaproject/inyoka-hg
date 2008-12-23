@@ -125,8 +125,7 @@ ul.toolbar li ul.smileybox {
 
 ul.toolbar li span.syntax_help {
     position: absolute;
-    right: 15px;
-    width: 210px;
+    right: 5px;
 }
 
 ul.toolbar {
