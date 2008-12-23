@@ -21,7 +21,7 @@ mkdir ./inyoka/media/portal/avatars
 mkdir ./inyoka/media/portal/team_icons
 echo "Created media directories"
 
-python -c 'from inyoka.conf import settings;settings.DEBUG = True;from inyoka.utils.migrations import Migrations;from inyoka.migrations import MIGRATIONS;migrations = Migrations(MIGRATIONS);migrations.upgrade()'
+python manage-inyoka.py migrate
 echo "finished basic database creation\n"
 echo "Create admin user"
 python manage-inyoka.py create_superuser

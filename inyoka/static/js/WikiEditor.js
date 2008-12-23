@@ -67,12 +67,22 @@
   /**
    * Helper function that creates a button object.
    */
-  var button = function(id, title, callback, profiles) {
+  var button = function(id, title, callback, profiles, helper) {
     return function(editor) {
       if (!profiles || $.inArray(editor.profile, profiles) > -1)
         return $('<a href="#" class="button" />')
           .attr('id', 'button-' + id)
           .attr('title', title)
+          .mouseover(function(evt) {
+            evt.preventDefault();
+            editor.helpbar.show();
+            helper.call(editor, evt);
+          })
+          .mouseout(function(evt) {
+            evt.preventDefault();
+            editor.helpbar.hide();
+            editor.helpbar.text("");
+          })
           .append($('<span />').text(title))
           .click(function(evt) {
             evt.preventDefault();
@@ -84,7 +94,7 @@
   /**
    * helper function that creates a dropdown object.
    */
-  var dropdown = function(id, title, items, callback, profiles) {
+  var dropdown = function(id, title, items, callback, profiles, helper) {
     return function(editor) {
       if (profiles && $.inArray(editor.profile, profiles))
         return;
@@ -92,6 +102,14 @@
         .attr('id', 'dropdown-' + id)
         .attr('title', title)
         .append($('<option class="title" value="" />').text(title))
+        .mouseover(function(evt) {
+          editor.helpbar.show();
+          helper.call(editor, evt);
+        })
+        .mouseout(function(evt) {
+          editor.helpbar.hide();
+          editor.helpbar.text("");
+        })
         .change(function(evt) {
           callback.call(editor, evt);
         });
@@ -117,6 +135,16 @@
     return function(evt) {
       return this.insertTag(format, (typeof def == 'undefined')
                             ? 'Formatierter Text' : def);
+    };
+  }
+
+  /**
+   * factory duncrion for combined usage with "button".
+   * It's an easy way to insert help commands.
+   */
+  var help = function(message) {
+    return function(evt) {
+      editor.helpbar.text(message);
     };
   }
 
@@ -153,36 +181,36 @@
         if (delim.length > 0)
           this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
         evt.target.selectedIndex = 0;
-    }, ['wiki']),
+    }, ['wiki'], help("= Überschrift =")),
     button('bold', 'Fetter Text', insert("'''%s'''"),
-           ['wiki', 'forum', 'small']),
+           ['wiki', 'forum', 'small'], help("'''Text'''")),
     button('italic', 'Kursiver Text', insert("''%s''"),
-           ['wiki', 'forum', 'small']),
+           ['wiki', 'forum', 'small'], help("''Text''")),
     button('underlined', 'Unterstrichener Text', insert('__%s__'),
-           ['wiki', 'forum', 'small']),
+           ['wiki', 'forum', 'small'], help("__Text__")),
     button('stroke', 'Durchgestrichener Text', insert('--(%s)--'),
-           ['wiki', 'forum']),
+           ['wiki', 'forum'], help("--(Text)--")),
     //button('code', 'Code', insert("``%s``"),
     //       ['wiki', 'forum', 'small']),
     button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
-           ['wiki', 'forum']),
+           ['wiki', 'forum'], help("{{{ Code }}}")),
     button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
-           ['wiki', 'forum']),
+           ['wiki', 'forum'], help("[:Seitenname:]")),
     button('external-link', 'Externer Link', insert('[%s]',
-           'http://www.example.org/'), ['wiki', 'forum', 'small']),
+           'http://www.example.org/'), ['wiki', 'forum', 'small'], help("[http://www.example.com/]")),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
       if (selection.length)
         this.setSelection(this.quoteText(selection));
-    }, ['wiki', 'forum']),
+    }, ['wiki', 'forum'], help("Auswahl zitieren")),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
-           ['wiki', 'forum']),
+           ['wiki', 'forum'], help("[[Bild(Bildname)]]")),
     (function(editor) {
       var result = $('<div />');
       button('code', 'Code', function(evt) {
         codebox.slideToggle('fast');
         return false;
-      })(editor).appendTo(result);
+      }, ['wiki', 'forum'], help("Programmcode einfügen"))(editor).appendTo(result);
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
       codebox[0].style.display = 'none'; //hide box in safari
       var tds = [$('<td>Rohtext</td>').click(function() {
@@ -212,7 +240,7 @@
       button('color', 'Farbe', function(evt) {
         colorbox.slideToggle('fast');
         return false;
-      })(editor).appendTo(result);
+      }, ['forum'], help("[color=FARBE]Text[/color]"))(editor).appendTo(result);
       var colorbox = $('<ul class="colorbox" />').appendTo(result).hide();
       colorbox[0].style.display = 'none'; //hide box in safari
       $.each(COLORS, function() {
@@ -237,7 +265,7 @@
       button('smilies', 'Smilies', function(evt) {
         smileybox.slideToggle('fast');
         return false;
-      })(editor).appendTo(result);
+      }, ['forum'], help("Smiley einfügen"))(editor).appendTo(result);
       var smileybox = $('<ul class="smileybox" />').appendTo(result).hide();
       smileybox[0].style.display = 'none'; //hide box in safari
       $.getJSON('/?__service__=wiki.get_smilies', function(smilies) {
@@ -261,12 +289,12 @@
     }),
     button('date', 'Datum', function(evt) {
       this.insertTag('[[Datum(%s)]]', formatISO8601(new Date()));
-    }, ['wiki']),
+    }, ['wiki'], help("[[Datum(DATUM)]]")),
     button('sig', 'Signatur', function(evt) {
       this.insertText(' --- ' + (this.username ?
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
-    }, ['wiki']),
+    }, ['wiki'], help("automatisch Signatur einfügen")),
     dropdown('macro', 'Makro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
         item('[[TagListe(%s)]]', 'Tag-Liste'),
@@ -287,7 +315,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }, ['wiki']),
+    }, ['wiki'], help("Auf Button klicken um Makros zu verwenden")),
     dropdown('template', 'Vorlage', [
         item('[[Vorlage(Tasten, %s)]]', 'Tasten'),
         item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
@@ -301,14 +329,14 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }, ['wiki']),
+    }, ['wiki'], help("Auf Button klicken um Vorlagen zu verwenden")),
     button('shrink', 'Eingabefeld verkleinern', function(evt) {
       var height = this.textarea.height() - 50;
       this.textarea.height((height >= 100) ? height : 100).focus();
-    }),
+    }, ['forum', 'wiki'], help("Eingabefeld verkleinern")),
     button('enlarge', 'Eingabefeld vergrößern', function(evt) {
       this.textarea.height(this.textarea.height() + 50).focus();
-    })
+    }, ['forum', 'wiki'], help("Eingabefeld vergrößern"))
   ]};
 
 
@@ -335,6 +363,10 @@
     for (var i = 0, n = bar.length, x; i != n; ++i)
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
+    /* Helpbar */
+    $('<span class="syntax_help note">Hilfe zur Syntax: <a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Siehe Wiki</a></span>')
+      .appendTo($('<li />').appendTo(t));
+    this.helpbar = $('<span class="toolbar_help note" />').appendTo($('<li />').appendTo(t)).hide();
   };
 
   /**

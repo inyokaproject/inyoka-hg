@@ -122,3 +122,16 @@ ul.toolbar li ul.smileybox {
     width: 190px;
     background-color: #eee;
 }
+
+ul.toolbar li span.syntax_help {
+  position: relative;
+  right: 25px;
+}
+
+ul.toolbar li span.toolbar_help {
+    position: relative;
+    padding: 5px;
+    border: 1px solid white;
+    color: #4d4d4d;
+    background-color: #eee;
+}
