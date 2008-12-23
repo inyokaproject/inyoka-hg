@@ -364,9 +364,9 @@
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
     /* Helpbar */
+    this.helpbar = $('<span class="toolbar_help note" />').appendTo($('<li />').appendTo(t)).hide();
     $('<span class="syntax_help note">Hilfe zur Syntax: <a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Siehe Wiki</a></span>')
       .appendTo($('<li />').appendTo(t));
-    this.helpbar = $('<span class="toolbar_help note" />').appendTo($('<li />').appendTo(t)).hide();
   };
 
   /**
