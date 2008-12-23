@@ -128,10 +128,21 @@ ul.toolbar li span.syntax_help {
   right: 25px;
 }
 
+ul.toolbar {
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
 ul.toolbar li span.toolbar_help {
-    position: relative;
-    padding: 5px;
-    border: 1px solid white;
+    position: absolute;
+    right: 15px;
+    width: 210px;
+    text-align: center;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
     color: #4d4d4d;
     background-color: #eee;
 }

@@ -192,8 +192,6 @@
            ['wiki', 'forum'], help("--(Text)--")),
     //button('code', 'Code', insert("``%s``"),
     //       ['wiki', 'forum', 'small']),
-    button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
-           ['wiki', 'forum'], help("{{{ Code }}}")),
     button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
            ['wiki', 'forum'], help("[:Seitenname:]")),
     button('external-link', 'Externer Link', insert('[%s]',
@@ -205,6 +203,8 @@
     }, ['wiki', 'forum'], help("Auswahl zitieren")),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum'], help("[[Bild(Bildname)]]")),
+    button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
+           ['wiki', 'forum'], help("{{{ Code }}}")),
     (function(editor) {
       var result = $('<div />');
       button('code', 'Code', function(evt) {
