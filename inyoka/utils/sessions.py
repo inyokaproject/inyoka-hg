@@ -74,7 +74,7 @@ class SurgeProtectionMixin(object):
     source_protection_timeout = 15
     source_protection_message = '''
         Du kannst Daten nicht so schnell hintereinander absenden.  Bitte
-        warte noch einige Zeit bis du das Forumlar erneut absendest.
+        warte noch einige Zeit bis du das Formular erneut absendest.
     '''
     source_protection_identifier = None
 
