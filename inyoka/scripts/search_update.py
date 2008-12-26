@@ -14,9 +14,11 @@
     :copyright: 2007 - 2008 by Christoph Hack, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
+import gc
 from xapian import DatabaseOpeningError
 import inyoka.utils.http
 from inyoka import application
+from django.db import connection
 from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
@@ -46,11 +48,15 @@ def update():
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
     for comp, adapter in search.adapters.iteritems():
+        connection.queries = []
+        gc.collect()
         for i, doc_id in enumerate(adapter.get_doc_ids()):
             search.index(comp, doc_id)
             if i % 100 == 0:
                 search.flush()
+                session.remove()
         search.flush()
+        session.remove
 
 
 if __name__ == '__main__':

@@ -144,7 +144,7 @@
    */
   var help = function(message) {
     return function(evt) {
-      editor.helpbar.text(message);
+      this.helpbar.text(message);
     };
   }
 
@@ -195,7 +195,7 @@
     button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
            ['wiki', 'forum'], help("[:Seitenname:]")),
     button('external-link', 'Externer Link', insert('[%s]',
-           'http://www.example.org/'), ['wiki', 'forum', 'small'], help("[http://www.example.com/]")),
+           'http://www.example.org/'), ['wiki', 'forum', 'small'], help("[www.example.com]")),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
       if (selection.length)
@@ -294,7 +294,7 @@
       this.insertText(' --- ' + (this.username ?
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
-    }, ['wiki'], help("automatisch Signatur einfügen")),
+    }, ['wiki'], help("Signatur einfügen")),
     dropdown('macro', 'Makro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
         item('[[TagListe(%s)]]', 'Tag-Liste'),
@@ -315,7 +315,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }, ['wiki'], help("Auf Button klicken um Makros zu verwenden")),
+    }, ['wiki'], help("Makros einfügen")),
     dropdown('template', 'Vorlage', [
         item('[[Vorlage(Tasten, %s)]]', 'Tasten'),
         item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
@@ -329,7 +329,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }, ['wiki'], help("Auf Button klicken um Vorlagen zu verwenden")),
+    }, ['wiki'], help("Vorlagen einfügen")),
     button('shrink', 'Eingabefeld verkleinern', function(evt) {
       var height = this.textarea.height() - 50;
       this.textarea.height((height >= 100) ? height : 100).focus();
@@ -357,6 +357,9 @@
         self.onKeyDown(evt);
       });*/
 
+    /* helpbar with some syntax informations */
+    this.helpbar = $('<span class="toolbar_help note" />');
+
     /* create toolbar based on button layout */
     t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
     var bar = toolbar();
@@ -364,7 +367,7 @@
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
     /* Helpbar */
-    this.helpbar = $('<span class="toolbar_help note" />').appendTo($('<li />').appendTo(t)).hide();
+    this.helpbar.appendTo($('<li />').appendTo(t)).hide();
     $('<span class="syntax_help note">Hilfe zur Syntax: <a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Siehe Wiki</a></span>')
       .appendTo($('<li />').appendTo(t));
   };
