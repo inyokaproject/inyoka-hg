@@ -50,8 +50,8 @@
             </a>
             {%- endif %}
           </p>
-          <p class="description">
-            von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a>
+          <p class="description note">
+            von <a href="{{ topic.author|url }}">{{ topic.author.username|e }}</a> am {{ topic.first_post.pub_date|datetimeformat }}
             {%- if topic.paginated %} &#160; &#160; [
               Gehe zu Seite {{topic.get_pagination() }}
             ]{% endif -%}
