@@ -54,8 +54,7 @@ class Pagination(object):
                                         idx + self.per_page - 1))
         else:
             result = query[idx:idx + self.per_page]
-        if not result and self.page != 1:
-            raise PageNotFound()
+
         self.objects = result
 
         if total:
@@ -64,6 +63,10 @@ class Pagination(object):
             self.total = len(query)
         else:
             self.total = query.count()
+
+        max_pages = (max(0, self.total - 1) // self.per_page + 1)
+        if self.page > max_pages:
+            raise PageNotFound()
 
         if link is None:
             link = request.path
@@ -77,7 +80,6 @@ class Pagination(object):
         if self.total and self.total/per_page < 1 and page > 1:
             url = self.generate_link(1, dict(request.GET.lists()))
             self.needs_redirect_to = lambda: HttpResponseRedirect(url)
-            print self.needs_redirect_to, url
 
     def generate_link(self, page, params):
         if page == 1:
