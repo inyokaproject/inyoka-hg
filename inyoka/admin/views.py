@@ -29,6 +29,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.http import HttpResponseRedirect, PageNotFound
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.storage import storage
+from inyoka.utils.mail import send_mail
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
@@ -36,7 +37,7 @@ from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
-     CreateUserForm, EditStyleForm, CreateGroupForm
+     CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
@@ -913,6 +914,48 @@ def resend_activation_mail(request):
         send_activation_mail(user)
         flash(u'Die Aktivierungsmail wurde erneut versandt.', True)
     return HttpResponseRedirect(request.GET.get('next') or href('admin', 'users'))
+
+
+@require_permission('user_edit')
+@templated('admin/user_mail.html')
+def user_mail(request, username):
+    try:
+        if '@' in username:
+            user = User.objects.get(email__iexact=username)
+        else:
+            user = User.objects.get(username)
+    except User.DoesNotExist:
+        raise PageNotFound
+    if request.method == 'POST':
+        form = UserMailForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            message = render_template('mails/formmailer_template.txt', {
+                'user': user,
+                'text': text,
+                'from': request.user.username,
+            })
+            #try:
+            send_mail(
+                'ubuntuusers.de - Nachricht von %s' % request.user.username,
+                message,
+                settings.INYOKA_SYSTEM_USER_EMAIL, 
+                [user.email])
+            #except: # don't know which exception is thrown
+            #    flash(u'Die Mail konnte nicht verschickt werden.')
+            #    return HttpResponseRedirect(href('admin', 'users', 'mail',
+            #                                 escape(username)))
+            flash(u'Die Mail an „%s“ wurde erfolgreich verschickt.'
+                  % escape(username), True)
+            return HttpResponseRedirect(request.GET.get('next') or href('admin', 'users'))
+        else:
+            flash(u'Es sind Probleme aufgetreten, bitte behebe sie!', False)
+    else:
+        form = UserMailForm()
+    return {
+        'form': form,
+        'user': user,
+    }
 
 @require_permission('group_edit')
 @templated('admin/groups.html')

@@ -1,0 +1,34 @@
+{#
+    admin/user_mail.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    simple formmailer
+
+    :copyright: 2008 by Nils winter.
+    :license: GNU GPL.
+#}
+{%- extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
+
+{% set navigation_trace = [
+    (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'mail', user.username), 'Mail an Benutzer „%s“ senden'|format(user.username|e))
+] %}
+
+{% block appheader %}
+<h1><a href="{{ href('admin') }}">Administration</a></h1>
+<h2><a href="{{ href('admin', 'users') }}">Benutzer</a></h2>
+{% endblock %}
+
+
+{% block admin_content %}
+<form id="user_mail_form" method="post" action="">
+  <h3>Mail verfassen</h3>
+  <dl>
+    {{ render_form(form, ['text'], inline=true) }}
+  </dl>
+  <p>
+    <input type="submit" value="Absenden" />
+  </p>
+</form>
+{% endblock %}

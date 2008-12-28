@@ -395,3 +395,10 @@ class EditEventForm(forms.Form):
     location_long = forms.DecimalField(label=u'Koordinaten (Breite)',
                                       required=False,
                                       min_value=-90, max_value=90)
+
+class UserMailForm(forms.Form):
+    text = forms.CharField(label=u'Text',
+        widget=forms.Textarea(),
+        help_text=u"""Die Nachricht wird als „reiner Text“ abgeschickt. Dein
+Benutzername wird in der Mail als Absender vermerkt."""
+    )
