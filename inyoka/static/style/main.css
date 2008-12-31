@@ -43,7 +43,7 @@ div.wrap2 {
 }
 
 div.wrap3 {
-  background-image:url(../img/head-xmas.jpg);
+  background-image:url(../img/head-silvester.jpg);
   background-repeat:no-repeat;
 }
 
@@ -478,7 +478,7 @@ table.syntaxtable td.linenos {
   padding: 0;
   margin: 0;
   text-decoration: none;
-  background-image: url(../img/logo-advent4.png);
+  background-image: url(../img/logo.png);
 }
 
 .header h1 span {
