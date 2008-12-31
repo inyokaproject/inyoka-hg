@@ -118,31 +118,6 @@
     {{ not_joined_groups|sort|jsonencode }}
   );
 
-/*  var banned_until = $('input[@name="banned_until"]');
-//  var bann_user_event = $('.bann_user_event');
-
-  if (banned_until.val()) {
-//    bann_user_event.text('Sperrung aufheben');
-    banned_until = new DateTimeField('input[@name="banned_until"]', false, true);
-  } else {
-    banned_until.hide()
-  }
-
-  bann_user_event
-    .click(function() {
-      if (banned instanceof DateTimeField) {
-        banned.destroy();
-        banned = $('input[@name="banned"]')
-          .val('')
-          .hide();
-        bann_user_event.text('Benutzer sperren')
-      } else {
-        banned = new DateTimeField('input[@name="banned"]', false, true);
-        bann_user_event.text('Sperrung aufheben');
-      }
-    });*/
-
-
   var date_joined = null;
   var dj_ui_switcher = $('.date_joined_ui_switcher')
     .click(function() {

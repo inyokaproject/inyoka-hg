@@ -11,12 +11,14 @@
 """
 import os
 import re
+import sys
 import shutil
 import urllib2
 from os import path
 from md5 import md5
 from urllib import quote
 from datetime import datetime
+from itertools import cycle, izip
 from werkzeug import url_unquote
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
@@ -31,6 +33,46 @@ META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
 NAVI_RE = re.compile(r'(<ul class="navi_global">).+?(</ul>)', re.DOTALL)
 IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
 LINK_RE = re.compile(r'href="%s' % href('wiki'))
+SNAPSHOT_MESSAGE = u'''<div class="message">
+<strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann weder bearbeitet werden noch kann dieser veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
+</div>''' % URL
+
+# original from Jochen Kupperschmidt with some modifications
+class ProgressBar(object):
+    """Visualize a status bar on the console."""
+
+    def __init__(self, max_width):
+        """Prepare the visualization."""
+        self.max_width = max_width
+        self.spin = cycle(r'-\|/').next
+        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
+        show(' [ ')
+        self.last_output_length = 0
+
+    def update(self, percent):
+        """Update the visualization."""
+        # Remove last state.
+        show('\b' * self.last_output_length)
+
+        # Generate new state.
+        width = int(percent / 100.0 * self.max_width)
+        output = self.tpl % ('-' * width, self.spin(), percent)
+
+        # Show the new state and store its length.
+        show(output)
+        self.last_output_length = len(output)
+
+
+def show(string):
+    """Show a string instantly on STDOUT."""
+    sys.stdout.write(string)
+    sys.stdout.flush()
+
+
+def percentize(steps):
+    """Generate percental values."""
+    for i in range(steps + 1):
+        yield i * 100.0 / steps
 
 
 def fetch_page(name):
@@ -80,7 +122,10 @@ def create_snapshot():
     attachment_folder = path.join(FOLDER, '_')
     os.mkdir(attachment_folder)
 
-    for name in Page.objects.get_page_list(existing_only=True):
+    pb = ProgressBar(40)
+
+    pages = Page.objects.get_page_list(existing_only=True)
+    for percent, name in izip(percentize(len(pages)), pages):
         page = Page.objects.get(name=name)
         rev = page.revisions.all()[0]
         if rev.attachment:
@@ -99,10 +144,9 @@ def create_snapshot():
             content = fetch_page(name).decode('utf8')
         except:
             continue
+        pb.update(percent)
 
-        content = TAB_RE.sub(u'''<div class="message">
-<strong>Hinweis:</strong> Da unsere Server überlastet sind, haben wir das Wiki auf eine statische Version umgestellt; es kann deswegen zur Zeit nicht bearbeitet werden.
-</div>''', content)
+        content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
         content = META_RE.sub('', content)
         content = NAVI_RE.sub('', content)
         content = IMG_RE.sub(handle_img, content)

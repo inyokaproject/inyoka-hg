@@ -206,11 +206,13 @@
     button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
            ['wiki', 'forum'], help("{{{ Code }}}")),
     (function(editor) {
+      if (editor.profile == 'small') {
+        return
+      }
       var result = $('<div />');
       button('code', 'Code', function(evt) {
         codebox.slideToggle('fast');
-        return false;
-      }, ['wiki', 'forum'], help("Programmcode einfügen"))(editor).appendTo(result);
+      }, ['wiki', 'forum'], help("Code einfügen"))(editor).appendTo(result);
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
       codebox[0].style.display = 'none'; //hide box in safari
       var tds = [$('<td>Rohtext</td>').click(function() {
