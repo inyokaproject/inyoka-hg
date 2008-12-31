@@ -135,8 +135,6 @@ ul.toolbar {
 }
 
 ul.toolbar li span.toolbar_help {
-    position: relative;
-    right: 10px;
     text-align: center;
     padding: 2px 6px 2px 6px;
     border-left: 1px solid #c1c1c1;
