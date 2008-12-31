@@ -11,6 +11,7 @@
 """
 import os
 import re
+import time
 import sys
 import shutil
 import urllib2
@@ -23,7 +24,7 @@ from werkzeug import url_unquote
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
 
-FOLDER = 'static_wiki'
+FOLDER = '/srv/www/de/staticwiki'
 URL = href('wiki')
 DONE_SRCS = {}
 
@@ -154,6 +155,7 @@ def create_snapshot():
         content = LINK_RE.sub('href="/', content)
         f.write(content.encode('utf8'))
         f.close()
+        time.sleep(2)
 
 
 if __name__ == '__main__':
