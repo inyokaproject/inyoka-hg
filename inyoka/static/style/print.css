@@ -8,21 +8,26 @@
  * :license: GNU GPL.
  */
 
-.header, .navigation, .topic_box, .footer, .message, .linklist {
+.header, .navigation, .topic_box, .footer, .message, .linklist,
+.signature,
+.appheader > *, .pathbar > *, .author > * {
     display: none;
 }
-.appheader > *, .pathbar > * {
-  display: none;
-}
+
 .appheader h1, .appheader h2 {
   display: inline;
 }
+
 .pathbar .trace {
   display: block;
 }
 
 .pathbar:last-child {
   display: none;
+}
+
+.author .username {
+  display: block;
 }
 
 .text a:link:after, .text a:link::after,
