@@ -38,6 +38,6 @@ ul.pastes li.date {
     color: #777;
 }
 
-div.code, pre {
+div.code {
     max-height: none;
 }

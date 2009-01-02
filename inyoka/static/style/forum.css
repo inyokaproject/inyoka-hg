@@ -534,10 +534,6 @@ ul.attr_list.broken li {
   display: block;
 }
 
-div.code pre {
-    max-height: none;
-}
-
 .codeblock_resizer {
     width: 10em;
     margin-left: auto;
