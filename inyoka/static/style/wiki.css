@@ -177,3 +177,6 @@ div.conflict strong {
     color: black;
 }
 
+div.code pre {
+    max-height: none;
+}
