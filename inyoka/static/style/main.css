@@ -417,7 +417,7 @@ h3 .note {
   font-size: 0.7em;
   padding-left: 0px;
 }
-div.code {
+div.code, pre {
   border:1px solid #CCCCCC;
   margin:0.5em 0 0;
   max-height:15em;
