@@ -212,6 +212,8 @@ div.workinprogress h3 {
   background-position: top right;
   background-repeat:no-repeat;
   font-size: 0.9em;
+  /* IE fix */
+  width: 50ex;
 }
 
 .toc .head {

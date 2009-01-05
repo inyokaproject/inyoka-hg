@@ -541,6 +541,7 @@ table.syntaxtable td.linenos {
 .page_content {
   margin: 1.0em 20px;
   margin-top: 0px;
+  position: relative;
 }
 
 .content {
@@ -581,7 +582,9 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .navi_sidebar {
-  float: left;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .navi_sidebar .container {
