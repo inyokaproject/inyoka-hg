@@ -1188,6 +1188,8 @@ ul.dropdown {
   list-style:none;
   margin: 1px;
   padding:3px 5px;
+  position: relative;
+  z-index: 3;
 }
 
 ul.dropdown li {
