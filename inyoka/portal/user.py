@@ -671,14 +671,16 @@ class User(models.Model):
             return href('admin', 'users', 'edit', self.urlsafe_username)
 
     def login(self, request):
-        self.last_login = datetime.utcnow()
-        request.session['uid'] = self.id
-        request.session.pop('_sk', None)
-        request.user = self
-        # invalidate the new_password_key
-        if self.new_password_key:
-            self.new_password_key = None
-        self.save()
+        pass
+#    def login(self, request):
+#        self.last_login = datetime.utcnow()
+#        request.session['uid'] = self.id
+#        request.session.pop('_sk', None)
+#        request.user = self
+#        # invalidate the new_password_key
+#        if self.new_password_key:
+#            self.new_password_key = None
+#        self.save()
 
 # I have no idea why a simple `property` did not work – maybe
 # this is the only right way to do something like that? --entequak
