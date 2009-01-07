@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 import logging
+from logging.handlers import SMTPHandler
 from inyoka.conf import settings
 from inyoka.utils.tracreporter import MemoryLogger
 
@@ -30,4 +31,7 @@ else:
     ))
     logging_handler.setLevel(logging.DEBUG)
 logger.addHandler(logging_handler)
+if not settings.DEBUG:
+    logger.addHandler(SMTPHandler(settings.EMAIL_HOST, settings.SERVER_EMAIL,
+                            [x[1] for x in settings.ADMINS],'ubuntu-de ERROR'))
 memlogger = MemoryLogger()
