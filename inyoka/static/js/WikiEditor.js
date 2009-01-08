@@ -212,6 +212,7 @@
       var result = $('<div />');
       button('code', 'Code', function(evt) {
         codebox.slideToggle('fast');
+        return false;
       }, ['wiki', 'forum'], help("Code einfügen"))(editor).appendTo(result);
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
       codebox[0].style.display = 'none'; //hide box in safari
