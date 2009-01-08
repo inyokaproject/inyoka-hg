@@ -582,9 +582,7 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .navi_sidebar {
-  position: absolute;
-  top: 0;
-  left: 0;
+  float: left;
 }
 
 .navi_sidebar .container {
