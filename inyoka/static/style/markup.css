@@ -271,14 +271,18 @@ div.knowledge .anchor {
 
 div.edited {
   border: 1px solid #597A00;
-  padding: 0em 0.4em;
+  padding: 0.4em;
   font-size: 0.8em;
 }
 
 div.moderated {
   border: 1px solid #cc7777;
-  padding: 0em 0.4em;
+  padding: 0.4em;
   font-size: 0.8em;
+}
+
+div.moderated p, div.edited p {
+  margin: 0;
 }
 
 pre {
