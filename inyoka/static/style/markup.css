@@ -270,15 +270,15 @@ div.knowledge .anchor {
 }
 
 div.edited {
-  background-color: #eee;
-  border: 1px solid #aaa;
-  padding: 0 1em;
+  border: 1px solid #cceacc;
+  padding: 0em 0.4em;
+  font-size: 0.7em;
 }
 
 div.moderated {
-  background-color: #eadada;
-  border: 1px solid #aaa;
-  padding: 0 1em;
+  border: 1px solid #eacccc;
+  padding: 0em 0.4em;
+  font-size: 0.7em;
 }
 
 pre {
