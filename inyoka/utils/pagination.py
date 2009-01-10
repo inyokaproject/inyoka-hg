@@ -64,7 +64,7 @@ class Pagination(object):
         else:
             self.total = query.count()
 
-        max_pages = (max(0, self.total - 1) // self.per_page + 1)
+        max_pages = max(0, self.total - 1 // (self.per_page + 1)
         if self.page > max_pages:
             raise PageNotFound()
 
