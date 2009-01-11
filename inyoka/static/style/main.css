@@ -541,7 +541,6 @@ table.syntaxtable td.linenos {
 .page_content {
   margin: 1.0em 20px;
   margin-top: 0px;
-  position: relative;
 }
 
 .content {
@@ -1186,8 +1185,6 @@ ul.dropdown {
   list-style:none;
   margin: 1px;
   padding:3px 5px;
-  position: relative;
-  z-index: 3;
 }
 
 ul.dropdown li {
