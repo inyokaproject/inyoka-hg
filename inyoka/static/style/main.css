@@ -841,6 +841,7 @@ form.search .search_expander {
 
 form.search ul.search_area {
   position: absolute;
+  z-index: 99;
   margin-top: 19px;
   line-height: 1em;
   list-style: none;
@@ -1185,6 +1186,8 @@ ul.dropdown {
   list-style:none;
   margin: 1px;
   padding:3px 5px;
+  position: relative;
+  z-index: 99;
 }
 
 ul.dropdown li {
