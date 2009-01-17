@@ -285,6 +285,14 @@ div.moderated p, div.edited p {
   margin: 0;
 }
 
+div.moderated strong {
+  color: #aa3333;
+}
+
+div.edited strong {
+  color: #597A00;
+}
+
 pre {
   padding: 0.5em;
 }

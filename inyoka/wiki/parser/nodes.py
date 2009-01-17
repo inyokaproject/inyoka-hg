@@ -922,10 +922,10 @@ class Moderated(Element):
         w.markup(u'[/mod]')
 
     def prepare_html(self):
-        yield u'<strong>Moderiert von <a class="crosslink user" href="%s">' \
-              u'%s</a>:</strong> ' % (href('portal', 'user', self.username),
-                                    self.username)
         yield u'<div class="moderated">'
+        yield u'<p><strong>Moderiert von <a class="crosslink user" href="%s">' \
+              u'%s</a>:</strong></p> ' % (href('portal', 'user', self.username),
+                                    self.username)
         for item in Element.prepare_html(self):
             yield item
         yield u'</div>'
@@ -952,10 +952,10 @@ class Edited(Element):
         w.markup(u'[/edit]')
 
     def prepare_html(self):
-        yield u'<strong>Bearbeitet von <a class="crosslink user" href="%s">' \
-              u'%s</a>:</strong> ' % (href('portal', 'user', self.username),
-                                    self.username)
         yield u'<div class="edited">'
+        yield u'<p><strong>Bearbeitet von <a class="crosslink user" href="%s">' \
+              u'%s</a>:</strong></p> ' % (href('portal', 'user', self.username),
+                                    self.username)
         for item in Element.prepare_html(self):
             yield item
         yield u'</div>'
