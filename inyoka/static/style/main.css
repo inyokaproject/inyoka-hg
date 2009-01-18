@@ -369,7 +369,7 @@ ul.errorlist, ul.errors, div.errors {
   color: white;
 }
 
-ul.errors li, ul.errorlist {
+ul.errors li, ul.errorlist, ul.errorlist a {
   color: white;
 }
 
