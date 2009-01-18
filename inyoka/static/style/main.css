@@ -82,6 +82,8 @@ input {
   border: 1px solid #AAA;
   font-family: 'Verdana', 'Deja-Vu Sans', 'Bitstream Vera Sans', sans-serif;
   font-size: 1em;
+  background-color: #FFFFFF;
+  color: #000000;
 }
 
 input[type="radio"] {
@@ -91,6 +93,7 @@ input[type="radio"] {
 input[type="submit"], input[type="button"], input[type="reset"] {
   border-color: #777;
   background-color: #eee;
+  color: #333333;
 }
 
 input[type="submit"]:active, input[type="button"]:active, input[type="reset"]:active {
