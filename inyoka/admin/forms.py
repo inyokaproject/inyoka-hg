@@ -90,15 +90,19 @@ class EditArticleForm(forms.Form):
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
-        u'angezeigt.', widget=DateTimeWidget)
+        u'angezeigt. Nach der Veröffentlichung nicht mehr ändern!',
+        widget=DateTimeWidget)
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False,
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
                   u'Feld frei, um ihn automatisch generieren zu lassen '
-                  u'(empfohlen).')
+                  u'(empfohlen). Nach der Veröffentlichung nicht mehr ändern!')
     comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt',
                                           required=False)
     checksum = forms.CharField(widget=forms.HiddenInput, required=False)
+    update = forms.BooleanField(label=u'Update', required=False,
+                                help_text=u'Setzt den Zeitpunkt der letzten '
+                                u'Bearbeitung auf jetzt')
 
 
 class EditCategoryForm(forms.Form):

@@ -58,8 +58,8 @@
       geschrieben von <a href="{{ article.author|url }}">
       {{ article.author.username|e}}</a> {{ article.pub_datetime|specificdatetimeformat(true) }} 
       in <a href="{{ article.category|url }}">{{ article.category.name|e }}</a> 
-      {%- if article.edit_count %}
-      — {{ article.edit_count }} Mal bearbeitet
+      {%- if article.updated > article.pub_datetime %}
+      – zuletzt aktualisiert {{ article.updated|specificdatetimeformat(true) }}
       {%- endif %}
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
     </p>

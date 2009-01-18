@@ -105,7 +105,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
     set_session_info(request, u'sieht sich die <a href="%s">'
                               u'Artikelübersicht</a> an' % link)
 
-    articles = articles.order_by('-pub_date', '-pub_time').select_related()
+    articles = articles.order_by('-updated').select_related()
 
     pagination = Pagination(request, articles, page, 15, link)
 

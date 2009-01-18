@@ -300,7 +300,7 @@ def ikhaya(request):
     return {}
 
 
-@require_permission('article_read')
+@require_permission('article_read', 'article_edit')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
     sortable = Sortable(Article.objects.all(), request.GET, '-pub_date',
@@ -353,6 +353,7 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 if not data.get('icon_id'):
                     data['icon_id'] = None
                 if not article:
+                    data.pop('update', None)
                     article = Article(**data)
                     article.save()
                     if suggestion_id:
@@ -363,12 +364,14 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 else:
                     changed = False
                     db_checksum = article.checksum
+                    update = data.pop('update', False)
                     for k in data:
                         if article.__getattribute__(k) != data[k]:
                             article.__setattr__(k, data[k])
                             changed = True
                     if changed:
-                        article.updated = datetime.utcnow()
+                        if update:
+                            article.updated = datetime.utcnow()
                         if db_checksum == checksum:
                             article.save()
                             flash(u'Der Artikel „%s“ wurde gespeichert.'
@@ -380,9 +383,13 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                                     u'Der Artikel wurde seit Beginn des '
                                     u'Bearbeitens verändert!'
                                 ])
+                    elif update:
+                        article.updated = datetime.utcnow()
+                        article.save()
                     else:
                         flash(u'Der Artikel „%s“ wurde nicht verändert'
                               % escape(article.subject))
+                return HttpResponseRedirect(article.get_absolute_url('edit'))
         elif 'preview' in request.POST:
             ctx = RenderContext(request)
             preview = parse('%s\n\n%s' % (request.POST.get('intro', ''),
@@ -408,7 +415,8 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
             initial = {
                 'subject': suggestion.title,
                 'text':    suggestion.text,
-                'intro':   suggestion.intro
+                'intro':   suggestion.intro,
+                'author':  suggestion.author,
             }
         form = EditArticleForm(initial=initial)
         _add_field_choices()

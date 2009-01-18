@@ -209,8 +209,6 @@ class Article(models.Model):
         suffix_id = False
         if not self.updated or self.updated < self.pub_datetime:
             self.updated = self.pub_datetime
-        else:
-            self.updated = datetime.utcnow()
         if not self.slug:
             if not self.icon:
                 # use the category's icon if available
