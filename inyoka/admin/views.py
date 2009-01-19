@@ -37,7 +37,8 @@ from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
-     CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm
+     CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
+     EditPublicArticleForm
 from inyoka.portal.models import StaticPage, Event, StaticFile
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
@@ -339,15 +340,19 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
         article = None
 
     if request.method == 'POST':
-        form = EditArticleForm(request.POST)
+        if article and article.public:
+            form = EditPublicArticleForm(request.POST)
+        else:
+            form = EditArticleForm(request.POST)
         if 'send' in request.POST:
             _add_field_choices()
             if form.is_valid():
                 data = form.cleaned_data
                 data['author'] = data['author'] or request.user
-                dt = get_user_timezone().localize(data['pub_date']) \
-                    .astimezone(pytz.utc).replace(tzinfo=None)
-                data['pub_date'], data['pub_time'] = dt.date(), dt.time()
+                if data['pub_date']:
+                    dt = get_user_timezone().localize(data['pub_date']) \
+                        .astimezone(pytz.utc).replace(tzinfo=None)
+                    data['pub_date'], data['pub_time'] = dt.date(), dt.time()
                 checksum = data.pop('checksum')
 
                 if not data.get('icon_id'):
@@ -366,7 +371,8 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                     db_checksum = article.checksum
                     update = data.pop('update', False)
                     for k in data:
-                        if article.__getattribute__(k) != data[k]:
+                        if article.__getattribute__(k) != data[k] \
+                           and data[k] not in (None, ''):
                             article.__setattr__(k, data[k])
                             changed = True
                     if changed:
@@ -395,7 +401,6 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
             preview = parse('%s\n\n%s' % (request.POST.get('intro', ''),
                             request.POST.get('text'))).render(ctx, 'html')
     else:
-        initial = {}
         if article_id:
             initial = {
                 'subject': article.subject,
@@ -410,15 +415,20 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 'comments_enabled': article.comments_enabled,
                 'checksum': article.checksum,
             }
+            if article.public:
+                form = EditPublicArticleForm(initial=initial)
+            else:
+                form = EditArticleForm(initial=initial)
         elif suggestion_id:
             suggestion = Suggestion.objects.get(id=suggestion_id)
-            initial = {
+            form = EditArticleForm(initial={
                 'subject': suggestion.title,
                 'text':    suggestion.text,
                 'intro':   suggestion.intro,
                 'author':  suggestion.author,
-            }
-        form = EditArticleForm(initial=initial)
+            })
+        else:
+            form = EditArticleForm()
         _add_field_choices()
 
     return {

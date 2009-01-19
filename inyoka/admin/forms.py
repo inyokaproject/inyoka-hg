@@ -104,6 +104,13 @@ class EditArticleForm(forms.Form):
                                 help_text=u'Setzt den Zeitpunkt der letzten '
                                 u'Bearbeitung auf jetzt')
 
+class EditPublicArticleForm(EditArticleForm):
+    pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
+        input_formats=DATETIME_INPUT_FORMATS, widget=DateTimeWidget(
+            attrs={'disabled': 'disabled'}), required=False)
+    slug = forms.CharField(label=u'Slug', max_length=100, required=False,
+        widget=forms.TextInput(attrs={'disabled': 'disabled'}))
+
 
 class EditCategoryForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=100)
