@@ -94,6 +94,20 @@ def action_runcp(hostname='0.0.0.0', port=8080):
     except KeyboardInterrupt:
         server.stop()
 
+def action_mysql():
+    import sys
+    from subprocess import Popen
+    from inyoka.conf import settings
+    cmd = ['mysql', settings.DATABASE_NAME]
+    if settings.DATABASE_USER:
+        cmd.extend(('-u', settings.DATABASE_USER))
+    if settings.DATABASE_PASSWORD:
+        cmd.append('-p%s' % settings.DATABASE_PASSWORD)
+    if settings.DATABASE_HOST:
+        cmd.extend(('-h', settings.DATABASE_HOST))
+    p = Popen(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    return p.wait()
+
 
 def _dowse():
     try:

@@ -52,7 +52,7 @@ shell:
 	@(python manage-inyoka.py shell)
 
 mysql:
-	@mysql -A -uroot ubuntuusers
+	@(python manage-inyoka.py mysql)
 
 clean-files:
 	find . -name '*.pyc' -exec rm -f {} +
