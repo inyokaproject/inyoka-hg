@@ -28,10 +28,15 @@ def make_app():
     return app
 
 
-action_runserver = script.make_runserver(make_app, '', 8080,
-                                         use_reloader=True)
 action_shell = script.make_shell(lambda: {})
 action_profiled = profiler.make_action(make_app, '', 8080)
+
+def action_runserver():
+    from inyoka.conf import settings
+    return script.make_runserver(make_app, settings.DEVSERVER_HOST,
+                                 settings.DEVSERVER_PORT,
+                                 use_reloader=True)
+action_runserver = action_runserver()
 
 
 def action_migrate():
