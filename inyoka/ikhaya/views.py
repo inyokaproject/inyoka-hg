@@ -10,6 +10,7 @@
 """
 from datetime import datetime, date
 from django.utils.text import truncate_html_words
+from django.db.models import Q
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, HttpResponse, PageNotFound, \
@@ -99,8 +100,10 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         link = ()
 
     if not request.user.can('article_read'):
-        articles = articles.filter(pub_date__lte=datetime.utcnow().date(),
-                                   public=True)
+        articles = articles.filter(public=True) \
+                           .filter(Q(pub_date__lt=datetime.utcnow().date())|
+                                   Q(pub_date = datetime.utcnow().date(), pub_time__lte = datetime.utcnow().time()))
+
     link = href('ikhaya', *link)
     set_session_info(request, u'sieht sich die <a href="%s">'
                               u'Artikelübersicht</a> an' % link)
