@@ -85,7 +85,7 @@
           <td colspan="2">Dieser Kommentar wurde von einem Moderator gelöscht.</td>
         </tr>
         {%- else %}
-        <tr id="comment_{{ loop.index }}"{% if comment.deleted %} class="hidden"{% endif %}>
+        <tr id="comment_{{ comment.id }}"{% if comment.deleted %} class="hidden"{% endif %}>
           {{ user_column(comment.author) }}
           {%- if comment.author_id == USER.id %}
           <td class="comment" style="background-color: #F8F6F1">
