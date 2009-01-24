@@ -304,9 +304,9 @@ def ikhaya(request):
 @require_permission('article_read', 'article_edit')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
-    sortable = Sortable(Article.objects.all(), request.GET, '-pub_date',
+    sortable = Sortable(Article.objects.all(), request.GET, '-updated',
         columns=['subject', 'portal_user.username', 'ikhaya_category.name',
-                 'pub_date'])
+                 'updated'])
     pagination = Pagination(request, sortable.get_objects(), page, 25,
         href('admin', 'ikhaya', 'articles'))
     return {

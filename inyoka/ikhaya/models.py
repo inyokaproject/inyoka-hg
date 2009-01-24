@@ -23,7 +23,7 @@ from inyoka.utils.text import slugify
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.cache import cache
-from inyoka.utils.dates import date_time_to_datetime
+from inyoka.utils.dates import date_time_to_datetime, datetime_to_timezone
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
@@ -120,6 +120,14 @@ class Article(models.Model):
     @deferred
     def pub_datetime(self):
         return date_time_to_datetime(self.pub_date, self.pub_time)
+
+    @property
+    def local_pub_datetime(self):
+        return datetime_to_timezone(self.pub_datetime).replace(tzinfo=None)
+
+    @property
+    def local_updated(self):
+        return datetime_to_timezone(self.updated).replace(tzinfo=None)
 
     def _simplify(self, text, key):
         """Remove markup of a text that belongs to this Article"""

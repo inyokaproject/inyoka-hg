@@ -31,7 +31,7 @@
     <th>{{ table.get_html('subject', 'Titel') }}</th>
     <th>{{ table.get_html('portal_user.username', 'Autor', related=true) }}</th>
     <th>{{ table.get_html('ikhaya_category.name', 'Kategorie', related=true) }}</th>
-    <th>{{ table.get_html('pub_date', 'Veröffentlichung') }}</th>
+    <th>{{ table.get_html('updated', 'Letzte Aktualisierung') }}</th>
   </tr>
   </thead>
   <tbody>
@@ -40,7 +40,7 @@
     <td><a href="{{ article|url('edit') }}">{{ article.subject|e }}</a></td>
     <td><a href="{{ article.author|url }}">{{ article.author.username|e }}</a></td>
     <td><a href="{{ article.category|url }}">{{ article.category.name|e }}</a></td>
-    <td>{{ article.pub_date.strftime('%d.%m.%Y') }} {{ article.pub_time.strftime('%H:%I') }}</td>
+    <td>{{ article.local_updated.strftime('%d.%m.%Y %H:%M') }}</td>
   </tr>
   {%- else %}
   <tr>
