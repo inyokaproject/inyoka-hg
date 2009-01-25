@@ -16,6 +16,9 @@
   {% for parent in forum.parents %}
     {% do navigation_trace.append((parent|url, parent.name)) %}
   {% endfor %}
+{% else %}
+  {# Special searches #}
+  {% set navigation_trace = [(CURRENT_URL, title)] %}
 {% endif %}
 
 {% block forum_content %}
