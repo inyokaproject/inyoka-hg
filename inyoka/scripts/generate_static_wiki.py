@@ -24,7 +24,7 @@ from werkzeug import url_unquote
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
 
-FOLDER = '/srv/www/de/staticwiki'
+FOLDER = 'static_wiki'
 URL = href('wiki')
 DONE_SRCS = {}
 
@@ -37,6 +37,7 @@ LINK_RE = re.compile(r'href="%s' % href('wiki'))
 SNAPSHOT_MESSAGE = u'''<div class="message">
 <strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann weder bearbeitet werden noch kann dieser veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
 </div>''' % URL
+
 
 # original from Jochen Kupperschmidt with some modifications
 class ProgressBar(object):
@@ -77,7 +78,12 @@ def percentize(steps):
 
 
 def fetch_page(name):
-    return urllib2.urlopen(os.path.join(URL, quote(name.encode('utf8')))).read()
+    try:
+        data = urllib2.urlopen(os.path.join(URL, quote(name.encode('utf8')))).read()
+    except urllib2.HTTPError, e:
+        print u"http error on page „%s”: %s" % (name, e)
+        return None
+    return data
 
 
 def save_file(url):
@@ -127,6 +133,10 @@ def create_snapshot():
 
     pages = Page.objects.get_page_list(existing_only=True)
     for percent, name in izip(percentize(len(pages)), pages):
+
+        if '/Baustelle/' in name:
+            continue
+
         page = Page.objects.get(name=name)
         rev = page.revisions.all()[0]
         if rev.attachment:
@@ -140,22 +150,23 @@ def create_snapshot():
                 if not path.exists(pth):
                     os.mkdir(pth)
 
-        f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
-        try:
-            content = fetch_page(name).decode('utf8')
-        except:
-            continue
+        content = fetch_page(name)
         pb.update(percent)
+        if content is None:
+            continue
+        content = content.decode('utf8')
 
-        content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
         content = META_RE.sub('', content)
         content = NAVI_RE.sub('', content)
         content = IMG_RE.sub(handle_img, content)
         content = SRC_RE.sub(handle_src, content)
         content = LINK_RE.sub('href="/', content)
+        content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
+
+        f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
-        time.sleep(2)
+        #time.sleep(2)
 
 
 if __name__ == '__main__':
