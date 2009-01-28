@@ -279,7 +279,7 @@ def do_rename(request, name):
         'page':         page,
         'new_name':     new_name
     }))
-    return HttpResponseRedirect(url_for(page))
+    return HttpResponseRedirect(url_for(page, 'show_no_redirect'))
 
 
 @require_privilege('edit')
