@@ -23,8 +23,10 @@
   <dl>
     <dt>Titel:</dt>
     <dd>{{ entry.title|e }}</dd>
+    {%- if not entry.author.is_anonymous %}
     <dt>Autor:</dt>
     <dd><a href="{{ entry.author|url }}">{{ entry.author.username|e }}</a></dd>
+    {%- endif %}
     <dt>Datum:</dt>
     <dd>{{ entry.pub_date|datetimeformat }}</dd>
     <dt>Aktionen:</dt>

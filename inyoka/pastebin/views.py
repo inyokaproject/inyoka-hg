@@ -32,7 +32,7 @@ def not_found(request, err_message=None):
 def index(request):
     if request.method == 'POST':
         form = AddPasteForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and 'renew_captcha' not in request.POST:
             data = form.cleaned_data
             entry = Entry(title=data['title'] or 'Unbenannt',
                           author=request.user,
@@ -44,6 +44,8 @@ def index(request):
                   u'<code>[paste:%s:%s]</code>' % (entry.id, entry.title),
                   True)
             return HttpResponseRedirect(href('pastebin', entry.id))
+        if 'renew_captcha' in request.POST:
+            del form.errors['captcha']
     else:
         form = AddPasteForm()
     set_session_info(request, u'erstellt gerade ein neues Paste.',
