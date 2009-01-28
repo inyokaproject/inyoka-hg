@@ -183,6 +183,7 @@ def feed(request, page_name=None, count=20):
                 feed_url=request.build_absolute_uri(),
                 id=href('wiki', page_name),
                 rights=href('portal', 'lizenz'),
+                icon=href('static', 'img', 'favicon.ico'),
             )
             new_cache = True
     else:
@@ -195,6 +196,7 @@ def feed(request, page_name=None, count=20):
                 feed_url=request.build_absolute_uri(),
                 id=href('wiki', u'Letzte_Änderungen'),
                 rights=href('portal', 'lizenz'),
+                icon=href('static', 'img', 'favicon.ico'),
             )
             new_cache = True
 

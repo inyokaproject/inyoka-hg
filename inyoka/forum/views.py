@@ -1235,6 +1235,7 @@ def topic_feed(request, slug=None, mode='short', count=20):
         url=url_for(topic),
         feed_url=request.build_absolute_uri(),
         rights=href('portal', 'lizenz'),
+        icon=href('static', 'img', 'favicon.ico'),
     )
 
     for post in posts:
@@ -1286,6 +1287,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         url=url,
         feed_url=request.build_absolute_uri(),
         rights=href('portal', 'lizenz')
+        icon=href('static', 'img', 'favicon.ico'),
     )
 
     for topic in topics:

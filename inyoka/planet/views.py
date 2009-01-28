@@ -107,6 +107,7 @@ def feed(request, mode='short', count=20):
         subtitle=u'Der ubuntuusers-Planet sammelt verschiedene Blogs zu '
                  u'Ubuntu und Linux',
         rights=href('portal', 'lizenz'),
+        icon=href('static', 'img', 'favicon.ico'),
     )
 
     for entry in Entry.objects.filter(hidden=False)[:count]:

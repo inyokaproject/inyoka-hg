@@ -321,7 +321,8 @@ def article_feed(request, slug=None, mode='short', count=20):
         feed_url=request.build_absolute_uri(),
         id=url,
         url=url,
-        title=title
+        title=title,
+        icon=href('static', 'img', 'favicon.png'),
     )
 
     for article in articles[:count]:
@@ -366,12 +367,13 @@ def comment_feed(request, id=None, mode='short', count=20):
         url = href('ikhaya')
 
     feed = FeedBuilder(
-         subtitle=IKHAYA_DESCRIPTION,
+        subtitle=IKHAYA_DESCRIPTION,
         rights=href('portal', 'lizenz'),
         feed_url=request.build_absolute_uri(),
         id=url,
         url=url,
-        title=title
+        title=title,
+        icon=href('static', 'img', 'favicon.ico'),
     )
 
     for comment in comments[:count]:

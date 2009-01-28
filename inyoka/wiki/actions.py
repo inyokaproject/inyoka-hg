@@ -541,7 +541,8 @@ def do_log(request, name):
             title=u'Seitenrevisionen von „%s“' % page.name,
             url=url_for(page),
             feed_url=request.build_absolute_uri(),
-            rights=href('portal', 'lizenz')
+            rights=href('portal', 'lizenz'),
+            icon=href('static', 'img', 'favicon.ico'),
         )
 
         for rev in page.revisions.all()[:15]:
