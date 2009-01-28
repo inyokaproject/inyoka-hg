@@ -85,7 +85,7 @@
           <td colspan="2">Dieser Kommentar wurde von einem Moderator gelöscht.</td>
         </tr>
         {%- else %}
-        <tr id="comment_{{ comment.id }}"{% if comment.deleted %} class="hidden"{% endif %}>
+        <tr id="comment_{{ loop.index }}"{% if comment.deleted %} class="hidden"{% endif %}>
           {{ user_column(comment.author) }}
           {%- if comment.author_id == USER.id %}
           <td class="comment" style="background-color: #F8F6F1">
@@ -107,7 +107,7 @@
                 <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
                 {%- endif %}
               </div>
-              <a href="{{ comment|url }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><strong>{{ loop.index }}.</strong></a>
+              <a href="#comment_{{ loop.index }}" title="Kopiere diesen Link, um auf diesen Beitrag zu verweisen" onclick="alert(this.title + '\n\n' + this.href); return false"><strong>{{ loop.index }}.</strong></a>
               Verfasst: {{ comment.pub_date|datetimeformat }}
             </div>
             <div class="text">
