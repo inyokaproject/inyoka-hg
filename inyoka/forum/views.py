@@ -1286,7 +1286,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         title=title,
         url=url,
         feed_url=request.build_absolute_uri(),
-        rights=href('portal', 'lizenz')
+        rights=href('portal', 'lizenz'),
         icon=href('static', 'img', 'favicon.ico'),
     )
 
