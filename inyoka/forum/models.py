@@ -150,31 +150,35 @@ class TopicMapperExtension(MapperExtension):
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
-            return
 
-        parent_ids = list(p.id for p in instance.forum.parents)
-        parent_ids.append(instance.forum_id)
+            parent_ids = list(p.id for p in instance.forum.parents)
+            parent_ids.append(instance.forum_id)
 
-        # set a new last_post_id because of integrity errors and
-        # decrase the topic_count
-        connection.execute(forum_table.update(
-            forum_table.c.last_post_id.in_(select([post_table.c.id],
-                post_table.c.topic_id == instance.id)),
-            values={
-                'last_post_id': select([func.max(post_table.c.id)], and_(
-                    post_table.c.topic_id != instance.id,
-                    topic_table.c.forum_id.in_(parent_ids),
-                    topic_table.c.id == post_table.c.topic_id)),
-                'topic_count': forum_table.c.topic_count - 1
-        }))
+            # set a new last_post_id because of integrity errors and
+            # decrase the topic_count
+            connection.execute(forum_table.update(
+                forum_table.c.last_post_id.in_(select([post_table.c.id],
+                    post_table.c.topic_id == instance.id)),
+                values={
+                    'last_post_id': select([func.max(post_table.c.id)], and_(
+                        post_table.c.topic_id != instance.id,
+                        topic_table.c.forum_id.in_(parent_ids),
+                        topic_table.c.id == post_table.c.topic_id)),
+                    'topic_count': forum_table.c.topic_count - 1
+            }))
 
         connection.execute(topic_table.update(
             topic_table.c.id == instance.id, values={
                 'first_post_id': None,
                 'last_post_id':  None,
         }))
+
         connection.execute('''
             delete from portal_subscription where topic_id = %s;
+        ''', [instance.id])
+
+        connection.execute('''
+            update wiki_page set topic_id = NULL where topic_id = %s;
         ''', [instance.id])
 
     def after_delete(self, mapper, connection, instance):
