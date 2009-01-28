@@ -494,14 +494,6 @@ def change_forum_post_position_column(m):
     ''')
 
 
-# XXX: unused
-def add_forum_atime_column(m):
-    m.engine.execute('''
-        alter table forum_post
-            add column atime datetime null default null;
-    ''')
-
-
 def add_wiki_text_html_render_instructions(m):
     m.engine.execute('''
         alter table wiki_text
