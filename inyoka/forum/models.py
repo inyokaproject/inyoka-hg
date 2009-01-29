@@ -990,6 +990,7 @@ class Attachment(object):
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
+            name = os.path.basename(name)
             name = get_new_unique_filename(name, path=new_abs_path, length=100-len(new_path)-len(os.sep))
             new_fo = open(path.join(new_abs_path, name), 'w')
             try:
