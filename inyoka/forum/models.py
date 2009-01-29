@@ -25,7 +25,7 @@ from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
 from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils.text import slugify, shorten_filename
+from inyoka.utils.text import slugify, shorten_filename, get_new_unique_filename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
@@ -990,7 +990,7 @@ class Attachment(object):
             old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
-            name = shorten_filename(name)
+            name = get_new_unique_filename(name, path=new_abs_path, length=100-len(new_path)-len(os.sep))
             new_fo = open(path.join(new_abs_path, name), 'w')
             try:
                 new_fo.write(old_fo.read())
