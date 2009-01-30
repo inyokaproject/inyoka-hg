@@ -88,7 +88,8 @@ from inyoka.conf import settings
 from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils.decorators import deferred
-from inyoka.utils.dates import format_specific_datetime, format_datetime
+from inyoka.utils.dates import format_specific_datetime, format_datetime, \
+    datetime_to_timezone
 from inyoka.utils.urls import href
 from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
@@ -1285,8 +1286,11 @@ class Revision(models.Model):
 
     def revert(self, note=None, user=None, remote_addr=None):
         """Revert this revision and make it the current one."""
-        note = (note and note + ' ' or '') + ('[%s wiederhergestellt]' %
-                                              self.title)
+        # no relative date information, because it stays in the note forever
+        note = (note and note + ' ' or '') + '[Revision vom ' + \
+               datetime_to_timezone(self.change_date).strftime(
+                   '%d.%m.%Y %H:%M %Z') + \
+               (' von %s wiederhergestellt]' % self.user.username)
         new_rev = Revision(page=self.page, text=self.text, user=user or
                            self.user, change_date=datetime.utcnow(),
                            note=note, deleted=False, remote_addr=
