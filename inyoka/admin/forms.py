@@ -81,17 +81,20 @@ class EditArticleForm(forms.Form):
     text = forms.CharField(widget=forms.Textarea(attrs={'rows': 15}),
                            label=u'Text')
     author = UserField(label=u'Autor', initial='',
-        help_text=u'Wenn du dieses Feld leer lässt, wirst du automatisch '
+        help_text=u'Wenn du dieses Feld leer lässt, wirst automatisch du '
                   u'als Autor eingetragen.')
     category_id = forms.ChoiceField(label=u'Kategorie')
     icon_id = forms.ChoiceField(label=u'Icon', required=False,
-            help_text=u'Wenn du dieses Feld leer lässt, wird automatisch '
-                      u'Icon der Kategorie ausgewählt')
+            help_text=u'Wenn du dieses Feld leer lässt, wird automatisch das '
+                      u'Icon der Kategorie ausgewählt.')
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
-        u'angezeigt. Nach der Veröffentlichung nicht mehr ändern!',
+        u'angezeigt. Nach der Veröffentlichung das Datum nicht mehr ändern!',
         widget=DateTimeWidget)
+    updated = forms.DateTimeField(label=u'Zeitpunkt der letzten Aktualisierung',
+        widget=DateTimeWidget, required=False, help_text=u'Wenn du diesed Feld '
+        u'leer lässt, wird automatisch das Veröffentlichungsdatum verwendet.')
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
     slug = forms.CharField(label=u'Slug', max_length=100, required=False,
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
@@ -100,9 +103,6 @@ class EditArticleForm(forms.Form):
     comments_enabled = forms.BooleanField(label=u'Kommentare erlaubt',
                                           required=False)
     checksum = forms.CharField(widget=forms.HiddenInput, required=False)
-    update = forms.BooleanField(label=u'Update', required=False,
-                                help_text=u'Setzt den Zeitpunkt der letzten '
-                                u'Bearbeitung auf jetzt')
 
 class EditPublicArticleForm(EditArticleForm):
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',

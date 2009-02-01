@@ -349,6 +349,12 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
             if form.is_valid():
                 data = form.cleaned_data
                 data['author'] = data['author'] or request.user
+                if not data['updated']:
+                    data['updated'] = data['pub_date']
+                if data['updated']:
+                    data['updated'] = get_user_timezone() \
+                        .localize(data['updated']) \
+                        .astimezone(pytz.utc).replace(tzinfo=None)
                 if data['pub_date']:
                     dt = get_user_timezone().localize(data['pub_date']) \
                         .astimezone(pytz.utc).replace(tzinfo=None)
@@ -358,7 +364,6 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 if not data.get('icon_id'):
                     data['icon_id'] = None
                 if not article:
-                    data.pop('update', None)
                     article = Article(**data)
                     article.save()
                     if suggestion_id:
@@ -369,15 +374,12 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 else:
                     changed = False
                     db_checksum = article.checksum
-                    update = data.pop('update', False)
                     for k in data:
                         if article.__getattribute__(k) != data[k] \
                            and data[k] not in (None, ''):
                             article.__setattr__(k, data[k])
                             changed = True
                     if changed:
-                        if update:
-                            article.updated = datetime.utcnow()
                         if db_checksum == checksum:
                             article.save()
                             flash(u'Der Artikel „%s“ wurde gespeichert.'
@@ -389,9 +391,6 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                                     u'Der Artikel wurde seit Beginn des '
                                     u'Bearbeitens verändert!'
                                 ])
-                    elif update:
-                        article.updated = datetime.utcnow()
-                        article.save()
                     else:
                         flash(u'Der Artikel „%s“ wurde nicht verändert'
                               % escape(article.subject))
@@ -415,6 +414,8 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                 'comments_enabled': article.comments_enabled,
                 'checksum': article.checksum,
             }
+            if article.updated != article.pub_datetime:
+                initial['updated'] = datetime_to_timezone(article.updated).replace(tzinfo=None)
             if article.public:
                 form = EditPublicArticleForm(initial=initial)
             else:

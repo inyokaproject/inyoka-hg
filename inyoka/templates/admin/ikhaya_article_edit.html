@@ -47,7 +47,7 @@
   <dl>
   {{ render_form(form, ['subject', 'intro', 'text', 'author', 'category_id', 'icon_id', 'public', 'comments_enabled'], inline=true) }}
   {%- if article != none %}
-  {{ render_form(form, ['update'], inline=true) }}
+  {{ render_form(form, ['updated'], inline=true) }}
   {%- endif %}
   {{ render_form(form, ['pub_date', 'slug'], inline=true) }}
   </dl>
