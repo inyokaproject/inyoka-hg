@@ -371,7 +371,7 @@
         x.appendTo($('<li />').appendTo(t))
     /* Helpbar */
     this.helpbar.appendTo($('<li />').appendTo(t)).hide();
-    $('<span class="syntax_help note">Hilfe zur Syntax: <a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Siehe Wiki</a></span>')
+    $('<span class="syntax_help note"><a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Hilfe zur Syntax</a></span>')
       .appendTo($('<li />').appendTo(t));
   };
 
