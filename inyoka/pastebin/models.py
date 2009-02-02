@@ -14,17 +14,17 @@ from inyoka.portal.user import User
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.decorators import deferred
 from inyoka.utils.highlight import highlight_code
-from inyoka.utils.database import UnicodeCharField, UnicodeTextField
+from inyoka.utils.database import UnicodeCharField
 
 
 class Entry(models.Model):
     title = UnicodeCharField('Titel', max_length=40)
     lang = UnicodeCharField('Sprache', max_length=20)
-    code = UnicodeTextField('Code')
-    rendered_code = UnicodeTextField('Gerenderter Code')
+    code = models.TextField('Code')
+    rendered_code = models.TextField('Gerenderter Code')
     pub_date = models.DateTimeField('Datum')
     author = models.ForeignKey(User, verbose_name='Autor')
-    referrer = UnicodeTextField('Verweisende Seiten', blank=True)
+    referrer = models.TextField('Verweisende Seiten', blank=True)
 
     class Meta:
         verbose_name = 'Eintrag'

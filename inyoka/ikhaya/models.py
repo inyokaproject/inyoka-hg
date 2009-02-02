@@ -27,7 +27,7 @@ from inyoka.utils.dates import date_time_to_datetime, datetime_to_timezone
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
-from inyoka.utils.database import UnicodeCharField, UnicodeTextField
+from inyoka.utils.database import UnicodeCharField
 
 
 class ArticleManager(models.Manager):
@@ -110,8 +110,8 @@ class Article(models.Model):
     category = models.ForeignKey(Category, verbose_name='Kategorie')
     icon = models.ForeignKey(StaticFile, blank=True, null=True,
                              verbose_name='Icon')
-    intro = UnicodeTextField('Einleitung')
-    text = UnicodeTextField('Text')
+    intro = models.TextField('Einleitung')
+    text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')
     slug = UnicodeCharField('Slug', max_length=100, blank=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
@@ -283,9 +283,9 @@ class Suggestion(models.Model):
     author = models.ForeignKey(User, related_name='suggestion_set')
     pub_date = models.DateTimeField('Datum')
     title = UnicodeCharField(max_length=100)
-    text = UnicodeTextField()
-    intro = UnicodeTextField()
-    notes = UnicodeTextField()
+    text = models.TextField()
+    intro = models.TextField()
+    notes = models.TextField()
     owner = models.ForeignKey(User, related_name='owned_suggestion_set',
                               null=True, blank=True)
 
@@ -322,11 +322,11 @@ class Suggestion(models.Model):
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, null=True)
-    text = UnicodeTextField()
+    text = models.TextField()
     author = models.ForeignKey(User)
     pub_date = models.DateTimeField()
     deleted = models.BooleanField(null=False, default=False)
-    rendered_text = UnicodeTextField()
+    rendered_text = models.TextField()
 
     def get_absolute_url(self, action='show'):
         if action in ['hide', 'restore', 'edit']:

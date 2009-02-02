@@ -16,7 +16,7 @@
 """
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
-from django.db.models import CharField, TextField
+from django.db.models import CharField
 from django.db.models.fields.subclassing import SubfieldBase
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy
@@ -67,14 +67,5 @@ class UnicodeCharField(CharField):
             return value
         return smart_unicode(value)
 
-
-class UnicodeTextField(TextField):
-
-    __metaclass__ = SubfieldBase
-
-    def to_python(self, value):
-        if isinstance(value, unicode):
-            # well, this should not happen since we use 'utf-8'
-            # for mysqldb. But… nobody knows ;)
-            return value
-        return smart_unicode(value)
+    def contribute_to_class(self, cls, name):
+        super(UnicodeCharField, self).contribute_to_class(cls, name)
