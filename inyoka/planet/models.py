@@ -17,11 +17,10 @@ from inyoka.conf import settings
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
-from inyoka.utils.database import UnicodeCharField
 
 
 class Blog(models.Model):
-    name = UnicodeCharField(max_length=40)
+    name = models.CharField(max_length=40)
     description = models.TextField(blank=True, null=True)
     blog_url = models.URLField()
     feed_url = models.URLField()
@@ -90,13 +89,13 @@ class Blog(models.Model):
 
 class Entry(models.Model):
     blog = models.ForeignKey(Blog)
-    guid = UnicodeCharField(max_length=200, unique=True)
-    title = UnicodeCharField(max_length=140)
+    guid = models.CharField(max_length=200, unique=True)
+    title = models.CharField(max_length=140)
     url = models.URLField()
     text = models.TextField()
     pub_date = models.DateTimeField()
     updated = models.DateTimeField()
-    author = UnicodeCharField(max_length=50)
+    author = models.CharField(max_length=50)
     author_homepage = models.URLField(blank=True, null=True)
     hidden = models.BooleanField()
 
