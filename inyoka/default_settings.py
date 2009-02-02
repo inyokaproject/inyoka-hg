@@ -35,12 +35,6 @@ MANAGERS = ADMINS = ()
 
 # set the database settings in the actual settings file
 DATABASE_NAME = DATABASE_USER = DATABASE_HOST = DATABASE_PORT = ''
-# tell mysqldb to use utf-8 instead of unicode because of a bug.
-# hopefully django handles everything as described in
-# http://docs.djangoproject.com/en/dev/ref/databases/#connecting-to-the-database
-DATABASE_OPTIONS = {
-    'use_unicode': False
-}
 
 # mysql only
 DATABASE_ENGINE = 'mysql'
