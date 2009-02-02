@@ -14,11 +14,12 @@ from inyoka.portal.user import User
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.decorators import deferred
 from inyoka.utils.highlight import highlight_code
+from inyoka.utils.database import UnicodeCharField
 
 
 class Entry(models.Model):
-    title = models.CharField('Titel', max_length=40)
-    lang = models.CharField('Sprache', max_length=20)
+    title = UnicodeCharField('Titel', max_length=40)
+    lang = UnicodeCharField('Sprache', max_length=20)
     code = models.TextField('Code')
     rendered_code = models.TextField('Gerenderter Code')
     pub_date = models.DateTimeField('Datum')

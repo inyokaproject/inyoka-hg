@@ -101,6 +101,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.text import join_pagename, get_pagetitle
 from inyoka.utils.diff3 import generate_udiff, prepare_udiff, \
     get_close_matches
+from inyoka.utils.database import UnicodeCharField
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
@@ -669,7 +670,7 @@ class Text(models.Model):
     """
     objects = TextManager()
     value = models.TextField()
-    hash = models.CharField(max_length=40, unique=True)
+    hash = UnicodeCharField(max_length=40, unique=True)
     html_render_instructions = models.TextField()
 
     def parse(self, template_context=None, transformers=None):
@@ -782,7 +783,7 @@ class Page(models.Model):
             If the page is bound this points to a `Revision` otherwise `None`.
     """
     objects = PageManager()
-    name = models.CharField(max_length=200, unique=True)
+    name = UnicodeCharField(max_length=200, unique=True)
     topic_id = models.IntegerField(null=True)
 
     #: this points to a revision if created with a query method
@@ -1257,9 +1258,9 @@ class Revision(models.Model):
     user = models.ForeignKey(User, related_name='wiki_revisions', null=True,
                              blank=True)
     change_date = models.DateTimeField()
-    note = models.CharField(max_length=512)
+    note = UnicodeCharField(max_length=512)
     deleted = models.BooleanField()
-    remote_addr = models.CharField(max_length=200, null=True)
+    remote_addr = UnicodeCharField(max_length=200, null=True)
     attachment = models.ForeignKey(Attachment, null=True, blank=True)
 
     @property
@@ -1336,8 +1337,8 @@ class MetaData(models.Model):
     by the `Page.metadata` property and the `Page.update_meta` method.
     """
     page = models.ForeignKey(Page)
-    key = models.CharField(max_length=30)
-    value = models.CharField(max_length=512)
+    key = UnicodeCharField(max_length=30)
+    value = UnicodeCharField(max_length=512)
 
 
 # imported here because of circular references

@@ -37,6 +37,7 @@ from inyoka.utils.user import normalize_username, get_hexdigest,\
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
 from inyoka.utils.templating import render_template
+from inyoka.utils.database import UnicodeCharField
 
 
 UNUSABLE_PASSWORD = '!$!'
@@ -231,7 +232,7 @@ def send_new_user_password(user):
 
 
 class Group(models.Model):
-    name = models.CharField('Name', max_length=80, unique=True)
+    name = UnicodeCharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField(u'Öffentliches Profil')
     _default_group = None
     permissions = models.IntegerField('Berechtigungen', default=0)
@@ -420,15 +421,15 @@ class User(models.Model):
     """User model that contains all informations about an user."""
     objects = UserManager()
 
-    username = models.CharField('Benutzername', max_length=30, unique=True)
+    username = UnicodeCharField('Benutzername', max_length=30, unique=True)
     email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50)
-    password = models.CharField('Passwort', max_length=128)
+    password = UnicodeCharField('Passwort', max_length=128)
     status = models.IntegerField('Aktiv', default=0)
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)
     date_joined = models.DateTimeField('Anmeldedatum', default=datetime.utcnow)
     groups = models.ManyToManyField(Group, verbose_name='Gruppen', blank=True,
                                     related_name='user_set')
-    new_password_key = models.CharField(u'Bestätigungskey für ein neues '
+    new_password_key = UnicodeCharField(u'Bestätigungskey für ein neues '
         u'Passwort', blank=True, null=True, max_length=32)
 
     banned_until = models.DateTimeField('Gesperrt bis', null=True)
@@ -437,23 +438,23 @@ class User(models.Model):
     post_count = models.IntegerField(u'Beiträge', default=0)
     avatar = models.ImageField('Avatar', upload_to='portal/avatars',
                                blank=True, null=True)
-    jabber = models.CharField('Jabber', max_length=200, blank=True)
-    icq = models.CharField('ICQ', max_length=16, blank=True)
-    msn = models.CharField('MSN', max_length=200, blank=True)
-    aim = models.CharField('AIM', max_length=200, blank=True)
-    yim = models.CharField('YIM', max_length=200, blank=True)
-    skype = models.CharField('Skype', max_length=200, blank=True)
-    wengophone = models.CharField('WengoPhone', max_length=200, blank=True)
-    sip = models.CharField('SIP', max_length=200, blank=True)
+    jabber = UnicodeCharField('Jabber', max_length=200, blank=True)
+    icq = UnicodeCharField('ICQ', max_length=16, blank=True)
+    msn = UnicodeCharField('MSN', max_length=200, blank=True)
+    aim = UnicodeCharField('AIM', max_length=200, blank=True)
+    yim = UnicodeCharField('YIM', max_length=200, blank=True)
+    skype = UnicodeCharField('Skype', max_length=200, blank=True)
+    wengophone = UnicodeCharField('WengoPhone', max_length=200, blank=True)
+    sip = UnicodeCharField('SIP', max_length=200, blank=True)
     signature = models.TextField('Signatur', blank=True)
     coordinates_long = models.FloatField('Koordinaten (Breite)', blank=True, null=True)
     coordinates_lat = models.FloatField(u'Koordinaten (Länge)', blank=True, null=True)
-    location = models.CharField('Wohnort', max_length=200, blank=True)
-    gpgkey = models.CharField('GPG-Key', max_length=8, blank=True)
-    occupation = models.CharField('Beruf', max_length=200, blank=True)
-    interests = models.CharField('Interessen', max_length=200, blank=True)
+    location = UnicodeCharField('Wohnort', max_length=200, blank=True)
+    gpgkey = UnicodeCharField('GPG-Key', max_length=8, blank=True)
+    occupation = UnicodeCharField('Beruf', max_length=200, blank=True)
+    interests = UnicodeCharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
-    launchpad = models.CharField('Launchpad-Benutzername', max_length=50, blank=True)
+    launchpad = UnicodeCharField('Launchpad-Benutzername', max_length=50, blank=True)
     _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
     _permissions = models.IntegerField('Rechte', default=0)
 
@@ -465,7 +466,7 @@ class User(models.Model):
                                      blank=True)
 
     # member title
-    member_title = models.CharField('Benutzertitel', blank=True, null=True,
+    member_title = UnicodeCharField('Benutzertitel', blank=True, null=True,
                                     max_length=200)
 
     # primary group from which the user gets some settings

@@ -16,12 +16,17 @@
 """
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
+from django.db.models import CharField
+from django.db.models.fields.subclassing import SubfieldBase
+from django.utils.encoding import smart_unicode
+from django.utils.translation import ugettext_lazy
+from django.core import exceptions
 from inyoka.conf import settings
 
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8&use_unicode=0' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
-), pool_recycle=25, convert_unicode=True, echo=settings.DATABASE_DEBUG)
+), pool_recycle=300, convert_unicode=True, echo=settings.DATABASE_DEBUG)
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
@@ -49,3 +54,18 @@ def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
         else:
             failed = 0
         range = range[1] + 1, range[1] + block_size
+
+
+class UnicodeCharField(CharField):
+
+    __metaclass__ = SubfieldBase
+
+    def to_python(self, value):
+        if isinstance(value, unicode):
+            # well, this should not happen since we use 'utf-8'
+            # for mysqldb. But… nobody knows ;)
+            return value
+        return smart_unicode(value)
+
+    def contribute_to_class(self, cls, name):
+        super(UnicodeCharField, self).contribute_to_class(cls, name)

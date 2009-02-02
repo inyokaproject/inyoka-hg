@@ -18,6 +18,7 @@ from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
+from inyoka.utils.database import UnicodeCharField
 from inyoka.wiki.models import Page
 from inyoka.forum.models import Forum, Topic
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -104,14 +105,14 @@ class SessionInfo(models.Model):
     active has a session info that is updated every request.  The
     management functions for this model are in `inyoka.utils.sessions`.
     """
-    key = models.CharField(max_length=200, unique=True)
+    key = UnicodeCharField(max_length=200, unique=True)
     last_change = models.DateTimeField()
-    subject_text = models.CharField(max_length=100, null=True)
-    subject_type = models.CharField(max_length=20)
-    subject_link = models.CharField(max_length=200, null=True)
-    action = models.CharField(max_length=500)
-    action_link = models.CharField(max_length=200, null=True)
-    category = models.CharField(max_length=200, null=True)
+    subject_text = UnicodeCharField(max_length=100, null=True)
+    subject_type = UnicodeCharField(max_length=20)
+    subject_link = UnicodeCharField(max_length=200, null=True)
+    action = UnicodeCharField(max_length=500)
+    action_link = UnicodeCharField(max_length=200, null=True)
+    category = UnicodeCharField(max_length=200, null=True)
 
 
 
@@ -134,7 +135,7 @@ class PrivateMessage(models.Model):
     """
     #objects = PrivateMessageManager()
     author = models.ForeignKey(User)
-    subject = models.CharField(u'Titel', max_length=255)
+    subject = UnicodeCharField(u'Titel', max_length=255)
     pub_date = models.DateTimeField(u'Datum')
     text = models.TextField(u'Text')
 
@@ -276,7 +277,7 @@ class StaticPage(models.Model):
     key = models.SlugField(u'Schlüssel', max_length=25, primary_key=True,
           unique=True, help_text=u'Wird für die URL verwendet.'\
                                  u' Kann nicht verändert werden.')
-    title = models.CharField(u'Titel', max_length=200)
+    title = UnicodeCharField(u'Titel', max_length=200)
     content = models.TextField(u'Inhalt',
         help_text=(u'Muss valides XHTML sein. Überschriften ab h3 abwärts.')
     )
@@ -305,7 +306,7 @@ class StaticPage(models.Model):
 
 
 class StaticFile(models.Model):
-    identifier = models.CharField('Identifier', max_length=100, unique=True)
+    identifier = UnicodeCharField('Identifier', max_length=100, unique=True)
     file = models.FileField(upload_to='portal/files')
     is_ikhaya_icon = models.BooleanField('Ist Ikhaya-Icon', default=False)
 
@@ -366,7 +367,7 @@ class Subscription(models.Model):
 
 
 class Event(models.Model):
-    name = models.CharField(max_length=50)
+    name = UnicodeCharField(max_length=50)
     slug = models.SlugField(unique=True) # this may change !!
     changed = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -374,8 +375,8 @@ class Event(models.Model):
     time = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField(blank=True)
     author = models.ForeignKey(User)
-    location = models.CharField(max_length=25, blank=True)
-    location_town = models.CharField(max_length=20, blank=True)
+    location = UnicodeCharField(max_length=25, blank=True)
+    location_town = UnicodeCharField(max_length=20, blank=True)
     location_lat = models.FloatField(u'Koordinaten (Länge)',
                                      blank=True, null=True)
     location_long = models.FloatField('Koordinaten (Breite)',
@@ -518,7 +519,7 @@ class SearchQueue(models.Model):
     Managing a to-do list for asynchronous indexing.
     """
     objects = SearchQueueManager()
-    component = models.CharField(max_length=1)
+    component = UnicodeCharField(max_length=1)
     doc_id = models.IntegerField()
 
     class Meta:
