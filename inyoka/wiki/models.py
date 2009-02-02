@@ -101,7 +101,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.text import join_pagename, get_pagetitle
 from inyoka.utils.diff3 import generate_udiff, prepare_udiff, \
     get_close_matches
-from inyoka.utils.database import UnicodeCharField
+from inyoka.utils.database import UnicodeCharField, UnicodeTextField
 from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
@@ -669,9 +669,9 @@ class Text(models.Model):
             The internal unique hash for this text.
     """
     objects = TextManager()
-    value = models.TextField()
+    value = UnicodeTextField()
     hash = UnicodeCharField(max_length=40, unique=True)
-    html_render_instructions = models.TextField()
+    html_render_instructions = UnicodeTextField()
 
     def parse(self, template_context=None, transformers=None):
         """

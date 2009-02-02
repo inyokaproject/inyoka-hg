@@ -37,7 +37,7 @@ from inyoka.utils.user import normalize_username, get_hexdigest,\
 from inyoka.utils.local import current_request
 from inyoka.utils.storage import storage
 from inyoka.utils.templating import render_template
-from inyoka.utils.database import UnicodeCharField
+from inyoka.utils.database import UnicodeCharField, UnicodeTextField
 
 
 UNUSABLE_PASSWORD = '!$!'
@@ -446,7 +446,7 @@ class User(models.Model):
     skype = UnicodeCharField('Skype', max_length=200, blank=True)
     wengophone = UnicodeCharField('WengoPhone', max_length=200, blank=True)
     sip = UnicodeCharField('SIP', max_length=200, blank=True)
-    signature = models.TextField('Signatur', blank=True)
+    signature = UnicodeTextField('Signatur', blank=True)
     coordinates_long = models.FloatField('Koordinaten (Breite)', blank=True, null=True)
     coordinates_lat = models.FloatField(u'Koordinaten (Länge)', blank=True, null=True)
     location = UnicodeCharField('Wohnort', max_length=200, blank=True)
@@ -455,14 +455,14 @@ class User(models.Model):
     interests = UnicodeCharField('Interessen', max_length=200, blank=True)
     website = models.URLField('Webseite', blank=True)
     launchpad = UnicodeCharField('Launchpad-Benutzername', max_length=50, blank=True)
-    _settings = models.TextField('Einstellungen', default=cPickle.dumps({}))
+    _settings = UnicodeTextField('Einstellungen', default=cPickle.dumps({}))
     _permissions = models.IntegerField('Rechte', default=0)
 
     # forum attribues
     forum_last_read = models.IntegerField('Letzter gelesener Post',
                                           default=0, blank=True)
-    forum_read_status = models.TextField('Gelesene Beiträge', blank=True)
-    forum_welcome = models.TextField('Gelesene Willkommensnachrichten',
+    forum_read_status = UnicodeTextField('Gelesene Beiträge', blank=True)
+    forum_welcome = UnicodeTextField('Gelesene Willkommensnachrichten',
                                      blank=True)
 
     # member title

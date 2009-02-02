@@ -17,12 +17,12 @@ from inyoka.conf import settings
 from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
-from inyoka.utils.database import UnicodeCharField
+from inyoka.utils.database import UnicodeCharField, UnicodeTextField
 
 
 class Blog(models.Model):
     name = UnicodeCharField(max_length=40)
-    description = models.TextField(blank=True, null=True)
+    description = UnicodeTextField(blank=True, null=True)
     blog_url = models.URLField()
     feed_url = models.URLField()
     icon = models.ImageField(upload_to='planet/icons', blank=True)
@@ -93,7 +93,7 @@ class Entry(models.Model):
     guid = UnicodeCharField(max_length=200, unique=True)
     title = UnicodeCharField(max_length=140)
     url = models.URLField()
-    text = models.TextField()
+    text = UnicodeTextField()
     pub_date = models.DateTimeField()
     updated = models.DateTimeField()
     author = UnicodeCharField(max_length=50)

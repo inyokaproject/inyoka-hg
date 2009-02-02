@@ -18,7 +18,7 @@ from inyoka.utils.dates import format_specific_datetime, \
      date_time_to_datetime, natural_date
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
-from inyoka.utils.database import UnicodeCharField
+from inyoka.utils.database import UnicodeCharField, UnicodeTextField
 from inyoka.wiki.models import Page
 from inyoka.forum.models import Forum, Topic
 from inyoka.wiki.parser import parse, render, RenderContext
@@ -137,7 +137,7 @@ class PrivateMessage(models.Model):
     author = models.ForeignKey(User)
     subject = UnicodeCharField(u'Titel', max_length=255)
     pub_date = models.DateTimeField(u'Datum')
-    text = models.TextField(u'Text')
+    text = UnicodeTextField(u'Text')
 
     class Meta:
         ordering = ('-pub_date',)
@@ -278,7 +278,7 @@ class StaticPage(models.Model):
           unique=True, help_text=u'Wird für die URL verwendet.'\
                                  u' Kann nicht verändert werden.')
     title = UnicodeCharField(u'Titel', max_length=200)
-    content = models.TextField(u'Inhalt',
+    content = UnicodeTextField(u'Inhalt',
         help_text=(u'Muss valides XHTML sein. Überschriften ab h3 abwärts.')
     )
 
@@ -373,7 +373,7 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     date = models.DateField()
     time = models.TimeField(blank=True, null=True) # None -> whole day
-    description = models.TextField(blank=True)
+    description = UnicodeTextField(blank=True)
     author = models.ForeignKey(User)
     location = UnicodeCharField(max_length=25, blank=True)
     location_town = UnicodeCharField(max_length=20, blank=True)
