@@ -166,8 +166,7 @@ def make_users():
             name, '%s@ubuntuusers.local' % name, name, False)
         u.date_joined = randtime()
         u.last_login = randtime()
-        for _ in xrange(randint(0, 5)):
-            u.groups.add(choice(groups))
+        u.groups = list(set(choice(groups) for _ in xrange(randint(0, 5))))
         u.post_count = randint(0, 1000)
         u.jabber = '%s@%s.local' % (word(markup=False), word(markup=False))
         u.icq = word(markup=False)[:16]
