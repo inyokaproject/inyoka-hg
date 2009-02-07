@@ -194,7 +194,7 @@ def register(request):
     }
 
 
-def activate(request, action='', username='', activation_key=''):
+def activate(request, action='', username='', activation_key='', legacy=False):
     """Activate a user with the activation key send via email."""
     redirect = is_safe_domain(request.GET.get('next', ''))
     if not redirect:
@@ -209,7 +209,7 @@ def activate(request, action='', username='', activation_key=''):
         raise PageNotFound()
 
     if action == 'delete':
-        if check_activation_key(user, activation_key):
+        if check_activation_key(user, activation_key, legacy=legacy):
             if not user.is_active:
                 # Is it save to delete an inactive user?
                 #user.delete()
@@ -223,7 +223,7 @@ def activate(request, action='', username='', activation_key=''):
             flash(u'Dein Aktivierungskey stimmt nicht überein!', False)
         return HttpResponseRedirect(href('portal'))
     else:
-        if check_activation_key(user, activation_key):
+        if check_activation_key(user, activation_key, legacy):
             user.status = 1
             user.save()
             flash(u'Du wurdest erfolgreich aktiviert und kannst dich nun '

@@ -662,10 +662,10 @@ class User(models.Model):
             return href('portal', 'privmsg', 'new',
                         self.urlsafe_username)
         elif action == 'activate':
-            return href('portal', 'register', 'activate',
+            return href('portal', 'activate',
                         self.urlsafe_username, gen_activation_key(self))
         elif action == 'activate_delete':
-            return href('portal', 'register', 'delete',
+            return href('portal', 'delete',
                         self.urlsafe_username, gen_activation_key(self))
         elif action == 'admin':
             return href('admin', 'users', 'edit', self.urlsafe_username)

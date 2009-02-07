@@ -50,25 +50,32 @@ def normalize_username(name):
     raise ValueError('invalid username')
 
 
-def gen_activation_key(user):
+def gen_activation_key(user, legacy=False):
     """
-    Create a new activation key.
-    It's a md5 hash from the user id, the username,
-    the users email and our secret key.
+    It's calculated using a sha1 hash of the user id, the username,
+    the users email and our secret key and shortened to ensure the
+    activation link has less then 80 chars.
 
     :Parameters:
         user
             An user object from the user the key
             will be generated for.
     """
-    return md5(('%d%s%s%s' % (
+    if legacy:
+        return md5(('%d%s%s%s' % (
+            user.id, user.username,
+            settings.SECRET_KEY,
+            user.email
+        )).encode('utf8')).hexdigest()
+    return sha1(('%d%s%s%s' % (
         user.id, user.username,
         settings.SECRET_KEY,
         user.email
-    )).encode('utf8')).hexdigest()
+    )).encode('utf8')).digest()[:9].encode('base64') \
+        .strip('\n=').replace('/', '_').replace('+', '-')
 
 
-def check_activation_key(user, key):
+def check_activation_key(user, key, legacy=False):
     """
     Check if an activation key is correct
 
@@ -79,7 +86,7 @@ def check_activation_key(user, key):
         key
             The key that needs to be checked for the *user*.
     """
-    return key == gen_activation_key(user)
+    return key == gen_activation_key(user, legacy)
 
 
 def get_hexdigest(salt, raw_password):

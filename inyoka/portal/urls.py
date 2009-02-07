@@ -47,6 +47,8 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^inyoka/$', 'about_inyoka'),
     (r'^register/$', 'register'),
     (r'^register/(?P<action>activate|delete)/(?P<username>[^/]+)/'
+     r'(?P<activation_key>.*?)/$', 'activate', {'legacy': True}),
+    (r'^(?P<action>activate|delete)/(?P<username>[^/]+)/'
      r'(?P<activation_key>.*?)/$', 'activate'),
     (r'^register/resend/(?P<username>[^/]+)/$', 'resend_activation_mail'),
     (r'^lost_password/$', 'lost_password'),
