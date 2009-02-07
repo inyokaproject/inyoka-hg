@@ -1235,7 +1235,7 @@ def calendar_month(request, year, month):
 
 @templated('portal/calendar_overview.html')
 def calendar_overview(request):
-    events = Event.objects.order_by('date').filter(date__gt=datetime.utcnow())[:10]
+    events = Event.objects.order_by('date').filter(date__gte=datetime.utcnow())[:10]
     set_session_info(request, u'sieht sich den Kalender an')
     return {
         'events': events,
