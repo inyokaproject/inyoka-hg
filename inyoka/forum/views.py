@@ -416,6 +416,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 flash(u'Du kannst auf in diesem Thema nicht antworten, da es '
                       u'von einem Moderator geschlossen wurde.', False)
                 return HttpResponseRedirect(url_for(topic))
+            else:
+                flash(u'Du antwortest auf einen bereits geschlossenen Thread. '
+                      u'Dies wird oft ans unhöflich aufgefasst, bitte sei dir '
+                      u'dessen bewusst!', False)
         else:
             if not check_privilege(privileges, 'reply'):
                 return abort_access_denied(request)

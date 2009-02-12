@@ -410,6 +410,14 @@ form.post_editor dd.text textarea {
     height: 250px;
 }
 
+/* Used for the texteditor to set the background-color to red
+ * if a moderator (or user with sufficient rights) answers to a thread.
+ */
+.mod_action {
+  background-color: #ffaaaa;
+  color: red;
+}
+
 form.post_editor dt.collapse_enabled {
     cursor: pointer;
     padding-left: 20px;

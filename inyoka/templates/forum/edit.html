@@ -53,7 +53,10 @@
       {%- endif %}
       {%- endif %}
       <dt class="text">Text:</dt>
-      <dd class="text">{{ form.text }}{{ form.errors.text }}</dd>
+      <dd class="text">
+        <textarea id="id_text" rows="10" cols="40" name="text"{% if topic.locked and can_moderate %} class="mod_action"{% endif %}></textarea>
+        {{ form.errors.text }}
+      </dd>
       {%- if storage['license_note_rendered'] %}
       <dd class="license_note">{{ storage['license_note_rendered'] }}</dd>
       {%- endif %}
