@@ -75,13 +75,13 @@
           .attr('title', title)
           .mouseover(function(evt) {
             evt.preventDefault();
-            editor.helpbar.show();
+            //editor.helpbar.show();
             helper.call(editor, evt);
           })
           .mouseout(function(evt) {
             evt.preventDefault();
-            editor.helpbar.hide();
-            editor.helpbar.text("");
+            //editor.helpbar.hide();
+            //editor.helpbar.text("");
           })
           .append($('<span />').text(title))
           .click(function(evt) {
@@ -103,12 +103,12 @@
         .attr('title', title)
         .append($('<option class="title" value="" />').text(title))
         .mouseover(function(evt) {
-          editor.helpbar.show();
+          //editor.helpbar.show();
           helper.call(editor, evt);
         })
         .mouseout(function(evt) {
-          editor.helpbar.hide();
-          editor.helpbar.text("");
+          //editor.helpbar.hide();
+          //editor.helpbar.text("");
         })
         .change(function(evt) {
           callback.call(editor, evt);
@@ -144,7 +144,7 @@
    */
   var help = function(message) {
     return function(evt) {
-      this.helpbar.text(message);
+      //this.helpbar.text(message);
     };
   }
 
@@ -190,8 +190,6 @@
            ['wiki', 'forum', 'small'], help("__Text__")),
     button('stroke', 'Durchgestrichener Text', insert('--(%s)--'),
            ['wiki', 'forum'], help("--(Text)--")),
-    //button('code', 'Code', insert("``%s``"),
-    //       ['wiki', 'forum', 'small']),
     button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
            ['wiki', 'forum'], help("[:Seitenname:]")),
     button('external-link', 'Externer Link', insert('[%s]',
@@ -355,13 +353,9 @@
 
     this.textarea = $(editor);
     this.textarea[0].inyokaWikiEditor = this;
-    /* XXX: disabled for the time being as it causes too much trouble
-      .keypress(function(evt) {
-        self.onKeyDown(evt);
-      });*/
 
     /* helpbar with some syntax informations */
-    this.helpbar = $('<span class="toolbar_help note" />');
+    //this.helpbar = $('<span class="toolbar_help note" />');
 
     /* create toolbar based on button layout */
     t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
@@ -369,9 +363,15 @@
     for (var i = 0, n = bar.length, x; i != n; ++i)
       if (x = bar[i](self))
         x.appendTo($('<li />').appendTo(t))
+
     /* Helpbar */
-    this.helpbar.appendTo($('<li />').appendTo(t)).hide();
-    $('<span class="syntax_help note"><a href="http://wiki.ubuntuusers.de/Forum/Syntax/">Hilfe zur Syntax</a></span>')
+    //this.helpbar.appendTo($('<li />').appendTo(t)).hide();
+    if (profile == 'wiki') {
+      link = 'http://wiki.ubuntuusers.de/Wiki/Syntax';
+    } else {
+      link = 'http://wiki.ubuntuusers.de/Forum/Syntax';
+    }
+    $('<span class="syntax_help note"><a href="' + link + '">Hilfe zur Syntax</a></span>')
       .appendTo($('<li />').appendTo(t));
   };
 
