@@ -119,7 +119,7 @@ def _bootstrap():
     """
     # set the inyoka revision
     global INYOKA_REVISION
-    import os, inyoka, time
+    import os, inyoka, time, django.db
     from subprocess import Popen, PIPE
     from signal import signal, SIGUSR1, SIG_DFL
 
@@ -167,6 +167,11 @@ def _bootstrap():
         logger.critical(u'\n\n'.join(out))
         return SIG_DFL
     signal(SIGUSR1, _sigusr1_handler)
+
+    from inyoka.utils.database import DjangoMySQLConnection
+    # hook in sqlalchemy connection instead of the django one
+    django.db.connection = DjangoMySQLConnection()
+
 
 _bootstrap()
 del _bootstrap

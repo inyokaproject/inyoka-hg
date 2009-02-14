@@ -16,6 +16,7 @@
 """
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
+from django.db.backends.mysql.base import DatabaseWrapper
 from inyoka.conf import settings
 
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8&use_unicode=0' % (
@@ -49,3 +50,17 @@ def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
         else:
             failed = 0
         range = range[1] + 1, range[1] + block_size
+
+
+class DjangoMySQLConnection(DatabaseWrapper):
+
+    def __init__(self, **kwargs):
+        super(DjangoMySQLConnection, self).__init__(**kwargs)
+        # hook in sqlalchemy connection for better unicode support.
+        self.connection = engine.connect().connection
+
+    def _rollback(self):
+        self.connection.rollback()
+
+    def get_server_version(self):
+        return tuple(int(x) for x in self.connection.connection.get_server_info())
