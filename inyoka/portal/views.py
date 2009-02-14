@@ -596,7 +596,7 @@ def usercp_profile(request):
         form = UserCPProfileForm(initial=values)
 
     storage_keys = storage.get_many(('max_avatar_width',
-        'max_avatar_height', 'max_signature_length'))
+        'max_avatar_height', 'max_avatar_size', 'max_signature_length'))
 
     return {
         'form':                 form,
@@ -604,6 +604,7 @@ def usercp_profile(request):
         'gmaps_apikey':         settings.GOOGLE_MAPS_APIKEY,
         'max_avatar_width':     storage_keys.get('max_avatar_width', -1),
         'max_avatar_height':    storage_keys.get('max_avatar_height', -1),
+        'max_avatar_size':      storage_keys.get('max_avatar_size', -1),
         'max_sig_length':       storage_keys.get('max_signature_length'),
     }
 

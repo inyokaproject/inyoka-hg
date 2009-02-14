@@ -18,6 +18,7 @@ from inyoka.utils.forms import CaptchaField, DateTimeWidget, \
 from inyoka.wiki.parser import validate_signature, SignatureError
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
+from inyoka.utils.storage import storage
 
 
 #: Some constants used for ChoiceFields
@@ -343,6 +344,22 @@ class UserCPProfileForm(forms.Form):
             if other_user.id != current_request.user.id:
                 raise forms.ValidationError(u'Diese E-Mail-Adresse wird schon verwendet!')
             return email
+
+    def clean_avatar(self):
+        """
+        Keep the user form setting avatar to a too big size.
+        """
+        data = self.cleaned_data
+        if data['avatar'] is None:
+            return
+        st = storage.get('max_avatar_size')
+        if data['avatar'].size > int(st)*1024:
+            raise forms.ValidationError(
+                u'Der von dir ausgewählte Avatar konnte nicht '
+                u'hochgeladen werden, da er zu groß ist. Bitte '
+                u'wähle einen anderen Avatar.')
+        return data['avatar']
+
 
 
 class SearchForm(forms.Form):

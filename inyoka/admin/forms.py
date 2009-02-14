@@ -17,6 +17,7 @@ from inyoka.utils.html import cleanup_html
 from inyoka.utils.user import normalize_username
 from inyoka.portal.models import StaticFile
 from inyoka.portal.user import Group, User
+from inyoka.utils.storage import storage
 
 
 class ConfigurationForm(forms.Form):
@@ -33,6 +34,7 @@ class ConfigurationForm(forms.Form):
         help_text=u'Beachte bitte untenstehende Angaben zu der Maximalgröße')
     max_avatar_width = forms.IntegerField(min_value=1)
     max_avatar_height = forms.IntegerField(min_value=1)
+    max_avatar_size = forms.IntegerField(min_value=1)
     max_signature_length = forms.IntegerField(min_value=1,
         label=u'Maximale Signaturlänge')
     max_signature_lines = forms.IntegerField(min_value=1,
@@ -312,6 +314,22 @@ class EditUserForm(forms.Form):
                 u'Der Zeitpunkt liegt in der Vergangenheit'
             )
         return data['banned_until']
+  
+    def clean_avatar(self):
+        """
+        Keep the user form setting avatar to a too big size.
+        """
+        data = self.cleaned_data
+        if data['avatar'] is None:
+            return
+        st = storage.get('max_avatar_size')
+        if data['avatar'].size > int(st)*1024:
+            raise forms.ValidationError(
+                u'Der von dir ausgewählte Avatar konnte nicht '
+                u'hochgeladen werden, da er zu groß ist. Bitte '
+                u'wähle einen anderen Avatar.')
+        return data['avatar']
+
 
 
 

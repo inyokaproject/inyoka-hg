@@ -74,10 +74,11 @@ def index(request):
 @require_permission('configuration_edit')
 @templated('admin/configuration.html')
 def config(request):
-    keys = ['max_avatar_width', 'max_avatar_height', 'max_signature_length',
-            'max_signature_lines', 'get_ubuntu_link', 'license_note',
-            'get_ubuntu_description', 'blocked_hosts', 'wiki_newpage_template',
-            'wiki_newpage_root', 'team_icon_height', 'team_icon_width']
+    keys = ['max_avatar_width', 'max_avatar_height', 'max_avatar_size', 
+            'max_signature_length', 'max_signature_lines', 'get_ubuntu_link', 
+            'license_note', 'get_ubuntu_description', 'blocked_hosts', 
+            'wiki_newpage_template', 'wiki_newpage_root', 'team_icon_height',
+            'team_icon_width']
 
     team_icon = storage['team_icon']
 
@@ -754,8 +755,9 @@ def user_edit(request, username):
                     ava_mh, ava_mw = storage.get_many(('max_avatar_height',
                         'max_avatar_width')).itervalues()
                     flash(u'Der von dir hochgeladene Avatar wurde auf '
-                          u'%sx%s Pixel skaliert, dadurch können '
-                          u'Qualitätseinbußen auftreten. Bitte beachte dies.'
+                          u'%sx%s Pixel skaliert. Dadurch könnten '
+                          u'Qualitätseinbußen aufgetreten sein. '
+                          u'Bitte beachte dies.'
                           % (ava_mh, ava_mw))
 
             if data['new_password']:

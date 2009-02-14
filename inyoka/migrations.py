@@ -293,6 +293,12 @@ def add_ikhaya_discussion_disabler(m):
     ''')
 
 
+def add_limit_avatar_size(m):
+    _set_storage(m, {
+        'max_avatar_size':          30,
+    })
+
+
 def fix_forum_text_table(m):
     m.engine.execute('''
         ALTER TABLE `forum_post_text` MODIFY COLUMN `text` LONGTEXT,
@@ -1057,5 +1063,5 @@ MIGRATIONS = [
     add_negative_privileges, add_reported_topics_storage,
     add_group_is_public_flag, add_notes_to_article_suggestion,
     add_comment_rendered_text_column, add_blog_active_flag,
-    add_user_count_posts_flag,
+    add_user_count_posts_flag, add_limit_avatar_size
 ]

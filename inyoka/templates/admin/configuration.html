@@ -27,8 +27,10 @@
   <dl>
     {{ render_form(form, ['max_signature_length', 'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
-    <dd>{{ form.max_avatar_height }} x {{ form.max_avatar_width }} Pixel
-        {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}</dd>
+    <dd>{{ form.max_avatar_height }} x {{ form.max_avatar_width }} Pixel und 
+        {{ form.max_avatar_size }} kiB
+        {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}
+        {{ form.errors.max_avatar_size }}</dd>
     <dt>Maximale Team-Icon Größe</dt>
     <dd>{{ form.team_icon_height }} x {{ form.team_icon_width }} Pixel
         {{ form.errors.team_icon_height }} {{ form.errors.team_icon_width }}</dd>
