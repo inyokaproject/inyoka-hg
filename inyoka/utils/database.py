@@ -60,8 +60,7 @@ class DjangoMySQLConnection(DatabaseWrapper):
         self.connection = engine.connect().connection
 
     def _rollback(self):
-        if self.connection is not None:
-            self.connection.rollback()
+        self.connection.rollback()
 
     def get_server_version(self):
         return tuple(int(x) for x in self.connection.connection.get_server_info())
