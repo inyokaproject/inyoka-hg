@@ -27,7 +27,7 @@ def make_app():
     if settings.DEBUG:
         app = DebuggedApplication(app, evalex=settings.ENABLE_DEBUGGER)
     if settings.DEBUG_LEAK:
-        gc.set_debug(gc.DEBUG_LEAK)
+        gc.set_debug(gc.DEBUG_SAVEALL)
     return app
 
 
