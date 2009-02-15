@@ -920,8 +920,12 @@ def movetopic(request, topic_slug):
     """Move a topic into another forum"""
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
-        form.fields['forum_id'].choices = [(f.id, f.name) for f in
-            sorted(forums, key=lambda x: x.name)]
+        form.fields['forum'].choices = (
+            (f.id, u'  ' * offset + f.name)
+            for offset, f in Forum.get_children_recursive(Forum.query.all())
+        )
+        #TODO: add disabled="disabled" to categories and current forum
+        #      (django doesn't feature that atm)
 
     topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
@@ -979,9 +983,14 @@ def movetopic(request, topic_slug):
 @templated('forum/splittopic.html')
 def splittopic(request, topic_slug):
     def _add_field_choices():
-        """Add dynamic field choices to the split topic formular"""
-        form.fields['forum'].choices = [(f.id, f.name) for f in
-            Forum.query.filter(forum_table.c.parent_id != None)]
+        """Add dynamic field choices to the move topic formular"""
+        form.fields['forum'].choices = (
+            (f.id, u'  ' * offset + f.name)
+            for offset, f in Forum.get_children_recursive(Forum.query.all())
+        )
+        #TODO: add disabled="disabled" to categories and current forum
+        #      (django doesn't feature that atm)
+
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in old_posts]
 
@@ -1027,7 +1036,7 @@ def splittopic(request, topic_slug):
 
             return HttpResponseRedirect(url_for(new_topic))
     else:
-        form = SplitTopicForm()
+        form = SplitTopicForm(initial={'forum': old_topic.forum_id})
         _add_field_choices()
 
     return {

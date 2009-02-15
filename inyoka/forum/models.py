@@ -409,6 +409,23 @@ class Forum(object):
         for page in xrange(CACHE_PAGES_COUNT):
             cache.delete('forum/topics/%d/%d' % (self.id, page+1))
 
+    @staticmethod
+    def get_children_recursive(forums, parent=None, offset=0):
+        """
+        Yield all forums sorted as in the index page, with indentation.
+        `forums` must be sorted by position.
+        Every entry is a tuple (offset, forum). Example usage::
+            for offset, f in get_children_recursive(Forum.query.all()):
+                choices.append((f.id, '  ' * offset + f.name))
+        """
+        if isinstance(parent, Forum):
+            parent = parent.id
+        matched_forums = filter(lambda f: f.parent_id == parent, forums)
+        for f in matched_forums:
+            yield offset, f
+            for l in Forum.get_children_recursive(forums, f, offset + 1):
+                yield l
+
     def __unicode__(self):
         return self.name
 
