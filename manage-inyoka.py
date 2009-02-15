@@ -27,7 +27,7 @@ def make_app():
     if settings.DEBUG:
         app = DebuggedApplication(app, evalex=settings.ENABLE_DEBUGGER)
     if settings.DEBUG_LEAK:
-        gc.set_debug(gc.DEBUG_SAVEALL)
+        gc.set_debug(gc.DEBUG_LEAK)
     return app
 
 
@@ -40,6 +40,7 @@ def action_runserver():
                                  settings.DEVSERVER_PORT,
                                  use_reloader=True)
 action_runserver = action_runserver()
+
 
 def action_migrate():
     """Migrate to the latest revision."""
@@ -125,6 +126,7 @@ def _dowse():
 
     return app
 action_dozer = script.make_runserver(_dowse, '', 8080, use_reloader=True)
+
 
 if __name__ == '__main__':
     script.run()
