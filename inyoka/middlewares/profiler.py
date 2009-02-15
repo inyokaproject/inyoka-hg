@@ -39,7 +39,7 @@ class MemoryProfilerMiddleware(object):
     """
 
     def process_request(self, request):
-        if hasattr(settings, 'DEBUG_LEAK') and 'memory' in request.GET:
+        if settings.DEBUG_LEAK and 'memory' in request.GET:
             data = defaultdict(int)
             for obj in gc.get_objects():
                 data[type(obj)] += 1
