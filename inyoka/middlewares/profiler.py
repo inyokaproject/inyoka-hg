@@ -11,6 +11,7 @@
 """
 from datetime import datetime
 from inyoka.utils.logger import memlogger
+from inyoka.conf import settings
 from inyoka.utils.http import HttpResponse
 from inyoka.utils.html import escape
 from collections import defaultdict
@@ -38,7 +39,7 @@ class MemoryProfilerMiddleware(object):
     """
 
     def process_request(self, request):
-        if 'memory' in request.GET:
+        if hasattr(settings, 'DEBUG_LEAK') and 'memory' in request.GET:
             data = defaultdict(int)
             for obj in gc.get_objects():
                 data[type(obj)] += 1

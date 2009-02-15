@@ -15,6 +15,7 @@ BASE_PATH = dirname(__file__)
 
 # debug mode is off by default
 DEBUG = False
+DEBUG_LEAK = False
 DATABASE_DEBUG = False
 DEVSERVER_HOST = 'localhost'
 DEVSERVER_PORT = 8080
