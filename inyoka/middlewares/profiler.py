@@ -59,12 +59,3 @@ class MemoryProfilerMiddleware(object):
                 garbagedata += MEMORY_DATA_TEMPLATE % (escape(str(obj)), count)
             return HttpResponse(MEMORY_TEMPLATE % (objdata, garbagedata))
         return
-            
-            
-
-    
-    def process_response(self, request, response):
-        #if request.subdomain and request.subdomain not in ('static', 'media') and \
-        #    socket.gethostname() == 'jok':
-        #    memlogger.log(request.build_absolute_uri(), request.method)
-        return response
