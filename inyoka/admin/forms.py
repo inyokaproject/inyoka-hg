@@ -34,7 +34,7 @@ class ConfigurationForm(forms.Form):
         help_text=u'Beachte bitte untenstehende Angaben zu der Maximalgröße')
     max_avatar_width = forms.IntegerField(min_value=1)
     max_avatar_height = forms.IntegerField(min_value=1)
-    max_avatar_size = forms.IntegerField(min_value=1)
+    max_avatar_size = forms.IntegerField(min_value=0)
     max_signature_length = forms.IntegerField(min_value=1,
         label=u'Maximale Signaturlänge')
     max_signature_lines = forms.IntegerField(min_value=1,
@@ -314,7 +314,7 @@ class EditUserForm(forms.Form):
                 u'Der Zeitpunkt liegt in der Vergangenheit'
             )
         return data['banned_until']
-  
+
     def clean_avatar(self):
         """
         Keep the user form setting avatar to a too big size.
@@ -322,8 +322,8 @@ class EditUserForm(forms.Form):
         data = self.cleaned_data
         if data['avatar'] is None:
             return
-        st = storage.get('max_avatar_size')
-        if data['avatar'].size > int(st)*1024:
+        st = int(storage.get('max_avatar_size'))
+        if st and data['avatar'].size > st * 1024:
             raise forms.ValidationError(
                 u'Der von dir ausgewählte Avatar konnte nicht '
                 u'hochgeladen werden, da er zu groß ist. Bitte '

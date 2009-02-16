@@ -352,8 +352,8 @@ class UserCPProfileForm(forms.Form):
         data = self.cleaned_data
         if data['avatar'] is None:
             return
-        st = storage.get('max_avatar_size')
-        if data['avatar'].size > int(st)*1024:
+        st = int(storage.get('max_avatar_size', 0))
+        if st and data['avatar'].size > st * 1024:
             raise forms.ValidationError(
                 u'Der von dir ausgewählte Avatar konnte nicht '
                 u'hochgeladen werden, da er zu groß ist. Bitte '
