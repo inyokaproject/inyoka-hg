@@ -212,7 +212,7 @@ div.workinprogress h3 {
   background-repeat:no-repeat;
   font-size: 0.9em;
   /* IE fix */
-  width: 50ex;
+  width: 40ex;
 }
 
 .toc .head {
@@ -220,8 +220,13 @@ div.workinprogress h3 {
   font-weight: bold;
 }
 
+.toc > ol {
+  margin-top: 1.8em;
+}
+
 .toc a {
   color: #5E4000;
+  text-align: left;
 }
 
 .toc .head a {
@@ -296,4 +301,5 @@ div.edited strong {
 pre {
   padding: 0.5em;
 }
+
 
