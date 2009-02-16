@@ -920,7 +920,7 @@ def movetopic(request, topic_slug):
     """Move a topic into another forum"""
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
-        form.fields['forum'].choices = (
+        form.fields['forum_id'].choices = (
             (f.id, u'  ' * offset + f.name)
             for offset, f in Forum.get_children_recursive(Forum.query.all())
         )
