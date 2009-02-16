@@ -16,9 +16,6 @@ from inyoka.utils.logger import logger
 from inyoka.utils.database import session
 from werkzeug import SharedDataMiddleware, Response, get_host
 
-# Open debug thread for now
-import guppy.heapy.RM
-
 _not_found = Response('Not Found', status=404)
 core_exceptions = (SystemExit, KeyboardInterrupt)
 try:
@@ -60,6 +57,11 @@ class InyokaHandler(WSGIHandler):
     Improved version of the django WSGI app without the exception handling
     which is somewhat annoying for our use case.
     """
+
+    def __init__(self):
+        super(InyokaHandler, self).__init__()
+        # Open debug thread for now
+        import guppy.heapy.RM
 
     def get_response(self, request):
         """Like the normal one but faster and less sucky."""
