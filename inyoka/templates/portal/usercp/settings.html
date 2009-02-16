@@ -29,6 +29,12 @@
         {{ form.errors.hide_signatures }}</dd>
     <dd>{{ form.hide_profile }} <label for="id_hide_profile">{{ form.hide_profile.label }}</label>
         {{ form.errors.hide_profile }}</dd>
+    <dd>{{ form.highlight_search }} <label for="id_highlight_search">{{ form.highlight_search.label }}</label><br />
+        <span class="note"> {{ form.highlight_search.help_text }}</span>
+        {{ form.errors.highlight_search }}</dd>
+    <dt>Forum</dt>
+    <dd>{{ form.mark_read_on_logout }} <label for="id_mark_read_on_logout">{{ form.mark_read_on_logout.label }}</label>
+        {{ form.errors.mark_read_on_logout }}</dd>
     <dd>{{ form.autosubscribe }} <label for="id_autosubscribe">{{ form.autosubscribe.label }}</label>
         {{ form.errors.autosubscribe }}</dd>
     <dd>{{ form.show_preview }} <label for="id_show_preview">{{ form.show_preview.label }}</label>
@@ -37,12 +43,6 @@
         <span class="note"> {{ form.show_thumbnails.help_text }}</span>
         {{ form.errors.show_thumbnails }}</dd></dl>
     </dd>
-    <dd>{{ form.highlight_search }} <label for="id_highlight_search">{{ form.highlight_search.label }}</label><br />
-        <span class="note"> {{ form.highlight_search.help_text }}</span>
-        {{ form.errors.highlight_search }}</dd>
-    <dt>Forum</dt>
-    <dd>{{ form.mark_read_on_logout }} <label for="id_mark_read_on_logout">{{ form.mark_read_on_logout.label }}</label>
-        {{ form.errors.mark_read_on_logout }}</dd>
   </dl>
   <p>
     <input type="submit" value="Speichern" />
