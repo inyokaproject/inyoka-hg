@@ -58,11 +58,6 @@ class InyokaHandler(WSGIHandler):
     which is somewhat annoying for our use case.
     """
 
-    def __init__(self):
-        super(InyokaHandler, self).__init__()
-        # Open debug thread for now
-        import guppy.heapy.RM
-
     def get_response(self, request):
         """Like the normal one but faster and less sucky."""
         try:
