@@ -16,6 +16,8 @@ from inyoka.utils.logger import logger
 from inyoka.utils.database import session
 from werkzeug import SharedDataMiddleware, Response, get_host
 
+# Open debug thread for now
+import guppy.heapy.RM
 
 _not_found = Response('Not Found', status=404)
 core_exceptions = (SystemExit, KeyboardInterrupt)
