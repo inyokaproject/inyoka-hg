@@ -415,7 +415,8 @@ class Forum(object):
         Yield all forums sorted as in the index page, with indentation.
         `forums` must be sorted by position.
         Every entry is a tuple (offset, forum). Example usage::
-            for offset, f in get_children_recursive(Forum.query.all()):
+            forums = Forum.query.order_by(Forum.position.asc()).all()
+            for offset, f in Forum.get_children_recursive(forums):
                 choices.append((f.id, u'  ' * offset + f.name))
         """
         if isinstance(parent, Forum):

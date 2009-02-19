@@ -401,7 +401,9 @@ def search(request):
     f.fields['forums'].choices = [('all', u'Alle Foren'),
         ('support', u'Alle Support-Foren')
     ]
-    for offset, forum in Forum.get_children_recursive(Forum.query.all()):
+    forums = filter_invisible(request.user, Forum.query.
+                              order_by(Forum.position.asc()).all())
+    for offset, forum in Forum.get_children_recursive(forums):
         f.fields['forums'].choices.append((forum.id, u'  ' * offset + forum.name))
 
     if f.is_valid():
