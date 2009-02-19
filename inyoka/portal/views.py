@@ -400,7 +400,9 @@ def search(request):
         f = SearchForm()
     f.fields['forums'].choices = [('all', u'Alle Foren'),
         ('support', u'Alle Support-Foren')
-    ] + [(o.slug, o.name) for o in Forum.query.all()]
+    ]
+    for offset, forum in Forum.get_children_recursive(Forum.query.all()):
+        f.fields['forums'].choices.append((forum.id, u'  ' * offset + forum.name))
 
     if f.is_valid():
         d = f.cleaned_data

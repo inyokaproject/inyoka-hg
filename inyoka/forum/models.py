@@ -416,7 +416,7 @@ class Forum(object):
         `forums` must be sorted by position.
         Every entry is a tuple (offset, forum). Example usage::
             for offset, f in get_children_recursive(Forum.query.all()):
-                choices.append((f.id, '  ' * offset + f.name))
+                choices.append((f.id, u'  ' * offset + f.name))
         """
         if isinstance(parent, Forum):
             parent = parent.id
