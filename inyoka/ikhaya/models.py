@@ -229,7 +229,7 @@ class Article(models.Model):
                 suffix_id = True
             else:
                 try:
-                    Article.objects.get(slug=slug)
+                    Article.objects.get(slug=slug, pub_date=self.pub_date)
                 except Article.DoesNotExist:
                     suffix_id = False
                 else:
