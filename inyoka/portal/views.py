@@ -641,7 +641,7 @@ def usercp_settings(request):
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False),
             'hide_profile': settings.get('hide_profile', False),
-            'autosubscribe': settings.get('autosubscribe', False),
+            'autosubscribe': settings.get('autosubscribe', True),
             'show_preview': settings.get('show_preview', False),
             'show_thumbnails': settings.get('show_thumbnails', False),
             'highlight_search': settings.get('highlight_search', True),
