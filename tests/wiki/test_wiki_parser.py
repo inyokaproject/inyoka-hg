@@ -17,7 +17,6 @@ def parse(code):
     prints the tree for easier debugging.
     """
     tree = Parser(code, transformers=[]).parse()
-    print tree
     return tree
 
 

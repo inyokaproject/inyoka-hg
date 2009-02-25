@@ -16,7 +16,7 @@ EPYDOC=epydoc --name=Inyoka --url=http://inyoka.ubuntuusers.de/ --docformat=rest
 	shell mysql clean-files
 
 test:
-	@(cd tests; py.test $(TESTS))
+	@(python run_tests.py)
 
 doc:
 	@(${EPYDOC} --no-frames --html --css extra/epydoc.css -o apidoc inyoka)

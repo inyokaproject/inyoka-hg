@@ -44,8 +44,6 @@ class CommonServicesMiddleware(CommonMiddleware):
             obj = request_cache._get_current_object()
         except RuntimeError:
             local.cache = {}
-            #gives damn UnboundLocalError – python's parser is damn buggy...
-            #request_cache = {}
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain

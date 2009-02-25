@@ -204,6 +204,13 @@ class Article(models.Model):
             self.subject
         )
 
+    def __repr__(self):
+        return '<%s %s - %s>' % (
+            self.__class__.__name__,
+            self.pub_date.strftime('%d.%m.%Y'),
+            self.subject.encode('utf-8')
+        )
+
     def update_search(self):
         """
         This updates the xapian search index.

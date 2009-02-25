@@ -20,7 +20,6 @@ def parse(source, transformer):
     it prints the tree so that it appears in the debug output.
     """
     tree = Parser(source, [transformer]).parse()
-    print tree
     return tree
 
 

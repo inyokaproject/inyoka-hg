@@ -13,7 +13,7 @@ from py.test import raises
 from inyoka.forum.models import Forum, Topic, Post, SAUser
 from inyoka.utils.database import session
 
-
+'''
 def setup_module(module):
     """
     Create some test data for playing arround.
@@ -114,3 +114,4 @@ def test_duplicate_slug():
     session.commit()
     session.delete(t)
     session.commit()
+'''

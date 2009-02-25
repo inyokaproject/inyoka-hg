@@ -14,9 +14,7 @@ from inyoka.wiki.parser import Parser, RenderContext
 def render(source):
     """Parse source and render it to html."""
     tree = Parser(source, []).parse()
-    print tree
     html = tree.render(RenderContext(), 'html')
-    print repr(html)
     return html
 
 
