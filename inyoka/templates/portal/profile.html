@@ -38,7 +38,7 @@
     <tr>
       <th>Name</th>
       <td>{{ user.username|e }}</td>
-      <td rowspan="6"><img class="userinfo_avatar" src="{{ user.avatar_url }}" alt="Avatar von „{{ user.username|e }}“" /></td>
+      <td rowspan="6"><img class="userinfo_avatar" src="{{ user.avatar_url|e }}" alt="Avatar von „{{ user.username|e }}“" /></td>
     </tr>
     <tr>
       <th>E-Mail-Adresse</th>
@@ -69,11 +69,11 @@
     </tr>
     <tr>
       <th>Beiträge</th>
-      <td>{{ user.post_count }} (<a href="{{ href('forum', 'author', user.username) }}">anzeigen</a>)</td>
+      <td>{{ user.post_count }} (<a href="{{ href('forum', 'author', user.username|e) }}">anzeigen</a>)</td>
     </tr>
     <tr>
       <th>GPG-Schlüssel</th>
-      <td>{% if user.gpgkey %}0x{{ user.gpgkey }}{% else %}–{% endif %}</td>
+      <td>{% if user.gpgkey %}0x{{ user.gpgkey|e }}{% else %}–{% endif %}</td>
     </tr>
     <tr>
       <th>Wohnort</th>
@@ -112,7 +112,13 @@
     </tr>
     <tr>
       <td>{{ user.sip|e or '–' }}</td>
-      {{ show_item('jabber') }}
+      {% if user.jabber and user.settings['show_jabber'] -%}
+      <td><a href="{{ user.jabber_url|e }}">{{ user.jabber|e }}</a></td>
+      {%- elif user.jabber and REQUEST.user.is_manager -%}
+      <td class="hidden">{{ user.jabber_url|e }}</td>
+      {%- else -%}
+      <td>–</td>
+      {%- endif -%}
       <td>
         <a href="{{ user|url('privmsg') }}">Private Nachricht</a>
       </td>

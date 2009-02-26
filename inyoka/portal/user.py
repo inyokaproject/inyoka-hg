@@ -612,6 +612,10 @@ class User(models.Model):
         return self.avatar.url
 
     @property
+    def jabber_url(self):
+        return u'xmpp://%s' % escape(self.jabber)
+
+    @property
     def urlsafe_username(self):
         '''return the username with space replaced by _ for urls'''
         return self.username.replace(' ', '_')
