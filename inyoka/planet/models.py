@@ -110,6 +110,7 @@ class Entry(models.Model):
 
     @property
     def simplified_text(self):
+        print text, type(text)
         return striptags(self.text)
 
     def update_search(self):

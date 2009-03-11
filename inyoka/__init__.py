@@ -168,9 +168,9 @@ def _bootstrap():
         return SIG_DFL
     signal(SIGUSR1, _sigusr1_handler)
 
-    from inyoka.utils.database import DjangoMySQLConnection
+    # from inyoka.utils.database import DjangoMySQLConnection
     # hook in sqlalchemy connection instead of the django one
-    django.db.connection = DjangoMySQLConnection()
+    # django.db.connection = DjangoMySQLConnection()
 
 
 _bootstrap()
