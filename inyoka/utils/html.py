@@ -105,6 +105,10 @@ def striptags(string):
     """Remove HTML tags from a string."""
     if string is None:
         return u''
+    #TODO: fix until we find out why django returns str instead of unicode
+    #      (or until we got rid of django ;-) )
+    if isinstance(string, str):
+        string = string.decode('utf8')
     return replace_entities(u' '.join(_strip_re.sub('', string).split()))
 
 
