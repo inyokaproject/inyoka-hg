@@ -9,13 +9,8 @@
     :copyright: 2008 by Christopher Grebs.
     :license: GNU GPL.
 """
-from py.test import raises
+from nose.tools import assert_raises
 from inyoka.utils.collections import MultiMap
-
-
-def immutable_testfunc():
-    map = MultiMap([])
-    map.pop()
 
 
 def test_map():
@@ -25,4 +20,4 @@ def test_map():
     assert map.values() == [[1, 2], [1, 2]]
     map.clear()
     assert map.items() == []
-    raises(TypeError, immutable_testfunc)
+    assert_raises(TypeError, map.pop)

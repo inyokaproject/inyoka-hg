@@ -1,3 +1,3 @@
-from tests import inyoka_suite
+from tests import run_inyoka_suite
 
-inyoka_suite()
+run_inyoka_suite()

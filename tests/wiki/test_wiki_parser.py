@@ -62,7 +62,7 @@ def test_autoclosing():
 
 def test_simple_lists():
     """Check if simple lists work."""
-    tree = parse(' * foo\n * ^^bar^^\n * ,,baz,,')
+    tree = parse(' * foo\n * ^^(bar)^^\n * ,,(baz),,')
     assert tree == nodes.Document([
         nodes.List('unordered', [
             nodes.ListItem([nodes.Text('foo')]),

@@ -20,13 +20,13 @@ def test_inline_markup():
         u"''foo''"
         u"'''foo'''"
         u"__foo__"
-        u',,foo,,'
-        u'^^foo^^'
+        u',,(foo),,'
+        u'^^(foo)^^'
         u'--(foo)--'
         u'`foo`'
         u'``foo``'
-        u'~-foo-~'
-        u'~+foo+~'
+        u'~-(foo)-~'
+        u'~+(foo)+~'
         u'((foo))'
         u'[color=red]foo[/color]'
     ).expect
@@ -62,7 +62,7 @@ def test_escape():
         u'\\__test\\__\\\\foo'
     ).expect
 
-    expect('text', '__test__\\foo')
+    expect('text', '__test__\\\\foo')
     expect('eof')
 
 
