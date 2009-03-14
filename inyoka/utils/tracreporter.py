@@ -304,6 +304,7 @@ class TBLoggerHandler(Handler):
             'title':        '%s: %s' % (record.levelname, get_exception_message(record.exc_info)),
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
+            'method':       current_request.method
         }
 
 
