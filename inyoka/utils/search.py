@@ -49,6 +49,8 @@ search = None
 
 def stem(word):
     """Stem a single word."""
+    if isinstance(word, str):
+        word = word.decode('utf8')
     return _stemmer(word.lower().encode('utf-8'))
 
 
