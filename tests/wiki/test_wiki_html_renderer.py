@@ -20,7 +20,7 @@ def render(source):
 
 def test_simple_markup():
     """Test the simple markup."""
-    html = render("''foo'', '''bar''', __baz__, ,,foo,,, ^^bar^^")
+    html = render("''foo'', '''bar''', __baz__, ,,(foo),,, ^^(bar)^^")
     assert html == (
         '<em>foo</em>, '
         '<strong>bar</strong>, '
