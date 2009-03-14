@@ -1096,7 +1096,7 @@ div.not_found img {
 }
 
 .ac_loading {
-	background : Window url('./indicator.gif') right center no-repeat;
+	background : Window url('../img/indicator.gif') right center no-repeat;
 }
 
 .ac_over {

@@ -19,7 +19,6 @@ from threading import Thread
 from xmlrpclib import ServerProxy
 from inyoka.conf import settings
 from inyoka.utils.urls import url_encode
-from inyoka.utils.local import current_request
 from inyoka import INYOKA_REVISION
 
 try:
@@ -140,7 +139,6 @@ class TracHandler(Handler):
             'priority':     priority,
             'component':    '-',
             'ticket_type':  'servererror',
-            'method':       current_request.method
         }
 
     def analyseForComment(self, record):
@@ -304,7 +302,6 @@ class TBLoggerHandler(Handler):
             'title':        '%s: %s' % (record.levelname, get_exception_message(record.exc_info)),
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
-            'method':       current_request.method
         }
 
 
