@@ -303,14 +303,6 @@ class SmileyInjector(Transformer):
                     new_children.pop()
         tree.children[:] = new_children
         return tree
-"""                prev = new_children[-1]
-                next = tree.children[idx - 1]
-                if is_paragraph(prev):
-                    prev.children.append(tree.children.pop(idx))
-                    idx -= 1
-                if is_paragraph(next):
-                    prev.children.append(tree.children.pop(idx + 1))
-                new_children[-1] = prev"""
 
 
 class KeyHandler(Transformer):
