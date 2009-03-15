@@ -276,8 +276,10 @@ class SmileyInjector(Transformer):
             return tree
         helper = '|'.join(re.escape(s) for s in
                           sorted(smilies, key=lambda x: -len(x)))
-        smiley_re = re.compile(r'(?<!\w|\d)(%s)(?=$|%s|[^\w\d])' %
-                                (helper, helper))
+        smiley_re = re.compile(r'(?=[^\w\d]|%s)(%s)(?=$|%s|[^\w\d])' %
+                                (helper, helper, helper), re.UNICODE)
+
+        print r'(?=[^\w\d]|%s)(%s)(?=$|%s|[^\w\d])' % (helper, helper, helper)
 
         new_children = []
         for node in tree.children:

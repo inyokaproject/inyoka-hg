@@ -61,20 +61,23 @@ def test_smiley_injector():
     Check the insertion capabilities of the SmileyInjector, not the
     database access of it. That's part of the wiki storage testsuite.
     """
-    tree = parse('Inline:-)is not allowed. This should work :-D. This too :-). Two smileys :-):-) should work too.',
+    tree = parse(u"""Inline:-)is not allowed. ÖÄÜ This should work :-D. This too :-). Two smileys :-):-) should work too.
+:-D And yet another XDline XDXD. :-)""",
                  SmileyInjector({
         ':-)':      'happy.png',
-        ':-D':      'grin.png'
+        ':-D':      'grin.png',
+        'XD':       'xd.png',
     }))
+
     assert tree == nodes.Document([
-        nodes.Text('Inline:-)is not allowed. This should work '),
-        nodes.Image('grin.png', ':-D'),
-        nodes.Text('. This too '),
-        nodes.Image('happy.png', ':-)'),
-        nodes.Text('. Two smileys '),
-        nodes.Image('happy.png', ':-)'),
-        nodes.Image('happy.png', ':-)'),
-        nodes.Text(' should work too.')
+        nodes.Text(u'Inline:-)is not allowed. ÖÄÜ This should work '),
+        nodes.Image('grin.png', ':-D'), nodes.Text('. This too '),
+        nodes.Image('happy.png', ':-)'), nodes.Text('. Two smileys '),
+        nodes.Image('happy.png', ':-)'), nodes.Image('happy.png', ':-)'),
+        nodes.Text(' should work too.\n'), nodes.Image('grin.png', ':-D'),
+        nodes.Text(' And yet another XDline '),
+        nodes.Image('xd.png', 'XD'), nodes.Image('xd.png', 'XD'),
+        nodes.Text('. '), nodes.Image('happy.png', ':-)')
     ])
 
 
