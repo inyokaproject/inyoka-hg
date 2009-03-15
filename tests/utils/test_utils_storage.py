@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 """
     test_storage
     ~~~~~~~~~~~~
@@ -10,13 +10,14 @@
     :license: GNU GPL.
 """
 import time
-from inyoka.utils.storage import storage, Storage
+from inyoka.utils.storage import storage, fetch
 from inyoka.utils.cache import cache
+from inyoka.utils.database import session
 
 
 def test_set():
     def _compare(key, value):
-        assert value == Storage.objects.get(key=key).value == \
+        assert value == session.execute(fetch, {'key': key}).fetchone()[0] == \
             cache.get('storage/' + key) == storage[key]
     storage['test'] = 'foo'
     storage['test'] = 'bar'

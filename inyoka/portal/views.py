@@ -56,7 +56,6 @@ from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
     reactivate_user, set_new_email, send_new_email_confirmation, \
     set_new_email, reset_email, send_activation_mail, send_new_user_password
 from inyoka.portal.utils import check_login, calendar_entries_for_month
-from inyoka.utils.antispam import is_spam
 
 
 SEARCH_AREAS = {

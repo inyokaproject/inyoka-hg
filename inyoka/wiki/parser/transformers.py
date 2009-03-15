@@ -275,7 +275,9 @@ class SmileyInjector(Transformer):
         if not smilies:
             return tree
         # The old re was (?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u), but I changed
-        # it because then you had to put two spaces between smilies.
+        # it because then you had to put two spaces between smilies. --beewee
+        # If some else has some idea how to solve that, do it. I'm unable to…
+        # --entequak
         smiley_re = re.compile(r'(%s)' %
                                '|'.join(re.escape(s) for s in sorted(smilies,
                                         key=lambda x: -len(x))))
