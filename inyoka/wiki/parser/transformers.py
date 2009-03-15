@@ -274,13 +274,10 @@ class SmileyInjector(Transformer):
             smilies = dict(storage.smilies)
         if not smilies:
             return tree
-        # The old re was (?:^|[^\w\d])(%s)(?:$|[^\w\d])(?u), but I changed
-        # it because then you had to put two spaces between smilies. --beewee
-        # If some else has some idea how to solve that, do it. I'm unable to…
-        # --entequak
-        smiley_re = re.compile(r'(%s)' %
-                               '|'.join(re.escape(s) for s in sorted(smilies,
-                                        key=lambda x: -len(x))))
+        helper = '|'.join(re.escape(s) for s in
+                          sorted(smilies, key=lambda x: -len(x)))
+        smiley_re = re.compile(r'(?<!\w|\d)(%s)(?=$|%s|[^\w\d])' %
+                                (helper, helper))
 
         new_children = []
         for node in tree.children:
@@ -292,6 +289,8 @@ class SmileyInjector(Transformer):
                 text = node.text
                 for match in smiley_re.finditer(text):
                     node.text = text[pos:match.start(1)]
+                    if not node.text:
+                        new_children.pop()
                     code = match.group(1)
                     pos = match.end(1)
                     node = nodes.Text()

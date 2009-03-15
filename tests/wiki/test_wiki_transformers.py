@@ -61,16 +61,20 @@ def test_smiley_injector():
     Check the insertion capabilities of the SmileyInjector, not the
     database access of it. That's part of the wiki storage testsuite.
     """
-    tree = parse('Inline:-)is not allowed. This should work :-D. This too :-)',
+    tree = parse('Inline:-)is not allowed. This should work :-D. This too :-). Two smileys :-):-) should work too.',
                  SmileyInjector({
         ':-)':      'happy.png',
         ':-D':      'grin.png'
     }))
     assert tree == nodes.Document([
-        nodes.Text('Inline:-)is not allowed. This should work'),
+        nodes.Text('Inline:-)is not allowed. This should work '),
         nodes.Image('grin.png', ':-D'),
         nodes.Text('. This too '),
-        nodes.Image('happy.png', ':-)')
+        nodes.Image('happy.png', ':-)'),
+        nodes.Text('. Two smileys '),
+        nodes.Image('happy.png', ':-)'),
+        nodes.Image('happy.png', ':-)'),
+        nodes.Text(' should work too.')
     ])
 
 
