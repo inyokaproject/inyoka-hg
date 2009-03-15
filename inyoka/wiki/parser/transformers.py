@@ -279,8 +279,6 @@ class SmileyInjector(Transformer):
         smiley_re = re.compile(r'(?=[^\w\d]|%s)(%s)(?=$|%s|[^\w\d])' %
                                 (helper, helper, helper), re.UNICODE)
 
-        print r'(?=[^\w\d]|%s)(%s)(?=$|%s|[^\w\d])' % (helper, helper, helper)
-
         new_children = []
         for node in tree.children:
             new_children.append(node)
