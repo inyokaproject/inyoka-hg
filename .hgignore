@@ -5,3 +5,4 @@
 ^inyoka/media/
 ^inyoka/scripts/converter/converter_config.py$
 ^DJANGO_SETTINGS_MODULE$
+^.pida-metadata$

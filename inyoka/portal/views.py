@@ -397,9 +397,8 @@ def search(request):
         f = SearchForm(request.REQUEST)
     else:
         f = SearchForm()
-    f.fields['forums'].choices = [('all', u'Alle Foren'),
-        ('support', u'Alle Support-Foren')
-    ]
+    f.fields['forums'].choices = [('support', u'Alle Support-Foren'),
+        ('all', u'Alle Foren')]
     forums = filter_invisible(request.user, Forum.query.
                               order_by(Forum.position.asc()).all())
     for offset, forum in Forum.get_children_recursive(forums):
@@ -411,6 +410,11 @@ def search(request):
         query = d['query']
 
         exclude = []
+
+        # we use per default the support-forum filter
+        if not d['forums']:
+            d['forums'] = 'support'
+
         if area in ('forum', 'all') and d['forums'] and \
                 d['forums'] not in ('support', 'all'):
             query += ' category:"%s"' % d['forums']
