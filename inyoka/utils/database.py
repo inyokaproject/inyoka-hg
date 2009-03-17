@@ -16,12 +16,14 @@
 """
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.orm import scoped_session, create_session
+from sqlalchemy.pool import NullPool
 from inyoka.conf import settings
 
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8&use_unicode=0' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
-), pool_recycle=25, convert_unicode=True, echo=settings.DATABASE_DEBUG)
+), pool_recycle=25, convert_unicode=True, echo=settings.DATABASE_DEBUG,
+   poolclass=NullPool)
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
