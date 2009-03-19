@@ -921,7 +921,7 @@ def movetopic(request, topic_slug):
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
         form.fields['forum_id'].choices = (
-            (f.id, u'  ' * offset + f.name)
+            (f.id, f.name[0] + u' ' + (u'   ' * offset) + f.name)
             for offset, f in Forum.get_children_recursive(Forum.query.all())
         )
         #TODO: add disabled="disabled" to categories and current forum

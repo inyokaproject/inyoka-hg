@@ -115,7 +115,8 @@ class MoveTopicForm(forms.Form):
     This form gives the user the possibility to select a new forum for a
     topic.
     """
-    forum_id = forms.ChoiceField()
+    forum_id = forms.ChoiceField(widget=forms.Select(attrs=
+        {'class':'firstletterselect'}))
 
 
 class SplitTopicForm(forms.Form):

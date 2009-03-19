@@ -1244,3 +1244,9 @@ div.dropdown {
   padding: 0 .66em;
   margin: 0;
 }
+
+
+select.firstletterselect option:first-letter {
+  color: #CCC;
+  font-family: monospace;
+}
