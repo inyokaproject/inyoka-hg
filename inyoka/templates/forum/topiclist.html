@@ -34,9 +34,8 @@
         <th class="view_count">Aufrufe</th>
         <th class="last_post">Letzte Antwort</th>
       </tr>
-      {%- for topic in topics if not topic.hidden %}
-      {#- #TODO: add some acl test so that mods can see hidden topics #}
-      <tr>{#{% if topic.hidden or topic.reported %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>#}
+      {%- for topic in topics if not (topic.hidden and not have_privilege(USER, topic, 'moderate')) %}
+      <tr>
         <td class="icon">
           {{ topic_icon(topic) }}
         </td>

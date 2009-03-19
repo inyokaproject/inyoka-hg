@@ -1489,7 +1489,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
 
         topic_ids = [i[0] for i in topic_ids.execute().fetchall()]
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
-        topic_ids = topic_ids[:30]
+        topic_ids = topic_ids[:TOPICS_PER_PAGE]
         topics = filter(lambda x: have_privilege(request.user, x, 'read'),
                         list(topics.filter(topic_table.c.id.in_(topic_ids))))
         pagination = []
@@ -1536,7 +1536,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'pagination':   pagination,
         'title':        title,
         'get_read_status':  lambda post_id: request.user.is_authenticated \
-                  and request.user._readstatus(post_id=post_id)
+                  and request.user._readstatus(post_id=post_id),
+        'have_privilege': have_privilege,
     }
 
 
