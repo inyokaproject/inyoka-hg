@@ -9,7 +9,13 @@
     :copyright: Copyright 2009 by Christopher Grebs.
     :license: GNU GPL.
 """
+# Disable cssutils logging messages for now
+import logging
+log = logging.getLogger('CSSUTILS')
+log.setLevel(logging.ERROR)
+
 from inyoka.utils.css import filter_style
+
 
 #TODO: add more security problems here!
 
