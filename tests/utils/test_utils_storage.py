@@ -30,5 +30,6 @@ def test_set():
     storage['boo'] = 'far'
     assert storage.get_many(['foo', 'boo', 'nonexisting']) == {
         'foo': 'bar',
-        'boo': 'far'
+        'boo': 'far',
+        'nonexisting': None
     }

@@ -17,20 +17,18 @@ from inyoka.utils.database import metadata, session
 
 #XXX: migration: remove the id column and rename the table
 storage_table = Table('portal_storage', metadata,
-        Column('id', Integer, primary_key=True),
-        Column('key', String(200), index=True),
-        Column('value', Text()),
-        )
+    Column('id', Integer, primary_key=True),
+    Column('key', String(200), index=True),
+    Column('value', Text()),
+)
 
 update = storage_table.update(
         storage_table.c.key==bindparam('key'),
         values={'value':bindparam('value')})
 
-fetch = select(
-        [storage_table.c.value]
-    ).where(
-        storage_table.c.key==bindparam('key')
-    ).limit(1)
+fetch = select([storage_table.c.value]) \
+    .where(storage_table.c.key==bindparam('key')) \
+    .limit(1)
 
 insert = storage_table.insert()
 
@@ -61,11 +59,11 @@ class CachedStorage(object):
         #XXX: ugly check, find a more nice solution
         rows = session.execute(fetch, {'key': key}).fetchall()
         if rows:
-            session.execute(update, { 'key': key, 'value': value})
+            session.execute(update, {'key': key, 'value': value})
             session.commit()
         else:
             try:
-                session.execute(insert, { 'key': key, 'value': value})
+                session.execute(insert, {'key': key, 'value': value})
                 session.commit()
             except IntegrityError:
                 # ignore concurrent insertion
@@ -85,11 +83,8 @@ class CachedStorage(object):
         #: They are queried using a database call.
         to_fetch = [k for k in keys if values.get(k) is None]
         # get the items that are not in cache using a database query
-        query = select(
-                    [storage_table.c.key, storage_table.c.value]
-                ).where(
-                    storage_table.c.key.in_(to_fetch)
-                )
+        query = select([storage_table.c.key, storage_table.c.value]) \
+            .where(storage_table.c.key.in_(to_fetch))
 
         for key, value in session.execute(query):
             values[key] = value
