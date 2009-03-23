@@ -30,7 +30,7 @@ session = scoped_session(lambda: create_session(engine,
     autoflush=True, transactional=True))
 
 
-if settings.DEBUG:
+if settings.DATABASE_DEBUG:
     import logging
     engine_logger = logging.getLogger('sqlalchemy.engine')
     engine_logger.setLevel(logging.INFO)

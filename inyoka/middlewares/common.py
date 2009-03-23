@@ -95,7 +95,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         local_manager.cleanup()
         session.remove()
 
-        if settings.DEBUG:
+        if settings.DATABASE_DEBUG:
             import sys
             import re
             from textwrap import wrap

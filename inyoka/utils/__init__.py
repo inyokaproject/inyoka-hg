@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 
-
+from os import path, rmdir, mkdir
 import cPickle
 try:
     from hashlib import sha1
@@ -29,3 +29,12 @@ def decode_confirm_data(data):
     if sha1(dump + settings.SECRET_KEY).digest() != hash:
         raise ValueError
     return cPickle.loads(dump)
+
+
+def create_media_folders(delete=False):
+    for folder in settings.MEDIA_DIRS:
+        pth = path.join(settings.MEDIA_ROOT, folder)
+        if path.exists(pth):
+            if delete:
+                rmdir(pth)
+                mkdir(pth)
