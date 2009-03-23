@@ -19,7 +19,12 @@ from werkzeug import Client, BaseResponse
 from nose.plugins.base import Plugin
 from inyoka.conf import settings
 
+# setup some paths
 settings.DATABASE_DEBUG = False
+# REQURED! If we're not in DEBUG mode the `TemplateResponse`
+# won't have the `tmpl_context` attribute!
+settings.DEBUG = True
+
 dbname = os.environ.get('INYOKA_TEST_DATABASE', 'inyoka_test')
 settings.DATABASE_NAME = dbname
 instance_dir = os.tempnam()
@@ -53,6 +58,11 @@ create_media_folders(instance_dir)
 
 
 class Context(object):
+    """
+    This is the context for our tests. It provides
+    some required things like the `admin` and `user`
+    attributes to create a overall test experience.
+    """
     admin = None
     user = None
 
@@ -60,6 +70,10 @@ class Context(object):
         self.setup_instance()
 
     def setup_instance(self):
+        """
+        Setup the test context. That means: Create an admin
+        and normal test user.
+        """
         # create admin user
         if not User.objects.get(username='admin'):
             self.admin = admin = User.objects.register_user('admin', 'admin@ubuntuusers.de', 'admin', False)
@@ -80,6 +94,9 @@ class Context(object):
         return instance_dir
 
     def add_forum(self, forum):
+        """Use this method to add a new forum.
+        This method will set the right permissions
+        for the admin user."""
         bits = dict(PRIVILEGES_DETAILS).keys()
         bits = join_flags(*bits)
         privilege = Privilege(
@@ -108,10 +125,13 @@ class ViewTestCase(unittest.TestCase):
         self.client = Client(application)
 
     def open_location(self, path, method='GET', follow_redirects=True):
+        """Open a location (url)"""
         resp = self.client.open(path, method=method, base_url=href(self.component), follow_redirects=True)
         return resp
 
     def get_context(self, path, method='GET'):
+        """This method returns the internal context of the templates
+        so that we can check it in our view-tests."""
         resp = self.open_location(path, method)
 
         # we assume to test a @templated view function. We don't have that much
@@ -122,6 +142,28 @@ class ViewTestCase(unittest.TestCase):
 
 
 def view_test(location=None, method='GET', component='portal'):
+    """
+    This decorator is used to create an easy test-environment. Example usage::
+
+        @view_test('/', component='forum')
+        def test_forum_index(client, tctx, ctx):
+            assert tctx['is_index'] == True
+
+    As you see this decorator adds the following arguments to the function
+    call::
+
+        `client`
+            The test client. It represents a user's browser. Thanks
+            to that the view function is able to create requests and check
+            the responses.
+        `tctx`
+            This is the template context returned by view functions decorated
+            with the @templated decorator. So it's required to test a @templated
+            function if you use the @view_test decorator.
+        `ctx`
+            The overall test context. It's a `Context` instance with some methods
+            and attributes to ensure a easy test experience.
+    """
     def _wrapper(func):
         def decorator(*args, **kwargs):
             client = Client(application)
