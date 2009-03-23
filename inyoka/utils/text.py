@@ -146,7 +146,7 @@ def shorten_filename(name, length=20, suffix=''):
     """
     Shorten the `name` to the specified `length`.
     If `suffix` is given append it before the extension.
-    
+
     >>> shorten_filename("FoobarBaz.tar.gz", 15, "-2")
     'Foobar-2.tar.gz'
     >>> shorten_filename("Foobar.tar.gz", 9, "-1")

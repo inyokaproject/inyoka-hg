@@ -16,7 +16,7 @@ from inyoka.conf import settings
 
 error = False
 
-# If a user uploads an attachment and then cancels posting the attachment is 
+# If a user uploads an attachment and then cancels posting the attachment is
 # not deleted.
 ret = call(['find', 'forum/attachments/temp/', '-ctime', '+1', '-exec', 'rm', '{}', ';'],
           cwd=settings.MEDIA_ROOT, stdout=sys.stdout, stderr=sys.stderr)

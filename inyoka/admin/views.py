@@ -74,9 +74,9 @@ def index(request):
 @require_permission('configuration_edit')
 @templated('admin/configuration.html')
 def config(request):
-    keys = ['max_avatar_width', 'max_avatar_height', 'max_avatar_size', 
-            'max_signature_length', 'max_signature_lines', 'get_ubuntu_link', 
-            'license_note', 'get_ubuntu_description', 'blocked_hosts', 
+    keys = ['max_avatar_width', 'max_avatar_height', 'max_avatar_size',
+            'max_signature_length', 'max_signature_lines', 'get_ubuntu_link',
+            'license_note', 'get_ubuntu_description', 'blocked_hosts',
             'wiki_newpage_template', 'wiki_newpage_root', 'team_icon_height',
             'team_icon_width']
 
@@ -960,7 +960,7 @@ def user_mail(request, username):
             send_mail(
                 'ubuntuusers.de - Nachricht von %s' % request.user.username,
                 message,
-                settings.INYOKA_SYSTEM_USER_EMAIL, 
+                settings.INYOKA_SYSTEM_USER_EMAIL,
                 [user.email])
             #except: # don't know which exception is thrown
             #    flash(u'Die Mail konnte nicht verschickt werden.')
