@@ -124,15 +124,15 @@ class ViewTestCase(unittest.TestCase):
     def setUp(self):
         self.client = Client(application)
 
-    def open_location(self, path, method='GET', follow_redirects=True):
+    def open_location(self, path, method='GET', **kwargs):
         """Open a location (url)"""
-        resp = self.client.open(path, method=method, base_url=href(self.component), follow_redirects=True)
+        resp = self.client.open(path, method=method, base_url=href(self.component), **kwargs)
         return resp
 
-    def get_context(self, path, method='GET'):
+    def get_context(self, path, method='GET', **kwargs):
         """This method returns the internal context of the templates
         so that we can check it in our view-tests."""
-        resp = self.open_location(path, method)
+        resp = self.open_location(path, method, **kwargs)
 
         # we assume to test a @templated view function. We don't have that much
         # view functions where we don't use the @templated decorator.
@@ -141,11 +141,11 @@ class ViewTestCase(unittest.TestCase):
         return resp[0].tmpl_context
 
 
-def view_test(location=None, method='GET', component='portal'):
+def view(location=None, method='GET', component='portal', **bkw):
     """
     This decorator is used to create an easy test-environment. Example usage::
 
-        @view_test('/', component='forum')
+        @view('/', component='forum')
         def test_forum_index(client, tctx, ctx):
             assert tctx['is_index'] == True
 
@@ -163,13 +163,33 @@ def view_test(location=None, method='GET', component='portal'):
         `ctx`
             The overall test context. It's a `Context` instance with some methods
             and attributes to ensure a easy test experience.
+
+    :Parameters:
+        `location` (optional)
+            The script path of the view. E.g ``/forum/foobar/``. If not given
+            the `tctx` supplied as an argument of the test-function will be `None`.
+        `method`
+            The method of the request. It must be one of GET, POST, HEAD, DELETE
+            or PUT.
+        `component`
+            The component of the inyoka portal. E.g portal, forum, paste…
+        `bkw`
+            You can also use the kwargs for all arguments `werkzeug.test.Client.open`
+            uses to supply `data` and other things.
     """
     def _wrapper(func):
         def decorator(*args, **kwargs):
             client = Client(application)
-            resp = client.open(location, method=method, base_url=href(component), follow_redirects=True)
-            assert isinstance(resp[0], TemplateResponse)
-            args = (client, resp[0].tmpl_context, context) + args
+            if not 'follow_redirects' in bkw:
+                bkw['follow_redirects'] = True
+            if location is not None:
+                resp = client.open(location, method=method,
+                                   base_url=href(component), **bkw)
+                assert isinstance(resp[0], TemplateResponse)
+                tctx = resp[0].tmpl_context
+            else:
+                tctx = None
+            args = (client, tctx, context) + args
             return func(*args, **kwargs)
         return patch_wrapper(decorator, func)
     return _wrapper
