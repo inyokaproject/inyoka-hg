@@ -25,9 +25,12 @@
   </div>
   {% if days_to_jaunty <= 30 %}
   <div class="container counter">
-    <img src="{{ href('static', 'img', 'counter', days_to_jaunty|string + '.png') }}" 
-         alt="{{ days_to_jaunty|string }} Tage bis zu Jaunty Jackalope"
-         />
+    <a href="http://wiki.ubuntuusers.de/Jaunty_Jackalope">
+      <img src="{{ href('static', 'img', 'counter', days_to_jaunty|string + '.png') }}" 
+           alt="Noch {{ days_to_jaunty|string }} Tage bis zu Jaunty Jackalope"
+           title="Noch {{ days_to_jaunty|string }} Tage bis zu Jaunty Jackalope"
+           />
+   </a>
   </div>
   {% endif %}
   <div class="container calendar">
