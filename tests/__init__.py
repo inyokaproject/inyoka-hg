@@ -36,6 +36,7 @@ from inyoka.utils.migrations import Migrations
 from inyoka.migrations import MIGRATIONS
 Migrations(MIGRATIONS).upgrade()
 from inyoka.utils.database import metadata
+metadata.clear()
 from inyoka.application import application
 from inyoka.utils import create_media_folders
 from inyoka.utils.cache import set_test_cache
