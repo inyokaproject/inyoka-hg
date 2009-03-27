@@ -3,25 +3,28 @@ How To Install
 
 Inyoka just integrates a nearly full featured test-suite. It's based on the python-module
 `unittest` and on the external library `nosetest`. To get the coverage support running we need
-the `coverage` module. So everything we need to do is entering `easy_install nose coverage`.
+the `coverage` module. So everything we need to do is executing `easy_install nose coverage`.
 And Baam, we got it!
 
 
 How To Run
 ----------
 
-Well, before we can run it we need to setup a test database. It doesn't matter how it's called.
+Well, before we can actually run it we need to setup a test database. It doesn't matter how it's called.
 The name defaults to `inyoka_test` but you can use the environment variable `INYOKA_TEST_DATABASE`
 to choose your own. Just create this database now.
 
 Everything you now need to do is: `make test`
-…and everything runs… or now :-)
+…and everything runs… or not :-)
+
+Hint: If you run the tests the first time all migrations are called.
+      So don't break this process, it just takes a bit.
 
 
 How To Write
 ------------
 
-This chapter is a bit more complex. But actually, writing unittests is easy. You can read
+This chapter is a bit more complex. But actually, writing unittests is very easy. You can read
 http://code.google.com/p/python-nose/wiki/WritingTests to get a basic idea.
 
 Our unittests are well structured and yet good documentated. Every Inyoka-Application (forum, planet etc.)
