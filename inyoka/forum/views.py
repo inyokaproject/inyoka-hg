@@ -543,7 +543,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid() and \
-            ((forum.id in settings.JOKE_FORUMS and captcha_form.is_valid()) or True):
+            ((forum.id in settings.JOKE_FORUMS or newtopic) and captcha_form.is_valid()):
         d = form.cleaned_data
         if not topic:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)

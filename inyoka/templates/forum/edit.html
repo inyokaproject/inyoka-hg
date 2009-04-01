@@ -120,7 +120,7 @@
           <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
       </dd>
     </dl>
-    {% if topic.forum_id in SETTINGS.JOKE_FORUMS %}
+    {% if topic.forum_id in SETTINGS.JOKE_FORUMS or isnewtopic %}
     <hr />
     <dl class="license_note">
       <dt>Bitte beantworte folgende Frage, bevor du deinen Beitrag absendest:</dd>
