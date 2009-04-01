@@ -11,7 +11,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \
-        ForeignKey, DateTime, Boolean, Index
+        ForeignKey, DateTime, Boolean, Index, PickleType
 from inyoka.utils.database import metadata
 
 
@@ -124,6 +124,17 @@ attachment_table = Table('forum_attachment', metadata,
     Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=True),
     Column('mimetype', String(100), nullable=True),
 )
+
+
+tcaptcha_table = Table('forum_tcaptcha', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('question', String(255), nullable=False),
+    Column('multiple_votes', Boolean, default=False, nullable=False),
+    Column('text_votes', Boolean, default=False, nullable=False),
+    Column('answers', String(500)),
+    Column('correct_answers', String(500))
+)
+
 
 # initialize indexes
 Index('viewtopic', post_table.c.topic_id, post_table.c.position)

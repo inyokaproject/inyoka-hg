@@ -111,7 +111,6 @@
     :license: GNU GPL.
 """
 
-
 def _bootstrap():
     """
     Get the inyoka version, store it and

@@ -16,10 +16,59 @@ import math
 from os import listdir
 from os.path import abspath, join, dirname, pardir
 from PIL import ImageFont, ImageDraw, Image, ImageChops, ImageColor
+from django import forms
 from inyoka.utils.http import HttpResponse
 
 
+
 resource_path = abspath(join(dirname(__file__), pardir, 'res'))
+
+
+def clean_answer(self):
+    c = self.captcha
+    data = self.data
+    if not 'answer' in data:
+        data['answer'] = None
+    answer = data.getlist('answer')
+    if c.text_votes:
+        answer = u''.join(answer)
+        if not answer.strip().lower() == c.correct_answers.strip().lower():
+            raise forms.ValidationError(u'Du hast das Captcha falsch beantwortet')
+    elif c.multiple_votes or (not c.text_votes and not c.multiple_votes):
+        ua = filter(None, [x.strip().lower() for x in answer])
+        ca = filter(None, [x.strip().lower() for x in c.correct_answers.split(',')])
+        print "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+        print ua, ca
+        if not ua == ca:
+            raise forms.ValidationError(u'Du hast das Captcha falsch beantwortet')
+    return answer
+
+
+def get_text_captcha_form(captcha):
+    c = captcha
+
+    if c.text_votes:
+        # the answer is a text field
+        answer = forms.CharField(label=u'Antwort', max_length=255)
+    elif c.multiple_votes:
+        # it's a multiple choice field
+        answer = forms.MultipleChoiceField(label=u'Antwort(en)')
+    else:
+        # it's a normal choice field
+        answer = forms.ChoiceField(label=u'Antwort', widget=forms.RadioSelect)
+
+    if c.multiple_votes or (not c.text_votes and not c.multiple_votes):
+        choices = filter(None, [(x.strip().lower(), x.strip())
+                                for x in c.answers.split(',')])
+        answer.choices = choices
+    fields = {
+        'answer': answer,
+    }
+    t = type('TextCaptchaForm', (forms.BaseForm,), {'base_fields': fields})
+    t.clean_answer = clean_answer
+    t.question = c.question
+    t.captcha = captcha
+    return t
 
 
 def generate_word():

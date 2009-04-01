@@ -10,7 +10,7 @@
     :license GNU GPL
     
 #}
-
+{% from 'macros.html' import render_form %}
 {%- extends 'forum/page.html' %}
 {% set navigation_trace = [] %}
 {% for parent in forum.parents %}
@@ -120,6 +120,14 @@
           <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
       </dd>
     </dl>
+    <hr />
+    <dl class="license_note">
+      <dt>Bitte beantworte folgende Frage, bevor du deinen Beitrag absendest:</dd>
+      <dd>{{ captcha_form.question }}</dt>
+      <dd>{{ render_form(captcha_form, ['answer'], inline=true) }}</dd>
+      <input type="hidden" value="{{ captcha_form.captcha.id }}" name="captcha-id" />
+    </dl>
+
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="
       {%- for att in attachments or () %}{% if not loop.first %},{% endif %}{{ att.id }}

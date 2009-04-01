@@ -29,6 +29,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
+from inyoka.utils.captcha import get_text_captcha_form
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
 from inyoka.utils.storage import storage
@@ -41,7 +42,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext
+    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext, TextCaptcha
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -184,7 +185,7 @@ def forum(request, slug, page=1):
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                               forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
-        'can_create': check_privilege(privs, 'create'),
+        'can_create':    check_privilege(privs, 'create'),
     })
     return ctx
 
@@ -345,6 +346,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     attachments = []
     preview = None
     article = None
+
+    #XXX: April Joke! Get the funny Text Captcha ;)
+    if 'captcha-id' in request.POST:
+        captcha = TextCaptcha.query.filter_by(id=int(
+            request.POST['captcha-id'])).first()
+    else:
+        captcha = TextCaptcha.query.limit(1).order_by(func.random()).first()
+    captcha_form = get_text_captcha_form(captcha)
+
     if article_name:
         try:
             article = Page.objects.get(name=normalize_pagename(article_name))
@@ -526,8 +536,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             att_ids.remove(attachment.id)
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
+    if 'send' in request.POST:
+        captcha_form = captcha_form(request.POST)
+    else:
+        captcha_form = captcha_form()
+
     # the user submitted a valid form
-    if 'send' in request.POST and form.is_valid():
+    if 'send' in request.POST and form.is_valid() and captcha_form.is_valid():
         d = form.cleaned_data
         if not topic:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
@@ -655,6 +670,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
+        'captcha_form': captcha_form
     }
 
 

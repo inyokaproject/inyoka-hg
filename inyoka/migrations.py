@@ -1038,6 +1038,21 @@ def add_user_count_posts_flag(m):
     ''')
 
 
+def add_tcaptcha_table(m):
+
+    m.engine.execute('''
+        CREATE TABLE forum_tcaptcha (
+            id INTEGER NOT NULL AUTO_INCREMENT,
+            question VARCHAR(255) NOT NULL,
+            multiple_votes BOOL NOT NULL,
+            text_votes BOOL NOT NULL,
+            answers VARCHAR(500),
+            correct_answers VARCHAR(500),
+            PRIMARY KEY (id)
+        )
+    ''')
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -1063,5 +1078,5 @@ MIGRATIONS = [
     add_negative_privileges, add_reported_topics_storage,
     add_group_is_public_flag, add_notes_to_article_suggestion,
     add_comment_rendered_text_column, add_blog_active_flag,
-    add_user_count_posts_flag, add_limit_avatar_size
+    add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table
 ]

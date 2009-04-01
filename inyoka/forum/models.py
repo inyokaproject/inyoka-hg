@@ -37,7 +37,7 @@ from inyoka.utils.decorators import deferred
 from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table, post_revision_table, \
-        forum_welcomemessage_table, user_group_table
+        forum_welcomemessage_table, user_group_table, tcaptcha_table
 from inyoka.forum.acl import filter_invisible
 from inyoka.portal.user import Group
 
@@ -1354,6 +1354,12 @@ class ReadStatus(object):
         return cPickle.dumps(self.data)
 
 
+class TextCaptcha(object):
+
+    def get_absolute_url(self):
+        return href('admin', 'tcaptchas', 'edit', self.id)
+
+
 dbsession.mapper(SAUser, user_table, properties={
     'groups': relation(SAGroup, secondary=user_group_table,
                        lazy='dynamic')
@@ -1407,3 +1413,4 @@ dbsession.mapper(Poll, poll_table, properties={
 dbsession.mapper(PollOption, poll_option_table)
 dbsession.mapper(PollVote, poll_vote_table)
 dbsession.mapper(WelcomeMessage, forum_welcomemessage_table)
+dbsession.mapper(TextCaptcha, tcaptcha_table)

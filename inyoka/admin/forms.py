@@ -431,3 +431,41 @@ class UserMailForm(forms.Form):
         help_text=u"""Die Nachricht wird als „reiner Text“ abgeschickt. Dein
 Benutzername wird in der Mail als Absender vermerkt."""
     )
+
+
+class AddTextCaptchaQuestion(forms.Form):
+    question = forms.CharField(label=u'Frage', max_length=255,
+        help_text=u'Die Frage an den Benutzer')
+    multiple_votes = forms.BooleanField(label=u'Multi-Choice', required=False,
+        help_text=u'Wenn ausgewählt, können mehrere Antworten richtig sein')
+    text_votes = forms.BooleanField(label=u'Textantwort', required=False,
+        help_text=(u'Wenn ausgewählt, muss die Antwort in ein Textfeld '
+                   u'geschrieben werden'))
+    answers = forms.CharField(label=u'Mögliche Antwort(en)', max_length=500,
+        help_text=(u'Die Antwort(en) die bei der Auswertung als richtig '
+                   u'erkannt werden sollen'))
+    correct_answers = forms.CharField(label=u'Richtige Antwort(en)', max_length=500,
+        help_text=(u'Die Antwort(en) die als richtig gewertet werden sollen.'))
+
+
+    def clean(self):
+        data = self.cleaned_data
+
+    def clean_answers(self):
+        data = self.cleaned_data
+
+        answers = data['answers']
+
+        if data['text_votes'] and data['multiple_votes']:
+            raise forms.ValidationError(u'Multi-Choice Votes können nicht '
+                                        u'mit Text-Antworten kombiniert werden')
+
+        if data['multiple_votes']:
+            answers = [x.strip() for x in answers.split(',')]
+        elif not data['text_votes'] and not data['multiple_votes']:
+            # normal choice or text field.
+            answers = [answers]
+        elif data['text_votes'] and not data['multiple_votes']:
+            answers = answers
+
+        return answers

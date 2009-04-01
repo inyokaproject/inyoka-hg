@@ -38,7 +38,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
-     EditPublicArticleForm
+     EditPublicArticleForm, AddTextCaptchaQuestion
 from inyoka.portal.models import StaticPage, Event, StaticFile
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
@@ -46,7 +46,8 @@ from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
     PRIVILEGES_DETAILS
-from inyoka.forum.models import Forum, Privilege, WelcomeMessage, SAUser
+from inyoka.forum.models import Forum, Privilege, WelcomeMessage, SAUser, \
+    TextCaptcha
 from inyoka.forum.database import forum_table, privilege_table, \
     user_group_table, user_table
 from inyoka.wiki.parser import parse, RenderContext
@@ -1297,4 +1298,64 @@ def styles(request):
         form = EditStyleForm(initial={'styles': storage.get(key, u'')})
     return {
         'form': form
+    }
+
+
+@require_permission('admin_panel')
+@templated('admin/tcaptcha_overview.html')
+def tcaptcha_overview(request, page=1):
+    objects = TextCaptcha.query.all()
+
+    pagination = Pagination(request, objects, page, 25,
+        href('admin', 'tcaptcha', 'questions'))
+
+    return {
+        'captchas': pagination.objects
+    }
+
+
+@require_permission('admin_panel')
+@templated('admin/tcaptcha_edit.html')
+def tcaptchas_edit(request, id=None):
+    new = id is None
+    q = None
+
+    if request.method == 'POST':
+        form = AddTextCaptchaQuestion(request.POST)
+        if form.is_valid():
+            data = form.data
+            if new:
+                q = TextCaptcha()
+            else:
+                q = TextCaptcha.query.filter_by(id=int(id)).first()
+            q.question = data['question']
+            if data.get('multiple_votes', None):
+                q.multiple_votes = data['multiple_votes']
+            if data.get('text_votes', None):
+                q.text_votes = data['text_votes']
+            q.answers = data['answers']
+            q.correct_answers = data['correct_answers']
+            if new:
+                dbsession.save(q)
+            dbsession.commit()
+            flash(u'Die neue Frage wurde erfolgreich angelegt!', True)
+            return HttpResponseRedirect(url_for(q))
+        else:
+            flash(u'Es traten Fehler auf. Bitte behebe diese', False)
+
+    else:
+        if new:
+            form = AddTextCaptchaQuestion()
+        else:
+            q = TextCaptcha.query.filter_by(id=int(id)).first()
+            form = AddTextCaptchaQuestion(initial={
+                'question': q.question,
+                'multiple_votes': q.multiple_votes,
+                'no_votes': q.text_votes,
+                'answers':  q.answers,
+                'correct_answers': q.correct_answers
+            })
+
+    return {
+        'form': form,
     }
