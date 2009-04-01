@@ -37,7 +37,7 @@ def clean_answer(self):
     elif c.multiple_votes or (not c.text_votes and not c.multiple_votes):
         ua = filter(None, [x.strip().lower() for x in answer])
         ca = filter(None, [x.strip().lower() for x in c.correct_answers.split(',')])
-        if not ua == ca:
+        if not ua.sort() == ca.sort():
             raise forms.ValidationError(u'Du hast das Captcha falsch beantwortet')
     return answer
 
