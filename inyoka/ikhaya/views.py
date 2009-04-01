@@ -267,7 +267,7 @@ def suggestion_delete(request, suggestion):
                     'note':     request.POST['note']
                 }
                 send_notification(s.author, u'suggestion_rejected',
-                                  u'Ikhaya-Vorschlag abgelehnt', args)
+                                  u'Ikhaya-Vorschlag gelöscht', args)
             cache.delete('ikhaya/suggestion_count')
             s.delete()
             flash(u'Der Vorschlag wurde gelöscht.', True)
