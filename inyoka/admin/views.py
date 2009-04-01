@@ -1307,7 +1307,7 @@ def tcaptcha_overview(request, page=1):
     objects = TextCaptcha.query.all()
 
     pagination = Pagination(request, objects, page, 25,
-        href('admin', 'tcaptcha', 'questions'))
+        href('admin', 'tcaptchas'))
 
     return {
         'captchas': pagination.objects,
