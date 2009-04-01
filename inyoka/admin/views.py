@@ -1310,7 +1310,8 @@ def tcaptcha_overview(request, page=1):
         href('admin', 'tcaptcha', 'questions'))
 
     return {
-        'captchas': pagination.objects
+        'captchas': pagination.objects,
+        'pagination': pagination
     }
 
 
