@@ -81,9 +81,9 @@
         </script>
         {%- for comment in comments %}
         {%- if comment.deleted and not can_admin_comment %}
-        <tr class="deleted">
+        {# <tr class="deleted">
           <td colspan="2">Dieser Kommentar wurde von einem Moderator gelöscht.</td>
-        </tr>
+        </tr> #}
         {%- else %}
         <tr id="comment_{{ loop.index }}"{% if comment.deleted %} class="hidden"{% endif %}>
           {{ user_column(comment.author) }}
