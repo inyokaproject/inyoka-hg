@@ -37,8 +37,6 @@ def clean_answer(self):
     elif c.multiple_votes or (not c.text_votes and not c.multiple_votes):
         ua = filter(None, [x.strip().lower() for x in answer])
         ca = filter(None, [x.strip().lower() for x in c.correct_answers.split(',')])
-        print "xxxxxxxxxxxxxxxxxxxxxxxxxx"
-        print ua, ca
         if not ua == ca:
             raise forms.ValidationError(u'Du hast das Captcha falsch beantwortet')
     return answer
@@ -60,6 +58,7 @@ def get_text_captcha_form(captcha):
     if c.multiple_votes or (not c.text_votes and not c.multiple_votes):
         choices = filter(None, [(x.strip().lower(), x.strip())
                                 for x in c.answers.split(',')])
+        random.shuffle(choices)
         answer.choices = choices
     fields = {
         'answer': answer,
