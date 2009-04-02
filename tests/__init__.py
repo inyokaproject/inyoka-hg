@@ -74,7 +74,9 @@ class Context(object):
         and normal test user.
         """
         # create admin user
-        if not User.objects.get(username='admin'):
+        try:
+            User.objects.get(username='admin')
+        except User.DoesNotExist:
             self.admin = admin = User.objects.register_user('admin', 'admin@ubuntuusers.de', 'admin', False)
             permissions = 0
             for perm in PERMISSION_NAMES.keys():
@@ -88,7 +90,9 @@ class Context(object):
                 self.add_forum(forum)
 
         # create the test user
-        if not User.objects.get(username='test'):
+        try:
+            User.objects.get(username='test')
+        except User.DoesNotExist:
             self.user = user = User.objects.register_user('test', 'test@ubuntuusers.de', 'test', False)
         return instance_dir
 
