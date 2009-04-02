@@ -54,7 +54,14 @@
       {%- endif %}
       <dt class="text">Text:</dt>
       <dd class="text">
-        <textarea id="id_text" rows="10" cols="40" name="text"{% if topic.locked and can_moderate %} class="mod_action"{% endif %}>{{ (form.data.text or form.initial.text)|e }}</textarea>
+      {# There must be another solution to cann `form.text` and modify the attributes in place… --entequak #}
+        <textarea id="id_text" rows="10" cols="40" name="text"{% if topic.locked and can_moderate %} class="mod_action"{% endif %}>
+        {% if form.data.text %}
+        {{ form.data.text|e }}
+        {% elif form.initial.text != none %}
+        {{ form.initial.text|e }}
+        {% endif %}
+        </textarea>
         {{ form.errors.text }}
       </dd>
       {%- if storage['license_note_rendered'] %}
