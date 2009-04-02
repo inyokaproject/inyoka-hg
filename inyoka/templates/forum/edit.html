@@ -58,7 +58,7 @@
         <textarea id="id_text" rows="10" cols="40" name="text"{% if topic.locked and can_moderate %} class="mod_action"{% endif %}>
         {%- if form.data.text -%}
         {{ form.data.text|e }}
-        {% elif form.initial.text != none %}
+        {%- elif form.initial.text != none -%}
         {{ form.initial.text|e }}
         {%- endif -%}
         </textarea>
