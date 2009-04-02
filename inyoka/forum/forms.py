@@ -52,7 +52,7 @@ class EditPostForm(forms.Form):
     # topic.
     #: the user can select, whether the post's topic should be sticky or not.
     sticky = forms.BooleanField(required=False)
-    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}));
+    title = forms.CharField(widget=forms.TextInput(attrs={'size':60}))
     ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
                                                 required=False)
     ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
