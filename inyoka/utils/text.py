@@ -19,7 +19,6 @@ import unicodedata
 _str_num_re = re.compile(r'(?:[^\d]*(\d+)[^\d]*)+')
 _path_crop = re.compile(r'^(..?/)+')
 _unsupported_re = re.compile(r'[\x00-\x19#%?]+')
-_punctuation_re = re.compile(r'[\s!"#$%&\'()*\-/<=>?@\[\\\]^_`{|},;]+')
 _slugify_replacement_table = {
     u'\xdf': 'ss',
     u'\xe4': 'ae',
@@ -27,9 +26,10 @@ _slugify_replacement_table = {
     u'\xf0': 'dh',
     u'\xf6': 'oe',
     u'\xfc': 'ue',
-    u'\xfe': 'th'
+    u'\xfe': 'th',
 }
-
+_slugify_word_re = re.compile(ur'[^a-zA-Z0-9%s]+' %
+    u''.join(re.escape(c) for c in _slugify_replacement_table.keys()))
 
 
 def increment_string(s):
@@ -62,7 +62,7 @@ def slugify(string, convert_lowercase=True):
     result = []
     if convert_lowercase:
         string = string.lower()
-    for word in _punctuation_re.split(string.strip()):
+    for word in _slugify_word_re.split(string.strip()):
         if word:
             for search, replace in _slugify_replacement_table.iteritems():
                 word = word.replace(search, replace)
