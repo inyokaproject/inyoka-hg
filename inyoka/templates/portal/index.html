@@ -81,7 +81,7 @@
           {%- elif article.comment_count == 1 %} Ein Kommentar
           {%- else %} {{ article.comment_count|hnumber|capitalize }} Kommentare
           {%- endif %}  
-          </span>
+          </a>
         {%- endif %}
       </div>
       <a href="{{ article|url }}">{{ article.subject|e }}</a>
