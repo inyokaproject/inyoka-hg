@@ -14,6 +14,7 @@ import os
 import random
 import posixpath
 import unicodedata
+from inyoka.conf import settings
 
 
 _str_num_re = re.compile(r'(?:[^\d]*(\d+)[^\d]*)+')
@@ -59,6 +60,8 @@ def get_random_password():
 
 def slugify(string, convert_lowercase=True):
     """Slugify a string."""
+    if isinstance(string, str):
+        string = string.decode(settings.DEFAULT_CHARSET)
     result = []
     if convert_lowercase:
         string = string.lower()
