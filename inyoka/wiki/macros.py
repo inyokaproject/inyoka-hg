@@ -26,6 +26,7 @@
     :license: GNU GPL.
 """
 import random
+import string
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
@@ -629,7 +630,8 @@ class TagList(Macro):
             active_tag = context.request.GET.get('tag')
         result = nodes.List('unordered', class_='taglist')
         if active_tag:
-            for page in Page.objects.find_by_tag(active_tag):
+            pages = Page.objects.find_by_tag(active_tag)
+            for page in sorted(pages, key=string.lower):
                 item = nodes.ListItem([nodes.InternalLink(page)])
                 result.children.append(item)
         else:
