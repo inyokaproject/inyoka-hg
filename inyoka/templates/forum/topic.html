@@ -136,7 +136,8 @@
     {%- for post in posts %}
       {%- if post.hidden and not can_moderate %}
       <tr class="deleted">
-        <td colspan="2">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
+        <td class="author"></td>
+        <td class="post">Dieser Beitrag wurde von einem Moderator gelöscht.</td>
       </tr>
       {%- else %}
       <tr id="post-{{ post.id }}"{% if post.hidden %} class="hidden"{% endif %}>
