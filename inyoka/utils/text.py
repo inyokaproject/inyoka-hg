@@ -77,7 +77,7 @@ def slugify(string, convert_lowercase=True):
 def human_number(number, genus=None):
     """Numbers from 1 - 12 are words."""
     if not 0 < number <= 12:
-        return number
+        return str(number)
     if number == 1:
         return {
             'masculine':    'ein',
