@@ -742,7 +742,7 @@ def usercp_subscriptions(request, page=1, notified_only=False):
                 for s in pagination.objects:
                     if str(s.id) in d['select']:
                         s.notified = False
-                    pagination.objects.sort(key=lambda s: s.notified, reverse=True)
+                    list(pagination.objects).sort(key=lambda s: s.notified, reverse=True)
 
     return {
         'subscriptions':    pagination.objects,
