@@ -180,3 +180,7 @@ div.conflict strong {
 div.code pre {
     max-height: none;
 }
+
+.tagcloud { 
+    text-align: center;
+}
