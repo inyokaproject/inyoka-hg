@@ -603,7 +603,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             # article and send notifications.
             article.topic_id = topic.id
             article.save()
-            for s in Subscription.objects.filter(wiki_page=article):
+            for s in Subscription.objects.filter(wiki_page=article) \
+                                         .exclude(user=request.user):
                 # also notify if the user has not yet visited the page,
                 # since otherwise he would never know about the topic
                 send_notification(s.user, 'new_page_discussion', u'Neue Diskussion für die '
