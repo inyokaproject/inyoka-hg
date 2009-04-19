@@ -104,7 +104,7 @@ def save_file(url):
         f.write(content)
         f.close()
         DONE_SRCS[hash] = fname
-    return os.path.join('/_', DONE_SRCS[hash])
+    return os.path.join('./_', DONE_SRCS[hash])
 
 
 def fix_path(pth):
