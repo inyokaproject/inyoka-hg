@@ -63,13 +63,19 @@ div.body {
   padding: 10px 0 20px 0;
 }
 
-a, :link {
+a, :link, :visited {
   color: #956205;
   text-decoration: underline;
   cursor: pointer;
 }
 
-a:visited {
+.content .post .text :visited,
+.content #page :visited,
+.content .article .intro :visited,
+.content .article .text :visited,
+.prvmsg_body :visited,
+.preview :visited
+{
   color: #3d2802;
 }
 
