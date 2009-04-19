@@ -63,10 +63,14 @@ div.body {
   padding: 10px 0 20px 0;
 }
 
-a, :link, :visited {
+a, :link {
   color: #956205;
   text-decoration: underline;
   cursor: pointer;
+}
+
+a:visited {
+  color: #3d2802;
 }
 
 a img, :link img, :visited img {
