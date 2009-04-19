@@ -23,6 +23,8 @@ from itertools import cycle, izip
 from werkzeug import url_unquote
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
+from inyoka.wiki.acl import has_privilege
+from inyoka.portal.user import User
 
 FOLDER = 'static_wiki'
 URL = href('wiki')
@@ -33,7 +35,7 @@ TAB_RE = re.compile(r'(<div class="navi_tabbar navigation">).+?(</div>)', re.DOT
 META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
 NAVI_RE = re.compile(r'(<ul class="navi_global">).+?(</ul>)', re.DOTALL)
 IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
-LINK_RE = re.compile(r'href="%s' % href('wiki'))
+LINK_RE = re.compile(r'href="%s([^"]+)"' % href('wiki'))
 SNAPSHOT_MESSAGE = u'''<div class="message">
 <strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann weder bearbeitet werden noch kann dieser veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
 </div>''' % URL
@@ -105,6 +107,10 @@ def save_file(url):
     return os.path.join('/_', DONE_SRCS[hash])
 
 
+def fix_path(pth):
+    return pth.replace(' ', '_').lower()
+
+
 def handle_src(match):
     return u'src="%s"' % save_file(match.groups()[0])
 
@@ -113,8 +119,12 @@ def handle_img(match):
     return u'href="%s"' % save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))))
 
 
-def fix_path(pth):
-    return pth.replace(' ', '_').lower()
+def handle_link(parts):
+    def replacer(match):
+        pre = link = (parts and u''.join('../' for i in xrange(parts)) or './')
+        return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+    return replacer
+
 
 
 def create_snapshot():
@@ -123,6 +133,8 @@ def create_snapshot():
         shutil.rmtree(FOLDER)
     except OSError:
         pass
+
+    user = User.objects.get_anonymous_user()
 
     # create the folder structure
     os.mkdir(FOLDER)
@@ -133,8 +145,9 @@ def create_snapshot():
 
     pages = Page.objects.get_page_list(existing_only=True)
     for percent, name in izip(percentize(len(pages)), pages):
+        parts = 0
 
-        if '/Baustelle/' in name:
+        if '/Baustelle/' in name or '/Benutzer' in name or not has_privilege(user, name, 'read'):
             continue
 
         page = Page.objects.get(name=name)
@@ -149,6 +162,7 @@ def create_snapshot():
                 pth = path.join(FOLDER, *fix_path(part).split('/'))
                 if not path.exists(pth):
                     os.mkdir(pth)
+                parts += 1
 
         content = fetch_page(name)
         pb.update(percent)
@@ -160,7 +174,7 @@ def create_snapshot():
         content = NAVI_RE.sub('', content)
         content = IMG_RE.sub(handle_img, content)
         content = SRC_RE.sub(handle_src, content)
-        content = LINK_RE.sub('href="/', content)
+        content = LINK_RE.sub(handle_link(parts), content)
         content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
 
         f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
