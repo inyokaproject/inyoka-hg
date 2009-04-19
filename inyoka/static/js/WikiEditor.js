@@ -24,23 +24,6 @@
   /* indentation size */
   var INDENTATION = 2;
 
-  /* number of colors */
-  var COLORS = [
-    '#DA0000',
-    '#D97000',
-    '#D9BF00',
-    '#A6D900',
-    '#45D900',
-    '#00D99B',
-    '#00ADD9',
-    '#0057D9',
-    '#0000D9',
-    '#8200D9',
-    '#910074',
-    '#474747',
-    '#888888',
-    '#C5C5C5'
-  ];
   var CODES = {
     'text': 'Code ohne Highlighting',
     'bash': 'Bash',
@@ -231,31 +214,6 @@
       $(document).click(function() {
         if (codebox.is(':visible'))
           codebox.slideUp('fast');
-      });
-      return result;
-    }),
-    (function(editor) {
-      if (editor.profile != 'forum')
-        return;
-      var result = $('<div />');
-      button('color', 'Farbe', function(evt) {
-        colorbox.slideToggle('fast');
-        return false;
-      }, ['forum'], help("[color=FARBE]Text[/color]"))(editor).appendTo(result);
-      var colorbox = $('<ul class="colorbox" />').appendTo(result).hide();
-      colorbox[0].style.display = 'none'; //hide box in safari
-      $.each(COLORS, function() {
-        var color = this;
-        $('<li />')
-          .css('background-color', color)
-          .click(function() {
-            editor.insertTag('[color=' + color + ']%s[/color]', 'Eingefärbter Text');
-          })
-          .appendTo(colorbox);
-      });
-      $(document).click(function() {
-        if (colorbox.is(':visible'))
-          colorbox.slideUp('fast');
       });
       return result;
     }),
