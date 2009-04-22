@@ -403,7 +403,7 @@ def search(request):
     forums = filter_invisible(request.user, Forum.query.
                               order_by(Forum.position.asc()).all())
     for offset, forum in Forum.get_children_recursive(forums):
-        f.fields['forums'].choices.append((forum.id, u'  ' * offset + forum.name))
+        f.fields['forums'].choices.append((forum.slug, u'  ' * offset + forum.name))
 
     if f.is_valid():
         d = f.cleaned_data
