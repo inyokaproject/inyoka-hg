@@ -966,7 +966,6 @@ BINARY_FUNCTIONS = {
                                      is not None,
     'join_with':        join_array,
     'split_by':         lambda a, b: unicode(a).split(unicode(b)),
-    'randint':          lambda a, b: random.randint(a, b),
 }
 
 CONVERTER = {
@@ -982,6 +981,7 @@ CONVERTER = {
                                   replace('"', '\\"'),
     'escaped':          lambda x: escape(unicode(x)),
     'array_of_lines':   lambda x: unicode(x).splitlines(),
+    'randint':          lambda a, b: random.randint(a, b)
 }
 
 TESTS = {
