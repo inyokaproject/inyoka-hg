@@ -965,7 +965,8 @@ BINARY_FUNCTIONS = {
     'matches_regex':    lambda a, b: re.match(unicode(b), unicode(a)) \
                                      is not None,
     'join_with':        join_array,
-    'split_by':         lambda a, b: unicode(a).split(unicode(b))
+    'split_by':         lambda a, b: unicode(a).split(unicode(b)),
+    'randint':          lambda a, b: random.randint(a, b),
 }
 
 CONVERTER = {
@@ -980,7 +981,7 @@ CONVERTER = {
                                   replace('\\', '\\\\') .
                                   replace('"', '\\"'),
     'escaped':          lambda x: escape(unicode(x)),
-    'array_of_lines':   lambda x: unicode(x).splitlines()
+    'array_of_lines':   lambda x: unicode(x).splitlines(),
 }
 
 TESTS = {

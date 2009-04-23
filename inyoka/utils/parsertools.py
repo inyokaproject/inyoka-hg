@@ -198,8 +198,9 @@ class OrderedDict(dict):
         return (key, val)
 
     def setdefault(self, key, failobj = None):
-        dict.setdefault(self, key, failobj)
+        ret = dict.setdefault(self, key, failobj)
         if key not in self._keys: self._keys.append(key)
+        return ret
 
     def update(self, dct):
         dict.update(self, dct)

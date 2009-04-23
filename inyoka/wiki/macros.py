@@ -30,7 +30,7 @@ import string
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
-from inyoka.wiki.parser import nodes
+from inyoka.wiki.parser import render, parse, nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision
@@ -1004,6 +1004,70 @@ class RandomMirror(Macro):
         return nodes.Text(url)
 
 
+class RandomQuote(Macro):
+    arguments = (
+        ('page', unicode, ''),
+        ('key', unicode, '')
+    )
+
+    def __init__(self, page, key):
+        self.page = page
+        self.key = key
+
+    def build_node(self, context, format):
+        try:
+            page = Page.objects.get_by_name(self.page)
+        except Page.DoesNotExist:
+            return nodes.error_box(u'Seite nicht gefunden',
+                                   u'Die Seite „%s“ wurde nicht '
+                                   u'gefunden.' % self.page)
+        doc = page.rev.text.parse()
+        stack = OrderedDict()
+        last_cat = None
+        buffer = []
+        for _ in doc.query.by_type(nodes.Section):
+            for node in _.children:
+                print node
+                if isinstance(node, nodes.Headline) and node.level == 1:
+                    if last_cat:
+                        stack[last_cat]['description'] = u''.join(x.text for x in buffer).strip()
+                    buffer = []
+                    id = node.id
+                    stack.setdefault(id, {}).update({
+                        'name':  u''.join(x.text for x in node.query.children)
+                    })
+                    last_cat = id
+                elif isinstance(node, nodes.List):
+                    # values for the key
+                    mirrors = random.choice(node.children)
+                    quote = u''.join(x.text for x in mirrors.query.children)
+
+                    stack.setdefault(last_cat, {}).update({
+                        'quote': quote
+                    })
+                elif isinstance(node, nodes.Paragraph):
+                    buffer.append(node)
+
+
+        if self.key:
+            if not self.key in stack:
+                return nodes.error_box(u'Der Schlüssel „%s” wurde nicht '
+                                       u'definiert.' % self.key)
+            cat = stack[self.key]
+            if cat['description']:
+                return nodes.Link(cat['quote'], children=[nodes.Text(cat['description'])])
+            return nodes.Text(cat['quote'])
+        else:
+            result = nodes.Container()
+            for v in stack.values():
+                desc = nodes.Strong(children=[nodes.Text(v['name'])])
+                value_list = nodes.List('unordered', children=[
+                    nodes.Link(v['quote'])
+                ])
+                result.children.extend([desc, value_list])
+            return result
+
+
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {
@@ -1030,6 +1094,7 @@ ALL_MACROS = {
     u'ÄhnlicheSeiten':      SimilarPages,
     u'SPAN':                Span,
     u'ZufälligerServer':    RandomMirror,
+    u'ZufallsZitat':        RandomQuote
 }
 
 
