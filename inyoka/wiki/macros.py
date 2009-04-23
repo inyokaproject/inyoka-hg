@@ -1027,10 +1027,9 @@ class RandomQuote(Macro):
         buffer = []
         for _ in doc.query.by_type(nodes.Section):
             for node in _.children:
-                print node
                 if isinstance(node, nodes.Headline) and node.level == 1:
-                    if last_cat:
-                        stack[last_cat]['description'] = u''.join(x.text for x in buffer).strip()
+                    #if last_cat:
+                    #    stack[last_cat]['description'] = u''.join(x.text for x in buffer).strip()
                     buffer = []
                     id = node.id
                     stack.setdefault(id, {}).update({
@@ -1053,8 +1052,8 @@ class RandomQuote(Macro):
                 return nodes.error_box(u'Der Schlüssel „%s” wurde nicht '
                                        u'definiert.' % self.key)
             cat = stack[self.key]
-            if cat.get('description', None):
-                return nodes.Link(cat['quote'], children=[nodes.Text(cat['description'])])
+            #if cat.get('description', None):
+            #    return nodes.Link(cat['quote'], children=[nodes.Text(cat['description'])])
             return nodes.Text(cat['quote'])
         else:
             result = nodes.Container()
