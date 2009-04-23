@@ -28,6 +28,7 @@ r"""
 import re
 import operator
 import math
+import random
 from inyoka.wiki.parser import unescape_string, escape
 from inyoka.wiki.utils import debug_repr, simple_match
 from inyoka.utils.parsertools import TokenStream
