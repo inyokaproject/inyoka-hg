@@ -1043,18 +1043,17 @@ class RandomQuote(Macro):
                     quote = u''.join(x.text for x in mirrors.query.children)
 
                     stack.setdefault(last_cat, {}).update({
-                        'quote': quote
+                        'quote': quote.strip()
                     })
                 elif isinstance(node, nodes.Paragraph):
                     buffer.append(node)
-
 
         if self.key:
             if not self.key in stack:
                 return nodes.error_box(u'Der Schlüssel „%s” wurde nicht '
                                        u'definiert.' % self.key)
             cat = stack[self.key]
-            if cat['description']:
+            if cat.get('description', None):
                 return nodes.Link(cat['quote'], children=[nodes.Text(cat['description'])])
             return nodes.Text(cat['quote'])
         else:
