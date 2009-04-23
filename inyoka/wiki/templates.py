@@ -981,7 +981,7 @@ CONVERTER = {
                                   replace('"', '\\"'),
     'escaped':          lambda x: escape(unicode(x)),
     'array_of_lines':   lambda x: unicode(x).splitlines(),
-    'randint':          lambda a, b: random.randint(a, b)
+    'randint':          lambda x: random.randint(1, x)
 }
 
 TESTS = {
