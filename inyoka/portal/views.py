@@ -97,7 +97,7 @@ def index(request):
         'record_time':              record_time,
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
-        'days_to_jaunty':           (date(2009, 04, 23) - date.today()).days,
+        'days_to_jaunty':           max((date(2009, 04, 23) - date.today()).days, 0),
         'calendar_events':          events,
     }
 
