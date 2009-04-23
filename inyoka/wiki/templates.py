@@ -28,6 +28,7 @@ r"""
 import re
 import operator
 import math
+import random
 from inyoka.wiki.parser import unescape_string, escape
 from inyoka.wiki.utils import debug_repr, simple_match
 from inyoka.utils.parsertools import TokenStream
@@ -966,7 +967,6 @@ BINARY_FUNCTIONS = {
                                      is not None,
     'join_with':        join_array,
     'split_by':         lambda a, b: unicode(a).split(unicode(b)),
-    'randint':          lambda a, b: random.randint(a, b),
 }
 
 CONVERTER = {
@@ -982,6 +982,7 @@ CONVERTER = {
                                   replace('"', '\\"'),
     'escaped':          lambda x: escape(unicode(x)),
     'array_of_lines':   lambda x: unicode(x).splitlines(),
+    'randint':          lambda x: float(random.randint(1.0, x))
 }
 
 TESTS = {
