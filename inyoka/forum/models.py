@@ -236,6 +236,8 @@ class PostMapperExtension(MapperExtension):
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
+        if not instance.topic:
+            return
         forums = instance.topic.forum.parents
         forums.append(instance.topic.forum)
         parent_ids = list(p.id for p in forums)
