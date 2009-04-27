@@ -6,8 +6,9 @@
 
     Creates a snapshot of all wiki pages in HTML format.
 
-    :copyright: 2008 by Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: 2008 by Benjamin Wiegand
+                2009 by Christopher Grebs.
+    :license: GNU GPL, see LICENSE for more details..
 """
 import os
 import re
@@ -21,6 +22,7 @@ from urllib import quote
 from datetime import datetime
 from itertools import cycle, izip
 from werkzeug import url_unquote
+from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
@@ -36,10 +38,23 @@ META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
 NAVI_RE = re.compile(r'(<ul class="navi_global">).+?(</ul>)', re.DOTALL)
 IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
 LINK_RE = re.compile(r'href="%s([^"]+)"' % href('wiki'))
+STARTPAGE_RE = re.compile(r'href="(%s)"' % href('wiki'))
+ERROR_REPORT_RE = re.compile(r'<a href=".[^"]+" id="user_error_report_link">Fehler melden</a><br/>')
+
+GLOBAL_MESSAGE_RE = re.compile(r'(<div class="message global">).+?(</div>)', re.DOTALL)
+
 SNAPSHOT_MESSAGE = u'''<div class="message">
-<strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann weder bearbeitet werden noch kann dieser veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
+<strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann nicht bearbeitet werden und veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
 </div>''' % URL
 
+EXCLUDE_PAGES = [u'Benutzer/', u'Anwendertreffen/', u'Baustelle/', u'LocoTeam/',
+                 u'Wiki/Vorlagen', u'Vorlage/', u'Verwaltung/', u'Galerie', 'Trash/',
+                 u'Messen/', u'UWN-Team/']
+# we're case insensitive
+EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
+
+
+INCLUDE_IMAGES = False
 
 # original from Jochen Kupperschmidt with some modifications
 class ProgressBar(object):
@@ -89,6 +104,8 @@ def fetch_page(name):
 
 
 def save_file(url):
+    if not INCLUDE_IMAGES:
+        return ""
     if url.startswith('/'):
         url = os.path.join(URL, url[1:])
     hash = md5(url).hexdigest()
@@ -100,7 +117,7 @@ def save_file(url):
         except:
             ext = content = ''
         fname = '%s.%s' % (hash, ext)
-        f = file(os.path.join(FOLDER, '_', fname), 'wb+')
+        f = file(os.path.join(FOLDER, 'files', '_', fname), 'wb+')
         f.write(content)
         f.close()
         DONE_SRCS[hash] = fname
@@ -111,20 +128,27 @@ def fix_path(pth):
     return pth.replace(' ', '_').lower()
 
 
-def handle_src(match):
-    return u'src="%s"' % save_file(match.groups()[0])
-
-
-def handle_img(match):
-    return u'href="%s"' % save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))))
-
-
-def handle_link(parts):
+def replacer(func, parts):
+    pre = (parts and u''.join('../' for i in xrange(parts)) or './')
     def replacer(match):
-        pre = link = (parts and u''.join('../' for i in xrange(parts)) or './')
-        return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+        return func(match, pre)
     return replacer
 
+
+def handle_src(match, pre):
+    return u'src="%s%s"' % (pre, save_file(match.groups()[0]))
+
+
+def handle_img(match, pre):
+    return u'href="%s%s"' % (pre, save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8')))))
+
+
+def handle_link(match, pre):
+    return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+
+
+def startpage_link(match, pre):
+    return u'href="%s%s.html"' % (pre, settings.WIKI_MAIN_PAGE.lower())
 
 
 def create_snapshot():
@@ -138,28 +162,44 @@ def create_snapshot():
 
     # create the folder structure
     os.mkdir(FOLDER)
-    attachment_folder = path.join(FOLDER, '_')
+    os.mkdir(path.join(FOLDER, 'files'))
+    attachment_folder = path.join(FOLDER, 'files', '_')
     os.mkdir(attachment_folder)
 
     pb = ProgressBar(40)
 
-    pages = Page.objects.get_page_list(existing_only=True)
+    unsorted = Page.objects.get_page_list(existing_only=True)
+    pages = set()
+    excluded_pages = set()
+    # sort out excluded pages
+    for page in unsorted:
+        for exclude in EXCLUDE_PAGES:
+            if exclude in page.lower():
+                excluded_pages.add(page)
+            else:
+                pages.add(page)
+    pages = pages - excluded_pages
+
+
     for percent, name in izip(percentize(len(pages)), pages):
         parts = 0
 
-        if '/Baustelle/' in name or '/Benutzer' in name or not has_privilege(user, name, 'read'):
+        if not has_privilege(user, name, 'read'):
             continue
 
-        page = Page.objects.get(name=name)
-        rev = page.revisions.all()[0]
-        if rev.attachment:
+        page = Page.objects.get_by_name(name, False, True)
+        if page.name in excluded_pages:
+            # however these are not filtered before…
+            continue
+
+        if page.rev.attachment:
             # page is an attachment
             continue
         if len(page.trace) > 1:
             # page is a subpage
             # create subdirectories
             for part in page.trace[:-1]:
-                pth = path.join(FOLDER, *fix_path(part).split('/'))
+                pth = path.join(FOLDER, 'files', *fix_path(part).split('/'))
                 if not path.exists(pth):
                     os.mkdir(pth)
                 parts += 1
@@ -172,15 +212,20 @@ def create_snapshot():
 
         content = META_RE.sub('', content)
         content = NAVI_RE.sub('', content)
-        content = IMG_RE.sub(handle_img, content)
-        content = SRC_RE.sub(handle_src, content)
-        content = LINK_RE.sub(handle_link(parts), content)
+        content = ERROR_REPORT_RE.sub('', content)
+        content = GLOBAL_MESSAGE_RE.sub('', content)
+        content = IMG_RE.sub(replacer(handle_img, parts), content)
+        content = SRC_RE.sub(replacer(handle_src, parts), content)
+        content = LINK_RE.sub(replacer(handle_link, parts), content)
+        content = STARTPAGE_RE.sub(replacer(startpage_link, parts), content)
         content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
 
-        f = file(path.join(FOLDER, '%s.html' % fix_path(page.name)), 'w+')
+        f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
         #time.sleep(2)
+    os.symlink(path.join(FOLDER, 'files', '%s.html' % settings.WIKI_MAIN_PAGE.lower()),
+               path.join(FOLDER, '%s.html' % settings.WIKI_MAIN_PAGE.lower()))
 
 
 if __name__ == '__main__':
