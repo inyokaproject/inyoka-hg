@@ -103,8 +103,8 @@ def fetch_page(name):
     return data
 
 
-def save_file(url):
-    if not INCLUDE_IMAGES:
+def save_file(url, is_main_page=False):
+    if not INCLUDE_IMAGES and not is_main_page:
         return ""
     if url.startswith('/'):
         url = os.path.join(URL, url[1:])
@@ -128,26 +128,26 @@ def fix_path(pth):
     return pth.replace(' ', '_').lower()
 
 
-def replacer(func, parts):
+def replacer(func, parts, is_main_page):
     pre = (parts and u''.join('../' for i in xrange(parts)) or './')
     def replacer(match):
-        return func(match, pre)
+        return func(match, pre, is_main_page)
     return replacer
 
 
-def handle_src(match, pre):
-    return u'src="%s%s"' % (pre, save_file(match.groups()[0]))
+def handle_src(match, pre, is_main_page):
+    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page))
 
 
-def handle_img(match, pre):
-    return u'href="%s%s"' % (pre, save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8')))))
+def handle_img(match, pre, is_main_page):
+    return u'href="%s%s"' % (pre, save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))), is_main_page))
 
 
-def handle_link(match, pre):
+def handle_link(match, pre, is_main_page):
     return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
 
 
-def startpage_link(match, pre):
+def startpage_link(match, pre, is_main_page):
     return u'href="%s%s.html"' % (pre, settings.WIKI_MAIN_PAGE.lower())
 
 
@@ -182,6 +182,7 @@ def create_snapshot():
 
 
     for percent, name in izip(percentize(len(pages)), pages):
+        is_main_page = False
         parts = 0
 
         if not has_privilege(user, name, 'read'):
@@ -191,6 +192,9 @@ def create_snapshot():
         if page.name in excluded_pages:
             # however these are not filtered before…
             continue
+
+        if page.name == settings.WIKI_MAIN_PAGE:
+            is_main_page = True
 
         if page.rev.attachment:
             # page is an attachment
@@ -214,16 +218,17 @@ def create_snapshot():
         content = NAVI_RE.sub('', content)
         content = ERROR_REPORT_RE.sub('', content)
         content = GLOBAL_MESSAGE_RE.sub('', content)
-        content = IMG_RE.sub(replacer(handle_img, parts), content)
-        content = SRC_RE.sub(replacer(handle_src, parts), content)
-        content = LINK_RE.sub(replacer(handle_link, parts), content)
-        content = STARTPAGE_RE.sub(replacer(startpage_link, parts), content)
+        content = IMG_RE.sub(replacer(handle_img, parts, is_main_page), content)
+        content = SRC_RE.sub(replacer(handle_src, parts, is_main_page), content)
+        content = LINK_RE.sub(replacer(handle_link, parts, is_main_page), content)
+        content = STARTPAGE_RE.sub(replacer(startpage_link, parts, is_main_page), content)
         content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
 
         f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
         #time.sleep(2)
+    os.chdir(FOLDER)
     os.symlink('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
                '%s.html' % settings.WIKI_MAIN_PAGE.lower())
 
