@@ -224,8 +224,8 @@ def create_snapshot():
         f.write(content.encode('utf8'))
         f.close()
         #time.sleep(2)
-    os.symlink(path.join(FOLDER, 'files', '%s.html' % settings.WIKI_MAIN_PAGE.lower()),
-               path.join(FOLDER, '%s.html' % settings.WIKI_MAIN_PAGE.lower()))
+    os.symlink('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
+               '%s.html' % settings.WIKI_MAIN_PAGE.lower())
 
 
 if __name__ == '__main__':
