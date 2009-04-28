@@ -1260,3 +1260,9 @@ select.firstletterselect option:first-letter {
   color: #CCC;
   font-family: monospace;
 }
+
+      .staticwikinote {
+        background-color: #F6F6F6;
+        border-color: #BBBBBB;
+        font-size: .9em;
+      }

@@ -45,7 +45,7 @@ ERROR_REPORT_RE = re.compile(r'<a href=".[^"]+" id="user_error_report_link">Fehl
 
 GLOBAL_MESSAGE_RE = re.compile(r'(<div class="message global">).+?(</div>)', re.DOTALL)
 
-SNAPSHOT_MESSAGE = u'''<div class="message">
+SNAPSHOT_MESSAGE = u'''<div class="message staticwikinote">
 <strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann nicht bearbeitet werden und veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
 </div>''' % URL
 
