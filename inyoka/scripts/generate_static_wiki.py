@@ -28,7 +28,7 @@ from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
 
-FOLDER = 'static_wiki'
+FOLDER = '/nfs/www/de/static_wiki'
 URL = href('wiki')
 DONE_SRCS = {}
 
@@ -227,10 +227,12 @@ def create_snapshot():
         f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
-        #time.sleep(2)
+        time.sleep(.2)
     os.chdir(FOLDER)
-    os.symlink('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
-               '%s.html' % settings.WIKI_MAIN_PAGE.lower())
+    #XXX: this needs to be done another way... for now I replaced all links
+    #     by hand. I don't like the idea of using re here as well... --entequak
+    #os.link('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
+    #        '%s.html' % settings.WIKI_MAIN_PAGE.lower())
 
 
 if __name__ == '__main__':
