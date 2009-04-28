@@ -33,6 +33,8 @@ URL = href('wiki')
 DONE_SRCS = {}
 
 SRC_RE = re.compile(r'src="([^"]+)"')
+STYLE_RE = re.compile(r'rel="stylesheet" type="text/css" href="([^"]+)"')
+FAVICON_RE = re.compile(r'rel="shortcut icon" href="([^"]+)"')
 TAB_RE = re.compile(r'(<div class="navi_tabbar navigation">).+?(</div>)', re.DOTALL)
 META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
 NAVI_RE = re.compile(r'(<ul class="navi_global">).+?(</ul>)', re.DOTALL)
@@ -143,6 +145,10 @@ def handle_img(match, pre, is_main_page):
     return u'href="%s%s"' % (pre, save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))), is_main_page))
 
 
+def handle_style(match, pre, is_main_page):
+    return u'href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page))
+
+
 def handle_link(match, pre, is_main_page):
     return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
 
@@ -222,6 +228,8 @@ def create_snapshot():
         content = SRC_RE.sub(replacer(handle_src, parts, is_main_page), content)
         content = LINK_RE.sub(replacer(handle_link, parts, is_main_page), content)
         content = STARTPAGE_RE.sub(replacer(startpage_link, parts, is_main_page), content)
+        content = STYLE_RE.sub(replacer(handle_style, parts, is_main_page), content)
+        content = FAVICON_RE.sub(replacer(handle_style, parts, is_main_page), content)
         content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
 
         f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
