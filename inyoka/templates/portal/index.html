@@ -23,16 +23,6 @@
       <span><a href="{{ get_ubuntu_link }}">{{ get_ubuntu_description }}</a></span>
     </div>
   </div>
-  {% if days_to_jaunty <= 30 %}
-  <div class="container counter">
-    <a href="http://wiki.ubuntuusers.de/Jaunty_Jackalope">
-      <img src="{{ href('static', 'img', 'counter', days_to_jaunty|string + '.png') }}" 
-           alt="Noch {{ days_to_jaunty|string }} Tage bis zu Jaunty Jackalope"
-           title="Noch {{ days_to_jaunty|string }} Tage bis zu Jaunty Jackalope"
-           />
-   </a>
-  </div>
-  {% endif %}
   <div class="container calendar">
     <div class="calendar link">
       <h3><a href="{{ href('portal', 'calendar') }}">Kalender</a></h3>
