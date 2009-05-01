@@ -61,3 +61,4 @@ clean-files:
 	find . -name '*.orig' -exec rm -f {} +
 	find . -name '*.orig.*' -exec rm -f {} +
 	find . -name '*.py.fej' -exec rm -f {} +
+\n
