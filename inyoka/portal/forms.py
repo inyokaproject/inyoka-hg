@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django import forms
+from django.utils.safestring import mark_safe
 from inyoka.portal.user import User
 from inyoka.utils.user import normalize_username
 from inyoka.utils.dates import TIMEZONES
@@ -141,11 +142,11 @@ class RegisterForm(forms.Form):
             except User.DoesNotExist:
                 return self.cleaned_data['email']
 
-            raise forms.ValidationError(
+            raise forms.ValidationError(mark_safe(
                 u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
                 u' Fals du dein Passwort vergessen hast, kannst du es '
                 u'<a href="%s">wiederherstellen lassen</a>' % escape(
-                    href('portal', 'lost_password'))
+                    href('portal', 'lost_password')))
             )
         else:
             raise forms.ValidationError(
@@ -256,10 +257,10 @@ class UserCPSettingsForm(forms.Form):
         data = self.cleaned_data['notify']
         if u'jabber' in data:
             if not current_request.user.jabber:
-                raise forms.ValidationError(u'Du musst eine gültige Jabber '
+                raise forms.ValidationError(mark_safe(u'Du musst eine gültige Jabber '
                     u'Adresse <a href="%s">angeben</a>, um unseren Jabber '
                     u'Service nutzen zu können.' % escape(href(
-                        'portal', 'usercp', 'profile')))
+                        'portal', 'usercp', 'profile'))))
         return data
 
 
