@@ -151,7 +151,7 @@
             {%- endif %}
           </p>
           {%- if post.author.member_title %}
-          <div class="member_title">{{ post.author.member_title }}</div>
+          <div class="member_title">{{ post.author.member_title|e }}</div>
           {%- endif %}
           {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
           {# TODO: different class?! #}
