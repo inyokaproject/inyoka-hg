@@ -33,7 +33,7 @@ URL = href('wiki')
 DONE_SRCS = {}
 
 SRC_RE = re.compile(r'src="([^"]+)"')
-STYLE_RE = re.compile(r'rel="stylesheet" type="text/css" href="([^"]+)"')
+STYLE_RE = re.compile(r'(?:rel="stylesheet"\s+type="text/css"\s+)href="([^"]+)"')
 FAVICON_RE = re.compile(r'rel="shortcut icon" href="([^"]+)"')
 TAB_RE = re.compile(r'(<div class="navi_tabbar navigation">).+?(</div>)', re.DOTALL)
 META_RE = re.compile(r'(<p class="meta">).+?(</p>)', re.DOTALL)
@@ -105,8 +105,8 @@ def fetch_page(name):
     return data
 
 
-def save_file(url, is_main_page=False):
-    if not INCLUDE_IMAGES and not is_main_page:
+def save_file(url, is_main_page=False, is_static=False):
+    if not INCLUDE_IMAGES and not is_main_page and not is_static:
         return ""
     if url.startswith('/'):
         url = os.path.join(URL, url[1:])
@@ -123,7 +123,7 @@ def save_file(url, is_main_page=False):
         f.write(content)
         f.close()
         DONE_SRCS[hash] = fname
-    return os.path.join('./_', DONE_SRCS[hash])
+    return os.path.join('_', DONE_SRCS[hash])
 
 
 def fix_path(pth):
@@ -138,7 +138,7 @@ def replacer(func, parts, is_main_page):
 
 
 def handle_src(match, pre, is_main_page):
-    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page))
+    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, False))
 
 
 def handle_img(match, pre, is_main_page):
@@ -146,7 +146,13 @@ def handle_img(match, pre, is_main_page):
 
 
 def handle_style(match, pre, is_main_page):
-    return u'href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page))
+    ret = u'rel="stylesheet" type="text/css" href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, True))
+    return ret
+
+
+def handle_favicon(match, pre, is_main_page):
+    ret = u'rel="shortcut icon" href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, True))
+    return ret
 
 
 def handle_link(match, pre, is_main_page):
@@ -226,17 +232,17 @@ def create_snapshot():
         content = GLOBAL_MESSAGE_RE.sub('', content)
         content = IMG_RE.sub(replacer(handle_img, parts, is_main_page), content)
         content = SRC_RE.sub(replacer(handle_src, parts, is_main_page), content)
-        content = LINK_RE.sub(replacer(handle_link, parts, is_main_page), content)
-        content = STARTPAGE_RE.sub(replacer(startpage_link, parts, is_main_page), content)
         content = STYLE_RE.sub(replacer(handle_style, parts, is_main_page), content)
         content = FAVICON_RE.sub(replacer(handle_style, parts, is_main_page), content)
+        content = LINK_RE.sub(replacer(handle_link, parts, is_main_page), content)
+        content = STARTPAGE_RE.sub(replacer(startpage_link, parts, is_main_page), content)
         content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
 
         f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
-        time.sleep(.2)
-    os.chdir(FOLDER)
+        #time.sleep(.2)
+    #os.chdir(FOLDER)
     #XXX: this needs to be done another way... for now I replaced all links
     #     by hand. I don't like the idea of using re here as well... --entequak
     #os.link('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
