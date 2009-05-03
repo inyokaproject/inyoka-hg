@@ -690,7 +690,7 @@
   onreset     %Script;       #IMPLIED
   accept      %ContentTypes; #IMPLIED
   accept-charset %Charsets;  #IMPLIED
-  autocomplete (on,off)      #IMPLIED
+  autocomplete (on|off)      #IMPLIED
   >
 
 <!--
@@ -732,7 +732,7 @@
   onselect    %Script;       #IMPLIED
   onchange    %Script;       #IMPLIED
   accept      %ContentTypes; #IMPLIED
-  autocomplete (on,off)      #IMPLIED
+  autocomplete (on|off)      #IMPLIED
   >
 
 <!ELEMENT select (optgroup|option)*>  <!-- option selector -->
