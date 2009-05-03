@@ -149,14 +149,14 @@
             {%- if post.author.primary_group.icon %}
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
             {%- endif %}
-            {%- if post.author.member_title %}
-            <div class="member_title">{{ post.author.member_title }}</div>
-            {%- endif %}
-            {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
-            {# TODO: different class?! #}
-            <div class="member_title">(Threadstarter)</div>
-            {%- endif %}
           </p>
+          {%- if post.author.member_title %}
+          <div class="member_title">{{ post.author.member_title }}</div>
+          {%- endif %}
+          {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
+          {# TODO: different class?! #}
+          <div class="member_title">(Threadstarter)</div>
+          {%- endif %}
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}
