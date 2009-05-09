@@ -68,9 +68,13 @@
         topic.solved and 'solved' or 'unsolved' }}">{{
         topic.solved and 'gelöst' or 'ungelöst' }}</span>
       <span class="linklist">|</span>
+      <span class="ubuntu_version
+            {%- if topic.get_ubuntu_version().class_ %} {{ topic.get_ubuntu_version().class_ }}{% endif %}">
       <strong>Ubuntu-Version:</strong>
-        {{ topic.get_ubuntu_version() }}<br />
-        {{ topic_actions() }}
+        {{ topic.get_version_info() }}
+      </span>
+      <br />
+      {{ topic_actions() }}
     </div>
   </div>
 

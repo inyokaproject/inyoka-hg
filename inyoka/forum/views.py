@@ -1453,6 +1453,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
                            eagerload('last_post'),
                            eagerload('last_post.author'))
 
+    if 'version' in request.GET:
+        topics = topics.filter_by(ubuntu_version=request.GET['version'])
+
     if action == 'last':
         hours = int(hours)
         if hours > 24:

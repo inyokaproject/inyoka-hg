@@ -84,7 +84,11 @@
         </td>
       </tr>
       {%- else %}
-      <tr{% if can_moderate and (topic.hidden or topic.reported) %} class="{% if topic.hidden %}hidden {% endif %}{% if topic.reported %}reported{% endif %}"{% endif %}>
+      {%- set classes = [] %}
+      {%- if can_moderate and topic.hidden %}{{ classes.append('hidden') }}{% endif %}
+      {%- if can_moderate and topic.reported %}{{ classes.append('reported') }}{% endif %}
+      {%- if topic.get_ubuntu_version().class_ %}{{ classes.append(topic.get_ubuntu_version().class_) }}{% endif %}
+      <tr{% if classes %} class="{{ classes|join(' ') }}"{% endif %}>
         {%- if topic.author_id == USER.id %}
         <td class="icon" style="background-color: #F6F4EF">
         {%- else %}
@@ -103,8 +107,8 @@
             {%- if can_moderate and topic.hidden %} [Verborgen] {% endif -%}
             {%- if can_moderate and topic.reported %} [Gemeldet] {% endif -%}
             <a href="{{ topic|url }}">{{ topic.title|e }}</a>
-            {%- if topic.get_ubuntu_version(False) %}
-            » <span class="ubuntu_version">{{ topic.get_ubuntu_version() }}</span>
+            {%- if topic.get_version_info(False) %}
+            » <span class="ubuntu_version">{{ topic.get_version_info() }}</span>
             {%- endif %}
             {%- if not topic.get_read_status(USER) %}
             <a href="{{ topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">
