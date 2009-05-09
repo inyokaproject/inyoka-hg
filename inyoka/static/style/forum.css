@@ -560,3 +560,7 @@ div.code pre {
     font-size: 0.9em;
 }
 
+.topic_title .ubuntu_version {
+    color: #444;
+    font-size: .9em;
+}

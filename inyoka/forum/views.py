@@ -347,14 +347,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     preview = None
     article = None
 
-    #XXX: April Joke! Get the funny Text Captcha ;)
-    if 'captcha-id' in request.POST:
-        captcha = TextCaptcha.query.filter_by(id=int(
-            request.POST['captcha-id'])).first()
-    else:
-        captcha = TextCaptcha.query.limit(1).order_by(func.random()).first()
-    captcha_form = get_text_captcha_form(captcha)
-
     if article_name:
         try:
             article = Page.objects.get(name=normalize_pagename(article_name))
@@ -536,15 +528,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             att_ids.remove(attachment.id)
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
-    if 'send' in request.POST:
-        captcha_form = captcha_form(request.POST)
-    else:
-        captcha_form = captcha_form()
-
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
-        if not forum.id in settings.JOKE_FORUMS and captcha_form.is_valid():
-            pass
         d = form.cleaned_data
         if not topic:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
@@ -673,7 +658,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
-        'captcha_form': captcha_form
     }
 
 

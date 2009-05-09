@@ -546,9 +546,9 @@ class Topic(object):
     def paginated(self):
         return bool((self.post_count - 1) // POSTS_PER_PAGE)
 
-    def get_ubuntu_version(self):
+    def get_ubuntu_version(self, default=u'Nicht angegeben'):
         if not (self.ubuntu_version or self.ubuntu_distro):
-            return u'Nicht angegeben'
+            return default
         out = []
         if self.ubuntu_distro:
             out.append(UBUNTU_DISTROS[self.ubuntu_distro])
