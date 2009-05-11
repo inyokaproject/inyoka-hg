@@ -3,7 +3,7 @@
     inyoka.forum.forms
     ~~~~~~~~~~~~~~~~~~
 
-    Forms for the forum.
+    Formulars for the forum.
 
     :copyright: 2007-2008 by Maximilian Trescher, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
@@ -53,13 +53,12 @@ class EditPostForm(forms.Form):
     sticky = forms.BooleanField(required=False)
     title = forms.CharField(widget=forms.TextInput(attrs={'size':60}))
     ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
-                                                required=True)
-    ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=True)
+                                                required=False)
+    ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
     is_plaintext = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         self.is_first_post = kwargs.pop('is_first_post', False)
-        self.force_version = kwargs.pop('force_version', False)
         forms.Form.__init__(self, *args, **kwargs)
 
     def clean(self):
@@ -67,9 +66,6 @@ class EditPostForm(forms.Form):
         if not self.is_first_post:
             for k in ['sticky', 'title', 'ubuntu_version', 'ubuntu_distro']:
                 self._errors.pop(k, None)
-        if not self.force_version:
-            self._errors.pop('ubuntu_version')
-            self._errors.pop('ubuntu_distro')
         return data
 
 
@@ -111,17 +107,6 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
         if not title.strip():
             raise forms.ValidationError('Titel darf nicht leer sein')
         return title
-
-    def __init__(self, *args, **kwargs):
-        self.force_version = kwargs.pop('force_version', False)
-        forms.Form.__init__(self, *args, **kwargs)
-
-    def clean(self):
-        data = self.cleaned_data
-        if not self.force_version:
-            self._errors.pop('ubuntu_version')
-            self._errors.pop('ubuntu_distro')
-        return data
 
 
 class MoveTopicForm(forms.Form):

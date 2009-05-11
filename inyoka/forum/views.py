@@ -394,14 +394,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         form = NewTopicForm(request.POST or None, initial={
             'text':  forum.newtopic_default_text,
             'title': article and article.name or '',
-        }, force_version=forum.force_version)
+        })
     elif quote:
         form = EditPostForm(request.POST or None, initial={
             'text': quote_text(quote.text, quote.author) + '\n',
-        }, force_version=forum.force_version)
+        })
     else:
-        form = EditPostForm(request.POST or None,
-                            force_version=forum.force_version)
+        form = EditPostForm(request.POST or None)
 
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
