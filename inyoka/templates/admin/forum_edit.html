@@ -1,10 +1,10 @@
 {#
-    templates.admin.forum_edit
+    templates.admin.ikhaya_edit
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Admin template for editing forums.
+    Template for editing or creating an Ikhaya article
 
-    :copyright: 2007–2009 by Marian Sigler, Benjamin Wiegand.
+    :copyright: 2007 by Marian Sigler, Benjamin Wiegand.
     :license: GNU GPL.
 #}
 {%- extends 'admin/overall.html' %}
@@ -30,7 +30,7 @@
 <h3>{{ title_trace[0] }}</h3>
 
 <form action="" method="post" class="forum">
-  {{ render_form(form, ['name', 'slug','description', 'parent', 'position', 'newtopic_default_text', 'force_version']) }}
+  {{ render_form(form, ['name', 'slug','description', 'parent', 'position', 'newtopic_default_text']) }}
   <h3>Willkommensnachricht</h3>
   {{ render_form(form, ['welcome_msg_subject', 'welcome_msg_text']) }}
   <p>

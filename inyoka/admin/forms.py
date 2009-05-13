@@ -387,8 +387,6 @@ class EditForumForm(forms.Form):
     newtopic_default_text = forms.CharField(label=u'Standardtext für neue Themen',
                                             widget=forms.Textarea(attrs={'rows': 3}),
                                             required=False)
-    force_version = forms.BooleanField(label=u'Angabe der Ubuntu-Version erzwingen',
-                                       required=False)
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data

@@ -637,7 +637,6 @@ def forum_edit(request, id=None):
                 forum.welcome_message_id = welcome_msg.id
 
             forum.newtopic_default_text = data.get('newtopic_default_text', None)
-            forum.force_version = data['force_version']
 
             if not form.errors and not errors:
                 dbsession.commit()
@@ -667,8 +666,7 @@ def forum_edit(request, id=None):
                 'parent': forum.parent_id,
                 'position': forum.position,
                 'welcome_msg_subject': welcome_msg and welcome_msg.title or u'',
-                'welcome_msg_text': welcome_msg and welcome_msg.text or u'',
-                'force_version': forum.force_version,
+                'welcome_msg_text': welcome_msg and welcome_msg.text or u''
             })
         _add_field_choices()
     return {
