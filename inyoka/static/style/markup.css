@@ -8,8 +8,9 @@
  * :license: GNU GPL.
  */
 
-a.missing {
-  color: #999;
+:link.missing, :visited.missing {
+  color: #999 !important;
+  /* !important is needed to overwrite default :visited style */
 }
 
 a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser {

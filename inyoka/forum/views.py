@@ -347,14 +347,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     preview = None
     article = None
 
-    #XXX: April Joke! Get the funny Text Captcha ;)
-    if 'captcha-id' in request.POST:
-        captcha = TextCaptcha.query.filter_by(id=int(
-            request.POST['captcha-id'])).first()
-    else:
-        captcha = TextCaptcha.query.limit(1).order_by(func.random()).first()
-    captcha_form = get_text_captcha_form(captcha)
-
     if article_name:
         try:
             article = Page.objects.get(name=normalize_pagename(article_name))
@@ -402,13 +394,14 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         form = NewTopicForm(request.POST or None, initial={
             'text':  forum.newtopic_default_text,
             'title': article and article.name or '',
-        })
+        }, force_version=forum.force_version)
     elif quote:
         form = EditPostForm(request.POST or None, initial={
             'text': quote_text(quote.text, quote.author) + '\n',
-        })
+        }, force_version=forum.force_version)
     else:
-        form = EditPostForm(request.POST or None)
+        form = EditPostForm(request.POST or None,
+                            force_version=forum.force_version)
 
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
@@ -536,22 +529,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             att_ids.remove(attachment.id)
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
-    if 'send' in request.POST:
-        captcha_form = captcha_form(request.POST)
-    else:
-        captcha_form = captcha_form()
-
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
-        if not forum.id in settings.JOKE_FORUMS and captcha_form.is_valid():
-            pass
         d = form.cleaned_data
         if not topic:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
         if newtopic or firstpost:
             topic.title = d['title']
-            topic.ubuntu_distro = d['ubuntu_distro']
-            topic.ubuntu_version = d['ubuntu_version']
+            topic.ubuntu_distro = d.get('ubuntu_distro')
+            topic.ubuntu_version = d.get('ubuntu_version')
             if check_privilege(privileges, 'sticky'):
                 topic.sticky = d['sticky']
             if check_privilege(privileges, 'create_poll'):
@@ -647,7 +633,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             'sticky': topic.sticky,
             'text': post.text,
             'is_plaintext': post.is_plaintext,
-        })
+        }, force_version=forum.force_version)
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
 
@@ -673,7 +659,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
-        'captcha_form': captcha_form
     }
 
 
@@ -1468,6 +1453,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
                            eagerload('author'),
                            eagerload('last_post'),
                            eagerload('last_post.author'))
+
+    if 'version' in request.GET:
+        topics = topics.filter_by(ubuntu_version=request.GET['version'])
 
     if action == 'last':
         hours = int(hours)

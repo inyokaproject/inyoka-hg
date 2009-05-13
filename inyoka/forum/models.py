@@ -48,18 +48,32 @@ SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
 
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
-UBUNTU_VERSIONS = {
-    '4.10': 'Warty Warthog',
-    '5.04': 'Hoary Hedgehog',
-    '5.10': 'Breezy Badger',
-    '6.06': 'Dapper Drake',
-    '6.10': 'Edgy Eft',
-    '7.04': 'Feisty Fawn',
-    '7.10': 'Gutsy Gibbon',
-    '8.04': 'Hardy Heron',
-    '8.10': 'Intrepid Ibex',
-    '9.04': 'Jaunty Jackalope'
-}
+
+class UbuntuVersion(object):
+    """holds the ubuntu versions. implement this as a model in SA!"""
+    def __init__(self, number, codename, lts=False, active=True, class_=None):
+        self.number = number
+        self.codename = codename
+        self.lts = lts
+        self.active = active
+        self.class_ = class_
+
+    def __str__(self):
+        return u'%s (%s)' % (self.number, self.codename)
+
+UBUNTU_VERSIONS = [
+    UbuntuVersion('4.10', 'Warty Warthog', active=False),
+    UbuntuVersion('5.04', 'Hoary Hedgehog', active=False),
+    UbuntuVersion('5.10', 'Breezy Badger', active=False),
+    UbuntuVersion('6.06', 'Dapper Drake', lts=True),
+    UbuntuVersion('6.10', 'Edgy Eft', active=False),
+    UbuntuVersion('7.04', 'Feisty Fawn', active=False),
+    UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
+    UbuntuVersion('8.04', 'Hardy Heron', lts=True),
+    UbuntuVersion('8.10', 'Intrepid Ibex'),
+    UbuntuVersion('9.04', 'Jaunty Jackalope'),
+    UbuntuVersion('9.10', 'Karmic Koala', class_='unstable'),
+]
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
@@ -547,14 +561,17 @@ class Topic(object):
         return bool((self.post_count - 1) // POSTS_PER_PAGE)
 
     def get_ubuntu_version(self):
+        if self.ubuntu_version:
+            return filter(lambda v: v.number == self.ubuntu_version, UBUNTU_VERSIONS)[0]
+
+    def get_version_info(self, default=u'Nicht angegeben'):
         if not (self.ubuntu_version or self.ubuntu_distro):
-            return u'Nicht angegeben'
+            return default
         out = []
         if self.ubuntu_distro:
             out.append(UBUNTU_DISTROS[self.ubuntu_distro])
         if self.ubuntu_version:
-            out.append(u'%s (%s)' % (self.ubuntu_version,
-                                    UBUNTU_VERSIONS[self.ubuntu_version]))
+            out.append(str(self.get_ubuntu_version()))
         return u' '.join(out)
 
     def get_read_status(self, user):

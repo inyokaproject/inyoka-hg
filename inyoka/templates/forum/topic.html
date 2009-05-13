@@ -68,9 +68,13 @@
         topic.solved and 'solved' or 'unsolved' }}">{{
         topic.solved and 'gelöst' or 'ungelöst' }}</span>
       <span class="linklist">|</span>
+      <span class="ubuntu_version
+            {%- if topic.get_ubuntu_version().class_ %} {{ topic.get_ubuntu_version().class_ }}{% endif %}">
       <strong>Ubuntu-Version:</strong>
-        {{ topic.get_ubuntu_version() }}<br />
-        {{ topic_actions() }}
+        {{ topic.get_version_info() }}
+      </span>
+      <br />
+      {{ topic_actions() }}
     </div>
   </div>
 
@@ -149,14 +153,14 @@
             {%- if post.author.primary_group.icon %}
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
             {%- endif %}
-            {%- if post.author.member_title %}
-            <div class="member_title">{{ post.author.member_title }}</div>
-            {%- endif %}
-            {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
-            {# TODO: different class?! #}
-            <div class="member_title">(Threadstarter)</div>
-            {%- endif %}
           </p>
+          {%- if post.author.member_title %}
+          <div class="member_title">{{ post.author.member_title|e }}</div>
+          {%- endif %}
+          {%- if post.author == topic.author and not (pagination.page == 1 and loop.first) %}
+          {# TODO: different class?! #}
+          <div class="member_title">(Threadstarter)</div>
+          {%- endif %}
           {%- if post.author.avatar and not USER.settings['hide_avatars'] %}
           <img class="avatar" src="{{ post.author.avatar_url }}" alt="Avatar von {{ post.author.username|e }}" />
           {%- endif %}
