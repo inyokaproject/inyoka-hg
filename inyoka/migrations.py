@@ -1052,12 +1052,6 @@ def add_tcaptcha_table(m):
         )
     ''')
 
-def add_forum_force_version_flag(m):
-    m.engine.execute('''
-        ALTER TABLE forum_forum
-            ADD COLUMN force_version TINYINT(1) NOT NULL DEFAULT 0;
-     ''')
-
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1084,6 +1078,5 @@ MIGRATIONS = [
     add_negative_privileges, add_reported_topics_storage,
     add_group_is_public_flag, add_notes_to_article_suggestion,
     add_comment_rendered_text_column, add_blog_active_flag,
-    add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
-    add_forum_force_version_flag,
+    add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table
 ]
