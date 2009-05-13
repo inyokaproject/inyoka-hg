@@ -3,7 +3,7 @@
     inyoka.forum.forms
     ~~~~~~~~~~~~~~~~~~
 
-    Formulars for the forum.
+    Forms for the forum.
 
     :copyright: 2007-2008 by Maximilian Trescher, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
@@ -107,6 +107,24 @@ class NewTopicForm(SurgeProtectionMixin, forms.Form):
         if not title.strip():
             raise forms.ValidationError('Titel darf nicht leer sein')
         return title
+
+    def clean_ubuntu_version(self):
+        ubuntu_version = self.cleaned_data.get('ubuntu_version', None)
+        if self.force_version and not ubuntu_version:
+            raise forms.ValidationError(forms.fields.Field.
+                                        default_error_messages['required'])
+        return ubuntu_version
+
+    def clean_ubuntu_distro(self):
+        ubuntu_distro = self.cleaned_data.get('ubuntu_distro', None)
+        if self.force_version and not ubuntu_distro:
+            raise forms.ValidationError(forms.fields.Field.
+                                        default_error_messages['required'])
+        return ubuntu_distro
+
+    def __init__(self, *args, **kwargs):
+        self.force_version = kwargs.pop('force_version', False)
+        forms.Form.__init__(self, *args, **kwargs)
 
 
 class MoveTopicForm(forms.Form):
