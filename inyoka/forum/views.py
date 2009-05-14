@@ -398,10 +398,9 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif quote:
         form = EditPostForm(request.POST or None, initial={
             'text': quote_text(quote.text, quote.author) + '\n',
-        }, force_version=forum.force_version)
+        })
     else:
-        form = EditPostForm(request.POST or None,
-                            force_version=forum.force_version)
+        form = EditPostForm(request.POST or None)
 
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
@@ -633,7 +632,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             'sticky': topic.sticky,
             'text': post.text,
             'is_plaintext': post.is_plaintext,
-        }, force_version=forum.force_version)
+        })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
 
