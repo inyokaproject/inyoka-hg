@@ -565,10 +565,10 @@ div.code pre {
     font-size: .9em;
 }
 
-/*tr.unstable .topic_title {
+tr.unstable .topic_title {
     padding-left: 20px;
     background: url(../img/forum/unstable.png) no-repeat 0px 1px;
-}*/
+}
 
     
 .topic_box_content .ubuntu_version.unstable {
