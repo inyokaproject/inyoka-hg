@@ -18,7 +18,7 @@ from inyoka.conf import settings
 
 
 _str_num_re = re.compile(r'(?:[^\d]*(\d+)[^\d]*)+')
-_path_crop = re.compile(r'^(..?/)+')
+_path_crop = re.compile(r'^(\.\.?/)+')
 _unsupported_re = re.compile(r'[\x00-\x19#%?]+')
 _slugify_replacement_table = {
     u'\xdf': 'ss',

@@ -8,6 +8,7 @@
 # :license: GNU GPL.
 #
 
+
 # remove --introspect-only once this bug is fixed:
 # http://sourceforge.net/tracker/index.php?func=detail&aid=1817965&group_id=32455&atid=405618
 EPYDOC=epydoc --name=Inyoka --url=http://inyoka.ubuntuusers.de/ --docformat=restructuredtext --debug --introspect-only -o apidoc
