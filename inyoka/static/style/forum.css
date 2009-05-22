@@ -256,6 +256,10 @@ table.topic td.post div.postinfo {
     border-bottom: 1px solid #CCC;
 }
 
+table.topic tr:target td.author {
+    background: #eee url(../img/forum/targetpostmarker.png) no-repeat right 1px;
+}
+
 table.topic td.post div.signature { 
     margin: 20px 0 -5px 0;
     padding: 5px 0 0 0;
