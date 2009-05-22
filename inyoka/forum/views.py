@@ -1416,6 +1416,9 @@ def newposts(request, page=1):
         .filter(topic_table.c.sticky == False) \
         .order_by(topic_table.c.last_post_id.desc())
 
+    if 'version' in request.GET:
+        topics = topics.filter_by(ubuntu_version=request.GET['version'])
+
     # get the forums the user is not allowed to see
     forbidden_forums = []
     privs = get_privileges(request.user, forum_ids)
