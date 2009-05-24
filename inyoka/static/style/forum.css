@@ -256,8 +256,8 @@ table.topic td.post div.postinfo {
     border-bottom: 1px solid #CCC;
 }
 
-table.topic tr:target td.author {
-    background: #eee url(../img/forum/targetpostmarker.png) no-repeat right 1px;
+table.topic tr:target td.post div.postinfo {
+    background: url(../img/table-header-alternative-target.png);
 }
 
 table.topic td.post div.signature { 
