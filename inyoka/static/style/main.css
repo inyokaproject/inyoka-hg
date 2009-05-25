@@ -343,6 +343,7 @@ table tbody td {
 
 table tbody th {
   background: #f2f2f2 url(../img/table-header-alternative.png);
+  background-repeat: repeat-x;
   color: #333333;
   padding: 0.3em 0;
 }
