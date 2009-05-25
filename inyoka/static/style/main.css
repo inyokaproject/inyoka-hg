@@ -432,10 +432,10 @@ h3 .note {
   padding-left: 0px;
 }
 div.code, pre {
-  border:1px solid #CCCCCC;
-  margin:0.5em 0 0;
-  max-height:15em;
-  overflow:auto;
+  border: 1px solid #CCCCCC;
+  margin: 0.5em 1em 0;
+  max-height: 15em;
+  overflow: auto;
 }
 /* !important is necessary because markup.css overwrites that otherwise */
 table.syntaxtable {
