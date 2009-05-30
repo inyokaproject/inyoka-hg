@@ -80,7 +80,6 @@ UBUNTU_VERSIONS = [
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
-    'kubuntu-kde4': u'Kubuntu (KDE 4)',
     'xubuntu': 'Xubuntu',
     'server': 'Server',
     'edubuntu': 'Edubuntu',
