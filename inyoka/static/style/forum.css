@@ -579,3 +579,27 @@ tr.unstable .topic_title {
     padding-right: 20px;
     background: url(../img/forum/unstable.png) no-repeat right top;
 }
+
+span#version_info.unstable,
+span#version_info.lts,
+span#version_info.current {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+span#version_info.unstable {
+  color: white;
+  padding-left: 20px;
+  background: #cc0033 url(../img/forum/unstable.png) no-repeat left center;
+  border: 1px solid #a8a887;
+}
+
+span#version_info.lts,
+span#version_info.current {
+  background-color: #ffffcc;
+  border: 1px solid #a8a887;
+}
+
+span#version_info a {
+  color: #000;
+}

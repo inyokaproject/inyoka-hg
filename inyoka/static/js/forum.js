@@ -124,7 +124,37 @@ $(function () {
   })();
 
 
+  /* Display some more informations about the ubuntu version */
+  (function() {
+    $('select[@name="ubuntu_version"]').change(function() {
+      var text_unstable = 'Dies ist die momentane <a href="{LL}">Entwicklungsversion</a> von Ubuntu';
+      var text_lts = 'Dies ist eine <a href="{LL}">LTS (Long Term Support)</a> Version';
+      var text_current = 'Dies ist die momentan <a href="{LL}>aktuelle Version</a> von Ubuntu';
+      var url = "/?__service__=forum.get_version_details";
+      var version_str = $(this).find('option:selected').val();
 
+      var with_link = function(text, data) { return text.replace(/\{LL\}/, data.link); };
+
+      $.getJSON(url, {
+        version: version_str
+      }, function(data) {
+        if (data.class == 'unstable') {
+          $('span#version_info').attr('class', 'unstable')
+            .html(with_link(text_unstable, data));
+        } else if (data.lts) {
+          $('span#version_info').attr('class', 'lts')
+            .html(with_link(text_lts, data));
+        } else if (data.current) {
+          $('span#version_info').attr('class', 'current')
+            .html(with_link(text_current, data));
+        } else {
+          $('span#version_info').attr('class', '').text('');
+        }
+      });
+
+      return false;
+    })
+  })();
 });
 
 

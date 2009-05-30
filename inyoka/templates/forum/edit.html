@@ -47,6 +47,7 @@
       <dd>
         {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
         {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
+        <span id="version_info"></span>
       </dd>
       {%- else %}
       <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>

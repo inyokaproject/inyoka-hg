@@ -11,7 +11,7 @@
 """
 from sqlalchemy.orm import eagerload
 from django.db import transaction
-from inyoka.forum.models import Topic, Post, Forum
+from inyoka.forum.models import UBUNTU_VERSIONS, Topic, Post, Forum
 from inyoka.forum.acl import get_forum_privileges, check_privilege, \
     have_privilege
 from inyoka.portal.models import Subscription
@@ -112,10 +112,25 @@ def on_unsubscribe(request):
         s.delete()
 
 
+def on_get_version_details(request):
+    version = request.GET['version']
+    obj = [x for x in UBUNTU_VERSIONS if x.number == version][0]
+    return {
+        'number': obj.number,
+        'codename': obj.codename,
+        'lts': obj.lts,
+        'active': obj.active,
+        'class': obj.class_,
+        'current': obj.current,
+        'link': obj.link
+    }
+
+
 dispatcher = SimpleDispatcher(
     get_topic_autocompletion=on_get_topic_autocompletion,
     get_post=on_get_post,
     toggle_categories=on_toggle_categories,
     subscribe=on_subscribe,
-    unsubscribe=on_unsubscribe
+    unsubscribe=on_unsubscribe,
+    get_version_details=on_get_version_details
 )

@@ -51,12 +51,15 @@ TOPICS_PER_PAGE = 30
 
 class UbuntuVersion(object):
     """holds the ubuntu versions. implement this as a model in SA!"""
-    def __init__(self, number, codename, lts=False, active=True, class_=None):
+    def __init__(self, number, codename, lts=False, active=True, class_=None,
+                 current=False):
         self.number = number
         self.codename = codename
         self.lts = lts
         self.active = active
         self.class_ = class_
+        self.current = current
+        self.link = href('wiki', codename)
 
     def __str__(self):
         return u'%s (%s)' % (self.number, self.codename)
@@ -71,7 +74,7 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
     UbuntuVersion('8.04', 'Hardy Heron', lts=True),
     UbuntuVersion('8.10', 'Intrepid Ibex'),
-    UbuntuVersion('9.04', 'Jaunty Jackalope'),
+    UbuntuVersion('9.04', 'Jaunty Jackalope', current=True),
     UbuntuVersion('9.10', 'Karmic Koala', class_='unstable'),
 ]
 UBUNTU_DISTROS = {
