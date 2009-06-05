@@ -46,7 +46,7 @@
   <h3>Hallo</h3>
   <img src="{{ href('static', 'img', 'portal', 'ubuntu.png') }}" alt="Ubuntu" class="cat" />
   <p>
-    Hier findest du freundliche Hilfe für Ubuntu, Kubuntu, Xubuntu, Edubuntu und die
+    Hier findest du freundliche Hilfe für Ubuntu, Kubuntu, Xubuntu und die
     anderen Ubuntu-Derivate. In unserem <a href="{{ href('forum') }}">Forum</a> beantworten
     hilfsbereite Forumsbenutzer gerne deine Fragen und im
     <a href="{{ href('wiki') }}">Wiki</a> findest du viele Anleitungen und Erklärungen.
@@ -101,7 +101,7 @@
     {% pluralize %}
     <strong>{{ guests }}</strong> Gäste.
   {% endtrans %}<br />
-  Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern am {{ record_time|datetimeformat }}.
+  Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern {{ record_time|specificdatetimeformat(true) }}.
   </p>
   <p>Registrierte Benutzer:
   {% for session in sessions.registered_sessions %}
