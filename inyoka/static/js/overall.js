@@ -200,8 +200,8 @@ $(document).ready(function() {
         $(aptitude).show();
         $(apt).hide();
       }), ' ',
-      $('<a>apturl</a>').attr('href', 'apt://' + $(apt).text().split(' ')
-                                                       .slice(3).join(','))
+      $('<a>apturl</a>').attr('href', 'apt://' + $.trim($(apt).text())
+        .split(' ').slice(3).join(','))
     )
   });
 
