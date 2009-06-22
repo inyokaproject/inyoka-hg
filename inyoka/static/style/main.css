@@ -449,6 +449,7 @@ table.syntaxtable pre {
   padding: 0.4em 1em;
   margin: 0;
   border: none;
+  overflow: visible;
 }
 
 table.syntaxtable td {
