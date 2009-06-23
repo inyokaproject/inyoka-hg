@@ -33,7 +33,7 @@
       {%- endif %}
       #}
       {%- if user.member_title %}
-      <div class="member_title">{{ user.member_title }}</div>
+      <div class="member_title">{{ user.member_title|e }}</div>
       {%- endif %}
     </p>
     {%- if user.avatar and not USER.settings['hide_avatars'] %}
