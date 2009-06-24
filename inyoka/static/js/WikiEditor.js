@@ -280,6 +280,7 @@
         item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
         item('{{{#!vorlage Hinweis\n%s\n}}}', 'Hinweis'),
         item('{{{#!vorlage Warnung\n%s\n}}}', 'Warnung'),
+        item('[[Vorlage(Getestet, %s)]]', 'Getestet'),
         item('[[Vorlage(Fremd, Paket, "%s")]]', 'Fremdpakete-Warnung'),
         item('[[Vorlage(Fremd, Quelle, "%s")]]', 'Fremdquelle-Warnung'),
         item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info'),
