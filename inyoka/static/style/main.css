@@ -488,12 +488,12 @@ table.syntaxtable td.linenos {
   background-repeat: no-repeat;
   background-position: 15px 15px;
   display: block;
-  width: 285px;
+  width: 257px;
   height: 90px;
   padding: 0;
   margin: 0;
   text-decoration: none;
-  background-image: url(../img/stoplogo.png);
+  background-image: url(../img/logo.png);
 }
 
 .header h1 span {
