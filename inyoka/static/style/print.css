@@ -51,6 +51,7 @@ table.forum thead, table.forum tfoot {
 div.code, pre {
   max-height: 100% !important;
   height: 100% !important;
+  color: black !important;
 }
 
 body, html {
