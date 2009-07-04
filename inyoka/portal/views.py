@@ -1086,7 +1086,8 @@ def grouplist(request, page=1):
         user_groups = request.user.groups.filter(is_public=True)
     table = Sortable(groups, request.GET, 'name',
                      columns=['id', 'name'])
-    pagination = Pagination(request, table.get_objects(), page, 15)
+    pagination = Pagination(request, table.get_objects(), page, 15,
+                            link=href('portal', 'groups'))
     set_session_info(request, u'schaut sich die Gruppenliste an.',
                      'Gruppenliste')
     return {
@@ -1108,7 +1109,8 @@ def group(request, name, page=1):
 
     table = Sortable(users, request.GET, 'id',
         columns=['id', 'username', 'location', 'date_joined', 'post_count'])
-    pagination = Pagination(request, table.get_objects(), page, 15)
+    pagination = Pagination(request, table.get_objects(), page, 15,
+                            link=href('portal', 'group', name))
     set_session_info(request, u'schaut sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (
         href('portal', 'group', escape(name)),
