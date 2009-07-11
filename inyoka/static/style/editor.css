@@ -62,8 +62,10 @@ ul.toolbar li #button-italic        { background-image: url(../img/icons/italic.
 ul.toolbar li #button-underlined    { background-image: url(../img/icons/underlined.png); }
 ul.toolbar li #button-code          { background-image: url(../img/icons/code.png); }
 ul.toolbar li #button-stroke        { background-image: url(../img/icons/stroke.png); }
+ul.toolbar li #button-mark          { background-image: url(../img/icons/mark.png); }
 ul.toolbar li #button-wiki-link     { background-image: url(../img/icons/wikilink.png); }
 ul.toolbar li #button-external-link { background-image: url(../img/icons/link.png); }
+ul.toolbar li #button-user-link     { background-image: url(../img/icons/user.png); }
 ul.toolbar li #button-quote         { background-image: url(../img/icons/quote.png); }
 ul.toolbar li #button-pre           { background-image: url(../img/icons/pre.png); }
 ul.toolbar li #button-picture       { background-image: url(../img/icons/picture.png); }

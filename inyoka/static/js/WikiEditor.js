@@ -170,13 +170,17 @@
     button('italic', 'Kursiver Text', insert("''%s''"),
            ['wiki', 'forum', 'small'], help("''Text''")),
     button('underlined', 'Unterstrichener Text', insert('__%s__'),
-           ['wiki', 'forum', 'small'], help("__Text__")),
+           ['forum', 'small'], help("__Text__")),
     button('stroke', 'Durchgestrichener Text', insert('--(%s)--'),
            ['wiki', 'forum'], help("--(Text)--")),
-    button('wiki-link', 'Wiki Link', insert('[:%s:]', 'Seitenname'),
-           ['wiki', 'forum'], help("[:Seitenname:]")),
+    button('mark', 'Hervorgehobener Text', insert('[mark]%s[/mark]'),
+           ['forum'], help("[mark]Text[/mark]")),
+    button('wiki-link', 'Wiki-Link', insert('[:%s:]', 'Seitenname'),
+           ['wiki', 'forum'], help("[:Seitenname:(Linktext)]")),
     button('external-link', 'Externer Link', insert('[%s]',
            'http://www.example.org/'), ['wiki', 'forum', 'small'], help("[www.example.com]")),
+    button('user-link', 'Benutzerlink', insert('[user:%s:]', 'Benutzername'),
+           ['wiki', 'forum'], help("[user:Beispiel:]")),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
       if (selection.length)
