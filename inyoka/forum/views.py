@@ -733,8 +733,6 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         """ % obj_slug
         slug = kwargs[obj_slug]
         x = obj.query.filter(obj.slug==slug).one()
-        if not have_privilege(request.user, x, CAN_READ):
-            return abort_access_denied(request)
         try:
             s = Subscription.objects.get(user=request.user, **{subscriptionkw : x.id})
         except Subscription.DoesNotExist:
