@@ -966,7 +966,7 @@ def movetopic(request, topic_slug):
 
             subscriptions = Subscription.objects.filter(topic_id=topic.id)
             for subscription in subscriptions:
-                if subscription.user == topic.author:
+                if subscription.user.id == topic.author.id:
                     continue
                 nargs['username'] = subscription.user.username
                 send_notification(subscription.user, 'topic_moved',
