@@ -17,17 +17,25 @@
 
 {% block forum_content %}
 <form action="" method="post">
-  <table>
+ <table>
+   <colgroup>
+      <col width="1%"/>
+      <col width="50%"/>
+      <col width="25%"/>
+      <col width="25%"/>
+    </colgroup>
     <thead>
       <tr>
-        <th colspan="2">Thema</th>
+        <th>#</th>
+        <th>Thema</th>
         <th>Gemeldet von</th>
+        <th>In Bearbeitung von</th>
       </tr>
     </thead>
     <tbody>
       {%- for topic in topics %}
       <tr class="reportlist_head">
-        <td style="width: 1em;">
+        <td>
           <input type="checkbox" name="selected" value="{{ topic.id }}" />
         </td>
         <td>
@@ -37,9 +45,16 @@
           <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a> |
           <a href="{{ href('portal', 'privmsg', 'new', reply_to='reportedtopic:%s' % topic.slug) }}">PN schreiben</a>
         </td>
+        <td>
+          {% if topic.report_claimed_by %}
+            <a href="{{ topic.report_claimed_by|url }}">{{ topic.report_claimed_by.username }}</a>
+          {% else %}
+            <a href="{{ href('forum', 'reported_topics', assign=USER, topic=topic.slug) }}">Mir zuweisen</a>
+          {% endif %}
+        </td>
       </tr>
       <tr>
-        <td colspan="3" style="white-space: pre-wrap">{{ topic.reported|e }}</td>
+        <td colspan="4" style="white-space: pre-wrap">{{ topic.reported|e }}</td>
       </tr>
       {%- else %}
       <tr>

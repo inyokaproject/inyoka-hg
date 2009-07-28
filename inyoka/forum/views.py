@@ -819,6 +819,12 @@ def reportlist(request):
         """Add dynamic field choices to the reported topic formular"""
         form.fields['selected'].choices = [(t.id, u'') for t in topics]
 
+    if 'assign' in request.GET and 'topic' in request.GET:
+        topic = Topic.query.filter(Topic.slug == request.GET['topic']).one()
+        topic.report_claimed_by_id = request.user.id
+        session.commit()
+        return HttpResponseRedirect(href('forum', 'reported_topics'))
+
     topics = Topic.query.filter(Topic.reported != None)
     if request.method == 'POST':
         form = ReportListForm(request.POST)
@@ -828,7 +834,8 @@ def reportlist(request):
             session.execute(topic_table.update(
                 topic_table.c.id.in_(d['selected']), values={
                     'reported': None,
-                    'reporter_id': None
+                    'reporter_id': None,
+                    'report_claimed_by_id': None
             }))
             session.commit()
             cache.delete('forum/reported_topic_count')

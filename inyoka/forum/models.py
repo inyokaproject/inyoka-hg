@@ -1403,6 +1403,8 @@ dbsession.mapper(Topic, topic_table, properties={
                        primaryjoin=topic_table.c.author_id == user_table.c.id),
     'reporter': relation(SAUser, foreign_keys=[topic_table.c.reporter_id],
                          primaryjoin=topic_table.c.reporter_id == user_table.c.id),
+    'report_claimed_by': relation(SAUser, foreign_keys=[topic_table.c.report_claimed_by_id],
+                         primaryjoin=topic_table.c.report_claimed_by_id == user_table.c.id),
     'last_post': relation(Post, post_update=True,
                           primaryjoin=topic_table.c.last_post_id == post_table.c.id),
     'first_post': relation(Post, post_update=True,
