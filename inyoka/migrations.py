@@ -1058,6 +1058,13 @@ def add_forum_force_version_flag(m):
             ADD COLUMN force_version TINYINT(1) NOT NULL DEFAULT 0;
      ''')
 
+def add_claimed_by_column(m):
+    m.engine.execute('''
+        ALTER TABLE `forum_topic` ADD COLUMN `report_claimed_by_id` INTEGER  DEFAULT NULL AFTER `has_poll`,
+         ADD CONSTRAINT `report_claimed_by_id_fk` FOREIGN KEY `report_claimed_by_id_fk` (`report_claimed_by_id`)
+         REFERENCES `portal_user` (`id`);
+    ''')
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1085,5 +1092,5 @@ MIGRATIONS = [
     add_group_is_public_flag, add_notes_to_article_suggestion,
     add_comment_rendered_text_column, add_blog_active_flag,
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
-    add_forum_force_version_flag,
+    add_forum_force_version_flag, add_claimed_by_column
 ]
