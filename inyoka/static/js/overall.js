@@ -205,6 +205,14 @@ $(document).ready(function() {
     )
   });
 
+  $('.ellipsis > input').keypress(function (e) {
+    if (e.keyCode==13) {
+      var a = $(this).next('input')[0].value.toString();
+      (a[a.length-1] == '/') ? a : (a + '/');
+      window.location = a + this.value;
+    }
+  });
+
   // the javascript powered login form
   (function() {
     $('#login_link').click(function() {
