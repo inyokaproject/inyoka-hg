@@ -95,7 +95,7 @@ class Pagination(object):
                  show_prev_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
         active = u'<span class="pageselect active">%(page)d</span>'
-        ellipsis = u'<span class="ellipsis"><input type="text" size="1"/>\
+        ellipsis = u'<span class="ellipsis"><input type="text" size="1" value="..."/>\
 <input type="hidden" value="%(href)s"/></span>'
         was_ellipsis = False
         result = []
