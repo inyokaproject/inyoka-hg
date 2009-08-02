@@ -204,7 +204,7 @@ $(document).ready(function() {
         .split(' ').slice(3).join(','))
     )
   });
-
+/*
   function reset_pagination() {
     $('.pagination .ellipsis').html(' … ');
   }
@@ -238,7 +238,7 @@ $(document).ready(function() {
         });
       return false;
     });
-
+*/
   // the javascript powered login form
   (function() {
     $('#login_link').click(function() {

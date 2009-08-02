@@ -75,11 +75,9 @@ class Pagination(object):
             link = request.path
         self.parameters = request.GET
         if isinstance(link, basestring):
-            self.generate_link = lambda x, y: link
+            self.link_base = link
         else:
             self.generate_link = link
-
-        self.link_base = self.generate_link(1, {})
 
         self.needs_redirect_to = None
         if self.total and self.total/per_page < 1 and page > 1:
@@ -144,6 +142,8 @@ class Pagination(object):
         class_ = 'pagination'
         if position:
             class_ += ' pagination_' + position
-        return (u'<div class="%s"><input type="hidden" value="%s"/>%s'
-                u'<div style="clear: both"></div></div>' %
-                (class_, self.link_base, u''.join(result)))
+#        return (u'<div class="%s"><input type="hidden" value="%s"/>%s'
+#                u'<div style="clear: both"></div></div>' %
+#                (class_, self.link_base, u''.join(result)))
+        return u'<div class="%s">%s<div style="clear: both">' \
+               u'</div></div>' % (class_, u''.join(result))
