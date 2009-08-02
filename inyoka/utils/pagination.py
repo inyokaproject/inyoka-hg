@@ -75,7 +75,7 @@ class Pagination(object):
             link = request.path
         self.parameters = request.GET
         if isinstance(link, basestring):
-            self.link_base = link
+            self.generate_link = lambda x, y: link
         else:
             self.generate_link = link
 
@@ -122,7 +122,7 @@ class Pagination(object):
                 })
             elif not was_ellipsis:
                 was_ellipsis = True
-                add(ellipsis % {'href': escape(self.link_base)})
+                add(ellipsis % {'href': escape(link)})
 
         if show_next_link:
             if self.page < pages:
