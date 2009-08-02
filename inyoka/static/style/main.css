@@ -284,14 +284,6 @@ div.pagination a:hover {
     color: white;
 }
 
-div.pagination a.ellipsis {
-    text-decoration: none;
-}
-
-div.pagination a.ellipsis:hover {
-    color: #555;
-}
-
 /*** Table Style ************************************************************/
 
 table {
