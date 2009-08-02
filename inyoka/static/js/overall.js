@@ -205,13 +205,39 @@ $(document).ready(function() {
     )
   });
 
-  $('.ellipsis > input').keypress(function (e) {
-    if (e.keyCode==13) {
-      var a = $(this).next('input')[0].value.toString();
-      (a[a.length-1] == '/') ? a : (a + '/');
-      window.location = a + this.value;
-    }
-  });
+  function reset_pagination() {
+    $('.pagination .ellipsis').html(' … ');
+  }
+
+  $('.pagination .ellipsis')
+    .replaceWith('<a href="#" class="ellipsis"> … </a>');
+  $('.pagination .ellipsis')
+    .attr('title', 'Klicken, um Seitenzahl einzugeben')
+    .click(function () {
+      var $ellipsis = $(this)
+      $ellipsis.html('<input>');
+      $ellipsis.find('input')
+        .attr('size', 3)
+        .focus()
+        .blur(reset_pagination)
+        .keypress(function (e) {
+          if (e.keyCode==13) { // enter
+            var a = $ellipsis.parent().find('input')[0].value.toString();
+            a = (a[a.length-1] == '/') ? a : (a + '/');
+
+            var n = parseInt(this.value);
+            if (isNaN(n) || n < 0) {
+              this.value = '';
+              return false;
+            }
+            window.location = a + n + '/';
+          }
+          else if (e.keyCode == 27) { // escape
+            this.blur();
+          }
+        });
+      return false;
+    });
 
   // the javascript powered login form
   (function() {

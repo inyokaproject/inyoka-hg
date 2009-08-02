@@ -95,8 +95,7 @@ class Pagination(object):
                  show_prev_link=True):
         normal = u'<a href="%(href)s" class="pageselect">%(page)d</a>'
         active = u'<span class="pageselect active">%(page)d</span>'
-        ellipsis = u'<span class="ellipsis"><input type="text" size="1"/>\
-<input type="hidden" value="%(href)s"/></span>'
+        ellipsis = u'<span class="ellipsis"> … </span>'
         was_ellipsis = False
         result = []
         add = result.append
@@ -122,7 +121,7 @@ class Pagination(object):
                 })
             elif not was_ellipsis:
                 was_ellipsis = True
-                add(ellipsis % {'href': escape(self.link_base)})
+                add(ellipsis)
 
         if show_next_link:
             if self.page < pages:
@@ -143,5 +142,6 @@ class Pagination(object):
         class_ = 'pagination'
         if position:
             class_ += ' pagination_' + position
-        return u'<div class="%s">%s<div style="clear: both">' \
-               u'</div></div>' % (class_, u''.join(result))
+        return (u'<div class="%s"><input type="hidden" value="%s"/>%s'
+                u'<div style="clear: both"></div></div>' %
+                (class_, self.link_base, u''.join(result)))
