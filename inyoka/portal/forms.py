@@ -8,6 +8,7 @@
     :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Marian Sigler.
     :license: GNU GPL, see LICENSE for more details.
 """
+import Image
 from django import forms
 from django.utils.safestring import mark_safe
 from inyoka.portal.user import User
@@ -355,6 +356,18 @@ class UserCPProfileForm(forms.Form):
             return
         st = int(storage.get('max_avatar_size', 0))
         if st and data['avatar'].size > st * 1024:
+            raise forms.ValidationError(
+                u'Der von dir ausgewählte Avatar konnte nicht '
+                u'hochgeladen werden, da er zu groß ist. Bitte '
+                u'wähle einen anderen Avatar.')
+        try:
+            image = Image.open(data['avatar'])
+        finally:
+            data['avatar'].seek(0)
+        max_size = (
+            int(storage.get('max_avatar_width', 0)),
+            int(storage.get('max_avatar_height', 0)))
+        if any(length > max_length for max_length, length in zip(max_size, image.size)):
             raise forms.ValidationError(
                 u'Der von dir ausgewählte Avatar konnte nicht '
                 u'hochgeladen werden, da er zu groß ist. Bitte '
