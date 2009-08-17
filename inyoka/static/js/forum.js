@@ -129,7 +129,7 @@ $(function () {
     $('select[@name="ubuntu_version"]').change(function() {
       var text_unstable = 'Dies ist die momentane <a href="{LL}">Entwicklungsversion</a> von Ubuntu';
       var text_lts = 'Dies ist eine <a href="{LL}">LTS (Long Term Support)</a> Version';
-      var text_current = 'Dies ist die momentan <a href="{LL}>aktuelle Version</a> von Ubuntu';
+      var text_current = 'Dies ist die momentan <a href="{LL}">aktuelle Version</a> von Ubuntu';
       var url = "/?__service__=forum.get_version_details";
       var version_str = $(this).find('option:selected').val();
 
