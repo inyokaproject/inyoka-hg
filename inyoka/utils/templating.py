@@ -61,6 +61,7 @@ def get_dtd():
 
 def populate_context_defaults(context):
     """Fill in context defaults."""
+    from inyoka.forum.acl import have_privilege
     try:
         request = current_request._get_current_object()
     except RuntimeError:
@@ -110,7 +111,8 @@ def populate_context_defaults(context):
         GLOBAL_MESSAGE=global_message,
         pm_count=pms,
         report_count=reported,
-        suggestion_count=suggestions
+        suggestion_count=suggestions,
+        have_privilege=have_privilege,
     )
 
 

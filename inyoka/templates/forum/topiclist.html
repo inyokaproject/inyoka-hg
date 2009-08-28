@@ -35,7 +35,11 @@
         <th class="last_post">Letzte Antwort</th>
       </tr>
       {%- for topic in topics if not (topic.hidden and not have_privilege(USER, topic, 'moderate')) %}
-      <tr>
+      {%- set classes = [] %}
+      {%- if have_privilege(USER, topic, 'moderate') and topic.hidden %}{% do classes.append('hidden') %}{% endif %}
+      {%- if have_privilege(USER, topic, 'moderate') and topic.reported %}{% do classes.append('reported') %}{% endif %}
+      {%- if topic.get_ubuntu_version().class_ %}{% do classes.append(topic.get_ubuntu_version().class_) %}{% endif %}
+      <tr{% if classes %} class="{{ classes|join(' ') }}"{% endif %}>
         <td class="icon">
           {{ topic_icon(topic) }}
         </td>
@@ -43,8 +47,8 @@
           <p class="topic_title">
             {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
             {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-            {%- if topic.hidden %} [Verborgen] {% endif %}
-            {%- if topic.reported %} [Gemeldet] {% endif %}
+            {%- if have_privilege(USER, topic, 'moderate') and topic.hidden %} [Verborgen] {% endif %}
+            {%- if have_privilege(USER, topic, 'moderate') and topic.reported %} [Gemeldet] {% endif %}
             <a href="{{ topic|url }}">{{ topic.title|e }}</a>
             {%- if not topic.get_read_status(USER) %}
             <a href="{{ topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">

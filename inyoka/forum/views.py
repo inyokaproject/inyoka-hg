@@ -1448,7 +1448,6 @@ def newposts(request, page=1):
         'title':      u'Neue Beiträge',
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(forum_id=f.id, post_id=post_id),
-        'have_privilege': have_privilege
     }
 
 
@@ -1552,7 +1551,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'title':        title,
         'get_read_status':  lambda post_id: request.user.is_authenticated \
                   and request.user._readstatus(post_id=post_id),
-        'have_privilege': have_privilege,
     }
 
 

@@ -38,6 +38,7 @@
 
 {% macro topic_icon(topic) -%}
   {% set is_read = topic.get_read_status(USER) -%}
+  {% set can_moderate = have_privilege(USER, topic, 'moderate') %}
   <img src="
   {{- href('static', 'img', 'forum', 'topic' ) -}}
   {%- if not is_read %}-new{% endif -%}
