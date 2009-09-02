@@ -95,6 +95,9 @@
         {%- if doc.solved %}
         <img src="{{ href('static', 'img/check.png') }}" alt="Gelöst" title="Gelöst" />
         {%- endif %}
+        {%- if doc.version %}
+        <span class="ubuntu_version">{{ doc.version }}</span>
+        {%- endif %}
       </h2>
       <p class="description">
         {{ doc.excerpt }}

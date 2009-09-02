@@ -75,7 +75,8 @@ class ForumSearchAdapter(SearchAdapter):
             'group_url': url_for(post.topic.forum),
             'highlight': True,
             'text': striptags(post.get_text()),
-            'solved': post.topic.solved
+            'solved': post.topic.solved,
+            'version': post.topic.get_version_info(False)
         }
 
     def get_doc_ids(self):
