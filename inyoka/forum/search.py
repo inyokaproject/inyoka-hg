@@ -47,6 +47,10 @@ class ForumSearchAdapter(SearchAdapter):
         post = Post.query.options(eagerload('topic'), eagerload('author')) \
             .get(post_id)
         if post and post.topic:
+            if post.topic.solved:
+                solved="1"
+            else:
+                solved="0"
             search.store(
                 component='f',
                 uid=post.id,
@@ -57,7 +61,10 @@ class ForumSearchAdapter(SearchAdapter):
                 category=[p.slug for p in post.topic.forum.parents] + \
                     [post.topic.forum.slug],
                 auth=[post.topic.forum_id, post.topic.hidden],
-                text=post.text
+                text=post.text,
+                solved=solved,
+                version=post.topic.ubuntu_version,
+                distro=post.topic.ubuntu_distro
             )
 
     def recv(self, post_id):

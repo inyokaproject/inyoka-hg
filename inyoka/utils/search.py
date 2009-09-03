@@ -380,7 +380,19 @@ class SearchSystem(object):
                     doc.add_posting(token, pos)
                     pos += 1
                 pos += 20
-
+        
+        # Solved (optional)
+        if data.get('solved'):
+            doc.add_term('S%d' % int(data['solved']))
+        
+        # Ubuntu-Version (optional)
+        if data.get('version'):
+            doc.add_term('V%s' % str(data['version']))
+        
+        # Ubuntu-Distro (optional)
+        if data.get('distro'):
+            doc.add_term('D%s' % str(data['distro']))
+        
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)
 

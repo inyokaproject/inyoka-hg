@@ -53,7 +53,21 @@ def handle_area(area):
     component = map.get(area.strip().lower())
     return component and xapian.Query(u'P%s' % component)
 
-
 @search_handler(u'category', u'kategorie')
 def handle_category(category):
     return xapian.Query(u'C%s' % category.lower())
+
+@search_handler(u'solved', u'gelöst')
+def handle_solved(solved):
+    try:
+        return xapian.Query(u'S%d' % int(solved))
+    except:
+        return xapian.Query(u'S%d' % bool(solved))
+
+@search_handler(u'version', u'version')
+def handle_version(version):
+    return xapian.Query(u'V%s' % version.lower())
+
+@search_handler(u'distro', u'Distribution')
+def handle_distro(distro):
+    return xapian.Query(u'D%s' % distro.lower())
