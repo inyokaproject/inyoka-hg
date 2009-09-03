@@ -671,6 +671,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
         abort_access_denied(request)
     if solved is not None:
         topic.solved = solved
+        topic.reindex()
         session.commit()
         flash(u'Das Thema wurde als %s markiert' % (solved and u'gelöst' or \
                                                     u'ungelöst'), True)
