@@ -535,7 +535,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
         if newtopic or firstpost:
             topic.title = d['title']
-            if topic.ubuntu_distro != d.get('ubuntu_distro') or topic.ubuntu_version != d.get('ubuntu_version'):
+            if topic.ubuntu_distro != d.get('ubuntu_distro')\
+               or topic.ubuntu_version != d.get('ubuntu_version'):
                 topic.ubuntu_distro = d.get('ubuntu_distro')
                 topic.ubuntu_version = d.get('ubuntu_version')
                 topic.reindex()

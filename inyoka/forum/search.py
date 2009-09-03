@@ -47,10 +47,6 @@ class ForumSearchAdapter(SearchAdapter):
         post = Post.query.options(eagerload('topic'), eagerload('author')) \
             .get(post_id)
         if post and post.topic:
-            if post.topic.solved:
-                solved="1"
-            else:
-                solved="0"
             search.store(
                 component='f',
                 uid=post.id,
@@ -62,7 +58,7 @@ class ForumSearchAdapter(SearchAdapter):
                     [post.topic.forum.slug],
                 auth=[post.topic.forum_id, post.topic.hidden],
                 text=post.text,
-                solved=solved,
+                solved=post.topic.solved and '1' or '0',
                 version=post.topic.ubuntu_version,
                 distro=post.topic.ubuntu_distro
             )
