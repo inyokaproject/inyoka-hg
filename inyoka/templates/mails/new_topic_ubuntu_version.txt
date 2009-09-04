@@ -1,0 +1,7 @@
+Hallo {{ username }},
+
+Der Benutzer {{ post.author.username }} hat einen neuen Thread im Forum „{{ forum.name }}“ geschrieben und ihn mit der Ubuntu Version „{{ topic.get_ubuntu_version() }}“ gekennzeichnet:
+{{ topic.title }} ({{ topic|url }})
+
+Falls du bei Beiträgen in diesem Forum in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ forum|url('unsubscribe') }}
+

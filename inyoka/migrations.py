@@ -1065,6 +1065,10 @@ def add_claimed_by_column(m):
          REFERENCES `portal_user` (`id`);
     ''')
 
+def add_subscription_notified_ubuntu_version(m):
+    m.engine.execute('''
+        ALTER TABLE `portal_subscription` ADD COLUMN `ubuntu_version` VARCHAR(4)  DEFAULT NULL AFTER `forum_id`;
+    ''')
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1092,5 +1096,6 @@ MIGRATIONS = [
     add_group_is_public_flag, add_notes_to_article_suggestion,
     add_comment_rendered_text_column, add_blog_active_flag,
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
-    add_forum_force_version_flag, add_claimed_by_column
+    add_forum_force_version_flag, add_claimed_by_column,
+    add_subscription_notified_ubuntu_version
 ]
