@@ -387,11 +387,11 @@ class SearchSystem(object):
         
         # Ubuntu-Version (optional)
         if data.get('version'):
-            doc.add_term('V%s' % str(data['version']))
-        
-        # Ubuntu-Distro (optional)
-        if data.get('distro'):
-            doc.add_term('D%s' % str(data['distro']))
+            text = data['version'].replace('(', '').replace(')', '').lower()
+            for token in text.split():
+                print token,
+                print
+                doc.add_term('V%s' % token)
         
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)

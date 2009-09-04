@@ -59,8 +59,7 @@ class ForumSearchAdapter(SearchAdapter):
                 auth=[post.topic.forum_id, post.topic.hidden],
                 text=post.text,
                 solved=post.topic.solved and '1' or '0',
-                version=post.topic.ubuntu_version,
-                distro=post.topic.ubuntu_distro
+                version=post.topic.get_version_info(default=None),
             )
 
     def recv(self, post_id):

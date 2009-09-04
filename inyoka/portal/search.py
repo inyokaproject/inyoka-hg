@@ -67,7 +67,3 @@ def handle_solved(solved):
 @search_handler(u'version', u'version')
 def handle_version(version):
     return xapian.Query(u'V%s' % version.lower())
-
-@search_handler(u'distro', u'Distribution')
-def handle_distro(distro):
-    return xapian.Query(u'D%s' % distro.lower())
