@@ -21,6 +21,7 @@ from inyoka.wiki.parser import validate_signature, SignatureError
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
 from inyoka.utils.storage import storage
+from inyoka.forum.forms import UBUNTU_VERSIONS
 
 
 #: Some constants used for ChoiceFields
@@ -47,6 +48,7 @@ SEARCH_SORT_CHOICES = (
     ('date', 'Datum')
 )
 
+VERSION_CHOICES = [(v.number, str(v)) for v in UBUNTU_VERSIONS if v.active]
 
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
@@ -231,6 +233,10 @@ class UserCPSettingsForm(forms.Form):
     notifications = forms.MultipleChoiceField(
         label=u'Benachrichtigen bei', required=False,
         choices=NOTIFICATION_CHOICES,
+        widget=forms.CheckboxSelectMultiple)
+    ubuntu_version = forms.MultipleChoiceField(
+        label='Benachrichtigung bei neuen Topics mit bestimmter Ubuntu Version',
+        required=False, choices=VERSION_CHOICES,
         widget=forms.CheckboxSelectMultiple)
     timezone = forms.ChoiceField(label='Zeitzone', required=True,
         choices=zip(TIMEZONES, TIMEZONES))

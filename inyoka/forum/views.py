@@ -568,6 +568,9 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                      'post':       post,
                      'topic':      topic,
                      'forum':      forum})
+            
+            #Inform about ubuntu_version, without the users, which has already
+            #imformed about this new topic
             for s in Subscription.objects.filter(ubuntu_version= \
                            topic.ubuntu_version, notified=False) \
                            .exclude(user=request.user, forum_id=forum.id):
