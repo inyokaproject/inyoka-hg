@@ -389,8 +389,6 @@ class SearchSystem(object):
         if data.get('version'):
             text = data['version'].replace('(', '').replace(')', '').lower()
             for token in text.split():
-                print token,
-                print
                 doc.add_term('V%s' % token)
         
         connection = self.get_connection(True)
