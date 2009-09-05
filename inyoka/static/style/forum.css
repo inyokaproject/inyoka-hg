@@ -599,3 +599,7 @@ span#version_info.current {
 span#version_info a {
   color: #000;
 }
+
+td.split {
+  text-align: center;
+}
