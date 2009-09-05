@@ -53,11 +53,13 @@
       <tr><th colspan="5" class="category">{{ forum.name|e }}</th></tr>
       <tr>
         <td colspan="5">
+          {%- if supporters %}
           <span>Supporter: 
           {%- for supporter in supporters %}
             <a href="{{supporter|url }}">{{ supporter.username|e }}</a>
           {%- endfor %}
           </span>
+          {%- endif %}
           {%- if forum.description %}
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
