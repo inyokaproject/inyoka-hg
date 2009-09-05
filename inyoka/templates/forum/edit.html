@@ -38,6 +38,11 @@
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <h2>{{ title_trace[0] }}</h2>
+    {%- if topic %}
+    <span class="ubuntu_version">
+        <strong>Ubuntu-Version:</strong> {{ topic.get_version_info() }}
+    </span>
+    {%- endif %}
     <dl>
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
