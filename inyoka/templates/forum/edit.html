@@ -40,9 +40,9 @@
     <h2>{{ title_trace[0] }}</h2>
     {%- if topic %}
       {%- if topic.get_version_info() %}
-      <span class="ubuntu_version">
+      <p class="ubuntu_version">
         <strong>Ubuntu-Version:</strong> {{ topic.get_version_info() }}
-      </span>
+      </p>
       {%- endif %}
       {%- if discussions %}
       <div class="topic_box discussion_info">
