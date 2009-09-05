@@ -13,6 +13,7 @@ import re
 from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
+from django.db.models import Q
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, or_, select, not_, exists, func
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
@@ -982,7 +983,7 @@ def movetopic(request, topic_slug):
                     u'Dein Thema „%s“ wurde verschoben'
                     % topic.title, nargs)
 
-            subscriptions = Subscription.objects.filter(topic_id=topic.id)
+            subscriptions = Subscription.objects.filter(Q(topic_id=topic.id) | Q(forum_id=forum.id))
             for subscription in subscriptions:
                 if subscription.user.id == topic.author.id:
                     continue
