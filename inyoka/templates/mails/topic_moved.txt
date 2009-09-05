@@ -1,4 +1,4 @@
 Hallo {{ username }},
 
-Dein Thema „{{ topic.title }}“ wurde von {{ mod }} in das Forum „{{ forum_name }}“ verschoben.
+Das Thema „{{ topic.title }}“ wurde von {{ mod }} in das Forum „{{ forum_name }}“ verschoben.
 Du kannst es dir hier ansehen: {{ topic|url }}
