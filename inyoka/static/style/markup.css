@@ -225,9 +225,12 @@ div.workinprogress h3 {
   margin-top: 1.8em;
 }
 
-.toc a {
-  color: #5E4000;
+.toc li {
   text-align: left;
+}
+
+.toc a {
+  color: #3B2800;
 }
 
 .toc .head a {
