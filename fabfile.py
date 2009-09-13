@@ -22,7 +22,7 @@ def staging():
     config.fab_hosts = ['staging.ubuntuusers.de']
 
 def production():
-    config.fab_hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org']
+    config.fab_hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
 
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
