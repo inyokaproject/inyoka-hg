@@ -352,7 +352,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
-    post = topic = forum = attachment = quote = posts = None
+    post = topic = forum = attachment = quote = posts = discussions = None
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
@@ -655,6 +655,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if not newtopic:
         posts = list(topic.posts.filter(post_table.c.hidden == 0) \
                                 .order_by(post_table.c.position.desc())[:15])
+        discussions = Page.objects.filter(topic_id=topic.id)
+
     return {
         'form':         form,
         'poll_form':    poll_form,
@@ -674,7 +676,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
-        'discussions':  Page.objects.filter(topic_id=topic.id),
+        'discussions':  discussions
     }
 
 
