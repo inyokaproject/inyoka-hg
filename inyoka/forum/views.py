@@ -574,8 +574,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         session.commit()
 
         if newtopic:
-            for s in Subscription.objects.filter(forum_id=forum.id,
-                                                 notified=False) \
+            for s in Subscription.objects.filter(forum_id=forum.id) \
                                          .exclude(user=request.user):
                 send_notification(s.user, 'new_topic',
                     u'Neues Thema im Forum %s: „%s“' % \
@@ -588,7 +587,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             #Inform about ubuntu_version, without the users, which has already
             #imformed about this new topic
             for s in Subscription.objects.filter(ubuntu_version= \
-                           topic.ubuntu_version, notified=False) \
+                           topic.ubuntu_version) \
                            .exclude(user=request.user, forum_id=forum.id):
                 send_notification(s.user, 'new_topic_ubuntu_version',
                     u'Neues Thema mit der Version %s: „%s“' % \
