@@ -183,12 +183,14 @@ def forum(request, slug, page=1):
     supporters = cache.get('forum/forum/supporters-%s' % f.id)
     if supporters is None:
         p = privilege_table.c
+        supporters = []
         cur = session.execute(select([p.user_id, p.positive],
             (p.forum_id == f.id) &
             (p.user_id != None)
         )).fetchall()
-        supporters = [User.objects.get(row.user_id) for row in cur
-                      if check_privilege(row.positive, 'moderate')]
+        subset = [r.user_id for r in cur if check_privilege(r.positive, 'moderate')]
+        if subset:
+            supporters = User.objects.filter(id__in=subset).order_by('username').all()
         cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
 
     ctx.update({
