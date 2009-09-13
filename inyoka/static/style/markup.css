@@ -95,6 +95,8 @@ div.bash {
   background-color: #454545;
   border: 1px solid #666;
   margin: 0.3em 1em;
+  clear: none;
+  overflow: auto;
 }
 
 div.bash pre {
@@ -108,8 +110,11 @@ div.bash pre {
 
 div.box {
   clear: both;
-  margin: 0.5em 1em;
+  margin: 0.5em 0em;
   border: 1px solid #bbb;
+  -moz-border-radius: 5px;
+  clear: none;
+  overflow: auto;
 }
 
 div.box div.contents {
@@ -123,6 +128,7 @@ div.box h3 {
   color: white;
   background-color: #bbb;
   padding: 0 1em;
+  -moz-border-radius: 3px 3px 0px 0px;
 }
 
 div.improvable {
@@ -225,9 +231,12 @@ div.workinprogress h3 {
   margin-top: 1.8em;
 }
 
-.toc a {
-  color: #5E4000;
+.toc li {
   text-align: left;
+}
+
+.toc a {
+  color: #3B2800;
 }
 
 .toc .head a {

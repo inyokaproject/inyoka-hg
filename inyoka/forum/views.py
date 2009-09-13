@@ -51,7 +51,7 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
     check_privilege, DISALLOW_ALL
 from inyoka.forum.database import post_table, topic_table, forum_table, \
-    poll_option_table, attachment_table
+    poll_option_table, attachment_table, privilege_table
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -180,6 +180,17 @@ def forum(request, slug, page=1):
                          u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                          'besuche das Forum')
 
+    supporters = cache.get('forum/forum/supporters-%s' % f.id)
+    if supporters is None:
+        p = privilege_table.c
+        cur = session.execute(select([p.user_id, p.positive],
+            (p.forum_id == f.id) &
+            (p.user_id != None)
+        )).fetchall()
+        supporters = [User.objects.get(row.user_id) for row in cur
+                      if check_privilege(row.positive, 'moderate')]
+        cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
+
     ctx.update({
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
@@ -187,6 +198,7 @@ def forum(request, slug, page=1):
                                                               forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
+        'supporters':     supporters
     })
     return ctx
 
@@ -340,7 +352,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
-    post = topic = forum = attachment = quote = posts = None
+    post = topic = forum = attachment = quote = posts = discussions = None
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
@@ -643,6 +655,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if not newtopic:
         posts = list(topic.posts.filter(post_table.c.hidden == 0) \
                                 .order_by(post_table.c.position.desc())[:15])
+        discussions = Page.objects.filter(topic_id=topic.id)
+
     return {
         'form':         form,
         'poll_form':    poll_form,
@@ -662,6 +676,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
+        'discussions':  discussions
     }
 
 

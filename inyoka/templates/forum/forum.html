@@ -56,10 +56,17 @@
           {%- if forum.description %}
           <p class="description">{{ forum.description|e }}</p>
           {%- endif %}
+          {%- if supporters %}
+          <p class="description">Supporter: 
+          {%- for supporter in supporters %}
+            <a href="{{supporter|url }}">{{ supporter.username|e }}</a>
+            {%- if not loop.last %}, {% endif %}
+          {%- endfor %}
+          </p>
+          {%- endif %}
           {{ pagination_right }}
           {{ forum_actions() }}
         </td>
-
       </tr>
     </thead>
     <tbody>

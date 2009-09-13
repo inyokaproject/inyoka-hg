@@ -7,6 +7,10 @@
  * :copyright: 2007-2008 by Armin Ronacher, Benjamin Wiegand.
  * :license: GNU GPL.
  */
+ 
+ p.ubuntu_version {
+    font-size: 0.8em;
+}
 
 ul.toolbar {
     margin: 0.5em 0 0.2em 0;

@@ -9,7 +9,7 @@
 */
 
 (function() {
-  if (navigator.appName.toLowerCase() == 'konqueror')
+  if (navigator.userAgent.indexOf('KHTML') >= 0)
     return
 
   var FEED_COUNTS = [10, 20, 30, 50, 75, 100];

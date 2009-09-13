@@ -47,7 +47,7 @@
     <table class="topic">
       <thead>
       <tr>
-        <th colspan="4">
+        <th colspan="12">
           {{ topic.title|e }}
         </th>
       </tr>
@@ -55,12 +55,12 @@
       <tbody>
       <tr>
         <td class="split">
-          <input type="submit" name="select_selected" value="Gewählte Beiträge" />
+          <input type="submit" name="select_selected" value="Gewählte" />
         </td>
         <td class="split">
           <input type="submit" name="select_following" value="Ab hier" />
         </td>
-        <td colspan="2"></td>
+        <td colspan="10"></td>
       </tr>
       {% for post in posts %}
         <tr>
@@ -70,13 +70,13 @@
           <td class="split">
             <input type="radio" name="start" value="{{ post.id }}" />
           </td>
-          <td class="author">
+          <td class="author" colspan="2">
             <a href="{{ post.author|url }}" name="{{ post.id }}">
               {{ post.author|e }}
             </a><br />
             Beiträge: {{ post.author.post_count }}
           </td>
-          <td>
+          <td colspan="8">
             <div class="postinfo">
               Verfasst {{ post.pub_date|datetimeformat }}
             </div>
@@ -86,12 +86,12 @@
       {% endfor %}
       <tr>
         <td class="split">
-          <input type="submit" name="select_selected" value="Gewählte Beiträge" />
+          <input type="submit" name="select_selected" value="Gewählte" />
         </td>
         <td class="split">
           <input type="submit" name="select_following" value="Ab hier" />
         </td>
-        <td colspan="2"></td>
+        <td colspan="10"></td>
       </tr>
       </tbody>
     </table>

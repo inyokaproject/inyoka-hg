@@ -38,6 +38,25 @@
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <h2>{{ title_trace[0] }}</h2>
+    {%- if topic %}
+      {%- if topic.get_version_info() and not (isfirstpost or isnewtopic) %}
+      <p class="ubuntu_version">
+        <strong>Ubuntu-Version:</strong> {{ topic.get_version_info() }}
+      </p>
+      {%- endif %}
+      {%- if discussions %}
+      <div class="topic_box discussion_info">
+        Dieses Thema ist die Diskussion
+        {%- if discussions|count == 1 %} des Artikels
+        {%- else %} der Artikel
+        {%- endif %}
+        {%- for article in discussions %}
+        <strong><a href="{{ article|url }}">{{ article.name|e }}</a></strong>
+        {%- if not loop.last %},{% endif %}
+        {%- endfor %}.
+      </div>
+      {%- endif %}
+    {%- endif %}
     <dl>
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
