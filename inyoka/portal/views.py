@@ -626,18 +626,14 @@ def usercp_settings(request):
         form = UserCPSettingsForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
-            data_version = data.pop('ubuntu_version')
-            db_version = [s.ubuntu_version for s in Subscription.objects \
+            new_versions = data.pop('ubuntu_version')
+            old_versions = [s.ubuntu_version for s in Subscription.objects \
                           .filter(user=request.user).exclude(ubuntu_version=None)]
             for version in [v.number for v in UBUNTU_VERSIONS]:
-                if version in data_version and version not in db_version:
-                    subscription = Subscription(
-                        user=request.user,
-                        ubuntu_version=version,
-                    )
-                    subscription.save()
-                elif version not in data_version and version in db_version:
-                    s = Subscription.objects.filter(user=request.user) \
+                if version in new_versions and version not in old_versions:
+                    Subscription(user=request.user, ubuntu_version=version).save()
+                elif version not in new_versions and version in old_versions:
+                    Subscription.objects.filter(user=request.user) \
                                         .exclude(ubuntu_version=None).delete()
             for key, value in data.iteritems():
                 request.user.settings[key] = data[key]
@@ -719,7 +715,7 @@ def usercp_subscriptions(request, page=1, notified_only=False):
     """
     page = int(page)
 
-    subscriptions = request.user.subscription_set.all()
+    subscriptions = request.user.subscription_set.filter(ubuntu_version=None)
     if notified_only:
         subscriptions = subscriptions.filter(notified=True)
     subscriptions = subscriptions.order_by('-notified')
