@@ -20,7 +20,7 @@ xapian_version = '1.0.9'
 pil_version = '1.1.6'
 
 def easy_install(package, home_dir, optional_args=None):
-    optional_args = optional_args or []
+    optional_args = optional_args or ['-U']
     cmd = [os.path.join(home_dir, 'bin', 'easy_install')]
     cmd.extend(optional_args)
     cmd.append(package)

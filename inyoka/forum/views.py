@@ -179,15 +179,18 @@ def forum(request, slug, page=1):
         set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                          u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                          'besuche das Forum')
+
     supporters = cache.get('forum/forum/supporters-%s' % f.id)
     if supporters is None:
         p = privilege_table.c
-        cur = list(session.execute(
-               select([p.user_id, p.positive], (p.forum_id == f.id))
-        ))
-        supporters = [User.objects.get(row.user_id) for row in cur if check_privilege(row.positive, 'moderate')]
-        cache.set('forum/forum/supporters-%s' % f.id, supporters, 120)
-    
+        cur = session.execute(select([p.user_id, p.positive],
+            (p.forum_id == f.id) &
+            (p.user_id != None)
+        )).fetchall()
+        supporters = [User.objects.get(row.user_id) for row in cur
+                      if check_privilege(row.positive, 'moderate')]
+        cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
+
     ctx.update({
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
