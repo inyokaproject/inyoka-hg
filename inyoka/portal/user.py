@@ -255,7 +255,8 @@ class Group(models.Model):
         fn = 'portal/team_icons/team_%s.%s' % (self.name, image.format.lower())
         image_path = path.join(settings.MEDIA_ROOT, fn)
         # clear the file system
-        self.delete_icon()
+        if self.icon:
+            self.delete_icon()
 
         std = storage.get_many(('team_icon_height', 'team_icon_width'))
         max_size = (int(std['team_icon_height']),
