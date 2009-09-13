@@ -574,8 +574,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         session.commit()
 
         if newtopic:
+            notified_user = []
             for s in Subscription.objects.filter(forum_id=forum.id) \
                                          .exclude(user=request.user):
+                notified_user.append(s.user)
                 send_notification(s.user, 'new_topic',
                     u'Neues Thema im Forum %s: „%s“' % \
                         (forum.name, topic.title),
@@ -588,14 +590,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             #imformed about this new topic
             for s in Subscription.objects.filter(ubuntu_version= \
                            topic.ubuntu_version) \
-                           .exclude(user=request.user, forum_id=forum.id):
-                send_notification(s.user, 'new_topic_ubuntu_version',
-                    u'Neues Thema mit der Version %s: „%s“' % \
-                        (topic.get_ubuntu_version(), topic.title),
-                    {'username':   s.user.username,
-                     'post':       post,
-                     'topic':      topic,
-                     'forum':      forum})
+                           .exclude(user=request.user):
+                if not s.user in notified_user:
+                    send_notification(s.user, 'new_topic_ubuntu_version',
+                        u'Neues Thema mit der Version %s: „%s“' % \
+                            (topic.get_ubuntu_version(), topic.title),
+                        {'username':   s.user.username,
+                         'post':       post,
+                         'topic':      topic,
+                         'forum':      forum})
 
             # we always notify about new topics, even if the forum was
             # not visited, because unlike the posts you won't see
