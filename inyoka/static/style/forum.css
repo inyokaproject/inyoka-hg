@@ -604,3 +604,8 @@ span#version_info a {
 td.split {
   text-align: center;
 }
+
+form a.pastelink {
+  float: right;
+  margin-top: 1em;
+}
