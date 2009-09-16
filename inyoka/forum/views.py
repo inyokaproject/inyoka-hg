@@ -179,15 +179,20 @@ def forum(request, slug, page=1):
         set_session_info(request, u'sieht sich das Forum „<a href="%s">'
                          u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
                          'besuche das Forum')
+
     supporters = cache.get('forum/forum/supporters-%s' % f.id)
     if supporters is None:
         p = privilege_table.c
-        cur = list(session.execute(
-               select([p.user_id, p.positive], (p.forum_id == f.id))
-        ))
-        supporters = [User.objects.get(row.user_id) for row in cur if check_privilege(row.positive, 'moderate')]
-        cache.set('forum/forum/supporters-%s' % f.id, supporters, 120)
-    
+        supporters = []
+        cur = session.execute(select([p.user_id, p.positive],
+            (p.forum_id == f.id) &
+            (p.user_id != None)
+        )).fetchall()
+        subset = [r.user_id for r in cur if check_privilege(r.positive, 'moderate')]
+        if subset:
+            supporters = User.objects.filter(id__in=subset).order_by('username').all()
+        cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
+
     ctx.update({
         'forum':         f,
         'subforums':     filter_invisible(request.user, f._children),
@@ -271,7 +276,7 @@ def viewtopic(request, topic_slug, page=1):
         polls = None
 
     pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
-                     total=t.post_count, rownum_column=post_table.c.position)
+                     total=t.post_count)#, rownum_column=post_table.c.position)
 
     if have_privilege(User.ANONYMOUS_USER, t, 'read'):
         set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
@@ -349,7 +354,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     When creating a new topic, the user has the choice to upload files bound
     to this topic or to create one or more polls.
     """
-    post = topic = forum = attachment = quote = posts = None
+    post = topic = forum = attachment = quote = posts = discussions = None
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
@@ -571,9 +576,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         session.commit()
 
         if newtopic:
-            for s in Subscription.objects.filter(forum_id=forum.id,
-                                                 notified=False) \
+            notified_user = []
+            for s in Subscription.objects.filter(forum_id=forum.id) \
                                          .exclude(user=request.user):
+                notified_user.append(s.user)
                 send_notification(s.user, 'new_topic',
                     u'Neues Thema im Forum %s: „%s“' % \
                         (forum.name, topic.title),
@@ -581,9 +587,24 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                      'post':       post,
                      'topic':      topic,
                      'forum':      forum})
-                # we always notify about new topics, even if the forum was
-                # not visited, because unlike the posts you won't see
-                # other new topics
+            
+            #Inform about ubuntu_version, without the users, which has already
+            #imformed about this new topic
+            for s in Subscription.objects.filter(ubuntu_version= \
+                           topic.ubuntu_version) \
+                           .exclude(user=request.user):
+                if not s.user in notified_user:
+                    send_notification(s.user, 'new_topic_ubuntu_version',
+                        u'Neues Thema mit der Version %s: „%s“' % \
+                            (topic.get_ubuntu_version(), topic.title),
+                        {'username':   s.user.username,
+                         'post':       post,
+                         'topic':      topic,
+                         'forum':      forum})
+
+            # we always notify about new topics, even if the forum was
+            # not visited, because unlike the posts you won't see
+            # other new topics
         elif not post_id:
             for s in Subscription.objects.filter(topic_id=topic.id,
                                                  notified=False) \
@@ -652,6 +673,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if not newtopic:
         posts = list(topic.posts.filter(post_table.c.hidden == 0) \
                                 .order_by(post_table.c.position.desc())[:15])
+        discussions = Page.objects.filter(topic_id=topic.id)
+
     return {
         'form':         form,
         'poll_form':    poll_form,
@@ -671,7 +694,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
-        'discussions':  Page.objects.filter(topic_id=topic.id),
+        'discussions':  discussions
     }
 
 

@@ -42,7 +42,7 @@
        #}den dortigen Eintrag verlinken.">Ablage</a>
     <h2>{{ title_trace[0] }}</h2>
     {%- if topic %}
-      {%- if topic.get_version_info() %}
+      {%- if topic.get_version_info() and not (isfirstpost or isnewtopic) %}
       <p class="ubuntu_version">
         <strong>Ubuntu-Version:</strong> {{ topic.get_version_info() }}
       </p>

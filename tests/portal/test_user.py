@@ -56,6 +56,6 @@ class TestGroupModel(unittest.TestCase):
     def test_icon(self):
         self.assertEqual(self.group.icon_url, None)
         # TODO
-    
+
     def tearDown(self):
         self.group.delete()

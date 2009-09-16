@@ -43,7 +43,7 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.acl import filter_invisible
-from inyoka.forum.models import Forum, SAUser, Topic, Post
+from inyoka.forum.models import Forum, SAUser, Topic, Post, UBUNTU_VERSIONS
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
@@ -626,6 +626,15 @@ def usercp_settings(request):
         form = UserCPSettingsForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
+            new_versions = data.pop('ubuntu_version')
+            old_versions = [s.ubuntu_version for s in Subscription.objects \
+                          .filter(user=request.user).exclude(ubuntu_version=None)]
+            for version in [v.number for v in UBUNTU_VERSIONS]:
+                if version in new_versions and version not in old_versions:
+                    Subscription(user=request.user, ubuntu_version=version).save()
+                elif version not in new_versions and version in old_versions:
+                    Subscription.objects.filter(user=request.user) \
+                                        .exclude(ubuntu_version=None).delete()
             for key, value in data.iteritems():
                 request.user.settings[key] = data[key]
             request.user.save()
@@ -636,10 +645,12 @@ def usercp_settings(request):
                   u'auf. Bitte behebe sie.')
     else:
         settings = request.user.settings
+        ubuntu_version = [s.ubuntu_version for s in Subscription.objects.filter(user=request.user).exclude(ubuntu_version=None)]
         values = {
             'notify': settings.get('notify', ['mail']),
             'notifications': settings.get('notifications', [c[0] for c in
                                                     NOTIFICATION_CHOICES]),
+            'ubuntu_version': ubuntu_version,
             'timezone': get_user_timezone(),
             'hide_avatars': settings.get('hide_avatars', False),
             'hide_signatures': settings.get('hide_signatures', False),
@@ -704,7 +715,7 @@ def usercp_subscriptions(request, page=1, notified_only=False):
     """
     page = int(page)
 
-    subscriptions = request.user.subscription_set.all()
+    subscriptions = request.user.subscription_set.filter(ubuntu_version=None)
     if notified_only:
         subscriptions = subscriptions.filter(notified=True)
     subscriptions = subscriptions.order_by('-notified')
