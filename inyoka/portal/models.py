@@ -328,6 +328,7 @@ class Subscription(models.Model):
     #forum = models.ForeignKey(Forum, null=True)
     topic_id = models.IntegerField(null=True)
     forum_id = models.IntegerField(null=True)
+    ubuntu_version = models.CharField(max_length=4, null=True)
     wiki_page = models.ForeignKey(Page, null=True)
     notified = models.BooleanField('User was already notified',
                                    default=False)

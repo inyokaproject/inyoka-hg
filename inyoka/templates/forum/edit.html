@@ -37,6 +37,9 @@
 
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
+    <a href="{{ href('pastebin') }}" class="pastelink" title="Sehr große {#
+       #}Codestücke oder Programmausgaben bitte in der Ablage speichern und {#
+       #}den dortigen Eintrag verlinken.">Ablage</a>
     <h2>{{ title_trace[0] }}</h2>
     {%- if topic %}
       {%- if topic.get_version_info() and not (isfirstpost or isnewtopic) %}
