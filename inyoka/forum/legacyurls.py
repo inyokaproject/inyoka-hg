@@ -130,7 +130,7 @@ def topic_actions(args, match, topic_id, action):
 @legacy.url(r'^/topic/\d+/quote/(\d+)/?$')
 def quote(args, match, post_id):
     try:
-        return href('forum', 'post', 'quote', int(post_id))
+        return href('forum', 'post', int(post_id), 'quote')
     except ValueError:
         return
 
