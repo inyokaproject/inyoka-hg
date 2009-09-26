@@ -23,6 +23,7 @@ from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
 _stemmer = xapian.Stem('de')
+_description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
 search = None
 
 
@@ -175,7 +176,7 @@ class SearchSystem(object):
         qp.add_prefix('category', 'C')
         qp.add_prefix('kategorie', 'C')
         
-        return qp.parse(query)
+        return qp.parse_query(query)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],
