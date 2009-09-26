@@ -968,7 +968,7 @@ def add_planet_hidden(m):
 
 def add_blog_active_flag(m):
     '''add an active flag to planet blogs. due to problems with merging we have to check if the column already exists.'''
-    q = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'planet_blog' AND table_schema = 'ubuntuusers' AND column_name = 'active'"
+    q = "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'planet_blog' AND table_schema = '%s' AND column_name = 'active'" % (settings.DATABASE_NAME)
     if not m.engine.execute(q).fetchone()[0]:
         m.engine.execute('''
             ALTER TABLE planet_blog
