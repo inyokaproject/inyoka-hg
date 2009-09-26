@@ -628,13 +628,13 @@ def usercp_settings(request):
             data = form.cleaned_data
             new_versions = data.pop('ubuntu_version')
             old_versions = [s.ubuntu_version for s in Subscription.objects \
-                          .filter(user=request.user).exclude(ubuntu_version=None)]
+                          .filter(user=request.user).exclude(ubuntu_version__isnull=True)]
             for version in [v.number for v in UBUNTU_VERSIONS]:
                 if version in new_versions and version not in old_versions:
                     Subscription(user=request.user, ubuntu_version=version).save()
                 elif version not in new_versions and version in old_versions:
-                    Subscription.objects.filter(user=request.user) \
-                                        .exclude(ubuntu_version=None).delete()
+                    Subscription.objects.filter(user=request.user, 
+                                                ubuntu_version=version).delete()
             for key, value in data.iteritems():
                 request.user.settings[key] = data[key]
             request.user.save()
@@ -645,7 +645,8 @@ def usercp_settings(request):
                   u'auf. Bitte behebe sie.')
     else:
         settings = request.user.settings
-        ubuntu_version = [s.ubuntu_version for s in Subscription.objects.filter(user=request.user).exclude(ubuntu_version=None)]
+        ubuntu_version = [s.ubuntu_version for s in Subscription.objects.\
+                          filter(user=request.user, ubuntu_version__isnull=False)]
         values = {
             'notify': settings.get('notify', ['mail']),
             'notifications': settings.get('notifications', [c[0] for c in
@@ -715,7 +716,7 @@ def usercp_subscriptions(request, page=1, notified_only=False):
     """
     page = int(page)
 
-    subscriptions = request.user.subscription_set.filter(ubuntu_version=None)
+    subscriptions = request.user.subscription_set.filter(ubuntu_version__isnull=True)
     if notified_only:
         subscriptions = subscriptions.filter(notified=True)
     subscriptions = subscriptions.order_by('-notified')
