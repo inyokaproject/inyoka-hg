@@ -141,6 +141,7 @@ class SearchSystem(object):
         
         def handle_custom_prefix(match):
             prefix = match.group(1)
+            print prefix
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
@@ -159,10 +160,10 @@ class SearchSystem(object):
                     return u'solved_id:%s' % int(data)
                 except ValueError:
                     return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
-            return '%s:"%s"' (prefix, data)
+            return '%s:"%s"' % (prefix, data)
         
-        query = re.sub(r'\b([a-z_]+):"([^"]+)\b"', handle_custom_prefix, query)
-        query = re.sub(r'\b([a-z_]+):(\w+)\b', handle_custom_prefix, query)
+        query = re.sub(ur'(?u)\b([a-z_öäüß]+):"([^"]+)\b"', handle_custom_prefix, query)
+        query = re.sub(ur'(?u)\b([a-z_öäüß]+):(\w+)\b', handle_custom_prefix, query)
 
         qp = xapian.QueryParser()
         qp.set_stemmer(_stemmer)
