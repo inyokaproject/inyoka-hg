@@ -138,7 +138,6 @@ class SearchSystem(object):
         query = re.sub(r'\b(UND\s+)?NICHT\b', 'AND NOT', query)
         query = re.sub(r'\bUND\b', 'AND', query)
         query = re.sub(r'\bODER\b', 'OR', query)
-        query = re.sub(r'\bNICHT\b', 'NOT', query)
         
         def handle_custom_prefix(match):
             prefix = match.group(1)
@@ -167,6 +166,8 @@ class SearchSystem(object):
         query = re.sub(ur'(?u)\b([\w_]+):([\w.]+)\b', handle_custom_prefix, query)
 
         qp = xapian.QueryParser()
+        qp.set_default_op(xapian.Query.OP_AND)
+        qp.set_stemming_strategy(xapian.QueryParser.STEM_SOME)
         qp.set_stemmer(_stemmer)
 
         qp.add_prefix('user_id', 'U')
