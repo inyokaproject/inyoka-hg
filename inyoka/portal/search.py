@@ -61,8 +61,8 @@ def handle_category(category):
 def handle_solved(solved):
     try:
         return xapian.Query(u'S%d' % int(solved))
-    except:
-        return xapian.Query(u'S%d' % bool(solved))
+    except ValueError:
+        return xapian.Query(u'S%d' % (1 if solved.lower() == "true" else 0))
 
 @search_handler(u'version', u'version')
 def handle_version(version):
