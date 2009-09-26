@@ -22,160 +22,8 @@ from inyoka.conf import settings
 from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
-
-_word_re = re.compile(r'\b[\w:\.][\w:\.]{,30}\b', re.U)
-
-_token_re = re.compile(ur'''(?x)
-    (?P<operator>[()-])     |
-    (?P<termdef>[a-zA-Zöäüß]+:) |
-    (?P<string>"[^"]*")     |
-    (?P<arg>[^\s()]+)
-''', re.U)
-
-_keywords = {
-    'ODER':     'or',
-    'NICHT':    'not',
-    'UND':      'and',
-    'OR':       'or',
-    'NOT':      'not',
-    'AND':      'and'
-}
-
-_description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
-
 _stemmer = xapian.Stem('de')
 search = None
-
-
-def stem(word):
-    """Stem a single word."""
-    if isinstance(word, str):
-        word = word.decode('utf8')
-    return _stemmer(word.lower().encode('utf-8'))
-
-
-def tokenize(text):
-    """Tokenize and encode to utf-8."""
-    for match in _word_re.finditer(text):
-        yield stem(match.group())
-
-
-class QueryParser(object):
-    """
-    Parse queries into xapian queries.
-    """
-
-    def __init__(self, term_defs=None, default_op=xapian.Query.OP_AND):
-        self.term_defs = term_defs or {}
-        self.default_op = default_op
-        self.term_pos = 0
-
-    def tokenize(self, query):
-        """Helper function to tokenize"""
-        for match in _token_re.finditer(query):
-            for key, value in match.groupdict().iteritems():
-                if value is not None:
-                    if key == 'arg' and value in _keywords:
-                        yield 'keyword', _keywords[value]
-                    elif key == 'string':
-                        yield 'longarg', value[1:-1]
-                    elif key == 'termdef':
-                        yield key, value[:-1]
-                    else:
-                        yield key, value
-                    break
-
-    def parse(self, query):
-        """Parse a string into a xapian query."""
-        stream = TokenStream.from_tuple_iter(self.tokenize(query))
-        return self.parse_default(stream)
-
-    def parse_default(self, stream, paren_expr=False):
-        args = []
-        while not stream.eof:
-            if paren_expr and stream.current.type == 'operator' and \
-               stream.current.value == ')':
-                stream.next()
-                break
-            args.append(self.parse_or(stream))
-        if not args:
-            return xapian.Query()
-        elif len(args) == 1:
-            return args[0]
-        return reduce(lambda a, b: xapian.Query(self.default_op, a, b), args)
-
-    def parse_or(self, stream):
-        q = self.parse_and(stream)
-        while stream.current.type == 'keyword' and \
-              stream.current.value == 'or':
-            stream.next()
-            q = xapian.Query(xapian.Query.OP_OR, q, self.parse_and(stream))
-        return q
-
-    def parse_and(self, stream):
-        q = self.parse_not(stream)
-        while stream.current.type == 'keyword' and \
-              stream.current.value == 'and':
-            stream.next()
-            if stream.current.type == 'keyword' and \
-               stream.current.value == 'not':
-                stream.next()
-                op = xapian.Query.OP_AND_NOT
-            else:
-                op = xapian.Query.OP_AND
-            q = xapian.Query(op, q, self.parse_not(stream))
-        return q
-
-    def parse_not(self, stream):
-        q = self.parse_primary(stream)
-        while (stream.current.type == 'keyword' and
-               stream.current.value == 'not') or \
-              (stream.current.type == 'operator' and
-               stream.current.value == '-'):
-            stream.next()
-            q = xapian.Query(xapian.Query.OP_AND_NOT, q,
-                             self.parse_primary(stream))
-        return q
-
-    def parse_primary(self, stream):
-        while not stream.eof:
-            if stream.current.type == 'arg':
-                word = stem(stream.current.value)
-                stream.next()
-                self.term_pos += 1
-                return xapian.Query(word, 1, self.term_pos)
-            elif stream.current.type == 'longarg':
-                nodes = []
-                for value in stream.current.value.split():
-                    self.term_pos += 1
-                    nodes.append(xapian.Query(stem(value), 1,
-                                              self.term_pos))
-                stream.next()
-                return xapian.Query(xapian.Query.OP_PHRASE, nodes)
-            elif stream.current.type == 'termdef':
-                term_def = stream.current.value
-                stream.next()
-                if stream.current.type in ('arg', 'longarg'):
-                    handler = self.term_defs.get(term_def)
-                    if not handler:
-                        continue
-                    try:
-                        qry = handler(stream.current.value)
-                        if qry is not None:
-                            return qry
-                    finally:
-                        stream.next()
-                else:
-                    continue
-            elif stream.current.type == 'operator':
-                if stream.current.value == '(':
-                    stream.next()
-                    return self.parse_default(stream, paren_expr=True)
-                else:
-                    stream.next()
-            else:
-                stream.next()
-        return xapian.Query()
 
 
 class SearchResult(object):
@@ -286,7 +134,48 @@ class SearchSystem(object):
 
     def parse_query(self, query):
         """Parse a query."""
-        return QueryParser(self.prefix_handlers).parse(query)
+        query = re.sub(r'\bUND\b', 'AND', query)
+        query = re.sub(r'\bODER\b' 'OR', query)
+        query = re.sub(r'\b(UND\s+)?NICHT\b', 'AND NOT', query)
+        
+        def handle_custom_prefix(match):
+            prefix = match.group(1)
+            data = match.group(2).strip()
+            if prefix in (u'user', u'author'):
+                from inyoka.portal.user import User
+                user = User.objects.get(username==data)
+                return u'user_id:%s' % user.id
+            elif prefix in (u'area', u'bereich'):
+                map = {
+                    'forum': 'f',
+                    'wiki': 'w',
+                    'ikhaya': 'i',
+                    'planet': 'p',
+                }
+                return u'component_id:%s' % map.get(data.lower())
+            elif prefix in (u'solved', u'gelöst'):
+                try:
+                    return u'solved_id:%s' % int(data)
+                except ValueError:
+                    return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
+            return '%s:"%s"' (prefix, data)
+        
+        query = re.sub(r'\b([a-z_]+):"([^"]+)\b"', handle_custom_prefix, query)
+        query = re.sub(r'\b([a-z_]+):(\w+)\b', handle_custom_prefix, query)
+
+        qp = xapian.QueryParser()
+        qp.set_stemmer(_stemmer)
+
+        qp.add_prefix('user_id', 'U')
+        qp.add_prefix('component_id', 'P')
+        qp.add_prefix('solved_id', 'S')
+        qp.add_prefix('title', 'T')
+        qp.add_prefix('titel', 'T')
+        qp.add_prefix('version', 'V')
+        qp.add_prefix('category', 'C')
+        qp.add_prefix('kategorie', 'C')
+        
+        return qp.parse(query)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],
@@ -324,7 +213,9 @@ class SearchSystem(object):
 
     def store(self, **data):
         doc = xapian.Document()
-        pos = 0
+        tg = xapian.TermGenerator()
+        tg.set_document(doc)
+        tg.set_stemmer(_stemmer)
 
         # identification (required)
         full_id = (data['component'].lower(), data['uid'])
@@ -336,18 +227,13 @@ class SearchSystem(object):
         if data.get('collapse'):
             doc.add_value(1, '%s:%s' % (full_id[0], data['collapse']))
             doc.add_term('R%s:%s' % (full_id[0], data['collapse']))
-
+        
         # title (optional)
         if data.get('title'):
-            title = list(tokenize(data['title']))
-            for token in title:
-                doc.add_posting(token, pos, 3)
-                pos += 1
-            pos += 20
-            for token in title:
-                doc.add_posting('T%s' % token, pos, 3)
-                pos += 1
-            pos += 20
+            tg.index_text(title, 5, 'T')
+            tg.increase_termpos()
+            tg.index_text(title, 5)
+            tg.increase_termpos()
 
         # user (optional)
         if data.get('user'):
@@ -376,10 +262,8 @@ class SearchSystem(object):
             if isinstance(text, (str, unicode)):
                 text = [text]
             for block in text:
-                for token in tokenize(block):
-                    doc.add_posting(token, pos)
-                    pos += 1
-                pos += 20
+                tg.index_text(text)
+                tg.increase_termpos()
         
         # Solved (optional)
         if data.get('solved'):
