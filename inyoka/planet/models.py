@@ -64,7 +64,7 @@ class Blog(models.Model):
         if not actual_path:
             pth = path.join(settings.MEDIA_ROOT, fn)
         else:
-            pth = actual_path.path
+            pth = self.icon.path
         ext = path.splitext(img.name)[1]
         icon.save(pth, "PNG")
         self.icon = fn
