@@ -135,7 +135,7 @@ class SearchSystem(object):
     def parse_query(self, query):
         """Parse a query."""
         query = re.sub(r'\bUND\b', 'AND', query)
-        query = re.sub(r'\bODER\b' 'OR', query)
+        query = re.sub(r'\bODER\b', 'OR', query)
         query = re.sub(r'\b(UND\s+)?NICHT\b', 'AND NOT', query)
         
         def handle_custom_prefix(match):
