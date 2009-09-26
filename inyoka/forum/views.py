@@ -420,6 +420,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
     if post:
+        if topic.locked or topic.hidden or post.hidden and \
+           not check_privilege(privileges, 'moderate'):
+                flash(u'Du darfst diesen Beitrag nicht bearbeiten!', False)
+                return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+                                             post.page))
         if not (check_privilege(privileges, 'moderate') or
                 (post.author_id == request.user.id and
                  check_privilege(privileges, 'reply') and
@@ -437,6 +442,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 flash(u'Du antwortest auf einen bereits geschlossenen Thread. '
                       u'Dies wird oft als unhöflich aufgefasst, bitte sei dir '
                       u'dessen bewusst!', False)
+        elif topic.hidden:
+            if not check_privilege(privileges, 'moderate'):
+                flash(u'Du kannst auf in diesem Thema nicht antworten, da es '
+                      u'von einem Moderator gelöscht wurde.', False)
+                return HttpResponseRedirect(url_for(topic))
         else:
             if not check_privilege(privileges, 'reply'):
                 return abort_access_denied(request)
