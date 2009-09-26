@@ -58,7 +58,7 @@ class ForumSearchAdapter(SearchAdapter):
                     [post.topic.forum.slug],
                 auth=[post.topic.forum_id, post.topic.hidden],
                 text=post.text,
-                solved=post.topic.solved and '1' or '0',
+                solved='1' if post.topic.solved else '0',
                 version=post.topic.get_version_info(default=None),
             )
 
