@@ -230,9 +230,9 @@ class SearchSystem(object):
         
         # title (optional)
         if data.get('title'):
-            tg.index_text(title, 5, 'T')
+            tg.index_text(data['title'], 5, 'T')
             tg.increase_termpos()
-            tg.index_text(title, 5)
+            tg.index_text(data['title'], 5)
             tg.increase_termpos()
 
         # user (optional)
@@ -262,7 +262,7 @@ class SearchSystem(object):
             if isinstance(text, (str, unicode)):
                 text = [text]
             for block in text:
-                tg.index_text(text)
+                tg.index_text(block)
                 tg.increase_termpos()
         
         # Solved (optional)

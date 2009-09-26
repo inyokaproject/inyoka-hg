@@ -12,58 +12,8 @@
     :copyright: Copyright 2007 by Christoph Hack.
     :license: GNU GPL.
 """
+# THIS MODULE IS A STUB
+# WE NEED IT FOR NOW CAUSE OF IMPORT ERRORS
 import xapian
 from inyoka.portal.user import User
-from inyoka.utils.search import search_handler, tokenize
-
-
-@search_handler(u'user', u'author')
-def handle_user(username):
-    """Look up the user id for an given given username."""
-    try:
-        user = User.objects.get(username=username)
-        return xapian.Query(u'U%d' % (user.id))
-    except User.DoesNotExist:
-        return None
-
-
-@search_handler(u'title', u'titel')
-def handle_title(title):
-    """Tokenize words in the title automatically."""
-    tokens = tokenize(title)
-    query = None
-    for token in tokens:
-        if query is None:
-            query = xapian.Query(u'T%s' % token)
-        else:
-            query = xapian.Query(xapian.Query.OP_AND, query,
-                                 xapian.Query(u'T%s'%  token))
-    return query
-
-
-@search_handler(u'area', u'bereich')
-def handle_area(area):
-    """Normalize the name of the area."""
-    map = {
-        'forum': 'f',
-        'wiki': 'w',
-        'ikhaya': 'i',
-        'planet': 'p',
-    }
-    component = map.get(area.strip().lower())
-    return component and xapian.Query(u'P%s' % component)
-
-@search_handler(u'category', u'kategorie')
-def handle_category(category):
-    return xapian.Query(u'C%s' % category.lower())
-
-@search_handler(u'solved', u'gelöst')
-def handle_solved(solved):
-    try:
-        return xapian.Query(u'S%d' % int(solved))
-    except ValueError:
-        return xapian.Query(u'S%d' % (1 if solved.lower() == "true" else 0))
-
-@search_handler(u'version', u'version')
-def handle_version(version):
-    return xapian.Query(u'V%s' % version.lower())
+from inyoka.utils.search import search_handler
