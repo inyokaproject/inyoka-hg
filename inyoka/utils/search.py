@@ -162,8 +162,8 @@ class SearchSystem(object):
                     return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
             return '%s:"%s"' % (prefix, data)
         
-        query = re.sub(ur'(?u)\b([a-z_öäüß]+):"([^"]+)\b"', handle_custom_prefix, query)
-        query = re.sub(ur'(?u)\b([a-z_öäüß]+):(\w+)\b', handle_custom_prefix, query)
+        query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
+        query = re.sub(ur'(?u)\b([\w_]+):(\w+)\b', handle_custom_prefix, query)
 
         qp = xapian.QueryParser()
         qp.set_stemmer(_stemmer)
