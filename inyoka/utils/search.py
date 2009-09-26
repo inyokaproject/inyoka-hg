@@ -25,12 +25,12 @@ from inyoka.utils.text import create_excerpt
 
 _word_re = re.compile(r'\b[\w:\.][\w:\.]{,20}\b', re.U)
 
-_token_re = re.compile(r'''(?x)
+_token_re = re.compile(ur'''(?x)
     (?P<operator>[()-])     |
-    (?P<termdef>[a-zA-Z]+:) |
+    (?P<termdef>[a-zA-Zöäüß]+:) |
     (?P<string>"[^"]*")     |
     (?P<arg>[^\s()]+)
-''')
+''', re.U)
 
 _keywords = {
     'ODER':     'or',

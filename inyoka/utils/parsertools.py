@@ -19,7 +19,7 @@ class Token(tuple):
     __slots__ = ()
 
     def __new__(self, type, value):
-        return tuple.__new__(self, (intern(type), value))
+        return tuple.__new__(self, (intern(str(type)), value))
 
     type = property(itemgetter(0))
     value = property(itemgetter(1))
