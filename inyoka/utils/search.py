@@ -163,7 +163,7 @@ class SearchSystem(object):
             return '%s:"%s"' % (prefix, data)
         
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
-        query = re.sub(ur'(?u)\b([\w_]+):(\w+)\b', handle_custom_prefix, query)
+        query = re.sub(ur'(?u)\b([\w_]+):([\w\d.]+)\b', handle_custom_prefix, query)
 
         qp = xapian.QueryParser()
         qp.set_stemmer(_stemmer)
