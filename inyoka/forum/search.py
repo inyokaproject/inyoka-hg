@@ -44,7 +44,8 @@ class ForumSearchAdapter(SearchAdapter):
     auth_decider = ForumSearchAuthDecider
 
     def store(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('author')) \
+        post = Post.query.options(eagerload('topic'), eagerload('topic.forum'),
+                                  eagerload('author')) \
             .get(post_id)
         if post and post.topic:
             search.store(
@@ -63,7 +64,8 @@ class ForumSearchAdapter(SearchAdapter):
             )
 
     def recv(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('author')). \
+        post = Post.query.options(eagerload('topic'), eagerload('topic.forum'),
+                                  eagerload('author')). \
             get(post_id)
         if post is None:
             return
@@ -82,7 +84,7 @@ class ForumSearchAdapter(SearchAdapter):
         }
 
     def get_doc_ids(self):
-        for row in select_blocks(select([post_table.c.id]), post_table.c.id):
+        for row in select_blocks(select([post_table.c.id]), post_table.c.id, 10000):
             yield row[0]
 
 
