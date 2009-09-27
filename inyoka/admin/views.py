@@ -16,6 +16,7 @@ from PIL import Image
 from StringIO import StringIO
 from sqlalchemy import and_, select
 from datetime import datetime, date, time as dt_time
+from django.db.models import Max
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
 from inyoka.conf import settings
@@ -248,8 +249,9 @@ def file_edit(request, file=None):
 @require_permission('blog_edit')
 @templated('admin/planet.html')
 def planet(request):
-    sortable = Sortable(Blog.objects.all(), request.GET, '-last_sync',
-                        columns=['name', 'last_sync', 'active'])
+    q = Blog.objects.annotate(latest_update=Max('entry__pub_date'))
+    sortable = Sortable(q, request.GET, '-last_update',
+                        columns=['name', 'latest_update'])
     return {
         'table': sortable,
         'blogs': sortable.get_objects(),
