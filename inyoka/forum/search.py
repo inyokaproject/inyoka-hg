@@ -8,6 +8,7 @@
     :copyright: Copyright 2008 by Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
+import gc
 from django.db import connection
 from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
@@ -76,13 +77,20 @@ class ForumSearchAdapter(SearchAdapter):
         post_ids = list(post_ids)
         max = len(post_ids)
         while i <= max:
-            ids = post_ids[i:i+range]
+            try:
+                ids = post_ids[i:i+range]
+            except IndexError:
+                ids = post_ids[i:]
             posts = Post.query.options(eagerload('topic'), eagerload('author'),
                                        eagerload('topic.forum')) \
                     .filter(Post.id.in_(ids)).all()
             for post in posts:
                 self._store_post(post)
+            # cleanup some stuff
             search.flush()
+            session.commit()
+            gc.collect()
+            # count up the index
             i += range
 
     def recv(self, post_id):

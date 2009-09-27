@@ -84,5 +84,5 @@ if __name__ == '__main__':
         print 'Search index does not exist, creating a new one'
         search.get_connection(True)
         print 'Starting to reindex everything'
-        reindex('f')
+        reindex()
     update()
