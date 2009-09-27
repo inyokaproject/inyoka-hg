@@ -22,8 +22,9 @@
   <thead>
   <tr>
     <th>{{ table.get_html('name', 'Name') }}</th>
-    <th>{{ table.get_html('last_sync', 'Letzte Aktualisierung') }}</th>
+    <th>{{ table.get_html('last_sync', 'Letzte Syncronisierung') }}</th>
     <th>{{ table.get_html('active', 'Aktiv') }}</th>
+    <th>Letzte Aktualisierung</th>
   </tr>
   </thead>
   <tbody>
@@ -32,6 +33,7 @@
     <td><a href="{{ blog|url('edit') }}">{{ blog.name|e }}</a></td>
     <td>{{ blog.last_sync|specificdatetimeformat(alt=True) }}</td>
     <td>{% if blog.active %}Ja{% else %}Nein{% endif %}</td>
+    <td>{{ blog.entry_set.latest().pub_date|timedeltaformat }}</td>
   </tr>
   {%- else %}
   <tr>
