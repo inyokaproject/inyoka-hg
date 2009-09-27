@@ -92,6 +92,13 @@ class SearchSystem(object):
         except ObjectDoesNotExist:
             self.delete(component, docid)
 
+    def index_multi(self, component, docids):
+        try:
+            self.adapters[component].store_multi(docids)
+        except ObjectDoesNotExist:
+            #TODO: how to resolve the failed object?
+            pass
+
     def queue(self, component, docid):
         from inyoka.portal.models import SearchQueue
         SearchQueue.objects.append(component, docid)
@@ -324,6 +331,7 @@ class AuthMatchDecider(xapian.MatchDecider):
 class SearchAdapter(object):
     type_id = None
     auth_decider = None
+    support_multi = False
 
     @classmethod
     def queue(self, docid):
@@ -332,6 +340,9 @@ class SearchAdapter(object):
 
     def store(self, docid):
         raise NotImplementedError('store')
+
+    def store_multi(self, docids):
+        raise NotImplementedError('store_multi')
 
     def recv(self, docid):
         raise NotImplementedError('recv')

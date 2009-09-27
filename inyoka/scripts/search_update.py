@@ -52,14 +52,20 @@ def reindex(app=None):
         print "starting at %s" % datetime.datetime.now()
         print
         sys.stdout.flush()
-        for i, doc_id in enumerate(adapter.get_doc_ids()):
-            search.index(comp, doc_id)
-            if i % 100 == 0:
-                search.flush()
-                if i % 3900 == 0:
-                    print
-                sys.stdout.write('.')
-                sys.stdout.flush()
+        ids = adapter.get_doc_ids()
+        if adapter.support_multi:
+            print "index multiple ids, no detailed stats possible"
+            search.index_multi(comp, ids)
+        else:
+            for i, id in enumerate(ids):
+                search.index(comp, id)
+                if i % 100 == 0:
+                    search.flush()
+                    if i % 3900 == 0:
+                        print
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+
         search.flush()
         session.remove()
 

@@ -44,6 +44,7 @@ class ForumSearchAuthDecider(object):
 class ForumSearchAdapter(SearchAdapter):
     type_id = 'f'
     auth_decider = ForumSearchAuthDecider
+    support_multi = True
 
     def store(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author'),
@@ -51,6 +52,9 @@ class ForumSearchAdapter(SearchAdapter):
         post = post.get(post_id)
         if post is None:
             return
+        self._store_post(post)
+
+    def _store_post(self, post):
         search.store(
             component='f',
             uid=post.id,
@@ -65,6 +69,21 @@ class ForumSearchAdapter(SearchAdapter):
             solved='1' if post.topic.solved else '0',
             version=post.topic.get_version_info(default=None),
         )
+
+    def store_multi(self, post_ids):
+        range = 2000
+        i = 0
+        post_ids = list(post_ids)
+        max = len(post_ids)
+        while i <= max:
+            ids = post_ids[i:i+range]
+            posts = Post.query.options(eagerload('topic'), eagerload('author'),
+                                       eagerload('topic.forum')) \
+                    .filter(Post.id.in_(ids)).all()
+            for post in posts:
+                self._store_post(post)
+            search.flush()
+            i += range
 
     def recv(self, post_id):
         post = Post.query.options(eagerload('topic'), eagerload('author'),
