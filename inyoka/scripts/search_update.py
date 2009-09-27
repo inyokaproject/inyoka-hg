@@ -47,17 +47,19 @@ def update():
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
     for comp, adapter in search.adapters.iteritems():
-        print
-        print "----------------------------------------"
+        print "\n\n"
         print "---------- indexing %s -----------------" % comp
         print "starting at %s" % datetime.datetime.now()
         print
+        sys.stdout.flush()
         connection.queries = []
         gc.collect()
         for i, doc_id in enumerate(adapter.get_doc_ids()):
             search.index(comp, doc_id)
             if i % 100 == 0:
                 search.flush()
+                if i / 100 == 50:
+                    print
                 sys.stdout.write('.')
                 sys.stdout.flush()
         search.flush()
