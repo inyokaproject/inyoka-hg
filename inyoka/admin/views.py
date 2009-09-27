@@ -250,7 +250,7 @@ def file_edit(request, file=None):
 @templated('admin/planet.html')
 def planet(request):
     q = Blog.objects.annotate(latest_update=Max('entry__pub_date'))
-    sortable = Sortable(q, request.GET, '-last_update',
+    sortable = Sortable(q, request.GET, '-latest_update',
                         columns=['name', 'latest_update'])
     return {
         'table': sortable,
