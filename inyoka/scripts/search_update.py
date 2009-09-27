@@ -14,7 +14,7 @@
     :copyright: 2007 - 2008 by Christoph Hack, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
-import gc
+import gc, sys, datetime
 from xapian import DatabaseOpeningError
 import inyoka.utils.http
 from inyoka import application
@@ -40,23 +40,29 @@ def update():
         search.index(doc[0], doc[1])
         if i % 100 == 0:
             search.flush()
-            session.remove()
-    search.flush()
-    session.remove()
+        search.flush()
+        session.remove()
 
 
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
     for comp, adapter in search.adapters.iteritems():
+        print
+        print "----------------------------------------"
+        print "---------- indexing %s -----------------" % comp
+        print "starting at %s" % datetime.datetime.now()
+        print
         connection.queries = []
         gc.collect()
         for i, doc_id in enumerate(adapter.get_doc_ids()):
             search.index(comp, doc_id)
             if i % 100 == 0:
                 search.flush()
-                session.remove()
+                sys.stdout.write('.')
+                sys.stdout.flush()
         search.flush()
-        session.remove
+        session.remove()
+
 
 
 if __name__ == '__main__':
