@@ -16,7 +16,7 @@ import virtualenv
 EXTRA_TEXT = """
 import tempfile, shutil
 
-xapian_version = '1.0.9'
+xapian_version = '1.0.16'
 pil_version = '1.1.6'
 
 def easy_install(package, home_dir, optional_args=None):
