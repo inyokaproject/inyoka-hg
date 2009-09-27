@@ -225,7 +225,7 @@ class EditUserForm(forms.Form):
                    u'wenn benötigt'))
     confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
         required=False, widget=forms.PasswordInput(render_value=False))
-    email = forms.CharField(label=u'E-Mail', required=False)
+    email = forms.CharField(label=u'E-Mail', required=True)
     status = forms.ChoiceField(label=u'Status', required=False,
                                    choices=enumerate([
                                        u'noch nicht aktiviert',
