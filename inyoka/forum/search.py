@@ -72,7 +72,7 @@ class ForumSearchAdapter(SearchAdapter):
         )
 
     def store_multi(self, post_ids):
-        range = 2000
+        range = 500
         i = 0
         post_ids = list(post_ids)
         max = len(post_ids)
