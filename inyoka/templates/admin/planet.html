@@ -8,6 +8,9 @@
     :license: GNU GPL.
 #}
 {%- extends 'admin/overall.html' %}
+{% set navigation_trace = [
+    (href('admin', 'planet'), 'Planet'),
+  ] %}
 {% block appheader %}
 <h1><a href="{{ href('admin') }}">Administration</a></h1>
 <h2><a href="{{ href('admin', 'planet') }}">Planet</a></h2>
@@ -18,13 +21,17 @@
 <table class="static_pages">
   <thead>
   <tr>
-    <th>Name</th>
+    <th>{{ table.get_html('name', 'Name') }}</th>
+    <th>{{ table.get_html('last_sync', 'Letzte Aktualisierung') }}</th>
+    <th>{{ table.get_html('active', 'Aktiv') }}</th>
   </tr>
   </thead>
   <tbody>
   {%- for blog in blogs %}
   <tr>
     <td><a href="{{ blog|url('edit') }}">{{ blog.name|e }}</a></td>
+    <td>{{ blog.last_sync|specificdatetimeformat(alt=True) }}</td>
+    <td>{% if blog.active %}Ja{% else %}Nein{% endif %}</td>
   </tr>
   {%- else %}
   <tr>

@@ -248,8 +248,11 @@ def file_edit(request, file=None):
 @require_permission('blog_edit')
 @templated('admin/planet.html')
 def planet(request):
+    sortable = Sortable(Blog.objects.all(), request.GET, '-last_sync',
+                        columns=['name', 'last_sync', 'active'])
     return {
-        'blogs': Blog.objects.all(),
+        'table': sortable,
+        'blogs': sortable.get_objects(),
     }
 
 
