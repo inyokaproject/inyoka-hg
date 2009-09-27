@@ -28,6 +28,7 @@
   Suchausdrücke können mit <strong>UND</strong>, <strong>ODER</strong> sowie
   <strong>UND&nbsp;NICHT</strong> kombiniert werden, wobei gegebenenfalls
   eine Klammer zu setzen ist.  Weitere Informationen zur Suche auf ubuntuusers.de findet man im Wiki unter <a href="{{ href('wiki', 'Suchfunktion') }}">Suchfunktion</a>.</p>
+  {#
   <form action="{{ href('portal', 'search') }}" method="GET" class="search_page">
     <p>{{ searchform.query }}</p>
     <input type="submit" value="Suchen" style="display: none;" />
@@ -79,8 +80,9 @@
       }
     }
     change_area('{{ area }}');
-  </script>
+  </script>#}
   <hr class="divider" />
+  <p><strong>Die Suche wurde vorübergehend wegen einer neu-indizierung des Suchindexes deaktiviert.  Bitte habt verständnis.</strong></p>
   {%- if query %}
   {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">

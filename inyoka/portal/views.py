@@ -391,6 +391,7 @@ def logout(request):
 def search(request):
     """Search dialog for the Xapian search engine."""
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
+    return {}
     area = request.GET.get('area') or 'all'
 
     if 'query' in request.REQUEST:
