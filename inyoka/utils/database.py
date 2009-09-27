@@ -22,7 +22,7 @@ from inyoka.conf import settings
 engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8&use_unicode=0' % (
     settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME
-), pool_recycle=25, convert_unicode=True, echo=settings.DATABASE_DEBUG,
+), pool_recycle=25, convert_unicode=True, echo=False,
    poolclass=NullPool)
 metadata = MetaData(bind=engine)
 

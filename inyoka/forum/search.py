@@ -8,15 +8,17 @@
     :copyright: Copyright 2008 by Christoph Hack.
     :license: GNU GPL, see LICENSE for more details.
 """
+from django.db import connection
 from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
-from inyoka.forum.models import Post, Forum, post_table
-from inyoka.utils.urls import url_for
+from inyoka.forum.models import Post, Forum, Topic, post_table, forum_table, \
+        topic_table, user_table
+from inyoka.utils.urls import url_for, href
 from inyoka.utils.html import striptags
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
-from inyoka.utils.database import select_blocks
+from inyoka.utils.database import select_blocks, session
 
 
 class ForumSearchAuthDecider(object):
@@ -44,36 +46,38 @@ class ForumSearchAdapter(SearchAdapter):
     auth_decider = ForumSearchAuthDecider
 
     def store(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('topic.forum'),
-                                  eagerload('author')) \
-            .get(post_id)
-        if post and post.topic:
-            search.store(
-                component='f',
-                uid=post.id,
-                title=post.topic.title,
-                user=post.author_id,
-                date=post.pub_date,
-                collapse=post.topic_id,
-                category=[p.slug for p in post.topic.forum.parents] + \
-                    [post.topic.forum.slug],
-                auth=[post.topic.forum_id, post.topic.hidden],
-                text=post.text,
-                solved='1' if post.topic.solved else '0',
-                version=post.topic.get_version_info(default=None),
-            )
-
-    def recv(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('topic.forum'),
-                                  eagerload('author')). \
-            get(post_id)
+        post = Post.query.options(eagerload('topic'), eagerload('author'),
+                                  eagerload('topic.forum'))
+        post = post.get(post_id)
         if post is None:
             return
+        search.store(
+            component='f',
+            uid=post.id,
+            title=post.topic.title,
+            user=post.author_id,
+            date=post.pub_date,
+            collapse=post.topic_id,
+            category=[p.slug for p in post.topic.forum.parents] + \
+                [post.topic.forum.slug],
+            auth=[post.topic.forum_id, post.topic.hidden],
+            text=post.text,
+            solved='1' if post.topic.solved else '0',
+            version=post.topic.get_version_info(default=None),
+        )
+
+    def recv(self, post_id):
+        post = Post.query.options(eagerload('topic'), eagerload('author'),
+                                  eagerload('topic.forum'))
+        post = post.get(post_id)
+        if post is None:
+            return
+
         return {
             'title': post.topic.title,
             'user': post.author,
             'date': post.pub_date,
-            'url': url_for(post),
+            'url': href('forum', 'post', post.id),
             'component': u'Forum',
             'group': post.topic.forum.name,
             'group_url': url_for(post.topic.forum),
@@ -84,8 +88,11 @@ class ForumSearchAdapter(SearchAdapter):
         }
 
     def get_doc_ids(self):
-        for row in select_blocks(select([post_table.c.id]), post_table.c.id, 10000):
-            yield row[0]
+        se = session.execute
+        pids = (p[0] for p in se(select([post_table.c.id],
+                                        post_table.c.topic_id==topic_table.c.id)))
+        for pid in pids:
+            yield pid
 
 
 search.register(ForumSearchAdapter())

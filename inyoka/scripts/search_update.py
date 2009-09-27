@@ -46,25 +46,29 @@ def update():
 
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
-    for comp, adapter in search.adapters.iteritems():
+    def index_comp(comp, adapter):
         print "\n\n"
         print "---------- indexing %s -----------------" % comp
         print "starting at %s" % datetime.datetime.now()
         print
         sys.stdout.flush()
-        connection.queries = []
-        gc.collect()
         for i, doc_id in enumerate(adapter.get_doc_ids()):
             search.index(comp, doc_id)
             if i % 100 == 0:
                 search.flush()
-                if i / 100 == 50:
+                if i % 3900 == 0:
                     print
                 sys.stdout.write('.')
                 sys.stdout.flush()
         search.flush()
         session.remove()
 
+    if app:
+        comp, adapter = app, search.adapters[app]
+        index_comp(comp, adapter)
+    else:
+        for comp, adapter in search.adapters.iteritems():
+            index_comp(comp, adapter)
 
 
 if __name__ == '__main__':
@@ -74,5 +78,5 @@ if __name__ == '__main__':
         print 'Search index does not exist, creating a new one'
         search.get_connection(True)
         print 'Starting to reindex everything'
-        reindex()
+        reindex('f')
     update()
