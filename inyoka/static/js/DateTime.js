@@ -96,6 +96,10 @@ $(document).click(function() {
         position: 'absolute',
         left:     this.input.offset().left
       }).show();
+      if (this.only_date) {
+        this.timetable.hide();
+        this.currentTime = '00:00:00';
+      }
     },
     readDateTime: function() {
       var self = this;
@@ -118,8 +122,9 @@ $(document).click(function() {
       }
     },
     writeDateTime: function() {
-      this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay + ' ' +
-                     this.currentTime)
+      this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay)
+      if (!this.only_date)
+        this.input.val(this.input.val() + ' ' + this.currentTime)
     },
     drawTimetable: function() {
       var self = this;

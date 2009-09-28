@@ -215,10 +215,6 @@ class PostMapperExtension(MapperExtension):
             instance.position = connection.execute(select(
                 [func.max(post_table.c.position)+1],
                 post_table.c.topic_id == instance.topic_id)).fetchone()[0] or 0
-        #    tmp = post_table.alias()
-        #    instance.position = select([func.max(tmp.c.position) + 1],
-        #        tmp.c.topic_id == instance.topic_id
-        #    )
         if not instance.pub_date:
             instance.pub_date = datetime.utcnow()
 
@@ -892,7 +888,7 @@ class Post(object):
             return False
         if t == -1:
             return True
-        delta = datetime.now() - self.pub_date
+        delta = datetime.utcnow() - self.pub_date
         delta = delta.days * 86400 + delta.seconds
         return delta < t
 

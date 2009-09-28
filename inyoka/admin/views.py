@@ -543,9 +543,9 @@ def ikhaya_date_edit(request, date=None):
             if not date:
                 date = Event()
             date.date = get_user_timezone().localize(
-                data['date']).astimezone(pytz.utc).replace(tzinfo=None)
+                data['date']).astimezone(pytz.utc)
             date.time = get_user_timezone().localize(
-                data['time']).astimezone(pytz.utc).replace(tzinfo=None)
+                data['time']).astimezone(pytz.utc)
             date.title = data['title']
             date.author_id = request.user.id
             date.description = data['description']
@@ -559,7 +559,7 @@ def ikhaya_date_edit(request, date=None):
             initial = {
                 'title': date.title,
                 'description': date.description,
-                'date': datetime_to_timezone(date.date).replace(tzinfo=None)
+                'date': datetime_to_timezone(date.date)
             }
         form = EditEventForm(initial=initial)
 
@@ -1215,7 +1215,7 @@ def event_edit(request, id=None):
                     date_time_to_datetime(
                         data['date'],
                         data['time'] or dt_time(0)
-                    )).astimezone(pytz.utc).replace(tzinfo=None)
+                    )).astimezone(pytz.utc)
                 event.date = d.date()
                 event.time = d.time()
             else:
@@ -1239,10 +1239,12 @@ def event_edit(request, id=None):
                 event = Event.objects.get(id=id)
             except Event.DoesNotExist:
                 raise PageNotFound
+            d = datetime_to_timezone(date_time_to_datetime(event.date,
+                                                           event.time))
             form = EditEventForm({
                 'name': event.name,
-                'date': event.date,
-                'time': event.time,
+                'date': d.date(),
+                'time': d.time(),
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
