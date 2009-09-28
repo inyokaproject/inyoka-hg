@@ -120,7 +120,8 @@ class SearchSystem(object):
         if thread not in self.connections:
             if _tcpsrv_re.match(settings.XAPIAN_DATABASE):
                 host, port = _tcpsrv_re.match(settings.XAPIAN_DATABASE).groups()
-                self.connections[thread] = xapian.remote_open(host, int(port))
+                self.connections[thread] = connection = \
+                    xapian.remote_open(host, int(port))
             else:
                 self.connections[thread] = connection = \
                     xapian.Database(settings.XAPIAN_DATABASE)
