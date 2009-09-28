@@ -148,7 +148,6 @@ class SearchSystem(object):
         
         def handle_custom_prefix(match):
             prefix = match.group(1)
-            print prefix
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
