@@ -420,7 +420,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     # check privileges
     privileges = get_forum_privileges(request.user, forum.id)
     if post:
-        if topic.locked or topic.hidden or post.hidden and \
+        if (topic.locked or topic.hidden or post.hidden) and \
            not check_privilege(privileges, 'moderate'):
                 flash(u'Du darfst diesen Beitrag nicht bearbeiten!', False)
                 return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
