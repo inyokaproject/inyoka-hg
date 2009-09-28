@@ -26,6 +26,8 @@ _stemmer = xapian.Stem('de')
 _description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
 search = None
 
+_tcpsrv_re = re.compile(r'tcpsrv://([\w\d\.]+):(\d+)/?')
+
 
 class SearchResult(object):
     """
@@ -107,13 +109,21 @@ class SearchSystem(object):
         """Get a new connection to the database."""
         if writeable:
             if not self._connection:
-                self._connection = xapian.WritableDatabase(
-                    settings.XAPIAN_DATABASE, xapian.DB_CREATE_OR_OPEN)
+                if _tcpsrv_re.match(settings.XAPIAN_DATABASE):
+                    host, port = _tcpsrv_re.match(settings.XAPIAN_DATABASE).groups()
+                    self._connection = xapian.remote_open_writable(host, int(port))
+                else:
+                    self._connection = xapian.WritableDatabase(
+                        settings.XAPIAN_DATABASE, xapian.DB_CREATE_OR_OPEN)
             return self._connection
         thread = get_current_thread()
         if thread not in self.connections:
-            self.connections[thread] = connection = \
-                xapian.Database(settings.XAPIAN_DATABASE)
+            if _tcpsrv_re.match(settings.XAPIAN_DATABASE):
+                host, port = _tcpsrv_re.match(settings.XAPIAN_DATABASE).groups()
+                self.connections[thread] = xapian.remote_open(host, int(port))
+            else:
+                self.connections[thread] = connection = \
+                    xapian.Database(settings.XAPIAN_DATABASE)
         else:
             connection = self.connections[thread]
         connection.reopen()
