@@ -148,7 +148,6 @@ class SearchSystem(object):
         
         def handle_custom_prefix(match):
             prefix = match.group(1)
-            print prefix
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
@@ -171,6 +170,9 @@ class SearchSystem(object):
         
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
         query = re.sub(ur'(?u)\b([\w_]+):([\w.]+)\b', handle_custom_prefix, query)
+        
+        # disable searching for phrases temporarily (qp.FLAG_PHRASE is disabled too)
+        query = re.sub(ur'(?u)(\w)-(\w)', ur'\1 \2', query)
 
         qp = xapian.QueryParser()
         qp.set_default_op(xapian.Query.OP_AND)
@@ -186,7 +188,7 @@ class SearchSystem(object):
         qp.add_prefix('category', 'C')
         qp.add_prefix('kategorie', 'C')
         
-        return qp.parse_query(query)
+        return qp.parse_query(query, qp.FLAG_DEFAULT ^ qp.FLAG_PHRASE)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],

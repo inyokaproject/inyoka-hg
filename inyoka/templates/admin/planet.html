@@ -29,7 +29,7 @@
   {%- for blog in blogs %}
   <tr>
     <td><a href="{{ blog|url('edit') }}">{{ blog.name|e }}</a></td>
-    <td>{{ blog.latest_update|datetimeformat }}</td>
+    <td>{{ blog.latest_update|datetimeformat if blog.latest_update else "Kein Eintrag" }}</td>
   </tr>
   {%- else %}
   <tr>
