@@ -324,8 +324,6 @@ class StaticFile(models.Model):
 class Subscription(models.Model):
     objects = SubscriptionManager()
     user = models.ForeignKey(User)
-    #topic = models.ForeignKey(Topic, null=True)
-    #forum = models.ForeignKey(Forum, null=True)
     topic_id = models.IntegerField(null=True)
     forum_id = models.IntegerField(null=True)
     ubuntu_version = models.CharField(max_length=4, null=True)
@@ -427,11 +425,7 @@ class Event(models.Model):
 
     def friendly_title(self, with_date=True, with_html_link=False):
         if with_date:
-            if self.time is None:
-                s_date = ' ' + natural_date(self.date, prefix=True)
-            else:
-                s_date = ' ' + format_specific_datetime(date_time_to_datetime(
-                                   self.date, self.time), alt=True)
+            s_date = self.natural_date
         else:
             s_date = ''
         s_location = self.location_town \
