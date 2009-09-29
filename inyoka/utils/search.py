@@ -162,7 +162,7 @@ class SearchSystem(object):
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
-                user = User.objects.get(username==data)
+                user = User.objects.get(username=data)
                 return u'user_id:%s' % user.id
             elif prefix in (u'area', u'bereich'):
                 map = {
