@@ -128,16 +128,6 @@ attachment_table = Table('forum_attachment', metadata,
 )
 
 
-tcaptcha_table = Table('forum_tcaptcha', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('question', String(255), nullable=False),
-    Column('multiple_votes', Boolean, default=False, nullable=False),
-    Column('text_votes', Boolean, default=False, nullable=False),
-    Column('answers', String(500)),
-    Column('correct_answers', String(500))
-)
-
-
 # initialize indexes
 Index('viewtopic', post_table.c.topic_id, post_table.c.position)
 Index('viewforum', topic_table.c.forum_id, topic_table.c.sticky,

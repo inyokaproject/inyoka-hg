@@ -30,7 +30,6 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
-from inyoka.utils.captcha import get_text_captcha_form
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
 from inyoka.utils.storage import storage
@@ -43,7 +42,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext, TextCaptcha
+    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm

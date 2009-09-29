@@ -191,7 +191,5 @@ MEDIA_DIRS = ['forum', 'forum/attachments', 'forum/attachments/temp',
               'wiki/attachments', 'media/portal', 'portal/avatars',
               'portal/team_icons']
 
-JOKE_FORUMS = []
-
 # export only uppercase keys
 __all__ = list(x for x in locals() if x.isupper())

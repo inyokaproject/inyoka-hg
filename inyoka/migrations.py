@@ -1070,6 +1070,13 @@ def add_subscription_notified_ubuntu_version(m):
         ALTER TABLE `portal_subscription` ADD COLUMN `ubuntu_version` VARCHAR(4)  DEFAULT NULL AFTER `forum_id`;
     ''')
 
+def drop_tcaptcha_table(m):
+    m.engine.execute('''
+        DROP TABLE forum_tcaptcha;
+    ''')
+
+
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -1097,5 +1104,5 @@ MIGRATIONS = [
     add_comment_rendered_text_column, add_blog_active_flag,
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
     add_forum_force_version_flag, add_claimed_by_column,
-    add_subscription_notified_ubuntu_version
+    add_subscription_notified_ubuntu_version, drop_tcaptcha_table
 ]
