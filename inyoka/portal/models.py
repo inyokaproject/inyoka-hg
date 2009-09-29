@@ -425,7 +425,7 @@ class Event(models.Model):
 
     def friendly_title(self, with_date=True, with_html_link=False):
         if with_date:
-            s_date = self.natural_date
+            s_date = self.natural_datetime
         else:
             s_date = ''
         s_location = self.location_town \
