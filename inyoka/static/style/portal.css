@@ -314,6 +314,15 @@ table.usercp_subscriptions th.items {
   border-bottom: 1px solid #ccc;
   padding-left: 0;
 }
+
+table.usercp_subscriptions td.items.unreadable {
+  color: #aaa;
+}
+
+table.usercp_subscriptions td.items.unreadable a {
+  color: #aaa;
+}
+
 table.usercp_subscriptions td.checkboxes, 
 table.usercp_subscriptions th.checkboxes {
   text-align: left;

@@ -20,7 +20,9 @@ from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page
 from inyoka.forum.models import Forum, Topic
+from inyoka.forum.acl import have_privilege as have_forum_privilege
 from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.wiki.acl import has_privilege as have_wiki_privilege
 from inyoka.portal.user import User
 from werkzeug import cached_property
 
@@ -340,6 +342,17 @@ class Subscription(models.Model):
     def forum(self):
         if self.forum_id:
             return Forum.query.get(self.forum_id)
+
+    @cached_property
+    def can_read(self):
+        user = self.user
+        if self.topic or self.forum:
+            return have_forum_privilege(user, self.topic or self.forum, 'read')
+        elif self.wiki_page:
+            return have_wiki_privilege(user, self.wiki_page.name, 'read')
+        else:
+            # e.g subscribed to ubuntu versions
+            return True
 
     def __unicode__(self):
         if self.topic:

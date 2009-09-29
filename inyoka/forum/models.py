@@ -243,7 +243,7 @@ class PostMapperExtension(MapperExtension):
         }))
         instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
-    
+
     def after_update(self, mapper, connection, instance):
         search.queue('f', instance.id)
 

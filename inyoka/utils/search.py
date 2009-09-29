@@ -156,7 +156,7 @@ class SearchSystem(object):
         query = re.sub(r'\b(UND\s+)?NICHT\b', 'AND NOT', query)
         query = re.sub(r'\bUND\b', 'AND', query)
         query = re.sub(r'\bODER\b', 'OR', query)
-        
+
         def handle_custom_prefix(match):
             prefix = match.group(1)
             data = match.group(2).strip()
@@ -178,10 +178,10 @@ class SearchSystem(object):
                 except ValueError:
                     return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
             return '%s:"%s"' % (prefix, data)
-        
+
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
         query = re.sub(ur'(?u)\b([\w_]+):([\w.]+)\b', handle_custom_prefix, query)
-        
+
         # disable searching for phrases temporarily (qp.FLAG_PHRASE is disabled too)
         query = re.sub(ur'(?u)(\w)-(\w)', ur'\1 \2', query)
 
@@ -198,7 +198,7 @@ class SearchSystem(object):
         qp.add_prefix('version', 'V')
         qp.add_prefix('category', 'C')
         qp.add_prefix('kategorie', 'C')
-        
+
         return qp.parse_query(query, qp.FLAG_DEFAULT ^ qp.FLAG_PHRASE)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
@@ -251,7 +251,7 @@ class SearchSystem(object):
         if data.get('collapse'):
             doc.add_value(1, '%s:%s' % (full_id[0], data['collapse']))
             doc.add_term('R%s:%s' % (full_id[0], data['collapse']))
-        
+
         # title (optional)
         if data.get('title'):
             tg.index_text(data['title'], 5, 'T')
@@ -288,17 +288,17 @@ class SearchSystem(object):
             for block in text:
                 tg.index_text(block)
                 tg.increase_termpos()
-        
+
         # Solved (optional)
         if data.get('solved'):
             doc.add_term('S%d' % int(data['solved']))
-        
+
         # Ubuntu-Version (optional)
         if data.get('version'):
             text = data['version'].replace('(', '').replace(')', '').lower()
             for token in text.split():
                 doc.add_term('V%s' % token)
-        
+
         connection = self.get_connection(True)
         connection.replace_document('Q%s:%d' % full_id, doc)
 

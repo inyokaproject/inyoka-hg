@@ -23,7 +23,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import MONTHS
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
-from inyoka.utils.notification import send_notification
+from inyoka.utils.notification import notify_about_subscription
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.portal.user import User
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
@@ -266,8 +266,8 @@ def suggestion_delete(request, suggestion):
                     'username': request.user.username,
                     'note':     request.POST['note']
                 }
-                send_notification(s.author, u'suggestion_rejected',
-                                  u'Ikhaya-Vorschlag gelöscht', args)
+                notify_about_subscription(s, u'suggestion_rejected',
+                    u'Ikhaya-Vorschlag gelöscht', args)
             cache.delete('ikhaya/suggestion_count')
             s.delete()
             flash(u'Der Vorschlag wurde gelöscht.', True)

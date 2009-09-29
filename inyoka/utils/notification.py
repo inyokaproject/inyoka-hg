@@ -13,12 +13,14 @@ from inyoka.utils.jabber import send as send_jabber
 from inyoka.utils.templating import render_template
 
 
-def send_notification(user, template_name=None, subject=None, args={}):
+def send_notification(user, template_name=None, subject=None, args=None):
     """
     Send a message to the user using the person's favourite method(s)
     he has specified in the user control panel.
     """
     assert subject is not None
+    args = args or {}
+
     #TODO: use xhtml jabber messages
     methods = user.settings.get('notify', ['mail'])
     if 'jabber' in methods and user.jabber:
@@ -33,3 +35,13 @@ def send_notification(user, template_name=None, subject=None, args={}):
                       settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
         except SMTPRecipientsRefused:
             pass
+
+
+def notify_about_subscription(sub, template=None, subject=None, args=None):
+    args = args or {}
+    if not sub.can_read:
+        # don't send subscriptions to user that don't have read
+        # access to the resource
+        return
+
+    send_notification(sub.user, template, subject, args)

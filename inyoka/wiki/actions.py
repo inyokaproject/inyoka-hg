@@ -28,7 +28,7 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
-from inyoka.utils.notification import send_notification
+from inyoka.utils.notification import notify_about_subscription
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.feeds import FeedBuilder
@@ -429,12 +429,12 @@ def do_edit(request, name):
                                                      notified=False) \
                                              .exclude(user=request.user):
                     rev, old_rev = page.revisions.all()[:2]
-                    send_notification(s.user, 'page_edited', u'Die Seite „%s“ wurde geändert'
-                                      % page.title, {
-                                          'username': s.user.username,
-                                          'rev':      rev,
-                                          'old_rev':  old_rev,
-                                      })
+                    notify_about_subscription(s, 'page_edited',
+                        u'Die Seite „%s“ wurde geändert' % page.title, {
+                              'username': s.user.username,
+                              'rev':      rev,
+                              'old_rev':  old_rev,
+                    })
                     s.notified = True
                     s.save()
 

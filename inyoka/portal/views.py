@@ -633,7 +633,7 @@ def usercp_settings(request):
                 if version in new_versions and version not in old_versions:
                     Subscription(user=request.user, ubuntu_version=version).save()
                 elif version not in new_versions and version in old_versions:
-                    Subscription.objects.filter(user=request.user, 
+                    Subscription.objects.filter(user=request.user,
                                                 ubuntu_version=version).delete()
             for key, value in data.iteritems():
                 request.user.settings[key] = data[key]

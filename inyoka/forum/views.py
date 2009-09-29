@@ -28,7 +28,7 @@ from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.notification import send_notification
+from inyoka.utils.notification import send_notification, notify_about_subscription
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session
@@ -421,9 +421,9 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if post:
         if (topic.locked or topic.hidden or post.hidden) and \
            not check_privilege(privileges, 'moderate'):
-                flash(u'Du darfst diesen Beitrag nicht bearbeiten!', False)
-                return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
-                                             post.page))
+            flash(u'Du darfst diesen Beitrag nicht bearbeiten!', False)
+            return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+                                         post.page))
         if not (check_privilege(privileges, 'moderate') or
                 (post.author_id == request.user.id and
                  check_privilege(privileges, 'reply') and
@@ -589,21 +589,21 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             for s in Subscription.objects.filter(forum_id=forum.id) \
                                          .exclude(user=request.user):
                 notified_user.append(s.user)
-                send_notification(s.user, 'new_topic',
+                notify_about_subscription(s, 'new_topic',
                     u'Neues Thema im Forum %s: „%s“' % \
                         (forum.name, topic.title),
                     {'username':   s.user.username,
                      'post':       post,
                      'topic':      topic,
                      'forum':      forum})
-            
+
             #Inform about ubuntu_version, without the users, which has already
             #imformed about this new topic
             for s in Subscription.objects.filter(ubuntu_version= \
                            topic.ubuntu_version) \
                            .exclude(user=request.user):
                 if not s.user in notified_user:
-                    send_notification(s.user, 'new_topic_ubuntu_version',
+                    notify_about_subscription(s, 'new_topic_ubuntu_version',
                         u'Neues Thema mit der Version %s: „%s“' % \
                             (topic.get_ubuntu_version(), topic.title),
                         {'username':   s.user.username,
@@ -618,7 +618,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             for s in Subscription.objects.filter(topic_id=topic.id,
                                                  notified=False) \
                                          .exclude(user=request.user):
-                send_notification(s.user, 'new_post',
+                notify_about_subscription(s, 'new_post',
                     u'Neue Antwort im Thema „%s“' % topic.title,
                     {'username':   s.user.username,
                      'post':       post,
@@ -635,10 +635,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                                          .exclude(user=request.user):
                 # also notify if the user has not yet visited the page,
                 # since otherwise he would never know about the topic
-                send_notification(s.user, 'new_page_discussion', u'Neue Diskussion für die '
-                    u'Seite „%s“ wurde eröffnet' % article.title, {
+                notify_about_subscription(s, 'new_page_discussion',
+                    u'Neue Diskussion für die Seite „%s“ wurde eröffnet'
+                    % article.title, {
                         'username': s.user.username,
-                        'creator': request.user.username,
+                        'creator':  request.user.username,
                         'page':     article,
                     })
                 s.notified = True
@@ -1023,7 +1024,7 @@ def movetopic(request, topic_slug):
                 if subscription.user.id == topic.author.id:
                     continue
                 nargs['username'] = subscription.user.username
-                send_notification(subscription.user, 'topic_moved',
+                notify_about_subscription(subscription, 'topic_moved',
                     u'Das Thema „%s“ wurde verschoben' % topic.title, nargs)
             return HttpResponseRedirect(url_for(topic))
     else:
@@ -1271,7 +1272,7 @@ def delete_topic(request, topic_slug):
                     'mod'      : request.user.username,
                     'topic'    : topic
                 }
-                send_notification(subscription.user, 'topic_deleted',
+                notify_about_subscription(subscription, 'topic_deleted',
                     u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
             session.delete(topic)
             session.commit()

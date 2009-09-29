@@ -32,8 +32,10 @@
       {%- for sub in subscriptions %}
       <tr>
         <td class="checkboxes"><input type="checkbox" name="select" value="{{ sub.id }}" /></td>
-        <td class="items">
+        <td class="items{% if not sub.can_read %} unreadable{% endif %}">
           {%- if sub.notified %}<img src="{{ href('static', 'img', 'icons', 'new.png') }}" alt="neu" title="Änderungen seit letztem Besuch" /> {% endif %}
+          {%- if not sub.can_read %}<img src="{{ href('static', 'img', 'unreadable.png') }}" alt="nicht lesbar" title="Keine ausreichenden Leserechte" /> {% endif %}
+
           {%- if sub.topic -%}
           Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
           {%- elif sub.wiki_page -%}
