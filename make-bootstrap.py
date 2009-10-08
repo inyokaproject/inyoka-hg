@@ -35,6 +35,7 @@ def xapian_install(home_dir):
     call_subprocess(['tar', '-xzf', 'xapian-core-%s.tar.gz' % xapian_version], cwd=folder)
     call_subprocess(['wget', 'http://oligarchy.co.uk/xapian/%s/xapian-bindings-%s.tar.gz' %
                     (xapian_version, xapian_version)], cwd=folder)
+
     call_subprocess(['tar', '-xzf', 'xapian-bindings-%s.tar.gz' % xapian_version], cwd=folder)
 
     core_folder = os.path.join(folder, 'xapian-core-' + xapian_version)
@@ -43,6 +44,9 @@ def xapian_install(home_dir):
     call_subprocess(['make', 'install'], cwd=core_folder)
 
     binding_folder = os.path.join(folder, 'xapian-bindings-' + xapian_version)
+    call_subprocess(['wget', 'http://webshox.org/~shoxi/misc/xapian-bindings-Makefile-fix.patch'],
+                    cwd=binding_folder)
+    call_subprocess(['patch', '-p1', 'xapian-bindings-Makefile-fix.patch'], cwd=binding_folder)
     call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
