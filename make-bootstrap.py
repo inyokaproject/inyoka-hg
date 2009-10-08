@@ -46,7 +46,7 @@ def xapian_install(home_dir):
     binding_folder = os.path.join(folder, 'xapian-bindings-' + xapian_version)
     call_subprocess(['wget', 'http://webshox.org/~shoxi/misc/xapian-bindings-Makefile-fix.patch'],
                     cwd=binding_folder)
-    call_subprocess(['patch', '-p1', 'xapian-bindings-Makefile-fix.patch'], cwd=binding_folder)
+    call_subprocess(['patch', '-p', '1', '-i', 'xapian-bindings-Makefile-fix.patch'], cwd=binding_folder)
     call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
