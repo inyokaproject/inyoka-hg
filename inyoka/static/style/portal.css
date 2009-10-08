@@ -136,6 +136,8 @@ img.cat {
   float: right;
   font-weight: bold;
   text-align: right;
+  padding-left: 1em;
+  padding-bottom: .5em;
 }
 
 .article .meta .comments {
