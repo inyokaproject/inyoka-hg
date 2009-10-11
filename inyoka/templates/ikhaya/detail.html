@@ -70,7 +70,11 @@
           if (document.location.href.search('#comment') == -1) {
             $('#comments').hide().before(
               $('<a class="show_comments">')
+    {%- if article.comment_count %}
                 .text('Kommentare anzeigen ({{ article.comment_count }})')
+    {%- else %}
+                .text('Kommentar schreiben')
+    {%- endif %}
                 .click(function() {
                   $('#comments').show();
                   $(this).remove();
