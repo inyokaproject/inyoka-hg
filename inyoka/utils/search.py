@@ -227,9 +227,6 @@ class SearchSystem(object):
             enq.set_sort_by_relevance_then_value(2, False)
         if collapse:
             enq.set_collapse_key(1)
-        # sort descending by date
-        enq.set_docid_order(xapian.Enquire.DESCENDING)
-        enq.set_weighting_scheme(xapian.BoolWeight())
         enq.set_query(qry)
         offset = (page - 1) * per_page
 
