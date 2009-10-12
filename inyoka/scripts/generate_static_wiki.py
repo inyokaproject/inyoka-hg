@@ -12,14 +12,11 @@
 """
 import os
 import re
-import time
 import sys
 import shutil
-import urllib2
 from os import path
 from md5 import md5
 from urllib import quote
-from datetime import datetime
 from itertools import cycle, izip
 from werkzeug import url_unquote
 from inyoka.conf import settings
@@ -28,7 +25,19 @@ from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
 
-FOLDER = '/nfs/www/de/static_wiki'
+try:
+    from eventlet import coros
+
+    # this imports a special version of the urllib2 module that uses non-blocking IO
+    from eventlet.green import urllib2
+    raise ImportError
+except ImportError:
+    print "To get better performance, install eventlet."
+    coros = None
+    import urllib2
+
+
+FOLDER = 'static_wiki'
 URL = href('wiki')
 DONE_SRCS = {}
 
@@ -42,6 +51,9 @@ IMG_RE = re.compile(r'href="%s\?target=([^"]+)"' % href('wiki', '_image'))
 LINK_RE = re.compile(r'href="%s([^"]+)"' % href('wiki'))
 STARTPAGE_RE = re.compile(r'href="(%s)"' % href('wiki'))
 ERROR_REPORT_RE = re.compile(r'<a href=".[^"]+" id="user_error_report_link">Fehler melden</a><br/>')
+POWERED_BY_RE = re.compile(r'<li class="poweredby">.*?</li>', re.DOTALL)
+SEARCH_PATHBAR_RE = re.compile(r'<form .*? class="search">.+?</form>', re.DOTALL)
+DROPDOWN_RE = re.compile(r'<div class="dropdown">.+?</div>', re.DOTALL)
 
 GLOBAL_MESSAGE_RE = re.compile(r'(<div class="message global">).+?(</div>)', re.DOTALL)
 
@@ -57,6 +69,7 @@ EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
 
 
 INCLUDE_IMAGES = False
+
 
 # original from Jochen Kupperschmidt with some modifications
 class ProgressBar(object):
@@ -159,8 +172,32 @@ def handle_link(match, pre, is_main_page):
     return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
 
 
-def startpage_link(match, pre, is_main_page):
+def handle_powered_by(match, pre, is_main_page):
+    return u'<li class="poweredby">Generiert mit <a href="http://ubuntuusers.de/inyoka">Inyoka</a></li>'
+
+
+def handle_startpage(match, pre, is_main_page):
     return u'href="%s%s.html"' % (pre, settings.WIKI_MAIN_PAGE.lower())
+
+
+REPLACERS = (
+    (META_RE,           ''),
+    (NAVI_RE,           ''),
+    (ERROR_REPORT_RE,   ''),
+    (GLOBAL_MESSAGE_RE, ''),
+    (SEARCH_PATHBAR_RE, ''),
+    (DROPDOWN_RE,       ''),
+    (TAB_RE,            SNAPSHOT_MESSAGE))
+
+
+CALLBACK_REPLACERS = (
+    (IMG_RE,            handle_img),
+    (SRC_RE,            handle_src),
+    (STYLE_RE,          handle_style),
+    (FAVICON_RE,        handle_favicon),
+    (LINK_RE,           handle_link),
+    (STARTPAGE_RE,      handle_startpage),
+    (POWERED_BY_RE,     handle_powered_by))
 
 
 def create_snapshot():
@@ -193,24 +230,24 @@ def create_snapshot():
     pages = pages - excluded_pages
 
 
-    for percent, name in izip(percentize(len(pages)), pages):
-        is_main_page = False
+    def _fetch_and_write(name):
         parts = 0
+        is_main_page = False
 
         if not has_privilege(user, name, 'read'):
-            continue
+            return
 
         page = Page.objects.get_by_name(name, False, True)
         if page.name in excluded_pages:
             # however these are not filtered before…
-            continue
+            return
 
         if page.name == settings.WIKI_MAIN_PAGE:
             is_main_page = True
 
         if page.rev.attachment:
             # page is an attachment
-            continue
+            return
         if len(page.trace) > 1:
             # page is a subpage
             # create subdirectories
@@ -221,32 +258,41 @@ def create_snapshot():
                 parts += 1
 
         content = fetch_page(name)
-        pb.update(percent)
         if content is None:
-            continue
+            return
         content = content.decode('utf8')
 
-        content = META_RE.sub('', content)
-        content = NAVI_RE.sub('', content)
-        content = ERROR_REPORT_RE.sub('', content)
-        content = GLOBAL_MESSAGE_RE.sub('', content)
-        content = IMG_RE.sub(replacer(handle_img, parts, is_main_page), content)
-        content = SRC_RE.sub(replacer(handle_src, parts, is_main_page), content)
-        content = STYLE_RE.sub(replacer(handle_style, parts, is_main_page), content)
-        content = FAVICON_RE.sub(replacer(handle_style, parts, is_main_page), content)
-        content = LINK_RE.sub(replacer(handle_link, parts, is_main_page), content)
-        content = STARTPAGE_RE.sub(replacer(startpage_link, parts, is_main_page), content)
-        content = TAB_RE.sub(SNAPSHOT_MESSAGE, content)
+
+        for regex, repl in REPLACERS:
+            content = regex.sub(repl, content)
+
+        for regex, callback in CALLBACK_REPLACERS:
+            content = regex.sub(replacer(callback, parts, is_main_page), content)
 
         f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
         f.write(content.encode('utf8'))
         f.close()
-        #time.sleep(.2)
-    #os.chdir(FOLDER)
-    #XXX: this needs to be done another way... for now I replaced all links
-    #     by hand. I don't like the idea of using re here as well... --entequak
-    #os.link('./files/%s.html' % settings.WIKI_MAIN_PAGE.lower(),
-    #        '%s.html' % settings.WIKI_MAIN_PAGE.lower())
+
+    if coros is None:
+        # use some dummy class for the coroutine pool
+        class pool(object):
+            def execute(self, callback, *args):
+                return callback(*args)
+        pool = pool()
+    else:
+        # use the eventlet coroutine pool implementation
+        pool = coros.CoroutinePool(max_size=10)
+
+    waiters = []
+
+    for percent, name in izip(percentize(len(pages)), pages):
+        waiters.append(pool.execute(_fetch_and_write, name))
+        pb.update(percent)
+
+    if coros is not None:
+        # only the eventlet implementation supports waiting
+        for waiter in waiters:
+            waiter.wait()
 
 
 if __name__ == '__main__':
