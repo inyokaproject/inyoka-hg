@@ -30,7 +30,6 @@ try:
 
     # this imports a special version of the urllib2 module that uses non-blocking IO
     from eventlet.green import urllib2
-    raise ImportError
 except ImportError:
     print "To get better performance, install eventlet."
     coros = None
