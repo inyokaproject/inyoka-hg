@@ -268,9 +268,15 @@ def create_snapshot():
         for regex, callback in CALLBACK_REPLACERS:
             content = regex.sub(replacer(callback, parts, is_main_page), content)
 
-        f = file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)), 'w+')
-        f.write(content.encode('utf8'))
-        f.close()
+        def _write_file(pth):
+            with open(pth, 'w+') as fobj:
+                fobj.write(content.encode('utf-8'))
+
+        _write_file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)))
+        if is_main_page:
+            content = re.compile(r'href="\./([^"]+)"') \
+                    .sub(lambda m: 'href="./files/%s"' % m.groups()[0], content)
+            _write_file(path.join(FOLDER, '%s.html' % fix_path(page.name)))
 
     if coros is None:
         # use some dummy class for the coroutine pool
