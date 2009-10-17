@@ -277,6 +277,7 @@ def create_snapshot():
             content = re.compile(r'href="\./([^"]+)"') \
                     .sub(lambda m: 'href="./files/%s"' % m.groups()[0], content)
             _write_file(path.join(FOLDER, '%s.html' % fix_path(page.name)))
+            _write_file(path.join(FOLDER, 'index.html'))
 
     if coros is None:
         # use some dummy class for the coroutine pool
