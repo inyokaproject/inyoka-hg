@@ -159,7 +159,6 @@ def privmsg(args, match):
         try:
             user = User.objects.get(id=args['u'])
             if user is None:
-                print 'no such user'
                 return
             return href('portal', 'privmsg', 'new', user.username)
         except KeyError:

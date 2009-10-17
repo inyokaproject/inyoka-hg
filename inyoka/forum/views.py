@@ -557,7 +557,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         d = form.cleaned_data
 
         if not post: # not when editing an existing post
-            print datetime.utcnow() - timedelta(0, 120)
             doublepost = Post.query \
                 .filter_by(author_id=request.user.id, text=d['text']) \
                 .filter(Post.pub_date > (datetime.utcnow() - timedelta(0, 120)))
@@ -565,7 +564,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 doublepost = doublepost.filter_by(topic_id=topic.id)
             doublepost = doublepost.options(eagerload(Post.topic)).first()
             if doublepost:
-                print doublepost.pub_date
                 flash(u'Dieser Beitrag wurde bereits erstellt!  '
                       u'Bitte überlege ob du nicht deinen vorherigen Beitrag '
                       u'editieren möchtest.')
