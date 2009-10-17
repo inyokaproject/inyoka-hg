@@ -381,10 +381,14 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        if '@' in username:
-            user = User.objects.get(email__iexact=username)
-        else:
+        try:
             user = User.objects.get(username)
+        except User.DoesNotExist, e:
+            # fallback to email login
+            if '@' in username:
+                user = User.objects.get(email__iexact=username)
+            else:
+                raise e
 
         if user.is_banned:
             if user.banned_until is None or \

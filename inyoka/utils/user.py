@@ -28,7 +28,7 @@ from inyoka.utils.urls import href
 SESSION_KEY = '_auth_user_id'
 
 
-_username_re = re.compile(r'^[\w0-9_ -]{1,30}(?u)$')
+_username_re = re.compile(r'^[@\-\.a-z0-9 öäüß]{1,30}$', re.I)
 _username_split_re = re.compile(r'[\s_]+')
 
 
