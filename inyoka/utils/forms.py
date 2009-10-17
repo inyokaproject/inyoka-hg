@@ -152,8 +152,7 @@ class HiddenCaptchaField(forms.Field):
 class EmailField(forms.CharField):
 
     def clean(self, value):
-        if not value:
-            return
+        value = super(forms.CharField, self).clean(value)
         value = value.strip()
         if is_blocked_host(value):
             raise forms.ValidationError(u'''

@@ -88,28 +88,23 @@ class RegisterForm(forms.Form):
         Validates that the username is alphanumeric and is not already
         in use.
         """
-        if 'username' in self.cleaned_data:
-            try:
-                username = normalize_username(self.cleaned_data['username'])
-            except ValueError:
-                raise forms.ValidationError(
-                    u'Dein Benutzername enthält nicht benutzbare Zeichen'
-                )
-            try:
-                user = User.objects.get(username)
-            except User.DoesNotExist:
-                return username
-
+        try:
+            username = normalize_username(self.cleaned_data['username'])
+        except ValueError:
             raise forms.ValidationError(
-                u'Der Benutzername ist leider schon vergeben. '
-                u'Bitte wähle einen anderen.'
+                u'Dein Benutzername enthält nicht benutzbare Zeichen'
             )
-        else:
-            raise forms.ValidationError(
-                u'Du musst einen Benutzernamen angeben!'
-            )
+        try:
+            user = User.objects.get(username)
+        except User.DoesNotExist:
+            return username
 
-    def clean_confirm_password(self):
+        raise forms.ValidationError(
+            u'Der Benutzername ist leider schon vergeben. '
+            u'Bitte wähle einen anderen.'
+        )
+
+    def clean(self):
         """
         Validates that the two password inputs match.
         """
@@ -138,23 +133,17 @@ class RegisterForm(forms.Form):
         Validates if the required field `email` contains
         a non existing mail address.
         """
-        data = self.cleaned_data
-        if 'email' in data and data['email'] is not None:
-            try:
-                user = User.objects.get(email__iexact=self.cleaned_data['email'])
-            except User.DoesNotExist:
-                return self.cleaned_data['email']
+        try:
+            user = User.objects.get(email__iexact=self.cleaned_data['email'])
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
 
-            raise forms.ValidationError(mark_safe(
-                u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
-                u' Fals du dein Passwort vergessen hast, kannst du es '
-                u'<a href="%s">wiederherstellen lassen</a>' % escape(
-                    href('portal', 'lost_password')))
-            )
-        else:
-            raise forms.ValidationError(
-                u'Du musst eine E-Mail-Adresse angeben!'
-            )
+        raise forms.ValidationError(mark_safe(
+            u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
+            u' Fals du dein Passwort vergessen hast, kannst du es '
+            u'<a href="%s">wiederherstellen lassen</a>' % escape(
+                href('portal', 'lost_password')))
+        )
 
 
 class LostPasswordForm(forms.Form):
