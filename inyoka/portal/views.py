@@ -103,6 +103,7 @@ def index(request):
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
         'calendar_events':          events,
         'countdown_url':            countdown_url,
+        'countdown_days':           countdown_days,
     }
 
 
