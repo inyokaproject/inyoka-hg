@@ -166,7 +166,6 @@ def feed(request, page_name=None, count=20):
     Shows the wiki pages or all revisions of one page that match
     the given criteria in an atom feed.
     """
-
     count = int(count)
     if count not in (10, 20, 30, 50, 50, 75, 100):
         raise PageNotFound()
@@ -201,9 +200,10 @@ def feed(request, page_name=None, count=20):
             new_cache = True
 
     if new_cache:
-        revisions = Revision.objects.all()[:100]
+        revisions = Revision.objects.all()
         if page_name:
             revisions = revisions.filter(page__name__iexact=page_name)
+        revisions = revisions[:100]
 
         for rev in revisions:
             kwargs = {}
@@ -229,8 +229,6 @@ def feed(request, page_name=None, count=20):
                 **kwargs
             )
         cache.set(cache_key, feed, 600)
-    else:
-        raise PageNotFound()
 
     feed.truncate(count)
     return feed.get_atom_response()
