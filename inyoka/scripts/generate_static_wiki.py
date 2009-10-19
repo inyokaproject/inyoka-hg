@@ -13,14 +13,16 @@
 import os
 import re
 import sys
+import time
 import shutil
 from os import path
-from md5 import md5
 from urllib import quote
+from hashlib import md5
 from itertools import cycle, izip
 from werkzeug import url_unquote
 from inyoka.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.text import escape, normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
@@ -139,7 +141,7 @@ def save_file(url, is_main_page=False, is_static=False):
 
 
 def fix_path(pth):
-    return pth.replace(' ', '_').lower()
+    return normalize_pagename(pth).rsplit('/', 1)[-1]
 
 
 def replacer(func, parts, is_main_page):
@@ -226,7 +228,7 @@ def create_snapshot():
                 excluded_pages.add(page)
             else:
                 pages.add(page)
-    pages = pages - excluded_pages
+    todo = pages - excluded_pages
 
 
     def _fetch_and_write(name):
@@ -261,12 +263,11 @@ def create_snapshot():
             return
         content = content.decode('utf8')
 
+        for regex, callback in CALLBACK_REPLACERS:
+            content = regex.sub(replacer(callback, parts, is_main_page), content)
 
         for regex, repl in REPLACERS:
             content = regex.sub(repl, content)
-
-        for regex, callback in CALLBACK_REPLACERS:
-            content = regex.sub(replacer(callback, parts, is_main_page), content)
 
         def _write_file(pth):
             with open(pth, 'w+') as fobj:
@@ -276,8 +277,9 @@ def create_snapshot():
         if is_main_page:
             content = re.compile(r'href="\./([^"]+)"') \
                     .sub(lambda m: 'href="./files/%s"' % m.groups()[0], content)
-            _write_file(path.join(FOLDER, '%s.html' % fix_path(page.name)))
             _write_file(path.join(FOLDER, 'index.html'))
+
+        time.sleep(0.5)
 
     if coros is None:
         # use some dummy class for the coroutine pool
@@ -291,7 +293,7 @@ def create_snapshot():
 
     waiters = []
 
-    for percent, name in izip(percentize(len(pages)), pages):
+    for percent, name in izip(percentize(len(todo)), todo):
         waiters.append(pool.execute(_fetch_and_write, name))
         pb.update(percent)
 
@@ -299,6 +301,9 @@ def create_snapshot():
         # only the eventlet implementation supports waiting
         for waiter in waiters:
             waiter.wait()
+
+    print ("Created Wikisnapshot with %s pages; excluded %s pages"
+           % (len(todo), len(excluded_pages)))
 
 
 if __name__ == '__main__':
