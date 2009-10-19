@@ -201,7 +201,7 @@ def feed(request, page_name=None, count=20):
             new_cache = True
 
     if new_cache:
-        revisions = Revision.objects.all()
+        revisions = Revision.objects.all()[:100]
         if page_name:
             revisions = revisions.filter(page__name__iexact=page_name)
 
