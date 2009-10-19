@@ -141,7 +141,7 @@ def save_file(url, is_main_page=False, is_static=False):
 
 
 def fix_path(pth):
-    return normalize_pagename(pth).rsplit('/', 1)[-1]
+    return normalize_pagename(pth, False).rsplit('/', 1)[-1]
 
 
 def replacer(func, parts, is_main_page):
@@ -152,7 +152,8 @@ def replacer(func, parts, is_main_page):
 
 
 def handle_src(match, pre, is_main_page):
-    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, False))
+    is_static = 'static' in match.groups()[0]
+    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, is_static))
 
 
 def handle_img(match, pre, is_main_page):
@@ -182,6 +183,13 @@ def handle_startpage(match, pre, is_main_page):
 
 
 REPLACERS = (
+    (IMG_RE,            handle_img),
+    (SRC_RE,            handle_src),
+    (STYLE_RE,          handle_style),
+    (FAVICON_RE,        handle_favicon),
+    (LINK_RE,           handle_link),
+    (STARTPAGE_RE,      handle_startpage),
+    (POWERED_BY_RE,     handle_powered_by),
     (META_RE,           ''),
     (NAVI_RE,           ''),
     (ERROR_REPORT_RE,   ''),
@@ -189,16 +197,6 @@ REPLACERS = (
     (SEARCH_PATHBAR_RE, ''),
     (DROPDOWN_RE,       ''),
     (TAB_RE,            SNAPSHOT_MESSAGE))
-
-
-CALLBACK_REPLACERS = (
-    (IMG_RE,            handle_img),
-    (SRC_RE,            handle_src),
-    (STYLE_RE,          handle_style),
-    (FAVICON_RE,        handle_favicon),
-    (LINK_RE,           handle_link),
-    (STARTPAGE_RE,      handle_startpage),
-    (POWERED_BY_RE,     handle_powered_by))
 
 
 def create_snapshot():
@@ -263,10 +261,9 @@ def create_snapshot():
             return
         content = content.decode('utf8')
 
-        for regex, callback in CALLBACK_REPLACERS:
-            content = regex.sub(replacer(callback, parts, is_main_page), content)
-
         for regex, repl in REPLACERS:
+            if callable(repl):
+                repl = replacer(repl, parts, is_main_page)
             content = regex.sub(repl, content)
 
         def _write_file(pth):
@@ -274,9 +271,10 @@ def create_snapshot():
                 fobj.write(content.encode('utf-8'))
 
         _write_file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)))
+
         if is_main_page:
-            content = re.compile(r'href="\./([^"]+)"') \
-                    .sub(lambda m: 'href="./files/%s"' % m.groups()[0], content)
+            content = re.compile(r'(src|href)="\./([^"]+)"') \
+                    .sub(lambda m: '%s="./files/%s"' % (m.groups()[0], m.groups()[1]), content)
             _write_file(path.join(FOLDER, 'index.html'))
 
         time.sleep(0.5)
