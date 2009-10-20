@@ -91,7 +91,7 @@ class RegisterForm(forms.Form):
         username = self.cleaned_data['username']
         if not is_valid_username(username):
             raise forms.ValidationError(
-                u'Dein Benutzername enthält nicht benutzbare Zeichen; es sind nur alphanumerische Zeichen sowie „-“, und „ “ erlaubt.'
+                u'Dein Benutzername enthält nicht benutzbare Zeichen; es sind nur alphanumerische Zeichen sowie „-“ und „ “ erlaubt.'
             )
         try:
             user = User.objects.get(username)
