@@ -163,23 +163,19 @@ class CreateUserForm(forms.Form):
         in use.
         """
         data = self.cleaned_data
-        if 'username' in data:
-            try:
-                username = normalize_username(data['username'])
-            except ValueError:
-                raise forms.ValidationError(u'Der Benutzername enthält '
-                                            u'nicht benutzbare Zeichen')
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                return username
+        username = data['username']
+        if not is_valid_username(username):
+            raise forms.ValidationError(u'Der Benutzername enthält '
+                                        u'nicht benutzbare Zeichen')
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return username
 
-            raise forms.ValidationError(
-                u'Der Benutzername ist leider schon vergeben. '
-                u'Bitte wähle einen anderen.'
-            )
-        else:
-            raise forms.ValidationError(u'Du musst einen Benutzernamen angeben!')
+        raise forms.ValidationError(
+            u'Der Benutzername ist leider schon vergeben. '
+            u'Bitte wähle einen anderen.'
+        )
 
     def clean_confirm_password(self):
         """

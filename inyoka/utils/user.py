@@ -29,21 +29,18 @@ SESSION_KEY = '_auth_user_id'
 
 
 _username_re = re.compile(r'^[@\-\.a-z0-9 öäüß]{1,30}$', re.I)
+_username_url_re = re.compile(r'^[@\-\._a-z0-9 öäüß]{1,30}$', re.I)
 _username_split_re = re.compile(r'[\s_]+')
 
 
 def is_valid_username(name):
     """Check if the username entered is a valid one."""
-    try:
-        normalize_username(name)
-    except ValueError:
-        return False
-    return True
+    return _username_re.search(name) is not None
 
 
 def normalize_username(name):
     """Normalize the username."""
-    if _username_re.search(name) is not None:
+    if _username_url_re.search(name) is not None:
         rv = ' '.join(_username_split_re.split(name)).strip()
         if rv:
             return rv

@@ -12,7 +12,7 @@ import Image
 from django import forms
 from django.utils.safestring import mark_safe
 from inyoka.portal.user import User
-from inyoka.utils.user import normalize_username
+from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaField, DateTimeWidget, \
@@ -88,11 +88,10 @@ class RegisterForm(forms.Form):
         Validates that the username is alphanumeric and is not already
         in use.
         """
-        try:
-            username = normalize_username(self.cleaned_data['username'])
-        except ValueError:
+        username = self.cleaned_data['username']
+        if not is_valid_username(username):
             raise forms.ValidationError(
-                u'Dein Benutzername enthält nicht benutzbare Zeichen'
+                u'Dein Benutzername enthält nicht benutzbare Zeichen; es sind nur alphanumerische Zeichen sowie „-“, und „ “ erlaubt.'
             )
         try:
             user = User.objects.get(username)
@@ -110,7 +109,7 @@ class RegisterForm(forms.Form):
         """
         if 'password' in self.cleaned_data and 'confirm_password' in self.cleaned_data:
             if self.cleaned_data['password'] == self.cleaned_data['confirm_password']:
-                return self.cleaned_data['confirm_password']
+                return self.cleaned_data
             raise forms.ValidationError(
                 u'Das Passwort muss mit der Passwortbestätigung übereinstimmen!'
             )
