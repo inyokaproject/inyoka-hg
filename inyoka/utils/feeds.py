@@ -23,7 +23,7 @@ def _make_text_block(name, content, content_type=None):
         return u'<%s type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">' \
                u'%s</div></%s>\n' % (
             name,
-            escape(content),
+            content,
             name,
         )
     if not content_type:

@@ -213,7 +213,7 @@ def feed(request, page_name=None, count=20):
                     rev.note and (u' Zusammenfassung: \n%s' % rev.note) or ''))
 
             kwargs['summary'] = text
-            kwargs['summary_type'] = 'xhtml'
+            kwargs['summary_type'] = None
             author = rev.user \
                 and {'name': rev.user.username, 'uri': url_for(rev.user)} \
                 or u'Anonymous'
