@@ -11,6 +11,7 @@
 import Image
 from django import forms
 from django.utils.safestring import mark_safe
+from django.db import connection
 from inyoka.portal.user import User
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
@@ -96,7 +97,12 @@ class RegisterForm(forms.Form):
         try:
             user = User.objects.get(username)
         except User.DoesNotExist:
-            return username
+            # To bad we had to change the user regex…,  we need to rename users fast…
+            c = connection.cursor()
+            c.execute("SELECT COUNT(*) FROM portal_user WHERE username LIKE %s", [username.replace(' ', '%')])
+            count = c.fetchone()[0]
+            if count == 0:
+                return username
 
         raise forms.ValidationError(
             u'Der Benutzername ist leider schon vergeben. '
