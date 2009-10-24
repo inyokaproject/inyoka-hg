@@ -1174,10 +1174,10 @@ def feedselector(request, app=None):
     if wiki_form is not None:
         wiki_pages = cache.get('feedselector/wiki/pages')
         if not wiki_pages:
-            wiki_pages = WikiPage.objects.all()
+            wiki_pages = WikiPage.objects.get_page_list()
             cache.set('feedselector/wiki/pages', wiki_pages)
         wiki_form.fields['page'].choices = [('*', u'Alle')] + \
-            [(p.name, p.name) for p in wiki_pages]
+            [(p, p) for p in wiki_pages]
 
     if request.method == 'POST':
         form = globals()['%s_form' % app]

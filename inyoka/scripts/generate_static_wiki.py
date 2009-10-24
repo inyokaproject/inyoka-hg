@@ -13,14 +13,16 @@
 import os
 import re
 import sys
+import time
 import shutil
 from os import path
-from md5 import md5
 from urllib import quote
+from hashlib import md5
 from itertools import cycle, izip
 from werkzeug import url_unquote
 from inyoka.conf import settings
 from inyoka.utils.urls import href
+from inyoka.utils.text import escape, normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
@@ -139,7 +141,7 @@ def save_file(url, is_main_page=False, is_static=False):
 
 
 def fix_path(pth):
-    return pth.replace(' ', '_').lower()
+    return normalize_pagename(pth, False).rsplit('/', 1)[-1]
 
 
 def replacer(func, parts, is_main_page):
@@ -150,7 +152,8 @@ def replacer(func, parts, is_main_page):
 
 
 def handle_src(match, pre, is_main_page):
-    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, False))
+    is_static = 'static' in match.groups()[0]
+    return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, is_static))
 
 
 def handle_img(match, pre, is_main_page):
@@ -180,6 +183,13 @@ def handle_startpage(match, pre, is_main_page):
 
 
 REPLACERS = (
+    (IMG_RE,            handle_img),
+    (SRC_RE,            handle_src),
+    (STYLE_RE,          handle_style),
+    (FAVICON_RE,        handle_favicon),
+    (LINK_RE,           handle_link),
+    (STARTPAGE_RE,      handle_startpage),
+    (POWERED_BY_RE,     handle_powered_by),
     (META_RE,           ''),
     (NAVI_RE,           ''),
     (ERROR_REPORT_RE,   ''),
@@ -187,16 +197,6 @@ REPLACERS = (
     (SEARCH_PATHBAR_RE, ''),
     (DROPDOWN_RE,       ''),
     (TAB_RE,            SNAPSHOT_MESSAGE))
-
-
-CALLBACK_REPLACERS = (
-    (IMG_RE,            handle_img),
-    (SRC_RE,            handle_src),
-    (STYLE_RE,          handle_style),
-    (FAVICON_RE,        handle_favicon),
-    (LINK_RE,           handle_link),
-    (STARTPAGE_RE,      handle_startpage),
-    (POWERED_BY_RE,     handle_powered_by))
 
 
 def create_snapshot():
@@ -226,7 +226,7 @@ def create_snapshot():
                 excluded_pages.add(page)
             else:
                 pages.add(page)
-    pages = pages - excluded_pages
+    todo = pages - excluded_pages
 
 
     def _fetch_and_write(name):
@@ -261,23 +261,23 @@ def create_snapshot():
             return
         content = content.decode('utf8')
 
-
         for regex, repl in REPLACERS:
+            if callable(repl):
+                repl = replacer(repl, parts, is_main_page)
             content = regex.sub(repl, content)
-
-        for regex, callback in CALLBACK_REPLACERS:
-            content = regex.sub(replacer(callback, parts, is_main_page), content)
 
         def _write_file(pth):
             with open(pth, 'w+') as fobj:
                 fobj.write(content.encode('utf-8'))
 
         _write_file(path.join(FOLDER, 'files', '%s.html' % fix_path(page.name)))
+
         if is_main_page:
-            content = re.compile(r'href="\./([^"]+)"') \
-                    .sub(lambda m: 'href="./files/%s"' % m.groups()[0], content)
-            _write_file(path.join(FOLDER, '%s.html' % fix_path(page.name)))
+            content = re.compile(r'(src|href)="\./([^"]+)"') \
+                    .sub(lambda m: '%s="./files/%s"' % (m.groups()[0], m.groups()[1]), content)
             _write_file(path.join(FOLDER, 'index.html'))
+
+        time.sleep(0.5)
 
     if coros is None:
         # use some dummy class for the coroutine pool
@@ -291,7 +291,7 @@ def create_snapshot():
 
     waiters = []
 
-    for percent, name in izip(percentize(len(pages)), pages):
+    for percent, name in izip(percentize(len(todo)), todo):
         waiters.append(pool.execute(_fetch_and_write, name))
         pb.update(percent)
 
@@ -299,6 +299,9 @@ def create_snapshot():
         # only the eventlet implementation supports waiting
         for waiter in waiters:
             waiter.wait()
+
+    print ("Created Wikisnapshot with %s pages; excluded %s pages"
+           % (len(todo), len(excluded_pages)))
 
 
 if __name__ == '__main__':

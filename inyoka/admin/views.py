@@ -688,7 +688,7 @@ def users(request):
         name = request.POST.get('user')
         try:
             try:
-                user = User.objects.get(name=name)
+                user = User.objects.get(username=name)
             except User.DoesNotExist, e:
                 # fallback to email
                 if '@' in name:

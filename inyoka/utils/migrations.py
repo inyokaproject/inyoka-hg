@@ -16,6 +16,7 @@ import sys
 from inspect import getdoc
 from sqlalchemy import Table
 from inyoka.utils.database import metadata, engine
+from sqlalchemy import Table
 
 
 class Migrations(object):
@@ -53,6 +54,7 @@ class Migrations(object):
 
         # perform the migrations and print to stdout
         for migration in migrate:
+            print '-', migration
             migration(self)
             version += 1
             print >> sys.stderr, 'upgraded to %d (%r)' % (
