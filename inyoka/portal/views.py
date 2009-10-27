@@ -492,7 +492,7 @@ def search(request):
 def profile(request, username):
     """Show the user profile if the user is logged in."""
 
-    user = User.objects.get(username)
+    user = User.objects.get(normalize_username(username))
 
     try:
         if username != user.urlsafe_username:
