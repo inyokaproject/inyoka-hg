@@ -35,6 +35,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime
+from inyoka.utils.user import normalize_username
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -688,7 +689,7 @@ def users(request):
         name = request.POST.get('user')
         try:
             try:
-                user = User.objects.get(username=name)
+                user = User.objects.get(username=normalize_username(name))
             except User.DoesNotExist, e:
                 # fallback to email
                 if '@' in name:
