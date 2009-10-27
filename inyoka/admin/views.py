@@ -725,7 +725,7 @@ def user_edit(request, username):
         if '@' in username:
             user = User.objects.get(email__iexact=username)
         else:
-            user = User.objects.get(username)
+            user = User.objects.get(normalize_user(username))
     except User.DoesNotExist:
         raise PageNotFound
     if username != user.urlsafe_username:
