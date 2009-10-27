@@ -205,7 +205,7 @@ def activate(request, action='', username='', activation_key=''):
     if not redirect:
         redirect = href('portal', 'login', username=username)
     try:
-        user = User.objects.get(username)
+        user = User.objects.get(normalize_username(username))
     except User.DoesNotExist:
         flash(u'Der Benutzer „%s“ existiert nicht!' % escape(username), False)
         return HttpResponseRedirect(href('portal'))
