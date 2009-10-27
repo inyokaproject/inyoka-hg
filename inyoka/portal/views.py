@@ -37,7 +37,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
-from inyoka.utils.user import normalize_username, check_activation_key
+from inyoka.utils.user import check_activation_key
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -205,7 +205,7 @@ def activate(request, action='', username='', activation_key=''):
     if not redirect:
         redirect = href('portal', 'login', username=username)
     try:
-        user = User.objects.get(normalize_username(username))
+        user = User.objects.get(username)
     except User.DoesNotExist:
         flash(u'Der Benutzer „%s“ existiert nicht!' % escape(username), False)
         return HttpResponseRedirect(href('portal'))
@@ -492,7 +492,7 @@ def search(request):
 def profile(request, username):
     """Show the user profile if the user is logged in."""
 
-    user = User.objects.get(normalize_username(username))
+    user = User.objects.get(username)
 
     try:
         if username != user.urlsafe_username:

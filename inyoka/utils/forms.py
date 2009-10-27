@@ -88,7 +88,7 @@ class UserField(forms.CharField):
         if not value:
             return
         try:
-            return User.objects.get(username=value)
+            return User.objects.get(value)
         except:
             raise forms.ValidationError(u'Diesen Benutzer gibt es nicht')
 

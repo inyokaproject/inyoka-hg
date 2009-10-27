@@ -1544,12 +1544,12 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         title = u'Ungelöste Themen'
         url = href('forum', 'unsolved')
     elif action == 'topic_author':
-        user = User.objects.get(username=user)
+        user = User.objects.get(user)
         topics = topics.filter(Topic.author_id == user.id)
         url = href('forum', 'topic_author', user.username)
         title = u'Themen von %s' % (escape(user.username))
     elif action == 'author':
-        user = user and User.objects.get(username=user) or request.user
+        user = user and User.objects.get(user) or request.user
         if user == User.objects.get_anonymous_user():
             raise PageNotFound()
         # get the ids of the topics the user has written posts in

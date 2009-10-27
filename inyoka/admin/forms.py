@@ -168,7 +168,7 @@ class CreateUserForm(forms.Form):
             raise forms.ValidationError(u'Der Benutzername enthält '
                                         u'nicht benutzbare Zeichen')
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(username)
         except User.DoesNotExist:
             return username
 
