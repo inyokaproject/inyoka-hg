@@ -310,7 +310,10 @@ class UserManager(models.Manager):
                 normalized = normalize_username(pk)
                 return User.objects.get(username__iexact=normalized, **kwargs)
             except (ValueError, User.DoesNotExist):
-                return User.objects.get(username__iexact=pk, **kwargs)
+                try:
+                    return User.objects.get(username__iexact=pk, **kwargs)
+                except User.DoesNotExist:
+                    return User.objects.get(username__iexact=pk.replace('_', ' '))
 
         if pk is None:
             pk = kwargs.pop('id__exact', None)
