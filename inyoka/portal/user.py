@@ -308,11 +308,8 @@ class UserManager(models.Manager):
         if isinstance(pk, basestring):
             try:
                 normalized = normalize_username(pk)
-            except ValueError:
-                pass
-            try:
                 return User.objects.get(username__iexact=normalized, **kwargs)
-            except User.DoesNotExist:
+            except (ValueError, User.DoesNotExist):
                 return User.objects.get(username__iexact=pk, **kwargs)
 
         if pk is None:
