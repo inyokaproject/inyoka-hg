@@ -28,9 +28,9 @@ from inyoka.utils.urls import href
 SESSION_KEY = '_auth_user_id'
 
 
-_username_re = re.compile(r'^[@\-\.a-z0-9 öäüß]{1,30}$', re.I)
-_username_url_re = re.compile(r'^[@\-\._a-z0-9 öäüß]{1,30}$', re.I)
-_username_split_re = re.compile(r'[\s_]+')
+_username_re = re.compile(ur'^[@\-\.a-z0-9 öäüß]{1,30}$', re.I|re.U)
+_username_url_re = re.compile(ur'^[@\-\._a-z0-9 öäüß]{1,30}$', re.I|re.U)
+_username_split_re = re.compile(ur'[\s_]+')
 
 
 def is_valid_username(name):

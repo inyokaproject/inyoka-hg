@@ -14,7 +14,7 @@ from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
                                DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
                                DateTimeWidget, EmailField
 from inyoka.utils.html import cleanup_html
-from inyoka.utils.user import normalize_username
+from inyoka.utils.user import normalize_username, is_valid_username
 from inyoka.portal.models import StaticFile
 from inyoka.portal.user import Group, User
 from inyoka.utils.storage import storage
