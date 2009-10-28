@@ -309,7 +309,7 @@ class UserManager(models.Manager):
             try:
                 normalized = normalize_username(pk)
             except ValueError:
-                raise User.DoesNotExist()
+                pass
             try:
                 return User.objects.get(username__iexact=normalized, **kwargs)
             except User.DoesNotExist:
