@@ -302,15 +302,19 @@ class Group(models.Model):
 class UserManager(models.Manager):
 
     def get(self, pk=None, **kwargs):
+        if 'username' in kwargs:
+            kwargs['username'] = normalize_username(kwargs['username'])
+
         if isinstance(pk, basestring):
             try:
-                return User.objects.get(username__iexact=pk, **kwargs)
-            except User.DoesNotExist:
-                try:
-                    normalized = normalize_username(pk)
-                except ValueError:
-                    raise User.DoesNotExist()
+                normalized = normalize_username(pk)
                 return User.objects.get(username__iexact=normalized, **kwargs)
+            except (ValueError, User.DoesNotExist):
+                try:
+                    return User.objects.get(username__iexact=pk, **kwargs)
+                except User.DoesNotExist:
+                    return User.objects.get(username__iexact=pk.replace('_', ' '))
+
         if pk is None:
             pk = kwargs.pop('id__exact', None)
         if pk is not None:
@@ -381,10 +385,14 @@ class UserManager(models.Manager):
             UserBanned
                 If the found user was banned by an admin.
         """
-        if '@' in username:
-            user = User.objects.get(email__iexact=username)
-        else:
+        try:
             user = User.objects.get(username)
+        except User.DoesNotExist, e:
+            # fallback to email login
+            if '@' in username:
+                user = User.objects.get(email__iexact=username)
+            else:
+                raise e
 
         if user.is_banned:
             if user.banned_until is None or \

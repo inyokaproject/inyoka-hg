@@ -1066,6 +1066,7 @@ class RandomQuote(Macro):
             return result
 
 
+
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
 ALL_MACROS = {

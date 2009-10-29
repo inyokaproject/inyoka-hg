@@ -51,10 +51,13 @@ def join_flags(flags):
 def execute_script(con, name):
     """Execute a script on a connectable."""
     f = file(join(SQL_FILES, name))
+    print file(join(SQL_FILES, name)).read()
     try:
         con.execute(f.read())
+        print 'done'
     finally:
         f.close()
+    print 'exit'
 
 
 def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):

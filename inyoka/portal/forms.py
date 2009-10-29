@@ -11,8 +11,9 @@
 import Image
 from django import forms
 from django.utils.safestring import mark_safe
+from django.db import connection
 from inyoka.portal.user import User
-from inyoka.utils.user import normalize_username
+from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaField, DateTimeWidget, \
@@ -88,34 +89,33 @@ class RegisterForm(forms.Form):
         Validates that the username is alphanumeric and is not already
         in use.
         """
-        if 'username' in self.cleaned_data:
-            try:
-                username = normalize_username(self.cleaned_data['username'])
-            except ValueError:
-                raise forms.ValidationError(
-                    u'Dein Benutzername enthält nicht benutzbare Zeichen'
-                )
-            try:
-                user = User.objects.get(username)
-            except User.DoesNotExist:
+        username = self.cleaned_data['username']
+        if not is_valid_username(username):
+            raise forms.ValidationError(
+                u'Dein Benutzername enthält nicht benutzbare Zeichen; es sind nur alphanumerische Zeichen sowie „-“ und „ “ erlaubt.'
+            )
+        try:
+            user = User.objects.get(username)
+        except User.DoesNotExist:
+            # To bad we had to change the user regex…,  we need to rename users fast…
+            c = connection.cursor()
+            c.execute("SELECT COUNT(*) FROM portal_user WHERE username LIKE %s", [username.replace(' ', '%')])
+            count = c.fetchone()[0]
+            if count == 0:
                 return username
 
-            raise forms.ValidationError(
-                u'Der Benutzername ist leider schon vergeben. '
-                u'Bitte wähle einen anderen.'
-            )
-        else:
-            raise forms.ValidationError(
-                u'Du musst einen Benutzernamen angeben!'
-            )
+        raise forms.ValidationError(
+            u'Der Benutzername ist leider schon vergeben. '
+            u'Bitte wähle einen anderen.'
+        )
 
-    def clean_confirm_password(self):
+    def clean(self):
         """
         Validates that the two password inputs match.
         """
         if 'password' in self.cleaned_data and 'confirm_password' in self.cleaned_data:
             if self.cleaned_data['password'] == self.cleaned_data['confirm_password']:
-                return self.cleaned_data['confirm_password']
+                return self.cleaned_data
             raise forms.ValidationError(
                 u'Das Passwort muss mit der Passwortbestätigung übereinstimmen!'
             )
@@ -138,23 +138,17 @@ class RegisterForm(forms.Form):
         Validates if the required field `email` contains
         a non existing mail address.
         """
-        data = self.cleaned_data
-        if 'email' in data and data['email'] is not None:
-            try:
-                user = User.objects.get(email__iexact=self.cleaned_data['email'])
-            except User.DoesNotExist:
-                return self.cleaned_data['email']
+        try:
+            user = User.objects.get(email__iexact=self.cleaned_data['email'])
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
 
-            raise forms.ValidationError(mark_safe(
-                u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
-                u' Fals du dein Passwort vergessen hast, kannst du es '
-                u'<a href="%s">wiederherstellen lassen</a>' % escape(
-                    href('portal', 'lost_password')))
-            )
-        else:
-            raise forms.ValidationError(
-                u'Du musst eine E-Mail-Adresse angeben!'
-            )
+        raise forms.ValidationError(mark_safe(
+            u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
+            u' Fals du dein Passwort vergessen hast, kannst du es '
+            u'<a href="%s">wiederherstellen lassen</a>' % escape(
+                href('portal', 'lost_password')))
+        )
 
 
 class LostPasswordForm(forms.Form):

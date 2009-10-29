@@ -59,7 +59,6 @@ def create_snapshot(folder):
     for page in Page.objects.all():
         if not (page.name == 'Startseite' or page.name.startswith('Wiki')):
             continue
-        print page.name
         rev = page.revisions.all()[0]
         if page.trace > 1:
             # page is a subpage

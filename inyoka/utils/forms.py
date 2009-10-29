@@ -88,7 +88,7 @@ class UserField(forms.CharField):
         if not value:
             return
         try:
-            return User.objects.get(username=value)
+            return User.objects.get(value)
         except:
             raise forms.ValidationError(u'Diesen Benutzer gibt es nicht')
 
@@ -152,8 +152,7 @@ class HiddenCaptchaField(forms.Field):
 class EmailField(forms.CharField):
 
     def clean(self, value):
-        if not value:
-            return
+        value = super(forms.CharField, self).clean(value)
         value = value.strip()
         if is_blocked_host(value):
             raise forms.ValidationError(u'''

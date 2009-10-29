@@ -687,10 +687,14 @@ def users(request):
     if request.method == 'POST':
         name = request.POST.get('user')
         try:
-            if '@' in name:
-                user = User.objects.get(email__iexact=name)
-            else:
+            try:
                 user = User.objects.get(name)
+            except User.DoesNotExist, e:
+                # fallback to email
+                if '@' in name:
+                    user = User.objects.get(email__iexact=name)
+                else:
+                    raise e
         except User.DoesNotExist:
             flash(u'Der Benutzer „%s“ existiert nicht.'
                   % escape(name))
@@ -738,7 +742,7 @@ def user_edit(request, username):
             data = form.cleaned_data
             if data['username'] != user.username:
                 try:
-                    User.objects.get(username=data['username'])
+                    User.objects.get(data['username'])
                 except User.DoesNotExist:
                     user.username = data['username']
                 else:

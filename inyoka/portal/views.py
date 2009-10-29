@@ -37,7 +37,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.tracreporter import Trac
-from inyoka.utils.user import normalize_username, check_activation_key
+from inyoka.utils.user import check_activation_key
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -93,6 +93,7 @@ def index(request):
 
     countdown_days = max((date(2009, 10, 29) - date.today()).days, 0)
     countdown_url = href('static', 'countdown/karmic-%d.png' % countdown_days)
+    countdown_url2 = href('static', 'countdown/karmic-out.png')
 
     return {
         'ikhaya_latest':            list(ikhaya_latest),
@@ -103,6 +104,8 @@ def index(request):
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
         'calendar_events':          events,
         'countdown_url':            countdown_url,
+        'countdown_url2':           countdown_url2,
+        'countdown_days':           countdown_days,
     }
 
 
@@ -1173,10 +1176,10 @@ def feedselector(request, app=None):
     if wiki_form is not None:
         wiki_pages = cache.get('feedselector/wiki/pages')
         if not wiki_pages:
-            wiki_pages = WikiPage.objects.all()
+            wiki_pages = WikiPage.objects.get_page_list()
             cache.set('feedselector/wiki/pages', wiki_pages)
         wiki_form.fields['page'].choices = [('*', u'Alle')] + \
-            [(p.name, p.name) for p in wiki_pages]
+            [(p, p) for p in wiki_pages]
 
     if request.method == 'POST':
         form = globals()['%s_form' % app]

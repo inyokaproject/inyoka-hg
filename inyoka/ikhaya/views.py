@@ -292,7 +292,7 @@ def suggestion_assign_to(request, suggestion, username):
         flash(u'Der Vorschlag wurde niemand zugewiesen', True)
     else:
         try:
-            suggestion.owner = User.objects.get(username=username)
+            suggestion.owner = User.objects.get(username)
         except User.DoesNotExist:
             raise PageNotFound
         suggestion.save()
