@@ -74,8 +74,8 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
     UbuntuVersion('8.04', 'Hardy Heron', lts=True),
     UbuntuVersion('8.10', 'Intrepid Ibex'),
-    UbuntuVersion('9.04', 'Jaunty Jackalope', current=True),
-    UbuntuVersion('9.10', 'Karmic Koala', class_='unstable'),
+    UbuntuVersion('9.04', 'Jaunty Jackalope'),
+    UbuntuVersion('9.10', 'Karmic Koala', current=True),
 ]
 UBUNTU_DISTROS = {
     'ubuntu': 'Ubuntu',
