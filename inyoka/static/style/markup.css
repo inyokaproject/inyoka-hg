@@ -13,10 +13,12 @@
   /* !important is needed to overwrite default :visited style */
 }
 
-a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser {
+a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser,
+a.interwiki-getdeb, a.interwiki-launchpad, a.interwiki-googlecode, a.interwiki-sourceforge {
   background-repeat: no-repeat;
   padding-left: 16px;
 }
+
 
 a.user {
   background-image: url(../img/interwiki/user.png);
@@ -57,6 +59,25 @@ a.interwiki-bug {
 a.interwiki-lpuser {
   background-image: url(../img/interwiki/lpuser.png);
 }
+
+a.interwiki-getdeb {
+  background-image: url(../img/interwiki/getdeb.png);
+  padding-left: 20px;
+  background-repeat: no-repeat;
+}
+
+a.interwiki-launchpad {
+  background-image: url(../img/interwiki/launchpad.png);
+}
+
+a.interwiki-googlecode {
+  background-image: url(../img/interwiki/googlecode.png);
+}
+
+a.interwiki-sourceforge {
+  background-image: url(../img/interwiki/sourceforge.png);
+}
+
 
 #page table {
   width: auto;

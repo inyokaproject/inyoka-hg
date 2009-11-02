@@ -824,8 +824,8 @@ class Parser(object):
     def parse_wiki_link(self, stream):
         """
         Parses an wiki or interwiki link.  Depending on the syntax the
-        returned link is either an `InternalLink` node or an
-        `InternalLink` node.
+        returned link is either an `InternalLink` node, an `Link` node or
+        an `InternalWikiLink` node.
         """
         stream.expect('wiki_link_begin')
         wiki, page = stream.expect('link_target').value
