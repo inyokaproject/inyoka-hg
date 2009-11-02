@@ -91,10 +91,6 @@ def index(request):
     storage_keys = storage.get_many(('get_ubuntu_link',
         'get_ubuntu_description'))
 
-    countdown_days = max((date(2009, 10, 29) - date.today()).days, 0)
-    countdown_url = href('static', 'countdown/karmic-%d.png' % countdown_days)
-    countdown_url2 = href('static', 'countdown/karmic-out.png')
-
     return {
         'ikhaya_latest':            list(ikhaya_latest),
         'sessions':                 get_sessions(),
@@ -103,9 +99,6 @@ def index(request):
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
         'calendar_events':          events,
-        'countdown_url':            countdown_url,
-        'countdown_url2':           countdown_url2,
-        'countdown_days':           countdown_days,
     }
 
 
