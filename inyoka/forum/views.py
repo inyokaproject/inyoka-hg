@@ -921,6 +921,9 @@ def reported_topics_subscription(request, mode):
     users = set(int(i) for i in storage['reported_topics_subscribers'].split(',') if i)
 
     if mode == 'subscribe':
+        if not request.user.can('manage_topics'):
+            flash(u'Keine Rechte!', False)
+            return HttpResponseRedirect(href('forum'))
         users.add(request.user.id)
         flash(u'Du wirst ab sofort benachrichtigt, wenn ein Thema gemeldet wird.', True)
     elif mode == 'unsubscribe':
