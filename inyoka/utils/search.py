@@ -177,9 +177,7 @@ class SearchSystem(object):
                     return u'solved_id:%s' % int(data)
                 except ValueError:
                     return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
-            # Has to be used, when searching for phrases is reaktivated
-            #return '%s:"%s"' % (prefix, data)
-            return '%s:%s' % (prefix, data)
+            return '%s:"%s"' % (prefix, data)
 
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
         query = re.sub(ur'(?u)\b([\w_]+):([\w.]+)\b', handle_custom_prefix, query)
