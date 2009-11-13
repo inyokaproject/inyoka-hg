@@ -27,7 +27,7 @@
   <dl>
     {{ render_form(form, ['max_signature_length', 'max_signature_lines'], inline=true) }}
     <dt>Maximale Avatargröße</dt>
-    <dd>{{ form.max_avatar_height }} × {{ form.max_avatar_width }} Pixel und 
+    <dd>{{ form.max_avatar_width }} × {{ form.max_avatar_height }} Pixel und 
         {{ form.max_avatar_size }} KiB (0 für unbegrenzt)
         {{ form.errors.max_avatar_height }} {{ form.errors.max_avatar_width }}
         {{ form.errors.max_avatar_size }}</dd>

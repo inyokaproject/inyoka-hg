@@ -29,7 +29,7 @@
       <dd>{{ form.avatar }}</dd>
       {%- if max_avatar_height >= 0 and max_avatar_width >= 0 %}
       <dd class="note">
-        Beachte, dass der Avatar maximal <strong>{{ max_avatar_height }} × {{ max_avatar_width }}</strong> Pixel {% if max_avatar_size %}und <strong>{{ max_avatar_size }}</strong> KiB {% endif %}groß sein darf.<br />
+        Beachte, dass der Avatar maximal <strong>{{ max_avatar_width }} × {{ max_avatar_height }}</strong> Pixel {% if max_avatar_size %}und <strong>{{ max_avatar_size }}</strong> KiB {% endif %}groß sein darf.<br />
         Alles, was größer ist, wird automatisch auf diese Größe skaliert.<br />
         Um also eine gute Bildqualität zu erreichen, darf der Avatar diese Größe nicht überschreiten.
       </dd>
