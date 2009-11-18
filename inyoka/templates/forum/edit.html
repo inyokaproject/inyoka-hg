@@ -35,6 +35,8 @@
 {% set scripts = ['WikiEditor.js', 'NewTopic.js'] %}
 {% set styles = ['editor.css'] %}
 
+{% from 'forum/_edit_latestpost_row.html' import post_row %}
+
 {% block forum_content %}
   <form action="" method="post" enctype="multipart/form-data" class="post_editor">
     <a href="{{ href('pastebin') }}" class="pastelink" title="Sehr große {#
@@ -210,26 +212,40 @@
   {%- if not isnewtopic %}
   <table class="topic" style="position:relative; top:11px">
     <thead>
-      <tr><th id="recent_posts" colspan="2">Letzte Einträge</th></tr>
+      <tr><th id="recent_posts" colspan="2">Letzte Beiträge</th></tr>
     </thead>
   </table>
-  <table class="topic">
+  <script type="text/javascript"> 
+    /* <![CDATA[ */
+      $('th#recent_posts').append(' (<a href="#" id="recent_posts_reload">aktualisieren</a>)');
+
+      var add_new_posts = function (data) {
+        if ( data ) {
+          $('.latest_posts tbody').prepend(data)
+        } else {
+          $('<tr id="no_recent_posts_note"><td colspan="2">Keine neuen Beiträge</td></tr>')
+            .hide().prependTo($('.latest_posts tbody')).slideDown(700, function () {
+              window.setTimeout(function () { $('#no_recent_posts_note').slideUp(700, function () {
+                $('#no_recent_posts_note').remove();
+              });
+              }, 5000);
+            });
+        }
+      };
+
+      $('#recent_posts_reload').click(function () {
+        latest_post_id = Number($('.latest_posts tr')[0].id.substr(5));
+        $.post('/?__service__=forum.get_new_latest_posts', {
+          post: latest_post_id
+        }, add_new_posts);
+        return false;
+      });
+    /* ]]> */
+  </script>
+  <table class="topic latest_posts">
     <tbody>
       {%- for post in posts %}
-      <tr id="post-{{ post.id }}">
-        <td class="author">
-          <p class="username"><a href="{{ post.author|url }}">{{ post.author|e }}</a></p>
-          <p>Beiträge: {{ post.author.post_count }}</p>
-          <p>Anmeldungsdatum: <br />{{ post.author.date_joined|dateformat }}</p>
-        </td>
-        <td class="post">
-          <div class="postinfo">
-            <a href="{{ post|url }}"><img src="{{ href('static', 'img', 'icon_minipost.gif') }}" alt="Beitrag" /></a>
-            Verfasst: {{ post.pub_date|specificdatetimeformat }}
-          </div>
-          {{ post.get_text() }}
-        </td>
-      </tr>
+        {{ post_row(post) }}
       {%- endfor %}
     </tbody>
   </table>

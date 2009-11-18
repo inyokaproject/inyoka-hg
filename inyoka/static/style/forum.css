@@ -609,3 +609,8 @@ form a.pastelink {
   float: right;
   margin-top: 1em;
 }
+
+#no_recent_posts_note td {
+  text-align: center;
+  background: #FFA;
+}

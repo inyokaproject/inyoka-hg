@@ -15,7 +15,9 @@ from inyoka.forum.models import UBUNTU_VERSIONS, Topic, Post, Forum
 from inyoka.forum.acl import get_forum_privileges, check_privilege, \
     have_privilege
 from inyoka.portal.models import Subscription
+from inyoka.utils.http import HttpResponse
 from inyoka.utils.services import SimpleDispatcher
+from inyoka.utils.templating import render_template
 
 
 def on_get_topic_autocompletion(request):
@@ -125,6 +127,22 @@ def on_get_version_details(request):
         'link': obj.link
     }
 
+def on_get_new_latest_posts(request):
+    post = int(request.POST['post'])
+    post = Post.query.get(post)
+
+    posts = Post.query.filter(
+        (Post.id > post.id) &
+        (Post.topic_id == post.topic_id)
+    ).order_by(Post.id.desc()).all()
+
+    code = render_template('forum/_edit_latestpost_row.html', {
+        '__main__': True,
+        'posts': posts,
+    })
+
+    return HttpResponse(code)
+
 
 dispatcher = SimpleDispatcher(
     get_topic_autocompletion=on_get_topic_autocompletion,
@@ -132,5 +150,6 @@ dispatcher = SimpleDispatcher(
     toggle_categories=on_toggle_categories,
     subscribe=on_subscribe,
     unsubscribe=on_unsubscribe,
-    get_version_details=on_get_version_details
+    get_version_details=on_get_version_details,
+    get_new_latest_posts=on_get_new_latest_posts,
 )
