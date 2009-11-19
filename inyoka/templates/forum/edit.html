@@ -215,33 +215,6 @@
       <tr><th id="recent_posts" colspan="2">Letzte Beiträge</th></tr>
     </thead>
   </table>
-  <script type="text/javascript"> 
-    /* <![CDATA[ */
-      $('th#recent_posts').append(' (<a href="#" id="recent_posts_reload">aktualisieren</a>)');
-
-      var add_new_posts = function (data) {
-        if ( data ) {
-          $('.latest_posts tbody').prepend(data)
-        } else {
-          $('<tr id="no_recent_posts_note"><td colspan="2">Keine neuen Beiträge</td></tr>')
-            .hide().prependTo($('.latest_posts tbody')).slideDown(700, function () {
-              window.setTimeout(function () { $('#no_recent_posts_note').slideUp(700, function () {
-                $('#no_recent_posts_note').remove();
-              });
-              }, 5000);
-            });
-        }
-      };
-
-      $('#recent_posts_reload').click(function () {
-        latest_post_id = Number($('.latest_posts tr')[0].id.substr(5));
-        $.post('/?__service__=forum.get_new_latest_posts', {
-          post: latest_post_id
-        }, add_new_posts);
-        return false;
-      });
-    /* ]]> */
-  </script>
   <table class="topic latest_posts">
     <tbody>
       {%- for post in posts %}
