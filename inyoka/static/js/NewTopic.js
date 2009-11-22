@@ -41,6 +41,7 @@ $(function () {
       $('#no_recent_posts_note').remove();
       $('#recent_posts_reload').data('loading', false);
     });
+    return false;
   };
 
   var add_new_posts = function (data) {
@@ -57,6 +58,7 @@ $(function () {
       window.setTimeout(remove_note, 5000);
       $('#no_recent_posts_note').click(remove_note);
     }
+    return false
   };
 
   $('#recent_posts_reload').click(function () {
