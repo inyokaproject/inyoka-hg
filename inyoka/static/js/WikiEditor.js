@@ -164,6 +164,7 @@
         if (delim.length > 0)
           this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
         evt.target.selectedIndex = 0;
+        return false;
     }, ['wiki'], help("= Überschrift =")),
     button('bold', 'Fetter Text', insert("'''%s'''"),
            ['wiki', 'forum', 'small'], help("'''Text'''")),
@@ -187,6 +188,7 @@
       var selection = this.getSelection();
       if (selection.length)
         this.setSelection(this.quoteText(selection));
+      return false;
     }, ['wiki', 'forum'], help("Auswahl zitieren")),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum'], help("[[Bild(Bildname)]]")),
@@ -204,12 +206,14 @@
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
       codebox[0].style.display = 'none'; //hide box in safari
       var tds = [$('<td>Rohtext</td>').click(function() {
-        editor.insertTag('{{{\n%s\n}}}', 'Code')
+        editor.insertTag('{{{\n%s\n}}}', 'Code');
+        return false;
       })];
       $.each(CODES, function(k, v) {
         tds.push($('<td>' + v + '</td>')
           .click(function() {
             editor.insertTag('{{{#!code ' + k + '\n%s\n}}}', 'Code');
+            return false;
           }))
       });
       for (var i = 0; i < tds.length / 2; i++) {
@@ -220,6 +224,7 @@
       $(document).click(function() {
         if (codebox.is(':visible'))
           codebox.slideUp('fast');
+        return false;
       });
       return result;
     }),
@@ -242,6 +247,7 @@
               .attr('alt', code)
               .click(function() {
                 editor.insertText(' ' + code + ' ');
+                return false;
               }))
             .appendTo(smileybox);
         });
@@ -249,6 +255,7 @@
       $(document).click(function() {
         if (smileybox.is(':visible'))
           smileybox.slideUp('fast');
+          return false;
       });
       return result;
     }),
@@ -259,6 +266,7 @@
       this.insertText(' --- ' + (this.username ?
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
+      return false;
     }, ['wiki'], help("Signatur einfügen")),
     dropdown('macro', 'Makro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
@@ -280,6 +288,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
+        return false;
     }, ['wiki'], help("Makros einfügen")),
     dropdown('template', 'Vorlage', [
         item('[[Vorlage(Tasten, %s)]]', 'Tasten'),
@@ -295,6 +304,7 @@
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
+        return false;
     }, ['wiki'], help("Vorlagen einfügen")),
     button('shrink', 'Eingabefeld verkleinern', function(evt) {
       var height = this.textarea.height() - 50;
