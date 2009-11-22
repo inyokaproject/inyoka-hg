@@ -55,6 +55,10 @@ table.forum tr.entry p.subforums {
     padding: 4px 0 3px 5px;
 }
 
+table.forum tr:hover {
+    background-color: #F8F6F1;
+}
+
 table.forum th.view_count {
     text-align: center;
 }
