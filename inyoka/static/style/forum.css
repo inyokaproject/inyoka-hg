@@ -56,7 +56,7 @@ table.forum tr.entry p.subforums {
 }
 
 table.forum tr:hover {
-    background-color: #F8F6F1;
+    background-color: #F8F4E9;
 }
 
 table.forum th.view_count {
