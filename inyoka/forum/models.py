@@ -661,10 +661,6 @@ class Post(object):
             paramstr and '?%s' % paramstr or '', '#post-%d' % id))
 
     @staticmethod
-    def get_max_id():
-        return dbsession.execute(select([func.max(Post.c.id)])).fetchone()[0]
-
-    @staticmethod
     def multi_update_search(ids):
         """
         Updates the search index for quite a lot of posts with a single query.
@@ -706,33 +702,6 @@ class Post(object):
         if page == 1:
             return None
         return page
-
-    def deregister(self):
-        """
-        This function removes all relations to this post.
-        """
-        pt, tt = post_table, topic_table
-        if self.id == self.topic.last_post_id:
-            try:
-                self.topic.last_post = Post.query.filter(and_(
-                    pt.c.topic_id==self.topic.id,
-                    not_(pt.c.id==self.id)
-                )).order_by(pt.c.id)[0]
-            except IndexError:
-                self.topic.last_post = None
-        if self.id == self.topic.forum.last_post_id:
-            last_post = Post.query.filter(and_(
-                pt.c.topic_id==tt.c.id,
-                tt.c.forum_id==self.topic.forum.id,
-                pt.c.id!=self.id
-            )).order_by(pt.c.id.desc()).limit(1)[0]
-            try:
-                self.topic.forum.last_post = last_post
-            except TypeError:
-                self.topic.forum.last_post = None
-        self.topic.post_count -= 1
-        dbsession.commit()
-        self.topic.forum.invalidate_topic_cache()
 
     @staticmethod
     def split(posts, old_topic, new_topic):
