@@ -170,22 +170,24 @@ class TopicMapperExtension(MapperExtension):
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
+            return
 
-            parent_ids = list(p.id for p in instance.forum.parents)
-            parent_ids.append(instance.forum_id)
+        parent_ids = [p.id for p in instance.forum.parents]
+        parent_ids.append(instance.forum_id)
+        ids = [p.id for p in instance.forum.parents[:-1]]
+        ids.append(instance.forum_id)
 
-            # set a new last_post_id because of integrity errors and
-            # decrase the topic_count
-            connection.execute(forum_table.update(
-                forum_table.c.last_post_id.in_(select([post_table.c.id],
-                    post_table.c.topic_id == instance.id)),
-                values={
-                    'last_post_id': select([func.max(post_table.c.id)], and_(
-                        post_table.c.topic_id != instance.id,
-                        topic_table.c.forum_id.in_(parent_ids),
-                        topic_table.c.id == post_table.c.topic_id)),
-                    'topic_count': forum_table.c.topic_count - 1
-            }))
+        # set a new last_post_id because of integrity errors and
+        # decrase the topic_count
+        connection.execute(forum_table.update(
+            forum_table.c.id.in_(ids),
+            values={
+                'last_post_id': select([func.max(post_table.c.id)], and_(
+                    post_table.c.topic_id != instance.id,
+                    topic_table.c.forum_id.in_(ids),
+                    topic_table.c.id == post_table.c.topic_id)),
+                'topic_count': forum_table.c.topic_count - 1
+        }))
 
         connection.execute(topic_table.update(
             topic_table.c.id == instance.id, values={
@@ -257,10 +259,20 @@ class PostMapperExtension(MapperExtension):
         """Remove references and decrement post counts for this topic."""
         if not instance.topic:
             return
-        forums = instance.topic.forum.parents
+        # this is crazy shit.  To increment or decrement we need the forums
+        # up to the root (the category!) but to find a new last_post_id
+        # we *only* have to search in the current forum and it's parents.
+        # If we search in the category for a new last_post_id it's not save
+        # to say that we get some out of the forum we need but also from
+        # others if we have luck :-)
+        forums_to_root = instance.topic.forum.parents
+        forums_to_root.append(instance.topic.forum)
+        forums = instance.topic.forum.parents[:-1]
         forums.append(instance.topic.forum)
-        parent_ids = list(p.id for p in forums)
-        parent_ids.append(instance.topic.forum_id)
+
+        # and now the ids...
+        forums_to_root_ids = [p.id for p in forums_to_root]
+        forum_ids = [p.id for p in forums]
 
         # degrade user post count
         if instance.topic.forum.user_count_posts:
@@ -270,6 +282,7 @@ class PostMapperExtension(MapperExtension):
             ))
             cache.delete('portal/user/%d' % instance.author_id)
 
+        # set the last post id for the topic
         if instance.id == instance.topic.last_post_id:
             new_last_post = Post.query.filter(and_(
                 topic_table.c.id == instance.topic_id,
@@ -280,6 +293,16 @@ class PostMapperExtension(MapperExtension):
                     'last_post_id': new_last_post.id}
             ))
 
+        # and also look if we are the last post of the overall forum
+        if instance.id == instance.topic.forum.last_post_id:
+            connection.execute(forum_table.update(
+                forum_table.c.id.in_(forum_ids),
+                values={'last_post_id': select([func.max(post_table.c.id)], and_(
+                    post_table.c.topic_id == topic_table.c.id,
+                    topic_table.c.forum_id == forum_table.c.id,
+                    post_table.c.id != instance.id))}
+            ))
+
         # decrement post_counts
         connection.execute(topic_table.update(
             topic_table.c.id == instance.topic_id, values={
@@ -288,7 +311,7 @@ class PostMapperExtension(MapperExtension):
         forum_ids = [f.id for f in instance.topic.forum.parents]
         forum_ids.append(instance.topic.forum.id)
         connection.execute(forum_table.update(
-            forum_table.c.id.in_(forum_ids), values={
+            forum_table.c.id.in_(forums_to_root_ids), values={
                 'post_count': forum_table.c.post_count - 1
             }))
 
@@ -480,15 +503,6 @@ class Topic(object):
             'post_count': forum_table.c.post_count - self.post_count,
         }))
 
-        dbsession.execute(forum_table.update(and_(
-                forum_table.c.id.in_(ids),
-                forum_table.c.last_post_id==self.last_post_id),
-            values={
-                'last_post_id': select([func.max(post_table.c.id)], and_(
-                            post_table.c.topic_id != self.id,
-                            topic_table.c.id == post_table.c.topic_id))
-        }))
-
         dbsession.commit()
         old_forum = self.forum
         self.forum = forum
@@ -528,6 +542,29 @@ class Topic(object):
             q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
             for x in dbsession.execute(q).fetchall():
                 cache.delete('portal/user/%d' % x[0])
+
+        # and find a new last post id for the new forum
+        new_ids = [p.id for p in self.forum.parents[:-1]]
+        new_ids.append(self.forum.id)
+        old_ids = [p.id for p in old_forum.parents[:-1]]
+        old_ids.append(old_forum.id)
+        ids = list(p.id for p in self.forum.parents[:-1])
+        ids.append(self.forum.id)
+
+        # search for a new last post in the old and the new forum
+        dbsession.execute(forum_table.update(
+            forum_table.c.id.in_(new_ids),
+            values={'last_post_id': select([func.max(post_table.c.id)], and_(
+                topic_table.c.id == post_table.c.topic_id,
+                topic_table.c.forum_id == forum_table.c.id))}
+        ))
+
+        dbsession.execute(forum_table.update(
+            forum_table.c.id.in_(old_ids),
+            values={'last_post_id': select([func.max(post_table.c.id)], and_(
+                topic_table.c.id == post_table.c.topic_id,
+                topic_table.c.forum_id == forum_table.c.id))}
+        ))
 
 
     def get_absolute_url(self, action='show'):
