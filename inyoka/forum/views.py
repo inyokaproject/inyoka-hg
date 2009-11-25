@@ -1096,7 +1096,9 @@ def splittopic(request, topic_slug):
                     forum=data['forum'],
                     slug=None,
                     post_count=0,
-                    author_id=posts[0].author_id
+                    author_id=posts[0].author_id,
+                    ubuntu_version=old_topic.ubuntu_version,
+                    ubuntu_distro=old_topic.ubuntu_distro,
                 )
                 new_topic.forum.topic_count += 1
                 session.flush([new_topic])
