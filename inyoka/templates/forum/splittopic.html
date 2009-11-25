@@ -35,6 +35,11 @@
       <dd>
         Titel des neuen Topics: {{ form.title }}{{ form.errors.title }}
       </dd>
+      <dd>
+        Version des neuen Topics:
+        {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
+        {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
+      </dd>
       <dt>
         <input type="radio" name="action" value="add" id="id_add" />
         <label for="id_add">An altes Topic anfügen</label>

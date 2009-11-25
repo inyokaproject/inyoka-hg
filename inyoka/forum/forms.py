@@ -161,6 +161,10 @@ class SplitTopicForm(forms.Form):
     #: All posts following are selected too automatically.
     #: It's ignored if `start` is empty if `select_selected` is True.
     start = forms.ChoiceField()
+    #: version info. defaults to the values set in the old topic.
+    ubuntu_version = forms.ChoiceField(choices=VERSION_CHOICES,
+                                                required=False)
+    ubuntu_distro = forms.ChoiceField(choices=DISTRO_CHOICES, required=False)
 
     def clean(self):
         data = self.cleaned_data

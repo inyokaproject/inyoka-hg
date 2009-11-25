@@ -1097,8 +1097,8 @@ def splittopic(request, topic_slug):
                     slug=None,
                     post_count=0,
                     author_id=posts[0].author_id,
-                    ubuntu_version=old_topic.ubuntu_version,
-                    ubuntu_distro=old_topic.ubuntu_distro,
+                    ubuntu_version=data['ubuntu_version'],
+                    ubuntu_distro=data['ubuntu_distro'],
                 )
                 new_topic.forum.topic_count += 1
                 session.flush([new_topic])
@@ -1111,7 +1111,11 @@ def splittopic(request, topic_slug):
 
             return HttpResponseRedirect(url_for(new_topic))
     else:
-        form = SplitTopicForm(initial={'forum': old_topic.forum_id})
+        form = SplitTopicForm(initial={
+            'forum': old_topic.forum_id,
+            'ubuntu_version': old_topic.ubuntu_version,
+            'ubuntu_distro': old_topic.ubuntu_distro,
+        })
         _add_field_choices()
 
     return {
