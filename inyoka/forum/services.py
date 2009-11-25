@@ -21,8 +21,8 @@ from inyoka.utils.templating import render_template
 
 
 def on_get_topic_autocompletion(request):
-    qs = list(Topic.objects.filter(slug__startswith=
-                                  request.GET.get('q', ''))[:11])
+    qs = list(Topic.query.filter(Topic.slug.startswith(
+                                  request.GET.get('q', '')))[:11])
     if len(qs) > 10:
         qs[10] = '...'
     return [x.slug for x in qs]
