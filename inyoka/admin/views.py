@@ -1215,7 +1215,7 @@ def event_edit(request, id=None):
                 'name': event.name,
                 'date': dt_date,
                 'time': dt_time,
-                'duration': event.duration,
+                'duration': date_time_to_timezone(event.duration),
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
