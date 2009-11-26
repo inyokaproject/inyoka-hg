@@ -1020,7 +1020,7 @@ def add_notes_to_article_suggestion(m):
 def add_comment_rendered_text_column(m):
     m.engine.execute('''
         ALTER TABLE ikhaya_comment
-            ADD COLUMN rendered_text LONGTEXT NOT NULL
+            ADD COL(blank=True, null=True)UMN rendered_text LONGTEXT NOT NULL
     ''')
 
 def add_user_count_posts_flag(m):
@@ -1078,6 +1078,11 @@ def drop_tcaptcha_table(m):
         DROP TABLE forum_tcaptcha;
     ''')
 
+def add_event_duration_field(m):
+    m.engine.execute('''
+        ALTER TABLE `portal_event` ADD COLUMN `duration` datetime default NULL;
+    ''')
+
 
 
 MIGRATIONS = [
@@ -1107,5 +1112,6 @@ MIGRATIONS = [
     add_comment_rendered_text_column, add_blog_active_flag,
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
     add_forum_force_version_flag, add_claimed_by_column,
-    add_subscription_notified_ubuntu_version, drop_tcaptcha_table
+    add_subscription_notified_ubuntu_version, drop_tcaptcha_table,
+    add_event_duration_field
 ]

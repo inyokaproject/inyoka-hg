@@ -34,7 +34,7 @@ from inyoka.utils.mail import send_mail
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
-        date_time_to_datetime
+        date_time_to_datetime, datetime_to_naive_utc
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -524,47 +524,6 @@ def ikhaya_category_edit(request, category=None):
     return {
         'form': form,
         'category': category
-    }
-
-
-@require_permission('event_edit')
-@templated('admin/ikhaya_date_edit.html')
-def ikhaya_date_edit(request, date=None):
-    """
-    Display an interface to let the user create or edit a date.
-    """
-    if date:
-        date = Event.objects.get(id=date)
-    if request.method == 'POST':
-        form = EditEventForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            if not date:
-                date = Event()
-            date.date = get_user_timezone().localize(
-                data['date']).astimezone(pytz.utc)
-            date.time = get_user_timezone().localize(
-                data['time']).astimezone(pytz.utc)
-            date.title = data['title']
-            date.author_id = request.user.id
-            date.description = data['description']
-            date.save()
-            flash(u'Die Veranstaltung „%s“ wurde geändert.'
-                  % escape(date.title), True)
-            return HttpResponseRedirect(href('admin', 'ikhaya', 'dates'))
-    else:
-        initial = {}
-        if date:
-            initial = {
-                'title': date.title,
-                'description': date.description,
-                'date': datetime_to_timezone(date.date)
-            }
-        form = EditEventForm(initial=initial)
-
-    return {
-        'form': form,
-        'date': date
     }
 
 
@@ -1211,19 +1170,21 @@ def event_edit(request, id=None):
                     raise PageNotFound
             else:
                 event = Event()
+            convert = (lambda v: get_user_timezone().localize(v) \
+                                .astimezone(pytz.utc).replace(tzinfo=None))
             data = form.cleaned_data
             event.name = data['name']
             if data['date'] and data['time']:
-                d = get_user_timezone().localize(
-                    date_time_to_datetime(
-                        data['date'],
-                        data['time'] or dt_time(0)
-                    )).astimezone(pytz.utc)
+                d = convert(date_time_to_datetime(
+                    data['date'],
+                    data['time'] or dt_time(0)
+                ))
                 event.date = d.date()
                 event.time = d.time()
             else:
                 event.date = data['date']
                 event.time = None
+            event.duration = convert(data['duration'])
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
@@ -1242,12 +1203,19 @@ def event_edit(request, id=None):
                 event = Event.objects.get(id=id)
             except Event.DoesNotExist:
                 raise PageNotFound
-            d = datetime_to_timezone(date_time_to_datetime(event.date,
-                                                           event.time))
+            if event.date and event.time:
+                dt = datetime_to_timezone(date_time_to_datetime(
+                    event.date, event.time or dt_time(0)))
+                dt_date = dt.date()
+                dt_time = dt.time()
+            else:
+                dt_date = event.date
+                dt_time = None
             form = EditEventForm({
                 'name': event.name,
-                'date': d.date(),
-                'time': d.time(),
+                'date': dt_date,
+                'time': dt_time,
+                'duration': event.duration,
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
@@ -1261,6 +1229,7 @@ def event_edit(request, id=None):
                     'name': be.name,
                     'date': be.date,
                     'time': be.time,
+                    'duration': be.duration,
                     'description': be.description,
                     'location_town': be.location_town,
                     'location': be.location,

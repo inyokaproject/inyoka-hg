@@ -10,12 +10,13 @@
                                   Marian Sigler.
     :license: GNU GPL.
 """
+from datetime import time
 from django.db import models, connection
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
 from inyoka.utils.dates import format_specific_datetime, \
-     date_time_to_datetime, natural_date
+     date_time_to_datetime, natural_date, format_datetime, format_timedelta
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page
@@ -301,8 +302,8 @@ class StaticPage(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('portal', self.key),
-            'edit': ('admin', 'pages', 'edit', self.key),
-            'delete': ('admin', 'pages', 'delete', self.key)
+            'edit': ('admin', '', 'edit', self.key),
+            'delete': ('admin', '', 'delete', self.key)
         }[action])
 
 
@@ -392,6 +393,8 @@ class Event(models.Model):
                                      blank=True, null=True)
     location_long = models.FloatField('Koordinaten (Breite)',
                                       blank=True, null=True)
+    duration = models.DateTimeField(blank=True, null=True)
+
 
     def get_absolute_url(self, action='show'):
         if action == 'copy':
@@ -456,11 +459,24 @@ class Event(models.Model):
 
     @property
     def natural_datetime(self):
-        if self.time is None:
-            return ' ' + natural_date(self.date, prefix=True)
+        def _convert(val, alt=False):
+            if val.time is None:
+                val = natural_date(val.date, prefix=True)
+            else:
+                val = format_datetime(date_time_to_datetime(
+                            val.date, val.time))
+            return val
+        if self.duration:
+            obj = (type('DateTimeValue', (object,), {
+                'date': self.duration.date(),
+                'time': self.duration.time()
+            }))()
+            return (' ' + _convert(self) +
+                    ' bis ' + _convert(obj) +
+                    ''
+            )
         else:
-            return ' ' + format_specific_datetime(date_time_to_datetime(
-                         self.date, self.time), alt=True)
+            return ' ' + _convert(self, True)
 
     @property
     def natural_coordinates(self):

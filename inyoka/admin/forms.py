@@ -409,7 +409,7 @@ class EditStyleForm(forms.Form):
 
 class EditEventForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=50)
-    date = forms.DateField(label=u'Datum', input_formats=DATE_INPUT_FORMATS)
+    date = forms.DateField(label=u'Datum (Von)', input_formats=DATE_INPUT_FORMATS)
     time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
                            required=False)
     description = forms.CharField(label=u'Details', required=False,
@@ -423,6 +423,9 @@ class EditEventForm(forms.Form):
     location_long = forms.DecimalField(label=u'Koordinaten (Breite)',
                                       required=False,
                                       min_value=-90, max_value=90)
+    duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
+        input_formats=DATETIME_INPUT_FORMATS, required=False)
+
 
 class UserMailForm(forms.Form):
     text = forms.CharField(label=u'Text',

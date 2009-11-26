@@ -35,8 +35,9 @@
   <dt><label for="id_name">Name:</label></dt>
   <dd>{{ form.name }}</dd>
   <dt>Zeitpunkt:</dt>
-  <dd><label for="id_date">Datum:</label> {{ form.date }}</dd>
-  <dd><label for="id_time">Uhrzeit:</label> {{ form.time }}</dd>
+  <dd><label for="id_date">Datum (von):</label> {{ form.date }}</dd>
+  <dd><label for="id_time">Uhrzeit (von):</label> {{ form.time }}</dd>
+  <dd><label for="id_duration">Zeitraum (bis):</label>{{ form.duration }}</dd>
   <dt><label for="id_description">Details:</label></dt>
   <dd>{{ form.description }}</dd>
   <dt>Ort:</dt>
@@ -53,6 +54,7 @@
 <script type="text/javascript">
   /* <![CDATA[ */
   var date = new DateTimeField('#id_date', true, true);
+  var duration = new DateTimeField('#id_duration', true);
   var text = new WikiEditor('#id_description');
   /* ]]> */
 </script>

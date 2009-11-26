@@ -11,7 +11,9 @@
 import random
 import string
 import calendar
+from datetime import timedelta, date
 from md5 import new as md5
+from django.db.models import Q
 from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
@@ -86,9 +88,26 @@ def calendar_entries_for_month(year, month):
     """
     from inyoka.portal.models import Event
     days = {}
-    for i in range(1, calendar.monthrange(year, month)[1] + 1):
+    month_range = range(1, calendar.monthrange(year, month)[1] + 1)
+    for i in month_range:
         days[i] = []
-    events = Event.objects.filter(date__year=year, date__month=month)
+    start_date = date(year=year, month=month, day=month_range[0])
+    end_date = date(year=year, month=month, day=month_range[-1])
+    events = Event.objects.filter(
+        Q(date__range=(start_date, end_date)) |
+        Q(duration__range=(start_date, end_date))).all()
+
     for event in events:
-        days[event.date.day].append(event)
+        if event.duration is not None:
+            if event.date < start_date:
+                delta = event.duration.date() - start_date
+                base = start_date.day
+            else:
+                delta = event.duration.date() - event.date
+                base = event.date.day
+            for day in range(delta.days+1):
+                if base + day in days:
+                    days[base+day].append(event)
+        else:
+            days[event.date.day].append(event)
     return days
