@@ -315,16 +315,6 @@ class PostMapperExtension(MapperExtension):
                 'post_count': forum_table.c.post_count - 1
             }))
 
-        # remove references
-        connection.execute(forum_table.update(
-                forum_table.c.last_post_id == instance.id, values={
-                    'last_post_id': select([func.max(post_table.c.id)],
-                        (post_table.c.topic_id == topic_table.c.id) &
-                        (topic_table.c.forum_id == forum_table.c.id) &
-                        (post_table.c.id != instance.id))
-                    }
-            ))
-
         # decrement position
         connection.execute(post_table.update(and_(
             post_table.c.position > instance.position,
@@ -548,8 +538,6 @@ class Topic(object):
         new_ids.append(self.forum.id)
         old_ids = [p.id for p in old_forum.parents[:-1]]
         old_ids.append(old_forum.id)
-        ids = list(p.id for p in self.forum.parents[:-1])
-        ids.append(self.forum.id)
 
         # search for a new last post in the old and the new forum
         dbsession.execute(forum_table.update(
