@@ -1020,7 +1020,7 @@ def add_notes_to_article_suggestion(m):
 def add_comment_rendered_text_column(m):
     m.engine.execute('''
         ALTER TABLE ikhaya_comment
-            ADD COL(blank=True, null=True)UMN rendered_text LONGTEXT NOT NULL
+            ADD COLUMN rendered_text LONGTEXT NOT NULL
     ''')
 
 def add_user_count_posts_flag(m):

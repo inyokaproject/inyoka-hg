@@ -302,8 +302,8 @@ class StaticPage(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('portal', self.key),
-            'edit': ('admin', '', 'edit', self.key),
-            'delete': ('admin', '', 'delete', self.key)
+            'edit': ('admin', 'pages', 'edit', self.key),
+            'delete': ('admin', 'pages', 'delete', self.key)
         }[action])
 
 
