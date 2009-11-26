@@ -409,14 +409,9 @@ class PageManager(models.Manager):
         Return a list of pages that have an entry for key with value in their
         metadata section.
         """
-        _iterables = (list, tuple, set, frozenset)
-        if not isinstance(key, _iterables):
-            key = [key]
-        kwargs = {'key__in': key}
+        kwargs = {'key': key}
         if value is not None:
-            if not isinstance(value, _iterables):
-                value = [value]
-            kwargs['value__in'] = value
+            kwargs['value'] = value
         rv = [x.page for x in MetaData.objects.select_related(depth=1).
               filter(**kwargs)]
         rv.sort(key=lambda x: x.name)

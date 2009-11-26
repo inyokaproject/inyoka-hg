@@ -33,7 +33,7 @@ from inyoka.utils.urls import href, url_encode
 from inyoka.wiki.parser import render, parse, nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
-from inyoka.wiki.models import Page, Revision
+from inyoka.wiki.models import Page, Revision, MetaData
 from inyoka.wiki.templates import expand_page_template
 from inyoka.utils.css import filter_style
 from inyoka.utils.urls import is_external_target
@@ -1076,12 +1076,10 @@ class FilterByMetaData(Macro):
 
     arguments = (
         ('filters', unicode, ''),
-        ('shorten_title', bool, False)
     )
 
-    def __init__(self, filters, shorten_title):
+    def __init__(self, filters):
         self.filters = [x.strip() for x in filters.split(';')]
-        #self.shorten_title = shorten_title
 
     def build_node(self, context, format):
         mapping = []
@@ -1091,18 +1089,30 @@ class FilterByMetaData(Macro):
             mapping.extend(map(lambda x: (key, x), values))
         mapping = MultiMap(mapping)
 
-        pages = set(Page.objects.find_by_metadata(
-            mapping.keys(), list(flatten_iterator(mapping.values()))
-        ))
+        pages = set([])
+
+        for key in mapping.keys():
+            values = list(flatten_iterator(mapping[key]))
+            includes = [x for x in values if not x.startswith('NOT ')]
+            kwargs = {'key': key, 'value__in': includes}
+            q = MetaData.objects.select_related(depth=1).filter(**kwargs)
+            res = set(x.page for x in q.all())
+            pages = pages.union(res)
 
         # filter the pages with `AND`
+        res = set([])
         for key in mapping.keys():
-            pages = set(filter(
-                lambda x: set(x.metadata[key]) == set(mapping[key]),
-                pages
-            ))
+            for page in pages:
+                e = [x[4:] for x in mapping[key] if x.startswith('NOT ')]
+                i = [x for x in mapping[key] if not x.startswith('NOT ')]
+                exclude = False
+                for val in set(page.metadata[key]):
+                    if val in e:
+                        exclude = True
+                if not exclude and set(page.metadata[key]) == set(i):
+                    res.add(page)
 
-        names = [p.name for p in pages]
+        names = [p.name for p in res]
 
         if not names:
             return nodes.error_box(u'Kein Ergebnis',
