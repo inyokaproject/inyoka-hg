@@ -18,7 +18,6 @@ def send_notification(user, template_name=None, subject=None, args=None):
     Send a message to the user using the person's favourite method(s)
     he has specified in the user control panel.
     """
-    return
     assert subject is not None
     args = args or {}
 
