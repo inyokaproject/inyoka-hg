@@ -1202,7 +1202,13 @@ def event_edit(request, id=None):
             try:
                 event = Event.objects.get(id=id)
             except Event.DoesNotExist:
-                raise PageNotFound
+                raise PageNotFound()
+        elif base_event:
+            event = base_event
+        else:
+            event = None
+
+        if event is not None:
             if event.date and event.time:
                 dt = datetime_to_timezone(date_time_to_datetime(
                     event.date, event.time or dt_time(0)))
@@ -1215,30 +1221,16 @@ def event_edit(request, id=None):
                 'name': event.name,
                 'date': dt_date,
                 'time': dt_time,
-                'duration': date_time_to_timezone(event.duration),
+                'duration': datetime_to_timezone(event.duration),
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
                 'location_lat': event.location_lat,
                 'location_long': event.location_long,
-            });
+            })
         else:
-            if base_event:
-                be = base_event
-                form = EditEventForm({
-                    'name': be.name,
-                    'date': be.date,
-                    'time': be.time,
-                    'duration': be.duration,
-                    'description': be.description,
-                    'location_town': be.location_town,
-                    'location': be.location,
-                    'location_lat': be.location_lat,
-                    'location_long': be.location_long
-                })
-            else:
-                form = EditEventForm()
-            event = None
+            form = EditEventForm()
+
     return {
         'form': form,
         'mode': mode,
