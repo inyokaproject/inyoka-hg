@@ -45,6 +45,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.parsertools import OrderedDict
+from inyoka.utils.collections import MultiMap, flatten_iterator
 
 
 def get_macro(name, args, kwargs):
@@ -1066,6 +1067,56 @@ class RandomQuote(Macro):
             return result
 
 
+class FilterByMetaData(Macro):
+    """
+    Filter pages by their metadata
+    """
+
+    is_block_tag = True
+
+    arguments = (
+        ('filters', unicode, ''),
+        ('shorten_title', bool, False)
+    )
+
+    def __init__(self, filters, shorten_title):
+        self.filters = [x.strip() for x in filters.split(';')]
+        #self.shorten_title = shorten_title
+
+    def build_node(self, context, format):
+        mapping = []
+        for part in self.filters:
+            key = part.split(':')[0].strip()
+            values = [x.strip() for x in part.split(':')[1].split(',')]
+            mapping.extend(map(lambda x: (key, x), values))
+        mapping = MultiMap(mapping)
+
+        pages = set(Page.objects.find_by_metadata(
+            mapping.keys(), list(flatten_iterator(mapping.values()))
+        ))
+
+        # filter the pages with `AND`
+        for key in mapping.keys():
+            pages = set(filter(
+                lambda x: set(x.metadata[key]) == set(mapping[key]),
+                pages
+            ))
+
+        names = [p.name for p in pages]
+
+        if not names:
+            return nodes.error_box(u'Kein Ergebnis',
+                u'Der Metadaten Filter hat keine Ergebnisse gefunden. Query: %s'
+                % u'; '.join(self.filters))
+
+        # build the node
+        result = nodes.List('unordered')
+        for page in names:
+            title = [nodes.Text(get_pagetitle(page))]
+            link = nodes.InternalLink(page, title, force_existing=True)
+            result.children.append(nodes.ListItem([link]))
+
+        return result
 
 #: this mapping is used by the `get_macro()` function to map public
 #: macro names to the classes.
@@ -1093,7 +1144,8 @@ ALL_MACROS = {
     u'ÄhnlicheSeiten':      SimilarPages,
     u'SPAN':                Span,
     u'ZufälligerServer':    RandomMirror,
-    u'ZufallsZitat':        RandomQuote
+    u'ZufallsZitat':        RandomQuote,
+    u'MetaFilter':          FilterByMetaData,
 }
 
 
