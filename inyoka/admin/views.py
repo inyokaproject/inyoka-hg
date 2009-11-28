@@ -1184,7 +1184,8 @@ def event_edit(request, id=None):
             else:
                 event.date = data['date']
                 event.time = None
-            event.duration = convert(data['duration'])
+            if data['duration']:
+                event.duration = convert(data['duration'])
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
