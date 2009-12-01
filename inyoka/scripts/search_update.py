@@ -36,10 +36,15 @@ def update():
     Update the next items from the queue.  You should call this
     function regularly (e.g. as cron).
     """
+    all = SearchQueue.objects.count()
+    print "Start Update on %s with %s queued objects" % (
+        datetime.datetime.utcnow(), all)
     for i, doc in enumerate(SearchQueue.objects.select_blocks()):
         search.index(doc[0], doc[1])
         if i % 100 == 0:
             search.flush()
+            all -= 100
+            print "flushed, %s objects remaining" % all
         search.flush()
         session.remove()
 
@@ -78,6 +83,7 @@ def reindex(app=None):
 
 
 if __name__ == '__main__':
+    print "search update started"
     try:
         search.get_connection()
     except DatabaseOpeningError:
