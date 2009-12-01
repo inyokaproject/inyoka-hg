@@ -47,7 +47,7 @@ def update():
             all -= 100
             print "flushed, %s objects remaining" % all
         search.flush()
-        session.remove()
+        session.commit()
 
 
 def reindex(app=None):
