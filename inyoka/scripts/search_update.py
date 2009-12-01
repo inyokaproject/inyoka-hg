@@ -46,7 +46,6 @@ def update():
             search.flush()
             all -= 100
             print "flushed, %s objects remaining" % all
-        search.flush()
         session.commit()
 
 
