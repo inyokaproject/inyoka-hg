@@ -42,6 +42,7 @@ def update():
     for i, doc in enumerate(SearchQueue.objects.select_blocks()):
         search.index(doc[0], doc[1])
         if i % 100 == 0:
+            print "flush connection"
             search.flush()
             all -= 100
             print "flushed, %s objects remaining" % all
