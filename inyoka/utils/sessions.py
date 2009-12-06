@@ -39,7 +39,7 @@ def set_session_info(request, action, category=None):
             return
         key = 'user:%s' % request.user.id
         # XXX: Find a better way to detect whether a user is in the team
-        user_type = request.user.can('admin_panel') and 'team' or 'user'
+        user_type = request.user.can('article_read') and 'team' or 'user'
         args = (request.user.username, user_type, url_for(request.user))
     else:
         key = request.session.session_key
