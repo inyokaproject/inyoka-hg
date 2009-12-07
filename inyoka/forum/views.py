@@ -1560,7 +1560,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     elif action == 'author':
         user = user and User.objects.get(user) or request.user
         if user == User.objects.get_anonymous_user():
-            raise PageNotFound()
+            flash(u'Für diese Funktion musst du eingeloggt sein')
+            return HttpResponseRedirect(href('portal', 'login'))
         # get the ids of the topics the user has written posts in
         # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
         topic_ids = select([topic_table.c.id],
