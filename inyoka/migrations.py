@@ -22,6 +22,7 @@
 """
 import os
 import re
+import cPickle
 from os import path
 from itertools import izip
 from os.path import dirname, join, exists
@@ -1084,6 +1085,22 @@ def add_event_duration_field(m):
     ''')
 
 
+def hide_signatures_for_anonymous(m):
+    """Hide signatures for not registered users per default
+
+    See http://forum.ubuntuusers.de/topic/signaturen-fuer-unagemeldete-besucher-und-som
+    """
+    settings = cPickle.loads(m.engine.execute(
+        'select _settings from portal_user where id=1'
+    ).fetchone()[0])
+    settings['hide_signatures'] = True
+
+    m.engine.execute('''
+        update portal_user set _settings=%s
+                           where id=1
+    ''', [cPickle.dumps(settings)])
+
+
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1113,5 +1130,5 @@ MIGRATIONS = [
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
     add_forum_force_version_flag, add_claimed_by_column,
     add_subscription_notified_ubuntu_version, drop_tcaptcha_table,
-    add_event_duration_field
+    add_event_duration_field, hide_signatures_for_anonymous
 ]
