@@ -16,7 +16,8 @@ from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
 from inyoka.utils.dates import format_specific_datetime, \
-     date_time_to_datetime, natural_date, format_datetime, format_timedelta
+     date_time_to_datetime, natural_date, format_datetime, format_timedelta, \
+     format_time
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page
@@ -459,24 +460,31 @@ class Event(models.Model):
 
     @property
     def natural_datetime(self):
-        def _convert(val, alt=False):
-            if val.time is None:
-                val = natural_date(val.date, prefix=True)
+        def _convert(dt, time_only):
+            if dt.time is None:
+                val = natural_date(dt.date, prefix=True)
+            elif dt.time is not None and time_only:
+                val = format_time(date_time_to_datetime(dt.date, dt.time))
             else:
-                val = format_datetime(date_time_to_datetime(
-                            val.date, val.time))
+                val = format_datetime(date_time_to_datetime(dt.date, dt.time))
             return val
         if self.duration:
             obj = (type('DateTimeValue', (object,), {
                 'date': self.duration.date(),
                 'time': self.duration.time()
             }))()
-            return (' ' + _convert(self) +
-                    ' bis ' + _convert(obj) +
+            time_only = False
+            if self.time:
+                dt = date_time_to_datetime(obj.date, obj.time)
+                delta = (dt - date_time_to_datetime(self.date, self.time))
+                if not delta.days:
+                    time_only = True
+            return (' ' + _convert(self, False) +
+                    ' bis ' + _convert(obj, time_only) +
                     ''
             )
         else:
-            return ' ' + _convert(self, True)
+            return ' ' + _convert(self, False)
 
     @property
     def natural_coordinates(self):

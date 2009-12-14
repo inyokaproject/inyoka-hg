@@ -186,7 +186,7 @@ def register(request):
             return HttpResponseRedirect(redirect)
 
     set_session_info(request, u'registriert sich',
-                     'registriere dich auch')
+                     'registriere dich auch!')
     return {
         'form':         form,
         'cookie_error': cookie_error_link is not None,
