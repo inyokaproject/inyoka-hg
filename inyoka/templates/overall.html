@@ -70,7 +70,6 @@
 
     <div class="body">
       <div class="appheader">
-        <a href="{{ href('wiki', 'ubuntuusers/Fehler melden') }}" id="user_error_report_link">Fehler melden</a><br/>
         {%- if not hide_quicklinks %}
         <ul class="mod_navi">
           {%- if USER.can('manage_topics') %}
@@ -209,6 +208,7 @@
           {%- else %}
           inyoka revision unavailable
           {%- endif %}
+          (<a href="{{ href('wiki', 'ubuntuusers/Fehler melden') }}">Fehler in Inyoka melden</a>)
         </li>
         <li class="license">
           <img src="{{ href('static', 'img/copyleft.png') }}" alt="Copyleft" />

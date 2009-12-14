@@ -1154,15 +1154,6 @@ div.not_found img {
 .tf_tokenfield input {
     border: none;
 }
-/* Temporary error reporting link */
-#user_error_report_link {
-    text-decoration: none;
-    background: url(../img/icons/bug.png) no-repeat;
-    padding-left: 20px;
-    float:right;
-    position: relative;
-    top: -0.5em;
-}
 
 #js_login_form {
     display: none;
