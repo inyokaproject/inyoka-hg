@@ -34,7 +34,7 @@
   </tr>
   {%- endif %}
   <tr><th colspan="2">Details
-    <small>({%- if USER.can('event_edit') %}<a href="{{ event|url('edit') }}">bearbeiten</a>{% endif %})</small></th></tr>
+    {%- if USER.can('event_edit') %} <small>(<a href="{{ event|url('edit') }}" class="adminlink">bearbeiten</a>)</small>{% endif %}</th></tr>
   <tr><td colspan="2">{{ event.rendered_description or '–' }}</td></tr>
 </table>
 {% endblock %}
