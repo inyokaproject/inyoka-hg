@@ -180,6 +180,10 @@ table.comments td.comment div.commentinfo {
     border-bottom: 1px solid #CCC;
 }
 
+table.comments tr:target td.comment div.commentinfo {
+    background: url(../img/table-header-alternative-target.png); 
+}
+
 table.comments td.comment div.signature { 
     margin: 20px 0 -5px 0;
     padding: 5px 0 0 0;
