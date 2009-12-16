@@ -11,11 +11,11 @@
 from django.utils.text import truncate_html_words
 from inyoka.conf import settings
 from inyoka.portal.user import Group
-from inyoka.portal.utils import check_login
+from inyoka.portal.utils import check_login, require_permission
 from inyoka.utils.urls import href
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import PageNotFound, templated, \
-     HttpResponseRedirect, HttpResponse
+     HttpResponseRedirect, HttpResponse, does_not_exist_is_404
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
@@ -42,7 +42,7 @@ def context_modifier(request, context):
     This function is called of ``templated`` automatically to copy the list of
     blogs into the context.
     """
-    context['blogs'] = list(Blog.objects.filter(active=True))
+    context['blogs'] = Blog.objects.filter(active=True).all()
 
 
 @templated('planet/index.html', modifier=context_modifier)
@@ -51,8 +51,11 @@ def index(request, page=1):
     The index function just returns the 30 latest entries of the planet.
     The page number is optional.
     """
-    pagination = Pagination(request, Entry.objects.filter(hidden=False), page, 30,
-        href('planet'))
+    if not request.user.can('blog_edit'):
+        entries = Entry.objects.select_related(depth=1).filter(hidden=False)
+    else:
+        entries = Entry.objects.select_related(depth=1)
+    pagination = Pagination(request, entries, page, 30, href('planet'))
     set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
                      href('planet'), 'Planet')
     return {
@@ -138,3 +141,22 @@ def feed(request, mode='short', count=20):
             **kwargs
         )
     return feed
+
+
+@require_permission('blog_edit')
+@does_not_exist_is_404
+def hide_entry(request, id):
+    """Hide a planet entry"""
+    entry = Entry.objects.get(id=id)
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash(u'Aktion wurde abgebrochen')
+        else:
+            entry.hidden = False if entry.hidden else True
+            entry.save()
+            msg = (u'Der Eintrag „%s” wurde erfolgreich %s' %
+                (entry.title, 'versteckt' if entry.hidden else 'wiederhergestellt'))
+            flash(msg, success=True)
+    else:
+        flash(render_template('planet/hide_entry.html', {'entry': entry}))
+    return HttpResponseRedirect(href('planet'))

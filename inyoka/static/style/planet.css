@@ -49,6 +49,10 @@ div.articles div.article div.contents {
   margin-left: 136px;
 }
 
+div.articles div.article div.contents div.post .hidden {
+  color: #ccc;
+}
+
 div.articles div.article div.head {
   background: url(../img/planet/bubble-top.png) repeat-x left top;
   margin: 0 0 0 12px;

@@ -105,8 +105,13 @@ class Entry(models.Model):
             self.title
         )
 
-    def get_absolute_url(self, action=None):
-        return self.url
+    def get_absolute_url(self, action='show'):
+        if action == 'show':
+            return self.url
+        else:
+            return href(*{
+                'hide':     ('planet', 'hide', self.id),
+            }[action])
 
     @property
     def simplified_text(self):

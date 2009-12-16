@@ -14,8 +14,9 @@ from django.conf.urls.defaults import patterns
 urlpatterns = patterns('inyoka.planet.views',
     (r'^$', 'index'),
     (r'^(\d+)/$', 'index'),
+    (r'^hide/(?P<id>\d+)/$', 'hide_entry'),
     (r'^suggest/$', 'suggest'),
-    (r'^feeds/(?P<mode>[a-z]+)/(?P<count>\d+)/$', 'feed')
+    (r'^feeds/(?P<mode>[a-z]+)/(?P<count>\d+)/$', 'feed'),
 )
 
 
