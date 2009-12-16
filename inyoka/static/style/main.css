@@ -1262,8 +1262,24 @@ select.firstletterselect option:first-letter {
   font-family: monospace;
 }
 
-      .staticwikinote {
-        background-color: #F6F6F6;
-        border-color: #BBBBBB;
-        font-size: .9em;
-      }
+.staticwikinote {
+  background-color: #F6F6F6;
+  border-color: #BBBBBB;
+  font-size: .9em;
+}
+
+
+.status_solved:before,
+.status_unsolved:before {
+    font-size: 1.2em;
+    line-height: .1em;
+    margin-right: .2em;
+}
+
+.status_solved:before {
+    content: url('http://static.ubuntuusers.de/img/forum_solved.png');
+}
+
+.status_unsolved:before {
+    content: url('http://static.ubuntuusers.de/img/forum_unsolved.png');
+}

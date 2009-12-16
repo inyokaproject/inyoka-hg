@@ -37,6 +37,8 @@
           {%- if not sub.can_read %}<img src="{{ href('static', 'img', 'unreadable.png') }}" alt="nicht lesbar" title="Keine ausreichenden Leserechte" /> {% endif %}
 
           {%- if sub.topic -%}
+          <span class="status_{{ sub.topic.solved and 'solved' or 'unsolved' }}"></span>
+
           Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
           {%- elif sub.wiki_page -%}
           Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>

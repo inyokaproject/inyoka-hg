@@ -163,20 +163,6 @@ table.forum thead td p.description {
     border-color: #E0B771;
 }
 
-.status_solved:before, 
-.status_unsolved:before {
-    font-size: 1.2em;
-    line-height: .1em;
-    margin-right: .2em;
-}
-
-.status_solved:before {
-    content: url('http://static.ubuntuusers.de/img/forum_solved.png');
-}
-
-.status_unsolved:before {
-    content: url('http://static.ubuntuusers.de/img/forum_unsolved.png');
-}
 
 table.topic {
     table-layout: fixed;
