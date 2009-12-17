@@ -10,7 +10,6 @@
     :license: GNU GPL.
 """
 from datetime import datetime
-from inyoka.utils.logger import memlogger
 from inyoka.conf import settings
 from inyoka.utils.http import HttpResponse
 from inyoka.utils.html import escape

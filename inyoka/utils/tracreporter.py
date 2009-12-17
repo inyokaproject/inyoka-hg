@@ -45,8 +45,6 @@ DEFAULT_PRIORITIES = {
     DEBUG:      'trivial'
 }
 
-xmlrpc_server = ServerProxy('http://memlogger:ubuntuusersrocks@dev.webshox.org:5180')
-
 
 class SimpleFormatter(Formatter):
 
@@ -303,29 +301,3 @@ class TBLoggerHandler(Handler):
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
         }
-
-
-class MemoryLogger(object):
-
-    def log(self, url, method):
-        Thread(target=self.submit, args=(url, method)).start()
-
-    def submit(self, url, method):
-        if hpy is None:
-            return
-
-        pid = os.getpid()
-        heapy = hpy()
-        h = heapy.heap()
-        data = {
-            'url': url,
-            'method': method,
-            'pid': os.getpid(),
-            'time': time.asctime(),
-            'size': (h.size / 1024 / 1024), # in MB
-            #'heap': str(h),
-            #'h.byrcs': str(h.byrcs),
-            #'byrcs[0].byid': str(h.byrcs[0].byid),
-            #'get_rp': str(h.get_rp())
-        }
-        xmlrpc_server.push_url(data)
