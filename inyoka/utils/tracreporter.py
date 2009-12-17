@@ -16,7 +16,7 @@ import traceback
 import time
 from Cookie import SimpleCookie
 from threading import Thread
-from xmlrpclib import ServerProxy
+from datetime import date
 from inyoka.conf import settings
 from inyoka.utils.urls import url_encode
 from inyoka import INYOKA_REVISION
@@ -27,11 +27,7 @@ except ImportError:
     from md5 import new as md5
 from logging import Handler, Formatter, CRITICAL, ERROR, WARNING, \
      INFO, DEBUG
-
-try:
-    from guppy import hpy
-except ImportError:
-    hpy = None
+import logging.handlers
 
 ts_input_re = re.compile(r'<input(.*?name="ts".*?)/?>')
 value_re = re.compile(r'value="(.*?)"')
@@ -300,4 +296,32 @@ class TBLoggerHandler(Handler):
             'title':        '%s: %s' % (record.levelname, get_exception_message(record.exc_info)),
             'summary':      summary_formatter.format(record),
             'traceback':    record.exc_text,
+        }
+
+
+class ErrorStackHandler(logging.handlers.HTTPHandler):
+
+    def __init__(self):
+        logging.handlers.HTTPHandler.__init__(self,
+            'www.errorstack.com',
+            '/submit?_s=2eefc30d3e3fbf5d76e27eda7ea0cafc',
+            'POST')
+
+    def emit(self, record):
+        Thread(target=logging.handlers.HTTPHandler.emit(self, record),
+               args=(record,)).start()
+
+    def mapLogRecord(self, record):
+        """Define the values submitted to errorstack.com. """
+        formatter = summary_formatter
+        if record.exc_info:
+            if not record.exc_text:
+                record.exc_text = formatter.formatException(record.exc_info)
+
+        return {
+            'title': '%s: %s' % (record.levelname, get_exception_message(record.exc_info)),
+            'asctime': formatter.formatTime(record, formatter.datefmt),
+            'createDate': date.today(),
+            'summary': formatter.format(record),
+            'traceback': record.exc_text,
         }

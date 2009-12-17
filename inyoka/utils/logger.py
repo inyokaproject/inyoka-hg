@@ -20,9 +20,11 @@ if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
     #from inyoka.utils.tracreporter import TracHandler
     #logging_handler = TracHandler()
     #logging_handler.setLevel(logging.ERROR)
-    from inyoka.utils.tracreporter import TBLoggerHandler
+    from inyoka.utils.tracreporter import TBLoggerHandler, ErrorStackHandler
     logging_handler = TBLoggerHandler()
     logging_handler.setLevel(logging.ERROR)
+#    logging_handler = ErrorStackHandler()
+#    logging_handler.setLevel(logging.ERROR)
 else:
     logging_handler = logging.StreamHandler()
     logging_handler.setFormatter(logging.Formatter(
