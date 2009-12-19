@@ -798,19 +798,19 @@ class Post(object):
                     op = operator.sub
 
                 user_table.update(
-                    user_table.c.id.in_(select([post_table.c.author_id], post_table.c.topic_id == self.id)),
+                    user_table.c.id.in_(select([post_table.c.author_id],
+                        post_table.c.topic_id == old_topic.id)),
                     values={'post_count': op(
                         user_table.c.post_count,
-                        select(
-                            [func.count()],
-                            ((post_table.c.topic_id==self.id) & (post_table.c.author_id==user_table.c.id)),
+                        select([func.count()],
+                            ((post_table.c.topic_id==old_topic.id) & (post_table.c.author_id==user_table.c.id)),
                             post_table)
                         )
                     }
                 )
                 dbsession.commit()
 
-                q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
+                q = select([post_table.c.author_id], post_table.c.topic_id == old_topic.id, distinct=True)
                 for x in dbsession.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
 
