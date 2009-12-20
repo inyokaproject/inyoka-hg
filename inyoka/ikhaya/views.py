@@ -305,7 +305,7 @@ def article_feed(request, slug=None, mode='short', count=20):
     """
     Shows the ikhaya entries that match the given criteria in an atom feed.
     """
-    articles = Article.published.select_related()
+    articles = Article.published.order_by('-updated').select_related()
 
     if slug:
         articles = articles.filter(category__slug=slug)
