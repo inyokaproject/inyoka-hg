@@ -287,7 +287,7 @@ class PostMapperExtension(MapperExtension):
             new_last_post = Post.query.filter(and_(
                 topic_table.c.id == instance.topic_id,
                 post_table.c.id != instance.id
-            )).order_by(post_table.c.id.asc()).first()
+            )).order_by(post_table.c.id.desc()).first()
             connection.execute(topic_table.update(
                 topic_table.c.id == instance.topic_id, values={
                     'last_post_id': new_last_post.id}
@@ -295,12 +295,16 @@ class PostMapperExtension(MapperExtension):
 
         # and also look if we are the last post of the overall forum
         if instance.id == instance.topic.forum.last_post_id:
+            # we cannot loop over all posts in the forum so we cheat a bit
+            # with selecting the last post from the current topic.
+            # Everything else would kill the server...
+            new_last_post = Post.query.filter(and_(
+                post_table.c.id != instance.id,
+                topic_table.c.id == instance.topic.id
+            )).order_by(post_table.c.id.desc()).first()
             connection.execute(forum_table.update(
-                forum_table.c.id.in_(forum_ids),
-                values={'last_post_id': select([func.max(post_table.c.id)], and_(
-                    post_table.c.topic_id == topic_table.c.id,
-                    topic_table.c.forum_id == forum_table.c.id,
-                    post_table.c.id != instance.id))}
+                forum_table.c.id.in_(forums_to_root_ids),
+                values={'last_post_id': new_last_post.id}
             ))
 
         # decrement post_counts
@@ -772,6 +776,7 @@ class Post(object):
         ''', [new_topic.id])
         dbsession.commit()
 
+
         if old_topic.forum.id != new_topic.forum.id:
             # update post count of the forums
             old_topic.forum.post_count -= len(posts)
@@ -819,10 +824,13 @@ class Post(object):
         if not remove_topic:
             old_topic.post_count -= len(posts)
             if old_topic.last_post.id == posts[-1].id:
-                post = Post.query.filter(
-                    topic_table.c.id==old_topic.id
-                ).order_by(topic_table.c.id.desc()).first()
+                post = Post.query.filter(and_(
+                    post_table.c.topic_id == old_topic.id,
+                    post_table.c.id != old_topic.last_post_id
+                )).order_by(post_table.c.id.desc()).first()
+
                 old_topic.last_post = post
+
             if old_topic.first_post.id == posts[0].id:
                 post = Post.query.filter(
                     topic_table.c.id==old_topic.id
