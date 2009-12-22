@@ -18,6 +18,7 @@ from inyoka.portal.models import Subscription
 from inyoka.utils.http import HttpResponse
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.templating import render_template
+from inyoka.utils.database import session
 
 
 def on_get_topic_autocompletion(request):
@@ -114,6 +115,18 @@ def on_unsubscribe(request):
         s.delete()
 
 
+def on_change_status(request, solved=None):
+    topic = Topic.query.filter_by(slug=request.POST['slug']).first()
+    if not topic:
+        return
+    elif not have_privilege(request.user, topic.forum, 'read'):
+        return abort_access_denied(request)
+    if solved is not None:
+        topic.solved = solved
+        topic.reindex()
+        session.commit()
+
+
 def on_get_version_details(request):
     version = request.GET['version']
     obj = [x for x in UBUNTU_VERSIONS if x.number == version][0]
@@ -150,6 +163,8 @@ dispatcher = SimpleDispatcher(
     toggle_categories=on_toggle_categories,
     subscribe=on_subscribe,
     unsubscribe=on_unsubscribe,
+    mark_solved=lambda r: on_change_status(r, True),
+    mark_unsolved=lambda r: on_change_status(r, False),
     get_version_details=on_get_version_details,
     get_new_latest_posts=on_get_new_latest_posts,
 )

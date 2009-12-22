@@ -90,10 +90,34 @@ $(function () {
   })();
 
 
-  function doSubscription(type, slug, tags) {
+  function doAction(type, slug, tags) {
     // Get the matching string for replacement. Since the two buttons (top and bottom)
     // are in the same macro we just need to check for one buttons text at all.
-    var action = $(tags[0]).text()=='abbestellen' ? 'unsubscribe' : 'subscribe';
+    var action = "";
+    var new_text = "";
+    // var action = $(tags[0]).text()=='abbestellen' ? 'unsubscribe' : 'subscribe';
+
+    var text = $(tags[0]).text();
+
+    switch (text) {
+      case 'abbestellen':
+        action = 'unsubscribe';
+        new_text = 'abonnieren';
+        break;
+      case 'abonnieren':
+        action = 'subscribe';
+        new_text = 'abbestellen';
+        break;
+      case 'als ungelöst markieren':
+        action = 'mark_unsolved';
+        new_text = 'als gelöst markieren';
+        break;
+      case 'als gelöst markieren':
+        action = 'mark_solved';
+        new_text = 'als ungelöst markieren';
+        break;
+    }
+
     var url = "/?__service__=forum." + action;
 
     $.post(url, {
@@ -102,7 +126,8 @@ $(function () {
     }, function(data) {
       // Bind new events and change button's text.
       $(tags).fadeOut('fast');
-      $(tags).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
+      //$(tags).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
+      $(tags).text(new_text);
       $(tags).fadeIn('fast');
     });
 
@@ -112,13 +137,27 @@ $(function () {
   (function() {
     $('a.action_subscribe.subscribe_topic').each(function() {
       $(this).click(function() {
-        doSubscription('topic', $(this).attr('id'), $('a.action_subscribe.subscribe_topic'));
+        doAction('topic', $(this).attr('id'), $('a.action_subscribe.subscribe_topic'));
         return false;
     })});
 
     $('a.action_subscribe.subscribe_forum').each(function() {
       $(this).click(function() {
-        doSubscription('forum', $(this).attr('id'), $('a.action_subscribe.subscribe_forum'));
+        doAction('forum', $(this).attr('id'), $('a.action_subscribe.subscribe_forum'));
+        return false;
+    })});
+
+    $('a.solve_topic').each(function() {
+      $(this).click(function() {
+        doAction('topic', $(this).attr('id'), $('a.solve_topic'));
+        // switch classes
+        if ($('a.solve_topic').hasClass('action_solve')) {
+          $('a.solve_topic').removeClass('action_solve');
+          $('a.solve_topic').addClass('action_unsolve');
+        } else {
+          $('a.solve_topic').removeClass('action_unsolve');
+          $('a.solve_topic').addClass('action_solve');
+        }
         return false;
     })});
   })();

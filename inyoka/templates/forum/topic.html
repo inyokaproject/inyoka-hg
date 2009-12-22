@@ -46,9 +46,9 @@
       <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_topic" id="{{ topic.slug }}">abonnieren</a>  |
       {%- endif %}
       {%- if topic.solved %}
-      <a href="{{ topic|url('unsolve') }}" class="action action_unsolve">als ungelöst markieren</a>  |
+      <a href="{{ topic|url('unsolve') }}" class="action action_unsolve solve_topic" id="{{ topic.slug }}">als ungelöst markieren</a>  |
       {%- else %}
-      <a href="{{ topic|url('solve') }}" class="action action_solve">als gelöst markieren</a>  |
+      <a href="{{ topic|url('solve') }}" class="action action_solve solve_topic" id="{{ topic.slug }}">als gelöst markieren</a>  |
       {%- endif %}
       <a href="{{ topic|url('report') }}" class="action action_report">melden</a>
       {% endif %}
