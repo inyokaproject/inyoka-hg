@@ -29,8 +29,8 @@ def get_expired_users():
 def _precheck_user_on_forum(user):
     from inyoka.forum.models import Topic, Post
     uid = user.id
-    topics = Topic.query.filter_by(author_id=uid)
-    posts = Post.query.filter_by(author_id=uid)
+    topics = Topic.query.filter_by(author_id=uid).all()
+    posts = Post.query.filter_by(author_id=uid).all()
     return topics or posts
 
 
