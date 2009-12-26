@@ -26,6 +26,14 @@ def get_expired_users():
             yield user
 
 
+def _precheck_user_on_forum(user):
+    from inyoka.forum.models import Topic, Post
+    uid = user.id
+    topics = Topic.query.filter_by(author_id=uid)
+    posts = Post.query.filter_by(author_id=uid)
+    return topics or posts
+
+
 def get_inactive_users(excludes=None):
     from inyoka.portal.user import User
     current_datetime = datetime.fromtimestamp(time.time())
@@ -64,7 +72,8 @@ def get_inactive_users(excludes=None):
         )
 
         if not any(counters):
-            yield user
+            if not _precheck_user_on_forum(user):
+                yield user
 
 
 if __name__ == '__main__':
@@ -76,4 +85,8 @@ if __name__ == '__main__':
     print "users deletable: %s" % (len(expired + inactive))
     if '--delete' in sys.argv:
         for user in set((expired + inactive)):
-            user.delete()
+            try:
+                user.delete()
+            except Exception, exc:
+                print "EXCEPTION RAISED ON USER %s" % user
+                print exc
