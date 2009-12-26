@@ -23,7 +23,8 @@ def get_expired_users():
 
     for user in User.objects.filter(status=0):
         if (current_datetime - user.date_joined) > delta_to_activate:
-            yield user
+            if not _user_has_content(user):
+                yield user
 
 
 def _precheck_user_on_forum(user):
@@ -32,6 +33,34 @@ def _precheck_user_on_forum(user):
     topics = Topic.query.filter_by(author_id=uid).all()
     posts = Post.query.filter_by(author_id=uid).all()
     return topics or posts
+
+
+def _user_has_content(user):
+    counters = (
+        # private messages
+        user.privatemessageentry_set.count() > 0,
+        # ikhaya articles
+        user.article_set.count() > 0,
+        # ikhaya article comments
+        user.comment_set.count() > 0,
+        # pastes
+        user.entry_set.count() > 0,
+        # created events
+        user.event_set.count() > 0,
+        # active suggestions to ikhaya articles
+        user.suggestion_set.count() > 0,
+        # user posts
+        user.post_count > 0,
+        # user wiki revisions
+        user.wiki_revisions.count() > 0,
+        # user subscriptions to threads/wikipages etc.
+        user.subscription_set.count() > 0
+    )
+
+    if not any(counters):
+        if not _precheck_user_on_forum(user):
+            return False
+    return True
 
 
 def get_inactive_users(excludes=None):
@@ -49,31 +78,8 @@ def get_inactive_users(excludes=None):
             # there are some users with no last login, set it to a proper value
             user.last_login = current_datetime
             user.save()
-
-        counters = (
-            # private messages
-            user.privatemessageentry_set.count() > 0,
-            # ikhaya articles
-            user.article_set.count() > 0,
-            # ikhaya article comments
-            user.comment_set.count() > 0,
-            # pastes
-            user.entry_set.count() > 0,
-            # created events
-            user.event_set.count() > 0,
-            # active suggestions to ikhaya articles
-            user.suggestion_set.count() > 0,
-            # user posts
-            user.post_count > 0,
-            # user wiki revisions
-            user.wiki_revisions.count() > 0,
-            # user subscriptions to threads/wikipages etc.
-            user.subscription_set.count() > 0
-        )
-
-        if not any(counters):
-            if not _precheck_user_on_forum(user):
-                yield user
+        if not _user_has_content(user):
+            yield user
 
 
 if __name__ == '__main__':
