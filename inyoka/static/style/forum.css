@@ -537,20 +537,6 @@ div.code pre {
     max-height: none;
 }
 
-.codeblock_resizer {
-    width: 10em;
-    margin-left: auto;
-    background: url(../img/expand-bar.png) #d6d6d6 bottom left repeat-x;
-    border-width: 0 1px 0 1px;
-    border-style: solid;
-    border-color: #a8a8a8;
-    cursor: pointer;
-    text-align: center;
-    font-weight: bold;
-    padding: 0 0 0.2em 0;
-    font-size: 0.9em;
-}
-
 .topic_title .ubuntu_version {
     color: #444;
     font-size: .9em;

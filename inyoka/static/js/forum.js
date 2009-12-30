@@ -64,32 +64,6 @@ $(function () {
     };
   })();
 
-  $('div.code').add('pre').each(function () {
-    if (this.clientHeight < this.scrollHeight) {
-      $(this)
-        .after('<div class="codeblock_resizer" title="vergrößern">vergrößern</div>')
-        .css('height', '15em').css('max-height', 'none')
-        .data('original_height', this.clientHeight);
-    }
-  });
-  (function() {
-    if (navigator.appName.toLowerCase() == 'konqueror')
-      return
-    $('.codeblock_resizer').click(function () {
-      $codeblock = $(this).prev();
-      if (!$codeblock.hasClass('codeblock_expanded')) {
-        $codeblock.addClass('codeblock_expanded');
-        $codeblock.animate({'height': $codeblock[0].scrollHeight}, 500);
-        this.innerHTML = this.title = 'verkleinern';
-      } else {
-        $codeblock.removeClass('codeblock_expanded');
-        $codeblock.animate({'height': $codeblock.data('original_height')}, 500);
-        this.innerHTML = this.title = 'vergrößern';
-      }
-    });
-  })();
-
-
   function doAction(type, slug, tags) {
     // Get the matching string for replacement. Since the two buttons (top and bottom)
     // are in the same macro we just need to check for one buttons text at all.

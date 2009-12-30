@@ -27,7 +27,7 @@
     {{ render_form(form, ['is_ikhaya_icon'], inline=true) }}
     {%- if file %}
     <dt>URL:</dl>
-    <dd><pre>{{ file|url }}</pre></dd>
+    <dd><tt>{{ file|url }}</tt></dd>
     {%- else %}
     {{ render_form(form, ['file'], inline=true) }}
     {%- endif %}
