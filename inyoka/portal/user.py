@@ -395,9 +395,18 @@ class UserManager(models.Manager):
                 raise e
 
         if user.is_banned:
-            if user.banned_until is None or \
-               (user.banned_until >= datetime.utcnow()):
+            # gebannt für immer…
+            if user.banned_until is None:
                 raise UserBanned()
+            else:
+                # gebannt für zeitraum
+                if (user.banned_until >= datetime.utcnow()):
+                    raise UserBanned()
+                else:
+                    # zeitraum vorbei, bann zurücksetzen
+                    user.status = 1
+                    user.banned_until = None
+                    user.save()
 
         if user.check_password(password, auto_convert=True):
             return user
