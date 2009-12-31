@@ -396,8 +396,7 @@ class UserManager(models.Manager):
 
         if user.is_banned:
             if user.banned_until is None or \
-               (user.banned_until.utctimetuple()[:3] !=
-                datetime.utcnow().utctimetuple()[:3]):
+               (user.banned_until >= datetime.utcnow()):
                 raise UserBanned()
 
         if user.check_password(password, auto_convert=True):
