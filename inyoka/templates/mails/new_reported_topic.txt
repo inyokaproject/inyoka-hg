@@ -1,6 +1,6 @@
 Hallo,
 
-Der Benutzer {{ USER.username }} hat das Thema {{ topic.title }} ({{ topic|url }}) gemeldet.
+der Benutzer {{ USER.username }} hat das Thema {{ topic.title }} ({{ topic|url }}) gemeldet.
 
     {{ topic.reported|wordwrap(75)|indent(4) }}
 

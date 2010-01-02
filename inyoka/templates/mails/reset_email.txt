@@ -1,6 +1,6 @@
 Hallo {{ user.username }},
 
-Die E-Mail-Adresse deines Benutzers auf ubuntuusers.de wurde auf {{ new_email }} geändert. Um Missbrauch zu vermeiden, kannst du die E-Mail-Adresse auf die alte zurücksetzen. Bitte beachte, dass das nur einen Monat ab heute möglich ist.
+die E-Mail-Adresse deines Benutzers auf ubuntuusers.de wurde auf {{ new_email }} geändert. Um Missbrauch zu vermeiden, kannst du die E-Mail-Adresse auf die alte zurücksetzen. Bitte beachte, dass das nur einen Monat ab heute möglich ist.
 
 Besuche dazu die Seite {{ href('portal', 'confirm', 'reset_email') }} und gib folgende Zeichenkette dort ein:
 
