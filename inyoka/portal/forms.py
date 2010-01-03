@@ -248,8 +248,8 @@ class UserCPSettingsForm(forms.Form):
         label='Bilder-Vorschau ebenfalls aktivieren',
         help_text='automatisch deaktiviert, wenn „Anhang-Vorschau“ deaktiviert ist')
     highlight_search = forms.BooleanField(required=False,
-        label='Sucherwörter hervorheben',
-        help_text='Sucherwörter werden in gelber Farbe hervorgehoben')
+        label='Suchwörter hervorheben',
+        help_text='Suchwörter werden in gelber Farbe hervorgehoben')
     mark_read_on_logout = forms.BooleanField(required=False,
         label=u'Automatisch alle Foren beim Abmelden als gelesen markieren')
 
