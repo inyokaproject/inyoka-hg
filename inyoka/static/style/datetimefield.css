@@ -14,6 +14,7 @@
   font-size: 0.7em;
   border: 0;
   width: 1px;
+  z-index: 1;
 }
 
 .datetime td {
