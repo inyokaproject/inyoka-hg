@@ -230,7 +230,7 @@ table.comments td.comment div.linklist {
 
 a.comment_link:hover {
   background-color: #222;
-  color: #fff;
+  color: #fff !important;
 }
 
 .tooltip {
