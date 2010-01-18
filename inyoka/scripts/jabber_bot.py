@@ -120,9 +120,9 @@ class Bot(object):
                 self.xmlrpc.handle_request()
                 while self.queue:
                     msg = self.queue.popleft()
-                    if self.debug:
-                        log('Sent message %r' % msg)
                     self.client.send(msg)
+                    if self.debug:
+                        log('Sent message to %r' % msg.getTo())
         finally:
             exc_info = sys.exc_info()
             if exc_info and self.debug:
