@@ -36,7 +36,7 @@ class Bot(object):
     The jabber bot.
     """
 
-    def __init__(self, jid, password, addr, debug=False):
+    def __init__(self, jid, password, addr, debug=False, srv=True):
         if debug:
             log('Connecting...')
         self.debug = debug
@@ -44,7 +44,7 @@ class Bot(object):
         self.queue = deque()
         self.client = xmpp.Client(jid.getDomain(), debug=[])
         try:
-            self.client.connect()
+            self.client.connect(use_srv=srv)
             self.client.auth(jid.getNode(), password, jid.resource)
             self.client.sendInitPresence(requestRoster=False)
         except Exception, e:
@@ -177,6 +177,7 @@ def main():
     hostname = args and args[0] or None
     jid = password = None
     debug = auto_reload = False
+    srv = True
 
     for option, value in opts:
         if option in ('-j', '--jid'):
@@ -187,6 +188,8 @@ def main():
             debug = True
         elif option == '--auto-reload':
             auto_reload = True
+        elif option == '--no-srv':
+            srv = False
         elif option in ('-h', '--help'):
             return help()
 
@@ -207,7 +210,7 @@ def main():
     if password is None:
         password = getpass.getpass('Password for %s: ' % jid)
 
-    make_bot = lambda: Bot(jid, password, (hostname, port), debug)
+    make_bot = lambda: Bot(jid, password, (hostname, port), debug, srv)
     while 1:
         try:
             make_bot().serve_forever()
