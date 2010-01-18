@@ -87,6 +87,7 @@ class Bot(object):
         return True
 
     def from_xhtml(self, jid, xhtml):
+        """ DONT USE! IT'S BROKEN """
         """
         Helper method that creates a message object for this jid and the XHTML
         data.  Returns `None` if it cannot parse the XHTML.
@@ -122,7 +123,7 @@ class Bot(object):
                     msg = self.queue.popleft()
                     self.client.send(msg)
                     if self.debug:
-                        log('Sent message to %r' % msg.getTo())
+                        log('Sent message to %s' % msg.getTo())
         finally:
             exc_info = sys.exc_info()
             if exc_info and self.debug:
