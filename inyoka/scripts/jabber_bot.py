@@ -171,7 +171,7 @@ def main():
     try:
         opts, args = getopt(sys.argv[1:], 'j:p:dh', ['jid=', 'password=',
                                                      'debug', 'auto-reload',
-                                                     'help'])
+                                                     'help', 'no-srv'])
     except GetoptError, e:
         return usage(unicode(e))
     hostname = args and args[0] or None
