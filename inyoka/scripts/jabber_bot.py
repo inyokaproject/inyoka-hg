@@ -122,8 +122,9 @@ class Bot(object):
                 while self.queue:
                     msg = self.queue.popleft()
                     self.client.send(msg)
+                    data = self.client.Process() # Read data from stream…
                     if self.debug:
-                        log('Sent message to %s' % msg.getTo())
+                        log('Sent message to \'%s\', recv data %r' % (msg.getTo(), data))
         finally:
             exc_info = sys.exc_info()
             if exc_info and self.debug:
