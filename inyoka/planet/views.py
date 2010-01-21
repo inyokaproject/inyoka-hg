@@ -60,7 +60,8 @@ def index(request, page=1):
                      href('planet'), 'Planet')
     return {
         'days':         group_by_day(pagination.objects),
-        'pagination':   pagination
+        'articles':     pagination.objects,
+        'pagination':   pagination,
     }
 
 

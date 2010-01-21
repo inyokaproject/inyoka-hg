@@ -111,3 +111,27 @@ div.articles div.article div.meta p a:hover {
 div.articles div.article div.post {
   background: url(../img/planet/bubble-bottom-right.png) no-repeat right bottom;
 }
+
+/* we use last/first-child everywhere to not display crap on clients
+ * that don't support first-child */
+.newestarticles h2 {
+  font-size: 1.1em;
+}
+.newestarticles ul:last-child {
+  padding-left: 0;
+  margin-left: 0;
+  line-height: 150%
+}
+.newestarticles ul:last-child li {
+  display: inline;
+  padding-left: 0;
+  margin-left: 0;
+}
+.newestarticles ul li::before {
+  content: " | ";
+  color: #CCC;
+}
+.newestarticles ul li:first-child::before {
+  content: "";
+}
+

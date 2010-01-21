@@ -17,12 +17,21 @@
 
 {% block planet_content %}
   {%- if days %}
+  <div class="newestarticles">
+  <h2>Direkt zu den neuesten Artikeln</h2>
+  <ul>
+  {%- for article in articles[:10] %}
+    <li><a href="#article_{{ article.id }}">{{ article.title|e }}</a></li>
+  {%- endfor %}
+  </ul>
+  </div>
   <div class="articles">
+
   {%- for day in days %}
     <div class="day">
       <h2>{{ day.date|dateformat }}</h2>
       {% for article in day.articles %}
-      <div class="article">
+      <div class="article" id="article_{{ article.id }}">
         <div class="author">
           <a href="{{ article.blog|url|e }}">
             <img src="{{ article.blog.icon_url|e }}" alt="" /><br />
