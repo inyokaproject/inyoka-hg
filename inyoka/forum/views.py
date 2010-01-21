@@ -1293,7 +1293,8 @@ def delete_topic(request, topic_slug):
                 nargs = {
                     'username' : subscription.user.username,
                     'mod'      : request.user.username,
-                    'topic'    : topic
+                    'topic'    : topic,
+                    'reason'   : request.POST.get('reason', None),
                 }
                 notify_about_subscription(subscription, 'topic_deleted',
                     u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)

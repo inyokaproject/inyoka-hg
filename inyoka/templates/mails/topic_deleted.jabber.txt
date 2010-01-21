@@ -1,1 +1,1 @@
-Das Thema „{{ topic.title}}“ wurde von {{ mod }} gelöscht, du wirst nicht mehr darüber Informiert.
+Das Thema „{{ topic.title}}“ wurde von {{ mod }} gelöscht. {% if reason %}Als Grund wurde angegeben: {{ reason }}{% endif %}
