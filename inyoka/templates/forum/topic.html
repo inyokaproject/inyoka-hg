@@ -53,6 +53,24 @@
       <a href="{{ topic|url('report') }}" class="action action_report">melden</a>
       {% endif %}
   </span>
+      {%- if can_moderate %}
+      <br />
+      <span class="linklist">
+        <a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> | 
+        <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
+        {%- if topic.locked %}
+        <a href="{{ topic|url('unlock') }}" class="action action_unlock adminlink">entsperren</a> | 
+        {%- else %}
+        <a href="{{ topic|url('lock') }}" class="action action_lock adminlink">sperren</a> |
+        {%- endif %}
+        {%- if topic.hidden %}
+        <a href="{{ topic|url('restore') }}" class="action action_restore adminlink">wiederherstellen</a> |
+        <a href="{{ topic|url('delete') }}" class="action action_delete adminlink">löschen</a>
+        {%- else %}
+        <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a> 
+        {%- endif %}
+      </span>
+      {%- endif %}
 {% endmacro %}
 
 {% block search_areas %}
@@ -249,24 +267,7 @@
   <div class="topic_box">
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
-      {{ topic_actions() }}<br />
-      {%- if can_moderate %}
-      <span class="linklist">
-        <a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> | 
-        <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
-        {%- if topic.locked %}
-        <a href="{{ topic|url('unlock') }}" class="action action_unlock adminlink">entsperren</a> | 
-        {%- else %}
-        <a href="{{ topic|url('lock') }}" class="action action_lock adminlink">sperren</a> |
-        {%- endif %}
-        {%- if topic.hidden %}
-        <a href="{{ topic|url('restore') }}" class="action action_restore adminlink">wiederherstellen</a> |
-        <a href="{{ topic|url('delete') }}" class="action action_delete adminlink">löschen</a>
-        {%- else %}
-        <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a> 
-        {%- endif %}
-      </span>
-      {%- endif %}
+      {{ topic_actions() }}
     </div>
   </div>
       <div class="pathbar">

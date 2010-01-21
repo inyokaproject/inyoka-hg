@@ -36,7 +36,7 @@ class Bot(object):
     The jabber bot.
     """
 
-    def __init__(self, jid, password, addr, debug=False):
+    def __init__(self, jid, password, addr, debug=False, srv=True):
         if debug:
             log('Connecting...')
         self.debug = debug
@@ -44,7 +44,7 @@ class Bot(object):
         self.queue = deque()
         self.client = xmpp.Client(jid.getDomain(), debug=[])
         try:
-            self.client.connect()
+            self.client.connect(use_srv=srv)
             self.client.auth(jid.getNode(), password, jid.resource)
             self.client.sendInitPresence(requestRoster=False)
         except Exception, e:
@@ -87,6 +87,7 @@ class Bot(object):
         return True
 
     def from_xhtml(self, jid, xhtml):
+        """ DONT USE! IT'S BROKEN """
         """
         Helper method that creates a message object for this jid and the XHTML
         data.  Returns `None` if it cannot parse the XHTML.
@@ -120,9 +121,10 @@ class Bot(object):
                 self.xmlrpc.handle_request()
                 while self.queue:
                     msg = self.queue.popleft()
-                    if self.debug:
-                        log('Sent message %r' % msg)
                     self.client.send(msg)
+                    data = self.client.Process() # Read data from stream…
+                    if self.debug:
+                        log('Sent message to \'%s\', recv data %r' % (msg.getTo(), data))
         finally:
             exc_info = sys.exc_info()
             if exc_info and self.debug:
@@ -171,12 +173,13 @@ def main():
     try:
         opts, args = getopt(sys.argv[1:], 'j:p:dh', ['jid=', 'password=',
                                                      'debug', 'auto-reload',
-                                                     'help'])
+                                                     'help', 'no-srv'])
     except GetoptError, e:
         return usage(unicode(e))
     hostname = args and args[0] or None
     jid = password = None
     debug = auto_reload = False
+    srv = True
 
     for option, value in opts:
         if option in ('-j', '--jid'):
@@ -187,6 +190,8 @@ def main():
             debug = True
         elif option == '--auto-reload':
             auto_reload = True
+        elif option == '--no-srv':
+            srv = False
         elif option in ('-h', '--help'):
             return help()
 
@@ -207,7 +212,7 @@ def main():
     if password is None:
         password = getpass.getpass('Password for %s: ' % jid)
 
-    make_bot = lambda: Bot(jid, password, (hostname, port), debug)
+    make_bot = lambda: Bot(jid, password, (hostname, port), debug, srv)
     while 1:
         try:
             make_bot().serve_forever()
