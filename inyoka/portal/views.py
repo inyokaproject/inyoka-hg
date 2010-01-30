@@ -873,6 +873,14 @@ def privmsg(request, folder=None, entry_id=None, page=1):
             if entry.restore():
                 flash(u'Die Nachricht wurde wiederhergestellt.', True)
                 message = None
+        elif action == 'delete':
+            msg = u'Die Nachricht wurde endgültig gelöscht' if\
+                  entry.folder == PRIVMSG_FOLDERS['trash'][0] else\
+                  u'Die Nachricht wurde in den Papierkorb verschoben'
+            if entry.delete():
+                flash(msg, True)
+                message = None
+
     else:
         message = None
     link = href('portal', 'privmsg', folder, 'page')
