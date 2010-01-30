@@ -23,10 +23,15 @@ class AuthMiddleware(object):
             user = User.objects.get_anonymous_user()
 
         # check for bann
-        if user.is_banned:
-            flash((u'Du wurdest ausgeloggt, da der Benutzer „%s“ '
-                   u'gerade gebannt wurde' % escape(user.username)), False,
-                   session=request.session)
+        if user.status > 1:
+            if user.is_banned:
+                flash((u'Du wurdest ausgeloggt, da der Benutzer „%s“ '
+                       u'gerade gebannt wurde' % escape(user.username)), False,
+                       session=request.session)
+            elif user.is_deleted:
+                flash((u'Du wurdest ausgeloggt, da du deinen Benutzer „%s“'
+                       u'in der Zwischenzeit gelöscht hast.' % escape(user.username)), False,
+                       session=request.session)
 
             request.session.pop('uid', None)
             user = User.objects.get_anonymous_user()
