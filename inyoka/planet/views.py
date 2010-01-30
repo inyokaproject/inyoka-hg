@@ -135,7 +135,6 @@ def feed(request, mode='short', count=20):
 
         feed.add(
             title=entry.title,
-            title_type="xhtml",
             url=entry.url,
             id=entry.guid,
             updated=entry.updated,
