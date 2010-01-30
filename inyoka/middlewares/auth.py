@@ -22,8 +22,8 @@ class AuthMiddleware(object):
         except (User.DoesNotExist, KeyError):
             user = User.objects.get_anonymous_user()
 
-        # check for bann
-        if user.status > 1:
+        # check for bann/deletion
+        if user.is_banned or user.is_deleted:
             if user.is_banned:
                 flash((u'Du wurdest ausgeloggt, da der Benutzer „%s“ '
                        u'gerade gebannt wurde' % escape(user.username)), False,
