@@ -21,7 +21,7 @@
   <h2>Direkt zu den neuesten Artikeln</h2>
   <ul>
   {%- for article in articles[:10] %}
-    <li><a title="{{ article.blog }}" href="#article_{{ article.id }}">{{ article.title|e }}</a></li>
+    <li><a title="{{ article.blog }}" href="#article_{{ article.id }}">{{ article.title }}</a></li>
   {%- endfor %}
   </ul>
   </div>
