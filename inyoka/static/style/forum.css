@@ -205,12 +205,6 @@ table.topic td.author p.username.inactive a {
     text-decoration: line-through;
 }
 
-table.topic td.author img.avatar {
-    margin: 10px 0 0 0;
-    border: 1px solid #ccc;
-    background-color: white;
-}
-
 table.topic td.author p.username {
 	position: relative;
 }
