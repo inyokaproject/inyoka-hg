@@ -80,10 +80,18 @@ UBUNTU_VERSIONS = [
 ]
 UBUNTU_VERSIONS.reverse()
 
-UBUNTU_DISTROS = {
+UBUNTU_DISTROS_LEGACY = {
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
     'kubuntu-kde4': u'Kubuntu (KDE 4)',
+    'xubuntu': 'Xubuntu',
+    'server': 'Server',
+    'edubuntu': 'Edubuntu',
+}
+
+UBUNTU_DISTROS = {
+    'ubuntu': 'Ubuntu',
+    'kubuntu': 'Kubuntu',
     'xubuntu': 'Xubuntu',
     'server': 'Server',
     'edubuntu': 'Edubuntu',
@@ -603,7 +611,7 @@ class Topic(object):
             return default
         out = []
         if self.ubuntu_distro:
-            out.append(UBUNTU_DISTROS[self.ubuntu_distro])
+            out.append(UBUNTU_DISTROS_LEGACY[self.ubuntu_distro])
         if self.ubuntu_version:
             out.append(str(self.get_ubuntu_version()))
         return u' '.join(out)
