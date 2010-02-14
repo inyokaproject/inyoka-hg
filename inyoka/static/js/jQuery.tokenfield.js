@@ -16,7 +16,7 @@ $.token_field = function(input, options) {
 	function createTokens(data) {
 		var tokens = data.split(options.splitToken);
 		for(token in tokens) {
-			if (tokens[token].replace(/\s+/g, '') != '') {
+			if (tokens[token].replace(/^\s+|\s+$/g, '') != '') {
 				$token = $(createToken(tokens[token]));
 				token_list.push(tokens[token]);
 				token_elements_list.push($token);
@@ -28,7 +28,7 @@ $.token_field = function(input, options) {
 	function createToken(token) {
 		var $token = $("<span class=" + options.tokenClass + ">" + token + "</span>");
 		$token.append($('<span class="tf_tok_delete">&nbsp;&nbsp;&nbsp;</span>').click(function () {
-			delindex = token_elements_list.indexOf(token);
+			delindex = token_list.indexOf($token.text().replace(/^\s+|\s+$/g, ''));
 			token_list.splice(delindex, 1);
 			token_elements_list.splice(delindex, 1);
 			$token.remove();
