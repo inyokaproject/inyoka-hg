@@ -136,7 +136,8 @@
         <p><label for="id_attachment">Dateianhang:</label>
           {{ attach_form.attachment }}{{ attach_form.errors.attachment }}</p>
         <p><label for="id_filename">Umbenennen in:</label>
-          {{ attach_form.filename }}{{ attach_form.errors.filename }}</p>
+          {{ attach_form.filename }}{{ attach_form.errors.filename }}
+          <span class="help_text">Optional. Dateinamenserweiterung nicht vergessen!</span></p>
         <p><label for="id_text">Beschreibung:</label>
           {{ attach_form.comment }}{{ attach_form.errors.comment }}</p>
         <p>{{ attach_form.override }} <label for="id_override">Bestehenden Anhang
