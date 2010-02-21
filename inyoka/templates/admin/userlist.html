@@ -23,7 +23,6 @@
   <p>{{ count }} Benutzer haben Sonderrechte:</p>
   <table>
     <tr>
-      <th>#</th>
       <th>Benutzername</th>
       <th>Wohnort</th>
       <th>Anmeldungsdatum</th>
@@ -31,7 +30,6 @@
     </tr>
     {%- for user in users %}
     <tr>
-      <td>{{ user.id }}</td>
       <td>
         <a href="{{ href('admin', 'users', 'edit', user.username) }}">{{ user.username|e }}</a></td>
       <td>{{ user.location }}</td>
