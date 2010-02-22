@@ -718,7 +718,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
-        'discussions':  discussions
+        'discussions':  discussions,
     }
 
 

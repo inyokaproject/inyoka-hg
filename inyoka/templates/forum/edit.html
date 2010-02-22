@@ -107,8 +107,11 @@
         </ul>
       </dd>
       {%- endif %}
-      <dd>Frage: {{ poll_form.question }} {{ poll_form.errors.question }}</dd>
+      <dd>Frage: {{ poll_form.question }} {{ poll_form.question.errors }}</dd>
       <dd>{{ poll_form.multiple }} <label for="id_multiple">Mehrfachantworten erlauben</label></dd>
+      {%- if poll_form.options.errors %}
+      <dd>{{ poll_form.options.errors }}</dd>
+      {%- endif %}
       {%- for option in options %}
       <dd class="newtopic_polls_replies">Antwort {{ loop.index }}: <input type="text" name="options" value="{{ option }}" />
         {%- if loop.last %}
@@ -116,7 +119,7 @@
         {%- endif -%}
       </dd>
       {%- endfor %}
-      <dd>Dauer der Umfrage: {{ poll_form.duration }} Tage {{ poll_form.errors.duration }}</dd>
+      <dd>Dauer der Umfrage: {{ poll_form.duration }} Tage {{ poll_form.duration.errors }}</dd>
       <dd class="note">Lasse dieses Feld leer, wenn die Umfrage unendlich lange dauern soll.</dd>
       <dd><input type="submit" name="add_poll" value="Umfrage hinzufügen" /></dd>
       {%- endif %}
