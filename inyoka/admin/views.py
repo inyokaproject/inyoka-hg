@@ -667,7 +667,7 @@ def users(request):
 def users_with_special_rights(request):
     query = SAUser.query.filter(privilege_table.c.user_id == user_table.c.id) \
                         .filter(privilege_table.c.user_id != None) \
-                        .order_by(user_table.c.username)
+                        .group_by(user_table.c.id).order_by(user_table.c.username)
     users = list(query)
     return {
         'users': users,
