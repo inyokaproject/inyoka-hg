@@ -57,7 +57,7 @@ def context_modifier(request, context):
     key = 'ikhaya/archive'
     data = cache.get(key)
     if data is None:
-        archive = list(Article.objects.dates('pub_date', 'month', order='DESC'))
+        archive = list(Article.published.dates('pub_date', 'month', order='DESC'))
         if len(archive) > 5:
             archive = archive[:5]
             short_archive = True
