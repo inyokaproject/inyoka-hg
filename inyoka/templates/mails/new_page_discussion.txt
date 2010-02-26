@@ -1,6 +1,6 @@
 Hallo {{ username }},
 
-Der Benutzer {{ creator }} hat eine neue Diskussion über die Wiki-Seite „{{ page.title }}“ angelegt:
+der Benutzer {{ creator }} hat eine neue Diskussion über die Wiki-Seite „{{ page.title }}“ angelegt:
 {{ page.topic|url }}
 
 Wenn du auch über neue Beiträge in der Diskussion benachrichtigt werden möchtest, so abonniere das Foren-Thema hier: {{ page.topic|url('subscribe') }}
