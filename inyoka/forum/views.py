@@ -1032,7 +1032,7 @@ def movetopic(request, topic_slug):
             }
             if 'topic_move' in\
             topic.author.settings.get('notifications',('topic_move',))\
-            and topic.author.username == request.user.username:
+            and topic.author.username != request.user.username:
                 send_notification(topic.author, 'topic_moved',
                     u'Dein Thema „%s“ wurde verschoben'
                     % topic.title, nargs)
