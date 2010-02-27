@@ -1037,7 +1037,7 @@ def movetopic(request, topic_slug):
                     u'Dein Thema „%s“ wurde verschoben'
                     % topic.title, nargs)
 
-            users_done = set([topic.author.id])
+            users_done = set([topic.author.id,request.user.id])
             subscriptions = Subscription.objects.filter(Q(topic_id=topic.id) | Q(forum_id=forum.id))
             for subscription in subscriptions:
                 if subscription.user.id in users_done:
