@@ -141,8 +141,6 @@ table.comments td.author p.username a {
 
 table.comments td.author img.avatar {
     margin: 10px 0 0 0;
-    border: 1px solid #ccc;
-    background-color: white;
 }
 
 table.comments td.author p.username {
