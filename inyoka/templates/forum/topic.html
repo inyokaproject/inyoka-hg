@@ -272,8 +272,8 @@
   </div>
       <div class="pathbar">
         <div class="pagination pagination_right">
-          <a href="{{ href('forum', 'topic', topic.slug, 'previous') }}" class="prev">« vorheriges Thema</a>
-          <a href="{{ href('forum', 'topic', topic.slug, 'next') }}" class="next">nächstes Thema »</a>
+          <a href="{{ href('forum', 'topic', topic.slug, 'previous') }}" rel="nofollow" class="prev">« vorheriges Thema</a>
+          <a href="{{ href('forum', 'topic', topic.slug, 'next') }}" rel="nofollow" class="next">nächstes Thema »</a>
         </div>
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace %}
