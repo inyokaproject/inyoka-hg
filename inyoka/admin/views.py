@@ -310,11 +310,19 @@ def ikhaya(request):
 @require_permission('article_read', 'article_edit')
 @templated('admin/ikhaya_articles.html')
 def ikhaya_articles(request, page=1):
-    sortable = Sortable(Article.objects.all(), request.GET, '-updated',
+    sorted = request.GET.get('order', None) is not None
+    if not sorted:
+        objects = Article.objects.order_by('public', '-updated').select_related()
+    else:
+        objects = Article.objects.all()
+
+    sortable = Sortable(objects, request.GET, '-updated',
         columns=['subject', 'portal_user.username', 'ikhaya_category.name',
                  'updated'])
-    pagination = Pagination(request, sortable.get_objects(), page, 25,
-        href('admin', 'ikhaya', 'articles'))
+    pagination = Pagination(request,
+        sorted and sortable.get_objects() or objects,
+        page, 25, href('admin', 'ikhaya', 'articles'))
+
     return {
         'table': sortable,
         'articles': list(pagination.objects),

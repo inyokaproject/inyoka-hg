@@ -1,4 +1,4 @@
 Hallo {{ username }},
 
-Der Benutzer {{ post.author.username }} hat einen neuen Thread im Forum „{{ forum.name }}“ geschrieben und ihn mit der Ubuntu Version „{{ topic.get_ubuntu_version() }}“ gekennzeichnet:
+der Benutzer {{ post.author.username }} hat einen neuen Thread im Forum „{{ forum.name }}“ geschrieben und ihn mit der Ubuntu Version „{{ topic.get_ubuntu_version() }}“ gekennzeichnet:
 {{ topic.title }} ({{ topic|url }})

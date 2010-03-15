@@ -57,7 +57,7 @@ def context_modifier(request, context):
     key = 'ikhaya/archive'
     data = cache.get(key)
     if data is None:
-        archive = list(Article.objects.dates('pub_date', 'month', order='DESC'))
+        archive = list(Article.published.dates('pub_date', 'month', order='DESC'))
         if len(archive) > 5:
             archive = archive[:5]
             short_archive = True
@@ -108,7 +108,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
     set_session_info(request, u'sieht sich die <a href="%s">'
                               u'Artikelübersicht</a> an' % link)
 
-    articles = articles.order_by('-updated').select_related()
+    articles = articles.order_by('public', '-updated').select_related()
 
     pagination = Pagination(request, articles, page, 15, link)
 
