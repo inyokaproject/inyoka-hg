@@ -1100,7 +1100,9 @@ def hide_signatures_for_anonymous(m):
                            where id=1
     ''', [cPickle.dumps(settings)])
 
-
+def fix_ubuntu_version_length(m):
+    """Varchar(4) -> Varchar(5)"""
+    m.engine.execute('ALTER TABLE portal_subscription MODIFY COLUMN ubuntu_version VARCHAR(5);')
 
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
@@ -1130,5 +1132,5 @@ MIGRATIONS = [
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
     add_forum_force_version_flag, add_claimed_by_column,
     add_subscription_notified_ubuntu_version, drop_tcaptcha_table,
-    add_event_duration_field, hide_signatures_for_anonymous
+    add_event_duration_field, hide_signatures_for_anonymous, fix_ubuntu_version_length
 ]
