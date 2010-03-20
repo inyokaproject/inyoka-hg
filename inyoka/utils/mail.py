@@ -27,6 +27,8 @@ _mail_re = re.compile(r'''(?xi)
 
 def send_mail(subject, message_, from_, to):
     assert len(to) == 1
+    if to[0].endswith('.invalid'):
+        return
 
     message = u'From: %s\nTo: %s' % (from_ , to[0])
     # Ignore für den Fall, dass wir hier blöde emailadressen bekommen…
