@@ -8,7 +8,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
-import re
+import re, os
 from email.mime.text import MIMEText
 from email.header import Header
 from subprocess import Popen, PIPE
@@ -38,6 +38,8 @@ def send_mail(subject, message_, from_, to):
     proc = Popen('nullmailer-inject', stdin=PIPE)
     proc.stdin.write(message)
     proc.stdin.close()
+    # replace with os.wait() in a outer level to not wait to much?!
+    proc.wait()
 
 
 def may_be_valid_mail(email):
