@@ -9,9 +9,12 @@
     :license: GNU GPL.
 """
 import re
+from email.mime.text import MIMEText
+from email.header import Header
+from subprocess import Popen, PIPE
 from dns.resolver import query as dns_query
 from dns.exception import DNSException
-from django.core.mail import send_mail
+#from django.core.mail import send_mail
 from inyoka.utils.storage import storage
 
 
@@ -21,6 +24,18 @@ _mail_re = re.compile(r'''(?xi)
         "(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|
           \\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@
 ''')
+
+def send_mail(subject, message_, from_, to):
+    assert len(to) == 1
+
+    message = u"From: %s\nTo: %s" % (from_ , to[0])
+    message = message.encode('utf-8')
+    message += '\nSubject: ' + Header(subject, 'utf-8', header_name='Subject').encode() + '\n'
+    message += MIMEText(message_.encode('utf-8'), _charset='utf-8').as_string()
+
+    proc = Popen('nullmailer-inject', stdin=PIPE)
+    proc.stdin.write(message)
+    proc.stdin.close()
 
 
 def may_be_valid_mail(email):
