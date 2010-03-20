@@ -26,9 +26,14 @@ _mail_re = re.compile(r'''(?xi)
 ''')
 
 def send_mail(subject, message_, from_, to):
-    assert len(to) == 1
+    # kick out our .invalid adresses
+    to = [x for x in to if not x.endswith('.invalid')]
+    if not len(to):
+        return
 
-    message = u'From: %s\nTo: %s' % (from_ , to[0])
+    recipients = ', '.join(to)
+
+    message = u'From: %s\n%s: %s' % (from_ , recipients)
     # Ignore für den Fall, dass wir hier blöde emailadressen bekommen…
     # TODO: non ascii adressen erlauben
     message = message.encode('ascii', 'ignore')
