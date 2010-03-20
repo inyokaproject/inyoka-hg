@@ -28,8 +28,10 @@ _mail_re = re.compile(r'''(?xi)
 def send_mail(subject, message_, from_, to):
     assert len(to) == 1
 
-    message = u"From: %s\nTo: %s" % (from_ , to[0])
-    message = message.encode('utf-8')
+    message = u'From: %s\nTo: %s' % (from_ , to[0])
+    # Ignore für den Fall, dass wir hier blöde emailadressen bekommen…
+    # TODO: non ascii adressen erlauben
+    message = message.encode('ascii', 'ignore')
     message += '\nSubject: ' + Header(subject, 'utf-8', header_name='Subject').encode() + '\n'
     message += MIMEText(message_.encode('utf-8'), _charset='utf-8').as_string()
 
