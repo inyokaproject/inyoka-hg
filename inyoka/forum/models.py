@@ -941,7 +941,7 @@ class PostRevision(object):
         if self.post.is_plaintext:
             return fix_plaintext(self.text)
         request = current_request._get_current_object()
-        context = RenderContext(request, simplified=True)
+        context = RenderContext(request, simplified=False)
         return parse(self.text).render(context, 'html')
 
     def restore(self, request):
