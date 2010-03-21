@@ -19,6 +19,9 @@ def send_notification(user, template_name=None, subject=None, args=None):
     assert subject is not None
     args = args or {}
 
+    if user.is_deleted:
+        return
+
     #TODO: use xhtml jabber messages
     methods = user.settings.get('notify', ['mail'])
     if 'jabber' in methods and user.jabber:
