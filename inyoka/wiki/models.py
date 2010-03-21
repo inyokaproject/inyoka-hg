@@ -457,25 +457,26 @@ class PageManager(models.Manager):
         Returns a list of tuples containing the page name and the page
         creation date.
         """
-        cur = connection.cursor()
+        return []
+#        cur = connection.cursor()
         # XXX: I'm not able to make it working without a subquery. Maybe
         #      someone else is?
-        cur.execute('''
-            select p.name, r.change_date
-             from wiki_revision r, wiki_page p
-             where r.change_date > %s and
-                   r.page_id = p.id and
-                   r.id in (
-                        select r.id
-                         from wiki_revision r
-                         group by r.page_id
-                         order by r.change_date desc
-                  )
-        ''', [date])
-        try:
-            return [(x[0], x[1]) for x in cur.fetchall()]
-        finally:
-            cur.close()
+#        cur.execute('''
+#            select p.name, r.change_date
+#             from wiki_revision r, wiki_page p
+#             where r.change_date > %s and
+#                   r.page_id = p.id and
+#                   r.id in (
+#                        select r.id
+#                         from wiki_revision r
+#                         group by r.page_id
+#                         order by r.change_date desc
+#                  )
+#        ''', [date])
+#        try:
+#            return [(x[0], x[1]) for x in cur.fetchall()]
+#        finally:
+#            cur.close()
 
     def create(self, name, text, user=None, change_date=None,
                note=None, attachment=None, attachment_filename=None,
