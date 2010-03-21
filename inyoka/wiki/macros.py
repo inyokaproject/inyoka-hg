@@ -1141,7 +1141,7 @@ ALL_MACROS = {
     u'Inhaltsverzeichnis':  TableOfContents,
     u'LetzteÄnderungen':    RecentChanges,
     u'NeueSeite':           NewPage,
-    u'NeueSeiten':          NewPages,
+#    u'NeueSeiten':          NewPages,
     u'Seitenliste':         PageList,
     u'Seitenname':          PageName,
     u'Seitenzahl':          PageCount,
