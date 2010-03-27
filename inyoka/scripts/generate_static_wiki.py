@@ -28,13 +28,13 @@ from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
 
 try:
-    from eventlet import coros
+    import eventlet
 
     # this imports a special version of the urllib2 module that uses non-blocking IO
     from eventlet.green import urllib2
 except ImportError:
     print "To get better performance, install eventlet."
-    coros = None
+    eventlet = None
     import urllib2
 
 
@@ -277,29 +277,17 @@ def create_snapshot():
                     .sub(lambda m: '%s="./files/%s"' % (m.groups()[0], m.groups()[1]), content)
             _write_file(path.join(FOLDER, 'index.html'))
 
-        time.sleep(0.5)
-
-    if coros is None:
-        # use some dummy class for the coroutine pool
-        class pool(object):
-            def execute(self, callback, *args):
-                return callback(*args)
-        pool = pool()
+    percents = list(percentize(len(todo)))
+    if eventlet is None:
+        for percent, name in izip(percents, todo):
+            _fetch_and_write(name)
+            pb.update(percent)
     else:
-        # use the eventlet coroutine pool implementation
-        pool = coros.CoroutinePool(max_size=10)
+        pool = eventlet.GreenPool(4)
+        for result in pool.imap(_fetch_and_write, todo):
+            pb.update(percents.pop(0))
 
-    waiters = []
-
-    for percent, name in izip(percentize(len(todo)), todo):
-        waiters.append(pool.execute(_fetch_and_write, name))
-        pb.update(percent)
-
-    if coros is not None:
-        # only the eventlet implementation supports waiting
-        for waiter in waiters:
-            waiter.wait()
-
+    print
     print ("Created Wikisnapshot with %s pages; excluded %s pages"
            % (len(todo), len(excluded_pages)))
 
