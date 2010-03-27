@@ -1262,7 +1262,11 @@ class WelcomeMessage(object):
 
 # set up the mappers for sqlalchemy
 class SAUser(object):
+    is_anonymous = property(lambda x: x.id == 1)
+    is_authenticated = property(lambda x: not x.is_anonymous)
     is_active = property(lambda x: x.status == 1)
+    is_banned = property(lambda x: x.status == 2)
+    is_deleted = property(lambda x: x.status == 3)
 
     def get_absolute_url(self, action=None):
         return href('portal', 'user', self.username)
