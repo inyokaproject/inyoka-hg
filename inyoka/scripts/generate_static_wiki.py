@@ -7,7 +7,7 @@
     Creates a snapshot of all wiki pages in HTML format.
 
     :copyright: 2008 by Benjamin Wiegand
-                2009 by Christopher Grebs.
+                2009-2010 by Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details..
 """
 import os
@@ -15,6 +15,7 @@ import re
 import sys
 import time
 import shutil
+from functools import partial
 from os import path
 from urllib import quote
 from hashlib import md5
@@ -70,6 +71,8 @@ EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
 
 
 INCLUDE_IMAGES = True
+
+_iterables = (tuple, list, set, frozenset)
 
 
 # original from Jochen Kupperschmidt with some modifications
@@ -216,6 +219,18 @@ def create_snapshot():
     # create the folder structure
     os.mkdir(FOLDER)
     os.mkdir(path.join(FOLDER, 'files'))
+    stroot = settings.STATIC_ROOT
+    ff = partial(path.join, stroot, 'img')
+    static_paths = ((path.join(stroot, 'img', 'icons'), 'icons'),
+        ff('logo.png'), ff('favicon.ico'), ff('float-left.jpg'),
+        ff('float-right.jpg'), ff('float-top.jpg'), ff('head.jpg'),
+        ff('head-right.png'), ff('anchor.png'))
+    for pth in static_paths:
+        _pth = pth[0] if isinstance(pth, _iterables) else pth
+        if path.isdir(_pth):
+            shutil.copytree(_pth, path.join(FOLDER, 'files', 'img', pth[1]))
+        else:
+            shutil.copy(_pth, path.join(FOLDER, 'files', 'img'))
     attachment_folder = path.join(FOLDER, 'files', '_')
     os.mkdir(attachment_folder)
 
