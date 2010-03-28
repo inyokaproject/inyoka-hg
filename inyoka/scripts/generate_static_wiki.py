@@ -69,7 +69,7 @@ EXCLUDE_PAGES = [u'Benutzer/', u'Anwendertreffen/', u'Baustelle/', u'LocoTeam/',
 EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
 
 
-INCLUDE_IMAGES = False
+INCLUDE_IMAGES = True
 
 
 # original from Jochen Kupperschmidt with some modifications
@@ -112,11 +112,9 @@ def percentize(steps):
 
 def fetch_page(name):
     try:
-        try:
-            name = name.encode('latin-1')
-        except UnicodeEncodeError:
-            name = name.encode('utf-8', 'replace')
-        fobj = urllib2.urlopen(os.path.join(URL, name))
+        if isinstance(name, unicode):
+            name = name.encode('utf-8')
+        fobj = urllib2.urlopen(os.path.join(URL, quote(name)))
         data = fobj.read()
     except urllib2.HTTPError, e:
         print "http error on page %s: %s" % (name, str(e))
@@ -146,6 +144,8 @@ def save_file(url, is_main_page=False, is_static=False):
 
 
 def fix_path(pth):
+    if isinstance(pth, unicode):
+        pth.encode('utf-8')
     return normalize_pagename(pth, False).lower()
 
 
