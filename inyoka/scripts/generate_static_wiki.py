@@ -112,15 +112,20 @@ def percentize(steps):
 
 def fetch_page(name):
     try:
-        data = urllib2.urlopen(os.path.join(URL, quote(name.encode('utf8')))).read()
+        try:
+            name = name.encode('latin-1')
+        except UnicodeEncodeError:
+            name = name.encode('utf-8', 'replace')
+        fobj = urllib2.urlopen(os.path.join(URL, name))
+        data = fobj.read()
     except urllib2.HTTPError, e:
-        print u"http error on page „%s”: %s" % (name, e)
-        return None
+        print "http error on page %s: %s" % (name, str(e))
+        return
     return data
 
 
 def save_file(url, is_main_page=False, is_static=False):
-    if not INCLUDE_IMAGES and not is_main_page and not is_static:
+    if not INCLUDE_IMAGES and not is_static and not is_main_page:
         return ""
     if url.startswith('/'):
         url = os.path.join(URL, url[1:])
@@ -141,7 +146,7 @@ def save_file(url, is_main_page=False, is_static=False):
 
 
 def fix_path(pth):
-    return normalize_pagename(pth, False).rsplit('/', 1)[-1]
+    return normalize_pagename(pth, False).lower()
 
 
 def replacer(func, parts, is_main_page):
@@ -256,7 +261,7 @@ def create_snapshot():
                     os.mkdir(pth)
                 parts += 1
 
-        content = fetch_page(name)
+        content = fetch_page(page.name)
         if content is None:
             return
         content = content.decode('utf8')
