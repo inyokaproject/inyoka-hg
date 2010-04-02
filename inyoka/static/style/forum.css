@@ -520,7 +520,7 @@ ul.attr_list a:hover img {
 }
 
 ul.attr_list.broken {
-  list-style disc;
+  list-style: disc;
 }
 
 ul.attr_list.broken li {
