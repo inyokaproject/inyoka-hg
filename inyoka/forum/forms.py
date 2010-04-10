@@ -183,8 +183,8 @@ class SplitTopicForm(forms.Form):
         slug = self.cleaned_data.get('topic')
         if slug:
             # Allow URL based Slugs
-            if slug.startswith(u"http"):
-                slug = slug.split(u"/")[-1]
+            if slug.startswith(u'http://'):
+                slug = slug.strip(u'/').split(u'/')[-1]
             t = Topic.query.filter_by(slug=slug).first()
             if not t:
                 raise forms.ValidationError(u'Ein Thema mit diesem Slug '
