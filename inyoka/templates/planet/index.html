@@ -47,7 +47,7 @@
             <div class="meta">
               <p>
                 {{ article.pub_date|specificdatetimeformat(true) }} |
-                <a href="{{ article|url|e }}">#</a>
+		 <a href="#article_{{ article.id }}">#</a>
                 {% if USER.can('blog_edit') %}| <a class="adminlink" href="{{ article|url('hide')|e }}">
                   {% if article.hidden %}wiederherstellen{% else %}verstecken{% endif %}</a>{% endif %}
               </p>
