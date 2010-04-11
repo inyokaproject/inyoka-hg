@@ -71,8 +71,8 @@ def redirect_new_page(request):
         backref = href('wiki', settings.WIKI_MAIN_PAGE)
 
     if not page:
-        flash(u'Konnte Seite nicht erstellen, kein Seitenname angegeben '
-              'wurde.', success=False)
+        flash(u'Die Seite konnte nicht erstellt werden da kein Seitenname '
+              'angegeben wurde.', success=False)
         return HttpResponseRedirect(backref)
     if base:
         page = join_pagename(base, page)
