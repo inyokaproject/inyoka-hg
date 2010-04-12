@@ -1119,7 +1119,9 @@ def splittopic(request, topic_slug):
                 'mod': request.user.username
             }
             users_done = set([request.user.id])
-            subscriptions = Subscription.objects.filter(Q(topic_id=old_topic.id) | Q(topic_id=new_topic.id) | Q(forum_id=new_forum.id))
+            subscriptions = Subscription.objects.select_related('user').filter(
+                Q(topic_id=old_topic.id) | Q(forum_id=new_forum.id)
+            )
             for subscription in subscriptions:
                 # Skip loop for users already notified:
                 if subscription.user.id in users_done:
