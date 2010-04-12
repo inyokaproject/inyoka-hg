@@ -33,6 +33,7 @@ NOTIFY_BY_CHOICES = (
 
 NOTIFICATION_CHOICES = (
     ('topic_move', 'Verschieben eines eigenen Themas'),
+    ('topic_split', 'Aufteilen eines Themas'),
     ('pm_new', 'Neuer privater Nachricht')
 )
 

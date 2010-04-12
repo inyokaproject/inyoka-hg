@@ -1112,6 +1112,21 @@ def splittopic(request, topic_slug):
 
             session.commit()
 
+            nargs = {
+                'username': None,
+                'new_topic': new_topic,
+                'old_topic': old_topic,
+                'mod': request.user.username
+            }
+            users_done = set([request.user.id])
+            subscriptions = Subscription.objects.filter(Q(topic_id=old_topic.id) | Q(topic_id=new_topic.id) | Q(forum_id=new_forum.id))
+            for subscription in subscriptions:
+                if subscription.user.id in users_done:
+                    continue
+                nargs['username'] = subscription.user.username
+                notify_about_subscription(subscription, 'topic_splited',
+                    u'Das Thema „%s“ wurde aufgeteilt.' % old_topic.title, nargs)
+                users_done.add(subscription.user.id)
             return HttpResponseRedirect(url_for(new_topic))
     else:
         form = SplitTopicForm(initial={
