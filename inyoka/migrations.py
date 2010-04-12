@@ -52,7 +52,6 @@ def join_flags(flags):
 def execute_script(con, name):
     """Execute a script on a connectable."""
     f = file(join(SQL_FILES, name))
-    print file(join(SQL_FILES, name)).read()
     try:
         con.execute(f.read())
         print 'done'
