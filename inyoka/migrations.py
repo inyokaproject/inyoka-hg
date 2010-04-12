@@ -1103,6 +1103,19 @@ def fix_ubuntu_version_length(m):
     """Varchar(4) -> Varchar(5)"""
     m.engine.execute('ALTER TABLE portal_subscription MODIFY COLUMN ubuntu_version VARCHAR(5);')
 
+def enable_split_topic_notification(m)
+    """Enable split topic notification for alle users."""
+    update = 'UPDATE portal_user SET _settings = %s WHERE id = %d;'
+    rs = m.execute('SELECT id,_settings FROM portal_user')
+    for user,_settings in rs:
+        settings = cPickle.loads(_settings)
+        if 'topic_split' not in settings['notifications']:
+            settings['notifications'].append('topic_split')
+        else:
+            continue
+        _settings = cPickle.dumps(settings)
+        m.engine.execute(update, [_settings,user]
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
