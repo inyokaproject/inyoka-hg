@@ -1112,6 +1112,7 @@ def splittopic(request, topic_slug):
 
             session.commit()
 
+            new_forum = new_topic.forum
             nargs = {
                 'username': None,
                 'new_topic': new_topic,
@@ -1128,7 +1129,7 @@ def splittopic(request, topic_slug):
                     continue
                 # Added Users to users_done which should not get any
                 # notification for splited Topics:
-                if 'topic_split' in subscription.user.settings.get('notifications',('topic_split',)):
+                if 'topic_split' not in subscription.user.settings.get('notifications',('topic_split',)):
                     users_done.add(subscription.user.id)
                     continue
                 nargs['username'] = subscription.user.username
