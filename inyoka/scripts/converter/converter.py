@@ -13,10 +13,14 @@
 import re
 import sys
 import cPickle
+import werkzeug
 from os import path, listdir
 from datetime import datetime
 from werkzeug import unescape
-from werkzeug.utils import url_unquote
+try:
+    from werkzeug.utils import url_unquote
+except ImportError:
+    from werkzeug import url_unquote
 from _mysql_exceptions import IntegrityError, OperationalError as meOperationalError
 from django.db import connection, transaction
 from sqlalchemy import create_engine, MetaData, Table

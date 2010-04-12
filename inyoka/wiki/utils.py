@@ -16,12 +16,16 @@ import os
 import re
 import shutil
 import urllib
+import werkzeug
 from subprocess import Popen, PIPE
 from cStringIO import StringIO
 from tempfile import TemporaryFile
 from sha import new as sha1
 from itertools import ifilter
-from werkzeug.utils import url_quote
+try:
+    from werkzeug.utils import url_quote
+except ImportError:
+    from werkzeug import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
