@@ -661,7 +661,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         if request.user.settings.get('autosubscribe', True) and \
            not Subscription.objects.user_subscribed(request.user,
-                                                    topic=topic):
+                                                    topic=topic) \
+           and not post_id:
             subscription = Subscription(
                 user=request.user,
                 topic_id=topic.id,
