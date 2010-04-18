@@ -112,7 +112,7 @@ FORUM_TOPIC_CACHE = 100
 FORUM_THUMBNAIL_SIZE = (64, 64)
 # time in seconds after posting a user is allowed to edit/delete his own posts,
 # for posts (without, with) replies. -1 for infinitely, 0 for never
-FORUM_OWNPOST_EDIT_LIMIT = (-1, 43200)
+FORUM_OWNPOST_EDIT_LIMIT = (-1, 1800)
 FORUM_OWNPOST_DELETE_LIMIT = (86400, 0)
 
 # the id of the ikhaya team group
