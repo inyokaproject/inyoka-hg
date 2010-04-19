@@ -26,6 +26,7 @@ from sqlalchemy.sql import select, func, and_, not_
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.text import slugify, shorten_filename, get_new_unique_filename
+from inyoka.utils.dates import timedelta_to_seconds
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
@@ -902,8 +903,7 @@ class Post(object):
         if t == -1:
             return True
         delta = datetime.utcnow() - self.pub_date
-        delta = delta.days * 86400 + delta.seconds
-        return delta < t
+        return timedelta_to_seconds(delta) < t
 
     def __unicode__(self):
         return '%s - %s' % (
