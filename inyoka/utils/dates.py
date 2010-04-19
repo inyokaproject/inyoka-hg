@@ -213,7 +213,7 @@ def format_timedelta(d, now=None, use_since=False):
 
 def timedelta_to_seconds(t):
     """
-    Format a datetime.timedelta o
+    Convert a datetime.timedelta to Seconds.
     """
     return t.days * 86400 + t.seconds
 
