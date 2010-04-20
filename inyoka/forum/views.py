@@ -1121,9 +1121,13 @@ def splittopic(request, topic_slug):
                 'mod': request.user.username
             }
             users_done = set([request.user.id])
-            subscriptions = Subscription.objects.select_related('user').filter(
-                Q(topic_id=old_topic.id) | Q(forum_id=new_forum.id)
-            )
+            filter = Q(topic_id=old_topic.id)
+            if data['action'] == 'new':
+                filter |= Q(forum_id=new_forum.id)
+            # Disable until http://forum.ubuntuusers.de/topic/benachrichtigungen-nach-teilung-einer-diskuss/ is resolved to not spam the users
+            #subscriptions = Subscription.objects.select_related('user').filter(filter)
+            subscriptions = []
+
             for subscription in subscriptions:
                 # Skip loop for users already notified:
                 if subscription.user.id in users_done:
