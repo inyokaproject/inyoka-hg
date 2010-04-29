@@ -50,3 +50,4 @@ def easy_install():
     require('hosts', provided_by = [test, staging, production])
     prompt('ez', 'easy_install parameters')
     run('unlet PYTHONPATH; source %s/bin/activate; easy_install $(ez)' % target_dir)
+

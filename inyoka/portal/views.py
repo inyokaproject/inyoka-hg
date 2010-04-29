@@ -670,7 +670,7 @@ def usercp_settings(request):
             'highlight_search': settings.get('highlight_search', True),
             'mark_read_on_logout': settings.get('mark_read_on_logout', False)
         }
-        form = UserCPSettingsForm(values)
+        form = UserCPSettingsForm(initial=values)
     return {
         'form': form,
         'user': request.user,

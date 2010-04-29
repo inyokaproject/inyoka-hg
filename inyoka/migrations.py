@@ -1103,6 +1103,21 @@ def fix_ubuntu_version_length(m):
     """Varchar(4) -> Varchar(5)"""
     m.engine.execute('ALTER TABLE portal_subscription MODIFY COLUMN ubuntu_version VARCHAR(5);')
 
+def enable_split_topic_notification(m):
+    """Enable split topic notification for alle users."""
+    user_table = Table('portal_user', m.metadata, autoload=True)
+    for user in select_blocks(user_table.select(), user_table.c.id):
+        settings = cPickle.loads(user._settings.encode('utf-8'))
+        if not settings.has_key('notifications'):
+            settings['notifications'] = []
+        if u'topic_split' not in settings['notifications']:
+            settings['notifications'].append(u'topic_split')
+        else:
+            continue
+        query = user_table.update(user_table.c.id==user.id,
+                { u'_settings': cPickle.dumps(settings).decode('utf-8') })
+        m.engine.execute(query)
+
 MIGRATIONS = [
     create_initial_revision, fix_ikhaya_icon_relation_definition,
     add_skype_and_sip, add_subscription_notified_and_forum,
@@ -1131,5 +1146,6 @@ MIGRATIONS = [
     add_user_count_posts_flag, add_limit_avatar_size, add_tcaptcha_table,
     add_forum_force_version_flag, add_claimed_by_column,
     add_subscription_notified_ubuntu_version, drop_tcaptcha_table,
-    add_event_duration_field, hide_signatures_for_anonymous, fix_ubuntu_version_length
+    add_event_duration_field, hide_signatures_for_anonymous, fix_ubuntu_version_length,
+    enable_split_topic_notification
 ]

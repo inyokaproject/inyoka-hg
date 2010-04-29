@@ -211,6 +211,11 @@ def format_timedelta(d, now=None, use_since=False):
     return (use_since and 'seit' or 'vor') + ' ' + \
            u' und '.join(format(a, *b) for a, b in result)
 
+def timedelta_to_seconds(t):
+    """
+    Convert a datetime.timedelta to Seconds.
+    """
+    return t.days * 86400 + t.seconds
 
 def natural_date(value, prefix=False, enforce_utc=False):
     """
