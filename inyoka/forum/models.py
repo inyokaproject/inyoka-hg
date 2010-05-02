@@ -74,10 +74,10 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('7.04', 'Feisty Fawn', active=False),
     UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
     UbuntuVersion('8.04', 'Hardy Heron', lts=True),
-    UbuntuVersion('8.10', 'Intrepid Ibex'),
+    UbuntuVersion('8.10', 'Intrepid Ibex', active=False),
     UbuntuVersion('9.04', 'Jaunty Jackalope'),
-    UbuntuVersion('9.10', 'Karmic Koala', current=True),
-    UbuntuVersion('10.04', 'Lucid Lynx', class_='unstable'),
+    UbuntuVersion('9.10', 'Karmic Koala'),
+    UbuntuVersion('10.04', 'Lucid Lynx', lts=True, current=True),
 ]
 UBUNTU_VERSIONS.reverse()
 
