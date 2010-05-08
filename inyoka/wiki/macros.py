@@ -372,7 +372,8 @@ class TableOfContents(TreeMacro):
             stack[-1].children.append(nodes.ListItem([link]))
         head = nodes.Layer(children=[nodes.Text(u'Inhaltsverzeichnis')],
                            class_='head')
-        result = nodes.Layer(class_='toc', children=[head, result])
+        result = nodes.Layer(class_='toc toc-depth-%d' % self.depth,
+                             children=[head, result])
         return result
 
 

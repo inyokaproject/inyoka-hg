@@ -260,6 +260,7 @@ div.workinprogress h3 {
   color: #3B2800;
 }
 
+.toc a.toctoggle,
 .toc .head a {
   text-decoration: none;
 }

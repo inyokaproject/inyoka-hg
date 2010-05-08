@@ -4,7 +4,7 @@
  *
  * Some general scripts for the whole portal (requires jQuery).
  *
- * :copyright: 2007-2008 by Christoph Hack, Armin Ronacher, Benjamin Wiegand.
+ * :copyright: 2007-2010 by Christoph Hack, Armin Ronacher, Benjamin Wiegand, kaputtnik, Marian Sigler.
  * :license: GNU GPL.
  */
 
@@ -57,16 +57,107 @@ $(document).ready(function() {
         .appendTo(navigation);
   })();
 
-  // create a link to hide a toc
-  $('.toc .head').append(
-    $('<a> [-]</a>').toggle(function() {
-        $(this).text(' [+]').parent().parent().find('ol').hide();
-      },
-      function() {
-        $(this).text(' [-]').parent().parent().find('ol').show();
+
+  // Make TOC links expandable.
+	(function() {
+		//Execute this function only when if there are tocs.
+		if (! $('.toc').length)
+			return;
+    if (navigator.userAgent.match(/konqueror/i))
+			return;
+
+		// create a link to hide a toc
+		$('.toc .head').append(
+			$('<a> [-]</a>').toggle(function() {
+          $(this).text(' [+]').parent().next().slideUp('fast');
+			  },
+			  function() {
+          $(this).text(' [-]').parent().next().slideDown('fast');
+			  }
+			)
+		);
+
+    $('.toc').each(function () {
+      toc = $(this);
+      // find out depth of old toc, so we can make ours look the same in the beginning 
+      var _classes = this.className.split(/\s+/)
+      for(var i=0; i < _classes.length; i++) {
+        if(_classes[i].match(/^toc-depth-(\d+)$/)) {
+          tocDepth = parseInt(_classes[i].slice(10));
+          break;
+        }
       }
-    )
-  );
+      if(typeof tocDepth === 'undefined')
+        return;
+
+      // mark old toc for later deletion
+      toc.find('ol').addClass('originaltoc');
+
+      // create first level
+      newtoc = $('<ol class="arabic"></ol>').hide().insertAfter(toc.find('.head'));
+
+      // Create the whole tocTree
+      var
+        tocTree = "",						// becomes Elementtree
+        level = 1,							// which toc-level am I?
+        headerLinks = $('.headerlink');		// Give me all the headers
+      for (var i=0 ; i < headerLinks.length ; i++ ){
+        var link = $(headerLinks[i]).parent().attr("id");
+        var linkText = $(headerLinks[i]).parent().text();
+        var linkText = linkText.substring(0, linkText.length-1).htmlEscape();
+        var thisClass = $(headerLinks[i]).parent().parent().attr("class");
+
+        if ( i < headerLinks.length-1 ) {
+          nextClass = $(headerLinks[i+1]).parent().parent().attr("class")
+        } else {
+          nextClass = "section_1"
+        };
+
+        nextLevel = parseInt(nextClass.match(/^section_(\d+)$/)[1]);
+        if ( nextLevel > level) {
+          // append "<li><ol>" !! without closing tags !!
+          tocTree +='<li><a href="#' + link + '" class="crosslink">' + linkText + '</a>';
+          tocTree += '<ol class="arabic toc-item-depth-' + level + '">';
+          level ++;
+        } else { 			//There is no deeper level
+          tocTree += '<li><a href="#' + link + '">' + linkText + '</a></li>';
+          while( nextLevel < level ) {
+            tocTree += '</ol></li>';
+            level --;
+          };
+        };
+      };
+      newtoc.append(tocTree);
+      
+      //we have to hide all sublevels, create [+/-], and the click-event
+      toc.find(":not(.originaltoc) ol").each(function(){
+        $('<a class="toctoggle"> [-] </a>').toggle(
+          function() {
+            $(this).text(' [+] ').next().slideUp('fast');
+          },
+          function() {
+            $(this).text(' [-] ').next().slideDown('fast');
+          }
+        ).insertBefore($(this));
+
+        var _classes = this.className.split(/\s+/)
+        for(var i=0; i < _classes.length; i++) {
+          if(_classes[i].match(/^toc-item-depth-(\d+)$/)) {
+            curDepth = parseInt(_classes[i].slice(15));
+            break;
+          }
+        }
+        if(curDepth >= tocDepth){
+          $(this).parent().find('.toctoggle').click()
+        };
+
+      });
+
+      toc.find('.originaltoc').remove();
+      newtoc.show();
+    });
+	}());
+
 
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
@@ -287,3 +378,9 @@ $(document).ready(function() {
   })();
 
 });
+
+String.prototype.htmlEscape = function () {
+  return this.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;").replace(/"/, "&quot;");
+}
+
