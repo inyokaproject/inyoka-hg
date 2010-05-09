@@ -377,7 +377,58 @@ $(document).ready(function() {
     });
   })();
 
+  (function () {
+    var SHORT_NOTATION_VERSIONS = new Array('karmic', 'lucid');
+
+    var set_version = function (link) {
+      group = $(link).parent().parent();
+      version = $(link).text().toLowerCase();
+      group.find('.ppa-code').remove();
+      sel = group.find('.selector');
+
+      sel.after('<pre class="ppa-code">' +
+          group.data['long_notation_text'].replace(/VERSION/, version) + '</div></pre>');
+      if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
+        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
+        sel.after('<p class="ppa-code">' +
+            group.data['short_notation_text'] + '</p>');
+      }
+      return false;
+    };
+
+    $('.ppa-list-outer').each(function () {
+      $this = $(this);
+      versions = new Array();
+      var need_short_notation = false;
+      classes = this.className.split(/\s+/);
+      for(var i=0; i < classes.length; i++) {
+        if(classes[i].match(/^ppa-version-/)) {
+          version = classes[i].slice(12)
+          versions.push(version);
+          if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
+            var need_short_notation = true;
+          }
+        }
+      }
+
+      $this.data['short_notation_text'] = $this.find('.ppa-list-short-code .contents p').html();
+      $this.data['long_notation_text'] = $this.find('.ppa-list-long-code .contents pre').html();
+
+      $this.children('.contents').remove();
+      sel = $('<p class="selector">').appendTo($this);
+      for(var i=0; i < versions.length; i++) {
+        var version = versions[i];
+        latest_link = $('<a href="#">')
+          .text(version.substr(0,1).toUpperCase() + version.substr(1))
+          .click(function(){ return set_version(this); })
+          .appendTo(sel).after('<span> </span>');
+      }
+      set_version(latest_link[0]);
+    })
+  })();
+
 });
+
 
 String.prototype.htmlEscape = function () {
   return this.replace(/&/g, "&amp;").replace(/</g, "&lt;")
