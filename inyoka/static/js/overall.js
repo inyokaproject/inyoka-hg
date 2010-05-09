@@ -386,6 +386,8 @@ $(document).ready(function() {
       group.find('.ppa-code').remove();
       sel = group.find('.selector');
 
+      $(link).addClass('active').siblings('a').removeClass('active');
+
       sel.after('<pre class="ppa-code">' +
           group.data['long_notation_text'].replace(/VERSION/, version) + '</div></pre>');
       if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
@@ -428,6 +430,7 @@ $(document).ready(function() {
   })();
 
 });
+
 
 
 String.prototype.htmlEscape = function () {

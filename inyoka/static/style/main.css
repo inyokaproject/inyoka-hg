@@ -1299,3 +1299,7 @@ select.firstletterselect option:first-letter {
 .status_unsolved:before {
     content: url('http://static.ubuntuusers.de/img/forum_unsolved.png');
 }
+
+.ppa-list-outer .selector a.active {
+    font-weight: bold;
+}
