@@ -134,7 +134,7 @@
 import re
 import unicodedata
 from inyoka.utils.css import filter_style
-from inyoka.utils.urls import href
+from inyoka.utils.urls import href, url_for
 from inyoka.utils.storage import storage
 from inyoka.wiki.parser.lexer import escape, Lexer
 from inyoka.wiki.parser.machine import Renderer, RenderContext
@@ -149,12 +149,19 @@ __all__ = ['parse', 'render', 'stream', 'escape']
 # the maximum depth of stack-protected nodes
 MAXIMUM_DEPTH = 200
 
+def _ikhaya_id(x):
+    from inyoka.ikhaya.models import Article
+    try:
+        return url_for(Article.objects.get(id=int(x)))
+    except ValueError:
+        return href('ikhaya', x)
+
 # the default inter-"wiki"s
 STANDARD_WIKI_MAP = {
     'user':   lambda x: href('portal', 'user', x),
     'paste':  lambda x: href('pastebin', x),
     'topic':  lambda x: href('forum', 'topic', x),
-    'ikhaya': lambda x: href('ikhaya', x),
+    'ikhaya': _ikhaya_id,
     'search': lambda x: href('portal', 'search', query=x),
 }
 
