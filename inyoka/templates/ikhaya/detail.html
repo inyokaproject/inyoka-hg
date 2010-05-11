@@ -47,6 +47,8 @@
     <h3 class="title"><a href="{{ article|url }}">{{ article.subject|e }}</a></h3>
     {%- if article.icon -%}
     <img class="icon" src="{{ article.icon|url }}" alt="{{ article.icon.identifier|e }}" />
+    {%- elif article.category.icon -%}
+    <img class="icon" src="{{ article.category.icon|url }}" alt="{{ article.category.icon.identifier|e }}" />
     {%- endif -%}
     <div class="intro">
       {{ article.rendered_intro }}
