@@ -24,13 +24,18 @@
   <tr>
     <th>{{ table.get_html('identifier', 'Bezeichner') }}</th>
     <th>{{ table.get_html('is_ikhaya_icon', 'Ist Ikhaya-Icon') }}</th>
+    <th>Aktionen</th>
   </tr>
   </thead>
   <tbody>
-  {%- for file in table.get_objects() %}
+  {%- for file in files %}
   <tr>
     <td><a href="{{ file|url('edit') }}">{{ file.identifier|e }}</a></td>
     <td>{{ file.is_ikhaya_icon and 'ja' or 'nein' }}</td>
+    <td class="actions">
+      <a href="{{ file|url('edit') }}">Editieren</a>
+      <a href="{{ file|url('delete') }}">Löschen</a>
+    </td>
   </tr>
   {%- else %}
   <tr>

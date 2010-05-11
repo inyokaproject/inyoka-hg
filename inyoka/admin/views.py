@@ -202,7 +202,8 @@ def files(request):
     sortable = Sortable(StaticFile.objects.all(), request.GET, 'identifier',
         columns=['identifier', 'is_ikhaya_icon'])
     return {
-        'table': sortable
+        'table': sortable,
+        'files': sortable.get_objects(),
     }
 
 
@@ -243,6 +244,21 @@ def file_edit(request, file=None):
         'form':   form,
         'file':   file
     }
+
+
+@require_permission('static_file_edit')
+def file_delete(request, file):
+    file = StaticFile.objects.get(identifier=file)
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash(u'Löschen abgebrochen')
+        else:
+            file.delete()
+            flash(u'Die Datei „%s” wurde erfolgreich gelöscht'
+                  % escape(file.identifier), True)
+    else:
+        flash(render_template('admin/files_delete.html', {'file': file}))
+    return HttpResponseRedirect(href('admin', 'files'))
 
 
 @require_permission('blog_edit')

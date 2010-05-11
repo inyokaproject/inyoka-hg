@@ -1,0 +1,19 @@
+{#
+    admin/files_delete.html
+    ~~~~~~~~~~~~~~~~~~~~~~~
+
+    This template is flashed to ensure that the user want to delete the selected file.
+
+    :copyright: 2010 by Christopher Grebs.
+    :license: GNU GPL.
+#}
+
+
+<form action="{{ file|url('delete')|e }}" method="post">
+  <p>Möchtest du die Datei „<a href="{{ file|url('show')|e }}">{{ file.identifier|e }}</a>“ wirklich löschen?</p>
+  <p>
+    <input type="submit" value="Löschen" />
+    <input type="submit" name="cancel" value="Abbrechen" />
+  </p>
+</form>
+
