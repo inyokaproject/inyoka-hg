@@ -429,6 +429,53 @@ $(document).ready(function() {
     })
   })();
 
+  (function () {
+    var set_version = function(link) {
+      version = $(link).text().toLowerCase();
+      $(link).addClass('active').siblings('a').removeClass('active');
+      sel = $(link).parent();
+      sel.siblings('pre').text(sel.data['deb-url-orig'].replace(/VERSION/, version));
+      return false;
+      
+      group = $(link).parent().parent();
+      version = $(link).text().toLowerCase();
+      group.find('.ppa-code').remove();
+      sel = group.find('.selector');
+
+      $(link).addClass('active').siblings('a').removeClass('active');
+
+      sel.after('<pre class="ppa-code">' +
+          group.data['long_notation_text'].replace(/VERSION/, version) + '</div></pre>');
+      if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
+        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
+        sel.after('<p class="ppa-code">' +
+            group.data['short_notation_text'] + '</p>');
+      }
+      return false;
+    };
+      
+    $('.thirdpartyrepo-outer').each(function () {
+      versions = new Array();
+      classes = this.className.split(/\s+/);
+      for(var i=0; i < classes.length; i++) {
+        if(classes[i].match(/^thirdpartyrepo-version-/)) {
+          version = classes[i].slice(23)
+          versions.push(version);
+        }
+      }
+      sel = $('<div class="selector">').insertBefore($(this).find('.contents pre'));
+      sel.data['deb-url-orig'] = $(this).find('.contents pre').text();
+      for (var i=0; i < versions.length; i++) {
+        var last_link = $('<a href="#">')
+          .text(versions[i].substr(0,1).toUpperCase() + versions[i].substr(1))
+          .click(function() { return set_version(this); })
+          .appendTo(sel).after('<span> </span>');
+      }
+      set_version(last_link[0]);
+      return true;
+    })
+  })();
+
 });
 
 

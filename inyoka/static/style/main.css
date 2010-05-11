@@ -1300,6 +1300,7 @@ select.firstletterselect option:first-letter {
     content: url('http://static.ubuntuusers.de/img/forum_unsolved.png');
 }
 
+.thirdpartyrepo-outer .selector a.active,
 .ppa-list-outer .selector a.active {
     font-weight: bold;
 }
