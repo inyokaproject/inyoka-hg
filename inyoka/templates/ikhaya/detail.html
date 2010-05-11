@@ -81,6 +81,9 @@
                 })
             );
           }
+          if (document.location.href.search('#new_comment') != -1) {
+            $('#comments').show();
+          }
           /* ]]> */
         </script>
         {%- for comment in comments %}
@@ -98,15 +101,15 @@
           {%- endif %}
             <div class="commentinfo">
               <div class="linklist">
-                {%- if can_admin_comment %}
+                {%- if can_admin_comment or comment.author_id == USER.id %}
                 <a href="{{ comment|url('edit') }}" class="adminlink action action_edit">bearbeiten</a> |
-                {%- if comment.deleted %}
+                {% endif %}
+                {%- if can_admin_comment and comment.deleted %}
                 <a href="{{ comment|url('restore') }}" class="adminlink action action_restore">wiederherstellen
-                {%- else %}
+                {%- elif can_admin_comment and not comment.deleted %}
                 <a href="{{ comment|url('hide') }}" class="adminlink action action_hide">verbergen
                 {%- endif -%}
                 </a> |
-                {%- endif %}
                 {%- if can_post_comment %}
                 <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
                 {%- endif %}

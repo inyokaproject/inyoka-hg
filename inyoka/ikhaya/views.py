@@ -151,7 +151,7 @@ def detail(request, year, month, day, slug):
                 c.pub_date = datetime.utcnow()
                 flash(u'Dein Kommentar wurde erstellt.', True)
             c.save()
-            return HttpResponseRedirect(url_for(article))
+            return HttpResponseRedirect(url_for(c))
     elif request.GET.get('moderate'):
         comment = Comment.objects.get(id=int(request.GET.get('moderate')))
         form = EditCommentForm(initial={

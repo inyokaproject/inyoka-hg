@@ -337,7 +337,9 @@ class Comment(models.Model):
     def get_absolute_url(self, action='show'):
         if action in ['hide', 'restore', 'edit']:
             return href('ikhaya', 'comment', self.id, action)
-        return self.article.get_absolute_url()
+        stamp = self.article.pub_date.strftime('%Y/%m/%d')
+        return href('ikhaya', stamp, self.article.slug,
+                    _anchor='comment_%s' % self.article.comment_count)
 
     def save(self, force_insert=False, force_update=False):
         if self.id is None:
