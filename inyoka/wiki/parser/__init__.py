@@ -152,9 +152,10 @@ MAXIMUM_DEPTH = 200
 def _ikhaya_id(x):
     from inyoka.ikhaya.models import Article
     try:
-        return url_for(Article.objects.get(id=int(x)))
-    except ValueError:
-        return href('ikhaya', x)
+        id = int(x)
+        return url_for(Article.objects.get(id=id))
+    except (ValueError, Article.DoesNotExist):
+        return href('ikhaya')
 
 # the default inter-"wiki"s
 STANDARD_WIKI_MAP = {
