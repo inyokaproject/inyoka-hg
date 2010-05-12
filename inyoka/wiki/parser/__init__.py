@@ -155,7 +155,7 @@ def _ikhaya_id(x):
         id = int(x)
         return url_for(Article.objects.get(id=id))
     except (ValueError, Article.DoesNotExist):
-        return href('ikhaya')
+        return href('ikhaya', x)
 
 # the default inter-"wiki"s
 STANDARD_WIKI_MAP = {
