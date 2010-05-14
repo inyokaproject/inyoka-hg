@@ -185,23 +185,25 @@ hide_comment = change_comment(True, u'Der Kommentar wurde verborgen.')
 restore_comment = change_comment(False, u'Der Kommentar wurde wiederhergestellt.')
 
 
-@require_permission('comment_edit')
 @templated('ikhaya/edit_comment.html')
 def edit_comment(request, comment_id):
     comment = Comment.objects.get(id=comment_id)
-    if request.method == 'POST':
-        form = EditCommentForm(request.POST)
-        if form.is_valid():
-            comment.text = form.cleaned_data['text']
-            comment.save()
-            flash('Der Kommentar wurde gespeichert', True)
-            return HttpResponseRedirect(comment.get_absolute_url())
-    else:
-        form = EditCommentForm(initial={'text': comment.text})
-    return {
-        'comment':  comment,
-        'form':     form,
-    }
+    user = request.user
+    if user.can('comment_edit') or user.id == comment.author.id:
+        if request.method == 'POST':
+            form = EditCommentForm(request.POST)
+            if form.is_valid():
+                comment.text = form.cleaned_data['text']
+                comment.save()
+                flash('Der Kommentar wurde gespeichert', True)
+                return HttpResponseRedirect(comment.get_absolute_url())
+        else:
+            form = EditCommentForm(initial={'text': comment.text})
+        return {
+            'comment':  comment,
+            'form':     form,
+         }
+    return AccessDeniedResponse()
 
 
 @templated('ikhaya/archive.html', modifier=context_modifier)
