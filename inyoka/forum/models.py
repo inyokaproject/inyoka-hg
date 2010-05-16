@@ -78,6 +78,7 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('9.04', 'Jaunty Jackalope'),
     UbuntuVersion('9.10', 'Karmic Koala'),
     UbuntuVersion('10.04', 'Lucid Lynx', lts=True, current=True),
+    UbuntuVersion('10.10', 'Maverick Meerkat', class_='unstable'),
 ]
 UBUNTU_VERSIONS.reverse()
 
