@@ -58,6 +58,7 @@
     {%- if article %}
     <span class="linklist">|
       <a href="{{ article|url() }}">Artikel anzeigen</a> |
+      <a href="{{ article|url('id') }}">#</a> |
       <a href="{{ article|url('delete') }}">Löschen</a>
     </span>
     {%- endif %}

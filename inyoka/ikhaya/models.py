@@ -190,7 +190,8 @@ class Article(models.Model):
         return href(*{
             'show': ('ikhaya', stamp, self.slug),
             'edit': ('admin', 'ikhaya', 'articles', 'edit', self.id),
-            'delete': ('admin', 'ikhaya', 'articles', 'delete', self.id)
+            'delete': ('admin', 'ikhaya', 'articles', 'delete', self.id),
+            'id': ( 'portal', 'ikhaya',  self.id)
         }[action])
 
     @property

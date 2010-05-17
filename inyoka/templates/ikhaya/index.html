@@ -52,7 +52,8 @@
           {%- else %} {{ article.comment_count|hnumber|capitalize }} <a href="{{ article|url }}#comments">Kommentare</a>
           {%- endif %}
         {%- endif %}
-        {%- if USER.can('article_edit') %} | <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
+        {%- if USER.can('article_edit') %} | <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a> |
+                                             <a href="{{ article|url('id') }}" class="adminlink">#</a>{% endif %}
       </p>
     </li>
     {%- endfor %}
