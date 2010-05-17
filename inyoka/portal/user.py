@@ -593,7 +593,11 @@ class User(models.Model):
     def primary_group(self):
         if self._primary_group is None:
             # we use the first assigned group as the primary one
-            return self.groups.all()[0]
+            groups = self.groups.all()
+            if len(groups) >= 1:
+                return groups[0]
+            else:
+                return None
         return self._primary_group
 
     @deferred

@@ -168,7 +168,7 @@
         {%- endif %}>
           <p class="username{% if not post.author.is_active %} inactive{% endif %}">
             <a href="{{ post.author|url }}">{{ post.author.username|e }}</a>
-            {%- if post.author.primary_group.icon %}
+            {%- if post.author.primary_group and post.author.primary_group.icon %}
             <img class="teamicon" src="{{ post.author.primary_group.icon_url }}" alt="Teamicon" />
             {%- endif %}
           </p>
