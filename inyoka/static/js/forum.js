@@ -128,9 +128,23 @@ $(function () {
         if ($('a.solve_topic').hasClass('action_solve')) {
           $('a.solve_topic').removeClass('action_solve');
           $('a.solve_topic').addClass('action_unsolve');
+	  with ($('span.status_unsolved')) {
+	    fadeOut('fast');
+	    removeClass('status_unsolved');
+	    addClass('status_solved');
+	    text('gelöst');
+	    fadeIn('fast');
+	  }
         } else {
           $('a.solve_topic').removeClass('action_unsolve');
           $('a.solve_topic').addClass('action_solve');
+	  with ($('span.status_solved')) {
+	    fadeOut('fast');
+	    removeClass('status_solved');
+	    addClass('status_unsolved');
+	    text('ungelöst');
+	    fadeIn('fast');
+	  }
         }
         return false;
     })});
