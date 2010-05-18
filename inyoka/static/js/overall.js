@@ -377,6 +377,7 @@ $(document).ready(function() {
     });
   })();
 
+  // Add a version switcher to the `PPA` template.
   (function () {
     var SHORT_NOTATION_VERSIONS = new Array('karmic', 'lucid');
 
@@ -398,7 +399,6 @@ $(document).ready(function() {
       return false;
     };
 
-    // Add a version switcher to the `PPA` template.
     $('.ppa-list-outer').each(function () {
       $this = $(this);
       versions = new Array();
@@ -419,13 +419,15 @@ $(document).ready(function() {
 
       $this.children('.contents').remove();
       sel = $('<p class="selector">').appendTo($this);
+      sel.prepend('<strong>Version: </strong>');
       for(var i=0; i < versions.length; i++) {
         var version = versions[i];
         latest_link = $('<a href="#">')
           .text(version.substr(0,1).toUpperCase() + version.substr(1))
           .click(function(){ return set_version(this); })
-          .appendTo(sel).after('<span> </span>');
+          .appendTo(sel).after('<span class="linklist"> | </span>');
       }
+      latest_link.next('.linklist').remove(); // remove last |
       set_version(latest_link[0]);
     })
   })();
