@@ -398,6 +398,7 @@ $(document).ready(function() {
       return false;
     };
 
+    // Add a version switcher to the `PPA` template.
     $('.ppa-list-outer').each(function () {
       $this = $(this);
       versions = new Array();
@@ -429,6 +430,7 @@ $(document).ready(function() {
     })
   })();
 
+  // Add a version switcher to the `Fremdquelle` template.
   (function () {
     var set_version = function(link) {
       version = $(link).text().toLowerCase();
@@ -464,13 +466,16 @@ $(document).ready(function() {
         }
       }
       sel = $('<div class="selector">').insertBefore($(this).find('.contents pre'));
-      sel.data['deb-url-orig'] = $(this).find('.contents pre').text();
+      sel
+        .prepend('<strong>Version: </strong>')
+        .data['deb-url-orig'] = $(this).find('.contents pre').text();
       for (var i=0; i < versions.length; i++) {
         var last_link = $('<a href="#">')
           .text(versions[i].substr(0,1).toUpperCase() + versions[i].substr(1))
           .click(function() { return set_version(this); })
-          .appendTo(sel).after('<span> </span>');
+          .appendTo(sel).after('<span class="linklist"> | </span>');
       }
+      last_link.next().remove(); // remove last |
       set_version(last_link[0]);
       return true;
     })
