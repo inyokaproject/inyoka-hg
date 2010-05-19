@@ -49,12 +49,7 @@
     <li>
       {%- if session.link %}
       <a href="{{ session.link }}" class="{{ session.type }}" title="{{ session.type|capitalize }}">{{ (session.text or 'Gast')|e }}</a>
-      {%- else %}
-      <span class="{{ session.type }}">{{ (session.text or 'Gast')|e }}</span>
       {%- endif %}
-      {{ session.action }}
-      <small>({{ session.last_change|timedeltaformat(true) }})</small>
-      {% if session.category %} (<a href="{{ session.action_link|e }}">{{ session.category|e }}</a>){% endif %}
     </li>
     {%- endfor %}
   </ul>
