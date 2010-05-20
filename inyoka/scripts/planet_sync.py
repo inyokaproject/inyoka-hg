@@ -85,7 +85,8 @@ def sync():
                                          int(time()), output_format='xhtml')
                 else:
                     title = escape(title)
-            title = entry.get('title')
+            else:
+                title = entry.get('title')
             url = entry.get('link') or blog.blog_url
             text = 'content' in entry and entry.content[0] or \
                    entry.get('summary_detail')
