@@ -46,11 +46,11 @@
   {%- if sessions.sessions %}
   <ul>
     {%- for session in sessions.sessions %}
-    <li>
       {%- if session.link %}
-      <a href="{{ session.link }}" class="{{ session.type }}" title="{{ session.type|capitalize }}">{{ (session.text or 'Gast')|e }}</a>
+      <li>
+        <a href="{{ session.link }}" class="{{ session.type }}" title="{{ session.type|capitalize }}">{{ (session.text or 'Gast')|e }}</a>
+      </li>
       {%- endif %}
-    </li>
     {%- endfor %}
   </ul>
   {%- endif %}
