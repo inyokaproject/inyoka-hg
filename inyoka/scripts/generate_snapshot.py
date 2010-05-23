@@ -65,7 +65,7 @@ def create_snapshot(folder):
             # create subdirectories
             for part in page.trace[:-1]:
                 pth = path.join(rev.attachment and attachment_folder or
-                                page_folder, *part.split('/'))
+                                page_folder, *part.split('/')).replace(' ', '_')
                 if not path.exists(pth):
                     os.mkdir(pth)
 
