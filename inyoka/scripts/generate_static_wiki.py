@@ -242,7 +242,7 @@ def create_snapshot():
     # sort out excluded pages
     for page in unsorted:
         for exclude in EXCLUDE_PAGES:
-            if exclude in page.lower():
+            if exclude.lower() in page.lower():
                 excluded_pages.add(page)
             else:
                 pages.add(page)
