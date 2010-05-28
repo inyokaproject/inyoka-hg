@@ -22,7 +22,7 @@
       </author>
     </authorgroup>
 
-    <releaseinfo>In diesem Handbuch wird die Version 2.14 des GNOME-Desktops beschrieben.</releaseinfo>
+    <releaseinfo>Dies ist der aktuelle Snapshot des Wikis vom {{ today.strftime('%d.%m.%Y') }}.</releaseinfo>
   </bookinfo>
 
   {%- for page in pages %}
