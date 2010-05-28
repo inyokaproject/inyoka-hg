@@ -146,7 +146,7 @@ class RegisterForm(forms.Form):
 
         raise forms.ValidationError(mark_safe(
             u'Die angegebene E-Mail-Adresse wird bereits benutzt!'
-            u' Fals du dein Passwort vergessen hast, kannst du es '
+            u' Falls du dein Passwort vergessen hast, kannst du es '
             u'<a href="%s">wiederherstellen lassen</a>' % escape(
                 href('portal', 'lost_password')))
         )

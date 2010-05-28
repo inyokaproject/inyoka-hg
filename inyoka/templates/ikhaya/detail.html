@@ -101,7 +101,9 @@
           {%- endif %}
             <div class="commentinfo">
               <div class="linklist">
-                {%- if can_admin_comment or comment.author_id == USER.id %}
+                {%- if comment.author_id == USER.id %}
+                <a href="{{ comment|url('edit') }}" class="action action_edit">bearbeiten</a> |
+                {%- elif can_admin_comment %}
                 <a href="{{ comment|url('edit') }}" class="adminlink action action_edit">bearbeiten</a> |
                 {% endif %}
                 {%- if can_admin_comment and comment.deleted %}
