@@ -71,7 +71,7 @@ class RegisterForm(forms.Form):
     techniques for bot catching included e.g a CAPTCHA and a hidden captcha
     for bots that just fill out everything.
     """
-    username = forms.CharField(label='Benutzername', max_length=30)
+    username = forms.CharField(label='Benutzername', max_length=20)
     email = EmailField(label='E-Mail', help_text=u'Wir benötigen deine '
         u'E-Mail-Adresse, um dir ein neues Passwort zu schicken, falls du '
         u'es vergessen haben solltest. Sie ist für andere Benutzer nicht '
