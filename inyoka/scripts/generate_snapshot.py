@@ -11,21 +11,70 @@
 """
 import os
 import re
+import sys
 import shutil
 import urllib2
 import urlparse
 from os import path
 from datetime import datetime
+from itertools import cycle, izip
 from inyoka.utils.urls import href
+from inyoka.utils.text import escape, normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.utils.templating import jinja_env
 
 NESTED1 = re.compile('<ulink url="([^"]*)"><mediaobject><imageobject><imagedata')
 NESTED2 = re.compile('/></imageobject></mediaobject></ulink>')
+ABSOLUTE_LINK_REGEX = re.compile('<ulink url="/([^"]*)">')
 INTERNAL_IMG_REGEX = re.compile('<imagedata fileref="%s\?target=([^"]*)' %
                                 href('wiki', '_image'))
 THUMBNAIL_REGEX = re.compile('<imagedata fileref="%s\?([^"]*)"' %
                              href('wiki', '_image'))
+
+
+EXCLUDE_PAGES = [u'Benutzer/', u'Anwendertreffen/', u'Baustelle/', u'LocoTeam/',
+                 u'Wiki/Vorlagen', u'Vorlage/', u'Verwaltung/', u'Galerie', 'Trash/',
+                 u'Messen/', u'UWN-Team/', u'Startseite', u'intern']
+# we're case insensitive
+EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
+
+
+# original from Jochen Kupperschmidt with some modifications
+class ProgressBar(object):
+    """Visualize a status bar on the console."""
+
+    def __init__(self, max_width):
+        """Prepare the visualization."""
+        self.max_width = max_width
+        self.spin = cycle(r'-\|/').next
+        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
+        show(' [ ')
+        self.last_output_length = 0
+
+    def update(self, percent):
+        """Update the visualization."""
+        # Remove last state.
+        show('\b' * self.last_output_length)
+
+        # Generate new state.
+        width = int(percent / 100.0 * self.max_width)
+        output = self.tpl % ('-' * width, self.spin(), percent)
+
+        # Show the new state and store its length.
+        show(output)
+        self.last_output_length = len(output)
+
+
+def show(string):
+    """Show a string instantly on STDOUT."""
+    sys.stdout.write(string)
+    sys.stdout.flush()
+
+
+def percentize(steps):
+    """Generate percental values."""
+    for i in range(steps + 1):
+        yield i * 100.0 / steps
 
 
 def handle_thumbnail(m):
@@ -33,12 +82,22 @@ def handle_thumbnail(m):
     for s in m.groups()[0].split('&'):
         k, v = s.split('=')
         d[k] = v
-    r = u'<imagedata fileref="../attachments/%s"' % urllib2.unquote(d['target'])
+    r = u'<imagedata fileref="./attachments/%s"' % urllib2.unquote(d['target'])
     if 'width' in d:
         r += u' width="%s"' % d['width']
     if 'height' in d:
         r += u' height="%s"' % d['height']
     return r
+
+
+def handle_link(m):
+    return u'<ulink url="./%s.xml">' % fix_path(m.groups()[0])
+
+
+def fix_path(pth):
+    if isinstance(pth, unicode):
+        pth.encode('utf-8')
+    return normalize_pagename(pth, False).lower()
 
 
 def create_snapshot(folder):
@@ -51,21 +110,42 @@ def create_snapshot(folder):
 
     # create the snapshot folder structure
     page_folder = path.join(folder, 'pages')
-    attachment_folder = path.join(folder, 'attachments')
+    attachment_folder = path.join(folder, 'pages', 'attachments')
     os.mkdir(page_folder)
     os.mkdir(attachment_folder)
 
     tpl = jinja_env.get_template('snapshot/docbook_page.xml')
-    for page in Page.objects.all():
-        if not (page.name == 'Startseite' or page.name.startswith('Wiki')):
-            continue
+
+    unsorted = Page.objects.get_page_list(existing_only=True)
+    pages = set()
+    excluded_pages = set()
+    # sort out excluded pages
+    for page in unsorted:
+        for exclude in EXCLUDE_PAGES:
+            if exclude.lower() in page.lower():
+                excluded_pages.add(page)
+            else:
+                pages.add(page)
+    todo = pages - excluded_pages
+    percents = list(percentize(len(todo)))
+    pb = ProgressBar(40)
+
+    processed = set([])
+
+    for percent, name in izip(percents, todo):
+
+        page = Page.objects.get_by_name(name, False, True)
+        if page.name in excluded_pages:
+            # however these are not filtered before…
+            return
+
         rev = page.revisions.all()[0]
         if page.trace > 1:
             # page is a subpage
             # create subdirectories
             for part in page.trace[:-1]:
                 pth = path.join(rev.attachment and attachment_folder or
-                                page_folder, *part.split('/')).replace(' ', '_')
+                                page_folder, *fix_path(part).split('/'))
                 if not path.exists(pth):
                     os.mkdir(pth)
 
@@ -75,19 +155,30 @@ def create_snapshot(folder):
                             path.split(rev.attachment.filename)[1]))
         else:
             # page is a normal text page
-            f = file(path.join(page_folder, '%s.xml' % page.name), 'w+')
+            f = file(fix_path(path.join(page_folder, '%s.xml' % page.name)), 'w+')
             content = rev.text.render(format='docbook')
-
             # perform some replacements to make links and images work
-            content = INTERNAL_IMG_REGEX.sub(r'<imagedata fileref="../attachments'
+            content = INTERNAL_IMG_REGEX.sub(r'<imagedata fileref="./attachments'
                                              r'/\1', content)
+            content = ABSOLUTE_LINK_REGEX.sub(handle_link, content)
             content = THUMBNAIL_REGEX.sub(handle_thumbnail, content)
-            # XXX: Images inside links don't work, this fixes this
+
+
+            # TODO: Images inside links don't work
+
             f.write(tpl.render({
                 'page': page,
                 'content': content
             }).encode('utf-8'))
             f.close()
+        processed.add(name)
+        pb.update(percent)
+
+    # write the final book file
+    with open(fix_path(path.join(page_folder, '..', 'snapshot.xml')), 'w+') as fobj:
+        tpl = jinja_env.get_template('snapshot/docbook_book.xml')
+        content = tpl.render({'pages': processed, 'today': datetime.now()})
+        fobj.write(content)
 
 
 if __name__ == '__main__':
