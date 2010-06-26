@@ -17,15 +17,12 @@ import string
 import cPickle
 import string
 from datetime import datetime
-try:
-    from hashlib import md5, sha1
-except ImportError:
-    from md5 import md5
-    from sha import sha as sha1
+from hashlib import md5, sha1
 from os import path
 from PIL import Image
 from StringIO import StringIO
 from django.db import models, connection
+
 from inyoka.conf import settings
 from inyoka.utils import encode_confirm_data
 from inyoka.utils.decorators import deferred

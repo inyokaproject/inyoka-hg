@@ -20,7 +20,7 @@ import werkzeug
 from subprocess import Popen, PIPE
 from cStringIO import StringIO
 from tempfile import TemporaryFile
-from sha import new as sha1
+from hashlib import sha1
 from itertools import ifilter
 try:
     from werkzeug.utils import url_quote
