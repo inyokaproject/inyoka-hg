@@ -357,8 +357,10 @@ def comment_feed(request, id=None, mode='short', count=20):
     """
     Shows the ikhaya comments that match the given criteria in an atom feed.
     """
-    comments = Comment.objects.select_related().filter(article__public=True) \
-                      .order_by('-id')
+    comments = Comment.objects.select_related() \
+        .filter(article__public=True, deleted=False)\
+        .order_by('-id')
+
     if id:
         article = Article.published.get(id=id)
         comments = comments.filter(article=article.id)
