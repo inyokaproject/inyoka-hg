@@ -10,7 +10,7 @@
     :license: GNU GPL.
 """
 import sys
-import md5
+from hashlib import md5
 from random import randrange
 from django import forms
 from django.forms.widgets import Input
@@ -127,7 +127,7 @@ class CaptchaField(forms.Field):
         solution = current_request.session.get('captcha_solution')
         if not solution:
             flash(u'Du musst Cookies aktivieren!', False)
-        h = md5.new(settings.SECRET_KEY)
+        h = md5(settings.SECRET_KEY)
         if isinstance(value, unicode):
             # md5 doesn't like to have non-ascii containing unicode strings
             value = value.encode('utf-8')

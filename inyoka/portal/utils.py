@@ -12,7 +12,6 @@ import random
 import string
 import calendar
 from datetime import timedelta, date
-from md5 import new as md5
 from django.db.models import Q
 from inyoka.conf import settings
 from inyoka.utils.urls import href

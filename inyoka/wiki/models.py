@@ -583,7 +583,7 @@ class TextManager(models.Manager):
         correct text, rather than a string based search.
         """
         # XXX: check for hash collisions?
-        hash = sha1.new(value.encode('utf-8')).hexdigest()
+        hash = sha1(value.encode('utf-8')).hexdigest()
         return models.Manager.get_or_create(self, hash=hash,
                                             defaults={'value': value})
 
