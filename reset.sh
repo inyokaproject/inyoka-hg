@@ -1,12 +1,7 @@
 #!/bin/bash
-. init.sh
+echo "Dropping database tables..."
+python manage-inyoka.py dropdb
 
-echo "Creating basic database tables..."
-DBNAME=$(python -c 'import inyoka.application; from inyoka.conf import settings; print settings.DATABASE_NAME')
-django-admin.py dbshell <<EOF
-	drop database ${DBNAME};
-	create database ${DBNAME};
-EOF
 # create the media folders
 rm -Rf ./inyoka/media
 mkdir ./inyoka/media

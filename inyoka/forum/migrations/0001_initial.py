@@ -33,7 +33,7 @@ class Migration(SchemaMigration):
             ('post_count', self.gf('django.db.models.fields.IntegerField')()),
             ('topic_count', self.gf('django.db.models.fields.IntegerField')()),
             ('welcome_message', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['forum.Welcomemessage'], null=True, blank=True)),
-            ('newtopic_default_text', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('newtopic_default_text', self.gf('django.db.models.fields.TextField')(blank=True, null=True)),
             ('user_count_posts', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
             ('force_version', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
         ))

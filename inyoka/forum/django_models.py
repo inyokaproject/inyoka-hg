@@ -29,7 +29,7 @@ class Forum(models.Model):
     post_count = models.IntegerField()
     topic_count = models.IntegerField()
     welcome_message = models.ForeignKey(Welcomemessage, null=True, blank=True)
-    newtopic_default_text = models.TextField(blank=True)
+    newtopic_default_text = models.TextField(blank=True, null=True)
     user_count_posts = models.BooleanField()
     force_version = models.BooleanField()
 

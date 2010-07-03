@@ -670,7 +670,7 @@ class Text(models.Model):
     objects = TextManager()
     value = models.TextField()
     hash = models.CharField(max_length=40, unique=True)
-    html_render_instructions = models.TextField()
+    html_render_instructions = models.TextField(null=True)
 
     def parse(self, template_context=None, transformers=None):
         """
