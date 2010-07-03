@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding model 'Group'
         db.create_table('portal_group', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -156,7 +156,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Deleting model 'Group'
         db.delete_table('portal_group')
 

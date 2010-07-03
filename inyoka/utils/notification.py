@@ -31,7 +31,7 @@ def send_notification(user, template_name=None, subject=None, args=None):
         message = render_template('mails/%s.txt' % template_name, args)
         send_mail(settings.EMAIL_SUBJECT_PREFIX + subject, message,
                   settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-        
+
 
 def notify_about_subscription(sub, template=None, subject=None, args=None):
     args = args or {}

@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
     )
 
     def forwards(self, orm):
-        
+
         # Adding model 'Blog'
         db.create_table('planet_blog', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -43,7 +43,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Deleting model 'Blog'
         db.delete_table('planet_blog')
 

@@ -70,4 +70,3 @@ class classproperty(object):
     def __get__(self, desc, cls):
         value = self.func(cls)
         return value
-

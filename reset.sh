@@ -1,4 +1,6 @@
 #!/bin/bash
+. init.sh
+
 echo "Creating basic database tables..."
 DBNAME=$(python -c 'import inyoka.application; from inyoka.conf import settings; print settings.DATABASE_NAME')
 django-admin.py dbshell <<EOF
@@ -21,7 +23,9 @@ mkdir ./inyoka/media/portal/avatars
 mkdir ./inyoka/media/portal/team_icons
 echo "Created media directories"
 
-python manage-inyoka.py migrate
+echo "Syncronize database"
+python manage-django.py syncdb
+python manage-django.py migrate
 echo "finished basic database creation\n"
 echo "Create admin user"
 python manage-inyoka.py create_superuser
