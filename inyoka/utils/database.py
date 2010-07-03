@@ -19,9 +19,15 @@ from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from inyoka.conf import settings
 
-engine = create_engine('mysql://%s:%s@%s/%s?charset=utf8&use_unicode=0' % (
-    settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-    settings.DATABASE_HOST, settings.DATABASE_NAME
+rdbm = 'mysql'
+extra = '?charset=utf8&use_unicode=0'
+if 'postgres' in settings.DATABASE_ENGINE:
+    rdbm = 'postgres'
+    extra = ''
+
+engine = create_engine('%s://%s:%s@%s/%s%s' % (
+    rdbm, settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+    settings.DATABASE_HOST, settings.DATABASE_NAME, extra
 ), pool_recycle=25, convert_unicode=True, echo=False,
    poolclass=NullPool)
 metadata = MetaData(bind=engine)

@@ -85,7 +85,6 @@ from datetime import datetime
 from mimetypes import guess_type
 from django.db import models, connection
 from inyoka.conf import settings
-from inyoka.wiki import parser, templates
 from inyoka.wiki.storage import storage
 from inyoka.utils.decorators import deferred
 from inyoka.utils.dates import format_specific_datetime, format_datetime, \
@@ -1342,4 +1341,5 @@ class MetaData(models.Model):
 
 
 # imported here because of circular references
+from inyoka.wiki import parser, templates
 from inyoka.wiki.parser import nodes

@@ -9,6 +9,7 @@
     :license: GNU GPL.
 """
 from os.path import dirname, join
+from django.conf.global_settings import *
 
 # the base path of the application
 BASE_PATH = dirname(__file__)
@@ -175,6 +176,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'south',
     'inyoka.portal',
     'inyoka.wiki',
     'inyoka.forum',

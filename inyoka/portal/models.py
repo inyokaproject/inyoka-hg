@@ -555,3 +555,10 @@ class SearchQueue(models.Model):
 
     class Meta:
         ordering = ['id']
+
+
+class Storage(models.Model):
+    key = models.CharField(max_length=200, db_index=True)
+    value = models.TextField()
+
+

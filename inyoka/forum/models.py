@@ -40,6 +40,8 @@ from inyoka.forum.database import forum_table, topic_table, post_table, \
         user_table, attachment_table, poll_table, privilege_table, \
         poll_option_table, poll_vote_table, group_table, post_revision_table, \
         forum_welcomemessage_table, user_group_table
+
+from inyoka.forum.django_models import *
 from inyoka.forum.acl import filter_invisible
 from inyoka.portal.user import Group
 

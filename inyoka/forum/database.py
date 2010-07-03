@@ -13,6 +13,7 @@
 from sqlalchemy import Table, Column, String, Text, Integer, \
         ForeignKey, DateTime, Boolean, Index, PickleType
 from inyoka.utils.database import metadata
+from inyoka import conf
 
 
 forum_table = Table('forum_forum', metadata,
@@ -31,7 +32,7 @@ forum_table = Table('forum_forum', metadata,
            nullable=True),
     Column('newtopic_default_text', Text, nullable=False),
     Column('user_count_posts', Boolean, default=True, nullable=False),
-    Column('force_version', Boolean, default=False, nullable=False),
+    Column('force_version', Boolean, default=False, nullable=False)
 )
 
 topic_table = Table('forum_topic', metadata,
@@ -71,14 +72,14 @@ post_table = Table('forum_post', metadata,
     Column('text', Text(), nullable=False),
     Column('rendered_text', Text(), nullable=True),
     Column('has_revision', Boolean, default=False, nullable=False),
-    Column('is_plaintext', Boolean, default=False, nullable=False),
+    Column('is_plaintext', Boolean, default=False, nullable=False)
 )
 
 post_revision_table = Table('forum_postrevision', metadata,
     Column('id', Integer, primary_key=True),
     Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=False),
     Column('text', Text(), nullable=False),
-    Column('store_date', DateTime, nullable=False),
+    Column('store_date', DateTime, nullable=False)
 )
 
 poll_table = Table('forum_poll', metadata,
@@ -110,7 +111,7 @@ privilege_table = Table('forum_privilege', metadata,
     Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=True),
     Column('forum_id', Integer, ForeignKey('forum_forum.id'), nullable=False),
     Column('positive', Integer, nullable=True),
-    Column('negative', Integer, nullable=True),
+    Column('negative', Integer, nullable=True)
 )
 
 #XXX Please note that those portal_* tables should not be used too much
