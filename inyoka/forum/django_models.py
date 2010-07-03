@@ -47,8 +47,8 @@ class Topic(models.Model):
     reporter = models.ForeignKey(User, related_name='reported_topics',
                                  null=True, blank=True)
     hidden = models.BooleanField()
-    ubuntu_version = models.CharField(max_length=5, blank=True)
-    ubuntu_distro = models.CharField(max_length=40, blank=True)
+    ubuntu_version = models.CharField(max_length=5, blank=True, null=True)
+    ubuntu_distro = models.CharField(max_length=40, blank=True, null=True)
     author = models.ForeignKey(User, related_name='created_topics')
     first_post = models.ForeignKey('Post', related_name='topic_set',
                                    null=True, blank=True)

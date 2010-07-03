@@ -53,8 +53,8 @@ class Migration(SchemaMigration):
             ('reported', self.gf('django.db.models.fields.TextField')(blank=True, null=True)),
             ('reporter', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='reported_topics', null=True, to=orm['portal.User'])),
             ('hidden', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
-            ('ubuntu_version', self.gf('django.db.models.fields.CharField')(max_length=5, blank=True)),
-            ('ubuntu_distro', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True)),
+            ('ubuntu_version', self.gf('django.db.models.fields.CharField')(max_length=5, blank=True, null=True)),
+            ('ubuntu_distro', self.gf('django.db.models.fields.CharField')(max_length=40, blank=True, null=True)),
             ('author', self.gf('django.db.models.fields.related.ForeignKey')(related_name='created_topics', to=orm['portal.User'])),
             ('first_post', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='topic_set', null=True, to=orm['forum.Post'])),
             ('last_post', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='topic_set2', null=True, to=orm['forum.Post'])),
@@ -260,8 +260,8 @@ class Migration(SchemaMigration):
             'solved': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'sticky': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'ubuntu_distro': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True'}),
-            'ubuntu_version': ('django.db.models.fields.CharField', [], {'max_length': '5', 'blank': 'True'}),
+            'ubuntu_distro': ('django.db.models.fields.CharField', [], {'max_length': '40', 'blank': 'True', 'null': 'True'}),
+            'ubuntu_version': ('django.db.models.fields.CharField', [], {'max_length': '5', 'blank': 'True', 'null': 'True'}),
             'view_count': ('django.db.models.fields.IntegerField', [], {})
         },
         'forum.voter': {
