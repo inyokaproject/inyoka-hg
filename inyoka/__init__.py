@@ -118,7 +118,7 @@ def _bootstrap():
     """
     # set the inyoka revision
     global INYOKA_REVISION
-    import os, inyoka, time, django.db
+    import os, inyoka, time
     from subprocess import Popen, PIPE
     from signal import signal, SIGUSR1, SIG_DFL
 
