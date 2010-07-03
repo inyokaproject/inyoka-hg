@@ -133,5 +133,3 @@ Index('viewtopic', post_table.c.topic_id, post_table.c.position)
 Index('viewforum', topic_table.c.forum_id, topic_table.c.sticky,
       topic_table.c.last_post_id)
 
-
-metadata.create_all()
