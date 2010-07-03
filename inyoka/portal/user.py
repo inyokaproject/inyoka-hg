@@ -24,7 +24,7 @@ from StringIO import StringIO
 from django.db import models, connection
 
 from inyoka.conf import settings
-from inyoka.utils import encode_confirm_data
+from inyoka.utils import encode_confirm_data, classproperty
 from inyoka.utils.decorators import deferred
 from inyoka.utils.cache import cache
 from inyoka.utils.mail import send_mail
@@ -702,10 +702,13 @@ class User(models.Model):
             self.new_password_key = None
         self.save()
 
-# I have no idea why a simple `property` did not work – maybe
-# this is the only right way to do something like that? --entequak
-User.SYSTEM_USER = User.objects.get_system_user()
-User.ANONYMOUS_USER = User.objects.get_anonymous_user()
+    @classproperty
+    def SYSTEM_USER(cls):
+        return cls.objects.get_system_user()
+
+    @classproperty
+    def ANONYMOUS_USER(cls):
+        return cls.objects.get_anonymous_user()
 
 # circ imports
 from inyoka.wiki.parser import parse, render, RenderContext
