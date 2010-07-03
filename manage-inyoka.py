@@ -115,25 +115,13 @@ def action_mysql():
 
 
 def action_dropdb():
-    from werkzeug import import_string
-    from inyoka.conf import settings
-    from django.db import connection, transaction
-    from django.core.management.sql import sql_delete
-    from django.core.management.color import no_style
+    from django.db import connection
+    from south.db import db
 
-    #TODO: django 1.2's sql_delete needs to apply a connection.  Consider this
-    #      due to upgrade!
-    for app in ("ikhaya", "forum", "pastebin", "planet", "portal", "wiki"):
-        import_string('inyoka.application')
-        mod = import_string('inyoka.%s' % app)
-        sql_list = sql_delete(mod, no_style())
-        try:
-            cursor = connection.cursor()
-            for sql in sql_list:
-                cursor.execute(sql)
-        except Exception, e:
-            transaction.rollback_unless_managed()
-            transaction.commit_unless_managed()
+    tables = connection.introspection.table_names()
+    for table in tables:
+        db.delete_table(table)
+
 
 
 def _dowse():
