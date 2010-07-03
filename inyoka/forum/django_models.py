@@ -43,7 +43,7 @@ class Topic(models.Model):
     sticky = models.BooleanField()
     solved = models.BooleanField()
     locked = models.BooleanField()
-    reported = models.TextField(blank=True)
+    reported = models.TextField(blank=True, null=True)
     reporter = models.ForeignKey(User, related_name='reported_topics',
                                  null=True, blank=True)
     hidden = models.BooleanField()

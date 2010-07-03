@@ -18,7 +18,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('value', self.gf('django.db.models.fields.TextField')()),
             ('hash', self.gf('django.db.models.fields.CharField')(unique=True, max_length=40)),
-            ('html_render_instructions', self.gf('django.db.models.fields.TextField')()),
+            ('html_render_instructions', self.gf('django.db.models.fields.TextField')(null=True)),
         ))
         db.send_create_signal('wiki', ['Text'])
 
@@ -160,7 +160,7 @@ class Migration(SchemaMigration):
         'wiki.text': {
             'Meta': {'object_name': 'Text'},
             'hash': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'}),
-            'html_render_instructions': ('django.db.models.fields.TextField', [], {}),
+            'html_render_instructions': ('django.db.models.fields.TextField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'value': ('django.db.models.fields.TextField', [], {})
         }
