@@ -44,7 +44,10 @@ action_runserver = action_runserver()
 
 def action_migrate():
     """Migrate to the latest revision."""
-    pass
+    from inyoka.utils.migrations import Migrations
+    from inyoka.migrations import MIGRATIONS
+    migrations = Migrations(MIGRATIONS)
+    migrations.upgrade()
 
 
 def action_create_superuser(username='', email='', password=''):
