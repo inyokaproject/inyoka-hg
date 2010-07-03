@@ -16,8 +16,8 @@ import virtualenv
 EXTRA_TEXT = """
 import tempfile, shutil
 
-xapian_version = '1.0.16'
-pil_version = '1.1.6'
+xapian_version = '1.0.21'
+pil_version = '1.1.7'
 
 def easy_install(package, home_dir, optional_args=None):
     optional_args = optional_args or ['-U']
@@ -44,9 +44,6 @@ def xapian_install(home_dir):
     call_subprocess(['make', 'install'], cwd=core_folder)
 
     binding_folder = os.path.join(folder, 'xapian-bindings-' + xapian_version)
-    call_subprocess(['wget', 'http://webshox.org/~cg/misc/xapian-bindings-Makefile-fix.patch'],
-                    cwd=binding_folder)
-    call_subprocess(['patch', '-p', '1', '-i', 'xapian-bindings-Makefile-fix.patch'], cwd=binding_folder)
     call_subprocess(['./configure', '--with-python', '--prefix', prefix], extra_env={
         'PYTHON':           os.path.join(home_dir, 'bin', 'python'),
         'XAPIAN_CONFIG':    os.path.join(folder, 'xapian-core-' +
@@ -81,20 +78,20 @@ def after_install(options, home_dir):
     print '  apt-get install libmemcache-dev libxapian-dev python-dev'
     print '  apt-get build-dep python-mysqldb python-imaging'
     print
-    easy_install('Jinja2', home_dir)
-    easy_install('Werkzeug', home_dir)
-    easy_install('Pygments', home_dir)
+    easy_install('Jinja2==2.5', home_dir)
+    easy_install('Werkzeug==0.6.2', home_dir)
+    easy_install('Pygments==1.3.1', home_dir)
     easy_install('SQLAlchemy==0.4.6', home_dir)
-    easy_install('simplejson', home_dir)
-    easy_install('pytz', home_dir)
-    easy_install('html5lib', home_dir)
-    easy_install('dnspython', home_dir)
+    easy_install('simplejson==2.1.1', home_dir)
+    easy_install('pytz==2010h', home_dir)
+    easy_install('html5lib==0.90', home_dir)
+    easy_install('dnspython==1.7.1', home_dir)
     easy_install('wsgiref', home_dir)
-    easy_install('MySQL-python', home_dir)
+    easy_install('MySQL-python==1.2.3', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('http://www.djangoproject.com/download/1.1/tarball/', home_dir)
     easy_install('python-memcached', home_dir)
-    easy_install('cssutils', home_dir)
+    easy_install('cssutils==0.9.7b3', home_dir)
     xapian_install(os.path.abspath(home_dir))
     pil_install(os.path.abspath(home_dir))
 """

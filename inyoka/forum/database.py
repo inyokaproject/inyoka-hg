@@ -113,11 +113,77 @@ privilege_table = Table('forum_privilege', metadata,
     Column('negative', Integer, nullable=True),
 )
 
-user_table = Table('portal_user', metadata, autoload=True)
-user_group_table = Table('portal_user_groups', metadata, autoload=True)
-group_table = Table('portal_group', metadata, autoload=True)
+#XXX Please note that those portal_* tables should not be used too much
+#    to stay in sync with Django.  If modify something here, modify it in
+#    the appropriate portal model too!
+#
+#    If you have time take a look if everything's in sync!
+
+user_table = Table('portal_user', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('username', String(30), nullable=False, unique=True),
+    Column('email', String(50), unique=True, nullable=False),
+    Column('password', String(128), nullable=False),
+    Column('status', Integer, nullable=False),
+    Column('last_login', DateTime, nullable=False),
+    Column('date_joined', DateTime, nullable=False),
+    Column('new_password_key', String(32), nullable=True),
+    Column('banned_until', DateTime, nullable=True),
+    # profile attributes
+    Column('post_count', Integer, default=0, nullable=False),
+    Column('avatar', String(100), nullable=False), # XXX: Use Django to modify that column!
+    Column('jabber', String(200), nullable=False),
+    Column('icq', String(16), nullable=False),
+    Column('msn', String(200), nullable=False),
+    Column('aim', String(200), nullable=False),
+    Column('yim', String(200), nullable=False),
+    Column('skype', String(200), nullable=False),
+    Column('wengophone', String(200), nullable=False),
+    Column('sip', String(200), nullable=False),
+    Column('signature', Text, nullable=False),
+    Column('coordinates_long', nullable=True),
+    Column('coordinates_lat', nullable=True),
+    Column('location', String(200), nullable=False),
+    Column('gpgkey', String(8), nullable=False),
+    Column('occupation', String(200), nullable=True),
+    Column('interests', String(200), nullable=True),
+    Column('website', nullable=False),
+    Column('launchpad', String(50), nullable=True),
+    Column('_settings', Text, nullable=False),
+    Column('_permissions', Integer, default=0, nullable=False),
+    # forum attributes
+    Column('forum_last_read', Integer, default=0, nullable=False),
+    Column('forum_read_status', Text, nullable=False),
+    Column('forum_welcome', Text, nullable=False),
+    Column('member_title', String(200), nullable=True),
+    #XXX: This column is named _primary_group in Django user model but named
+    #     differently in database.
+    Column('primary_group_id', Integer, ForeignKey('portal_group.id'), nullable=True)
+)
+
+
+user_group_table = Table('portal_user_groups', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=False),
+    Column('group_id', Integer, ForeignKey('portal_group.id'), nullable=False),
+)
+
+
+group_table = Table('portal_group', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(80), nullable=False, unique=True),
+    Column('is_public', Boolean, default=1, nullable=False),
+    Column('permissions', Integer, default=0, nullable=False),
+    Column('icon', String(100), nullable=True) #XXX: Use Django to modify that column!
+)
+
 forum_welcomemessage_table = Table('forum_welcomemessage', metadata,
-                                   autoload=True)
+    Column('id', Integer, primary_key=True),
+    Column('title', String(120), nullable=False),
+    Column('text', Text, nullable=False),
+    Column('rendered_text', Text, nullable=False),
+)
+
 attachment_table = Table('forum_attachment', metadata,
     Column('id', Integer, primary_key=True),
     Column('file', String(100), unique=True, nullable=False),
