@@ -91,6 +91,7 @@ def after_install(options, home_dir):
     easy_install('dnspython', home_dir)
     easy_install('wsgiref', home_dir)
     easy_install('MySQL-python', home_dir)
+    easy_install('South', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('http://www.djangoproject.com/download/1.1/tarball/', home_dir)
     easy_install('python-memcached', home_dir)
