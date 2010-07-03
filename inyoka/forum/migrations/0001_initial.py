@@ -188,7 +188,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_post': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Post']", 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'newtopic_default_text': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'newtopic_default_text': ('django.db.models.fields.TextField', [], {'blank': 'True', 'null': 'True'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Forum']", 'null': 'True', 'blank': 'True'}),
             'position': ('django.db.models.fields.IntegerField', [], {}),
             'post_count': ('django.db.models.fields.IntegerField', [], {}),
