@@ -205,8 +205,10 @@ class SearchSystem(object):
               date_end=None, collapse=True, component=None, exclude=[],
               sort='relevance'):
         """Search for something."""
-        enq = xapian.Enquire(self.get_connection())
+        auth = AuthMatchDecider(user, self.auth_deciders)
         qry = self.parse_query(query)
+        offset = (page - 1) * per_page
+
         if component:
             qry = xapian.Query(xapian.Query.OP_FILTER, qry,
                                xapian.Query('P%s' % component.lower()))
@@ -221,17 +223,23 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
-        if sort == 'date':
-            enq.set_sort_by_value_then_relevance(2)
-        else:
-            enq.set_sort_by_relevance_then_value(2, False)
-        if collapse:
-            enq.set_collapse_key(1)
-        enq.set_query(qry)
-        offset = (page - 1) * per_page
 
-        auth = AuthMatchDecider(user, self.auth_deciders)
-        mset = enq.get_mset(offset, per_page, per_page * 3, None, auth)
+        def _get_enquire():
+            enq = xapian.Enquire(self.get_connection())
+            if sort == 'date':
+                enq.set_sort_by_value_then_relevance(2)
+            else:
+                enq.set_sort_by_relevance_then_value(2, False)
+            if collapse:
+                enq.set_collapse_key(1)
+            enq.set_query(qry)
+            return enq
+
+        try:
+            mset = _get_enquire().get_mset(offset, per_page, per_page * 3, None, auth)
+        except xapian.DatabaseModifiedError:
+            # try just one more time with a refreshed database
+            mset = _get_enquire().get_mset(offset, per_page, per_page * 3, None, auth)
 
         return SearchResult(mset, qry, page, per_page, self.adapters)
 
