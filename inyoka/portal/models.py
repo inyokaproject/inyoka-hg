@@ -522,12 +522,14 @@ class SearchQueueManager(models.Manager):
         Fetch all elements in blocks from the search queue.
         Note that the elements automatically get deleted.
         """
+        count = self.count()
         fetch = lambda: self.all()[:block_size]
         items = fetch()
-        while items:
+        while count:
             last_id = 0
             for item in items:
                 last_id = item.id
+                count -= 1
                 yield (item.component, item.doc_id)
             SearchQueue.objects.remove(last_id)
             items = fetch()

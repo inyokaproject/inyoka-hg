@@ -11,9 +11,11 @@
     automatically gets created; afterwards the index is completely generated
     for all documents of all components.
 
-    :copyright: 2007 - 2008 by Christoph Hack, Benjamin Wiegand.
+    :copyright: 2007 - 2010 by Christoph Hack, Benjamin Wiegand,
+                               Christopher Grebs.
     :license: GNU GPL, see LICENSE for more details.
 """
+from __future__ import division
 import gc, sys, datetime
 from xapian import DatabaseOpeningError
 import inyoka.utils.http
@@ -36,17 +38,20 @@ def update():
     Update the next items from the queue.  You should call this
     function regularly (e.g. as cron).
     """
-    all = SearchQueue.objects.count()
+    max = SearchQueue.objects.count()
     print "Start Update on %s with %s queued objects" % (
-        datetime.datetime.utcnow(), all)
-    for i, doc in enumerate(SearchQueue.objects.select_blocks()):
-        search.index(doc[0], doc[1])
-        if i % 100 == 0:
-            print "flush connection"
+        datetime.datetime.utcnow(), max)
+
+    cur = 0
+    iterator = SearchQueue.objects.select_blocks()
+    for type, idx in iterator:
+        search.index(type, idx)
+        cur += 1
+        if (cur % 100) == 0:
+            print "flush connection and database session"
             search.flush()
-            all -= 100
-            print "flushed, %s objects remaining" % all
-        session.commit()
+            session.commit()
+            print "flushed, %s objects remaining" % (int(max) - int(cur))
 
 
 def reindex(app=None):
