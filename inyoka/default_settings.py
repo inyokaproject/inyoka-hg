@@ -176,7 +176,6 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'south',
     'inyoka.portal',
     'inyoka.wiki',
     'inyoka.forum',
@@ -185,6 +184,12 @@ INSTALLED_APPS = (
     'inyoka.planet',
     'inyoka.admin',
 )
+
+try:
+    import south
+    INSTALLED_APPS += ('south',)
+except ImportError:
+    pass
 
 # some terms to exclude by default to maintain readability
 SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch',]
