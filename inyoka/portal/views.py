@@ -14,9 +14,12 @@
 from werkzeug import parse_accept_header
 from pytz import country_timezones
 from datetime import datetime, date
+
 from django import forms
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
+from django.utils.translation import ugettext as _
+
 from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data
 from inyoka.utils.text import get_random_password, human_number, normalize_pagename
@@ -120,8 +123,8 @@ def whoisonline(request):
     if registered_users is None:
         registered_users = int(User.objects.count())
         cache.set('portal/registered_users', registered_users, 1000)
-    set_session_info(request, u'schaut sich an, wer online ist',
-                     u'Wer ist online')
+    set_session_info(request, _(u'schaut sich an, wer online ist'),
+                     _(u'Wer ist online'))
     record, record_time = get_user_record()
     return {
         'sessions':                 get_sessions(),
