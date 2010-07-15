@@ -92,3 +92,4 @@ if __name__ == '__main__':
         print 'Starting to reindex everything'
         reindex()
     update()
+    print "search updated finished"
