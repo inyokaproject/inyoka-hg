@@ -422,11 +422,7 @@ class UserManager(models.Manager):
         """
         global _SYSTEM_USER
         if not _SYSTEM_USER:
-            try:
-                _SYSTEM_USER = User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
-            except User.DoesNotExist:
-                _SYSTEM_USER = User.objects.create_user(settings.INYOKA_SYSTEM_USER,
-                                                settings.INYOKA_SYSTEM_USER_EMAIL)
+            _SYSTEM_USER = User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
         return _SYSTEM_USER
 
 

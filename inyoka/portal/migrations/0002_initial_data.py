@@ -12,6 +12,13 @@ class Migration(DataMigration):
         orm.Group.objects.create(pk=1, name='Registriert', is_public=False)
         orm.Storage.objects.create(pk=1, key='markup_styles', value='')
         orm.User.objects.create(pk=1, username='anonymous',
+            email='anonymous@ubuntuusers.de', password='!', status=1,
+            last_login=now(), date_joined=now(), post_count=0, jabber='',
+            icq='', msn='', aim='', yim='', signature='', location='',
+            gpgkey='', occupation='', interests='', website='',
+            _settings='(dp1\n.', forum_last_read=0,
+            forum_read_status='', forum_welcome='')
+        orm.User.objects.create(pk=2, username='ubuntuusers',
             email='system@ubuntuusers.de', password='!', status=1,
             last_login=now(), date_joined=now(), post_count=0, jabber='',
             icq='', msn='', aim='', yim='', signature='', location='',
@@ -19,11 +26,10 @@ class Migration(DataMigration):
             _settings='(dp1\n.', forum_last_read=0,
             forum_read_status='', forum_welcome='')
 
-
     def backwards(self, orm):
         orm.Group.objects.filter(pk=1).delete()
         orm.Storage.objects.filter(pk=1).delete()
-        orm.User.objects.filter(pk=1).delete()
+        orm.User.objects.filter(pk__in=[1,2]).delete()
 
 
     models = {

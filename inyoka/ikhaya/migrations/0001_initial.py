@@ -75,11 +75,11 @@ class Migration(SchemaMigration):
         # Deleting model 'Category'
         db.delete_table('ikhaya_category')
 
-        # Deleting model 'Article'
-        db.delete_table('ikhaya_article')
-
         # Removing unique constraint on 'Article', fields ['pub_date', 'slug']
         db.delete_unique('ikhaya_article', ['pub_date', 'slug'])
+
+        # Deleting model 'Article'
+        db.delete_table('ikhaya_article')
 
         # Deleting model 'Suggestion'
         db.delete_table('ikhaya_suggestion')
