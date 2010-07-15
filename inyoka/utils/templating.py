@@ -10,6 +10,7 @@
 """
 import os
 import simplejson
+from glob import glob
 from jinja2 import Environment, FileSystemLoader
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
@@ -137,8 +138,12 @@ class InyokaEnvironment(Environment):
     """
 
     def __init__(self):
-        loader = FileSystemLoader(os.path.join(os.path.dirname(__file__),
-                                               os.pardir, 'templates'))
+        template_paths = [os.path.join(os.path.dirname(__file__),
+                                       os.pardir, 'templates')]
+
+        template_paths.extend(glob(os.path.join(os.path.dirname(__file__),
+                                                os.pardir, '*/templates')))
+        loader = FileSystemLoader(template_paths)
         Environment.__init__(self, loader=loader,
                              extensions=['jinja2.ext.i18n', 'jinja2.ext.do'],
                              auto_reload=settings.DEBUG,
