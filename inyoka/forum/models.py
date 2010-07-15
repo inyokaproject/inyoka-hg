@@ -1115,8 +1115,11 @@ class Attachment(object):
         fallback = u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
             url, self.mimetype)
 
-        if not show_preview:
+        if not show_preview and self.mimetype not in SUPPORTED_IMAGE_TYPES:
             return fallback
+        elif not show_preview or not show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
+            return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
+                url, self.mimetype, self.comment, self.name)
 
         if show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
             # handle and cache thumbnails
@@ -1127,8 +1130,9 @@ class Attachment(object):
                 # create a new thumbnail
                 img = Image.open(StringIO(self.contents))
                 if img.format == 'PNG' and img.info.get('interlace'):
-                    return u'<a href="%s" type="%s">%s anschauen</a>' % (
-                        url, self.mimetype, self.name)
+                    return u'<a href="%s" type="%s" title="%s">%s ' \
+                        u'anschauen</a>' % (
+                        url, self.mimetype, self.comment, self.name)
 
                 if img.size > settings.FORUM_THUMBNAIL_SIZE:
                     img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
