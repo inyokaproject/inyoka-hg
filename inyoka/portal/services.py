@@ -9,8 +9,8 @@
     :copyright: Copyright 2007 by Armin Ronacher.
     :license: GNU GPL.
 """
-import md5
 import time
+from hashlib import md5
 from urlparse import urlparse
 from inyoka.conf import settings
 from inyoka.portal.user import User, Group
@@ -79,7 +79,7 @@ def on_get_random_password(request):
 
 def on_get_captcha(request):
     captcha = Captcha()
-    h = md5.new(settings.SECRET_KEY)
+    h = md5(settings.SECRET_KEY)
     h.update(captcha.solution)
     request.session['captcha_solution'] = h.digest()
     return captcha.get_response()
