@@ -76,8 +76,13 @@
                 .text('Kommentar schreiben')
     {%- endif %}
                 .click(function() {
-                  $('#comments').show();
-                  $(this).remove();
+                  $('#comments').show().before(
+		    $('<a class="hide_comments">').text('Kommentare ausblenden').click(function() {
+		      $('#comments').hide();
+		      $(this).hide();
+		      $('.show_comments').show();
+		    }));
+                  $(this).hide();
                 })
             );
           }

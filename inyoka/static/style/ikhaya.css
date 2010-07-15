@@ -87,7 +87,8 @@ img.icon {
   margin:0px 0px 10px 10px;
 }
 
-a.show_comments {
+a.show_comments,
+a.hide_comments {
   display: block;
   padding: 1em;
   text-align: center;
@@ -99,7 +100,8 @@ a.show_comments {
   font-weight: bold;
 }
 
-a.show_comments:hover {
+a.show_comments:hover,
+a.hide_comments:hover {
   text-decoration: underline;
 }
 
