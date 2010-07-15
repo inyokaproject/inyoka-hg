@@ -75,9 +75,10 @@ def pil_install(home_dir):
 
 def after_install(options, home_dir):
     print 'On errors execute the following commands on the machine first:'
-    print '  apt-get install libmemcache-dev libxapian-dev python-dev'
-    print '  apt-get build-dep python-mysqldb python-imaging'
+    print '  apt-get install libmemcache-dev python-dev'
+    print '  apt-get build-dep python-mysqldb python-imaging libxapian15'
     print
+    easy_install('distribute', home_dir)
     easy_install('Jinja2==2.5', home_dir)
     easy_install('Werkzeug==0.6.2', home_dir)
     easy_install('Pygments==1.3.1', home_dir)
@@ -87,9 +88,10 @@ def after_install(options, home_dir):
     easy_install('html5lib==0.90', home_dir)
     easy_install('dnspython==1.7.1', home_dir)
     easy_install('wsgiref', home_dir)
-    easy_install('MySQL-python==1.2.3', home_dir)
+#    easy_install('MySQL-python==1.2.3', home_dir)
+    easy_install('http://downloads.sourceforge.net/project/mysql-python/mysql-python/1.2.3/MySQL-python-1.2.3.tar.gz?use_mirror=mesh&ts=1279197622', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
-    easy_install('http://www.djangoproject.com/download/1.1/tarball/', home_dir)
+    easy_install('Django==1.1.2', home_dir)
     easy_install('python-memcached', home_dir)
     easy_install('cssutils==0.9.7b3', home_dir)
     xapian_install(os.path.abspath(home_dir))

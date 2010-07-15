@@ -16,7 +16,7 @@ from dns.resolver import query as dns_query
 from dns.exception import DNSException
 #from django.core.mail import send_mail
 from inyoka.utils.storage import storage
-
+from inyoka.conf import settings
 
 _mail_re = re.compile(r'''(?xi)
     (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+
@@ -37,11 +37,17 @@ def send_mail(subject, message_, from_, to):
     message += '\nSubject: ' + Header(subject, 'utf-8', header_name='Subject').encode() + '\n'
     message += MIMEText(message_.encode('utf-8'), _charset='utf-8').as_string()
 
-    proc = Popen(['/usr/sbin/sendmail', '-t'], stdin=PIPE)
-    proc.stdin.write(message)
-    proc.stdin.close()
-    # replace with os.wait() in a outer level to not wait to much?!
-    proc.wait()
+    try:
+        proc = Popen(['/usr/sbin/sendmail', '-t'], stdin=PIPE)
+        proc.stdin.write(message)
+        proc.stdin.close()
+        # replace with os.wait() in a outer level to not wait to much?!
+        proc.wait()
+    except OSError:
+        if settings.DEBUG:
+            print message
+        else:
+            raise
 
 
 def may_be_valid_mail(email):

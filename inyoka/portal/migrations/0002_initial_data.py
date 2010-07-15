@@ -6,12 +6,37 @@ from django.db import models
 
 now = datetime.datetime.utcnow
 
+DEFAULT_STORAGE_VALUES = {
+    'global_message':           '',
+    'max_avatar_width':         80,
+    'max_avatar_height':        100,
+    'max_signature_length':     400,
+    'max_signature_lines':      4,
+    'get_ubuntu_link':          '',
+    'get_ubuntu_description':   '8.04 „Hardy Heron“',
+    'blocked_hosts': '',
+    'max_avatar_size':          30,
+    'team_icon': '',
+    'wiki_newpage_template':    u'',
+    'wiki_newpage_root':        'Baustelle',
+    'team_icon_height': 28,
+    'team_icon_width': 38,
+    'reported_topics_subscribers': '',
+}
+
+
 class Migration(DataMigration):
 
     def forwards(self, orm):
         orm.Group.objects.create(pk=1, name='Registriert', is_public=False)
-        orm.Storage.objects.create(pk=1, key='markup_styles', value='')
         orm.User.objects.create(pk=1, username='anonymous',
+            email='anonymous@ubuntuusers.de', password='!', status=1,
+            last_login=now(), date_joined=now(), post_count=0, jabber='',
+            icq='', msn='', aim='', yim='', signature='', location='',
+            gpgkey='', occupation='', interests='', website='',
+            _settings='(dp1\n.', forum_last_read=0,
+            forum_read_status='', forum_welcome='')
+        orm.User.objects.create(pk=2, username='ubuntuusers',
             email='system@ubuntuusers.de', password='!', status=1,
             last_login=now(), date_joined=now(), post_count=0, jabber='',
             icq='', msn='', aim='', yim='', signature='', location='',
@@ -19,11 +44,14 @@ class Migration(DataMigration):
             _settings='(dp1\n.', forum_last_read=0,
             forum_read_status='', forum_welcome='')
 
+        for key,value in DEFAULT_STORAGE_VALUES.items():
+            orm.Storage.objects.create(key=key, value=value)
 
     def backwards(self, orm):
         orm.Group.objects.filter(pk=1).delete()
-        orm.Storage.objects.filter(pk=1).delete()
-        orm.User.objects.filter(pk=1).delete()
+        orm.Storage.objects.filter(key__in=DEFAULT_STORAGE_VALUES.keys()).delete()
+        orm.Storage.objects.all().delete()
+        orm.User.objects.filter(pk__in=[1,2]).delete()
 
 
     models = {

@@ -50,3 +50,15 @@ def easy_install():
     require('hosts', provided_by = [test, staging, production])
     prompt('ez', 'easy_install parameters')
     run('unlet PYTHONPATH; source %s/bin/activate; easy_install $(ez)' % target_dir)
+
+_APPS = ['forum', 'portal', 'wiki', 'ikhaya', 'admin', 'utils', 'pastebin', 'planet']
+
+def update_translations():
+    """Recreates the pot file and updates the po files"""
+    for app in _APPS:
+        local('pybabel extract -F extra/babel.cfg -o inyoka/%s/locale/django.pot inyoka/%s/' % (app,app), capture=False)
+        local('pybabel update -i inyoka/%s/locale/django.pot -d inyoka/%s/locale -l de' % (app,app), capture=False)
+
+def compile_translations():
+    for app in _APPS:
+        local('pybabel compile -d inyoka/%s/locale -l de' % app, capture=False)
