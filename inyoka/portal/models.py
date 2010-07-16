@@ -525,7 +525,7 @@ class SearchQueueManager(models.Manager):
         count = self.count()
         fetch = lambda: self.all()[:block_size]
         items = fetch()
-        while count:
+        while count > 0:
             last_id = 0
             for item in items:
                 last_id = item.id
