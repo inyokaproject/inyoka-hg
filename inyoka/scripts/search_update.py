@@ -53,6 +53,10 @@ def update():
             session.commit()
             print "flushed, %s objects remaining" % (int(max) - int(cur))
 
+    # finally a flush at the end of everything
+    search.flush()
+    session.commit()
+
 
 def reindex(app=None):
     """Update the search index by reindexing all tuples from the database."""
