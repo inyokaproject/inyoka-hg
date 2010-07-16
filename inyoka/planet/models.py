@@ -34,18 +34,10 @@ class Blog(models.Model):
             return href('static', 'img', 'planet', 'anonymous.png')
         return self.icon.url
 
-    def update_search(self):
-        """
-        This updates the xapian search index.
-        """
-        PlanetSearchAdapter.queue(self.id)
-
     def delete(self):
         for entry in self.entry_set.all():
             entry.delete()
         self.delete_icon()
-        # update search
-        self.update_search()
         super(Blog, self).delete()
 
     def delete_icon(self):
@@ -125,9 +117,11 @@ class Entry(models.Model):
 
     def save(self, force_insert=False, force_update=False):
         super(Entry, self).save(force_insert, force_update)
-        self.update_search()
+        if self.updated > self.blog.last_sync and self.blog.active:
+            self.update_search()
 
     def delete(self):
+        super(Entry, self).delete()
         # update search
         self.update_search()
 

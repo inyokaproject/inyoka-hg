@@ -110,15 +110,6 @@ def fix_plaintext(text):
     return text
 
 
-class SearchMapperExtension(MapperExtension):
-    """
-    Simple MapperExtension that listen on some events
-    to get the xapian database up to date.
-    """
-    def after_delete(self, mapper, connection, instance):
-        search.queue('f', instance.id)
-
-
 class ForumMapperExtension(MapperExtension):
 
     def get(self, query, ident, *args, **kwargs):
@@ -263,6 +254,9 @@ class PostMapperExtension(MapperExtension):
         search.queue('f', instance.id)
 
     def after_update(self, mapper, connection, instance):
+        search.queue('f', instance.id)
+
+    def after_delete(self, mapper, connection, instance):
         search.queue('f', instance.id)
 
     def before_delete(self, mapper, connection, instance):

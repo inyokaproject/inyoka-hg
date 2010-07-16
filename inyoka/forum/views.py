@@ -577,7 +577,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                or topic.ubuntu_version != d.get('ubuntu_version'):
                 topic.ubuntu_distro = d.get('ubuntu_distro')
                 topic.ubuntu_version = d.get('ubuntu_version')
-                topic.reindex()
             if check_privilege(privileges, 'sticky'):
                 topic.sticky = d['sticky']
             if check_privilege(privileges, 'create_poll'):

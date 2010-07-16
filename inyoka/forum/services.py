@@ -123,6 +123,8 @@ def on_change_status(request, solved=None):
         return abort_access_denied(request)
     if solved is not None:
         topic.solved = solved
+        # reindex the whole topic to push the new read status to all
+        # posts.
         topic.reindex()
         session.commit()
 
