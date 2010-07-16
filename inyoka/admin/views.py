@@ -288,7 +288,7 @@ def planet_edit(request, blog=None):
             d = form.cleaned_data
             if not blog:
                 blog = Blog()
-            for k in ('name', 'description', 'blog_url', 'feed_url'):
+            for k in ('name', 'description', 'blog_url', 'feed_url', 'active'):
                 setattr(blog, k, d[k])
             if d['delete_icon']:
                 blog.delete_icon()

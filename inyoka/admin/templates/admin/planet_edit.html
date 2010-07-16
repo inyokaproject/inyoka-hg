@@ -12,7 +12,14 @@
 {% block admin_content %}
   <form action="" method="post" enctype="multipart/form-data">
     <dl>
-      {{ render_form(form, ['name', 'description', 'blog_url', 'feed_url']) }}
+      {{ render_form(form, ['name', 'description', 'blog_url', 'feed_url'], inline=True) }}
+      <dt>
+        <label for="id_active">Blog indizieren?</label>
+      </dt>
+      <dd>
+        <input checked="checked" type="checkbox" name="active" id="id_active" /> Ja, indiziere diesen Blog.
+      </dd>
+
       <dt>Icon:</dt>
       <dd>
         {{- form.icon }}{{ form.errors.icon }}<br />

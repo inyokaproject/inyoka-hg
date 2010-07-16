@@ -73,6 +73,7 @@ class EditBlogForm(forms.Form):
     feed_url = forms.URLField(label=u'URL des Feeds')
     icon = forms.ImageField(label=u'Icon', required=False)
     delete_icon = forms.BooleanField(label=u'Icon löschen', required=False)
+    active = forms.BooleanField(label=u'Blog indizieren?', required=False)
 
 
 class EditArticleForm(forms.Form):
