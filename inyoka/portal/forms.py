@@ -12,6 +12,7 @@ import Image
 from django import forms
 from django.utils.safestring import mark_safe
 from django.db import connection
+from django.utils.translation import ugettext as _
 from inyoka.portal.user import User
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
@@ -178,7 +179,7 @@ class LostPasswordForm(forms.Form):
                 self.user = User.objects.get(data['username'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
-                    u'Einen Benutzer „%s“ gibt es nicht!' % data['username']
+                    _(u'User “%s” does not exist!') % data['username']
                 )
 
 
