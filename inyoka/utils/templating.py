@@ -11,6 +11,7 @@
 import os
 import simplejson
 from glob import glob
+from django.utils import translation
 from jinja2 import Environment, FileSystemLoader
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
@@ -197,7 +198,7 @@ class InyokaEnvironment(Environment):
             jsonencode=simplejson.dumps
         )
 
-        self.install_null_translations()
+        self.install_gettext_translations(translation)
 
 
 # setup the template environment
