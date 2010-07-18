@@ -31,15 +31,15 @@ DEFAULT_STORAGE_VALUES = {
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        orm.Group.objects.create(pk=1, name='Registriert', is_public=False)
-        orm.User.objects.create(pk=1, username='anonymous',
+        orm.Group.objects.create(name='Registriert', is_public=False)
+        orm.User.objects.create(username='anonymous',
             email='anonymous@ubuntuusers.de', password='!', status=1,
             last_login=now(), date_joined=now(), post_count=0, jabber='',
             icq='', msn='', aim='', yim='', signature='', location='',
             gpgkey='', occupation='', interests='', website='',
             _settings='(dp1\n.', forum_last_read=0,
             forum_read_status='', forum_welcome='')
-        orm.User.objects.create(pk=2, username='ubuntuusers',
+        orm.User.objects.create(username='ubuntuusers.de',
             email='system@ubuntuusers.de', password='!', status=1,
             last_login=now(), date_joined=now(), post_count=0, jabber='',
             icq='', msn='', aim='', yim='', signature='', location='',
@@ -51,10 +51,10 @@ class Migration(DataMigration):
             orm.Storage.objects.create(key=key, value=value)
 
     def backwards(self, orm):
-        orm.Group.objects.filter(pk=1).delete()
+        orm.Group.objects.filter(name='Registriert').delete()
         orm.Storage.objects.filter(key__in=DEFAULT_STORAGE_VALUES.keys()).delete()
         orm.Storage.objects.all().delete()
-        orm.User.objects.filter(pk__in=[1,2]).delete()
+        orm.User.objects.filter(username__in=['ubuntuusers.de','anonymous']).delete()
 
 
     models = {

@@ -411,7 +411,7 @@ class UserManager(models.Manager):
     def get_anonymous_user(self):
         global _ANONYMOUS_USER
         if not _ANONYMOUS_USER:
-            _ANONYMOUS_USER = User.objects.get(id=1)
+            _ANONYMOUS_USER = User.objects.get(username=settings.INYOKA_ANONYMOUS_USER)
         return _ANONYMOUS_USER
 
     def get_system_user(self):
@@ -422,7 +422,7 @@ class UserManager(models.Manager):
         """
         global _SYSTEM_USER
         if not _SYSTEM_USER:
-            _SYSTEM_USER = User.objects.get(username__iexact=settings.INYOKA_SYSTEM_USER)
+            _SYSTEM_USER = User.objects.get(username=settings.INYOKA_SYSTEM_USER)
         return _SYSTEM_USER
 
 

@@ -92,7 +92,7 @@ TRAC_PASSWORD = None
 # system settings
 INYOKA_SYSTEM_USER = u'ubuntuusers.de'
 INYOKA_SYSTEM_USER_EMAIL = 'system@' + BASE_DOMAIN_NAME
-INYOKA_SYSTEM_USER_EMAIL = None
+INYOKA_ANONYMOUS_USER = u'anonymous'
 
 # use etags
 USE_ETAGS = True
