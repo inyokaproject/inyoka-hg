@@ -17,11 +17,14 @@ DEFAULT_STORAGE_VALUES = {
     'blocked_hosts': '',
     'max_avatar_size':          30,
     'team_icon': '',
-    'wiki_newpage_template':    u'',
-    'wiki_newpage_root':        'Baustelle',
     'team_icon_height': 28,
     'team_icon_width': 38,
+    'markup_styles': '',
+    # move to forum
     'reported_topics_subscribers': '',
+    # move to wiki
+    'wiki_newpage_template':    u'',
+    'wiki_newpage_root':        'Baustelle',
 }
 
 
