@@ -161,13 +161,14 @@ class PageManager(models.Manager):
             grow unnecessary high with a sane page count (< 1000000 pages)
         """
         cur = connection.cursor()
+        count_field = connection.ops.quote_name('count')
         cur.execute('''
-            select w.value, count(w.value) as `count`
+            select w.value, count(w.value) as %s 
               from wiki_metadata w
              where w.key = 'tag'
           group by w.value
-          order by `count` desc %s;
-        ''' % (max is not None and 'limit %d' % max or ''))
+          order by %s desc %s;
+        ''' % (count_field, count_field , (max is not None and 'limit %d' % max or '')))
         try:
             return [{
                 'name':     tag[0],

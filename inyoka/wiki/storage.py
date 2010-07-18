@@ -100,7 +100,7 @@ class BaseStorage(object):
                    not r.deleted and
                    m.key = 'X-Behave' and
                    m.value = %s
-          group by r.id
+          group by r.id, t.value, p.name
           order by p.name
         ''', [self.behavior_key])
 
