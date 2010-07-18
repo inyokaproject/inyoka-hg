@@ -22,7 +22,7 @@ echo "Syncronize database"
 python manage-django.py syncdb
 echo "Run migrations"
 python manage-django.py migrate
-echo "finished basic database creation\n"
+echo "finished basic database creation"
 echo "Create admin user"
 python manage-inyoka.py create_superuser
 

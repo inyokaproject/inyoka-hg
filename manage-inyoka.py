@@ -119,9 +119,10 @@ def action_dropdb():
     from south.db import db
 
     tables = connection.introspection.table_names()
+    db.start_transaction()
     for table in tables:
         db.delete_table(table)
-
+    db.commit_transaction()
 
 
 def _dowse():
