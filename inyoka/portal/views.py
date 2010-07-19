@@ -69,6 +69,14 @@ SEARCH_AREAS = {
 }
 
 
+# TODO: move into some kind of config, but as a quick fix for now...
+AUTOBAN_SPAMMER_WORDS = (
+    ('million', 'us', 'dollar'),
+    ('xxx', 'porn'),
+)
+# autoban gets active if all words of a tuple match
+
+
 def not_found(request, err_message=None):
     """
     This is called if no URL matches or a view returned a `PageNotFound`.
@@ -917,6 +925,19 @@ def privmsg_new(request, username=None):
             preview = parse(request.POST.get('text','')).render(ctx, 'html')
         elif form.is_valid():
             d = form.cleaned_data
+
+            for group in AUTOBAN_SPAMMER_WORDS:
+                t = d['text']
+                if all(map(lambda x: x in t, group)):
+                    if '>' in t:
+                        continue # User quoted, most likely a forward and no spam (good that inyoka isn't opensource)
+                    request.user.status = 2
+                    request.user.banned_until = None
+                    request.user.save()
+                    flash(u'Du wurdest automatisch gebannt aufgrund von Spamverdacht. Sollte der Ban ungerechtfertigt sein, bitte per mail bei webteam@ubuntuusers.de melden')
+                    User.objects.logout(request)
+                    return HttpResponseRedirect(href('portal'))
+
             recipient_names = set(r.strip() for r in \
                                   d['recipient'].split(';') if r)
             group_recipient_names = set(r.strip() for r in \
