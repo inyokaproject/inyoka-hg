@@ -73,6 +73,7 @@ SEARCH_AREAS = {
 AUTOBAN_SPAMMER_WORDS = (
     ('million', 'us', 'dollar'),
     ('xxx', 'porn'),
+    ('Sprachaustausch', 'gesundheitlich', 'immediately'),
 )
 # autoban gets active if all words of a tuple match
 
