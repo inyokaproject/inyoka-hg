@@ -23,6 +23,7 @@ from inyoka.wiki.parser import validate_signature, SignatureError
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
 from inyoka.utils.storage import storage
+from inyoka.utils.sessions import SurgeProtectionMixin
 from inyoka.forum.forms import UBUNTU_VERSIONS
 
 
@@ -411,6 +412,9 @@ class PrivateMessageForm(forms.Form):
             if not d['recipient'].strip() and not d['group_recipient'].strip():
                 raise forms.ValidationError(u'Mindestens einen Empfänger angeben.')
         return self.cleaned_data
+
+class PrivateMessageFormProtected(SurgeProtectionMixin, PrivateMessageForm):
+    source_protection_timeout = 60 * 5
 
 
 class DeactivateUserForm(forms.Form):

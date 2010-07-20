@@ -13,7 +13,7 @@
 """
 from werkzeug import parse_accept_header
 from pytz import country_timezones
-from datetime import datetime, date
+from datetime import timedelta, datetime, date
 
 from django import forms
 from django.forms.models import model_to_dict
@@ -52,7 +52,8 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
      UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
      NOTIFICATION_CHOICES, ForumFeedSelectorForm, IkhayaFeedSelectorForm, \
-     PlanetFeedSelectorForm, WikiFeedSelectorForm, PrivateMessageIndexForm
+     PlanetFeedSelectorForm, WikiFeedSelectorForm, PrivateMessageIndexForm, \
+     PrivateMessageFormProtected
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
@@ -916,11 +917,16 @@ def privmsg(request, folder=None, entry_id=None, page=1):
 @check_login(message=u'Du musst eingeloggt sein, um deine privaten '
                      u'Nachrichten anzusehen')
 def privmsg_new(request, username=None):
+    # if the user has no posts in the forum and registered less than a week ago
+    # he can only send one pm every 5 minutes
+    form_class = PrivateMessageForm
+    if (not request.user.post_count and request.user.date_joined > (datetime.now() - timedelta(days=7))):
+        form_class = PrivateMessageFormProtected
     set_session_info(request, u'schreibt eine neue private Nachricht')
     preview = None
-    form = PrivateMessageForm()
+    form = form_class()
     if request.method == 'POST':
-        form = PrivateMessageForm(request.POST)
+        form = form_class(request.POST)
         if 'preview' in request.POST:
             ctx = RenderContext(request)
             preview = parse(request.POST.get('text','')).render(ctx, 'html')
