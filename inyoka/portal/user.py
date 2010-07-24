@@ -669,7 +669,7 @@ class User(models.Model):
     def delete_avatar(self):
         """Delete the avatar from the file system."""
         fn = self.avatar.name
-        if path.exists(fn):
+        if fn is not None and path.exists(fn):
             os.remove(fn)
         self.avatar = None
 
