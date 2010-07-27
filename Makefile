@@ -28,8 +28,11 @@ pdfdoc:
 reindent:
 	@extra/reindent.py -r -B .
 
+syncdb:
+	@(python manage-django.py syncdb)
+
 migrate:
-	@(python manage-inyoka.py migrate)
+	@(python manage-django.py migrate)
 
 test_data:
 	@(python make_testdata.py)
