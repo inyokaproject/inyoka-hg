@@ -42,11 +42,6 @@ def action_runserver():
 action_runserver = action_runserver()
 
 
-def action_migrate():
-    """Migrate to the latest revision."""
-    print "Doing nothing…"
-
-
 def action_create_superuser(username='', email='', password=''):
     """
     Create a user with all privileges.  If you don't provide an argument
