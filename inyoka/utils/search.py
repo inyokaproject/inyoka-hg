@@ -26,6 +26,8 @@ from inyoka.utils.text import create_excerpt
 _stemmer = xapian.Stem('de')
 search = None
 
+
+_description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
 _tcpsrv_re = re.compile(r'tcpsrv://([\w\d\.]+):(\d+)/?')
 
 
@@ -49,7 +51,7 @@ class SearchResult(object):
         self.results = []
         self.mset = mset
         self.enq = enq
-        terms = enq.get_matching_terms(iter(mset)._iter)
+        terms = _description_re.findall(str(query))
         for match in mset:
             full_id = match.document.get_value(0).split(':')
             adapter = adapters[full_id[0]]

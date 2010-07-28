@@ -42,7 +42,7 @@ class WikiSearchAdapter(SearchAdapter):
             'group': u'Wiki',
             'group_url': href('wiki'),
             'highlight': True,
-            'text': striptags(rev.rendered_text),
+            'text': rev.rendered_text,
             'hidden': rev.deleted
         }
 
