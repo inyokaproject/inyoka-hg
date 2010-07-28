@@ -346,7 +346,7 @@ def render_html(text_block, highlight_locations=None, start_offset=None, end_off
 def create_excerpt(text, terms, length=350):
     text = striptags(text)
     highlight_locations = find_highlightable_terms(text, terms)
-    start_offset, end_offset = find_window(highlight_locations, length * 2)
+    start_offset, end_offset = find_window(highlight_locations, length)
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
