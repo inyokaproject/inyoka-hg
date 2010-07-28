@@ -177,39 +177,178 @@ def get_new_unique_filename(name, path='', shorten=True, length=20):
     return new_name
 
 
-def create_excerpt(text, terms, length=350):
-    """
-    """
-    # find the first occurence of a term in the text
-    idx = 0
-    first_term = ''
+# Old Version, maybe gets reactivated once testing with new method (see below)
+# does not get better excerpts
+#
+#def create_excerpt(text, terms, length=350):
+#    """
+#    """
+#    # find the first occurence of a term in the text
+#    idx = 0
+#    first_term = ''
+#    for term in terms:
+#        try:
+#            i = text.index(term)
+#        except ValueError:
+#            i = 0
+#        if i > idx or not idx:
+#            idx = i
+#            first_term = term
+#
+#    # find the best position to start the excerpt
+#    if idx + len(first_term) < length:
+#        excerpt = text[:length]
+#        if len(excerpt) < len(text):
+#            excerpt += u'...'
+#    else:
+#        excerpt = u'...%s' % text[idx:idx + length]
+#        if len(text) > idx + length:
+#            excerpt += u'...'
+#    excerpt = escape(excerpt)
+#
+#
+#    # highlight the terms in the excerpt
+#    r = re.compile('(%s)' % '|'.join(terms))
+#    excerpt = ''.join(i % 2 != 0 and '<strong>%s</strong>' % part or part
+#                      for i, part in enumerate(r.split(excerpt)))
+#    return excerpt
+
+
+
+def find_highlightable_terms(text, terms):
+    # Use a set so we only do this once per unique term.
+    positions = {}
+
+    # Pre-compute the length.
+    end_offset = len(text)
+    lower_text_block = text.lower()
+
     for term in terms:
-        try:
-            i = text.index(term)
-        except ValueError:
-            i = 0
-        if i > idx or not idx:
-            idx = i
-            first_term = term
+        if not term in positions:
+            positions[term] = []
 
-    # find the best position to start the excerpt
-    if idx + len(first_term) < length:
-        excerpt = text[:length]
-        if len(excerpt) < len(text):
-            excerpt += u'...'
-    else:
-        excerpt = u'...%s' % text[idx:idx + length]
-        if len(text) > idx + length:
-            excerpt += u'...'
-    excerpt = escape(excerpt)
+        start_offset = 0
+
+        while start_offset < end_offset:
+            next_offset = lower_text_block.find(term, start_offset, end_offset)
+
+            # If we get a -1 out of find, it wasn't found. Bomb out and
+            # start the next term.
+            if next_offset == -1:
+                break
+
+            positions[term].append(next_offset)
+            start_offset = next_offset + len(term)
+
+    return positions
 
 
-    # highlight the terms in the excerpt
-    r = re.compile('(%s)' % '|'.join(terms))
-    excerpt = ''.join(i % 2 != 0 and '<strong>%s</strong>' % part or part
-                      for i, part in enumerate(r.split(excerpt)))
-    return excerpt
+def find_window(highlight_locations, max_length):
+    best_start = 0
+    best_end = max_length
+
+    # First, make sure we have terms.
+    if not len(highlight_locations):
+        return (best_start, best_end)
+
+    terms_found = []
+
+    # Next, make sure we found any terms at all.
+    for term, offset_list in highlight_locations.items():
+        if len(offset_list):
+            # Add all of the locations to the list.
+            terms_found.extend(offset_list)
+
+    if not len(terms_found):
+        return (best_start, best_end)
+
+    if len(terms_found) == 1:
+        return (terms_found[0], terms_found[0] + max_length)
+
+    # Sort the list so it's in ascending order.
+    terms_found = sorted(terms_found)
+
+    # We now have a denormalized list of all positions were a term was
+    # found. We'll iterate through and find the densest window we can by
+    # counting the number of found offsets (-1 to fit in the window).
+    highest_density = 0
+
+    if terms_found[:-1][0] > max_length:
+        best_start = terms_found[:-1][0]
+        best_end = best_start + max_length
+
+    for count, start in enumerate(terms_found[:-1]):
+        current_density = 1
+
+        for end in terms_found[count + 1:]:
+            if end - start < max_length:
+                current_density += 1
+            else:
+                current_density = 0
+
+            # Only replace if we have a bigger (not equal density) so we
+            # give deference to windows earlier in the document.
+            if current_density > highest_density:
+                best_start = start
+                best_end = start + max_length
+                highest_density = current_density
+
+    return (best_start, best_end)
+
+
+def render_html(text_block, highlight_locations=None, start_offset=None, end_offset=None):
+    # Start by chopping the block down to the proper window.
+    text = text_block[start_offset:end_offset]
+
+    # Invert highlight_locations to a location -> term list
+    term_list = []
+
+    for term, locations in highlight_locations.items():
+        term_list += [(loc - start_offset, term) for loc in locations]
+
+    loc_to_term = sorted(term_list)
+
+    hl_start, hl_end = (' <strong>', '</strong> ')
+    highlight_length = len(hl_start + hl_end)
+
+    # Copy the part from the start of the string to the first match,
+    # and there replace the match with a highlighted version.
+    highlighted_chunk = ""
+    matched_so_far = 0
+    prev = 0
+    prev_str = ""
+
+    for cur, cur_str in loc_to_term:
+        # This can be in a different case than cur_str
+        actual_term = text[cur:cur + len(cur_str)]
+
+        # Handle incorrect highlight_locations by first checking for the term
+        if actual_term.lower() == cur_str:
+            highlighted_chunk += text[prev + len(prev_str):cur] + hl_start + actual_term + hl_end
+            prev = cur
+            prev_str = cur_str
+
+            # Keep track of how far we've copied so far, for the last step
+            matched_so_far = cur + len(actual_term)
+
+    # Don't forget the chunk after the last term
+    highlighted_chunk += text[matched_so_far:]
+
+    if start_offset > 0:
+        highlighted_chunk = '...%s' % highlighted_chunk
+
+    if end_offset < len(text_block):
+        highlighted_chunk = '%s...' % highlighted_chunk
+
+    return highlighted_chunk
+
+
+def create_excerpt(text, terms, length=350):
+    text = striptags(text)
+    highlight_locations = find_highlightable_terms(text, terms)
+    start_offset, end_offset = find_window(highlight_locations, length * 2)
+    return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
 # circular imports
-from inyoka.utils.html import escape
+from inyoka.utils.html import escape, striptags
