@@ -19,14 +19,22 @@ from datetime import datetime
 from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
+from inyoka.utils import get_significant_digits
 from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
 _stemmer = xapian.Stem('de')
-_description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
 search = None
 
 _tcpsrv_re = re.compile(r'tcpsrv://([\w\d\.]+):(\d+)/?')
+
+
+
+def get_human_readable_estimate(mset):
+    lower = mset.get_matches_lower_bound()
+    upper = mset.get_matches_upper_bound()
+    est = mset.get_matches_estimated()
+    return get_significant_digits(est, lower, upper)
 
 
 class SearchResult(object):
@@ -34,12 +42,14 @@ class SearchResult(object):
     This class holds all search results.
     """
 
-    def __init__(self, mset, query, page, per_page, adapters={}):
-        self.matches_estimated = mset.get_matches_estimated()
+    def __init__(self, mset, enq, query, page, per_page, adapters={}):
         self.page = page
-        self.page_count = self.matches_estimated / per_page + 1
+        self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
         self.results = []
+        self.mset = mset
+        self.enq = enq
+        terms = enq.get_matching_terms(iter(mset)._iter)
         for match in mset:
             full_id = match.document.get_value(0).split(':')
             adapter = adapters[full_id[0]]
@@ -49,7 +59,6 @@ class SearchResult(object):
                 continue
             if data is None:
                 continue
-            terms = _description_re.findall(str(query))
             try:
                 text = data.pop('text')
             except KeyError:
@@ -224,24 +233,18 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
 
-        def _get_enquire():
-            enq = xapian.Enquire(self.get_connection())
-            if sort == 'date':
-                enq.set_sort_by_value_then_relevance(2)
-            else:
-                enq.set_sort_by_relevance_then_value(2, False)
-            if collapse:
-                enq.set_collapse_key(1)
-            enq.set_query(qry)
-            return enq
+        enq = xapian.Enquire(self.get_connection())
+        if sort == 'date':
+            enq.set_sort_by_value_then_relevance(2)
+        else:
+            enq.set_sort_by_relevance_then_value(2, False)
+        if collapse:
+            enq.set_collapse_key(1)
+        enq.set_query(qry)
 
-        try:
-            mset = _get_enquire().get_mset(offset, per_page, per_page * 3, None, auth)
-        except xapian.DatabaseModifiedError:
-            # try just one more time with a refreshed database
-            mset = _get_enquire().get_mset(offset, per_page, per_page * 3, None, auth)
+        mset = enq.get_mset(offset, per_page, per_page, None, auth)
 
-        return SearchResult(mset, qry, page, per_page, self.adapters)
+        return SearchResult(mset, enq, qry, page, per_page, self.adapters)
 
     def store(self, **data):
         doc = xapian.Document()
