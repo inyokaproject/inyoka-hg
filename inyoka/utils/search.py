@@ -41,7 +41,7 @@ class SearchResult(object):
         self.per_page = per_page
         self.results = []
         for match in mset:
-            full_id = match.get_document().get_value(0).split(':')
+            full_id = match.document.get_value(0).split(':')
             adapter = adapters[full_id[0]]
             try:
                 data = adapter.recv(full_id[1])
@@ -49,7 +49,7 @@ class SearchResult(object):
                 continue
             if data is None:
                 continue
-            terms = _description_re.findall(query.get_description())
+            terms = _description_re.findall(str(query))
             try:
                 text = data.pop('text')
             except KeyError:
@@ -57,7 +57,7 @@ class SearchResult(object):
             if text:
                 data['excerpt'] = create_excerpt(text, terms)
             data['title'] = create_excerpt(data['title'], terms)
-            data['score'] = match[xapian.MSET_PERCENT]
+            data['score'] = match.percent
             self.results.append(data)
         self.terms = []
         t = query.get_terms_begin()
