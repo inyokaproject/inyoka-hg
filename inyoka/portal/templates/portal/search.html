@@ -85,7 +85,7 @@
   {%- if query %}
   {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">
-    {%- for doc in results.results %}
+    {%- for doc in results.results if not doc.hidden %}
     <li>
       <h2>
         <img src="{{ href('static', 'img/icons/small/%s.png' % doc.component|lower) }}"

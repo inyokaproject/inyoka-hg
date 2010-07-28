@@ -399,7 +399,8 @@ class IkhayaSearchAdapter(SearchAdapter):
             'group_url': url_for(article.category),
             'highlight': True,
             'text': u'%s %s' % (article.simplified_intro,
-                                article.simplified_text)
+                                article.simplified_text),
+            'hidden': article.hidden
         }
 
     def get_doc_ids(self):
