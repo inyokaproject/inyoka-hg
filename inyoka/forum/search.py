@@ -113,7 +113,8 @@ class ForumSearchAdapter(SearchAdapter):
             'highlight': True,
             'text': striptags(post.get_text()),
             'solved': post.topic.solved,
-            'version': post.topic.get_version_info(False)
+            'version': post.topic.get_version_info(False),
+            'hidden': post.hidden or post.topic.hidden
         }
 
     def get_doc_ids(self):
