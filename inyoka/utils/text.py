@@ -344,8 +344,18 @@ def render_html(text_block, highlight_locations=None, start_offset=None, end_off
 
 
 def create_excerpt(text, terms, length=350):
+
+    # filter and normalize terms to acutally match something...
+    real_terms = set([])
+    for term in terms:
+        chval = ord(term[0])
+        if chval >= ord('a') or chval <= ord('Z'):
+            real_terms.add(term[1:])
+        else:
+            real_terms.add(term)
+
     text = striptags(text)
-    highlight_locations = find_highlightable_terms(text, terms)
+    highlight_locations = find_highlightable_terms(text, real_terms)
     start_offset, end_offset = find_window(highlight_locations, length)
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
