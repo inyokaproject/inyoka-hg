@@ -349,7 +349,7 @@ def create_excerpt(text, terms, length=350):
     real_terms = set([])
     for term in terms:
         chval = ord(term[0])
-        if chval >= ord('a') or chval <= ord('Z'):
+        if chval >= ord('A') and chval <= ord('Z'):
             real_terms.add(term[1:])
         else:
             real_terms.add(term)
