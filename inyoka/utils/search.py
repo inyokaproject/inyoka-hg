@@ -188,7 +188,6 @@ class SearchSystem(object):
                     return u'solved_id:%s' % int(data)
                 except ValueError:
                     return u'solved_id:%s' % (1 if data.lower() == "true" else 0)
-            print "xxxxxxxxxxxxxxxxxxxxxx", prefix, data
             return '%s:"%s"' % (prefix, data)
 
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
@@ -211,8 +210,7 @@ class SearchSystem(object):
         qp.add_prefix('category', 'C')
         qp.add_prefix('kategorie', 'C')
 
-        flags = (qp.FLAG_BOOLEAN | qp.FLAG_WILDCARD |
-                 qp.FLAG_SPELLING_CORRECTION | qp.FLAG_DEFAULT)
+        flags = (qp.FLAG_BOOLEAN | qp.FLAG_DEFAULT)
         return qp.parse_query(query, flags)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
