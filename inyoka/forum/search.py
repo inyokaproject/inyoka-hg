@@ -16,7 +16,6 @@ from inyoka.forum.acl import get_privileges, check_privilege
 from inyoka.forum.models import Post, Forum, Topic, post_table, forum_table, \
         topic_table, user_table
 from inyoka.utils.urls import url_for, href
-from inyoka.utils.html import striptags
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
 from inyoka.utils.database import select_blocks, session
@@ -111,7 +110,7 @@ class ForumSearchAdapter(SearchAdapter):
             'group': post.topic.forum.name,
             'group_url': url_for(post.topic.forum),
             'highlight': True,
-            'text': striptags(post.get_text()),
+            'text': post.get_text(),
             'solved': post.topic.solved,
             'version': post.topic.get_version_info(False),
             'hidden': post.hidden or post.topic.hidden
