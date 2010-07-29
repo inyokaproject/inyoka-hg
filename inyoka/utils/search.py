@@ -193,9 +193,6 @@ class SearchSystem(object):
         query = re.sub(ur'(?u)\b([\w_]+):"([^"]+)\b"', handle_custom_prefix, query)
         query = re.sub(ur'(?u)\b([\w_]+):([\w.]+)\b', handle_custom_prefix, query)
 
-        # disable searching for phrases temporarily (qp.FLAG_PHRASE is disabled too)
-        query = re.sub(ur'(?u)(\w)-(\w)', ur'\1 \2', query)
-
         qp = xapian.QueryParser()
         qp.set_default_op(xapian.Query.OP_AND)
         qp.set_stemming_strategy(xapian.QueryParser.STEM_SOME)
@@ -210,8 +207,7 @@ class SearchSystem(object):
         qp.add_prefix('category', 'C')
         qp.add_prefix('kategorie', 'C')
 
-        flags = (qp.FLAG_BOOLEAN | qp.FLAG_DEFAULT)
-        return qp.parse_query(query, flags)
+        return qp.parse_query(query, qp.FLAG_DEFAULT ^ qp.FLAG_BOOLEAN)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],
