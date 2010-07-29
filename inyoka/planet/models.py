@@ -14,7 +14,6 @@ from PIL import Image
 from StringIO import StringIO
 from django.db import models, connection
 from inyoka.conf import settings
-from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 
@@ -105,10 +104,6 @@ class Entry(models.Model):
                 'hide':     ('planet', 'hide', self.id),
             }[action])
 
-    @property
-    def simplified_text(self):
-        return striptags(self.text)
-
     def update_search(self):
         """
         This updates the xapian search index.
@@ -146,7 +141,7 @@ class PlanetSearchAdapter(SearchAdapter):
             'component': u'Planet',
             'group': entry.blog.name,
             'group_url': url_for(entry.blog),
-            'text': entry.simplified_text,
+            'text': entry.text,
             'hidden': entry.hidden,
         }
 

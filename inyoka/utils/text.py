@@ -355,6 +355,9 @@ def create_excerpt(text, terms, length=350):
         else:
             real_terms.add(term)
 
+    # don't just strip the text, replace <br> and paragraphs with whitespaces
+    # to get a bit more beauty in text rendering.
+    text = text.replace('<br />', ' ').replace('<p>', ' ')
     text = striptags(text)
     highlight_locations = find_highlightable_terms(text, real_terms)
     start_offset, end_offset = find_window(highlight_locations, length)

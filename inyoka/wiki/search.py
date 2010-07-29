@@ -12,7 +12,6 @@ from django.db import connection
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
 from inyoka.wiki.models import Revision
 from inyoka.utils.urls import url_for, href
-from inyoka.utils.html import striptags
 from inyoka.utils.search import search, SearchAdapter
 
 
