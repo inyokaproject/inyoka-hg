@@ -204,8 +204,8 @@ class SearchSystem(object):
         qp.add_prefix('title', 'T')
         qp.add_prefix('titel', 'T')
         qp.add_prefix('version', 'V')
-        qp.add_prefix('category', 'C')
-        qp.add_prefix('kategorie', 'C')
+        qp.add_boolean_prefix('category', 'C')
+        qp.add_boolean_prefix('kategorie', 'C')
 
         return qp.parse_query(query, qp.FLAG_DEFAULT ^ qp.FLAG_BOOLEAN)
 
