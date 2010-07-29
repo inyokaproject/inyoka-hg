@@ -431,7 +431,7 @@ def search(request):
 
         if area in ('forum', 'all') and d['forums'] and \
                 d['forums'] not in ('support', 'all'):
-            query += ' category:"%s"' % d['forums']
+            query += ' category:%s' % d['forums']
         elif d['forums'] == 'support':
             exclude = list(settings.SEARCH_DEFAULT_EXCLUDE)
 
