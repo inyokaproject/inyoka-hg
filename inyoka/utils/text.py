@@ -145,6 +145,7 @@ def get_pagetitle(name, full=True):
         name = name.rsplit('/', 1)[-1]
     return u' '.join(x for x in name.split('_') if x)
 
+
 def shorten_filename(name, length=20, suffix=''):
     """
     Shorten the `name` to the specified `length`.
@@ -308,7 +309,7 @@ def render_html(text_block, highlight_locations=None, start_offset=None, end_off
 
     loc_to_term = sorted(term_list)
 
-    hl_start, hl_end = (' <strong>', '</strong> ')
+    hl_start, hl_end = ('<strong>', '</strong>')
     highlight_length = len(hl_start + hl_end)
 
     # Copy the part from the start of the string to the first match,
