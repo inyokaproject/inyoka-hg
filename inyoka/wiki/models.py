@@ -163,7 +163,7 @@ class PageManager(models.Manager):
         cur = connection.cursor()
         count_field = connection.ops.quote_name('count')
         cur.execute('''
-            select w.value, count(w.value) as %s 
+            select w.value, count(w.value) as %s
               from wiki_metadata w
              where w.key = 'tag'
           group by w.value
