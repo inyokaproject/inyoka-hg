@@ -20,6 +20,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext
 from inyoka.utils.text import slugify
+from inyoka.utils.html import striptags
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import date_time_to_datetime, datetime_to_timezone
