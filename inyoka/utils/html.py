@@ -22,7 +22,6 @@ from html5lib import HTMLParser, treewalkers, treebuilders
 from html5lib.serializer import XHTMLSerializer, HTMLSerializer
 from html5lib.filters.optionaltags import Filter as OptionalTagsFilter
 from html5lib.filters import sanitizer
-from inyoka.utils.text import increment_string
 
 
 #: set of tags that don't want child elements.
@@ -275,3 +274,6 @@ class CleanupFilter(object):
                  token['name'] in self.end_tags:
                 token['name'] = self.end_tags[token['name']]
             yield token
+
+# circ import
+from inyoka.utils.text import increment_string
