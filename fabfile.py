@@ -12,7 +12,7 @@ from fabric.api import *
 import tempfile
 
 env.user = 'ubuntu_de'
-inyoka_repo = 'http://hg.ubuntu-eu.org/ubuntu-de-inyoka/'
+inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
 target_dir = '~/virtualenv'
 
 def test():
