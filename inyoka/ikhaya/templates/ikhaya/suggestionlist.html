@@ -34,7 +34,7 @@
         </td>
         <td class="post">
           <div class="postinfo">
-            Verfasst: {{ suggestion.pub_date.strftime('%d.%m.%Y %H:%M') }}
+            Verfasst: {{ suggestion.pub_date|datetimeformat }}
             <span class="linklist"> |
               {%- if suggestion.owner_id == none %}
               <a href="{{ href('ikhaya', 'suggestions', 'assign', suggestion.id, USER.username) }}">Mir zuweisen</a> |
