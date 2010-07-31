@@ -1,0 +1,113 @@
+# -*- coding: utf-8 -*-
+"""
+    inyoka.utils.mongolog
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Simple logging module that uses a mongodb server to log our
+    exceptions.  Maybe this can be advanced some day to create nearly
+    real-time statistics about ubuntuusers.de.
+
+    :copyright: 2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
+"""
+import os
+import sys
+import logging
+import traceback
+
+from logging import CRITICAL, ERROR, WARNING, INFO, DEBUG
+from socket import gethostname
+from datetime import datetime
+from hashlib import md5
+
+from inyoka import INYOKA_REVISION
+
+try:
+    from pymongo.connection import Connection
+except ImportError:
+    Connection = None
+
+
+DEFAULT_PRIORITIES = {
+    CRITICAL:   'blocker',
+    ERROR:      'critical',
+    WARNING:    'major',
+    INFO:       'minor',
+    DEBUG:      'trivial'
+}
+
+
+class SimpleFormatter(logging.Formatter):
+
+    def format(self, record):
+        record.message = record.getMessage()
+        record.asctime = self.formatTime(record, self.datefmt)
+        if record.exc_info:
+            if not record.exc_text:
+                record.exc_text = self.formatException(record.exc_info)
+        dct = dict(record.__dict__)
+        dct['revision'] = INYOKA_REVISION
+        return self._fmt % dct
+
+
+raw_formatter = SimpleFormatter()
+
+
+def get_record_hash(record):
+    # if the record is a traceback, hash the traceback only
+    if record.exc_info:
+        lines = traceback.format_exception(*record.exc_info)
+        message = ''.join(lines)
+    # otherwise hash the message
+    else:
+        message = raw_formatter.format(record)
+    if isinstance(message, unicode):
+        message = message.encode('utf-8', 'replace')
+    return md5(message).hexdigest()
+
+
+def get_exception_message(exc_info):
+    if exc_info and exc_info[0] is not None:
+        return traceback.format_exception_only(*exc_info[:2])[0].strip()
+
+
+class MongoHandler(logging.Handler):
+    """ Custom log handler
+
+    Logs all messages to a mongo collection. This  handler is
+    designed to be used with the standard python logging mechanism.
+    """
+
+    def __init__(self, host, port, db, collection, user, password, level=logging.NOTSET):
+        """ Init log handler and store the collection handle """
+        logging.Handler.__init__(self, level)
+        if Connection is None:
+            # make everything a dummy
+            self.emit = lambda r: None
+        else:
+            self.data = {'host': host, 'port': port, 'db': db,
+                         'collection': collection, 'user': user,
+                         'password': password}
+            self.database = Connection(host, port)[db]
+            self.formatter = SimpleFormatter()
+
+    def emit(self, record):
+        """ Store the record to the collection. Async insert """
+        record.message = record.getMessage()
+        if record.exc_info:
+            if not record.exc_text:
+                record.exc_text = self.formatter.formatException(record.exc_info)
+
+        dct = dict(record.__dict__)
+        dct['revision'] = INYOKA_REVISION
+        dct['hash'] = get_record_hash(record)
+        dct['created'] = datetime.utcnow()
+
+        # drop not neccessary information
+        for info in ('exc_info', 'relativeCreated', 'thread'):
+            dct.pop(info, None)
+
+        # authenticate for every thread... fancy but well...
+        self.database.authenticate(self.data['user'], self.data['password'])
+        collection = self.database[self.data['collection']]
+        collection.save(dct)
