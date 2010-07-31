@@ -44,7 +44,7 @@ def index(request):
                   u'<code>[paste:%s:%s]</code>' % (entry.id, entry.title),
                   True)
             return HttpResponseRedirect(href('pastebin', entry.id))
-        if 'renew_captcha' in request.POST:
+        if 'renew_captcha' in request.POST and 'captcha' in form.errors:
             del form.errors['captcha']
     else:
         form = AddPasteForm()
