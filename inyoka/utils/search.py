@@ -49,8 +49,6 @@ class SearchResult(object):
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
         self.results = []
-        self.mset = mset
-        self.enq = enq
         terms = _description_re.findall(str(query))
         for match in mset:
             full_id = match.document.get_value(0).split(':')
