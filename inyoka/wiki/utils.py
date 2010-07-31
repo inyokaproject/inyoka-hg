@@ -196,20 +196,28 @@ def get_thumbnail(location, width=None, height=None, force=False):
     results = []
     try:
         for format, quality in ('png', '100'), ('jpeg', '80'):
-            dst = TemporaryFile()
-            client = Popen(base_params + [format, '-quality', quality, '-'],
-                           stdin=PIPE, stdout=dst, stderr=PIPE)
-            src.seek(0)
-            shutil.copyfileobj(src, client.stdin)
-            client.stdin.close()
-            client.stderr.close()
-            if client.wait():
-                return
-            dst.seek(0, 2)
-            pos = dst.tell()
-            results.append((pos, dst, format))
+            try:
+                dst = TemporaryFile()
+                client = Popen(base_params + [format, '-quality', quality, '-'],
+                               stdin=PIPE, stdout=dst, stderr=PIPE)
+                src.seek(0)
+                shutil.copyfileobj(src, client.stdin)
+                client.stdin.close()
+                client.stderr.close()
+                if client.wait():
+                    return
+                dst.seek(0, 2)
+                pos = dst.tell()
+                results.append((pos, dst, format))
+            except IOError:
+                continue
     finally:
         src.close()
+
+    # Return none if there were errors in thumbnail rendering, that way we can
+    # raise 404 exceptions instead of raising 500 exceptions for the user.
+    if not results:
+        return None
 
     # select the smaller of the two versions and copy and get the filename for
     # that format. Then ensure that the target folder exists

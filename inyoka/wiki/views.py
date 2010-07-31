@@ -148,9 +148,11 @@ def get_image_resource(request):
         return AccessDeniedResponse()
 
     if height or width:
-        target = urljoin(settings.MEDIA_URL,
-                         get_thumbnail(target, width, height,
-                                       request.GET.get('force') == 'yes'))
+        thumbnail = get_thumbnail(target, width, height,
+                                  request.GET.get('force') == 'yes')
+        if thumbnail is None:
+            raise PageNotFound()
+        target = urljoin(settings.MEDIA_URL, thumbnail)
     else:
         target = Page.objects.attachment_for_page(target)
         if not target:
