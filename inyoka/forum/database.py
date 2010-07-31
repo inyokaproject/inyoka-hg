@@ -191,7 +191,7 @@ attachment_table = Table('forum_attachment', metadata,
     Column('name', String(255), nullable=False),
     Column('comment', Text(), nullable=True),
     Column('post_id', Integer, ForeignKey('forum_post.id'), nullable=True),
-    Column('mimetype', String(100), nullable=True),
+    Column('mimetype', String(100), nullable=True, key='_mimetype'),
 )
 
 

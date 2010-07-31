@@ -994,7 +994,7 @@ class Attachment(object):
             # on binding to the posts
             fn = path.join('forum', 'attachments', 'temp',
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
-            attachment = Attachment(name=name, file=fn, mimetype=mime,
+            attachment = Attachment(name=name, file=fn, _mimetype=mime,
                                     **kwargs)
             f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
             try:
@@ -1076,7 +1076,7 @@ class Attachment(object):
     @property
     def mimetype(self):
         """The mimetype of the attachment."""
-        return self.mimetype or guess_type(self.filename)[0] or \
+        return self._mimetype or guess_type(self.filename)[0] or \
                'application/octet-stream'
 
     @property
@@ -1122,15 +1122,18 @@ class Attachment(object):
                 'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
                 # create a new thumbnail
-                img = Image.open(StringIO(self.contents))
-                if img.format == 'PNG' and img.info.get('interlace'):
-                    return u'<a href="%s" type="%s" title="%s">%s ' \
-                        u'anschauen</a>' % (
-                        url, self.mimetype, self.comment, self.name)
+                try:
+                    img = Image.open(StringIO(self.contents))
+                    if img.format == 'PNG' and img.info.get('interlace'):
+                        return u'<a href="%s" type="%s" title="%s">%s ' \
+                            u'anschauen</a>' % (
+                            url, self.mimetype, self.comment, self.name)
 
-                if img.size > settings.FORUM_THUMBNAIL_SIZE:
-                    img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
-                img.save(img_path, img.format)
+                    if img.size > settings.FORUM_THUMBNAIL_SIZE:
+                        img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
+                    img.save(img_path, img.format)
+                except IOError:
+                    pass
             thumb_url = href('media', 'forum/thumbnails/%s-%s'
                              % (self.id, self.file.split('/')[-1]))
             return u'<a href="%s"><img class="preview" src="%s" ' \
