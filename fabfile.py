@@ -34,7 +34,7 @@ def bootstrap():
     run('hg clone %s %s/inyoka' % (inyoka_repo, target_dir))
     local("%s make-bootstrap.py > '%s'" % (python_interpreter, bootstrap))
     put(bootstrap, 'bootstrap.py')
-    run('unlet PYTHONPATH; %s bootstrap.py --no-site-packages %s' % (python_interpreter, target_dir))
+    run('unset PYTHONPATH; %s bootstrap.py --no-site-packages %s' % (python_interpreter, target_dir))
     run("ln -s %s/inyoka/inyoka %s/lib/python`%s -V 2>&1|grep -o '[0-9].[0-9]'`/site-packages" % \
             (target_dir, target_dir, python_interpreter))
 
