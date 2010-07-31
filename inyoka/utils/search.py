@@ -11,6 +11,7 @@
     :license: GNU GPL.
 """
 import re
+import time
 import xapian
 from weakref import WeakKeyDictionary
 from threading import currentThread as get_current_thread
@@ -134,10 +135,21 @@ class SearchSystem(object):
             else:
                 self.connections[thread] = connection = \
                     xapian.Database(settings.XAPIAN_DATABASE)
+            return self.connections[thread]
         else:
             connection = self.connections[thread]
 
-        connection.reopen()
+        _connection_attemts = 0
+        while _connection_attemts <= 3:
+            try:
+                connection.reopen()
+            except xapian.DatabaseOpeningError:
+                time.sleep(0.1)
+                connection.reopen()
+                _connection_attemts += 1
+            else:
+                break
+
         return connection
 
     def register(self, adapter):
@@ -250,6 +262,7 @@ class SearchSystem(object):
 
                 mset = enq.get_mset(offset, per_page, per_page, None, auth)
             except xapian.DatabaseModificationError:
+                time.sleep(0.1)
                 connection.reopen()
                 _connection_attemts += 1
             else:
