@@ -89,6 +89,16 @@ TRAC_URL = None
 TRAC_USERNAME = None
 TRAC_PASSWORD = None
 
+# MongoDB data
+MONGO_DATA = {
+    'host': 'localhost',
+    'port': 27092,
+    'db': '',
+    'collection': '',
+    'user': '',
+    'password': ''
+}
+
 # system settings
 INYOKA_SYSTEM_USER = u'ubuntuusers.de'
 INYOKA_SYSTEM_USER_EMAIL = 'system@' + BASE_DOMAIN_NAME
