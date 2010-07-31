@@ -710,17 +710,26 @@ class Post(object):
     def edit(self, request, text, is_plaintext=False):
         """
         Change the text of the post. If the post is already stored in the
-        database, create a post revision containing the old text.
+        database, create a post revision containing the new text.
         If the text has not changed, return.
         """
         if self.text == text and self.is_plaintext == is_plaintext:
             return
         if self.id:
+            ## create a first revision for the initial post
+            if not self.has_revision:
+                rev = PostRevision()
+                rev.post = self
+                rev.store_date = self.pub_date
+                rev.text = self.text
+                self.has_revision = True
+
+            ## create a new revision for the current post
             rev = PostRevision()
             rev.post = self
             rev.store_date = datetime.utcnow()
-            rev.text = self.text
-            self.has_revision = True
+            rev.text = text
+
         self.text = text
         if not is_plaintext:
             self.rendered_text = self.render_text(request)
@@ -919,8 +928,8 @@ class Post(object):
 
 class PostRevision(object):
     """
-    This saves old revisions of posts. It can be used to restore posts if
-    something odd was done to them.
+    This saves old and current revisions of posts. It can be used to restore
+    posts if something odd was done to them or to view changes.
     """
 
     def __repr__(self):
