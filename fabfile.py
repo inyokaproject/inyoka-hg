@@ -61,3 +61,56 @@ def compile_translations():
     """Build gmo files from po"""
     for app in _APPS:
         local('pybabel compile -D django -d inyoka/%s/locale -l de' % app, capture=False)
+
+def run_tests():
+    """Run tests"""
+    from tests import run_inyoka_suite
+    run_inyoka_suite()
+
+def reindent():
+    """Reindent all python sources"""
+    local("extra/reindent.py -r -B .", capture=False)
+
+def syncdb():
+    """Sync database models"""
+    local("python manage-django.py syncdb", capture=False)
+
+def migrate():
+    """Migrate database"""
+    local("python manage-django.py migrate", capture=False)
+
+def create_test_data():
+    """Creates some data, usefull for testing inyoka without production db dump"""
+    local("python make_testdata.py", capture=False)
+
+def convert():
+    """phpBB/MoinMoin to Inyoka converter"""
+    local("python inyoka/scripts/converter/converter.py", capture=False)
+
+def server_cherrypy():
+    """Start cherrypy development server"""
+    local("python manage-inyoka.py runcp", capture=False)
+
+def server():
+    """Start development server"""
+    local("python manage-inyoka.py runserver", capture=False)
+
+def profiled():
+    """Insert your docstring here"""
+    local("python manage-inyoka.py profiled", capture=False)
+
+def shell():
+    """Start development shell"""
+    local("python manage-inyoka.py shell", capture=False)
+
+def mysql():
+	local("python manage-inyoka.py mysql", capture=False)
+
+def clean_files():
+    """Clean most temporary files"""
+    local("find . -name '*.pyc' -exec rm -f {} +")
+    local("find . -name '*.pyo' -exec rm -f {} +")
+    local("find . -name '*~' -exec rm -f {} +")
+    local("find . -name '*.orig' -exec rm -f {} +")
+    local("find . -name '*.orig.*' -exec rm -f {} +")
+    local("find . -name '*.py.fej' -exec rm -f {} +")
