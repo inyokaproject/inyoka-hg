@@ -178,44 +178,6 @@ def get_new_unique_filename(name, path='', shorten=True, length=20):
     return new_name
 
 
-# Old Version, maybe gets reactivated once testing with new method (see below)
-# does not get better excerpts
-#
-#def create_excerpt(text, terms, length=350):
-#    """
-#    """
-#    # find the first occurence of a term in the text
-#    idx = 0
-#    first_term = ''
-#    for term in terms:
-#        try:
-#            i = text.index(term)
-#        except ValueError:
-#            i = 0
-#        if i > idx or not idx:
-#            idx = i
-#            first_term = term
-#
-#    # find the best position to start the excerpt
-#    if idx + len(first_term) < length:
-#        excerpt = text[:length]
-#        if len(excerpt) < len(text):
-#            excerpt += u'...'
-#    else:
-#        excerpt = u'...%s' % text[idx:idx + length]
-#        if len(text) > idx + length:
-#            excerpt += u'...'
-#    excerpt = escape(excerpt)
-#
-#
-#    # highlight the terms in the excerpt
-#    r = re.compile('(%s)' % '|'.join(terms))
-#    excerpt = ''.join(i % 2 != 0 and '<strong>%s</strong>' % part or part
-#                      for i, part in enumerate(r.split(excerpt)))
-#    return excerpt
-
-
-
 def find_highlightable_terms(text, terms):
     # Use a set so we only do this once per unique term.
     positions = {}
