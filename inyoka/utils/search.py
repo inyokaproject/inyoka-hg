@@ -136,6 +136,7 @@ class SearchSystem(object):
                     xapian.Database(settings.XAPIAN_DATABASE)
         else:
             connection = self.connections[thread]
+
         connection.reopen()
         return connection
 
@@ -230,16 +231,29 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
 
-        enq = xapian.Enquire(self.get_connection())
-        if sort == 'date':
-            enq.set_sort_by_value_then_relevance(2)
-        else:
-            enq.set_sort_by_relevance_then_value(2, False)
-        if collapse:
-            enq.set_collapse_key(1)
-        enq.set_query(qry)
+        connection = self.get_connection()
 
-        mset = enq.get_mset(offset, per_page, per_page, None, auth)
+        _connection_attemts = 0
+
+        # Try to reopen the database if the revision has been discarded
+        # or otherwise modified.
+        while _connection_attemts <= 3:
+            try:
+                enq = xapian.Enquire(self.get_connection())
+                if sort == 'date':
+                    enq.set_sort_by_value_then_relevance(2)
+                else:
+                    enq.set_sort_by_relevance_then_value(2, False)
+                if collapse:
+                    enq.set_collapse_key(1)
+                enq.set_query(qry)
+
+                mset = enq.get_mset(offset, per_page, per_page, None, auth)
+            except xapian.DatabaseModificationError:
+                connection.reopen()
+                _connection_attemts += 1
+            else:
+                break
 
         return SearchResult(mset, enq, qry, page, per_page, self.adapters)
 
