@@ -1051,11 +1051,9 @@ class RandomQuote(Macro):
 
         if self.key:
             if not self.key in stack:
-                return nodes.error_box(u'Der Schlüssel „%s” wurde nicht '
-                                       u'definiert.' % self.key)
+                return nodes.error_box(u'Schlüssel nicht definiert',
+                    u'Der Schlüssel „%s” wurde nicht definiert.' % self.key)
             cat = stack[self.key]
-            #if cat.get('description', None):
-            #    return nodes.Link(cat['quote'], children=[nodes.Text(cat['description'])])
             return nodes.Text(cat['quote'])
         else:
             result = nodes.Container()
