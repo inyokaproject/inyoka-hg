@@ -7,11 +7,19 @@
 
     :copyright: 2008 Benjamin Wiegand.
     :license GNU GPL
-    
+
 #}
 
 {%- extends 'forum/page.html' %}
 {% set title_trace = ['Alte Versionen anzeigen'] %}
+{% set navigation_trace = [] %}
+{% for parent in forum.parents|reverse %}
+  {% do navigation_trace.append((parent|url, parent.name)) %}
+{% endfor %}
+{% do navigation_trace.extend([
+    (forum|url, forum.name),
+    (topic|url, topic.title)
+  ]) %}
 
 {% block forum_content %}
 <table class="topic">
