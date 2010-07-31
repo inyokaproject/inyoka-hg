@@ -1030,8 +1030,6 @@ class RandomQuote(Macro):
         for _ in doc.query.by_type(nodes.Section):
             for node in _.children:
                 if isinstance(node, nodes.Headline) and node.level == 1:
-                    #if last_cat:
-                    #    stack[last_cat]['description'] = u''.join(x.text for x in buffer).strip()
                     buffer = []
                     id = node.id
                     stack.setdefault(id, {}).update({
