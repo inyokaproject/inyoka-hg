@@ -8,8 +8,8 @@
     :copyright: Copyright 2008 by Florian Apolloner.
     :license: GNU GPL.
 """
-from fabric.api import *
-import tempfile
+from fabric.api import env,run,local,put,require,prompt
+from tempfile import mktemp
 
 env.user = 'ubuntu_de'
 inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
@@ -26,19 +26,17 @@ def production():
 
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
-    let(
-        hosts = [x.strip() for x in raw_input('Servers: ').split(',')],
-        python_interpreter = raw_input('Python-executable (default: python2.5): ').strip() or 'python2.5',
-        target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv',
-    )
-    bootstrap = tempfile.mktemp(".py", "fabric_")
+    env.hosts = [x.strip() for x in raw_input('Servers: ').split(',')],
+    python_interpreter = raw_input('Python-executable (default: python2.5): ').strip() or 'python2.5',
+    target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv',
+    bootstrap = mktemp(".py", "fabric_")
     run('mkdir %s' % target_dir)
     run('hg clone %s %s/inyoka' % (inyoka_repo, target_dir))
-    local("$(python_interpreter) make-bootstrap.py > '%s'" % bootstrap)
+    local("%s make-bootstrap.py > '%s'" % (python_interpreter, bootstrap))
     put(bootstrap, 'bootstrap.py')
-    run('unlet PYTHONPATH; $(python_interpreter) bootstrap.py --no-site-packages %s' % target_dir)
-    run("ln -s %s/inyoka/inyoka %s/lib/python`$(python_interpreter) -V 2>&1|grep -o '[0-9].[0-9]'`/site-packages" % \
-            (target_dir, target_dir))
+    run('unlet PYTHONPATH; %s bootstrap.py --no-site-packages %s' % (python_interpreter, target_dir))
+    run("ln -s %s/inyoka/inyoka %s/lib/python`%s -V 2>&1|grep -o '[0-9].[0-9]'`/site-packages" % \
+            (target_dir, target_dir, python_interpreter))
 
 def deploy():
     """Update Inyoka and touch the wsgi file"""
@@ -60,5 +58,6 @@ def update_translations():
         local('pybabel update -D django -i inyoka/%s/locale/django.pot -d inyoka/%s/locale -l de' % (app,app), capture=False)
 
 def compile_translations():
+    """Build gmo files from po"""
     for app in _APPS:
         local('pybabel compile -D django -d inyoka/%s/locale -l de' % app, capture=False)
