@@ -93,10 +93,9 @@ TRAC_PASSWORD = None
 MONGO_DATA = {
     'host': 'localhost',
     'port': 27092,
-    'db': '',
-    'collection': '',
-    'user': '',
-    'password': ''
+    'db': None,
+    'user': None,
+    'password': None
 }
 
 # system settings

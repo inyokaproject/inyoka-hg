@@ -81,7 +81,7 @@ class MongoHandler(logging.Handler):
     def __init__(self, host, port, db, collection, user, password, level=logging.NOTSET):
         """ Init log handler and store the collection handle """
         logging.Handler.__init__(self, level)
-        if Connection is None:
+        if Connection is None or db is None or host is None:
             # make everything a dummy
             self.emit = lambda r: None
         else:
