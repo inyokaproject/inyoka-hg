@@ -152,7 +152,7 @@ class Lexer(object):
                  enter='edit'),
             rule(r'\[raw\](.*?)\[/raw\]', bygroups('raw')),
             rule(r'\\\\[^\S\n]*(\n|$)(?m)', 'nl'),
-            include('highlightable')
+            include('highlightable_with_inlines')
         ),
         'links': ruleset(
             rule(r'\[\s*(\d+)\s*\]', bygroups('sourcelink')),
@@ -165,10 +165,18 @@ class Lexer(object):
             rule(_url_pattern + r'[^\s/]+(/[^\s.,:;?]*([.,:;?][^\s.,:;?]+)*)?[^\)\\\s]',
                  'free_link')
         ),
+        'highlightable_with_inlines': ruleset(
+            rule(r'\[mark\]', enter='highlighted_wi')
+        ),
         'highlightable': ruleset(
             rule(r'\[mark\]', enter='highlighted')
         ),
-        # highlighted code
+        # highlighted code; the first allows other inlines as content
+        # and is used for normal text, the other is used in pre_data
+        'highlighted_wi': ruleset(
+            rule(r'\[/mark\]', leave=1),
+            include('inline_with_links')
+        ),
         'highlighted': ruleset(
             rule(r'\[/mark\]', leave=1)
         ),

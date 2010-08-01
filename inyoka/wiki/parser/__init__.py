@@ -133,6 +133,8 @@
 """
 import re
 import unicodedata
+from functools import partial
+
 from inyoka.utils.css import filter_style
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.storage import storage
@@ -387,6 +389,8 @@ class Parser(object):
             'raw':                  self.parse_raw,
             'nl':                   self.parse_nl,
             'highlighted_begin':    self.parse_highlighted,
+            'highlighted_wi_begin': partial(self.parse_highlighted,
+                                            name='highlighted_wi'),
             'conflict_begin':       self.parse_conflict_left,
             'conflict_switch':      self.parse_conflict_middle,
             'conflict_end':         self.parse_conflict_end,
@@ -462,13 +466,13 @@ class Parser(object):
         stream.expect('nl')
         return nodes.Newline()
 
-    def parse_highlighted(self, stream):
+    def parse_highlighted(self, stream, name='highlighted'):
         """Parse a highlighted section."""
-        stream.expect('highlighted_begin')
+        stream.expect('%s_begin' % name)
         children = []
-        while stream.current.type != 'highlighted_end':
+        while stream.current.type != '%s_end' % name:
             children.append(self.parse_node(stream))
-        stream.expect('highlighted_end')
+        stream.expect('%s_end' % name)
         return nodes.Highlighted(children)
 
     def parse_conflict_left(self, stream):
