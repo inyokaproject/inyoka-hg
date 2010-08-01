@@ -19,6 +19,7 @@ from logging import CRITICAL, ERROR, WARNING, INFO, DEBUG
 from socket import gethostname
 from datetime import datetime
 from hashlib import md5
+from threading import Lock
 
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
@@ -38,13 +39,20 @@ DEFAULT_PRIORITIES = {
 }
 
 
+_connection = None
+_connection_lock = Lock()
+
+
 def get_mdb_database(authenticate=True):
+    global _connection
     data = settings.MONGODB_DATA
     if not data['host'] or not data['db']:
         return
 
-    connection = Connection(data['host'], data['port'])
-    database = connection[data['db']]
+    if _connection is None:
+        _connection = Connection(data['host'], data['port'])
+
+    database = _connection[data['db']]
     if authenticate and data['user']:
         database.authenticate(data['user'], data['password'])
     return database
