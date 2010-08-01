@@ -69,7 +69,7 @@ class UbuntuVersion(object):
         return u'%s (%s)' % (self.number, self.codename)
 
 UBUNTU_VERSIONS = [
-    UbuntuVersion('', 'Keine Angabe', active=True),
+    UbuntuVersion('keine', 'Keine Angabe', active=True),
     UbuntuVersion('4.10', 'Warty Warthog', active=False),
     UbuntuVersion('5.04', 'Hoary Hedgehog', active=False),
     UbuntuVersion('5.10', 'Breezy Badger', active=False),
@@ -87,13 +87,13 @@ UBUNTU_VERSIONS = [
 UBUNTU_VERSIONS.reverse()
 
 UBUNTU_DISTROS_LEGACY = {
-    'keine_angabe': 'Keine Angabe',
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
     'kubuntu-kde4': u'Kubuntu (KDE 4)',
     'xubuntu': 'Xubuntu',
     'server': 'Server',
     'edubuntu': 'Edubuntu',
+    'keine': 'Keine Angabe'
 }
 
 UBUNTU_DISTROS = {
@@ -102,6 +102,7 @@ UBUNTU_DISTROS = {
     'xubuntu': 'Xubuntu',
     'server': 'Server',
     'edubuntu': 'Edubuntu',
+    'keine': 'Keine Angabe'
 }
 CACHE_PAGES_COUNT = 5
 
@@ -610,6 +611,8 @@ class Topic(object):
     def get_version_info(self, default=u'Nicht angegeben'):
         if not (self.ubuntu_version or self.ubuntu_distro):
             return default
+        if self.ubuntu_version == u'keine' and self.ubuntu_distro == u'keine':
+            return u'Kein Ubuntu'
         out = []
         if self.ubuntu_distro:
             out.append(UBUNTU_DISTROS_LEGACY[self.ubuntu_distro])
