@@ -26,7 +26,7 @@ if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
 #    logging_handler = ErrorStackHandler()
 #    logging_handler.setLevel(logging.ERROR)
     from inyoka.utils.mongolog import MongoHandler
-    logging_handler = MongoHandler(**settings.MONGO_DATA)
+    logging_handler = MongoHandler()
     logging_handler.setLevel(logging.ERROR)
 else:
     logging_handler = logging.StreamHandler()

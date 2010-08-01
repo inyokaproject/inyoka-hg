@@ -21,6 +21,7 @@ from datetime import datetime
 from hashlib import md5
 
 from inyoka import INYOKA_REVISION
+from inyoka.conf import settings
 
 try:
     from pymongo.connection import Connection
@@ -35,6 +36,18 @@ DEFAULT_PRIORITIES = {
     INFO:       'minor',
     DEBUG:      'trivial'
 }
+
+
+def get_mdb_database(authenticate=True):
+    data = settings.MONGODB_DATA
+    if not data['host'] or not data['db']:
+        return
+
+    connection = Connection(data['host'], data['port'])
+    database = connection[data['db']]
+    if authenticate and data['user']:
+        database.authenticate(data['user'], data['password'])
+    return database
 
 
 class SimpleFormatter(logging.Formatter):
@@ -78,18 +91,14 @@ class MongoHandler(logging.Handler):
     designed to be used with the standard python logging mechanism.
     """
 
-    def __init__(self, host, port, db, collection, user, password, level=logging.NOTSET):
+    def __init__(self, collection='errors', level=logging.NOTSET):
         """ Init log handler and store the collection handle """
         logging.Handler.__init__(self, level)
-        if Connection is None or db is None or host is None:
+        if Connection is None:
             # make everything a dummy
             self.emit = lambda r: None
-        else:
-            self.data = {'host': host, 'port': port, 'db': db,
-                         'collection': collection, 'user': user,
-                         'password': password}
-            self.database = Connection(host, port)[db]
-            self.formatter = SimpleFormatter()
+        self.formatter = SimpleFormatter()
+        self.collection = collection
 
     def emit(self, record):
         """ Store the record to the collection. Async insert """
@@ -107,7 +116,9 @@ class MongoHandler(logging.Handler):
         for info in ('exc_info', 'relativeCreated', 'thread'):
             dct.pop(info, None)
 
-        # authenticate for every thread... fancy but well...
-        self.database.authenticate(self.data['user'], self.data['password'])
-        collection = self.database[self.data['collection']]
+        database = get_mdb_database(True)
+        if database is None:
+            return
+
+        collection = database[self.collection]
         collection.save(dct)

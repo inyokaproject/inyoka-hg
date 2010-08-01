@@ -90,7 +90,7 @@ TRAC_USERNAME = None
 TRAC_PASSWORD = None
 
 # MongoDB data
-MONGO_DATA = {
+MONGODB_DATA = {
     'host': 'localhost',
     'port': 27092,
     'db': None,
