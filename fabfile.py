@@ -104,7 +104,7 @@ def shell():
     local("python manage-inyoka.py shell", capture=False)
 
 def mysql():
-	local("python manage-inyoka.py mysql", capture=False)
+    local("python manage-inyoka.py mysql", capture=False)
 
 def clean_files():
     """Clean most temporary files"""
