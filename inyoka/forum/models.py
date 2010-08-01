@@ -69,6 +69,7 @@ class UbuntuVersion(object):
         return u'%s (%s)' % (self.number, self.codename)
 
 UBUNTU_VERSIONS = [
+    UbuntuVersion('', 'Keine Angabe', active=True),
     UbuntuVersion('4.10', 'Warty Warthog', active=False),
     UbuntuVersion('5.04', 'Hoary Hedgehog', active=False),
     UbuntuVersion('5.10', 'Breezy Badger', active=False),
@@ -86,6 +87,7 @@ UBUNTU_VERSIONS = [
 UBUNTU_VERSIONS.reverse()
 
 UBUNTU_DISTROS_LEGACY = {
+    'keine_angabe': 'Keine Angabe',
     'ubuntu': 'Ubuntu',
     'kubuntu': 'Kubuntu',
     'kubuntu-kde4': u'Kubuntu (KDE 4)',
