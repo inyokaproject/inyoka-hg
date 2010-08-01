@@ -269,6 +269,7 @@ table.topic td.post div.linklist {
 .action {
     background-repeat: no-repeat;
     padding-left: 20px;
+    padding-bottom: 2px;
 }
 
 .action_split {
