@@ -126,18 +126,18 @@ class Pagination(object):
         if show_next_link:
             if self.page < pages:
                 link = self.generate_link(self.page + 1, params)
-                tmpl = u'<a href="%s" class="next"> Weiter » </a>'
+                tmpl = u'<a href="%s" class="next">Weiter »</a>'
                 add(tmpl % escape(link))
             else:
-                add(u'<span class="disabled next"> Weiter » </span>')
+                add(u'<span class="disabled next">Weiter »</span>')
 
         if show_prev_link:
             if self.page > 1:
                 link = self.generate_link(self.page -1, params)
-                tmpl = u'<a href="%s" class="prev"> « Zurück </a>'
+                tmpl = u'<a href="%s" class="prev">« Zurück</a>'
                 result.insert(0, tmpl % escape(link))
             else:
-                result.insert(0, (u'<span class="disabled prev"> « Zurück </span>'))
+                result.insert(0, (u'<span class="disabled prev">« Zurück</span>'))
 
         class_ = 'pagination'
         if position:

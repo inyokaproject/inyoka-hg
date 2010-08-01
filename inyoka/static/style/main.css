@@ -262,13 +262,12 @@ div.pagination .pageselect, div.pagination .next, div.pagination .ellipsis, div.
     line-height: 1.4em;
     background-color: white;
     height: 1.4em;
-    padding: 0 0.5em 0 0.5em!important;
+    padding: 0 0.5em;
     margin-left: 1px;
 }
 
 div.pagination .pageselect, div.pagination .next, div.pagination .prev {
     border: 1px solid #aaa;
-    padding: 4px;
     text-decoration: none;
 }
 
