@@ -65,10 +65,11 @@ class Pagination(object):
             self.total = query.count()
 
         if self.per_page == 0: # Display all entries on one page
-            max_pages = 1
+            self.max_pages = 1
         else:
-            max_pages = (max(0, self.total - 1) // self.per_page) + 1
-        if self.page > max_pages:
+            self.max_pages = (max(0, self.total - 1) // self.per_page) + 1
+
+        if self.page > self.max_pages:
             raise PageNotFound()
 
         if link is None:
