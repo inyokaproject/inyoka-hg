@@ -1087,11 +1087,15 @@ def splittopic(request, topic_slug, page=1):
 
     old_posts = old_topic.posts
 
-    if request.method == 'POST' and 'switch' in request.POST:
+    if request.method == 'POST' and ('switch1' in request.POST or
+                                     'switch2' in request.POST):
         form = SplitTopicForm(data=request.POST)
         _add_field_choices()
         form._errors = ErrorDict()
-        switch_to = int(request.POST['switch_to'])
+        if 'switch1' in request.POST:
+            switch_to = int(request.POST['switch_to1'])
+        if 'switch2' in request.POST:
+            switch_to = int(request.POST['switch_to2'])
 
         pagination = Pagination(request, old_topic.posts, switch_to, POSTS_PER_PAGE,
             url_for(old_topic, action='split'), total=old_topic.post_count,

@@ -11,8 +11,11 @@
 """
 
 import sys, os, subprocess
-
-import virtualenv
+# virtualenv is stored wrong in debian squeeze
+try:
+    from virtualenv import create_bootstrap_script
+except ImportError:
+    from virtualenv.virtualenv import create_bootstrap_script
 
 EXTRA_TEXT = """
 import tempfile, shutil
@@ -101,7 +104,7 @@ def after_install(options, home_dir):
 """
 
 def main():
-    print virtualenv.create_bootstrap_script(EXTRA_TEXT)
+    print create_bootstrap_script(EXTRA_TEXT)
 
 if __name__ == '__main__':
     main()
