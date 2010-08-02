@@ -1069,8 +1069,6 @@ def splittopic(request, topic_slug, page=1):
             (f.id, u'  ' * offset + f.name)
             for offset, f in Forum.get_children_recursive(Forum.query.all())
         )
-        #TODO: add disabled="disabled" to categories and current forum
-        #      (django doesn't feature that atm)
 
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in old_posts]
@@ -1090,24 +1088,28 @@ def splittopic(request, topic_slug, page=1):
     old_posts = old_topic.posts
 
     if request.method == 'POST' and 'switch' in request.POST:
-        form = SplitTopicForm(request.POST)
+        form = SplitTopicForm(data=request.POST)
         _add_field_choices()
         form._errors = ErrorDict()
-
         switch_to = int(request.POST['switch_to'])
 
         pagination = Pagination(request, old_topic.posts, switch_to, POSTS_PER_PAGE,
             url_for(old_topic, action='split'), total=old_topic.post_count,
             rownum_column=post_table.c.position)
 
+        rendered_posts = pagination.objects.all()
+
         return {
             'topic': old_topic,
             'forum': old_topic.forum,
             'form':  form,
             'pagination': pagination.generate(),
-            'posts': pagination.objects.all(),
+            'posts': rendered_posts,
             'current_page': switch_to,
-            'max_pages': pagination.max_pages
+            'max_pages': pagination.max_pages,
+            'post_ids': [p.id for p in rendered_posts],
+            'selected_ids': [int(id) for id in request.POST.getlist('select')],
+            'selected_start': int(request.POST.get('start') or 0)
         }
 
     elif request.method == 'POST':
