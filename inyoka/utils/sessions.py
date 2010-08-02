@@ -33,6 +33,7 @@ def set_session_info(request, action, category=None):
         transaction.rollback()
         return
 
+
     if request.user.is_authenticated:
         if request.user.settings.get('hide_profile', False):
             transaction.rollback()
@@ -40,29 +41,35 @@ def set_session_info(request, action, category=None):
         key = 'user:%s' % request.user.id
         # XXX: Find a better way to detect whether a user is in the team
         user_type = request.user.can('article_read') and 'team' or 'user'
-        args = (request.user.username, user_type, url_for(request.user))
+        args = {
+            'subject_text': request.user.username,
+            'subject_type': user_type,
+            'subject_link': url_for(request.user)
+        }
     else:
         key = request.session.session_key
-        args = (None, 'anonymous', None)
-    args += (datetime.utcnow(), action, request.build_absolute_uri(),
-             category, key)
-    try:
-        cursor = connection.cursor()
-        cursor.execute('''
-            insert into portal_sessioninfo (subject_text, subject_type,
-                   subject_link, last_change, action, action_link,
-                   category, `key`)
-            values (%s, %s, %s, %s, %s, %s, %s, %s)
-                on duplicate key
-            update subject_text = %s, subject_type = %s, subject_link = %s,
-       last_change = %s, action = %s, action_link = %s,
-          category = %s;
-        ''', args + args[:-1])
-        cursor.close()
-    except:
-        transaction.rollback()
-    else:
-        transaction.commit()
+        args = {
+            'subject_text': None,
+            'subject_type': 'anonymous',
+            'subject_link': None
+        }
+
+    args.update({
+        'last_change': datetime.utcnow(),
+        'action': action,
+        'action_link': request.build_absolute_uri(),
+        'category': category
+    })
+
+    affected_rows = SessionInfo.objects.filter(key=key).update(**args)
+    if affected_rows == 0:
+        # No session info for the key exists, try an insert
+        try:
+            SessionInfo.objects.create(key=key, **args)
+        except:
+            transaction.rollback()
+
+    transaction.commit()
 
 
 class SurgeProtectionMixin(object):
