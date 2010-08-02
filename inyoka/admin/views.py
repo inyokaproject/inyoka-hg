@@ -15,7 +15,7 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from sqlalchemy import and_, select
-from datetime import datetime, date, time as dt_time
+from datetime import datetime, timedelta, date, time as dt_time
 from django.db.models import Max
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
@@ -35,6 +35,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime, datetime_to_naive_utc
+from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -1296,4 +1297,23 @@ def styles(request):
         form = EditStyleForm(initial={'styles': storage.get(key, u'')})
     return {
         'form': form
+    }
+
+
+@require_permission('admin_panel')
+@templated('admin/monitoring.html')
+def monitoring(request):
+    database = get_mdb_database(True)
+    errors = database['errors']
+
+    recent = datetime.utcnow() - timedelta(hours=2)
+    recent_errors = errors.find({'created': {'$lt': recent}})
+    closed = errors.find({'status': 'closed'}).count()
+
+    stats = (('closed', errors.find({'status': 'closed'}).count()),
+             ('open', errors.find({'status': ['open', 'new']}).count()))
+    return {
+        'count': errors.count(),
+        'stats': stats,
+        'recent_erros': recent_errors
     }

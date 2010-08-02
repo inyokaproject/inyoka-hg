@@ -116,9 +116,10 @@ class MongoHandler(logging.Handler):
                 record.exc_text = self.formatter.formatException(record.exc_info)
 
         dct = dict(record.__dict__)
-        dct['revision'] = INYOKA_REVISION
         dct['hash'] = get_record_hash(record)
+        dct['revision'] = INYOKA_REVISION
         dct['created'] = datetime.utcnow()
+        dct['status'] = 'new'
 
         # drop not neccessary information
         for info in ('exc_info', 'relativeCreated', 'thread'):
