@@ -409,6 +409,12 @@ $.fn.visualize = function(options, container){
 				.appendTo(canvasContain);
 		}
 		
+		//append title
+		if(o.appendTitle){
+			$('<div class="visualize-title">'+ title +'</div>').appendTo(infoContain);
+		}
+
+
 		//append key
 		if(o.appendKey){
 			var newKey = $('<ul class="visualize-key"></ul>');
