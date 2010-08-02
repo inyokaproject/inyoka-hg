@@ -12,6 +12,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: GNU GPL.
 """
+from functools import partial
 from werkzeug import script
 from werkzeug.debug import DebuggedApplication
 from werkzeug.contrib import profiler
@@ -34,12 +35,61 @@ def make_app():
 action_shell = script.make_shell(lambda: {})
 action_profiled = profiler.make_action(make_app, '', 8080)
 
-def action_runserver():
+
+def action_runserver(hostname='', port=8080, server='simple'):
     from inyoka.conf import settings
-    return script.make_runserver(make_app, settings.DEVSERVER_HOST,
-                                 settings.DEVSERVER_PORT,
-                                 use_reloader=True)
-action_runserver = action_runserver()
+
+    parts = settings.BASE_DOMAIN_NAME.split(':')
+    if not hostname:
+        hostname = parts[0] or 'localhost'
+    port = int(parts[1]) if len(parts) > 1 else port
+
+    app = make_app()
+
+    def _simple():
+        from werkzeug.serving import run_simple
+        run_simple(hostname, port, app, threaded=False,
+            processes=1, use_reloader=True, use_debugger=False)
+
+    def _eventlet():
+        from eventlet import api, wsgi
+        wsgi.server(api.tcp_listener((hostname, port)), app)
+
+    def _cherrypy():
+        from cherrypy.wsgiserver import CherryPyWSGIServer
+        server = CherryPyWSGIServer((hostname, port), app,
+            server_name=ctx.cfg['base_domain_name'],
+            request_queue_size=500)
+        server.start()
+
+    def _tornado():
+        from tornado import httpserver, ioloop, wsgi
+        container = wsgi.WSGIContainer(app)
+        http_server = httpserver.HTTPServer(container)
+        http_server.listen(port, hostname)
+        ioloop.IOLoop.instance().start()
+
+    def _gevent():
+        from gevent import monkey; monkey.patch_all()
+        from gevent.wsgi import WSGIServer
+        WSGIServer((hostname, port), app).serve_forever()
+
+    def _meinheld():
+        from meinheld import server
+        server.listen((hostname, port))
+        server.run(app)
+
+    mapping = {
+        'simple': _simple,
+        'eventlet': _eventlet,
+        'cherrypy': _cherrypy,
+        'tornado': _tornado,
+        'gevent': _gevent,
+        'meinheld': _meinheld
+    }
+
+    # run actually the server
+    mapping[server]()
 
 
 def action_create_superuser(username='', email='', password=''):
@@ -93,6 +143,7 @@ def action_runcp(hostname='0.0.0.0', port=8080):
         server.start()
     except KeyboardInterrupt:
         server.stop()
+
 
 def action_mysql():
     import sys
