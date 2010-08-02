@@ -67,7 +67,7 @@ class Pagination(object):
         if self.per_page == 0: # Display all entries on one page
             self.max_pages = 1
         else:
-            self.max_pages = (max(0, self.total - 1) // self.per_page) + 1
+            self.max_pages = max(0, self.total - 1) // self.per_page + 1
 
         if self.page > self.max_pages:
             raise PageNotFound()
