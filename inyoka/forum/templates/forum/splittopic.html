@@ -48,7 +48,24 @@
         Slug des Topics: {{ form.topic }}{{ form.errors.topic }}
       </dd>
     </dl>
-    {{ form.errors.action }}
+
+    <hr />
+    <div class="pagination">
+      <p>Du befindest dich auf Seite <strong>{{ current_page }}</strong>, 
+         das Topic hat <strong>{{ max_pages }}</strong> Seiten.</p>
+      <span>
+        Auf Seite <input type="text" name="switch_to" class="ellipsis" value="{{ current_page }}">
+        <input type="submit" name="switch" value="wechseln." />
+      </span>
+      <p>
+        <strong>Bitte beachte: </strong>Lade die Seite nicht einfach neu, da sonst alle Daten verloren gehen
+        und du außerdem auch auf einer ganz anderen Seite landest.  Benutze die gestellten Buttons
+        und Formular-Felder um zu navigieren!
+      </p>
+    </div>
+
+    <br />
+
     <table class="topic">
       <thead>
       <tr>
@@ -100,6 +117,16 @@
       </tr>
       </tbody>
     </table>
+
+    <div class="pagination">
+      <p>Du befindest dich auf Seite <strong>{{ current_page }}</strong>, 
+         das Topic hat <strong>{{ max_pages }}</strong> Seiten.</p>
+      <span>
+        Auf Seite <input type="text" name="switch_page" class="ellipsis" value="{{ current_page }}">
+        <input type="submit" name="switch" value="wechseln." />
+      </span>
+    </div>
+
   </form>
   <script type="text/javascript">
     /* <![CDATA[ */

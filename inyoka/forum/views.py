@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from django.db.models import Q
+from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, or_, select, not_, exists, func
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
@@ -1061,7 +1062,7 @@ def movetopic(request, topic_slug):
 
 
 @templated('forum/splittopic.html')
-def splittopic(request, topic_slug):
+def splittopic(request, topic_slug, page=1):
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
         form.fields['forum'].choices = (
@@ -1082,11 +1083,37 @@ def splittopic(request, topic_slug):
     if not have_privilege(request.user, old_topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
+    pagination = Pagination(request, old_topic.posts, page, POSTS_PER_PAGE,
+        url_for(old_topic, action='split'), total=old_topic.post_count,
+        rownum_column=post_table.c.position)
+
     old_posts = old_topic.posts
 
-    if request.method == 'POST':
+    if request.method == 'POST' and 'switch' in request.POST:
         form = SplitTopicForm(request.POST)
         _add_field_choices()
+        form._errors = ErrorDict()
+
+        switch_to = int(request.POST['switch_to'])
+
+        pagination = Pagination(request, old_topic.posts, switch_to, POSTS_PER_PAGE,
+            url_for(old_topic, action='split'), total=old_topic.post_count,
+            rownum_column=post_table.c.position)
+
+        return {
+            'topic': old_topic,
+            'forum': old_topic.forum,
+            'form':  form,
+            'pagination': pagination.generate(),
+            'posts': pagination.objects.all(),
+            'current_page': switch_to,
+            'max_pages': pagination.max_pages
+        }
+
+    elif request.method == 'POST':
+        form = SplitTopicForm(request.POST)
+        _add_field_choices()
+
         if form.is_valid():
             data = form.cleaned_data
 
@@ -1127,7 +1154,7 @@ def splittopic(request, topic_slug):
             filter = Q(topic_id=old_topic.id)
             if data['action'] == 'new':
                 filter |= Q(forum_id=new_forum.id)
-            # Disable until http://forum.ubuntuusers.de/topic/benachrichtigungen-nach-teilung-einer-diskuss/ is resolved to not spam the users
+            #TODO: Disable until http://forum.ubuntuusers.de/topic/benachrichtigungen-nach-teilung-einer-diskuss/ is resolved to not spam the users
             #subscriptions = Subscription.objects.select_related('user').filter(filter)
             subscriptions = []
 
@@ -1156,8 +1183,11 @@ def splittopic(request, topic_slug):
     return {
         'topic': old_topic,
         'forum': old_topic.forum,
-        'posts': list(old_posts),
-        'form':  form
+        'form':  form,
+        'pagination': pagination.generate(),
+        'posts': pagination.objects.all(),
+        'current_page': page,
+        'max_pages': pagination.max_pages
     }
 
 
