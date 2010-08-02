@@ -58,7 +58,7 @@ def action_runserver(hostname='', port=8080, server='simple'):
     def _cherrypy():
         from cherrypy.wsgiserver import CherryPyWSGIServer
         server = CherryPyWSGIServer((hostname, port), app,
-            server_name=ctx.cfg['base_domain_name'],
+            server_name=settings.BASE_DOMAIN_NAME,
             request_queue_size=500)
         server.start()
 
