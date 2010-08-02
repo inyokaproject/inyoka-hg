@@ -154,17 +154,17 @@
             </form>
             <script type="text/javascript">
               /* <![CDATA[ */
-              var text = new WikiEditor('textarea[@name="text"]', 'forum');
+              var text = new WikiEditor('textarea[name="text"]', 'forum');
               (function() {
                 var
-                  editor = $('textarea[@name="text"]'),
+                  editor = $('textarea[name="text"]'),
                   output = $('<div class="preview" />')
                 var preview = $('<div class="preview_wrapper"  />')
                   .hide()
                   .append('<h2 class="title">Vorschau<\/h2>')
                   .append(output);
 
-                $('form input[@name="preview"]').click(function() {
+                $('form input[name="preview"]').click(function() {
                   $('body, input, textarea').css('cursor', 'progress');
                   preview.hide();
                   $.post('/?__service__=wiki.render_preview', {

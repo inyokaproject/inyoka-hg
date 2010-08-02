@@ -16,16 +16,16 @@
     this.container = $(container);
 
     // Groups the user not joined
-    this.user_not_joined = $('select[@name="user_groups_not_joined"]');
+    this.user_not_joined = $('select[name="user_groups_not_joined"]');
     
     // Groups the user joined
-    this.user_joined = $('select[@name="user_groups_joined"]')
+    this.user_joined = $('select[name="user_groups_joined"]')
 
     // add items to the select boxes
     this.rebuildBoxes(user_joined, user_not_joined);
   
     // add needed submit event
-    $($(container).find('input[@type="submit"]')[0])
+    $($(container).find('input[type="submit"]')[0])
       .submit(function() {
         $.each([self.user_not_joined, self.user_joined], function() {
           this.find('option').each(function() {

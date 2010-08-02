@@ -41,18 +41,18 @@
   {%- endif %}
   <script type="text/javascript">
     /*<![CDATA[*/
-      new WikiEditor('textarea[@name="text"]', 'wiki');
+      new WikiEditor('textarea[name="text"]', 'wiki');
 
       (function() {
         var
-          editor = $('textarea[@name="text"]'),
+          editor = $('textarea[name="text"]'),
           output = $('<div class="preview"></div>');
         var preview = $('<div></div>')
           .hide()
           .append('<h2>Vorschau</h2>')
           .append(output);
 
-        $('form input[@name="preview"]').click(function() {
+        $('form input[name="preview"]').click(function() {
         $('body, input, textarea').css('cursor', 'progress');
           preview.hide();
           $.post('/?__service__=wiki.render_preview', {

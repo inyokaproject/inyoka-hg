@@ -110,7 +110,7 @@
 </form>
 <script type="text/javascript">
   /* <![CDATA[ */
-  var signature = new WikiEditor('textarea[@name="signature"]');
+  var signature = new WikiEditor('textarea[name="signature"]');
   var forum_rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
     {{ forum_privileges|jsonencode }});
   var select_form = new GroupBox('#user_edit_box',
@@ -126,27 +126,27 @@
         date_joined = null;
         dj_ui_switcher.text('grafischen Editor aktivieren');
       } else {
-        date_joined = new DateTimeField('input[@name="date_joined"]');
+        date_joined = new DateTimeField('input[name="date_joined"]');
         dj_ui_switcher.text('grafischen Editor deaktivieren');
       }
     });
 
-  $('input[@name="group_titles"]').change(function() {
+  $('input[name="group_titles"]').change(function() {
     var value = "";
-    $('input[@name="group_titles"]:checked').each(function(i) {
+    $('input[name="group_titles"]:checked').each(function(i) {
       if (i>0) value += " & ";
       value += $(this).val();
     });
     $('#id_member_title').val(value);
   });
 
-  $('select[@name="user_groups_joined"]').change(function() {
-    var field = $('select[@name="user_groups_joined"]');
-    $('input[@name="primary_group"]').val(field.find('option:selected').val());
+  $('select[name="user_groups_joined"]').change(function() {
+    var field = $('select[name="user_groups_joined"]');
+    $('input[name="primary_group"]').val(field.find('option:selected').val());
   });
 
   $('a.delete_primary_group').click(function() {
-    $('input[@name="primary_group"]').val("");
+    $('input[name="primary_group"]').val("");
     return false;
   });
   /* ]]> */

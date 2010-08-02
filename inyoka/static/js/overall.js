@@ -9,11 +9,6 @@
  */
 
 $(document).ready(function() {
-  // konqueror fix
-  with ($.browser) {
-    safari = safari || !!navigator.appName.match(/konqueror/i)
-  };
-
   var loginForm = null;
 
   // preload images
@@ -167,7 +162,7 @@ $(document).ready(function() {
     var
       initialized = false,
       $currentSearchArea = $('select.search_area').val(),
-      $currentAreaName = $('select.search_area option[@selected]').html(),
+      $currentAreaName = $('select.search_area option:selected').html(),
       areaPopup = $('<ul class="search_area" />'),
       searchArea = $('select.search_area').hide();
       $('.search_query').addClass('area_' + $currentSearchArea);
@@ -198,7 +193,7 @@ $(document).ready(function() {
                   $currentAreaName = $(this).html();
                   $('.search_query').removeClass('area_' + $currentSearchArea);
                   $currentSearchArea = currentArea;
-                  $currentAreaName = $('select.search_area option[@value=' +
+                  $currentAreaName = $('select.search_area option[value=' +
                                        $currentSearchArea + ']').html()
                   $('.search_query').addClass('area_' + $currentSearchArea);
                   $('li', areaPopup).each(function() {
@@ -269,7 +264,7 @@ $(document).ready(function() {
     $('form').submit(function() {
       if (submitted)
         return false;
-      $('input[@type="submit"]').addClass('disabled');
+      $('input[type="submit"]').addClass('disabled');
       submitted = true;
     });
   })();

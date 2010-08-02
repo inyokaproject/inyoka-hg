@@ -73,8 +73,8 @@
 
 <script type="text/javascript">
   /* <![CDATA[ */
-  var text = new WikiEditor('textarea[@name="text"]', 'forum');
-  var intro = new WikiEditor('textarea[@name="intro"]', 'forum');
+  var text = new WikiEditor('textarea[name="text"]', 'forum');
+  var intro = new WikiEditor('textarea[name="intro"]', 'forum');
 
   var intro_skipped = false;
   $('#id_intro').keyup(function () {
@@ -90,15 +90,15 @@
   /* Preview implementation */
   (function() {
     var
-      ieditor = $('textarea[@name="intro"]'),
-      teditor = $('textarea[@name="text"]'),
+      ieditor = $('textarea[name="intro"]'),
+      teditor = $('textarea[name="text"]'),
       output = $('<div class="preview"></div>');
     var preview = $('<div class="preview_wrapper" />')
       .hide()
       .append('<h2 class="title">Vorschau</h2>')
       .append(output);
 
-    $('form input[@name="preview"]').click(function() {
+    $('form input[name="preview"]').click(function() {
       preview.hide();
       $.post('/?__service__=wiki.render_preview', {
         text: ieditor.val() + '\n----\n\n' + teditor.val()

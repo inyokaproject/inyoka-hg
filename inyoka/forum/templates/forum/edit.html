@@ -177,10 +177,10 @@
   </form>
   <script type="text/javascript">
     /* <![CDATA[ */
-    var editor = new WikiEditor('textarea[@name="text"]', 'forum');
+    var editor = new WikiEditor('textarea[name="text"]', 'forum');
     (function() {
       var
-        editor = $('textarea[@name="text"]'),
+        editor = $('textarea[name="text"]'),
         output = $('<div class="preview" />')
       var preview = $('<div class="preview_wrapper" />')
         .hide()
@@ -188,7 +188,7 @@
         .append(output);
 
       var after_rendering = function(data) {
-        var is_plaintext = $('input[@name="is_plaintext"]')[0].checked;
+        var is_plaintext = $('input[name="is_plaintext"]')[0].checked;
         if (is_plaintext) {
           output.text(data);
         } else {
@@ -202,10 +202,10 @@
           document.location += '#preview';
       };
 
-      $('form input[@name="preview"]').click(function() {
+      $('form input[name="preview"]').click(function() {
         $('body, input, textarea').css('cursor', 'progress');
         preview.hide();
-        var is_plaintext = $('input[@name="is_plaintext"]')[0].checked;
+        var is_plaintext = $('input[name="is_plaintext"]')[0].checked;
         if (is_plaintext) {
           after_rendering(editor.val());
         } else {

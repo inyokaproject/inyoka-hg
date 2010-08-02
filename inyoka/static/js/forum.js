@@ -153,7 +153,7 @@ $(function () {
 
   /* Display some more informations about the ubuntu version */
   (function() {
-    $('select[@name="ubuntu_version"]').change(function() {
+    $('select[name="ubuntu_version"]').change(function() {
       var text_unstable = 'Dies ist die momentane <a href="{LL}">Entwicklungsversion</a> von Ubuntu';
       var text_lts = 'Dies ist eine <a href="{LL}">LTS (Long Term Support)</a> Version';
       var text_current = 'Dies ist die momentan <a href="{LL}">aktuelle Version</a> von Ubuntu';
