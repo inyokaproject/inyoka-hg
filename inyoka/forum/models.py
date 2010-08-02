@@ -611,12 +611,12 @@ class Topic(object):
     def get_version_info(self, default=u'Nicht angegeben'):
         if not (self.ubuntu_version or self.ubuntu_distro):
             return default
-        if self.ubuntu_version == u'keine' and self.ubuntu_distro == u'keine':
+        if self.ubuntu_distro == u'keine':
             return u'Kein Ubuntu'
         out = []
         if self.ubuntu_distro:
             out.append(UBUNTU_DISTROS_LEGACY[self.ubuntu_distro])
-        if self.ubuntu_version:
+        if self.ubuntu_version and self.ubuntu_version != u'keine':
             out.append(str(self.get_ubuntu_version()))
         return u' '.join(out)
 
