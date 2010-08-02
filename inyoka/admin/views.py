@@ -1300,7 +1300,7 @@ def styles(request):
     }
 
 
-@require_permission('admin_panel')
+@require_permission('manage_stats')
 @templated('admin/monitoring.html')
 def monitoring(request):
     database = get_mdb_database(True)
