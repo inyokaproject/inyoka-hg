@@ -93,7 +93,7 @@ def index(request, category=None):
                 raise PageNotFound
 
             if have_privilege(User.ANONYMOUS_USER, category, 'read'):
-                set_session_info(request, session_info)
+                set_session_info(request, *session_info)
             categories = [category]
 
             fmsg = category.find_welcome(request.user)
@@ -103,7 +103,7 @@ def index(request, category=None):
             categories = list(query.filter(forum_table.c.parent_id == None) \
                               .order_by(forum_table.c.position))
             # forum-overview can be set without any acl check ;)
-            set_session_info(request, session_info)
+            set_session_info(request, *session_info)
 
         cache.set(key, categories, 120)
 
