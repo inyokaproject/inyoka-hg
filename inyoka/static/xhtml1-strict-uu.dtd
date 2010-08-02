@@ -709,7 +709,8 @@
 <!ENTITY % InputType
   "(text | password | checkbox |
     radio | submit | reset | datetime |
-    date | file | hidden | image | button)"
+    date | file | hidden | image | button |
+	valuetype)"
    >
 
 <!-- the name attribute is required for all but submit & reset -->

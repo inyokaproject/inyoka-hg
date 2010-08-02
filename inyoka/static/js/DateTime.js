@@ -15,7 +15,7 @@
  * them. */
 $(function() {
   $('input').each(function() {
-    var type = this.getAttribute('type');
+    var type = this.getAttribute('valuetype');
     if (type == 'datetime')
       new DateTimeField(this, true);
     else if (type == 'date')

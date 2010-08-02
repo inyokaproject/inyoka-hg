@@ -107,11 +107,23 @@ class CaptchaWidget(Input):
 
 
 class DateTimeWidget(Input):
-    input_type = 'datetime'
+    input_type = 'text'
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        attrs['valuetype'] = 'datetime'
+        return Input.render(self, name, value, attrs)
 
 
 class DateWidget(Input):
-    input_type = 'date'
+    input_type = 'text'
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        attrs['valuetype'] = 'datetime'
+        return Input.render(self, name, value, attrs)
 
 
 class CaptchaField(forms.Field):
