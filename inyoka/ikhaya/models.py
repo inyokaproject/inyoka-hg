@@ -112,7 +112,7 @@ class Article(models.Model):
     intro = models.TextField('Einleitung')
     text = models.TextField('Text')
     public = models.BooleanField('Veröffentlicht')
-    slug = models.CharField('Slug', max_length=100, blank=True)
+    slug = models.SlugField('Slug', max_length=100, blank=True)
     is_xhtml = models.BooleanField('XHTML Markup', default=False)
     comment_count = models.IntegerField(default=0)
     comments_enabled = models.BooleanField('Kommentare erlaubt', default=True)
@@ -250,6 +250,11 @@ class Article(models.Model):
                     random.random(),
                     random.random()
                 )[:50]
+
+        # Force to use a valid slug
+        slugified = slugify(self.slug)
+        if slugified != self.slug:
+            self.slug = slugified
 
         super(Article, self).save(force_insert, force_update)
         self.update_search()
