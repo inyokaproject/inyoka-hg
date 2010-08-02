@@ -109,6 +109,9 @@
         {%- elif doc.component == 'Wiki' %}
         zuletzt bearbeitet von <a href="{{ doc.user_url }}">{{ doc.user.username|e }}</a> am {{ doc.date.strftime('%d.%m.%Y um %H:%M') }}
         {%- endif %}
+        {%- if doc.component == 'Forum' %}
+        <a href="{{ doc.last_post_url }}" alt="Springe zu letztem Beitrag"><img src="{{ href('static', 'img/forum/goto.png') }}" /></a>
+        {%- endif %}
       </p>
     </li>
     {%- else %}

@@ -113,7 +113,8 @@ class ForumSearchAdapter(SearchAdapter):
             'text': post.get_text(),
             'solved': post.topic.solved,
             'version': post.topic.get_version_info(False),
-            'hidden': post.hidden or post.topic.hidden
+            'hidden': post.hidden or post.topic.hidden,
+            'last_post_url': url_for(post.topic.last_post),
         }
 
     def get_doc_ids(self):
