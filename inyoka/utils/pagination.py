@@ -142,8 +142,5 @@ class Pagination(object):
         class_ = 'pagination'
         if position:
             class_ += ' pagination_' + position
-#        return (u'<div class="%s"><input type="hidden" value="%s"/>%s'
-#                u'<div style="clear: both"></div></div>' %
-#                (class_, self.link_base, u''.join(result)))
         return u'<div class="%s">%s<div style="clear: both">' \
                u'</div></div>' % (class_, u''.join(result))
