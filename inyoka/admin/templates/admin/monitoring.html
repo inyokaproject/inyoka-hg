@@ -9,7 +9,8 @@
 {% set navigation_trace = [
     (href('admin', 'monitoring'), 'Monitoring'),
   ] %}
-{% set scripts = ['highcharts.js', 'highcharts.exporting.js'] %}
+{% set scripts = ['jQuery.visualize.js'] %}
+{% set styles = ['visualize.css'] %}
 {% block appheader %}
 <h1><a href="{{ href('admin') }}">Administration</a></h1>
 <h2><a href="{{ href('admin', 'monitoring') }}">Monitoring</a></h2>
@@ -24,67 +25,32 @@
 
 <hr />
 <h4>Fehlerstatistiken</h4>
-<div id="container" class="highcharts-container"></div>
+<table class="errorstats">
+  <tr>
+    <th>Offen</th>
+    <th>Geschlossen</th>
+  </tr>
+  <tr>
+    <td>500</td>
+    <td>231</td>
+  </tr>
+</table>
 
 <script type="text/javascript">
   /* <![CDATA[ */
   $(document).ready(function() {
-
-    var chart = new Highcharts.Chart({
-      chart: {
-        renderTo: 'container',
-        margin: [50, 0, 15, 10]
-      },
-      title: {
-        text: 'Fehlerstatistik'
-      },
-      plotAreaa: {
-        shadow: null,
-        borderWidth: null,
-        backgroundColor: null
-      },
-      tooltip: {
-         formatter: function() {
-            return '<b> '+ this.point.name +' </b>: '+ this.y;
-         }
-      },
-      plotOptions: {
-         pie: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            dataLabels: {
-               enabled: true,
-               formatter: function() {
-                  if (this.y > 5) return this.point.name;
-               },
-               color: 'white',
-               style: {
-                  font: '13px Trebuchet MS, Verdana, sans-serif',
-                  margin: '50px',
-               },
-               x: 5,
-               y: 20,
-            }
-         }
-      },
-      legend: {
-         layout: 'vertical',
-         style: {
-            left: 'auto',
-            bottom: 'auto',
-            right: '50px',
-            top: '100px'
-         }
-      },
-       series: [{
-         type: 'pie',
-         name: 'Fehlerstatistik',
-         size: 250,
-         data: {{ stats|jsonencode }},
-      }]
+    $('table.errorstats').visualize({
+      type: 'pie',
+      height: '200px',
+      width: '420px',
+      parseDirection: 'y',
+      appendTitle: false
     });
-  })
-
+    $('table.errorstats').hide();
+  });
   /* ]]> */
 </script>
+
+
+
 {% endblock %}

@@ -1310,8 +1310,10 @@ def monitoring(request):
     recent_errors = errors.find({'created': {'$lt': recent}})
     closed = errors.find({'status': 'closed'}).count()
 
-    stats = (('Geschlossen', closed),
-             ('Offen', errors.count() - closed))
+    stats = {
+        'closed': closed,
+        'open': errors.count() - closed
+    }
     return {
         'count': errors.count(),
         'stats': stats,
