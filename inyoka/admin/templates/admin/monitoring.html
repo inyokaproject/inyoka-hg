@@ -24,7 +24,7 @@
 
 <hr />
 <h4>Fehlerstatistiken</h4>
-<div id="container" class="highcharts-container" style="height:410px; width: 800px; margin: 0 auto; clear:both"></div>
+<div id="container" class="highcharts-container"></div>
 
 <script type="text/javascript">
   /* <![CDATA[ */
@@ -33,7 +33,7 @@
     var chart = new Highcharts.Chart({
       chart: {
         renderTo: 'container',
-        margin: [50, 200, 60, 170]
+        margin: [50, 0, 15, 10]
       },
       title: {
         text: 'Fehlerstatistik'
@@ -45,7 +45,7 @@
       },
       tooltip: {
          formatter: function() {
-            return '<b>'+ this.point.name +'</b>: '+ this.y +' %';
+            return '<b> '+ this.point.name +' </b>: '+ this.y;
          }
       },
       plotOptions: {
@@ -59,8 +59,11 @@
                },
                color: 'white',
                style: {
-                  font: '13px Trebuchet MS, Verdana, sans-serif'
-               }
+                  font: '13px Trebuchet MS, Verdana, sans-serif',
+                  margin: '50px',
+               },
+               x: 5,
+               y: 20,
             }
          }
       },
@@ -76,9 +79,9 @@
        series: [{
          type: 'pie',
          name: 'Fehlerstatistik',
-         data: {{ stats|jsonencode }}
+         size: 250,
+         data: {{ stats|jsonencode }},
       }]
-
     });
   })
 
