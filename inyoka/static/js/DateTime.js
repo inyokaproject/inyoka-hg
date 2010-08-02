@@ -15,9 +15,10 @@
  * them. */
 $(function() {
   $('input').each(function() {
-    if ($(this).attr('type') == 'datetime')
+    var type = this.getAttribute('type');
+    if (type == 'datetime')
       new DateTimeField(this, true);
-    else if ($(this).attr('type') == 'date')
+    else if (type == 'date')
       new DateTimeField(this, true, true);
   });
 });
