@@ -946,7 +946,7 @@ class RandomKeyValue(Macro):
         ('key', unicode, u''),
         ('node_type', {
             'text': u'text',
-            'list': u'list'
+            'link': u'link'
         }, 'text'),
     )
 
@@ -992,7 +992,7 @@ class RandomKeyValue(Macro):
                 return nodes.error_box(u'Schlüssel nicht definiert',
                     u'Der Schlüssel „%s” wurde nicht definiert.' % self.key)
             cat = stack[self.key]
-            node_type = self.node_type == 'list' and nodes.List or nodes.Text
+            node_type = self.node_type == 'list' and nodes.Link or nodes.Text
             return node_type(cat['desc'])
         else:
             result = nodes.Container()
