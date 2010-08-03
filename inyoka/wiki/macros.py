@@ -1095,7 +1095,7 @@ ALL_MACROS = {
     u'ÄhnlicheSeiten':      SimilarPages,
     u'SPAN':                Span,
     u'ZufallsZitat':        RandomKeyValue,
-    u'ZufallsServer':       RandomKeyValue,
+    u'ZufälligerServer':    RandomKeyValue,
     u'MetaFilter':          FilterByMetaData,
 }
 
