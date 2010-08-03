@@ -23,10 +23,6 @@ def test_legacy_url(request, test_func):
         return HttpResponsePermanentRedirect(old_url)
 
 
-def make_tester(f):
-    return lambda request: test_legacy_url(request, f)
-
-
 class LegacyDispatcher(object):
     """Helper class for legacy URLs."""
 

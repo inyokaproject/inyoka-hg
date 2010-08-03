@@ -99,7 +99,7 @@ def forum_actions(args, match, forum_id, action):
     ACTIONS = {
         'watch': 'subscribe',
         'unwatch': 'unsubscribe',
-        'mark_read': '-', #TODO
+        'mark_read': 'markread',
     }
     try:
         action = ACTIONS[action]
