@@ -169,6 +169,7 @@ def shorten_filename(name, length=20, suffix=''):
         raise ValueError, "%s is >= %d chars" % (new_suffix, length)
     return name[:length - len(new_suffix)] + new_suffix
 
+
 def get_new_unique_filename(name, path='', shorten=True, length=20):
     counter = 0
     new_name = shorten_filename(name, length)
@@ -261,7 +262,18 @@ def find_window(highlight_locations, max_length):
 
 def render_html(text_block, highlight_locations=None, start_offset=None, end_offset=None):
     # Start by chopping the block down to the proper window.
-    text = text_block[start_offset:end_offset]
+    words = text_block[start_offset:].split(' ')
+    result = []
+    m = 0
+    for word in words:
+        m += len(word) + 1
+        if m < start_offset:
+            continue
+        elif m > end_offset:
+            break
+        else:
+            result.append(word)
+    text = u' '.join(result)
 
     # Invert highlight_locations to a location -> term list
     term_list = []
