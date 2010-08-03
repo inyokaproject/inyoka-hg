@@ -162,7 +162,11 @@
 
         <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
           navigation_trace|default([]) %}
-          <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
+          <a href="{{ link|e }}">
+            {%- if loop.last %}<strong>{% endif -%}
+            {{ title|truncate(35)|e }}
+            {%- if loop.last %}</strong>{% endif -%}
+            </a>{% if not loop.last
             %} »{% endif %}
         {%- endfor %}
         </p>
