@@ -46,6 +46,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.sortable import Sortable
 from inyoka.utils.parsertools import OrderedDict
 from inyoka.utils.collections import MultiMap, flatten_iterator
+from inyoka.utils.logger import logger
 
 
 def get_macro(name, args, kwargs):
@@ -939,82 +940,20 @@ class Span(Macro):
                         class_=self.class_, style=self.style)
 
 
-# TODO: Remove this at PostRelease and find something better
-MIRRORS = {
-    'general': ['http://download.pcwelt.de/ubuntu/',
-        'ftp://ftp.fu-berlin.de/linux/ubuntu/releases/',
-        'http://de.archive.ubuntu.com/ubuntu-releases/',
-        'http://ftp-stud.hs-esslingen.de/pub/Mirrors/releases.ubuntu.com/',
-        'http://ftp.cw.net/pub/linux/ftp.ubuntu.com/releases/',
-        'http://ftp.halifax.rwth-aachen.de/ubuntu-releases/',
-        'ftp://ftp.rrzn.uni-hannover.de/pub/mirror/linux/ubuntu-releases/',
-        'http://ftp.stw-bonn.de/ubuntu-cd/',
-        'http://ftp.uni-kl.de/pub/linux/ubuntu.iso/',
-        'http://sunsite.informatik.rwth-aachen.de/ftp/pub/Linux/ubuntu/releases/',
-        'http://cdmirror.ubuntu.xena.abysmal.eu/',
-        'http://ftp.hosteurope.de/mirror/releases.ubuntu.com/',
-        'http://ftp.tu-clausthal.de/ftp/mirror/ubuntu/releases/',
-        'http://ftp.uni-bayreuth.de/linux/ubuntu/releases/',
-        'ftp://mirror.secaron.lu/ubuntu/',
-        'http://releases.ubuntu.uasw.edu/',
-        'http://ftp-stud.fht-esslingen.de/Mirrors/releases.ubuntu.com/',
-        'http://ftp.tu-chemnitz.de/pub/linux/ubuntu-releases/',
-        'http://ubuntu.intergenia.de/releases/',
-        'http://snert.mi.hs-heilbronn.de/pub/ubuntu/releases/'],
-    'xubuntu': ['http://ubuntu.ipacct.com/xubuntu/',
-        'ftp://ftp.free.fr/mirrors/ftp.xubuntu.com/releases/',
-        'http://ubuntu.univ-nantes.fr/ubuntu-cd/xubuntu/',
-        'http://ubuntu-cdimage.datahop.it/xubuntu/releases/',
-        'http://nl.archive.ubuntu.com/ubuntu-cdimage-xubuntu/releases/',
-        'http://ftp.dei.uc.pt/pub/linux/xubuntu/releases/',
-        'http://neacm.fe.up.pt/pub/xubuntu/releases/',
-        'http://se.archive.ubuntu.com/mirror/cdimage.ubuntu.com/xubuntu/releases/',
-        'http://cdimages.ubuntu.com/xubuntu/releases/',
-        'http://ftp.cw.net/xubuntu/releases/'],
-    'ports': ['http://cdimage.ubuntu.com/ports/releases/',
-        'http://ftp.gnome.org/mirror/cdimage.ubuntu.com/ports/releases/',
-        'http://ftp.acc.umu.se/mirror/cdimage.ubuntu.com/ports/releases/'],
-    'dvd': ['http://ftp.funet.fi/pub/Linux/INSTALL/Ubuntu/dvd-releases/releases/',
-        'http://ftp.ntua.gr/pub/linux/ubuntu-releases-dvd/',
-        'ftp://ubuntu.etf.bg.ac.yu/distributions/ubuntu/ubuntu-dvd/',
-        'http://ubuntu-cdimage.datahop.it/releases/',
-        'http://nl.archive.ubuntu.com/ubuntu-cdimages/',
-        'ftp://nl.archive.ubuntu.com/ubuntu-cdimages/',
-        'http://ftp.acc.umu.se/mirror/cdimage.ubuntu.com/releases/',
-        'http://es.archive.ubuntu.com/cdimage/releases/',
-        'ftp://ftp.ulak.net.tr/linux/ubuntu-releases/',
-        'ftp://ftp.linux.org.tr/pub/ubuntu-releases/',
-        'http://www.mirrorservice.org/sites/cdimage.ubuntu.com/cdimage/releases/']
-}
-
-class RandomMirror(Macro):
+class RandomKeyValue(Macro):
     arguments = (
-        ('key', unicode, 'general'),
-        ('path', unicode, ''),
-        ('description', unicode, '')
+        ('page', unicode, u''),
+        ('key', unicode, u''),
+        ('node_type', {
+            'text': u'text',
+            'list': u'list'
+        }, 'text'),
     )
 
-    def __init__(self, key, path, description):
-        self.key = key
-        self.path = path
-        self.description = description
-
-    def build_node(self, context, format):
-        url = random.choice(MIRRORS[self.key]) + self.path
-        if self.description:
-            return nodes.Link(url, children=[nodes.Text(self.description)])
-        return nodes.Text(url)
-
-
-class RandomQuote(Macro):
-    arguments = (
-        ('page', unicode, ''),
-        ('key', unicode, '')
-    )
-
-    def __init__(self, page, key):
+    def __init__(self, page, key, node_type):
         self.page = page
         self.key = key
+        self.node_type = node_type
 
     def build_node(self, context, format):
         try:
@@ -1023,6 +962,7 @@ class RandomQuote(Macro):
             return nodes.error_box(u'Seite nicht gefunden',
                                    u'Die Seite „%s“ wurde nicht '
                                    u'gefunden.' % self.page)
+
         doc = page.rev.text.parse()
         stack = OrderedDict()
         last_cat = None
@@ -1038,11 +978,11 @@ class RandomQuote(Macro):
                     last_cat = id
                 elif isinstance(node, nodes.List):
                     # values for the key
-                    mirrors = random.choice(node.children)
-                    quote = u''.join(x.text for x in mirrors.query.children)
+                    items = random.choice(node.children)
+                    desc = u''.join(x.text for x in items.query.children)
 
                     stack.setdefault(last_cat, {}).update({
-                        'quote': quote.strip()
+                        'desc': desc.strip()
                     })
                 elif isinstance(node, nodes.Paragraph):
                     buffer.append(node)
@@ -1052,13 +992,17 @@ class RandomQuote(Macro):
                 return nodes.error_box(u'Schlüssel nicht definiert',
                     u'Der Schlüssel „%s” wurde nicht definiert.' % self.key)
             cat = stack[self.key]
-            return nodes.Text(cat['quote'])
+            node_type = self.node_type == 'list' and nodes.List or nodes.Text
+            return node_type(cat['desc'])
         else:
             result = nodes.Container()
             for v in stack.values():
+                if not 'desc' in v:
+                    continue
+
                 desc = nodes.Strong(children=[nodes.Text(v['name'])])
                 value_list = nodes.List('unordered', children=[
-                    nodes.Link(v['quote'])
+                    nodes.Link(v['desc'])
                 ])
                 result.children.extend([desc, value_list])
             return result
@@ -1150,8 +1094,8 @@ ALL_MACROS = {
     u'Zufallsseite':        RandomPageList,
     u'ÄhnlicheSeiten':      SimilarPages,
     u'SPAN':                Span,
-    u'ZufälligerServer':    RandomMirror,
-    u'ZufallsZitat':        RandomQuote,
+    u'ZufallsZitat':        RandomKeyValue,
+    u'ZufallsServer':       RandomKeyValue,
     u'MetaFilter':          FilterByMetaData,
 }
 
