@@ -84,25 +84,25 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('10.04', 'Lucid Lynx', lts=True, current=True),
     UbuntuVersion('10.10', 'Maverick Meerkat', class_='unstable'),
 ]
-UBUNTU_VERSIONS.reverse()
+#UBUNTU_VERSIONS.reverse()
 
 UBUNTU_DISTROS_LEGACY = {
-    'ubuntu': 'Ubuntu',
+    'keine': 'Keine Angabe',
+    'edubuntu': 'Edubuntu',
     'kubuntu': 'Kubuntu',
     'kubuntu-kde4': u'Kubuntu (KDE 4)',
-    'xubuntu': 'Xubuntu',
     'server': 'Server',
-    'edubuntu': 'Edubuntu',
-    'keine': 'Keine Angabe'
+    'ubuntu': 'Ubuntu',
+    'xubuntu': 'Xubuntu'
 }
 
 UBUNTU_DISTROS = {
-    'ubuntu': 'Ubuntu',
-    'kubuntu': 'Kubuntu',
-    'xubuntu': 'Xubuntu',
-    'server': 'Server',
+    'keine': 'Keine Angabe',
     'edubuntu': 'Edubuntu',
-    'keine': 'Keine Angabe'
+    'kubuntu': 'Kubuntu',
+    'server': 'Server',
+    'ubuntu': 'Ubuntu',
+    'xubuntu': 'Xubuntu'
 }
 CACHE_PAGES_COUNT = 5
 
