@@ -31,6 +31,11 @@
     ] %}
 {% else %}
   {% set title_trace = ['Posting bearbeiten']%}
+  {% set navigation_trace =  [
+    (forum|url, forum.name),
+    (topic|url, topic.title),
+    ('', 'Posting bearbeiten')
+    ] %}
 {% endif %}
 {% set scripts = ['WikiEditor.js', 'NewTopic.js'] %}
 {% set styles = ['editor.css'] %}
