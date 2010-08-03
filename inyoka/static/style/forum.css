@@ -168,6 +168,10 @@ table.topic {
     table-layout: fixed;
 }
 
+table.topic table td, table.topic table th {
+  border: solid 1px #ccc;
+}
+
 /* deleted post */
 table.topic tr.deleted {
     text-align: center;
