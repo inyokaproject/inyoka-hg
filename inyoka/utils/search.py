@@ -66,7 +66,7 @@ class SearchResult(object):
                 text = None
             if text:
                 data['excerpt'] = create_excerpt(text, terms)
-            data['title'] = create_excerpt(data['title'], terms)
+            data['title'] = data['title']
             data['score'] = match.percent
             self.results.append(data)
         self.terms = []
