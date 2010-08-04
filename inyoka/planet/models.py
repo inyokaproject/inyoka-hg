@@ -16,6 +16,7 @@ from django.db import models, connection
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
+from inyoka.utils.html import striptags
 
 
 class Blog(models.Model):
@@ -95,6 +96,10 @@ class Entry(models.Model):
             self.blog,
             self.title
         )
+
+    @property
+    def simplified_text(self):
+        return striptags(self.text)
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
