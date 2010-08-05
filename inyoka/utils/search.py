@@ -14,7 +14,7 @@ import re
 import time
 import xapian
 from weakref import WeakKeyDictionary
-from threading import currentThread as get_current_thread
+from threading import currentThread as get_current_thread, local
 from time import mktime
 from datetime import datetime
 from cPickle import dumps, loads
@@ -24,8 +24,31 @@ from inyoka.utils import get_significant_digits
 from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
-_stemmer = xapian.Stem('de')
+
+LANGUAGE = 'de'
 search = None
+
+_tls = local()
+
+def get_stemmer(language_code=LANGUAGE):
+    """Get a stemmer for a given language.
+
+    Thread local storage is
+    used to ensure that the returned stemmer is specific to the current thread,
+    since stemmers aren't threadsafe.
+
+    """
+    try:
+        return _tls.stemmers[language_code]
+    except KeyError:
+        stemmer = xapian.Stem(language_code)
+        _tls.stemmers[language_code] = stemmer
+        return stemmer
+    except AttributeError:
+        stemmer = xapian.Stem(language_code)
+        _tls.stemmers = {language_code: stemmer}
+        return stemmer
+
 
 
 _description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
@@ -207,7 +230,7 @@ class SearchSystem(object):
         qp = xapian.QueryParser()
         qp.set_default_op(xapian.Query.OP_AND)
         qp.set_stemming_strategy(xapian.QueryParser.STEM_SOME)
-        qp.set_stemmer(_stemmer)
+        qp.set_stemmer(get_stemmer())
 
         qp.add_prefix('user_id', 'U')
         qp.add_prefix('component_id', 'P')
@@ -274,7 +297,7 @@ class SearchSystem(object):
         doc = xapian.Document()
         tg = xapian.TermGenerator()
         tg.set_document(doc)
-        tg.set_stemmer(_stemmer)
+        tg.set_stemmer(get_stemmer())
 
         # identification (required)
         full_id = (data['component'].lower(), data['uid'])
