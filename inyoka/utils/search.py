@@ -241,7 +241,7 @@ class SearchSystem(object):
         qp.add_boolean_prefix('category', 'C')
         qp.add_boolean_prefix('kategorie', 'C')
 
-        return qp.parse_query(query, qp.FLAG_DEFAULT ^ qp.FLAG_BOOLEAN)
+        return qp.parse_query(query, qp.FLAG_DEFAULT)
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],
