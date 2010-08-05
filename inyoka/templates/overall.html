@@ -9,6 +9,7 @@
     :copyright: 2007-2008 by Benjamin Wiegand, Marian Sigler.
     :license: GNU GPL.
 -#}
+{% from 'macros.html' import breadcrump %}
 {{- XHTML_DTD }}
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#"
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -160,16 +161,7 @@
           </div>
         {%- endif %}
 
-        <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
-          navigation_trace|default([]) %}
-          <a href="{{ link|e }}">
-            {%- if loop.last %}<strong>{% endif -%}
-            {{ title|truncate(35)|e }}
-            {%- if loop.last %}</strong>{% endif -%}
-            </a>{% if not loop.last
-            %} »{% endif %}
-        {%- endfor %}
-        </p>
+        {{ breadcrump(navigation_trace) }}
 
       </div>{# .pathbar #}
 

@@ -11,6 +11,7 @@
     
 #}
 {%- extends 'forum/page.html' %}
+{% from 'macros.html' import breadcrump %}
 
 {% set title_trace = [topic.title|e] %}
 {% set name = 'Thema „%s“ - ' % topic.title|e %}
@@ -275,11 +276,7 @@
           <a href="{{ href('forum', 'topic', topic.slug, 'previous') }}" rel="nofollow" class="prev">« vorheriges Thema</a>
           <a href="{{ href('forum', 'topic', topic.slug, 'next') }}" rel="nofollow" class="next">nächstes Thema »</a>
         </div>
-        <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
-          navigation_trace %}
-          <a href="{{ link|e }}">{{ title|e }}</a>{% if not loop.last
-            %} »{% endif %}
-        {%- endfor %}</p>
+        {{ breadcrump(navigation_trace) }}
         <div style="clear:both;"></div>
       </div>{# .pathbar #}
 {% endblock %}

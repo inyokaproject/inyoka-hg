@@ -40,3 +40,18 @@
 </dl>
 {%- endif %}
 {%- endmacro %}
+
+
+{# display breadcrump (aka navigation trace) #}
+{% macro breadcrump(navigation_trace=none) %}
+  <p class="trace">{%- for link, title in [(href('portal'), 'ubuntuusers.de')] +
+    navigation_trace|default([]) %}
+    <a href="{{ link|e }}">
+      {%- if loop.last and not loop.first %}<strong>{% endif -%}
+      {{ title|truncate(35)|e }}
+      {%- if loop.last and not loop.first %}</strong>{% endif -%}
+      </a>{% if not loop.last
+      %} »{% endif %}
+  {%- endfor %}
+  </p>
+{% endmacro %}
