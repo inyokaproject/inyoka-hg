@@ -61,16 +61,50 @@
     </div>
   </form>
   <script>
+
+  var ajax_search = function() {
+      $('div.search_results').html($('<strong style="text-align: center;">Lade Suchergebnisse...</strong>'));
+
+      // form data
+      var queryString = $.trim($('form.search_page input[name="query"]').val());
+      var area = $.trim($('form.search_page input[type=radio]:checked').val());
+      var date_begin = $.trim($('form.search_page input[name="date_begin"]').val());
+      var date_end = $.trim($('form.search_page input[name="date_end"]').val());
+      var sort = $.trim($('form.search_page select[name="sort"]:selected').val());
+      var forums = $.trim($('form.search_page select[name="forums"]:selected').val());
+
+      // If the query string is non-empty,
+      if (queryString.length) {
+          // Submit GET request to the URL matching the route named 'search_query'
+          var values = {
+              'query': queryString,
+              'area': area,
+              'date_begin': date_begin,
+              'date_end': date_end,
+              'sort': sort,
+              'forums': forums
+          };
+          $('div.search_results').load("{{ href('portal', 'search') }} div.search_results", values, function(data) {
+            // TODO: Set new url of the search!
+          });
+      }
+      return false;
+  }
+
+  $(document).ready(function() {
+
     $('#expand').click(function() {
       $(this).hide();
       $('#advanced').show();
       return false;
-    })
+    });
+
     $('input[name="area"]').each(function(i, elm) {
       $(this).change(function() {
         change_area($(this).val());
       })
-    })
+    });
+
     function change_area(id) {
       if (id != 'all') {
         $('dl.search_fields').hide();
@@ -80,8 +114,24 @@
       }
     }
     change_area('{{ area }}');
+
+    $('input[type="submit"]').click(ajax_search);
+
+    // TODO: Add more features like spell-suggestions here.
+    $('input[name="query"]').keydown(function(event) {
+      switch(event.keyCode) {
+        // RETURN key
+        case 13:
+          ajax_search();
+          break;
+      };
+    }).focus();
+
+  });
+
   </script>
   <hr class="divider" />
+  <div class="search_results">
   {%- if query %}
   {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">
@@ -122,4 +172,5 @@
   {% if results.results %}{{ pagination }}{% endif %}
   <br clear="both" />
   {%- endif %}
+  </div>
 {% endblock %}
