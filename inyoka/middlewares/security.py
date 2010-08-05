@@ -35,7 +35,7 @@ class SecurityMiddleware(object):
         return h.hexdigest()
 
     def process_request(self, request):
-        if request.method == 'POST':
+        if request.method == 'POST' and not request.is_ajax():
             csrf_token = self._make_token(request)
             try:
                 submitted_token = request.POST['_form_token']
