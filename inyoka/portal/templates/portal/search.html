@@ -70,8 +70,8 @@
       var area = $.trim($('form.search_page input[type=radio]:checked').val());
       var date_begin = $.trim($('form.search_page input[name="date_begin"]').val());
       var date_end = $.trim($('form.search_page input[name="date_end"]').val());
-      var sort = $.trim($('form.search_page select[name="sort"]:selected').val());
-      var forums = $.trim($('form.search_page select[name="forums"]:selected').val());
+      var sort = $.trim($('form.search_page select[name="sort"] option:selected').val());
+      var forums = $.trim($('form.search_page select[name="forums"] option:selected').val());
 
       // If the query string is non-empty,
       if (queryString.length) {
