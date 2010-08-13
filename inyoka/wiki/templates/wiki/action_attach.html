@@ -23,7 +23,9 @@
   <div id="page">
     <form action="?action=attach" method="post"
       enctype="multipart/form-data" id="form_addattachment">
-      <p><label for="id_attachment">Dateianhang:</label>
+      <p>
+        {{ form.attachment.errors }}
+        <label for="id_attachment">Dateianhang:</label>
         {{ form.attachment }}</p>
       <p><label for="id_filename">Umbenennen in:</label>
         {{ form.filename }}</p>

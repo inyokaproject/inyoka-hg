@@ -100,7 +100,7 @@ def do_show(request, name):
     if request.GET.get('redirect') != 'no':
         redirect = page.metadata.get('X-Redirect')
         if redirect:
-            flash(u'Von „<a href="%s">%s</a>“ weitergeleitet.' % (
+            (u'Von „<a href="%s">%s</a>“ weitergeleitet.' % (
                 escape(href('wiki', page.name, redirect='no')),
                 escape(page.title)
             ))
