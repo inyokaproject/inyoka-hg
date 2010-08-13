@@ -34,7 +34,7 @@ class WikiSearchAdapter(SearchAdapter):
                 .filter(page__id=page_id).latest()
         return {
             'title': rev.page.name,
-            'user': rev.user,
+            'user': rev.user.username,
             'date': rev.change_date,
             'url': url_for(rev.page),
             'component': u'Wiki',
@@ -42,7 +42,8 @@ class WikiSearchAdapter(SearchAdapter):
             'group_url': href('wiki'),
             'highlight': True,
             'text': rev.rendered_text,
-            'hidden': rev.deleted
+            'hidden': rev.deleted,
+            'user_url': url_for(rev.user),
         }
 
     def store(self, page_id):

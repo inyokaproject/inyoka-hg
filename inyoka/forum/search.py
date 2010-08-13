@@ -103,7 +103,7 @@ class ForumSearchAdapter(SearchAdapter):
 
         return {
             'title': post.topic.title,
-            'user': post.author,
+            'user': post.author.username,
             'date': post.pub_date,
             'url': href('forum', 'post', post.id),
             'component': u'Forum',
@@ -115,6 +115,7 @@ class ForumSearchAdapter(SearchAdapter):
             'version': post.topic.get_version_info(False),
             'hidden': post.hidden or post.topic.hidden,
             'last_post_url': url_for(post.topic.last_post),
+            'user_url': url_for(post.author)
         }
 
     def get_doc_ids(self):

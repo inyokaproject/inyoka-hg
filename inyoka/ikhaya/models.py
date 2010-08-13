@@ -396,7 +396,7 @@ class IkhayaSearchAdapter(SearchAdapter):
         article = Article.objects.select_related(depth=1).get(id=docid)
         return {
             'title': article.subject,
-            'user': article.author,
+            'user': article.author.username,
             'date': article.pub_datetime,
             'url': url_for(article),
             'component': u'Ikhaya',
@@ -405,7 +405,8 @@ class IkhayaSearchAdapter(SearchAdapter):
             'highlight': True,
             'text': u'%s %s' % (article.simplified_intro,
                                 article.simplified_text),
-            'hidden': article.hidden
+            'hidden': article.hidden,
+            'user_url': url_for(article.author),
         }
 
     def get_doc_ids(self):
