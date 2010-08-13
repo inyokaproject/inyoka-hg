@@ -198,7 +198,7 @@
     <div class="footer">
       <ul>
         <li class="poweredby">
-          <a href="{{ href('portal', 'inyoka')|e }}">Inyoka</a> unter der Haube<br />
+          <a href="{{ href('portal', 'inyoka')|e }}">Inyoka</a> unter der Haube {% if not USER.is_anonymous %}(in {{ REQUEST.watch.duration|round(2) }}s gerendert){% endif %}<br />
           {%- if INYOKA_REVISION %}
           inyoka rev-{{ INYOKA_REVISION }}
           {%- else %}

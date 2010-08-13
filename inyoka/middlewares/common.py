@@ -24,6 +24,7 @@ from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
 from inyoka.utils.flashing import has_flashed_messages
 from inyoka.utils.local import local, local_manager, request_cache
+from inyoka.utils.timer import StopWatch
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -44,6 +45,10 @@ class CommonServicesMiddleware(CommonMiddleware):
             obj = request_cache._get_current_object()
         except RuntimeError:
             local.cache = {}
+
+        # Start time tracker
+        request.watch = StopWatch()
+        request.watch.start()
 
         # dispatch requests to subdomains or redirect to the portal if
         # it's a request to a unknown subdomain
