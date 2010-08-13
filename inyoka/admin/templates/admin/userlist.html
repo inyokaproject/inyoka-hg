@@ -33,7 +33,7 @@
       <td>
         <a href="{{ href('admin', 'users', 'edit', user.username) }}">{{ user.username|e }}</a></td>
       <td>{{ user.location }}</td>
-      <td>{{ user.date_joined.strftime('%d.%m.%Y') }}</td>
+      <td>{{ user.date_joined|dateformat }}</td>
       <td>{{ user.post_count }}</td>
     </tr>
     {%- endfor %}

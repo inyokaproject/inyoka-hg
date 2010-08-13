@@ -40,7 +40,7 @@
     <td><a href="{{ article|url('edit') }}">{{ article.subject|e }}</a></td>
     <td><a href="{{ article.author|url }}">{{ article.author.username|e }}</a></td>
     <td><a href="{{ article.category|url }}">{{ article.category.name|e }}</a></td>
-    <td>{{ article.local_updated.strftime('%d.%m.%Y %H:%M') }}</td>
+    <td>{{ article.local_updated|datetimeformat }}</td>
   </tr>
   {%- else %}
   <tr>

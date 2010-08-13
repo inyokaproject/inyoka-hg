@@ -2,7 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
 <book id="index" lang="de"> 
-  <title>ubuntuusers.de - Snapshot des Wikis vom {{ today.strftime('%d.%m.%Y') }}</title>
+  <title>ubuntuusers.de - Snapshot des Wikis vom {{ today|dateformat }}</title>
   <bookinfo>
     <copyright>
       <year>{{ today.strftime('%Y') }}</year>
@@ -22,7 +22,7 @@
       </author>
     </authorgroup>
 
-    <releaseinfo>Dies ist der aktuelle Snapshot des Wikis vom {{ today.strftime('%d.%m.%Y') }}.</releaseinfo>
+    <releaseinfo>Dies ist der aktuelle Snapshot des Wikis vom {{ today|dateformat }}.</releaseinfo>
   </bookinfo>
 
   {%- for page in pages %}
