@@ -72,7 +72,7 @@
               $('<a class="show_comments">')
     {%- if article.comment_count %}
                 .text('Kommentare anzeigen ({{ article.comment_count }})')
-    {%- else %}
+    {%- elif not article.comment_count and can_post_comment %}
                 .text('Kommentar schreiben')
     {%- endif %}
                 .click(function() {
