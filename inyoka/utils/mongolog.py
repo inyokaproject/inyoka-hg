@@ -110,28 +110,38 @@ class MongoHandler(logging.Handler):
 
     def emit(self, record):
         """ Store the record to the collection. Async insert """
-        fmt = self.formatter
-        record.message = record.getMessage()
-        if record.exc_info:
-            if not record.exc_text:
-                record.exc_text = fmt.formatException(record.exc_info)
-        record.asctime = fmt.formatTime(record, fmt.datefmt)
-
-        msg = {
-            'hash': get_record_hash(record),
-            'revision': INYOKA_REVISION,
-            'created': datetime.utcnow()
-            'status': 'new',
-            'levelname': record.levelname,
-            'info': get_exception_message(record.exc_info),
-            'message': record.message,
-            'asctime': record.asctime,
-            'exc_text': record.exc_text
-        }
-
         database = get_mdb_database(True)
         if database is None:
             return
-
         collection = database[self.collection]
-        collection.save(dct)
+
+
+        # check if the hash already exists, if so increment
+        # the occured counter.
+        record_hash = get_record_hash(record)
+        existing = collection.find_one({'hash': record_hash})
+        if existing:
+            collection.update({'hash': record_hash}, {'$inc': {'occured': +1}})
+        else:
+            # insert a new entry if the error did not occur yet
+            fmt = self.formatter
+            record.message = record.getMessage()
+            if record.exc_info:
+                if not record.exc_text:
+                    record.exc_text = fmt.formatException(record.exc_info)
+            record.asctime = fmt.formatTime(record, fmt.datefmt)
+
+            msg = {
+                'hash': get_record_hash(record),
+                'revision': INYOKA_REVISION,
+                'created': datetime.utcnow(),
+                'status': 'new',
+                'levelname': record.levelname,
+                'info': get_exception_message(record.exc_info),
+                'message': record.message,
+                'asctime': record.asctime,
+                'exc_text': record.exc_text,
+                'occured': 0
+            }
+
+            collection.save(msg)
