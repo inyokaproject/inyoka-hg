@@ -30,10 +30,11 @@
       <tr>
         <th class="topic" colspan="2">Thema</th>
         <th class="forum">Forum</th>
-        <th class="post_count">Antworten</th>
         <th class="view_count">Aufrufe</th>
+        <th class="post_count">Antworten</th>
         <th class="last_post">Letzte Antwort</th>
       </tr>
+
       {%- for topic in topics if not (topic.hidden and not have_privilege(USER, topic, 'moderate')) %}
       {%- set classes = [] %}
       {%- if have_privilege(USER, topic, 'moderate') and topic.hidden %}{% do classes.append('hidden') %}{% endif %}
@@ -64,8 +65,8 @@
           </p>
         </td>
         <td><a href="{{ topic.forum|url }}">{{ topic.forum.name|e }}</a></td>
-        <td class="post_count">{{ topic.post_count - 1 }}</td>
         <td class="view_count">{{ topic.view_count }}</td>
+        <td class="post_count">{{ topic.post_count - 1 }}</td>
         <td class="last_post">
           {%- if topic.last_post %}
             <a href="{{ topic.last_post|url}}" class="date">{{
