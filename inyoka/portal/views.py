@@ -405,18 +405,11 @@ def logout(request):
 def search(request):
     """Search dialog for the Xapian search engine."""
     set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
-    area = request.GET.get('area') or 'all'
 
-    if 'query' in request.REQUEST:
-        f = SearchForm(request.REQUEST)
+    if 'query' in request.GET:
+        f = SearchForm(request.REQUEST, user=request.user)
     else:
-        f = SearchForm()
-    f.fields['forums'].choices = [('support', u'Alle Support-Foren'),
-        ('all', u'Alle Foren')]
-    forums = filter_invisible(request.user, Forum.query.
-                              order_by(Forum.position.asc()).all())
-    for offset, forum in Forum.get_children_recursive(forums):
-        f.fields['forums'].choices.append((forum.slug, u'  ' * offset + forum.name))
+        f = SearchForm(user=request.user)
 
     if f.is_valid():
         d = f.cleaned_data
@@ -429,7 +422,7 @@ def search(request):
         if not d['forums']:
             d['forums'] = 'support'
 
-        if area in ('forum', 'all') and d['forums'] and \
+        if d['area'] in ('forum', 'all') and d['forums'] and \
                 d['forums'] not in ('support', 'all'):
             query += ' category:"%s"' % d['forums']
         elif d['forums'] == 'support':
@@ -478,6 +471,7 @@ def search(request):
             highlight = results.highlight_string
 
         rv = {
+            'area':             d['area'],
             'query':            d['query'],
             'highlight':        highlight,
             'results':          results,
@@ -485,9 +479,9 @@ def search(request):
             'sort':             d['sort'],
         }
     else:
-        rv = {}
+        rv = {'area': request.GET.get('area') or 'all'}
+
     rv.update({
-        'area':         area,
         'searchform':   f,
         'advanced':     request.GET.get('advanced')
     })

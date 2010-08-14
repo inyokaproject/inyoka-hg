@@ -13,19 +13,21 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.db import connection
 from django.utils.translation import ugettext as _
-from inyoka.portal.user import User
+
+from inyoka.forum.forms import UBUNTU_VERSIONS
+from inyoka.forum.acl import filter_invisible
+from inyoka.forum.models import Forum
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.forms import CaptchaField, DateTimeWidget, \
                                HiddenCaptchaField, EmailField, JabberField
-from inyoka.wiki.parser import validate_signature, SignatureError
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
 from inyoka.utils.storage import storage
 from inyoka.utils.sessions import SurgeProtectionMixin
-from inyoka.forum.forms import UBUNTU_VERSIONS
-
+from inyoka.portal.user import User
+from inyoka.wiki.parser import validate_signature, SignatureError
 
 #: Some constants used for ChoiceFields
 NOTIFY_BY_CHOICES = (
@@ -381,6 +383,18 @@ class UserCPProfileForm(forms.Form):
 
 class SearchForm(forms.Form):
     """The search formular"""
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        forms.Form.__init__(self, *args, **kwargs)
+
+        self.fields['forums'].choices = [('support', u'Alle Support-Foren'),
+            ('all', u'Alle Foren')]
+        forums = filter_invisible(user, Forum.query.
+                                  order_by(Forum.position.asc()).all())
+        for offset, forum in Forum.get_children_recursive(forums):
+            self.fields['forums'].choices.append((forum.slug, u'  ' * offset + forum.name))
+
     query = forms.CharField(label='Suchbegriffe:', widget=forms.TextInput)
     area = forms.ChoiceField(label='Bereich:', choices=SEARCH_AREA_CHOICES,
                       required=False, widget=forms.RadioSelect, initial='all')
@@ -394,6 +408,10 @@ class SearchForm(forms.Form):
         required=False)
     show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
         required=False)
+
+    def clean_area(self):
+        # Select all areas when no area was specified explicitely
+        return self.cleaned_data.get('area') or 'all'
 
 
 class PrivateMessageForm(forms.Form):
