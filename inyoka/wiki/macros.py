@@ -426,10 +426,12 @@ class AttachmentList(Macro):
     is_block_tag = True
     arguments = (
         ('page', unicode, ''),
+        ('shorten_title', bool, False)
     )
 
-    def __init__(self, page):
+    def __init__(self, page, shorten_title):
         self.page = normalize_pagename(page)
+        self.shorten_title = shorten_title
 
     def build_node(self, context, format):
         result = nodes.List('unordered')
