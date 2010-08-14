@@ -442,7 +442,7 @@ class PageManager(models.Manager):
               from wiki_attachment a, wiki_revision r, wiki_page p
              where r.page_id = p.id and r.attachment_id = a.id and
                    p.name = %s and not r.deleted
-          group by a.file order by r.id desc;
+          group by a.file, r.id order by r.id desc;
         ''', [page_name])
         row = cursor.fetchone()
         if row:
@@ -985,7 +985,7 @@ class Page(models.Model):
                             select page_id, max(id) as id
                             from wiki_revision
                             where page_id in (%s)
-                            group by page_id
+                            group by page_id, id
                         ) as d1 using (id);
                 ''' % ', '.join(map(str, related_pages)))
                 cur.execute('''
