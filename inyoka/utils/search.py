@@ -73,7 +73,7 @@ class SearchResult(object):
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
         self.results = []
-        terms = _description_re.findall(str(query).lower())
+        terms = _description_re.findall(str(query))
         for match in mset:
             full_id = match.document.get_value(0).split(':')
             adapter = adapters[full_id[0]]
