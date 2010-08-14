@@ -234,7 +234,7 @@ class SearchSystem(object):
 
         qp.add_prefix('user_id', 'U')
         qp.add_prefix('component_id', 'P')
-        qp.add_prefix('solved_id', 'S')
+        qp.add_boolean_prefix('solved_id', 'S')
         qp.add_prefix('title', 'T')
         qp.add_prefix('titel', 'T')
         qp.add_prefix('version', 'V')
