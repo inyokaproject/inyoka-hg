@@ -110,20 +110,24 @@ class MongoHandler(logging.Handler):
 
     def emit(self, record):
         """ Store the record to the collection. Async insert """
+        fmt = self.formatter
         record.message = record.getMessage()
         if record.exc_info:
             if not record.exc_text:
-                record.exc_text = self.formatter.formatException(record.exc_info)
+                record.exc_text = fmt.formatException(record.exc_info)
+        record.asctime = fmt.formatTime(record, fmt.datefmt)
 
-        dct = dict(record.__dict__)
-        dct['hash'] = get_record_hash(record)
-        dct['revision'] = INYOKA_REVISION
-        dct['created'] = datetime.utcnow()
-        dct['status'] = 'new'
-
-        # drop not neccessary information
-        for info in ('exc_info', 'relativeCreated', 'thread'):
-            dct.pop(info, None)
+        msg = {
+            'hash': get_record_hash(record),
+            'revision': INYOKA_REVISION,
+            'created': datetime.utcnow()
+            'status': 'new',
+            'levelname': record.levelname,
+            'info': get_exception_message(record.exc_info),
+            'message': record.message,
+            'asctime': record.asctime,
+            'exc_text': record.exc_text
+        }
 
         database = get_mdb_database(True)
         if database is None:
