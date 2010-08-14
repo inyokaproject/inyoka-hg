@@ -62,6 +62,7 @@
   </form>
   <script>
 
+{#
   var ajax_search = function() {
       $('div.search_results').html($('<strong style="text-align: center;">Lade Suchergebnisse...</strong>'));
 
@@ -90,7 +91,7 @@
       }
       return false;
   }
-
+#}
   $(document).ready(function() {
 
     $('#expand').click(function() {
@@ -115,6 +116,7 @@
     }
     change_area('{{ area }}');
 
+{#
     $('input[name="advanced"]').click(ajax_search);
 
     // TODO: Add more features like spell-suggestions here.
@@ -126,7 +128,7 @@
           break;
       };
     }).focus();
-
+#}
   });
 
   </script>
