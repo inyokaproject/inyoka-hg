@@ -207,6 +207,7 @@ class Lexer(object):
             include('inline_with_links')
         ),
         'emphasized': ruleset(
+            rule("'''([^'])", bygroups('text'), enter='strong'),
             rule("''", leave=1),
             include('inline_with_links')
         ),

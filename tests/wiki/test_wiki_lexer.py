@@ -46,6 +46,21 @@ def test_inline_markup():
     expect('eof')
 
 
+def test_strong_emphasized_mixture():
+    expect = lexer.tokenize(u"''abcde '''fett''' und '''fett''' abcde''").expect
+    expect('emphasized_begin')
+    expect('text', 'abcde ')
+    expect('strong_begin')
+    expect('text', 'fett')
+    expect('strong_end')
+    expect('text', ' und ')
+    expect('strong_begin')
+    expect('text', 'fett')
+    expect('string_end')
+    expect('text', ' abcde')
+    expect('emphasized_end')
+
+
 def test_extra():
     expect = lexer.tokenize(
         u'--------------------\n'
