@@ -36,8 +36,8 @@
 <div class="errorlist">
   {%- for error in errors %}
   <div id="w{{ error.hash }}">
-    <h4><strong>{{ error.message }}:</strong> {{ error.info }}</h4>
-    <div><pre>{{ error.exc_text }}</pre></div>
+    <h4><strong>{{ error.message|e }}:</strong> {{ error.info|e }}</h4>
+    <div><pre>{{ error.exc_text|e }}</pre></div>
     <ul class="advanced" id="v{{ error.hash }}">
     {%- if not error.frames %}
     {%- set frames = [error.frame] %}
@@ -45,23 +45,25 @@
     {%- set frames = error.frames %}
     {% endif %}
     {%- for frame in frames %}
-      <li class="frame">
-        <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
-        {% if frame.vars %}
-        <table class="vars" id="v{{ error.hash }}">
-          <tr>
-            <th>Variable</th>
-            <th>Value</th>
-          </tr>
-          {% for var in frame.vars|sort %}
+      {% if frame.vars %}
+        <li class="frame">
+          <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
+          {% if frame.vars %}
+          <table class="vars" id="v{{ error.hash }}">
             <tr>
-              <td>{{ var[0] }}</td>
-              <td class="code"><pre>{{ var[1]|safe }}</pre></td>
+              <th>Variable</th>
+              <th>Value</th>
             </tr>
-          {% endfor %}
-        </table>
-        {% endif %}
-      </li>
+            {% for var in frame.vars|sort %}
+              <tr>
+                <td>{{ var[0]|e }}</td>
+                <td class="code"><pre>{{ var[1]|e }}</pre></td>
+              </tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+        </li>
+      {% endif %}
     {% endfor %}
     </ul>
 
