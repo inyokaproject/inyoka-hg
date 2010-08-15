@@ -5,8 +5,8 @@
  *    A little box to add/remove the user to some groups.
  *
  *
- *    :copyright: 2008 by Christopher Grebs.
- *    :license: GNU GPL.
+ *    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+ *    :license: GNU GPL, see LICENSE for more details.
  */
 
 (function() {

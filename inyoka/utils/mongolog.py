@@ -7,7 +7,7 @@
     exceptions.  Maybe this can be advanced some day to create nearly
     real-time statistics about ubuntuusers.de.
 
-    :copyright: 2010 by the Inyoka Team, see AUTHORS for more details.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 import logging

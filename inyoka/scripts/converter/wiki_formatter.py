@@ -6,8 +6,8 @@
     This file contains a MoinMoin formatter that can be used to convert
     MoinMoin syntax to inyoka syntax.
 
-    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
 from MoinMoin.formatter.base import FormatterBase

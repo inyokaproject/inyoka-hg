@@ -67,7 +67,7 @@
     Use `sqlalchemy=True` along with `sa_column=my_sa.c.column`
     to tell the `Sortable` that it should shift into sqlalchemy-mode.
 
-    :copyright: 2007-2008 by Benjamin Wiegand, Christopher Grebs.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.urls import href

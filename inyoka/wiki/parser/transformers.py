@@ -12,8 +12,8 @@
     stage attribute set to 'final' are expanded after all the transformers
     finished their job.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
 from inyoka.wiki.parser import nodes

@@ -128,8 +128,8 @@
     are expanded at parse time can return `nodes.MetaData` metadata.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
 import unicodedata

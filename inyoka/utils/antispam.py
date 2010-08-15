@@ -5,8 +5,8 @@
 
     Fight stupid spammers.
 
-    :copyright: 2007-2008 by Armin Ronacher, Christopher Grebs.
-    :license: BSD
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
 import re

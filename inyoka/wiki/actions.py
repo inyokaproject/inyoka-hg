@@ -15,9 +15,8 @@
     normalized.  The database models do not do this on their own!
 
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack,
-                                       Benjamin Wiegand, Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
 from inyoka.utils.urls import href, url_for

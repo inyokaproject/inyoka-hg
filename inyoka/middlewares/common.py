@@ -12,8 +12,8 @@
     For development purposes we also set up virtual url dispatching modules for
     static and media.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from django.db import connection
 from django.middleware.common import CommonMiddleware

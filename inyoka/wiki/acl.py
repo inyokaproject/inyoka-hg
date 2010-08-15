@@ -22,7 +22,7 @@
     provides a function called `test_changes_allowed` that checks for that.
 
 
-    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.decorators import patch_wrapper

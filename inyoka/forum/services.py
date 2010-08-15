@@ -6,8 +6,8 @@
     Forum specific services.
 
 
-    :copyright: Copyright 2008 by Armin Ronacher, Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy.orm import eagerload
 from django.db import transaction

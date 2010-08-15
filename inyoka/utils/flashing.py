@@ -5,9 +5,8 @@
 
     Implements a simple system to flash messages.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Marian Sigler
-                and Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.local import current_request
 

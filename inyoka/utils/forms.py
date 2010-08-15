@@ -6,8 +6,8 @@
     This file contains extensions for the django forms like special form
     fields.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import sys
 from hashlib import md5

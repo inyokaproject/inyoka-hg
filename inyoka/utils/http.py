@@ -6,8 +6,8 @@
     This module contains functions for http-related things like special
     responses etc.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from django.http import HttpResponse, HttpResponseRedirect, \
      HttpResponsePermanentRedirect, HttpResponseForbidden, \

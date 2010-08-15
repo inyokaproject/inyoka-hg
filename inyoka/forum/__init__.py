@@ -3,8 +3,8 @@
     inyoka.forum
     ~~~~~~~~~~~~
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christoph Hack.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 # register seach components
 from inyoka.forum import search

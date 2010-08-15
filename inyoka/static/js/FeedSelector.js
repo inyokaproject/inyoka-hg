@@ -4,8 +4,8 @@
 
     JavaScript for the feed selector.
 
-    :copyright: 2007 by Marian Sigler, Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 */
 
 (function() {

@@ -5,8 +5,8 @@
 
     The inyoka default settings.
 
-    :copyright: 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from os.path import dirname, join
 from django.conf.global_settings import *

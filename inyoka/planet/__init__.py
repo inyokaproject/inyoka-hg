@@ -5,6 +5,6 @@
 
     The planet application.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """

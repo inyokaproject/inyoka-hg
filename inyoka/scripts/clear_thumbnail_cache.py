@@ -6,8 +6,8 @@
 
     This script removes unused thumbnails from the wiki thumbnail cache.
 
-    :copyright: 2007 by Arimin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.wiki.utils import clean_thumbnail_cache as clean_wiki_cache
 

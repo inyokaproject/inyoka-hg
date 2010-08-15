@@ -5,8 +5,8 @@
 
     Various application independent utilities.
 
-    :copyright: Copyright 2008 by Marian Sigler.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import math
 from os import path, rmdir, mkdir

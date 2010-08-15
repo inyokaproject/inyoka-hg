@@ -11,8 +11,7 @@
     automatically gets created; afterwards the index is completely generated
     for all documents of all components.
 
-    :copyright: 2007 - 2010 by Christoph Hack, Benjamin Wiegand,
-                               Christopher Grebs.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division

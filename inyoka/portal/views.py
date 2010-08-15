@@ -7,7 +7,7 @@
     private messages, static pages and the login/register and search
     dialogs.
 
-    :copyright: Copyright 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug import parse_accept_header

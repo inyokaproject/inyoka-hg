@@ -5,7 +5,7 @@
 
     Database models for the planet.
 
-    :copyright: 2007 - 2008 by Benjamin Wiegand, maix, Christoph Hack.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 import os

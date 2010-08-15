@@ -5,7 +5,7 @@
 
     Holds the current active cache object.
 
-    :copyright: 2008-2010 by the Inyoka Team, see AUTHORS for more details.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key

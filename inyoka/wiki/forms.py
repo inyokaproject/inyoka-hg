@@ -5,8 +5,8 @@
 
     Contains all the forms we use in the wiki.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from django import forms
 from inyoka.wiki.utils import has_conflicts

@@ -6,8 +6,8 @@
     Dict like interface to the portal.storage model.
 
 
-    :copyright: Copyright 2007 by Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, Integer, String, Text, \
                         select, bindparam

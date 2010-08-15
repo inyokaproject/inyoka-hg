@@ -5,8 +5,8 @@
 
     Various functions for highlighting code using pygments.
 
-    :copyright: Copyright 2007 by Benjamin Wiegand, Christoph Hack.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, get_lexer_for_filename, \

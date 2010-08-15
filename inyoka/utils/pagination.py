@@ -31,8 +31,8 @@
     Caveat: paginations with link functions generated in a closure are
     not pickleable.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import math
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect

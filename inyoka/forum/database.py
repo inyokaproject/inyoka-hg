@@ -7,7 +7,7 @@
     module is quite ugly and a bit redundant, but it bypasses some
     django limitations and we are going to migrate to SA anyway.
 
-    :copyright: 2008 by Christoph Hack, Christopher Grebs.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \

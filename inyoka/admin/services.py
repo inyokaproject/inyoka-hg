@@ -6,8 +6,8 @@
     Various services for the admin interface.
 
 
-    :copyright: Copyright 2008 by Armin Ronacher, Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.portal.user import User
 from inyoka.utils.services import SimpleDispatcher

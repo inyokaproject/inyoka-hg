@@ -5,8 +5,8 @@
 
     This replaces the django auth middleware.
 
-    :copyright: 2008 by Christopher Grebs, Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.portal.user import User
 from inyoka.utils.flashing import flash

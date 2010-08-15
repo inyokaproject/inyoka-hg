@@ -7,8 +7,8 @@
  * It's based on django code that implements a similar widget for the admin
  * panel.
  *
- * :copyright: 2007-2008 by Benjamin Wiegand, Armin Ronacher, Django Project.
- * :license: GNU GPL.
+ * :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+ * :license: GNU GPL, see LICENSE for more details.
  */
 
 /* Get all inputs with type date or datetime and create a DateTimeField for

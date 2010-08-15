@@ -11,8 +11,8 @@
  * The toolbar is added dynamically to the editor so that users without
  * JavaScript don't get a useless UI.
  *
- * :copyright: 2007 by Armin Ronacher.
- * :license: GNU GPL.
+ * :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+ * :license: GNU GPL, see LICENSE for more details.
  */
 
 

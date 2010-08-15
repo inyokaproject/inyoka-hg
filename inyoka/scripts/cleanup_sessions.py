@@ -6,8 +6,8 @@
 
     Clean up unused sessions and session infos.
 
-    :copyright: 2007 by Arimin Ronacher.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime, timedelta
 # fix import error for now

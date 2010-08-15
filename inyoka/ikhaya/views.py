@@ -5,7 +5,7 @@
 
     Views for Ikhaya.
 
-    :copyright: 2007 - 2008 by Benjamin Wiegand, Christoph Hack.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime, date

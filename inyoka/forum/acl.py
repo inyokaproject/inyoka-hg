@@ -5,7 +5,7 @@
 
     Authentification systen for the forum.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy.sql import select

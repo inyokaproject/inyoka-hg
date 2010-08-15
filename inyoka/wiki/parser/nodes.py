@@ -15,9 +15,8 @@
     a required by the `DeferredNode`.
 
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christoph Hack,
-                                       Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from urlparse import urlparse, urlunparse
 from inyoka.conf import settings

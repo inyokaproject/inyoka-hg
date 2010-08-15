@@ -4,8 +4,8 @@
  *
  * Some general scripts for the whole portal (requires jQuery).
  *
- * :copyright: 2007-2010 by Christoph Hack, Armin Ronacher, Benjamin Wiegand, kaputtnik, Marian Sigler.
- * :license: GNU GPL.
+ * :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+ * :license: GNU GPL, see LICENSE for more details.
  */
 
 $(document).ready(function() {

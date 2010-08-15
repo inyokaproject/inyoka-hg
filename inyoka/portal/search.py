@@ -9,7 +9,7 @@
     have a look at the `inyoka.app.search` modules, where app is the
     name of the application.
 
-    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 # THIS MODULE IS A STUB

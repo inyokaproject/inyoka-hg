@@ -4,8 +4,8 @@
  *
  * Adds support for inserting quotes into the WikiEditor.
  *
- * :copyright: 2008 by Armin Ronacher, Benjamin Wiegand.
- * :license: GNU GPL.
+ * :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+ * :license: GNU GPL, see LICENSE for more details.
  */
 
 var set_quote_links = (function() {
