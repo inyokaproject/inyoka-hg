@@ -1,4 +1,5 @@
-#-*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     inyoka.scripts.clean_expired_users
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
