@@ -35,43 +35,44 @@
 <h3>Tracebacks</h3>
 <div class="errorlist">
   {%- for error in errors %}
-  <h4><strong>{{ error.message }}:</strong> {{ error.info }}</h4>
-  <pre>{{ error.exc_text }}</pre>
-  <ul class="advanced" id="v{{ error.hash }}">
-  {%- if not error.frames %}
-  {%- set frames = [error.frame] %}
-  {%- else %}
-  {%- set frames = error.frames %}
-  {% endif %}
-  {%- for frame in frames %}
-    <li class="frame">
-      <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
-
-      {% if frame.vars %}
-      <table class="vars" id="v{{ error.hash }}">
-        <tr>
-          <th>Variable</th>
-          <th>Value</th>
-        </tr>
-        {% for var in frame.vars|sort %}
+  <div id="w{{ error.hash }}">
+    <h4><strong>{{ error.message }}:</strong> {{ error.info }}</h4>
+    <pre>{{ error.exc_text }}</pre>
+    <ul class="advanced" id="v{{ error.hash }}">
+    {%- if not error.frames %}
+    {%- set frames = [error.frame] %}
+    {%- else %}
+    {%- set frames = error.frames %}
+    {% endif %}
+    {%- for frame in frames %}
+      <li class="frame">
+        <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
+        {% if frame.vars %}
+        <table class="vars" id="v{{ error.hash }}">
           <tr>
-            <td>{{ var[0] }}</td>
-            <td class="code"><pre>{{ var[1]|pprint|safe }}</pre></td>
+            <th>Variable</th>
+            <th>Value</th>
           </tr>
-        {% endfor %}
-      </table>
-      {% endif %}
-    </li>
-  {% endfor %}
-  </ul>
+          {% for var in frame.vars|sort %}
+            <tr>
+              <td>{{ var[0] }}</td>
+              <td class="code"><pre>{{ var[1]|safe }}</pre></td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
 
-  <p class="details">
-    <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
-    <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
-  </p>
-  {%- else %}
-  <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
-  {%- endfor %}
+    <p class="details">
+      <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
+      <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
+    </p>
+    {%- else %}
+    <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
+    {%- endfor %}
+  </div>
 </div>
 
 <script type="text/javascript">
@@ -99,6 +100,7 @@
       $('ul.advanced[id=' + id + ']').slideToggle('fast');
       return false;
     });
+
   });
   /* ]]> */
 </script>
