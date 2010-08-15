@@ -12,6 +12,7 @@
 """
 import os
 import sys
+import time
 import logging
 import traceback
 
@@ -26,6 +27,7 @@ from inyoka.conf import settings
 
 try:
     from pymongo.connection import Connection
+    from pymongo.errors import AutoReconnect
 except ImportError:
     Connection = None
 
@@ -42,19 +44,24 @@ DEFAULT_PRIORITIES = {
 _connection = None
 _connection_lock = Lock()
 
-
 def get_mdb_database(authenticate=True):
     global _connection
     data = settings.MONGODB_DATA
     if not data['host'] or not data['db']:
         return
 
-    if _connection is None:
-        _connection = Connection(data['host'], data['port'])
-
-    database = _connection[data['db']]
-    if authenticate and data['user']:
-        database.authenticate(data['user'], data['password'])
+    _connection_attempts = 0
+    while _connection_attempts < 5:
+        try:
+            if _connection is None:
+                _connection = Connection(data['host'], data['port'])
+            database = _connection[data['db']]
+            if authenticate and data['user']:
+                database.authenticate(data['user'], data['password'])
+            break
+        except AutoReconnect:
+            _connection_attempts += 1
+            time.sleep(0.1)
     return database
 
 
