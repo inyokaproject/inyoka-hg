@@ -1303,19 +1303,29 @@ def styles(request):
 @require_permission('manage_stats')
 @templated('admin/monitoring.html')
 def monitoring(request):
+    from pymongo import DESCENDING
     database = get_mdb_database(True)
-    errors = database['errors']
+    collection = database['errors']
 
-    recent = datetime.utcnow() - timedelta(hours=2)
-    recent_errors = errors.find({'created': {'$lt': recent}})
-    closed = errors.find({'status': 'closed'}).count()
+    if 'close' in request.GET:
+        hash = request.GET.get('close')
+        if collection.find({'hash': hash}).count():
+            collection.update({'hash': hash}, {'$set': {'status': 'close'}})
+            return HttpResponseRedirect(href('admin', 'monitoring'))
+
+    all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
+                           .sort('created', DESCENDING)
+    error_count = collection.count()
+    closed = collection.find({'status': 'close'}).count()
+    reopened = collection.find({'status': 'reopen'}).count()
 
     stats = {
         'closed': closed,
-        'open': errors.count() - closed
+        'open': error_count - closed - reopened,
+        'reopened': reopened
     }
     return {
-        'count': errors.count(),
+        'count': error_count,
         'stats': stats,
-        'recent_erros': recent_errors
+        'errors': all_errors
     }

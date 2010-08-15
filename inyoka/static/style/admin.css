@@ -196,3 +196,46 @@ img.admin_teamicon {
 #forum_rights div.privileges label {
   margin: 0 1em 0 0.5em;
 }
+
+/* Monitoring styles */
+
+div.errorlist h4 {
+  font-size: 15px;
+  font-weight: normal;
+  padding: 15px;
+  background-color: #eee;
+}
+
+div.errorlist h4:hover {
+  background-color: #ccc;
+}
+
+div.errorlist pre {
+  margin: 0;
+  padding: 5px 0 3px 15px;
+  background-color: #ccc;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #fafafa;
+  border-bottom: 1px solid #fafafa;
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre-wrap;       /* css-3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  border: 1px;
+}
+
+div.errorlist p.details {
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 35px;
+  clear: both;
+  font-size: 11px;
+}
+
+div.errorlist p.details span.actions {
+  float: right;
+  font-size: 1.2em;
+}
