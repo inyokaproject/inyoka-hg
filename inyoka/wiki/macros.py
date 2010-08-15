@@ -714,6 +714,37 @@ class Template(Macro):
     def build_node(self):
         return expand_page_template(self.template, self.context, True)
 
+class Attachment(Macro):
+    """
+    This macro displays a download link for an attachment.
+    """
+
+    arguments = (
+        ('attachment', unicode, u''),
+        ('text', unicode, u''),
+    )
+
+    def __init__(self, target, text):
+        self.target = target
+        self.text = text
+        self.is_external = is_external_target(target)
+        if not self.is_external:
+            self.metadata = [nodes.MetaData('X-Attach', [target])]
+            target = normalize_pagename(target, True)
+        self.children = [nodes.Text(self.text or self.target)]
+
+    def build_node(self, context, format):
+        target = self.target
+        if self.is_external:
+            return nodes.Link(target, self.children)
+        else:
+            if context.wiki_page:
+                target = join_pagename(context.wiki_page, self.target)
+            source = href('wiki', '_attachment',
+                target=target,
+            )
+            return nodes.Link(source, self.children)
+
 
 class Picture(Macro):
     """
@@ -1076,6 +1107,7 @@ ALL_MACROS = {
     u'Anker':               Anchor,
     u'BR':                  Newline,
     u'Bild':                Picture,
+    u'Anhang':              Attachment,
     u'Datum':               Date,
     u'Einbinden':           Include,
     u'FehlendeSeiten':      MissingPages,
