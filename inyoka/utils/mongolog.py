@@ -133,12 +133,15 @@ def get_traceback_frames(exc_info):
 
 def serialize_as_much_as_possible(frame):
     result = {}
-    vars = [(key, [repr(v) for v in value] if '__iter__' in dir(value) else repr(value))
-                  for key, value in frame['vars']]
+    try:
+        vars = [(key, [repr(v) for v in value] if '__iter__' in dir(value) else repr(value))
+                      for key, value in frame['vars']]
 
-    result['vars'] = vars
-    for item in ('filename', 'function', 'lineno', 'id'):
-        result[item] = frame[item]
+        result['vars'] = vars
+        for item in ('filename', 'function', 'lineno', 'id'):
+            result[item] = frame[item]
+    except:
+        pass
 
     return result
 
@@ -172,7 +175,10 @@ class MongoHandler(logging.Handler):
         record_hash = get_record_hash(record)
         existing = collection.find_one({'hash': record_hash})
         if existing:
-            collection.update({'hash': record_hash}, {'$inc': {'occured': +1}})
+            values = {'$inc': {'occured': +1}}
+            if existing['status'] == 'closed':
+                values['status'] = 'reopen'
+            collection.update({'hash': record_hash}, values)
         else:
             # insert a new entry if the error did not occur yet
             fmt = self.formatter
