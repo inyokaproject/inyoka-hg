@@ -434,3 +434,10 @@ table.pms {
 table.pms td.actions {
   min-width: 80px;
 }
+div.pnfooter {
+  float: right;
+  text-align: right;
+}
+div.pnfooter .onepage {
+  font-size: x-small;
+}

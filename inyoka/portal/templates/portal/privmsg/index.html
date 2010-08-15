@@ -45,18 +45,18 @@
     <div>Solltest du eine offensichtliche Werbenachricht erhalten haben, leite diese bitte an einen der <a href="http://wiki.ubuntuusers.de/ubuntuusers/Moderatoren">Moderatoren</a> weiter. Beleidigungen oder Streitereien die über PNs ausgetragen werden sind eure Privatangelegenheit, bitte regelt so etwas unter euch.</div>
   {%- endif %}
 
- <table class="pms">
-    <thead>
-      <tr>
-        <th class="subject">Betreff</th>
-        <th class="author">Von</th>
-        <th class="recipients">An</th>
-        <th class="date">Datum</th>
-        <th class="actions">Aktionen</th>
-        <th class="delete" style="white-space: nowrap">Löschen</th>
-      </tr>
-    </thead>
-    <form action="" method="post">
+  <form action="" method="post">
+    <table class="pms">
+      <thead>
+        <tr>
+          <th class="subject">Betreff</th>
+          <th class="author">Von</th>
+          <th class="recipients">An</th>
+          <th class="date">Datum</th>
+          <th class="actions">Aktionen</th>
+          <th class="delete" style="white-space: nowrap">Löschen</th>
+        </tr>
+      </thead>
       <tbody>
         {%- for entry in entries %}
         <tr{% if message == entry.message %} class="active_pn"{% endif %}>
@@ -88,31 +88,33 @@
         </tr>
         {%- else %}
         <tr>
-          <td colspan="5">Derzeit befinden sich noch keine Nachrichten
+          <td colspan="6">Derzeit befinden sich noch keine Nachrichten
           in diesem Ordner.</td>
         </tr>
         {%- endfor %}
       </tbody>
       <tfoot>
         <tr>
-          <td><p><a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a></p></td>
-          <td><p><input type="submit" value="Markierte Nachrichten löschen" class="linkbutton" /></p></td>
-          <td colspan="4">
-            <div style="float: right;">
+          <td colspan="6">
+            <div class="pnfooter">
               {{ pagination }}
+              <p class="onepage">
+                {% if one_page %}
+                <a href="{{ href('portal', 'privmsg', folder.id) }}">Nachrichten auf mehrere Seiten aufteilen</a>
+                {% else %}
+                <a href="{{ href('portal', 'privmsg', folder.id, 'page', '0') }}">Alle Nachrichten auf einer Seite anzeigen</a>
+                {% endif %}
+              </p>
             </div>
+            <p class="linklist">
+              <a href="{{ href('portal', 'privmsg', 'new') }}">Neue Nachricht schreiben</a> |
+              <input type="submit" value="Markierte Nachrichten löschen" class="linkbutton" />
+            </p>
           </td>
         </tr>
-        <tr>
-          {% if one_page %}
-          <td><p><a href="{{ href('portal', 'privmsg', folder.id) }}">Nachrichten auf mehrere Seiten aufteilen</a></p></td>
-          {% else %}
-          <td><p><a href="{{ href('portal', 'privmsg', folder.id, 'page', '0') }}">Alle Nachrichten auf einer Seite anzeigen</a></p></td>
-          {% endif %}
-        </tr>
       </tfoot>
-    </form>
-  </table>
+    </table>
+  </form>
 <script type="text/javascript">
   /* <![CDATA[ */
   var all_checked = false;
