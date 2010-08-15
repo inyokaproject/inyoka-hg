@@ -551,7 +551,7 @@ class PageManager(models.Manager):
         if isinstance(text, basestring):
             text, created = Text.objects.get_or_create(value=text)
         if note is None:
-            node = 'Erstellt'
+            note = 'Erstellt'
         if attachment is not None:
             att = Attachment()
             att.file.save(attachment_filename, attachment)
