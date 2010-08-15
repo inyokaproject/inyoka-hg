@@ -9,14 +9,13 @@
     renderer which might be useful for the pastebin too.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :license: GNU GPL, see LICENSE for more details.    
 """
 import os
 import re
 import shutil
 import urllib
-import werkzeug
 from subprocess import Popen, PIPE
 from cStringIO import StringIO
 from tempfile import TemporaryFile

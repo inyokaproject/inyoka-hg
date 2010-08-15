@@ -17,9 +17,9 @@
 import re
 import sys
 import feedparser
-import _mysql_exceptions
 from time import time
 from datetime import datetime
+
 from inyoka.conf import settings
 from inyoka.utils.html import escape, cleanup_html
 from inyoka.planet.models import Blog, Entry

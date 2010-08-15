@@ -22,15 +22,15 @@
     which implements all the builtin macros.
 
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import random
 import string
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode
-from inyoka.wiki.parser import render, parse, nodes
+from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
 from inyoka.wiki.models import Page, Revision, MetaData
@@ -43,10 +43,8 @@ from inyoka.utils.dates import parse_iso8601, format_datetime, format_time, \
     datetime_to_timezone
 from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
-from inyoka.utils.sortable import Sortable
 from inyoka.utils.parsertools import OrderedDict
 from inyoka.utils.collections import MultiMap, flatten_iterator
-from inyoka.utils.logger import logger
 
 
 def get_macro(name, args, kwargs):

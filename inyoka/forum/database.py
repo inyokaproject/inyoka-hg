@@ -11,9 +11,8 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import Table, Column, String, Text, Integer, \
-        ForeignKey, DateTime, Boolean, Index, PickleType
+        ForeignKey, DateTime, Boolean, Index
 from inyoka.utils.database import metadata
-from inyoka import conf
 
 
 forum_table = Table('forum_forum', metadata,

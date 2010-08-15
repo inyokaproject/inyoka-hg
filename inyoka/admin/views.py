@@ -5,8 +5,8 @@
 
     This module holds the admin views.
 
-    :copyright: 2008 by Christopher Grebs, Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: 2008-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :license: GNU GPL, see LICENSE for more details.    
 """
 import os
 import pytz
@@ -34,7 +34,7 @@ from inyoka.utils.mail import send_mail
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
-        date_time_to_datetime, datetime_to_naive_utc
+        date_time_to_datetime
 from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \

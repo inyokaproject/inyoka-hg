@@ -9,16 +9,14 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import gc
-from django.db import connection
 from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
-from inyoka.forum.models import Post, Forum, Topic, post_table, forum_table, \
-        topic_table, user_table
+from inyoka.forum.models import Post, Forum, post_table, topic_table
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
-from inyoka.utils.database import select_blocks, session
+from inyoka.utils.database import session
 
 
 class ForumSearchAuthDecider(object):

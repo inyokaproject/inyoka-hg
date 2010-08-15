@@ -11,7 +11,6 @@ import time
 import inyoka.application
 from inyoka.conf import settings
 settings.DATABASE_DEBUG = False
-from sqlalchemy.sql import desc
 from inyoka.forum.models import post_table
 from inyoka.utils.database import session
 from inyoka.scripts.converter.converter import select_blocks

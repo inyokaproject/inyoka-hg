@@ -5,19 +5,16 @@
 
     Models for the portal.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs,
-                                  Benjamin Wiegand, Christoph Hack,
-                                  Marian Sigler.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
-from datetime import time
 from django.db import models, connection
+
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
 from inyoka.utils.local import current_request
-from inyoka.utils.dates import format_specific_datetime, \
-     date_time_to_datetime, natural_date, format_datetime, format_timedelta, \
-     format_time
+from inyoka.utils.dates import format_time, \
+     date_time_to_datetime, natural_date, format_datetime
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.wiki.models import Page

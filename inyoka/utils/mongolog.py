@@ -10,13 +10,10 @@
     :copyright: 2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import os
-import sys
 import logging
 import traceback
 
 from logging import CRITICAL, ERROR, WARNING, INFO, DEBUG
-from socket import gethostname
 from datetime import datetime
 from hashlib import md5
 from threading import Lock

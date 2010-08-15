@@ -23,12 +23,11 @@ from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data
 from inyoka.utils.text import get_random_password, human_number, normalize_pagename
 from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
-from inyoka.utils.http import templated, TemplateResponse, HttpResponse, \
+from inyoka.utils.http import templated, HttpResponse, \
      PageNotFound, does_not_exist_is_404, HttpResponseRedirect
 from inyoka.utils.sessions import get_sessions, set_session_info, \
      make_permanent, get_user_record, test_session_cookie
 from inyoka.utils.urls import href, url_for, is_safe_domain, global_not_found
-from inyoka.utils.search import search as search_system
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.sortable import Sortable, Filterable
@@ -36,9 +35,8 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
-from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
+from inyoka.utils.dates import DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
-from inyoka.utils.tracreporter import Trac
 from inyoka.utils.user import check_activation_key
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -49,10 +47,8 @@ from inyoka.forum.models import Forum, SAUser, Topic, Post, UBUNTU_VERSIONS
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
-     UserCPProfileForm, SetNewPasswordForm, UserErrorReportForm, \
-     NOTIFICATION_CHOICES, ForumFeedSelectorForm, IkhayaFeedSelectorForm, \
-     PlanetFeedSelectorForm, WikiFeedSelectorForm, PrivateMessageIndexForm, \
-     PrivateMessageFormProtected
+     UserCPProfileForm, SetNewPasswordForm, \
+     NOTIFICATION_CHOICES, PrivateMessageIndexForm, PrivateMessageFormProtected
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \

@@ -22,12 +22,11 @@
     provides a function called `test_changes_allowed` that checks for that.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Benjamin Wiegand.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
-from inyoka.utils.search import search
 from inyoka.wiki.storage import storage
 from inyoka.wiki.models import Page
 

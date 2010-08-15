@@ -5,15 +5,13 @@
 
     This module implements a log handler that reports into a trac.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
-import os
 import urllib2
 import csv
 import re
 import traceback
-import time
 from Cookie import SimpleCookie
 from threading import Thread
 from datetime import date

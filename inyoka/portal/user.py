@@ -6,10 +6,8 @@
     Our own user model used for implementing our own
     permission system and our own administration center.
 
-    :copyright: Copyright 2007-2008 by Armin Ronacher, Christopher Grebs,
-                                       Benjamin Wiegand, Christoph Hack,
-                                       Marian Sigler.
-    :license: GNU GPL.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :license: GNU GPL, see LICENSE for more details.
 """
 import os
 import random
@@ -17,7 +15,6 @@ import string
 import cPickle
 import string
 from datetime import datetime
-from hashlib import md5, sha1
 from os import path
 from PIL import Image
 from StringIO import StringIO
@@ -709,6 +706,5 @@ class User(models.Model):
 
 # circ imports
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils.captcha import generate_word
 from inyoka.utils.urls import href
 from inyoka.forum.models import ReadStatus

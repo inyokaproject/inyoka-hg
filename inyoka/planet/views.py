@@ -5,7 +5,7 @@
 
     Views for the planet.
 
-    :copyright: 2007 by Benjamin Wiegand, Marian Sigler.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.utils.text import truncate_html_words
@@ -14,14 +14,13 @@ from inyoka.portal.user import Group
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.utils.urls import href
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import PageNotFound, templated, \
-     HttpResponseRedirect, HttpResponse, does_not_exist_is_404
+from inyoka.utils.http import templated, HttpResponseRedirect, \
+                              does_not_exist_is_404
 from inyoka.utils.html import escape
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.mail import send_mail
-from inyoka.utils.cache import cache
 from inyoka.utils.dates import group_by_day
 from inyoka.utils.urls import global_not_found
 from inyoka.planet.models import Blog, Entry

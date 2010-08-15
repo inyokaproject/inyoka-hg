@@ -11,15 +11,14 @@
     comments in ikhaya on the model and so we can't store pingbacks
     properly.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2008-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
 import urllib2
 from xmlrpclib import ServerProxy, Fault
 from urlparse import urlparse
-from inyoka.utils import xmlrpc
-from inyoka.utils.html import striptags, escape, unescape
+from inyoka.utils.html import striptags, unescape
 from inyoka.utils.urls import is_safe_domain
 
 

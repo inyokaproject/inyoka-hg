@@ -5,7 +5,7 @@
 
     Various forms for the portal.
 
-    :copyright: Copyright 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 import Image
@@ -18,7 +18,7 @@ from inyoka.conf import settings
 from inyoka.forum.forms import UBUNTU_VERSIONS
 from inyoka.forum.acl import filter_invisible
 from inyoka.forum.models import Forum
-from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
+from inyoka.utils.dates import datetime_to_timezone
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain

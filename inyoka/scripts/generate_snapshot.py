@@ -14,12 +14,12 @@ import re
 import sys
 import shutil
 import urllib2
-import urlparse
 from os import path
 from datetime import datetime
 from itertools import cycle, izip
+
 from inyoka.utils.urls import href
-from inyoka.utils.text import escape, normalize_pagename
+from inyoka.utils.text import normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.utils.templating import jinja_env
 

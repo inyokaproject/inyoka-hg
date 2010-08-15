@@ -197,6 +197,7 @@ INSTALLED_APPS = (
 try:
     import south
     INSTALLED_APPS += ('south',)
+    del south
 except ImportError:
     pass
 

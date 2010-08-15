@@ -5,10 +5,10 @@
 
     This module provides various e-mail related functionality.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2008-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
-import re, os
+import re
 from email.mime.text import MIMEText
 from email.header import Header
 from subprocess import Popen, PIPE

@@ -82,8 +82,8 @@
         Rather simple view functions that dispatch to the appropriate `actions`.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :license: GNU GPL, see LICENSE for more details.    
 """
 
 # register search auth decider

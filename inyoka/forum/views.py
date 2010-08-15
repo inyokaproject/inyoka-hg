@@ -11,20 +11,21 @@
 """
 import re
 from datetime import datetime, timedelta
+
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from django.db.models import Q
 from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_, or_, select, not_, exists, func
+from sqlalchemy.sql import and_, or_, select, not_, exists
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
+
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
 from inyoka.utils.sessions import set_session_info
-from inyoka.utils.http import templated, does_not_exist_is_404, \
-    PageNotFound, HttpResponseRedirect
+from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template

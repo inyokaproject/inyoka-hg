@@ -7,22 +7,17 @@
 
     Some parts are ported from the django auth-module.
 
-    :copyright: 2008 by Christopher Grebs, Marian Sigler,
-        Benjamin Wiegand.
-    :license: GNU GPL
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
-import random, string, re
+import re
 try:
     from hashlib import md5, sha1
 except ImportError:
     from md5 import md5
     from sha import sha as sha1
-from datetime import datetime
+
 from inyoka.conf import settings
-from inyoka.utils.html import escape
-from inyoka.utils.mail import send_mail
-from inyoka.utils.templating import render_template
-from inyoka.utils.urls import href
 
 
 SESSION_KEY = '_auth_user_id'

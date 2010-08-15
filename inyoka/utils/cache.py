@@ -5,12 +5,12 @@
 
     Holds the current active cache object.
 
-    :copyright: Copyright 2008 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2008-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
+
 from inyoka.conf import settings
-from inyoka.utils.local import local
 
 
 cache = (type('UnconfiguredCache', (object,), {}))()
@@ -87,7 +87,6 @@ def _set_cache(obj):
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
-        from inyoka.utils.local import local
         _set_cache(InyokaMemcachedCache(settings.MEMCACHE_SERVERS))
     else:
         _set_cache(SimpleCache())

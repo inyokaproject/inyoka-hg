@@ -7,8 +7,8 @@
     PyCAPTCHA by Micah Dowty.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher, Micah Dowty.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details, Micah Dowty.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import random
 import colorsys
@@ -16,9 +16,7 @@ import math
 from os import listdir
 from os.path import abspath, join, dirname, pardir
 from PIL import ImageFont, ImageDraw, Image, ImageChops, ImageColor
-from django import forms
 from inyoka.utils.http import HttpResponse
-
 
 
 resource_path = abspath(join(dirname(__file__), pardir, 'res'))

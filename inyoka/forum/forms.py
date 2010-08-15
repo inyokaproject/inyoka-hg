@@ -8,7 +8,6 @@
     :copyright: 2007-2008 by Maximilian Trescher, Benjamin Wiegand.
     :license: GNU GPL, see LICENSE for more details.
 """
-import operator
 from django import forms
 from inyoka.utils.forms import MultiField
 from inyoka.forum.models import UBUNTU_VERSIONS, UBUNTU_DISTROS, Topic, Forum

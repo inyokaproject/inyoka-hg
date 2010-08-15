@@ -13,7 +13,6 @@
 import os
 import re
 import sys
-import time
 import shutil
 from functools import partial
 from os import path
@@ -21,9 +20,10 @@ from urllib import quote
 from hashlib import md5
 from itertools import cycle, izip
 from werkzeug import url_unquote
+
 from inyoka.conf import settings
 from inyoka.utils.urls import href
-from inyoka.utils.text import escape, normalize_pagename
+from inyoka.utils.text import normalize_pagename
 from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User

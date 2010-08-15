@@ -6,23 +6,24 @@
     Various services for the portal or all applications.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import time
 from hashlib import md5
 from urlparse import urlparse
+
 from inyoka.conf import settings
 from inyoka.portal.user import User, Group
 from inyoka.portal.models import Event
 from inyoka.utils.text import get_random_password
-from inyoka.utils.http import PageNotFound, HttpResponseRedirect
+from inyoka.utils.http import PageNotFound
 from inyoka.utils.dates import MONTHS, WEEKDAYS
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.captcha import Captcha
 from inyoka.utils.templating import render_template
 from inyoka.utils.xmlrpc import xmlrpc
-from inyoka.utils.urls import href
+
 
 def on_get_current_user(request):
     """Get the current user."""

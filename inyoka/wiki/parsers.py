@@ -15,13 +15,12 @@
     passed the wrapper `data` which they can process.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details. 
+    :license: GNU GPL, see LICENSE for more details.    
 """
 from inyoka.conf import settings
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import ArgumentCollector, dump_argstring, debug_repr
-from inyoka.wiki.models import Page
 from inyoka.wiki.templates import expand_page_template
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.text import join_pagename, normalize_pagename

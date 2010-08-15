@@ -22,11 +22,11 @@ from datetime import datetime
 from mimetypes import guess_type
 from itertools import groupby
 from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
-from sqlalchemy.sql import select, func, and_, not_
+from sqlalchemy.sql import select, func, and_
 
 from inyoka.conf import settings
 from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.utils.text import slugify, shorten_filename, get_new_unique_filename
+from inyoka.utils.text import slugify, get_new_unique_filename
 from inyoka.utils.dates import timedelta_to_seconds
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href

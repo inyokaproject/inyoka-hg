@@ -1,10 +1,16 @@
 #-*- coding: utf-8 -*-
+"""
+    inyoka.utils.css
+    ~~~~~~~~~~~~~~~~
+
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
+"""
 import re
 import xml.dom
 import logging
 import cssutils
-from cssutils.css import CSSStyleDeclaration as CSSStyleDeclarationBase, \
-    CSSPrimitiveValue
+from cssutils.css import CSSStyleDeclaration as CSSStyleDeclarationBase
 from cssutils.serialize import CSSSerializer as CSSSerializerBase, \
     Preferences as CSSPreferences, Out
 from inyoka.utils.urls import is_safe_domain

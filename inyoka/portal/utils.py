@@ -5,20 +5,17 @@
 
     Utilities for the portal.
 
-    :copyright: 2008 by Benjamin Wiegand, Christopher Grebs, Armin Ronacher.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import random
-import string
 import calendar
-from datetime import timedelta, date
+from datetime import date
 from django.db.models import Q
-from inyoka.conf import settings
+
 from inyoka.utils.urls import href
 from inyoka.utils.decorators import patch_wrapper
 from inyoka.utils.flashing import flash
 from inyoka.utils.http import AccessDeniedResponse, HttpResponseRedirect
-from inyoka.utils.templating import render_template
 
 
 def check_login(message=None):

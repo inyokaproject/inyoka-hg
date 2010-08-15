@@ -6,15 +6,13 @@
     This middleware profiles our db queries, memory usage and other
     counters...
 
-    :copyright: 2008 by Christopher Grebs.
-    :license: GNU GPL.
+    :copyright: (c) 2008-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
-from datetime import datetime
 from inyoka.conf import settings
 from inyoka.utils.http import HttpResponse
 from inyoka.utils.html import escape
 from collections import defaultdict
-import time, socket
 import gc
 
 

@@ -7,11 +7,10 @@
     to build urls for different subdomains using the `href` function.
 
 
-    :copyright: Copyright 2007 by Armin Ronacher.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
-import cgi
 from urlparse import urlparse
 from django.core.urlresolvers import RegexURLResolver
 from inyoka.conf import settings

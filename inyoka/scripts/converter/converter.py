@@ -13,8 +13,7 @@
 import re
 import sys
 import cPickle
-import werkzeug
-from os import path, listdir
+from os import path
 from datetime import datetime
 from werkzeug import unescape
 try:
@@ -32,8 +31,7 @@ settings.DATABASE_DEBUG = False
 from inyoka.forum.acl import join_flags, PRIVILEGES
 from inyoka.wiki import bbcode
 from inyoka.wiki.models import Page as InyokaPage
-from inyoka.wiki.parser import nodes
-from inyoka.wiki.parser.transformers import AutomaticParagraphs, Transformer
+from inyoka.wiki.parser.transformers import AutomaticParagraphs
 from inyoka.forum.models import Privilege, Attachment, Topic, \
     Poll, Forum, topic_table as sa_topic_table, forum_table as \
     sa_forum_table, post_table as sa_post_table, poll_vote_table as \

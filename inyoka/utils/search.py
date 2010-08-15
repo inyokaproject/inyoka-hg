@@ -7,8 +7,8 @@
     of the inyoka system.  For the concrete implementations have a look at the
     `inyoka.app.search` modules, where app is the name of the application.
 
-    :copyright: Copyright 2007 by Armin Ronacher, Christoph Hack.
-    :license: GNU GPL.
+    :copyright: 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 import re
 import time
@@ -21,7 +21,6 @@ from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
 from inyoka.utils import get_significant_digits
-from inyoka.utils.parsertools import TokenStream
 from inyoka.utils.text import create_excerpt
 
 

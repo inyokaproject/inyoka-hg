@@ -13,8 +13,7 @@ from django.utils.text import truncate_html_words
 from django.db.models import Q
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
-     HttpResponseRedirect, HttpResponse, PageNotFound, \
-     does_not_exist_is_404
+     HttpResponseRedirect, PageNotFound, does_not_exist_is_404
 from inyoka.utils.html import escape
 from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash

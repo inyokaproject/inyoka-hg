@@ -16,12 +16,11 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import division
-import gc, sys, datetime
+import sys, datetime
 from xapian import DatabaseOpeningError
+
 import inyoka.utils.http
 from inyoka import application
-from django.db import connection
-from django.db.models import get_app, get_models
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
 from inyoka.utils.database import session
