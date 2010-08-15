@@ -5,7 +5,7 @@
 
     Various forms for the portal.
 
-    :copyright: 2007 by Benjamin Wiegand, Christopher Grebs, Marian Sigler.
+    :copyright: Copyright 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
 import Image
@@ -14,9 +14,11 @@ from django.utils.safestring import mark_safe
 from django.db import connection
 from django.utils.translation import ugettext as _
 
+from inyoka.conf import settings
 from inyoka.forum.forms import UBUNTU_VERSIONS
 from inyoka.forum.acl import filter_invisible
 from inyoka.forum.models import Forum
+from inyoka.utils.dates import datetime_to_timezone, DEFAULT_TIMEZONE
 from inyoka.utils.user import is_valid_username
 from inyoka.utils.dates import TIMEZONES
 from inyoka.utils.urls import href, is_safe_domain
@@ -26,6 +28,7 @@ from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
 from inyoka.utils.storage import storage
 from inyoka.utils.sessions import SurgeProtectionMixin
+from inyoka.utils.search import search as search_system
 from inyoka.portal.user import User
 from inyoka.wiki.parser import validate_signature, SignatureError
 
@@ -55,6 +58,14 @@ SEARCH_SORT_CHOICES = (
 )
 
 VERSION_CHOICES = [(v.number, str(v)) for v in UBUNTU_VERSIONS if v.active]
+
+SEARCH_AREAS = {
+    'wiki': 'w',
+    'forum': 'f',
+    'ikhaya': 'i',
+    'planet': 'p'
+}
+
 
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
@@ -385,12 +396,12 @@ class SearchForm(forms.Form):
     """The search formular"""
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
+        self.user = kwargs.pop('user')
         forms.Form.__init__(self, *args, **kwargs)
 
         self.fields['forums'].choices = [('support', u'Alle Support-Foren'),
             ('all', u'Alle Foren')]
-        forums = filter_invisible(user, Forum.query.
+        forums = filter_invisible(self.user, Forum.query.
                                   order_by(Forum.position.asc()).all())
         for offset, forum in Forum.get_children_recursive(forums):
             self.fields['forums'].choices.append((forum.slug, u'  ' * offset + forum.name))
@@ -412,6 +423,39 @@ class SearchForm(forms.Form):
     def clean_area(self):
         # Select all areas when no area was specified explicitely
         return self.cleaned_data.get('area') or 'all'
+
+    def search(self):
+        """Performs the actual query and return the results"""
+        d = self.cleaned_data
+
+        query = d['query']
+
+        exclude = []
+
+        # we use per default the support-forum filter
+        if not d['forums']:
+            d['forums'] = 'support'
+
+        if d['area'] in ('forum', 'all') and d['forums'] and \
+                d['forums'] not in ('support', 'all'):
+            query += ' category:"%s"' % d['forums']
+        elif d['forums'] == 'support':
+            exclude = list(settings.SEARCH_DEFAULT_EXCLUDE)
+
+        if not d['show_wiki_attachments']:
+            exclude.append('C__attachment__')
+
+        return search_system.query(self.user,
+            query,
+            page=d['page'] or 1,
+            per_page=d['per_page'] or 20,
+            date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
+            date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
+            component=SEARCH_AREAS.get(d['area']),
+            exclude=exclude,
+            sort=d['sort']
+        )
+
 
 
 class PrivateMessageForm(forms.Form):

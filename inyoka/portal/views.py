@@ -7,9 +7,8 @@
     private messages, static pages and the login/register and search
     dialogs.
 
-    :copyright: Copyright 2007-2008 by Benjamin Wiegand, Christopher Grebs,
-                                       Christoph Hack, Marian Sigler.
-    :license: GNU GPL.
+    :copyright: Copyright 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug import parse_accept_header
 from pytz import country_timezones
@@ -60,14 +59,6 @@ from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
     reactivate_user, set_new_email, send_new_email_confirmation, \
     set_new_email, reset_email, send_activation_mail, send_new_user_password
 from inyoka.portal.utils import check_login, calendar_entries_for_month
-
-
-SEARCH_AREAS = {
-    'wiki': 'w',
-    'forum': 'f',
-    'ikhaya': 'i',
-    'planet': 'p'
-}
 
 
 # TODO: move into some kind of config, but as a quick fix for now...
@@ -412,40 +403,15 @@ def search(request):
         f = SearchForm(user=request.user)
 
     if f.is_valid():
-        d = f.cleaned_data
+        results = f.search()
 
-        query = d['query']
-
-        exclude = []
-
-        # we use per default the support-forum filter
-        if not d['forums']:
-            d['forums'] = 'support'
-
-        if d['area'] in ('forum', 'all') and d['forums'] and \
-                d['forums'] not in ('support', 'all'):
-            query += ' category:"%s"' % d['forums']
-        elif d['forums'] == 'support':
-            exclude = list(settings.SEARCH_DEFAULT_EXCLUDE)
-
-        if not d['show_wiki_attachments']:
-            exclude.append('C__attachment__')
-
-        results = search_system.query(request.user,
-            query,
-            page=d['page'] or 1,
-            per_page=d['per_page'] or 20,
-            date_begin=datetime_to_timezone(d['date_begin'], enforce_utc=True),
-            date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
-            component=SEARCH_AREAS.get(d['area']),
-            exclude=exclude,
-            sort=d['sort']
-        )
         normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
         disabled = u'<span class="disabled next">%(text)s</span>'
         active = u'<span class="pageselect active">%(text)s</span>'
         pagination = [u'<div class="pagination pagination_right">']
         add = pagination.append
+
+        d = f.cleaned_data
 
         def _link(page):
             return href('portal', 'search', page=page, query=d['query'],
