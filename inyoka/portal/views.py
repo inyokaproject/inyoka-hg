@@ -47,7 +47,8 @@ from inyoka.forum.models import Forum, SAUser, Topic, Post, UBUNTU_VERSIONS
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \
-     UserCPProfileForm, SetNewPasswordForm, \
+     UserCPProfileForm, SetNewPasswordForm, ForumFeedSelectorForm, \
+     IkhayaFeedSelectorForm, PlanetFeedSelectorForm, WikiFeedSelectorForm, \
      NOTIFICATION_CHOICES, PrivateMessageIndexForm, PrivateMessageFormProtected
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
