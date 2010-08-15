@@ -128,10 +128,23 @@ def get_traceback_frames(exc_info):
     return frames
 
 
+def pformat(obj, verbose=False):
+    """Prettyprint an object.  Either use the `pretty` library or the
+    builtin `pprint`.
+    """
+    try:
+        from pretty import pretty
+        return pretty(obj, verbose=verbose)
+    except ImportError:
+        from pprint import pformat
+        return pformat(obj)
+
+
 def serialize_as_much_as_possible(frame):
     result = {}
     try:
-        vars = [(key, [repr(v) for v in value] if '__iter__' in dir(value) else repr(value))
+        vars = [(key, [repr(v) for v in value] if '__iter__' in dir(value)
+                                               else pformat(value))
                       for key, value in frame['vars']]
 
         result['vars'] = vars
