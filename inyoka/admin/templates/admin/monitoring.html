@@ -35,7 +35,7 @@
 <h3>Tracebacks</h3>
 <div class="errorlist">
   {%- for error in errors %}
-  <h4>{{ error.info }}</h4>
+  <h4><strong>{{ error.message }}: {{ error.info }}</h4>
   <pre>{{ error.exc_text }}</pre>
   <ul class="advanced" id="v{{ error.hash }}">
   {%- if not error.frames %}
@@ -86,11 +86,11 @@
     });
     $('table.errorstats').hide();
 
-    $('div.errorlist h4').next().toggle();
+    $('div.errorlist h4').next().toggle().next().toggle();
     $('ul.advanced').toggle();
 
     $('div.errorlist h4').click(function() {
-      $(this).next().slideToggle('fast');
+      $(this).next().slideToggle('fast').next().slideToggle('fast');
       return false;
     }).css('cursor', 'pointer');
 
