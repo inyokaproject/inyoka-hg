@@ -69,10 +69,10 @@
       <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
       <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
     </p>
-    {%- else %}
+    </div>
+  {%- else %}
     <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
-    {%- endfor %}
-  </div>
+  {%- endfor %}
 </div>
 
 <script type="text/javascript">
