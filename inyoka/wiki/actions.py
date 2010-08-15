@@ -320,7 +320,7 @@ def do_edit(request, name):
                                            storage['wiki_newpage_template'],
                                            name),
                              'create'):
-                return HttpResponseRedirect(href('wiki', storage['wiki_newpage_template'], name, action=edit))
+                return HttpResponseRedirect(href('wiki', storage['wiki_newpage_template'], name, action='edit'))
             return AccessDeniedResponse()
         current_rev_id = ''
     else:

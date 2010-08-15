@@ -11,10 +11,12 @@
 """
 from sqlalchemy.orm import eagerload
 from django.db import transaction
+
 from inyoka.forum.models import UBUNTU_VERSIONS, Topic, Post, Forum
 from inyoka.forum.acl import get_forum_privileges, check_privilege, \
     have_privilege
 from inyoka.portal.models import Subscription
+from inyoka.portal.utils import abort_access_denied
 from inyoka.utils.http import HttpResponse
 from inyoka.utils.services import SimpleDispatcher
 from inyoka.utils.templating import render_template

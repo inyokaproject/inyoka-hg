@@ -11,6 +11,7 @@
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 
 from inyoka.conf import settings
+from inyoka.utils.local import local
 
 
 cache = (type('UnconfiguredCache', (object,), {}))()
