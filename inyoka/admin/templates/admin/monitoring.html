@@ -37,9 +37,30 @@
   {%- for error in errors %}
   <h4>{{ error.info }}</h4>
   <pre>{{ error.exc_text }}</pre>
+  <table class="advanced" id="v{{ error.hash }}">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for var in error.frame.vars|sort(0) %}
+          {%- if var[1] %}
+          <tr>
+            <td>{{ var[0]|safe }}</td>
+            <td class="code"><div>{{ var[1]|safe }}</div></td>
+          </tr>
+          {%- endif %}
+        {%- else %}
+        <span class="underline">No advanced frame information available</span>
+        {% endfor %}
+      </tbody>
+  </table>
+    
   <p class="details">
     <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
-    <span class="actions"><a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
+    <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
   </p>
   {%- else %}
   <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
@@ -59,11 +80,18 @@
     $('table.errorstats').hide();
 
     $('div.errorlist h4').next().toggle();
+    $('table.advanced').toggle();
 
     $('div.errorlist h4').click(function() {
       $(this).next().slideToggle('fast');
       return false;
     }).css('cursor', 'pointer');
+
+    $('a.show_frames').click(function() {
+      id = $(this).attr('id');
+      $('table.advanced[id=' + id + ']').slideToggle('fast');
+      return false;
+    });
   });
   /* ]]> */
 </script>
