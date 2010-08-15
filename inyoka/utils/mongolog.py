@@ -175,10 +175,10 @@ class MongoHandler(logging.Handler):
         record_hash = get_record_hash(record)
         existing = collection.find_one({'hash': record_hash})
         if existing:
-            values = {'$inc': {'occured': +1}}
-            if existing['status'] == 'closed':
-                values['status'] = 'reopen'
-            collection.update({'hash': record_hash}, values)
+            if existing['status'] == 'close':
+                collection.update({'hash': record_hash},
+                                  {'$set': {'status': 'reopen'}})
+            collection.update({'hash': record_hash}, {'$inc': {'occured': +1}})
         else:
             # insert a new entry if the error did not occur yet
             fmt = self.formatter
