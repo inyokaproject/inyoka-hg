@@ -241,3 +241,14 @@ div.errorlist p.details span.actions {
   float: right;
   font-size: 1.2em;
 }
+
+ul.advanced { list-style-type: none; }
+ul.advanced li.frame { margin-bottom: 1em; }
+
+
+div.errorlist table { border:1px solid #ccc; background:white; }
+div.errorlist tbody td, tbody th { vertical-align:top; padding:2px 3px; }
+div.errorlist thead th { padding:1px 6px 1px 3px; background:#fefefe; font-weight:normal; font-size:11px; border:1px solid #ddd; }
+div.errorlist table.vars { margin:5px 0 2px 10px; }
+div.errorlist table.vars td, table.req td { font-family:monospace; }
+div.errorlist table.vars pre { background-color: white; }

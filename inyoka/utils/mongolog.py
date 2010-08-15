@@ -197,7 +197,7 @@ class MongoHandler(logging.Handler):
                 'asctime': record.asctime,
                 'exc_text': record.exc_text,
                 'occured': 1,
-                'frame': serialize_as_much_as_possible(frames[-1]),
+                'frames': [serialize_as_much_as_possible(f) for f in frames]
             }
 
             collection.save(msg)

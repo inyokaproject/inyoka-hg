@@ -37,27 +37,34 @@
   {%- for error in errors %}
   <h4>{{ error.info }}</h4>
   <pre>{{ error.exc_text }}</pre>
-  <table class="advanced" id="v{{ error.hash }}">
-      <thead>
+  <ul class="advanced" id="v{{ error.hash }}">
+  {%- if not error.frames %}
+  {%- set frames = [error.frame] %}
+  {%- else %}
+  {%- set frames = error.frames %}
+  {% endif %}
+  {%- for frame in frames %}
+    <li class="frame">
+      <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
+
+      {% if frame.vars %}
+      <table class="vars" id="v{{ error.hash }}">
         <tr>
           <th>Variable</th>
           <th>Value</th>
         </tr>
-      </thead>
-      <tbody>
-        {% for var in error.frame.vars|sort(0) %}
-          {%- if var[1] %}
+        {% for var in frame.vars|sort %}
           <tr>
-            <td>{{ var[0]|safe }}</td>
-            <td class="code"><div>{{ var[1]|safe }}</div></td>
+            <td>{{ var[0] }}</td>
+            <td class="code"><pre>{{ var[1]|pprint|safe }}</pre></td>
           </tr>
-          {%- endif %}
-        {%- else %}
-        <span class="underline">No advanced frame information available</span>
         {% endfor %}
-      </tbody>
-  </table>
-    
+      </table>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+
   <p class="details">
     <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
     <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
@@ -80,7 +87,7 @@
     $('table.errorstats').hide();
 
     $('div.errorlist h4').next().toggle();
-    $('table.advanced').toggle();
+    $('ul.advanced').toggle();
 
     $('div.errorlist h4').click(function() {
       $(this).next().slideToggle('fast');
@@ -89,7 +96,7 @@
 
     $('a.show_frames').click(function() {
       id = $(this).attr('id');
-      $('table.advanced[id=' + id + ']').slideToggle('fast');
+      $('ul.advanced[id=' + id + ']').slideToggle('fast');
       return false;
     });
   });
