@@ -77,11 +77,17 @@
           <td>{{ entry.message.pub_date|datetimeformat }}</td>
           <td class="actions">
             {%- if not entry.is_own_message %}
-            <a href="{{ entry|url('reply') }}" class="pn_reply" title="Antworten" />
+            <a href="{{ entry|url('reply') }}" title="Antworten">
+              <img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" />
+            </a>
             {%- endif %}
-            <a href="{{ entry|url('forward') }}" class="pn_forward" title="Weiterleiten" />
+            <a href="{{ entry|url('forward') }}" title="Weiterleiten">
+              <img src="{{ href('static', 'img/icons/small/msg-forward.png') }}" alt="Weiterleiten" />
+            </a>
             {%- if not entry.in_archive %}
-            <a href="{{ entry|url }}?action=archive" class="pn_archive" title="Archivieren" />
+            <a href="{{ entry|url }}?action=archive" title="Archivieren">
+              <img src="{{ href('static', 'img/icons/small/archive.png') }}" alt="Archivieren" />
+            </a>
             {%- endif %}
           </td>
           <td class="pn_delete"><input type="checkbox" name="delete" value="{{ entry.id }}" /></td>
