@@ -12,7 +12,7 @@ import gc
 from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
-from inyoka.forum.models import Post, Forum, post_table, topic_table
+from inyoka.forum.models import Post, Forum
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred

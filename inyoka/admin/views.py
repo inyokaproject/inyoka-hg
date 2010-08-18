@@ -49,8 +49,6 @@ from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
     PRIVILEGES_DETAILS
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage, SAUser
-from inyoka.forum.database import forum_table, privilege_table, \
-    user_group_table, user_table
 from inyoka.wiki.parser import parse, RenderContext
 
 tmp = dict(PRIVILEGES_DETAILS)

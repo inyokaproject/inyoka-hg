@@ -50,8 +50,6 @@ from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
     check_privilege, DISALLOW_ALL
-from inyoka.forum.database import post_table, topic_table, forum_table, \
-    poll_option_table, attachment_table, privilege_table
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
@@ -101,8 +99,8 @@ def index(request, category=None):
             if fmsg is not None:
                 return welcome(request, fmsg.slug, request.path)
         else:
-            categories = list(query.filter(forum_table.c.parent_id == None) \
-                              .order_by(forum_table.c.position))
+            categories = query.filter(Forum.parent_id == None) \
+                              .order_by(Forum.position).all()
             # forum-overview can be set without any acl check ;)
             set_session_info(request, *session_info)
 
