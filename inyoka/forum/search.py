@@ -12,7 +12,7 @@ import gc
 from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
-from inyoka.forum.models import Post, Forum
+from inyoka.forum.models import Post, Forum, Topic
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
@@ -117,9 +117,7 @@ class ForumSearchAdapter(SearchAdapter):
         }
 
     def get_doc_ids(self):
-        se = session.execute
-        pids = (p[0] for p in se(select([post_table.c.id],
-                                        post_table.c.topic_id==topic_table.c.id)))
+        pids = dbsession.query(Post.id).filter(Post.topic_id==Topic.id)
         for pid in pids:
             yield pid
 
