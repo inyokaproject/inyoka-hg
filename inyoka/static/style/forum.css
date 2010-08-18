@@ -368,11 +368,13 @@ table.poll td.percentage, table.poll td.votes {
 }
 
 div.forum_offset_pagination {
+    height: 1.5em;
     float: none;
     margin: 0;
     font-size: 0.85em;
     border: 1px solid #ccc;
     padding: 10px;
+    clear: both;
 }
 
 form.post_editor {
