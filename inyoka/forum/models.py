@@ -116,8 +116,7 @@ class ForumMapperExtension(MapperExtension):
         if isinstance(ident, basestring):
             slug_map = cache.get('forum/slugs')
             if slug_map is None:
-                slug_map = dict(dbsession.execute(select(
-                    [forum_table.c.slug, forum_table.c.id])).fetchall())
+                slug_map = dict(dbsession.query(Forum.slug, Forum.id).all())
                 cache.set('forum/slugs', slug_map)
             ident = slug_map.get(ident)
             if ident is None:
