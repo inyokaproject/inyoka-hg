@@ -337,7 +337,7 @@ def create_excerpt(text, terms, length=350):
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
-def get_next_increment(values, string):
+def get_next_increment(values, string, max_length=None):
     """Return the next usable incremented string.
 
     Usage Example::
@@ -352,18 +352,32 @@ def get_next_increment(values, string):
         'cat'
         >>> get_next_increment(['cat'], 'cat')
         u'cat2'
+        >>> get_next_increment(['cat', 'cat10', 'cat2'], 'cat', 3)
+        u'c11'
+        >>> get_next_increment(['cat', 'cat100'], 'cat', 3)
+        u'101'
 
     """
     values = list(values)
     if not values:
-        return string
+        return string[:max_length] if max_length is not None else string
 
     base = None
     for value in values:
         match = _str_num_re.search(value)
         if match is not None and int(match.group(1)) > base:
             base = int(match.group(1))
-    return increment_string(string if base is None else string + unicode(base))
+
+    gs = (lambda s: s if base is None else s + unicode(base))
+    poi = increment_string(gs(string))
+    if max_length is None:
+        return poi
+
+    if len(poi) > max_length:
+        # we need to shorten the string a bit so that we don't break any rules
+        strip = max_length - len(poi)
+        string = string[:strip]
+    return increment_string(gs(string))
 
 
 # circular imports
