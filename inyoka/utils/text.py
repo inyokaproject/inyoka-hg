@@ -337,5 +337,34 @@ def create_excerpt(text, terms, length=350):
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
+def get_next_increment(values, string):
+    """Return the next usable incremented string.
+
+    Usage Example::
+
+        >>> get_next_increment(['cat', 'cat10', 'cat2'], 'cat')
+        u'cat11'
+        >>> get_next_increment(['cat', 'cat2'], 'cat')
+        u'cat3'
+        >>> get_next_increment(['cat', 'cat1'], 'cat')
+        u'cat2'
+        >>> get_next_increment([], 'cat')
+        'cat'
+        >>> get_next_increment(['cat'], 'cat')
+        u'cat2'
+
+    """
+    values = list(values)
+    if not values:
+        return string
+
+    base = None
+    for value in values:
+        match = _str_num_re.search(value)
+        if match is not None and int(match.group(1)) > base:
+            base = int(match.group(1))
+    return increment_string(string if base is None else string + unicode(base))
+
+
 # circular imports
 from inyoka.utils.html import escape, striptags

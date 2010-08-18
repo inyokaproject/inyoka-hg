@@ -21,6 +21,9 @@ from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
 from sqlalchemy.ext.declarative import declarative_base, _declarative_constructor
 from inyoka.conf import settings
+from inyoka.utils.text import get_next_increment
+from inyoka.utils.collections import flatten_iterator
+
 
 rdbm = 'mysql'
 extra = '?charset=utf8&use_unicode=1'
@@ -127,3 +130,15 @@ def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
         else:
             failed = 0
         range = range[1] + 1, range[1] + block_size
+
+
+def find_next_increment(column, string):
+    """Get the next incremented string based on `column` and `string`.
+
+    Example::
+
+        find_next_increment(Category.slug, 'category name')
+    """
+
+    existing = session.query(column).filter(column.like('%s%%' % string)).all()
+    return get_next_increment(flatten_iterator(existing), string)
