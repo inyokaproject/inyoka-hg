@@ -150,10 +150,9 @@ class TopicMapperExtension(MapperExtension):
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
         parent_ids.append(instance.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'topic_count': forum_table.c.topic_count + 1,
-        }))
+        Forum.query.filter(Forum.id.in_(parent_ids)).update(values={
+            'topic_count': Forum.topic_count + 1
+        })
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
@@ -166,18 +165,15 @@ class TopicMapperExtension(MapperExtension):
 
         # set a new last_post_id because of integrity errors and
         # decrase the topic_count
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(ids),
-            values={
-                'last_post_id': select([func.max(post_table.c.id)], and_(
-                    post_table.c.topic_id != instance.id,
-                    topic_table.c.forum_id.in_(ids),
-                    topic_table.c.id == post_table.c.topic_id)),
-                'topic_count': forum_table.c.topic_count - 1
+        connection.execute(Forum.__table__.update(Forum.id.in_(ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Post.topic_id != instance.id,
+                Topic.forum_id.in_(ids),
+                Topic.id == Post.topic_id)),
+            'topic_count': Forum.topic_count - 1
         }))
 
-        connection.execute(topic_table.update(
-            topic_table.c.id == instance.id, values={
+        connection.execute(Topic.__table__.update(Topic.id == instance.id, {
                 'first_post_id': None,
                 'last_post_id':  None,
         }))
@@ -201,36 +197,34 @@ class PostMapperExtension(MapperExtension):
     def before_insert(self, mapper, connection, instance):
         if not instance.is_plaintext:
             instance.rendered_text = instance.render_text()
-        if instance.position is None:
         # XXX: race-conditions and other stupid staff... :/
         # require a mysql update to work properly!
+        if instance.position is None:
             instance.position = connection.execute(select(
-                [func.max(post_table.c.position)+1],
-                post_table.c.topic_id == instance.topic_id)).fetchone()[0] or 0
-        if not instance.pub_date:
-            instance.pub_date = datetime.utcnow()
+                [func.max(Post.position)+1],
+                Post.topic_id == instance.topic_id)).fetchone()[0] or 0
 
     def after_insert(self, mapper, connection, instance):
         if instance.topic.forum.user_count_posts:
-            connection.execute(user_table.update(
-                user_table.c.id==instance.author_id, values={
-                'post_count': user_table.c.post_count + 1
+            connection.execute(User.__table__.update(
+                User.id==instance.author_id, values={
+                'post_count': User.post_count + 1
             }))
             cache.delete('portal/user/%d' % instance.author_id)
         values = {
-            'post_count': topic_table.c.post_count + 1,
+            'post_count': Topic.post_count + 1,
             'last_post_id': instance.id
         }
         if instance.topic.first_post_id is None:
             values['first_post_id'] = instance.id
-        connection.execute(topic_table.update(
-            topic_table.c.id==instance.topic_id, values=values
+        connection.execute(Topic.__table__.update(
+            Topic.id==instance.topic_id, values=values
         ))
         parent_ids = list(p.id for p in instance.topic.forum.parents)
         parent_ids.append(instance.topic.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'post_count': forum_table.c.post_count + 1,
+        connection.execute(Topic.__table__.update(
+            Forum.id.in_(parent_ids), values={
+            'post_count': Forum.post_count + 1,
             'last_post_id': instance.id
         }))
         instance.topic.forum.invalidate_topic_cache()
@@ -249,7 +243,7 @@ class PostMapperExtension(MapperExtension):
         """Remove references and decrement post counts for this topic."""
         if not instance.topic:
             return
-        # this is crazy shit.  To increment or decrement we need the forums
+        # This is crazy shit.  To increment or decrement we need the forums
         # up to the root (the category!) but to find a new last_post_id
         # we *only* have to search in the current forum and it's parents.
         # If we search in the category for a new last_post_id it's not save
@@ -266,22 +260,22 @@ class PostMapperExtension(MapperExtension):
 
         # degrade user post count
         if instance.topic.forum.user_count_posts:
-            connection.execute(user_table.update(
-                user_table.c.id == instance.author_id, values={
-                    'post_count': user_table.c.post_count - 1}
+            connection.execute(User.__table__.update(
+                User.id == instance.author_id, values={
+                    'post_count': User.post_count - 1}
             ))
             cache.delete('portal/user/%d' % instance.author_id)
 
         # set the last post id for the topic
         if instance.id == instance.topic.last_post_id:
             new_last_post = Post.query.filter(and_(
-                topic_table.c.id == instance.topic_id,
-                post_table.c.id != instance.id
-            )).order_by(post_table.c.id.desc()).first()
-            connection.execute(topic_table.update(
-                topic_table.c.id == instance.topic_id, values={
-                    'last_post_id': new_last_post.id}
-            ))
+                Topic.id == instance.topic_id,
+                Post.id != instance.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Topic.__table__.update(
+                Topic.id == instance.topic_id, values={
+                    'last_post_id': new_last_post.id
+            }))
 
         # and also look if we are the last post of the overall forum
         if instance.id == instance.topic.forum.last_post_id:
@@ -289,31 +283,31 @@ class PostMapperExtension(MapperExtension):
             # with selecting the last post from the current topic.
             # Everything else would kill the server...
             new_last_post = Post.query.filter(and_(
-                post_table.c.id != instance.id,
-                topic_table.c.id == instance.topic.id
-            )).order_by(post_table.c.id.desc()).first()
-            connection.execute(forum_table.update(
-                forum_table.c.id.in_(forums_to_root_ids),
+                Post.id != instance.id,
+                Topic.id == instance.topic.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Forum.__table__.update(
+                Forum.id.in_(forums_to_root_ids),
                 values={'last_post_id': new_last_post.id}
             ))
 
         # decrement post_counts
-        connection.execute(topic_table.update(
-            topic_table.c.id == instance.topic_id, values={
-                'post_count': topic_table.c.post_count - 1
+        connection.execute(Topic.__table__.update(
+            Topic.id == instance.topic_id, values={
+                'post_count': Topic.post_count - 1
             }))
         forum_ids = [f.id for f in instance.topic.forum.parents]
         forum_ids.append(instance.topic.forum.id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(forums_to_root_ids), values={
-                'post_count': forum_table.c.post_count - 1
+        connection.execute(Forum.__table__.update(
+            Forum.id.in_(forums_to_root_ids), values={
+                'post_count': Forum.post_count - 1
             }))
 
         # decrement position
-        connection.execute(post_table.update(and_(
-            post_table.c.position > instance.position,
-            post_table.c.topic_id == instance.topic_id), values={
-                'position': post_table.c.position - 1
+        connection.execute(Post.__table__.update(and_(
+            Post.position > instance.position,
+            Post.topic_id == instance.topic_id), values={
+                'position': Post.position - 1
             }
         ))
 
@@ -365,10 +359,10 @@ class SAUser(Model):
     email = Column(String(50), unique=True, nullable=False)
     password = Column(String(128), nullable=False)
     status = Column(Integer, nullable=False)
-    last_login = Column(DateTime, nullable=False)
-    date_joined = Column(DateTime, nullable=False)
+    last_login = Column(DateTime, nullable=False, default=datetime.utcnow)
+    date_joined = Column(DateTime, nullable=False, default=datetime.utcnow)
     new_password_key = Column(String(32), nullable=True)
-    banned_until = Column(DateTime, nullable=True)
+    banned_until = Column(DateTime, nullable=True, default=datetime.utcnow)
     # profile attributes
     post_count = Column(Integer, default=0, nullable=False)
     avatar = Column(String(100), nullable=False) # XXX: Use Django to modify that column!
@@ -535,7 +529,7 @@ class Forum(Model):
         if not topics:
             topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
                 eagerload('last_post.author')).filter_by(forum_id=self.id) \
-                .order_by((Topic.sticky.desc(), Topic.last_post_id.desc())).limit(limit)
+                .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()).limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
                 topics = topics.all()
                 cache.set(key, topics)
@@ -679,15 +673,15 @@ class Topic(Model):
 
     def touch(self):
         """Increment the view count in a safe way."""
-        self.view_count = topic_table.c.view_count + 1
+        self.view_count = Topic.view_count + 1
 
     def move(self, forum):
         """Move the topic to an other forum."""
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
-            'topic_count': forum_table.c.topic_count -1,
-            'post_count': forum_table.c.post_count - self.post_count,
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(ids), values={
+            'topic_count': Forum.topic_count -1,
+            'post_count': Forum.post_count - self.post_count,
         }))
 
         dbsession.commit()
@@ -697,9 +691,9 @@ class Topic(Model):
         dbsession.commit()
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
-            'topic_count': forum_table.c.topic_count + 1,
-            'post_count': forum_table.c.post_count + self.post_count,
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(ids), values={
+            'topic_count': Forum.topic_count + 1,
+            'post_count': Forum.post_count + self.post_count,
         }))
         dbsession.commit()
         forum.invalidate_topic_cache()
@@ -712,21 +706,21 @@ class Topic(Model):
             elif not forum.user_count_posts and old_forum.user_count_posts:
                 op = operator.sub
 
-            dbsession.execute(user_table.update(
-                user_table.c.id.in_(select([post_table.c.author_id], post_table.c.topic_id == self.id)),
+            dbsession.execute(SAUser.__table__.update(
+                SAUser.id.in_(select([Post.author_id], Post.topic_id == self.id)),
                 values={'post_count': op(
-                    user_table.c.post_count,
+                    User.post_count,
                     select(
                         [func.count()],
-                        ((post_table.c.topic_id == self.id) &
-                         (post_table.c.author_id == user_table.c.id)),
-                        post_table)
+                        ((Post.topic_id == self.id) &
+                         (Post.author_id == SAUser.id)),
+                        Post.__table__)
                     )
                 }
             ))
             dbsession.commit()
 
-            q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
+            q = select([Post.author_id], Post.topic_id == self.id, distinct=True)
             for x in dbsession.execute(q).fetchall():
                 cache.delete('portal/user/%d' % x[0])
 
@@ -737,19 +731,17 @@ class Topic(Model):
         old_ids.append(old_forum.id)
 
         # search for a new last post in the old and the new forum
-        dbsession.execute(forum_table.update(
-            forum_table.c.id.in_(new_ids),
-            values={'last_post_id': select([func.max(post_table.c.id)], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.forum_id == forum_table.c.id))}
-        ))
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(new_ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Topic.id == Post.topic_id,
+                Topic.forum_id == Forum.id))
+        }))
 
-        dbsession.execute(forum_table.update(
-            forum_table.c.id.in_(old_ids),
-            values={'last_post_id': select([func.max(post_table.c.id)], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.forum_id == forum_table.c.id))}
-        ))
+        dbsession.execute(Forum.update(Forum.id.in_(old_ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Topic.id == Post.topic_id,
+                Topic.forum_id == Forum.id))
+        }))
 
 
     def get_absolute_url(self, action='show'):
@@ -823,9 +815,9 @@ class Topic(Model):
 
     def reindex(self):
         """Mark the whole topic for reindexing."""
-        for p, in dbsession.execute(select([post_table.c.id],
-                                           post_table.c.topic_id == self.id)):
-            search.queue('f', p)
+        ids = dbsession.query(Post.id).filter(Post.topic_id==self.id)
+        for post_id in ids:
+            search.queue('f', post_id)
 
     def __unicode__(self):
         return self.title
@@ -848,7 +840,7 @@ class PostRevision(Model):
     id = Column(Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey('forum_post.id'), nullable=False)
     text = Column(Text, nullable=False)
-    store_date = Column(DateTime, nullable=False)
+    store_date = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
         return '<%s post=%d (%s), stored=%s>' % (
@@ -888,7 +880,7 @@ class Post(Model):
     id = Column(Integer, primary_key=True)
     position = Column(Integer, nullable=False, default=0)
     author_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
-    pub_date = Column(DateTime, nullable=False, index=True)
+    pub_date = Column(DateTime, nullable=False, index=True, default=datetime.utcnow)
     topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=False)
     hidden = Column(Boolean, default=False, nullable=False)
     text = Column(Text, nullable=False)
@@ -931,13 +923,11 @@ class Post(Model):
     @staticmethod
     def url_for_post(id, paramstr=None):
         #XXX: shouldn't we use post.position here?
-        row = dbsession.execute(select(
-            [func.count(post_table.c.id), topic_table.c.slug], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.id == select(
-                    [post_table.c.topic_id], post_table.c.id == id),
-                    post_table.c.id <= id)
-            ).group_by(topic_table.c.id)).fetchone()
+        row = dbsession.query(Post.id, Topic.slug).filter(and_(
+            Topic.id == Post.topic_id,
+            Topic.id == (select([Post.topic_id], Post.id == id)),
+            Post.id <= id
+        )).group_by(Topic.id).first()
         if not row:
             return None
         post_count, slug = row
@@ -977,7 +967,6 @@ class Post(Model):
             ## create a new revision for the current post
             rev = PostRevision()
             rev.post = self
-            rev.store_date = datetime.utcnow()
             rev.text = text
 
         self.text = text
@@ -1024,8 +1013,8 @@ class Post(Model):
 
         dbsession.flush()
         ids = [p.id for p in posts]
-        dbsession.execute(post_table.update(
-            post_table.c.id.in_(ids), values={
+        dbsession.execute(Post.__table__.update(
+            Post.id.in_(ids), values={
                 'topic_id': new_topic.id
         }))
         dbsession.commit()
@@ -1053,8 +1042,8 @@ class Post(Model):
                 new_topic.forum.last_post = posts[-1]
             if posts[-1].id == old_topic.forum.last_post.id:
                 last_post = Post.query.filter(and_(
-                    post_table.c.topic_id==topic_table.c.id,
-                    topic_table.c.forum_id==old_topic.forum_id
+                    Post.topic_id==Topic.id,
+                    Topic.forum_id==old_topic.forum_id
                 )).first()
 
                 old_topic.forum.last_post_id = last_post and last_post.id \
@@ -1068,20 +1057,19 @@ class Post(Model):
                 elif not n and o:
                     op = operator.sub
 
-                user_table.update(
-                    user_table.c.id.in_(select([post_table.c.author_id],
-                        post_table.c.topic_id == old_topic.id)),
+                dbsession.execute(SAUser.__table__.update(
+                    User.id.in_(select([Post.author_id], Post.topic_id == old_topic.id)),
                     values={'post_count': op(
-                        user_table.c.post_count,
-                        select([func.count()],
-                            ((post_table.c.topic_id==old_topic.id) & (post_table.c.author_id==user_table.c.id)),
-                            post_table)
+                        SAUser.post_count, select([func.count()],
+                            ((Post.topic_id == old_topic.id) &
+                             (Post.author_id == User.id)),
+                            Post.__table)
                         )
                     }
-                )
+                ))
                 dbsession.commit()
 
-                q = select([post_table.c.author_id], post_table.c.topic_id == old_topic.id, distinct=True)
+                q = select([Post.author_id], Post.topic_id == old_topic.id, distinct=True)
                 for x in dbsession.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
 
@@ -1091,16 +1079,16 @@ class Post(Model):
             old_topic.post_count -= len(posts)
             if old_topic.last_post.id == posts[-1].id:
                 post = Post.query.filter(and_(
-                    post_table.c.topic_id == old_topic.id,
-                    post_table.c.id != old_topic.last_post_id
-                )).order_by(post_table.c.id.desc()).first()
+                    Post.topic_id == old_topic.id,
+                    Post.id != old_topic.last_post_id
+                )).order_by(Post.id.desc()).first()
 
                 old_topic.last_post = post
 
             if old_topic.first_post.id == posts[0].id:
                 post = Post.query.filter(
-                    topic_table.c.id==old_topic.id
-                ).order_by(topic_table.c.id.asc()).first()
+                    Topic.id==old_topic.id
+                ).order_by(Topic.id.asc()).first()
                 old_topic.first_post = post
         else:
             if old_topic.has_poll:
@@ -1264,9 +1252,9 @@ class Attachment(Model):
         if not path.exists(new_abs_path):
             os.mkdir(new_abs_path)
 
-        attachments = dbsession.execute(attachment_table.select(and_(
-            attachment_table.c.id.in_(att_ids),
-            attachment_table.c.post_id == None
+        attachments = dbsession.execute(Attachment.__table__.select(and_(
+            Attachment.id.in_(att_ids),
+            Attachment.post_id == None
         ))).fetchall()
 
         for row in attachments:
@@ -1284,7 +1272,7 @@ class Attachment(Model):
                 old_fo.close()
             # delete the temp-file
             os.remove(path.join(settings.MEDIA_ROOT, old_fn))
-            at = attachment_table
+            at = Attachment.__table__
             dbsession.execute(at.update(and_(
                 at.c.id == id,
                 at.c.post_id == None
@@ -1472,8 +1460,9 @@ class Poll(Model):
         """Bind the polls given in poll_ids to the given topic id."""
         if not poll_ids:
             return False
-        dbsession.execute(poll_table.update(and_(poll_table.c.id.in_(poll_ids),
-            poll_table.c.topic_id == None), values={
+        dbsession.execute(Poll.__table__.update(and_(
+            Poll.id.in_(poll_ids),
+            Poll.topic_id == None), values={
                 'topic_id': topic_id
         }))
 
@@ -1485,8 +1474,8 @@ class Poll(Model):
     def has_participated(self, user=None):
         user = user or current_request.user
         return bool(dbsession.execute(select([1],
-            (poll_vote_table.c.poll_id == self.id) &
-            (poll_vote_table.c.voter_id == user.id))).fetchone())
+            (PollVote.poll_id == self.id) &
+            (PollVote.voter_id == user.id))).fetchone())
 
     participated = property(has_participated)
 
@@ -1539,7 +1528,6 @@ class WelcomeMessage(Model):
         return parse(self.text).render(context, format)
 
 
-
 class ReadStatus(object):
     """
     Manages the read status of forums and topics for a specific user.
@@ -1589,9 +1577,9 @@ class ReadStatus(object):
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,
             [self(c) for c in item.forum.children], True) and not \
-            dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
-                forum_table.c.last_post_id > (row[0] or -1),
-                ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
+            dbsession.execute(select([1], and_(Forum.id == forum_id,
+                Forum.last_post_id > (row[0] or -1),
+                ~Forum.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
             return True
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:

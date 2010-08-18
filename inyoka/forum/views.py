@@ -43,7 +43,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext
+    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext, Privilege
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -131,7 +131,7 @@ def forum(request, slug, page=1):
         f = Forum.query.options(eagerload('_children'),
                                 eagerload('_children.last_post'),
                                 eagerload('_children.last_post.author')) \
-                .get(slug)
+                .filter_by(slug=slug).first()
 
         # if the forum is a category we raise PageNotFound. Categories have
         # their own url at /category.
@@ -159,8 +159,9 @@ def forum(request, slug, page=1):
                                      eagerload('last_post'),
                                      eagerload('last_post.author')) \
             .filter_by(forum_id=f.id) \
-            .order_by((topic_table.c.sticky.desc(),
-                       topic_table.c.last_post_id.desc()))
+            .order_by(Topic.sticky.desc(),
+                      Topic.last_post_id.desc())
+
 
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
 
@@ -180,7 +181,7 @@ def forum(request, slug, page=1):
 
     supporters = cache.get('forum/forum/supporters-%s' % f.id)
     if supporters is None:
-        p = privilege_table.c
+        p = Privilege
         supporters = []
         cur = session.execute(select([p.user_id, p.positive],
             (p.forum_id == f.id) &
@@ -235,7 +236,7 @@ def viewtopic(request, topic_slug, page=1):
     discussions = Page.objects.filter(topic_id=t.id)
 
     posts = t.posts.options(eagerload('author'), eagerload('attachments')) \
-                   .order_by(post_table.c.position)
+                   .order_by(Post.position)
 
     if t.has_poll:
         polls = Poll.query.options(eagerload('options')).filter(
@@ -259,10 +260,10 @@ def viewtopic(request, topic_slug, page=1):
                         flash(u'Die Abstimmung ist bereits zu Ende.', False)
                         continue
                     poll.votings.append(PollVote(voter_id=request.user.id))
-                    session.execute(poll_option_table.update(
-                        poll_option_table.c.id.in_(votes) &
-                        (poll_option_table.c.poll_id == poll.id), values={
-                            'votes': poll_option_table.c.votes + 1
+                    session.execute(PollOption.__table__.update(
+                        PollOption.id.in_(votes) &
+                        (PollOption.poll_id == poll.id), values={
+                            'votes': PollOption.votes + 1
                     }))
                     flash(u'Deine Stimme wurde gespeichert.', True)
             session.commit()
@@ -274,7 +275,7 @@ def viewtopic(request, topic_slug, page=1):
         polls = None
 
     pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
-                     total=t.post_count, rownum_column=post_table.c.position)
+                     total=t.post_count, rownum_column=Post.position)
 
     if have_privilege(User.ANONYMOUS_USER, t, 'read'):
         set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
@@ -514,8 +515,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.
         attachments = Attachment.query.filter(and_(
-            attachment_table.c.id.in_(att_ids),
-            attachment_table.c.post_id == bool(post)==True and post.id or None
+            Attachment.id.in_(att_ids),
+            Attachment.post_id == bool(post)==True and post.id or None
         )).all()
         if 'attach' in request.POST:
             attach_form = AddAttachmentForm(request.POST, request.FILES)
@@ -698,8 +699,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attachments = Attachment.query.filter_by(post_id=post.id)
 
     if not newtopic:
-        posts = list(topic.posts.filter(post_table.c.hidden == 0) \
-                                .order_by(post_table.c.position.desc())[:15])
+        posts = list(topic.posts.filter(Post.hidden == 0) \
+                                .order_by(Post.position.desc())[:15])
         discussions = Page.objects.filter(topic_id=topic.id)
 
     return {
@@ -896,8 +897,8 @@ def reportlist(request):
         _add_field_choices()
         if form.is_valid():
             d = form.cleaned_data
-            session.execute(topic_table.update(
-                topic_table.c.id.in_(d['selected']), values={
+            session.execute(Topic.__table__.update(
+                Topic.id.in_(d['selected']), values={
                     'reported': None,
                     'reporter_id': None,
                     'report_claimed_by_id': None
@@ -954,8 +955,8 @@ def first_unread_post(request, topic_slug):
     """
     Redirect the user to the first unread post in a special topic.
     """
-    t = topic_table.c
-    p = post_table.c
+    t = Topic.__table__
+    p = Post.__table__
     try:
         topic_id, forum_id = select([t.id, t.forum_id],
             t.slug == topic_slug).execute().fetchone()
@@ -1010,7 +1011,7 @@ def movetopic(request, topic_slug):
         return abort_access_denied(request)
 
     forums = filter_invisible(request.user, Forum.query.filter(and_(
-        forum_table.c.parent_id != None, forum_table.c.id != topic.forum_id)))
+        Forum.parent_id != None, Forum.id != topic.forum_id)))
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
@@ -1081,7 +1082,7 @@ def splittopic(request, topic_slug, page=1):
 
     pagination = Pagination(request, old_topic.posts, page, POSTS_PER_PAGE,
         url_for(old_topic, action='split'), total=old_topic.post_count,
-        rownum_column=post_table.c.position)
+        rownum_column=Post.position)
 
     old_posts = old_topic.posts
 
@@ -1097,7 +1098,7 @@ def splittopic(request, topic_slug, page=1):
 
         pagination = Pagination(request, old_topic.posts, switch_to, POSTS_PER_PAGE,
             url_for(old_topic, action='split'), total=old_topic.post_count,
-            rownum_column=post_table.c.position)
+            rownum_column=Post.position)
 
         rendered_posts = pagination.objects.all()
 
@@ -1122,9 +1123,9 @@ def splittopic(request, topic_slug, page=1):
             data = form.cleaned_data
 
             if data['select_following']:
-                posts = old_posts.filter(post_table.c.id >= data['start'])
+                posts = old_posts.filter(Post.id >= data['start'])
             else:
-                posts = old_posts.filter(post_table.c.id.in_(data['select']))
+                posts = old_posts.filter(Post.id.in_(data['select']))
 
             posts = list(posts)
 
@@ -1521,7 +1522,7 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    forum_ids = [f[0] for f in select([forum_table.c.id]).execute()]
+    forum_ids = [f[0] for f in select([Forum.id]).execute()]
     # get read status data
     data = request.user._readstatus.data
 
@@ -1540,12 +1541,12 @@ def newposts(request, page=1):
         ids = filter(lambda id: data[id][0] is not None, data.keys())
         where = or_(*[
             (
-                (topic_table.c.forum_id == id) &
-                (topic_table.c.last_post_id > data[id][0])
+                (Forum.forum_id == id) &
+                (Topic.last_post_id > data[id][0])
             ) for id in ids
         ] + [
             # don't filter in forums where "last read post" isn't set
-            not_(topic_table.c.forum_id.in_(ids))
+            not_(Topic.forum_id.in_(ids))
         ])
 
     # get single topics that are marked as "read"
@@ -1555,7 +1556,7 @@ def newposts(request, page=1):
 
     # filter read topics
     if read_topics:
-        cond = not_(topic_table.c.last_post_id.in_(read_topics))
+        cond = not_(Topic.last_post_id.in_(read_topics))
         if where:
             where &= cond
         else:
@@ -1563,8 +1564,8 @@ def newposts(request, page=1):
 
     topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
                                  eagerload('last_post.author')) \
-        .filter(topic_table.c.sticky == False) \
-        .order_by(topic_table.c.last_post_id.desc())
+        .filter(Topic.sticky == False) \
+        .order_by(Topic.last_post_id.desc())
 
     if 'version' in request.GET:
         topics = topics.filter_by(ubuntu_version=request.GET['version'])
@@ -1579,7 +1580,7 @@ def newposts(request, page=1):
     # don't show topics of forums where the user doesn't have CAN_READ
     # permission
     if forbidden_forums:
-        topics = topics.filter(not_(topic_table.c.forum_id.in_(forbidden_forums)))
+        topics = topics.filter(not_(Topic.forum_id.in_(forbidden_forums)))
 
     if where:
         topics = topics.filter(where)
@@ -1599,7 +1600,7 @@ def newposts(request, page=1):
 @templated('forum/topiclist.html')
 def topiclist(request, page=1, action='newposts', hours=24, user=None):
     page = int(page)
-    topics = Topic.query.order_by(topic_table.c.last_post_id.desc()) \
+    topics = Topic.query.order_by(Topic.last_post_id.desc()) \
                   .options(eagerload('forum'),
                            eagerload('author'),
                            eagerload('last_post'),
@@ -1613,8 +1614,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         if hours > 24:
             raise PageNotFound()
         topics = topics.filter(and_(
-            topic_table.c.last_post_id == post_table.c.id,
-            post_table.c.pub_date > datetime.now() - timedelta(hours=hours)
+            Topic.last_post_id == Post.id,
+            Post.pub_date > datetime.now() - timedelta(hours=hours)
         ))
         title = u'Beiträge der letzten %d Stunden' % hours
         url = href('forum', 'last%d' % hours)
@@ -1638,12 +1639,12 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             return HttpResponseRedirect(href('portal', 'login'))
         # get the ids of the topics the user has written posts in
         # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
-        topic_ids = select([topic_table.c.id],
-            exists([post_table.c.topic_id],
-                (post_table.c.author_id == user.id) &
-                (post_table.c.topic_id == topic_table.c.id)
+        topic_ids = select([Topic.id],
+            exists([Post.topic_id],
+                (Post.author_id == user.id) &
+                (Post.topic_id == Topic.id)
             )
-        ).order_by(topic_table.c.last_post_id.desc()) \
+        ).order_by(Topic.last_post_id.desc()) \
          .offset((page - 1) * TOPICS_PER_PAGE) \
          .limit(TOPICS_PER_PAGE + 1)
 
@@ -1651,7 +1652,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
         topic_ids = topic_ids[:TOPICS_PER_PAGE]
         topics = filter(lambda x: have_privilege(request.user, x, 'read'),
-                        list(topics.filter(topic_table.c.id.in_(topic_ids))))
+                        list(topics.filter(Topic.id.in_(topic_ids))))
         pagination = []
         normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
         disabled = u'<span class="disabled next">%(text)s</span>'
@@ -1686,7 +1687,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     if action != 'author':
         forum_ids = [f.id for f in filter_invisible(request.user,
                                                     Forum.query.all())]
-        topics = topics.filter(topic_table.c.forum_id.in_(forum_ids))
+        topics = topics.filter(Topic.forum_id.in_(forum_ids))
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
         topics = pagination.objects
         pagination = pagination.generate()
