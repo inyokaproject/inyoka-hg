@@ -35,7 +35,7 @@ from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
-from inyoka.utils.database import session as dbsession, Model
+from inyoka.utils.database import session as dbsession, Model, SlugGenerator
 from inyoka.utils.decorators import deferred
 
 from inyoka.forum.acl import filter_invisible
@@ -132,10 +132,6 @@ class ForumMapperExtension(MapperExtension):
             forum = query.session.merge(forum, dont_load=True)
         return forum
 
-    def before_insert(self, mapper, connection, instance):
-        if not instance.slug:
-            instance.slug = slugify(instance.name)
-
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forum/%d' % instance.id)
         #XXX: since it's not possible to save the forum_id in the view
@@ -150,18 +146,6 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(int(instance.forum_id))
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        # shorten slug to 45 chars (max length is 50) because else problems
-        # when appending id can occur
-        instance.slug = slugify(instance.title)[:45]
-        if Topic.query.filter_by(slug=instance.slug).first():
-            slugs = connection.execute(select([topic_table.c.slug],
-                topic_table.c.slug.like('%s-%%' % instance.slug)))
-            start = len(instance.slug) + 1
-            try:
-                instance.slug += '-%d' % (max(int(s[0][start:]) for s in slugs \
-                    if s[0][start:].isdigit()) + 1)
-            except ValueError:
-                instance.slug += '-1'
 
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
@@ -650,7 +634,8 @@ class Topic(Model):
     When creating a new topic, a new post is added to it automatically.
     """
     __tablename__ = 'forum_topic'
-    __mapper_args__ = {'extension': TopicMapperExtension()}
+    __mapper_args__ = {'extension': (TopicMapperExtension(),
+                                     SlugGenerator('slug', 'title'))}
 
     id = Column(Integer, primary_key=True)
     forum_id = Column(Integer, ForeignKey('forum_forum.id'))

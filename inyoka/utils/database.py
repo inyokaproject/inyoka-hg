@@ -20,8 +20,9 @@ from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
 from sqlalchemy.ext.declarative import declarative_base, _declarative_constructor
+from sqlalchemy.orm.attributes import get_attribute, set_attribute
 from inyoka.conf import settings
-from inyoka.utils.text import get_next_increment
+from inyoka.utils.text import get_next_increment, slugify
 from inyoka.utils.collections import flatten_iterator
 
 
@@ -40,6 +41,13 @@ metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
     autoflush=True, autocommit=False))
+
+
+if settings.DATABASE_DEBUG:
+    import logging
+    engine_logger = logging.getLogger('sqlalchemy.engine')
+    engine_logger.setLevel(logging.INFO)
+    engine_logger.addHandler(logging.FileHandler('db.log'))
 
 
 def mapper(model, table, **options):
@@ -109,11 +117,47 @@ Model = declarative_base(name='Model', cls=ModelBase,
 Model.query = session.query_property(Query)
 
 
-if settings.DATABASE_DEBUG:
-    import logging
-    engine_logger = logging.getLogger('sqlalchemy.engine')
-    engine_logger.setLevel(logging.INFO)
-    engine_logger.addHandler(logging.FileHandler('db.log'))
+class SlugGenerator(orm.MapperExtension):
+    """This MapperExtension can generate unique slugs automatically.
+
+    .. note::
+
+        If you apply a max_length to the slug field that length is
+        decreased by 10 to get enough space for increment strings.
+
+    :param slugfield: The field the slug gets saved to.
+    :param generate_from: Either a string or a list of fields to generate
+                          the slug from.  If a list is applied they are
+                          joined with ``sep``.
+    :param sep: The string to join multiple fields.  If only one field applied
+                the seperator is not used.
+    """
+
+    def __init__(self, slugfield, generate_from, sep=u'/'):
+        if not isinstance(generate_from, (list, tuple)):
+            generate_from = (generate_from,)
+        self.slugfield = slugfield
+        self.generate_from = generate_from
+        self.separator = sep
+
+    def before_insert(self, mapper, connection, instance):
+        fields = [get_attribute(instance, f) for f in self.generate_from]
+
+        table = mapper.columns[self.slugfield].table
+        column = table.c[self.slugfield]
+        assert isinstance(column.type, (db.Unicode, db.String))
+        max_length = column.type.length
+
+        # filter out fields with no value as we cannot join them they are
+        # not relevant for slug generation.
+        fields = filter(None, fields)
+        slug = self.separator.join(map(slugify, fields))
+        # strip the string if max_length is applied
+        slug = slug[:max_length-10] if max_length is not None else slug
+
+        set_attribute(instance, self.slugfield,
+            find_next_increment(getattr(instance.__class__, self.slugfield),
+                                slug, max_length))
 
 
 def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
@@ -132,13 +176,12 @@ def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
         range = range[1] + 1, range[1] + block_size
 
 
-def find_next_increment(column, string):
+def find_next_increment(column, string, max_length=None):
     """Get the next incremented string based on `column` and `string`.
 
     Example::
 
         find_next_increment(Category.slug, 'category name')
     """
-
     existing = session.query(column).filter(column.like('%s%%' % string)).all()
-    return get_next_increment(flatten_iterator(existing), string)
+    return get_next_increment(flatten_iterator(existing), string, max_length)
