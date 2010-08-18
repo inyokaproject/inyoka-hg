@@ -206,9 +206,9 @@ class PostMapperExtension(MapperExtension):
 
     def after_insert(self, mapper, connection, instance):
         if instance.topic.forum.user_count_posts:
-            connection.execute(User.__table__.update(
-                User.id==instance.author_id, values={
-                'post_count': User.post_count + 1
+            connection.execute(SAUser.__table__.update(
+                SAUser.id==instance.author_id, values={
+                'post_count': SAUser.post_count + 1
             }))
             cache.delete('portal/user/%d' % instance.author_id)
         values = {
@@ -260,9 +260,9 @@ class PostMapperExtension(MapperExtension):
 
         # degrade user post count
         if instance.topic.forum.user_count_posts:
-            connection.execute(User.__table__.update(
-                User.id == instance.author_id, values={
-                    'post_count': User.post_count - 1}
+            connection.execute(SAUser.__table__.update(
+                SAUser.id == instance.author_id, values={
+                    'post_count': SAUser.post_count - 1}
             ))
             cache.delete('portal/user/%d' % instance.author_id)
 
@@ -709,7 +709,7 @@ class Topic(Model):
             dbsession.execute(SAUser.__table__.update(
                 SAUser.id.in_(select([Post.author_id], Post.topic_id == self.id)),
                 values={'post_count': op(
-                    User.post_count,
+                    SAUser.post_count,
                     select(
                         [func.count()],
                         ((Post.topic_id == self.id) &
@@ -1058,11 +1058,11 @@ class Post(Model):
                     op = operator.sub
 
                 dbsession.execute(SAUser.__table__.update(
-                    User.id.in_(select([Post.author_id], Post.topic_id == old_topic.id)),
+                    SAUser.id.in_(select([Post.author_id], Post.topic_id == old_topic.id)),
                     values={'post_count': op(
                         SAUser.post_count, select([func.count()],
                             ((Post.topic_id == old_topic.id) &
-                             (Post.author_id == User.id)),
+                             (Post.author_id == SAUser.id)),
                             Post.__table)
                         )
                     }
