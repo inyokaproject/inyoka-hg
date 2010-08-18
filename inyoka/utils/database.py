@@ -15,7 +15,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from sqlalchemy import orm
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine, String, Unicode
 from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
@@ -75,13 +75,6 @@ class Query(orm.Query):
             cache.set(key, data, timeout=timeout)
         data = list(self.merge_result(data, load=False))
         return data
-
-    def lightweight(self, deferred=None, lazy=None):
-        """Send a lightweight query which deferes some more expensive
-        things such as comment queries or even text and parser data.
-        """
-        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
-        return self.options(*args)
 
 
 class ModelBase(object):
@@ -145,7 +138,7 @@ class SlugGenerator(orm.MapperExtension):
 
         table = mapper.columns[self.slugfield].table
         column = table.c[self.slugfield]
-        assert isinstance(column.type, (db.Unicode, db.String))
+        assert isinstance(column.type, (Unicode, String))
         max_length = column.type.length
 
         # filter out fields with no value as we cannot join them they are
