@@ -86,7 +86,7 @@ def after_install(options, home_dir):
     easy_install('Jinja2==2.5', home_dir)
     easy_install('Werkzeug==0.6.2', home_dir)
     easy_install('Pygments==1.3.1', home_dir)
-    easy_install('SQLAlchemy==0.6.3, home_dir)
+    easy_install('SQLAlchemy==0.6.3', home_dir)
     easy_install('simplejson==2.1.1', home_dir)
     easy_install('pytz==2010h', home_dir)
     easy_install('html5lib==0.90', home_dir)
