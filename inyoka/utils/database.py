@@ -5,9 +5,6 @@
 
     This module provides an SQLAlchemy metadata and engine.
 
-    This module must never import application code so that migrations
-    can work properly for bootstrapping and upgrading.
-
     The default session shutdown happens in the application handler in
     `inyoka.application`.
 
