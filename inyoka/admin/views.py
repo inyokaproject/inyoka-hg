@@ -15,7 +15,7 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from sqlalchemy import and_, select
-from datetime import datetime, timedelta, date, time as dt_time
+from datetime import date, time as dt_time
 from django.db.models import Max
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
@@ -899,12 +899,11 @@ def user_new(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            u = User.objects.register_user(
+            User.objects.register_user(
                 username=data['username'],
                 email=data['email'],
                 password=data['password'],
-                send_mail=data['authenticate']
-            )
+                send_mail=data['authenticate'])
             flash(u'Der Benutzer „%s“ wurde erfolgreich erstellt'
                   % escape(data['username']), True)
             flash(u'Du kannst nun weitere Details bearbeiten')
@@ -976,7 +975,7 @@ def groups(request):
     if request.method == 'POST':
         name = request.POST.get('group')
         try:
-            group = Group.objects.get(name=name)
+            Group.objects.get(name=name)
         except Group.DoesNotExist:
             flash(u'Die Gruppe „%s“ existiert nicht.'
                   % escape(name), False)
@@ -1234,14 +1233,14 @@ def event_edit(request, id=None):
                 dt = datetime_to_timezone(date_time_to_datetime(
                     event.date, event.time or dt_time(0)))
                 dt_date = dt.date()
-                dt_time = dt.time()
+                time_ = dt.time()
             else:
                 dt_date = event.date
-                dt_time = None
+                time_ = None
             form = EditEventForm({
                 'name': event.name,
                 'date': dt_date,
-                'time': dt_time,
+                'time': time_,
                 'duration': datetime_to_timezone(event.duration),
                 'description': event.description,
                 'location_town': event.location_town,
