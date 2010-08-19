@@ -9,7 +9,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import gc
-from sqlalchemy.sql import select
 from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
 from inyoka.forum.models import Post, Forum, Topic

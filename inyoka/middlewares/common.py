@@ -42,7 +42,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         # create local cache object if it does not exist
         # (so that our cache is not overwriting it every time...)
         try:
-            obj = request_cache._get_current_object()
+            request_cache._get_current_object()
         except RuntimeError:
             local.cache = {}
 

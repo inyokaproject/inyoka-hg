@@ -40,12 +40,6 @@ def get_dtd():
     """
     global inyoka_dtd
     if inyoka_dtd is None:
-        if settings.DEBUG:
-            dtd_path = os.path.realpath(
-                os.path.join(os.path.dirname(__file__), '..',
-                             'static', 'xhtml1-strict-uu.dtd'))
-        else:
-            dtd_path = href('static', 'xhtml1-strict-uu.dtd')
         inyoka_dtd = '<!DOCTYPE html SYSTEM "%s">' % (
             settings.DEBUG and os.path.realpath(
                 os.path.join(os.path.dirname(__file__), '..',

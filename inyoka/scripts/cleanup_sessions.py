@@ -10,17 +10,13 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime, timedelta
-# fix import error for now
-from inyoka import application
 from inyoka.portal.models import SessionInfo
 from inyoka.utils.sessions import SESSION_DELTA
-#from django.contrib.sessions.models import Session
 
 
 def main():
-    #Session.objects.filter(expire_date__lt=datetime.utcnow()).delete()
-    SessionInfo.objects.filter(last_change__lt=datetime.utcnow() -
-                               timedelta(seconds=SESSION_DELTA)).delete()
+    last_change = (datetime.utcnow() - timedelta(seconds=SESSION_DELTA))
+    SessionInfo.objects.filter(last_change__lt=last_change).delete()
 
 
 if __name__ == '__main__':

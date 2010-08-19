@@ -8,7 +8,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import time
-import inyoka.application
 from inyoka.conf import settings
 settings.DATABASE_DEBUG = False
 from inyoka.forum.models import post_table

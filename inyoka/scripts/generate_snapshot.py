@@ -163,7 +163,6 @@ def create_snapshot(folder):
             content = ABSOLUTE_LINK_REGEX.sub(handle_link, content)
             content = THUMBNAIL_REGEX.sub(handle_thumbnail, content)
 
-
             # TODO: Images inside links don't work
 
             f.write(tpl.render({

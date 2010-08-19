@@ -165,7 +165,7 @@ def shorten_filename(name, length=20, suffix=''):
     new_suffix = suffix + dot + extension
     slice_index = length - len(new_suffix)
     if slice_index <= 0:
-        raise ValueError, "%s is >= %d chars" % (new_suffix, length)
+        raise ValueError("%s is >= %d chars" % (new_suffix, length))
     return name[:length - len(new_suffix)] + new_suffix
 
 

@@ -644,7 +644,6 @@ class Topic(Model):
             if num <= threshold or num > pages - threshold:
                 if result and result[-1] != ellipsis:
                     result.append(u'<span class="comma">, </span>')
-                was_space = False
                 link = self.get_absolute_url()
                 if num != 1:
                     link = '%s%d/' % (link, num)

@@ -70,22 +70,22 @@ def on_toggle_categories(request):
 def on_subscribe(request):
     type = request.POST['type']
     slug = request.POST['slug']
-    obj = None
+    cls = None
 
     if type == 'forum':
-        obj = Forum
+        cls = Forum
     elif type == 'topic':
-        obj = Topic
+        cls = Topic
 
     col = str((type in ('forum', 'topic') and type+'_id' or type))
 
-    x = obj.query.filter(obj.slug==slug).one()
-    if not have_privilege(request.user, x, 'read'):
+    obj = cls.query.filter(cls.slug==slug).one()
+    if not have_privilege(request.user, obj, 'read'):
         #XXX: we should raise here, because it's nearly impossible
         #     to cach that in JS.
         return abort_access_denied(request)
     try:
-        s = Subscription.objects.get(user=request.user, **{col: x.id})
+        Subscription.objects.get(user=request.user, **{col: x.id})
     except Subscription.DoesNotExist:
         Subscription(user=request.user, **{col: x.id}).save()
 

@@ -10,9 +10,8 @@
 """
 import re
 import pytz
-from calendar import monthrange
 from operator import attrgetter
-from datetime import date, time, datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.utils.dateformat import DateFormat
 from inyoka.utils.local import current_request
 

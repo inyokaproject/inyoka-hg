@@ -751,7 +751,7 @@ def change_status(request, topic_slug, solved=None, locked=None):
 
 
 @transaction.autocommit
-def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
+def _generate_subscriber(cls, obj_slug, subscriptionkw, flasher):
     """
     Generates a subscriber-function to deal with objects of type `obj`
     which have the slug `slug` and are registered in the subscription by
@@ -759,7 +759,7 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
     """
     if subscriptionkw in ('forum', 'topic'):
         subscriptionkw = subscriptionkw + '_id'
-    subscriptionkw = subscriptionkw
+
     @simple_check_login
     def subscriber(request, **kwargs):
         """
@@ -767,25 +767,25 @@ def _generate_subscriber(obj, obj_slug, subscriptionkw, flasher):
         If there isn't such a subscription, a new one is created.
         """ % obj_slug
         slug = kwargs[obj_slug]
-        x = obj.query.filter(obj.slug==slug).one()
-        if not have_privilege(request.user, x, CAN_READ):
+        obj = cls.query.filter(cls.slug==slug).one()
+        if not have_privilege(request.user, obj, CAN_READ):
             return abort_access_denied(request)
         try:
-            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x.id})
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw: obj.id})
         except Subscription.DoesNotExist:
             # there's no such subscription yet, create a new one
-            Subscription(user=request.user,**{subscriptionkw : x.id}).save()
+            Subscription(user=request.user,**{subscriptionkw : obj.id}).save()
             flash(flasher)
         # redirect the user to the page he last watched
         if request.GET.get('continue', False) and is_safe_domain(request.GET['continue']):
             return HttpResponseRedirect(request.GET['continue'])
         else:
-            return HttpResponseRedirect(url_for(x))
+            return HttpResponseRedirect(url_for(obj))
     return subscriber
 
 
 @transaction.autocommit
-def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
+def _generate_unsubscriber(cls, obj_slug, subscriptionkw, flasher):
     """
     Generates an unsubscriber-function to deal with objects of type `obj`
     which have the slug `slug` and are registered in the subscription by
@@ -798,9 +798,9 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         """ If the user has already subscribed to this %s, this view removes it.
         """ % obj_slug
         slug = kwargs[obj_slug]
-        x = obj.query.filter(obj.slug==slug).one()
+        obj = cls.query.filter(cls.slug==slug).one()
         try:
-            s = Subscription.objects.get(user=request.user, **{subscriptionkw : x.id})
+            s = Subscription.objects.get(user=request.user, **{subscriptionkw : obj.id})
         except Subscription.DoesNotExist:
             pass
         else:
@@ -811,7 +811,7 @@ def _generate_unsubscriber(obj, obj_slug, subscriptionkw, flasher):
         if request.GET.get('continue', False) and is_safe_domain(request.GET['continue']):
             return HttpResponseRedirect(request.GET['continue'])
         else:
-            return HttpResponseRedirect(url_for(x))
+            return HttpResponseRedirect(url_for(obj))
     return unsubscriber
 
 subscribe_forum = _generate_subscriber(Forum,

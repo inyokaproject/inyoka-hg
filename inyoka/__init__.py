@@ -117,13 +117,13 @@ def _bootstrap():
     """
     # set the inyoka revision
     global INYOKA_REVISION
-    import os, inyoka, time
+    import inyoka
+    from os import path
     from subprocess import Popen, PIPE
-    from signal import signal, SIGUSR1, SIG_DFL
 
     # get inyoka revision
     hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
-               cwd=os.path.dirname(inyoka.__file__))
+               cwd=path.dirname(inyoka.__file__))
     hg.stdin.close()
     hg.stderr.close()
     rv = hg.stdout.read()
@@ -137,6 +137,7 @@ def _bootstrap():
                 hg_node = p[1].strip()
                 break
     INYOKA_REVISION = hg_node
+
 
 _bootstrap()
 del _bootstrap

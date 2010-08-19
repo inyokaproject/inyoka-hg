@@ -269,7 +269,6 @@ def clean_thumbnail_cache():
     # on them
     thumb_folder = os.path.join(settings.MEDIA_ROOT, 'wiki', 'thumbnails')
     snapshot_filenames = set()
-    snapshot_folders = set()
     for dirpath, dirnames, filenames in os.walk(thumb_folder):
         dirpath = os.path.join(thumb_folder, dirpath)
         for filename in filenames:

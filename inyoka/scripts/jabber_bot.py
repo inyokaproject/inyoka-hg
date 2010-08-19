@@ -101,6 +101,7 @@ class Bot(object):
             raise Fault(1, str(e))
 
         buffer = []
+
         def walk(nodes):
             for node in nodes:
                 walk(node.getChildren())
@@ -122,7 +123,8 @@ class Bot(object):
                 while self.queue:
                     msg = self.queue.popleft()
                     self.client.send(msg)
-                    data = self.client.Process() # Read data from stream…
+                    # Read data from stream
+                    data = self.client.Process()
                     if self.debug:
                         log('Sent message to \'%s\', recv data %r' % (msg.getTo(), data))
         finally:

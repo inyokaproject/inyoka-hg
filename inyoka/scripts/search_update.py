@@ -19,7 +19,6 @@ import sys, datetime
 from xapian import DatabaseOpeningError
 
 import inyoka.utils.http
-from inyoka import application
 from inyoka.portal.models import SearchQueue
 from inyoka.utils.search import search
 from inyoka.utils.database import session

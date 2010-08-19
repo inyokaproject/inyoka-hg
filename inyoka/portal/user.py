@@ -13,7 +13,6 @@ import os
 import random
 import string
 import cPickle
-import string
 from datetime import datetime
 from os import path
 from PIL import Image

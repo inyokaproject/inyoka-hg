@@ -16,7 +16,7 @@ from sqlalchemy import MetaData, create_engine, String, Unicode
 from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
-from sqlalchemy.ext.declarative import declarative_base, _declarative_constructor
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import get_attribute, set_attribute
 from inyoka.conf import settings
 from inyoka.utils.text import get_next_increment, slugify

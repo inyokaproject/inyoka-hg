@@ -201,7 +201,7 @@ except ImportError:
     pass
 
 # some terms to exclude by default to maintain readability
-SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch',]
+SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch']
 
 # All media directories inyoka requires
 MEDIA_DIRS = ['forum', 'forum/attachments', 'forum/attachments/temp',
