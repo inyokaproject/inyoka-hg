@@ -222,7 +222,7 @@ class PostMapperExtension(MapperExtension):
         ))
         parent_ids = list(p.id for p in instance.topic.forum.parents)
         parent_ids.append(instance.topic.forum_id)
-        connection.execute(Topic.__table__.update(
+        connection.execute(Forum.__table__.update(
             Forum.id.in_(parent_ids), values={
             'post_count': Forum.post_count + 1,
             'last_post_id': instance.id
@@ -923,7 +923,7 @@ class Post(Model):
     @staticmethod
     def url_for_post(id, paramstr=None):
         #XXX: shouldn't we use post.position here?
-        row = dbsession.query(Post.id, Topic.slug).filter(and_(
+        row = dbsession.query(func.count(Post.id), Topic.slug).filter(and_(
             Topic.id == Post.topic_id,
             Topic.id == (select([Post.topic_id], Post.id == id)),
             Post.id <= id
