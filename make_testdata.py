@@ -187,10 +187,6 @@ def make_users():
 def make_forum():
     print 'Creating forum test data'
     pb = ProgressBar(40)
-    try:
-        admin = User.objects.filter(is_manager=True)[0]
-    except:
-        admin = None
     for percent, name in izip(percentize(FORUMS_COUNT), create_names(FORUMS_COUNT, title)):
         parent = None
         if randint(1, 6) != 6:
@@ -200,10 +196,6 @@ def make_forum():
                 pass
         f = Forum(name=name, parent=parent)
         session.flush()
-        if admin is not None:
-            session.save(Privilege(
-                user=admin, forum=f, bits=join_flags(*PRIVILEGES)
-            ))
         forums.append(f)
         session.commit()
         if parent:
@@ -223,12 +215,6 @@ def make_forum():
     f = Forum(name=u'Rund ums Wiki', parent=None)
     d = Forum(name=u'Diskussionen', slug=settings.WIKI_DISCUSSION_FORUM, parent=f)
     session.flush()
-    # set privileges for the discussions and all about the wiki forums
-    for forum in (f, d):
-        if admin is not None:
-            session.save(Privilege(
-                user=admin, forum=forum, bits=join_flags(*PRIVILEGES)
-            ))
     forums.append(f)
     forums.append(d)
     session.commit()
