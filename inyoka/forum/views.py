@@ -699,7 +699,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attachments = Attachment.query.filter_by(post_id=post.id)
 
     if not newtopic:
-        posts = list(topic.posts.filter(Post.hidden == 0) \
+        posts = list(topic.posts.filter(Post.hidden == False) \
                                 .order_by(Post.position.desc())[:15])
         discussions = Page.objects.filter(topic_id=topic.id)
 
