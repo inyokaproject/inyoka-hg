@@ -955,8 +955,8 @@ def first_unread_post(request, topic_slug):
     """
     Redirect the user to the first unread post in a special topic.
     """
-    t = Topic.__table__
-    p = Post.__table__
+    t = Topic.__table__.c
+    p = Post.__table__.c
     try:
         topic_id, forum_id = select([t.id, t.forum_id],
             t.slug == topic_slug).execute().fetchone()
