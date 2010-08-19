@@ -337,5 +337,48 @@ def create_excerpt(text, terms, length=350):
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
+def get_next_increment(values, string, max_length=None):
+    """Return the next usable incremented string.
+
+    Usage Example::
+
+        >>> get_next_increment(['cat', 'cat10', 'cat2'], 'cat')
+        u'cat11'
+        >>> get_next_increment(['cat', 'cat2'], 'cat')
+        u'cat3'
+        >>> get_next_increment(['cat', 'cat1'], 'cat')
+        u'cat2'
+        >>> get_next_increment([], 'cat')
+        'cat'
+        >>> get_next_increment(['cat'], 'cat')
+        u'cat2'
+        >>> get_next_increment(['cat', 'cat10', 'cat2'], 'cat', 3)
+        u'c11'
+        >>> get_next_increment(['cat', 'cat100'], 'cat', 3)
+        u'101'
+
+    """
+    values = list(values)
+    if not values:
+        return string[:max_length] if max_length is not None else string
+
+    base = None
+    for value in values:
+        match = _str_num_re.search(value)
+        if match is not None and int(match.group(1)) > base:
+            base = int(match.group(1))
+
+    gs = (lambda s: s if base is None else s + unicode(base))
+    poi = increment_string(gs(string))
+    if max_length is None:
+        return poi
+
+    if len(poi) > max_length:
+        # we need to shorten the string a bit so that we don't break any rules
+        strip = max_length - len(poi)
+        string = string[:strip]
+    return increment_string(gs(string))
+
+
 # circular imports
 from inyoka.utils.html import escape, striptags

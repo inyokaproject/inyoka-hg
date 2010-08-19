@@ -20,7 +20,10 @@ from StringIO import StringIO
 from datetime import datetime
 from mimetypes import guess_type
 from itertools import groupby
-from sqlalchemy.orm import eagerload, relation, backref, MapperExtension
+from sqlalchemy import Table, Column, String, Text, Integer, \
+        ForeignKey, DateTime, Boolean, Index
+from sqlalchemy.orm import eagerload, relationship, backref, MapperExtension, \
+    EXT_CONTINUE
 from sqlalchemy.sql import select, func, and_
 
 from inyoka.conf import settings
@@ -33,14 +36,9 @@ from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
-from inyoka.utils.database import session as dbsession
+from inyoka.utils.database import session as dbsession, Model, SlugGenerator
 from inyoka.utils.decorators import deferred
-from inyoka.forum.database import forum_table, topic_table, post_table, \
-        user_table, attachment_table, poll_table, privilege_table, \
-        poll_option_table, poll_vote_table, group_table, post_revision_table, \
-        forum_welcomemessage_table, user_group_table
 
-from inyoka.forum.django_models import *
 from inyoka.forum.acl import filter_invisible
 from inyoka.portal.user import Group
 
@@ -51,6 +49,7 @@ SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
 
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
+
 
 class UbuntuVersion(object):
     """holds the ubuntu versions. implement this as a model in SA!"""
@@ -118,8 +117,7 @@ class ForumMapperExtension(MapperExtension):
         if isinstance(ident, basestring):
             slug_map = cache.get('forum/slugs')
             if slug_map is None:
-                slug_map = dict(dbsession.execute(select(
-                    [forum_table.c.slug, forum_table.c.id])).fetchall())
+                slug_map = dict(dbsession.query(Forum.slug, Forum.id).all())
                 cache.set('forum/slugs', slug_map)
             ident = slug_map.get(ident)
             if ident is None:
@@ -135,15 +133,12 @@ class ForumMapperExtension(MapperExtension):
             forum = query.session.merge(forum, dont_load=True)
         return forum
 
-    def before_insert(self, mapper, connection, instance):
-        if not instance.slug:
-            instance.slug = slugify(instance.name)
-
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forum/%d' % instance.id)
         #XXX: since it's not possible to save the forum_id in the view
         # we store it twice, once with id and once with slug
         cache.delete('forum/forum/%s' % instance.slug)
+        return EXT_CONTINUE
 
 
 class TopicMapperExtension(MapperExtension):
@@ -153,26 +148,15 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(int(instance.forum_id))
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        # shorten slug to 45 chars (max length is 50) because else problems
-        # when appending id can occur
-        instance.slug = slugify(instance.title)[:45]
-        if Topic.query.filter_by(slug=instance.slug).first():
-            slugs = connection.execute(select([topic_table.c.slug],
-                topic_table.c.slug.like('%s-%%' % instance.slug)))
-            start = len(instance.slug) + 1
-            try:
-                instance.slug += '-%d' % (max(int(s[0][start:]) for s in slugs \
-                    if s[0][start:].isdigit()) + 1)
-            except ValueError:
-                instance.slug += '-1'
+        return EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
         parent_ids.append(instance.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'topic_count': forum_table.c.topic_count + 1,
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
+            'topic_count': Forum.topic_count + 1
         }))
+        return EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
@@ -185,18 +169,15 @@ class TopicMapperExtension(MapperExtension):
 
         # set a new last_post_id because of integrity errors and
         # decrase the topic_count
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(ids),
-            values={
-                'last_post_id': select([func.max(post_table.c.id)], and_(
-                    post_table.c.topic_id != instance.id,
-                    topic_table.c.forum_id.in_(ids),
-                    topic_table.c.id == post_table.c.topic_id)),
-                'topic_count': forum_table.c.topic_count - 1
+        connection.execute(Forum.__table__.update(Forum.id.in_(ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Post.topic_id != instance.id,
+                Topic.forum_id.in_(ids),
+                Topic.id == Post.topic_id)),
+            'topic_count': Forum.topic_count - 1
         }))
 
-        connection.execute(topic_table.update(
-            topic_table.c.id == instance.id, values={
+        connection.execute(Topic.__table__.update(Topic.id == instance.id, {
                 'first_post_id': None,
                 'last_post_id':  None,
         }))
@@ -209,10 +190,13 @@ class TopicMapperExtension(MapperExtension):
             update wiki_page set topic_id = NULL where topic_id = %s;
         ''', [instance.id])
 
+        return EXT_CONTINUE
+
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
         cache.delete('forum/index')
         cache.delete('forum/reported_topic_count')
+        return EXT_CONTINUE
 
 
 class PostMapperExtension(MapperExtension):
@@ -220,55 +204,58 @@ class PostMapperExtension(MapperExtension):
     def before_insert(self, mapper, connection, instance):
         if not instance.is_plaintext:
             instance.rendered_text = instance.render_text()
-        if instance.position is None:
         # XXX: race-conditions and other stupid staff... :/
         # require a mysql update to work properly!
+        if instance.position is None:
             instance.position = connection.execute(select(
-                [func.max(post_table.c.position)+1],
-                post_table.c.topic_id == instance.topic_id)).fetchone()[0] or 0
-        if not instance.pub_date:
-            instance.pub_date = datetime.utcnow()
+                [func.max(Post.position)+1],
+                Post.topic_id == instance.topic_id)).fetchone()[0] or 0
+        return EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         if instance.topic.forum.user_count_posts:
-            connection.execute(user_table.update(
-                user_table.c.id==instance.author_id, values={
-                'post_count': user_table.c.post_count + 1
+            connection.execute(SAUser.__table__.update(
+                SAUser.id==instance.author_id, values={
+                'post_count': SAUser.post_count + 1
             }))
             cache.delete('portal/user/%d' % instance.author_id)
         values = {
-            'post_count': topic_table.c.post_count + 1,
+            'post_count': Topic.post_count + 1,
             'last_post_id': instance.id
         }
         if instance.topic.first_post_id is None:
             values['first_post_id'] = instance.id
-        connection.execute(topic_table.update(
-            topic_table.c.id==instance.topic_id, values=values
+        connection.execute(Topic.__table__.update(
+            Topic.id==instance.topic_id, values=values
         ))
         parent_ids = list(p.id for p in instance.topic.forum.parents)
         parent_ids.append(instance.topic.forum_id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(parent_ids), values={
-            'post_count': forum_table.c.post_count + 1,
+        connection.execute(Forum.__table__.update(
+            Forum.id.in_(parent_ids), values={
+            'post_count': Forum.post_count + 1,
             'last_post_id': instance.id
         }))
         instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def after_update(self, mapper, connection, instance):
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def after_delete(self, mapper, connection, instance):
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         self.deregister(mapper, connection, instance)
+        return EXT_CONTINUE
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
         if not instance.topic:
             return
-        # this is crazy shit.  To increment or decrement we need the forums
+        # This is crazy shit.  To increment or decrement we need the forums
         # up to the root (the category!) but to find a new last_post_id
         # we *only* have to search in the current forum and it's parents.
         # If we search in the category for a new last_post_id it's not save
@@ -285,22 +272,22 @@ class PostMapperExtension(MapperExtension):
 
         # degrade user post count
         if instance.topic.forum.user_count_posts:
-            connection.execute(user_table.update(
-                user_table.c.id == instance.author_id, values={
-                    'post_count': user_table.c.post_count - 1}
+            connection.execute(SAUser.__table__.update(
+                SAUser.id == instance.author_id, values={
+                    'post_count': SAUser.post_count - 1}
             ))
             cache.delete('portal/user/%d' % instance.author_id)
 
         # set the last post id for the topic
         if instance.id == instance.topic.last_post_id:
             new_last_post = Post.query.filter(and_(
-                topic_table.c.id == instance.topic_id,
-                post_table.c.id != instance.id
-            )).order_by(post_table.c.id.desc()).first()
-            connection.execute(topic_table.update(
-                topic_table.c.id == instance.topic_id, values={
-                    'last_post_id': new_last_post.id}
-            ))
+                Topic.id == instance.topic_id,
+                Post.id != instance.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Topic.__table__.update(
+                Topic.id == instance.topic_id, values={
+                    'last_post_id': new_last_post.id
+            }))
 
         # and also look if we are the last post of the overall forum
         if instance.id == instance.topic.forum.last_post_id:
@@ -308,42 +295,204 @@ class PostMapperExtension(MapperExtension):
             # with selecting the last post from the current topic.
             # Everything else would kill the server...
             new_last_post = Post.query.filter(and_(
-                post_table.c.id != instance.id,
-                topic_table.c.id == instance.topic.id
-            )).order_by(post_table.c.id.desc()).first()
-            connection.execute(forum_table.update(
-                forum_table.c.id.in_(forums_to_root_ids),
+                Post.id != instance.id,
+                Topic.id == instance.topic.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Forum.__table__.update(
+                Forum.id.in_(forums_to_root_ids),
                 values={'last_post_id': new_last_post.id}
             ))
 
         # decrement post_counts
-        connection.execute(topic_table.update(
-            topic_table.c.id == instance.topic_id, values={
-                'post_count': topic_table.c.post_count - 1
+        connection.execute(Topic.__table__.update(
+            Topic.id == instance.topic_id, values={
+                'post_count': Topic.post_count - 1
             }))
         forum_ids = [f.id for f in instance.topic.forum.parents]
         forum_ids.append(instance.topic.forum.id)
-        connection.execute(forum_table.update(
-            forum_table.c.id.in_(forums_to_root_ids), values={
-                'post_count': forum_table.c.post_count - 1
+        connection.execute(Forum.__table__.update(
+            Forum.id.in_(forums_to_root_ids), values={
+                'post_count': Forum.post_count - 1
             }))
 
         # decrement position
-        connection.execute(post_table.update(and_(
-            post_table.c.position > instance.position,
-            post_table.c.topic_id == instance.topic_id), values={
-                'position': post_table.c.position - 1
+        connection.execute(Post.__table__.update(and_(
+            Post.position > instance.position,
+            Post.topic_id == instance.topic_id), values={
+                'position': Post.position - 1
             }
         ))
 
 
-class Forum(object):
+#XXX set up the mappers for sqlalchemy
+#    ---------------------------------
+#
+#    Please note that those portal_* tables should not be used too much
+#    to stay in sync with Django.  If modify something here, modify it in
+#    the appropriate portal model too!
+#
+#    If you have time take a look if everything's in sync!
+
+from inyoka.utils.database import metadata
+user_group_table = Table('portal_user_groups', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('user_id', Integer, ForeignKey('portal_user.id'), nullable=False),
+    Column('group_id', Integer, ForeignKey('portal_group.id'), nullable=False),
+)
+
+
+class SAGroup(Model):
+    __tablename__ = 'portal_group'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False, unique=True)
+    is_public = Column(Boolean, default=1, nullable=False)
+    permissions = Column(Integer, default=0, nullable=False)
+    icon = Column(String(100), nullable=True) #XXX: Use Django to modify that column!
+
+    @property
+    def icon_url(self):
+        if not self.icon:
+            return None
+        return href('media', self.icon)
+
+    def get_absolute_url(self, action=None):
+        return href('portal', 'groups', self.name)
+
+    def __unicode__(self):
+        return self.name
+
+
+class SAUser(Model):
+    __tablename__ = 'portal_user'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(30), nullable=False, unique=True)
+    email = Column(String(50), unique=True, nullable=False)
+    password = Column(String(128), nullable=False)
+    status = Column(Integer, nullable=False)
+    last_login = Column(DateTime, nullable=False, default=datetime.utcnow)
+    date_joined = Column(DateTime, nullable=False, default=datetime.utcnow)
+    new_password_key = Column(String(32), nullable=True)
+    banned_until = Column(DateTime, nullable=True, default=datetime.utcnow)
+    # profile attributes
+    post_count = Column(Integer, default=0, nullable=False)
+    avatar = Column(String(100), nullable=False) # XXX: Use Django to modify that column!
+    jabber = Column(String(200), nullable=False)
+    icq = Column(String(16), nullable=False)
+    msn = Column(String(200), nullable=False)
+    aim = Column(String(200), nullable=False)
+    yim = Column(String(200), nullable=False)
+    skype = Column(String(200), nullable=False)
+    wengophone = Column(String(200), nullable=False)
+    sip = Column(String(200), nullable=False)
+    signature = Column(Text, nullable=False)
+    coordinates_long = Column(String(200), nullable=True)
+    coordinates_lat = Column(String(200), nullable=True)
+    location = Column(String(200), nullable=False)
+    gpgkey = Column(String(8), nullable=False)
+    occupation = Column(String(200), nullable=True)
+    interests = Column(String(200), nullable=True)
+    website = Column(String(200), nullable=False)
+    launchpad = Column(String(50), nullable=True)
+    _settings = Column(Text, nullable=False)
+    _permissions = Column(Integer, default=0, nullable=False)
+    # forum attributes
+    forum_last_read = Column(Integer, default=0, nullable=False)
+    forum_read_status = Column(Text, nullable=False)
+    forum_welcome = Column(Text, nullable=False)
+    member_title = Column(String(200), nullable=True)
+
+    primary_group_id = Column(Integer, ForeignKey('portal_group.id'), nullable=True)
+
+    # relationship configuration
+    groups = relationship(SAGroup, secondary=user_group_table, lazy='dynamic')
+
+    # Shortcut properties
+    is_anonymous = property(lambda x: x.id == 1)
+    is_authenticated = property(lambda x: not x.is_anonymous)
+    is_active = property(lambda x: x.status == 1)
+    is_banned = property(lambda x: x.status == 2)
+    is_deleted = property(lambda x: x.status == 3)
+
+    def get_absolute_url(self, action=None):
+        return href('portal', 'user', self.username)
+
+    @property
+    def avatar_url(self):
+        if not self.avatar:
+            return href('static', 'img', 'portal', 'no_avatar.png')
+        return href('media', self.avatar)
+
+    @property
+    def rendered_signature(self):
+        return self.render_signature()
+
+    def render_signature(self, request=None, format='html', nocache=False):
+        """Render the user signature and cache it if `nocache` is `False`."""
+        if request is None:
+            request = current_request._get_current_object()
+        context = RenderContext(request)
+        if nocache or self.id is None or format != 'html':
+            return parse(self.signature).render(context, format)
+        key = 'portal/user/%d/signature' % self.id
+        instructions = cache.get(key)
+        if instructions is None:
+            instructions = parse(self.signature).compile(format)
+            cache.set(key, instructions)
+        return render(instructions, context)
+
+    @deferred
+    def settings(self):
+        return cPickle.loads(str(self._settings))
+
+    @deferred
+    def primary_group(self):
+        if self.primary_group_id is None:
+            # we use the first assigned group as the primary one
+            groups = self.groups.all()
+            return groups and groups[0] or Group.get_default_group()
+        return SAGroup.query.get(self.primary_group_id)
+
+    def __unicode__(self):
+        return self.username
+
+
+class Forum(Model):
     """
     This is a forum that may contain subforums or threads.
     If parent is None this forum is a root forum, else it's a subforum.
     Position is an integer that's used to sort the forums.  The lower position
     is, the higher the forum is displayed.
     """
+    __tablename__ = 'forum_forum'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    slug = Column(String(100), nullable=False, unique=True, index=True)
+    description = Column(String(500), nullable=False, default='')
+    parent_id = Column(Integer, ForeignKey('forum_forum.id'), nullable=True, index=True)
+    position = Column(Integer, nullable=False, default=0)
+    last_post_id = Column(Integer, ForeignKey('forum_post.id',
+                          use_alter=True, name='forum_forum_lastpost_id'),
+                          nullable=True)
+    post_count = Column(Integer, default=0, nullable=False)
+    topic_count = Column(Integer, default=0, nullable=False)
+    welcome_message_id = Column(Integer, ForeignKey('forum_welcomemessage.id'),
+                                nullable=True)
+    newtopic_default_text = Column(Text, nullable=True)
+    user_count_posts = Column(Boolean, default=True, nullable=False)
+    force_version = Column(Boolean, default=False, nullable=False)
+
+    # relationship configuration
+    topics = relationship('Topic', lazy='dynamic')
+    _children = relationship('Forum',
+        backref=backref('parent', remote_side=[id]))
+    last_post = relationship('Post', post_update=True)
+
+    __mapper_args__ = {'extension': (ForumMapperExtension(),
+                                     SlugGenerator('slug', 'name')),
+                       'order_by': position}
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
@@ -370,9 +519,8 @@ class Forum(object):
         cache_key = 'forum/children/%d' % self.id
         children_ids = cache.get(cache_key)
         if children_ids is None:
-            children_ids = [row[0] for row in dbsession.execute(select(
-                [forum_table.c.id], forum_table.c.parent_id == self.id) \
-                .order_by(forum_table.c.position)).fetchall()]
+            children_ids = dbsession.query(Forum.id).filter(
+                Forum.parent_id == self.id).order_by(Forum.position).all()
             cache.set(cache_key, children_ids)
         children = [Forum.query.get(id) for id in children_ids]
         return children
@@ -394,7 +542,7 @@ class Forum(object):
         if not topics:
             topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
                 eagerload('last_post.author')).filter_by(forum_id=self.id) \
-                .order_by((Topic.sticky.desc(), Topic.last_post_id.desc())).limit(limit)
+                .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()).limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
                 topics = topics.all()
                 cache.set(key, topics)
@@ -486,36 +634,78 @@ class Forum(object):
         )
 
 
-class Topic(object):
+class Topic(Model):
     """
     A topic symbolizes a bunch of Posts (at least one) that is located inside
     a Forum.
     When creating a new topic, a new post is added to it automatically.
     """
+    __tablename__ = 'forum_topic'
+    __mapper_args__ = {'extension': (TopicMapperExtension(),
+                                     SlugGenerator('slug', 'title'))}
+
+    id = Column(Integer, primary_key=True)
+    forum_id = Column(Integer, ForeignKey('forum_forum.id'))
+    title = Column(String(100), nullable=False)
+    slug = Column(String(50), nullable=False, index=True)
+    view_count = Column(Integer, default=0, nullable=False)
+    post_count = Column(Integer, default=0, nullable=False)
+    sticky = Column(Boolean, default=False, nullable=False)
+    solved = Column(Boolean, default=False, nullable=False)
+    locked = Column(Boolean, default=False, nullable=False)
+    reported = Column(Text, nullable=False)
+    reporter_id = Column(Integer, ForeignKey('portal_user.id'), nullable=True)
+    report_claimed_by_id = Column(Integer, ForeignKey('portal_user.id'))
+    hidden = Column(Boolean, default=False, nullable=False)
+    ubuntu_version = Column(String(5), nullable=True)
+    ubuntu_distro = Column(String(40), nullable=True)
+    author_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
+    first_post_id = Column(Integer,
+        ForeignKey('forum_post.id', use_alter=True, name='forum_topic_fistpost_fk'),
+        nullable=True)
+    last_post_id = Column(Integer,
+        ForeignKey('forum_post.id', use_alter=True, name='forum_topic_lastpost_fk'),
+        nullable=True)
+    has_poll = Column(Boolean, default=False, nullable=False)
+
+    # relationship configuration
+    author = relationship(SAUser, primaryjoin=author_id == SAUser.id)
+    reporter = relationship(SAUser, primaryjoin=reporter_id == SAUser.id)
+    report_claimed_by = relationship(SAUser,
+        primaryjoin=report_claimed_by_id == SAUser.id)
+    last_post = relationship('Post', post_update=True,
+        primaryjoin='Topic.last_post_id == Post.id')
+    first_post = relationship('Post', post_update=True,
+        primaryjoin='Topic.first_post_id == Post.id')
+
+    forum = relationship(Forum)
+    polls = relationship('Poll', backref='topic', cascade='save-update')
+    posts = relationship('Post', backref='topic', cascade='all, delete-orphan',
+        primaryjoin='Topic.id == Post.topic_id', lazy='dynamic',
+        passive_deletes=True)
 
     def touch(self):
         """Increment the view count in a safe way."""
-        self.view_count = topic_table.c.view_count + 1
+        self.view_count = Topic.view_count + 1
 
     def move(self, forum):
         """Move the topic to an other forum."""
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
-            'topic_count': forum_table.c.topic_count -1,
-            'post_count': forum_table.c.post_count - self.post_count,
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(ids), values={
+            'topic_count': Forum.topic_count -1,
+            'post_count': Forum.post_count - self.post_count,
         }))
 
         dbsession.commit()
         old_forum = self.forum
         self.forum = forum
-        dbsession.flush([self])
         dbsession.commit()
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
-        dbsession.execute(forum_table.update(forum_table.c.id.in_(ids), values={
-            'topic_count': forum_table.c.topic_count + 1,
-            'post_count': forum_table.c.post_count + self.post_count,
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(ids), values={
+            'topic_count': Forum.topic_count + 1,
+            'post_count': Forum.post_count + self.post_count,
         }))
         dbsession.commit()
         forum.invalidate_topic_cache()
@@ -528,21 +718,21 @@ class Topic(object):
             elif not forum.user_count_posts and old_forum.user_count_posts:
                 op = operator.sub
 
-            dbsession.execute(user_table.update(
-                user_table.c.id.in_(select([post_table.c.author_id], post_table.c.topic_id == self.id)),
+            dbsession.execute(SAUser.__table__.update(
+                SAUser.id.in_(select([Post.author_id], Post.topic_id == self.id)),
                 values={'post_count': op(
-                    user_table.c.post_count,
+                    SAUser.post_count,
                     select(
                         [func.count()],
-                        ((post_table.c.topic_id == self.id) &
-                         (post_table.c.author_id == user_table.c.id)),
-                        post_table)
+                        ((Post.topic_id == self.id) &
+                         (Post.author_id == SAUser.id)),
+                        Post.__table__)
                     )
                 }
             ))
             dbsession.commit()
 
-            q = select([post_table.c.author_id], post_table.c.topic_id == self.id, distinct=True)
+            q = select([Post.author_id], Post.topic_id == self.id, distinct=True)
             for x in dbsession.execute(q).fetchall():
                 cache.delete('portal/user/%d' % x[0])
 
@@ -553,19 +743,17 @@ class Topic(object):
         old_ids.append(old_forum.id)
 
         # search for a new last post in the old and the new forum
-        dbsession.execute(forum_table.update(
-            forum_table.c.id.in_(new_ids),
-            values={'last_post_id': select([func.max(post_table.c.id)], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.forum_id == forum_table.c.id))}
-        ))
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(new_ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Topic.id == Post.topic_id,
+                Topic.forum_id == Forum.id))
+        }))
 
-        dbsession.execute(forum_table.update(
-            forum_table.c.id.in_(old_ids),
-            values={'last_post_id': select([func.max(post_table.c.id)], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.forum_id == forum_table.c.id))}
-        ))
+        dbsession.execute(Forum.update(Forum.id.in_(old_ids), {
+            'last_post_id': select([func.max(Post.id)], and_(
+                Topic.id == Post.topic_id,
+                Topic.forum_id == Forum.id))
+        }))
 
 
     def get_absolute_url(self, action='show'):
@@ -639,9 +827,9 @@ class Topic(object):
 
     def reindex(self):
         """Mark the whole topic for reindexing."""
-        for p, in dbsession.execute(select([post_table.c.id],
-                                           post_table.c.topic_id == self.id)):
-            search.queue('f', p)
+        ids = dbsession.query(Post.id).filter(Post.topic_id==self.id)
+        for post_id in ids:
+            search.queue('f', post_id)
 
     def __unicode__(self):
         return self.title
@@ -654,10 +842,72 @@ class Topic(object):
         )
 
 
-class Post(object):
+class PostRevision(Model):
+    """
+    This saves old and current revisions of posts. It can be used to restore
+    posts if something odd was done to them or to view changes.
+    """
+    __tablename__ = 'post_postrevision'
+
+    id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, ForeignKey('forum_post.id'), nullable=False)
+    text = Column(Text, nullable=False)
+    store_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<%s post=%d (%s), stored=%s>' % (
+            self.__class__.__name__,
+            self.post.id,
+            self.post.topic.title,
+            self.store_date.strftime('%Y-%m-%d %H:%M')
+        )
+
+    def get_absolute_url(self, action='restore'):
+        return href('forum', 'revision', self.id, 'restore')
+
+    @property
+    def rendered_text(self):
+        if self.post.is_plaintext:
+            return fix_plaintext(self.text)
+        request = current_request._get_current_object()
+        context = RenderContext(request, simplified=False)
+        return parse(self.text).render(context, 'html')
+
+    def restore(self, request):
+        """
+        Edits the text of the post the revision belongs to and deletes the
+        revision.
+        """
+        self.post.edit(request, self.text)
+        dbsession.delete(self)
+
+
+class Post(Model):
     """
     Represents a post in a topic.
     """
+    __tablename__ = 'forum_post'
+    __mapper_args__ = {'extension': PostMapperExtension()}
+
+    id = Column(Integer, primary_key=True)
+    position = Column(Integer, nullable=False, default=0)
+    author_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
+    pub_date = Column(DateTime, nullable=False, index=True, default=datetime.utcnow)
+    topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=False)
+    hidden = Column(Boolean, default=False, nullable=False)
+    text = Column(Text, nullable=False)
+    rendered_text = Column(Text, nullable=True)
+    has_revision = Column(Boolean, default=False, nullable=False)
+    is_plaintext = Column(Boolean, default=False, nullable=False)
+
+    # relationship configuration
+    author = relationship(SAUser,
+        primaryjoin=author_id == SAUser.id,
+        foreign_keys=[author_id])
+    attachments = relationship('Attachment', cascade='all, delete')
+    revisions = relationship(PostRevision, backref='post', lazy='dynamic',
+        primaryjoin=PostRevision.post_id == id,
+        cascade='all, delete-orphan')
 
     def render_text(self, request=None, format='html', force_existing=False):
         context = RenderContext(request)
@@ -685,13 +935,11 @@ class Post(object):
     @staticmethod
     def url_for_post(id, paramstr=None):
         #XXX: shouldn't we use post.position here?
-        row = dbsession.execute(select(
-            [func.count(post_table.c.id), topic_table.c.slug], and_(
-                topic_table.c.id == post_table.c.topic_id,
-                topic_table.c.id == select(
-                    [post_table.c.topic_id], post_table.c.id == id),
-                    post_table.c.id <= id)
-            ).group_by(topic_table.c.id)).fetchone()
+        row = dbsession.query(func.count(Post.id), Topic.slug).filter(and_(
+            Topic.id == Post.topic_id,
+            Topic.id == (select([Post.topic_id], Post.id == id)),
+            Post.id <= id
+        )).group_by(Topic.id).first()
         if not row:
             return None
         post_count, slug = row
@@ -731,7 +979,6 @@ class Post(object):
             ## create a new revision for the current post
             rev = PostRevision()
             rev.post = self
-            rev.store_date = datetime.utcnow()
             rev.text = text
 
         self.text = text
@@ -778,8 +1025,8 @@ class Post(object):
 
         dbsession.flush()
         ids = [p.id for p in posts]
-        dbsession.execute(post_table.update(
-            post_table.c.id.in_(ids), values={
+        dbsession.execute(Post.__table__.update(
+            Post.id.in_(ids), values={
                 'topic_id': new_topic.id
         }))
         dbsession.commit()
@@ -807,8 +1054,8 @@ class Post(object):
                 new_topic.forum.last_post = posts[-1]
             if posts[-1].id == old_topic.forum.last_post.id:
                 last_post = Post.query.filter(and_(
-                    post_table.c.topic_id==topic_table.c.id,
-                    topic_table.c.forum_id==old_topic.forum_id
+                    Post.topic_id==Topic.id,
+                    Topic.forum_id==old_topic.forum_id
                 )).first()
 
                 old_topic.forum.last_post_id = last_post and last_post.id \
@@ -822,20 +1069,19 @@ class Post(object):
                 elif not n and o:
                     op = operator.sub
 
-                user_table.update(
-                    user_table.c.id.in_(select([post_table.c.author_id],
-                        post_table.c.topic_id == old_topic.id)),
+                dbsession.execute(SAUser.__table__.update(
+                    SAUser.id.in_(select([Post.author_id], Post.topic_id == old_topic.id)),
                     values={'post_count': op(
-                        user_table.c.post_count,
-                        select([func.count()],
-                            ((post_table.c.topic_id==old_topic.id) & (post_table.c.author_id==user_table.c.id)),
-                            post_table)
+                        SAUser.post_count, select([func.count()],
+                            ((Post.topic_id == old_topic.id) &
+                             (Post.author_id == SAUser.id)),
+                            Post.__table)
                         )
                     }
-                )
+                ))
                 dbsession.commit()
 
-                q = select([post_table.c.author_id], post_table.c.topic_id == old_topic.id, distinct=True)
+                q = select([Post.author_id], Post.topic_id == old_topic.id, distinct=True)
                 for x in dbsession.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
 
@@ -845,16 +1091,16 @@ class Post(object):
             old_topic.post_count -= len(posts)
             if old_topic.last_post.id == posts[-1].id:
                 post = Post.query.filter(and_(
-                    post_table.c.topic_id == old_topic.id,
-                    post_table.c.id != old_topic.last_post_id
-                )).order_by(post_table.c.id.desc()).first()
+                    Post.topic_id == old_topic.id,
+                    Post.id != old_topic.last_post_id
+                )).order_by(Post.id.desc()).first()
 
                 old_topic.last_post = post
 
             if old_topic.first_post.id == posts[0].id:
                 post = Post.query.filter(
-                    topic_table.c.id==old_topic.id
-                ).order_by(topic_table.c.id.asc()).first()
+                    Topic.id==old_topic.id
+                ).order_by(Topic.id.asc()).first()
                 old_topic.first_post = post
         else:
             if old_topic.has_poll:
@@ -930,44 +1176,18 @@ class Post(object):
         )
 
 
-class PostRevision(object):
-    """
-    This saves old and current revisions of posts. It can be used to restore
-    posts if something odd was done to them or to view changes.
-    """
-
-    def __repr__(self):
-        return '<%s post=%d (%s), stored=%s>' % (
-            self.__class__.__name__,
-            self.post.id,
-            self.post.topic.title,
-            self.store_date.strftime('%Y-%m-%d %H:%M')
-        )
-
-    def get_absolute_url(self, action='restore'):
-        return href('forum', 'revision', self.id, 'restore')
-
-    @property
-    def rendered_text(self):
-        if self.post.is_plaintext:
-            return fix_plaintext(self.text)
-        request = current_request._get_current_object()
-        context = RenderContext(request, simplified=False)
-        return parse(self.text).render(context, 'html')
-
-    def restore(self, request):
-        """
-        Edits the text of the post the revision belongs to and deletes the
-        revision.
-        """
-        self.post.edit(request, self.text)
-        dbsession.delete(self)
-
-
-class Attachment(object):
+class Attachment(Model):
     """
     Represents an attachment associated to a post.
     """
+    __tablename__ = 'forum_attachment'
+
+    id = Column(Integer, primary_key=True)
+    file = Column(String(100), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    comment = Column(Text, nullable=True)
+    post_id = Column(Integer, ForeignKey('forum_post.id'), nullable=True)
+    _mimetype = Column('mimetype', String(100), nullable=True)
 
     @staticmethod
     def create(name, content, mime, attachments, override=False, **kwargs):
@@ -1014,7 +1234,6 @@ class Attachment(object):
                 f.write(content)
             finally:
                 f.close()
-            dbsession.save(attachment)
             return attachment
 
     def delete(self):
@@ -1044,9 +1263,9 @@ class Attachment(object):
         if not path.exists(new_abs_path):
             os.mkdir(new_abs_path)
 
-        attachments = dbsession.execute(attachment_table.select(and_(
-            attachment_table.c.id.in_(att_ids),
-            attachment_table.c.post_id == None
+        attachments = dbsession.execute(Attachment.__table__.select(and_(
+            Attachment.id.in_(att_ids),
+            Attachment.post_id == None
         ))).fetchall()
 
         for row in attachments:
@@ -1064,7 +1283,7 @@ class Attachment(object):
                 old_fo.close()
             # delete the temp-file
             os.remove(path.join(settings.MEDIA_ROOT, old_fn))
-            at = attachment_table
+            at = Attachment.__table__
             dbsession.execute(at.update(and_(
                 at.c.id == id,
                 at.c.post_id == None
@@ -1170,7 +1389,18 @@ class Attachment(object):
         return href('media', self.file)
 
 
-class Privilege(object):
+class Privilege(Model):
+    __tablename__ = 'forum_privilege'
+
+    id = Column(Integer, primary_key=True)
+    group_id = Column(Integer, nullable=True)
+    user_id = Column(Integer, ForeignKey('portal_user.id'), nullable=True)
+    forum_id = Column(Integer, ForeignKey('forum_forum.id'), nullable=False)
+    positive = Column(Integer, nullable=True)
+    negative = Column(Integer, nullable=True)
+
+    # relationship configuration
+    forum = relationship(Forum)
 
     def __init__(self, forum, group=None, user=None, positive=None,
                  negative=None):
@@ -1185,7 +1415,44 @@ class Privilege(object):
         self.negative = negative
 
 
-class Poll(object):
+class PollOption(Model):
+    __tablename__ = 'forum_polloption'
+
+    id = Column(Integer, primary_key=True)
+    poll_id = Column(Integer, ForeignKey('forum_poll.id'), nullable=False)
+    name = Column(String(250), nullable=False)
+    votes = Column(Integer, default=0, nullable=False)
+
+    @property
+    def percentage(self):
+        """Calculate the percentage of votes for this poll option."""
+        if self.poll.votes:
+            return self.votes / self.poll.votes * 100.0
+        return 0.0
+
+
+class PollVote(Model):
+    __tablename__ = 'forum_voter'
+
+    id = Column(Integer, primary_key=True)
+    voter_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
+    poll_id = Column(Integer, ForeignKey('forum_poll.id'), nullable=False)
+
+
+class Poll(Model):
+    __tablename__ = 'forum_poll'
+
+    id = Column(Integer, primary_key=True)
+    question = Column(String(250), nullable=False)
+    topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=True,
+                      index=True)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+    multiple_votes = Column(Boolean, default=False, nullable=False)
+
+    # relationship configuration
+    options = relationship(PollOption, backref='poll', cascade='all, delete-orphan')
+    votings = relationship(PollVote, backref='poll', cascade='all, delete-orphan')
 
     @staticmethod
     def create(question, options, multiple_votes, topic_id=None,
@@ -1204,8 +1471,9 @@ class Poll(object):
         """Bind the polls given in poll_ids to the given topic id."""
         if not poll_ids:
             return False
-        dbsession.execute(poll_table.update(and_(poll_table.c.id.in_(poll_ids),
-            poll_table.c.topic_id == None), values={
+        dbsession.execute(Poll.__table__.update(and_(
+            Poll.id.in_(poll_ids),
+            Poll.topic_id == None), values={
                 'topic_id': topic_id
         }))
 
@@ -1217,8 +1485,8 @@ class Poll(object):
     def has_participated(self, user=None):
         user = user or current_request.user
         return bool(dbsession.execute(select([1],
-            (poll_vote_table.c.poll_id == self.id) &
-            (poll_vote_table.c.voter_id == user.id))).fetchone())
+            (PollVote.poll_id == self.id) &
+            (PollVote.voter_id == user.id))).fetchone())
 
     participated = property(has_participated)
 
@@ -1235,27 +1503,19 @@ class Poll(object):
         return not self.ended and not self.participated
 
 
-class PollOption(object):
-
-    @property
-    def percentage(self):
-        """Calculate the percentage of votes for this poll option."""
-        if self.poll.votes:
-            return self.votes / self.poll.votes * 100
-        return 0.0
-
-
-class PollVote(object):
-    pass
-
-
-class WelcomeMessage(object):
+class WelcomeMessage(Model):
     """
     This class can be used, to attach additional Welcome-Messages to
     a category or forum.  That might be usefull for greeting the users or
     explaining extra rules.  The message will be displayed only once for
     each user.
     """
+    __tablename__ = 'forum_welcomemessage'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(120), nullable=False)
+    text = Column(Text, nullable=False)
+    rendered_text = Column(Text, nullable=False)
 
     def __init__(self, title, text):
         self.title = title
@@ -1263,8 +1523,6 @@ class WelcomeMessage(object):
 
     def save(self):
         self.rendered_text = self.render_text()
-        dbsession.save(self)
-        dbsession.flush([self])
 
     def render_text(self, request=None, format='html'):
         if request is None:
@@ -1277,72 +1535,6 @@ class WelcomeMessage(object):
                 request = None
         context = RenderContext(request, simplified=True)
         return parse(self.text).render(context, format)
-
-
-# set up the mappers for sqlalchemy
-class SAUser(object):
-    is_anonymous = property(lambda x: x.id == 1)
-    is_authenticated = property(lambda x: not x.is_anonymous)
-    is_active = property(lambda x: x.status == 1)
-    is_banned = property(lambda x: x.status == 2)
-    is_deleted = property(lambda x: x.status == 3)
-
-    def get_absolute_url(self, action=None):
-        return href('portal', 'user', self.username)
-
-    @property
-    def avatar_url(self):
-        if not self.avatar:
-            return href('static', 'img', 'portal', 'no_avatar.png')
-        return href('media', self.avatar)
-
-    @property
-    def rendered_signature(self):
-        return self.render_signature()
-
-    def render_signature(self, request=None, format='html', nocache=False):
-        """Render the user signature and cache it if `nocache` is `False`."""
-        if request is None:
-            request = current_request._get_current_object()
-        context = RenderContext(request)
-        if nocache or self.id is None or format != 'html':
-            return parse(self.signature).render(context, format)
-        key = 'portal/user/%d/signature' % self.id
-        instructions = cache.get(key)
-        if instructions is None:
-            instructions = parse(self.signature).compile(format)
-            cache.set(key, instructions)
-        return render(instructions, context)
-
-    @deferred
-    def settings(self):
-        return cPickle.loads(str(self._settings))
-
-    @deferred
-    def primary_group(self):
-        if self.primary_group_id is None:
-            # we use the first assigned group as the primary one
-            groups = self.groups.all()
-            return groups and groups[0] or Group.get_default_group()
-        return SAGroup.query.get(self.primary_group_id)
-
-    def __unicode__(self):
-        return self.username
-
-
-class SAGroup(object):
-
-    @property
-    def icon_url(self):
-        if not self.icon:
-            return None
-        return href('media', self.icon)
-
-    def get_absolute_url(self, action=None):
-        return href('portal', 'groups', self.name)
-
-    def __unicode__(self):
-        return self.name
 
 
 class ReadStatus(object):
@@ -1394,9 +1586,9 @@ class ReadStatus(object):
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,
             [self(c) for c in item.forum.children], True) and not \
-            dbsession.execute(select([1], and_(forum_table.c.id == forum_id,
-                forum_table.c.last_post_id > (row[0] or -1),
-                ~forum_table.c.last_post_id.in_(row[1]))).limit(1)).fetchone():
+            dbsession.execute(select([1], and_(Forum.id == forum_id,
+                Forum.last_post_id > (row[0] or -1),
+                ~Forum.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
             return True
         elif len(row[1]) > settings.FORUM_LIMIT_UNREAD:
@@ -1409,60 +1601,3 @@ class ReadStatus(object):
 
     def serialize(self):
         return cPickle.dumps(self.data)
-
-
-dbsession.mapper(SAUser, user_table, properties={
-    'groups': relation(SAGroup, secondary=user_group_table,
-                       lazy='dynamic')
-})
-dbsession.mapper(SAGroup, group_table)
-dbsession.mapper(Privilege, privilege_table, properties={
-    'forum': relation(Forum)
-})
-dbsession.mapper(Forum, forum_table, properties={
-    'topics': relation(Topic, lazy='dynamic'),
-    '_children': relation(Forum, backref=backref('parent',
-                          remote_side=[forum_table.c.id])),
-    'last_post': relation(Post, post_update=True)
-    }, extension=ForumMapperExtension(),
-    order_by=forum_table.c.position
-)
-dbsession.mapper(Topic, topic_table, properties={
-    'author': relation(SAUser, foreign_keys=[topic_table.c.author_id],
-                       primaryjoin=topic_table.c.author_id == user_table.c.id),
-    'reporter': relation(SAUser, foreign_keys=[topic_table.c.reporter_id],
-                         primaryjoin=topic_table.c.reporter_id == user_table.c.id),
-    'report_claimed_by': relation(SAUser, foreign_keys=[topic_table.c.report_claimed_by_id],
-                         primaryjoin=topic_table.c.report_claimed_by_id == user_table.c.id),
-    'last_post': relation(Post, post_update=True,
-                          primaryjoin=topic_table.c.last_post_id == post_table.c.id),
-    'first_post': relation(Post, post_update=True,
-                           primaryjoin=topic_table.c.first_post_id == post_table.c.id),
-    'forum': relation(Forum),
-    'polls': relation(Poll, backref='topic', cascade='save-update'),
-    'posts': relation(Post, backref='topic', cascade='all, delete-orphan',
-                      primaryjoin=topic_table.c.id == post_table.c.topic_id,
-                      lazy='dynamic', passive_deletes=True),
-    }, extension=TopicMapperExtension()
-)
-dbsession.mapper(Post, post_table, properties={
-    'author': relation(SAUser,
-        primaryjoin=post_table.c.author_id == user_table.c.id,
-        foreign_keys=[post_table.c.author_id]),
-    'attachments': relation(Attachment, cascade='all, delete'),
-    'revisions': relation(PostRevision, backref='post', lazy='dynamic',
-        cascade='all, delete-orphan',
-        primaryjoin=post_revision_table.c.post_id == post_table.c.id)
-    },
-    extension=PostMapperExtension(),
-)
-dbsession.mapper(PostRevision, post_revision_table)
-dbsession.mapper(Attachment, attachment_table)
-dbsession.mapper(Poll, poll_table, properties={
-    'options': relation(PollOption, backref='poll',
-        cascade='all, delete-orphan'),
-    'votings': relation(PollVote, backref='poll', cascade='all, delete-orphan')
-})
-dbsession.mapper(PollOption, poll_option_table)
-dbsession.mapper(PollVote, poll_vote_table)
-dbsession.mapper(WelcomeMessage, forum_welcomemessage_table)

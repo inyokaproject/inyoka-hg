@@ -23,8 +23,6 @@ python manage-django.py syncdb
 echo "Run migrations"
 python manage-django.py migrate
 echo "finished basic database creation"
-echo "Create admin user"
-python manage-inyoka.py create_superuser
 
 # make sure that the xapian database is recreated
 rm -rf $(python -c 'from django.conf import settings; print "\"%s\"" % settings.XAPIAN_DATABASE')
