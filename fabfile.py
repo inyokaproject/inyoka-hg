@@ -13,6 +13,7 @@ from tempfile import mktemp
 
 env.user = 'ubuntu_de'
 inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
+staging_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod-sa06/'
 target_dir = '~/virtualenv'
 
 def test():
@@ -20,9 +21,11 @@ def test():
 
 def staging():
     env.hosts = ['staging.ubuntuusers.de']
+    env.repository = staging_repo
 
 def production():
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
+    env.repository = inyoka_repo
 
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
@@ -41,7 +44,7 @@ def bootstrap():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('hosts', provided_by = [test, staging, production])
-    run('cd %s/inyoka; hg pull -u %s' % (target_dir, inyoka_repo))
+    run('cd %s/inyoka; hg pull -u %s' % (target_dir, env.repository))
 
 def easy_install():
     """Run easy_install on the server"""
