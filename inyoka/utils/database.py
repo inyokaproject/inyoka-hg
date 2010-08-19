@@ -25,8 +25,8 @@ from inyoka.utils.collections import flatten_iterator
 
 rdbm = 'mysql'
 extra = '?charset=utf8&use_unicode=1'
-if 'postgres' in settings.DATABASE_ENGINE:
-    rdbm = 'postgres'
+if 'postgresql' in settings.DATABASE_ENGINE:
+    rdbm = 'postgresql+psycopg2'
     extra = ''
 
 engine = create_engine('%s://%s:%s@%s/%s%s' % (
