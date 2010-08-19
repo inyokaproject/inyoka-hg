@@ -75,7 +75,7 @@ class UserBanned(Exception):
 
 
 def reactivate_user(id, email, status, time):
-    if (datetime.now() - time).days > 33:
+    if (datetime.utcnow() - time).days > 33:
         return {
             'failed': u'Seit der Löschung ist mehr als ein Monat vergangen!',
         }
@@ -87,7 +87,7 @@ def reactivate_user(id, email, status, time):
         }
     user.email = email
     user.status = status
-    if user.banned_until and user.banned_until < datetime.now():
+    if user.banned_until and user.banned_until < datetime.utcnow():
         user.status = 1
         user.banned_until = None
     user.save()
@@ -111,7 +111,7 @@ def deactivate_user(user):
         'id': user.id,
         'email': user.email,
         'status': user.status,
-        'time': datetime.now(),
+        'time': datetime.utcnow(),
     }
 
     userdata = encode_confirm_data(userdata)
@@ -144,7 +144,7 @@ def send_new_email_confirmation(user, email):
         'action': 'set_new_email',
         'id': user.id,
         'email': email,
-        'time': datetime.now()
+        'time': datetime.utcnow()
     }
 
     text = render_template('mails/new_email_confirmation.txt', {
@@ -160,7 +160,7 @@ def set_new_email(id, email, time):
     Save the new email address the user has confirmed, and send an email to
     his old address where he can reset it to protect against abuse.
     """
-    if (datetime.now() - time).days > 8:
+    if (datetime.utcnow() - time).days > 8:
         return {'failed': u'Link zu alt!'}
     user = User.objects.get(id=id)
 
@@ -168,7 +168,7 @@ def set_new_email(id, email, time):
         'action': 'reset_email',
         'id': user.id,
         'email': user.email,
-        'time': datetime.now(),
+        'time': datetime.utcnow(),
     }
     text = render_template('mails/reset_email.txt', {
         'user': user,
@@ -186,7 +186,7 @@ def set_new_email(id, email, time):
 
 
 def reset_email(id, email, time):
-    if (datetime.now() - time).days > 33:
+    if (datetime.utcnow() - time).days > 33:
         return {'failed': u'Link zu alt!'}
 
     user = User.objects.get(id=id)

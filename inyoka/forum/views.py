@@ -1624,7 +1624,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             raise PageNotFound()
         topics = topics.filter(and_(
             Topic.last_post_id == Post.id,
-            Post.pub_date > datetime.now() - timedelta(hours=hours)
+            Post.pub_date > datetime.utcnow() - timedelta(hours=hours)
         ))
         title = u'Beiträge der letzten %d Stunden' % hours
         url = href('forum', 'last%d' % hours)

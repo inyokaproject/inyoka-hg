@@ -1310,8 +1310,8 @@ class Poll(Model):
     question = Column(String(250), nullable=False)
     topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=True,
                       index=True)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
+    start_time = Column(DateTime, nullable=False, default=datetime.utcnow())
+    end_time = Column(DateTime, nullable=False, default=datetime.utcnow())
     multiple_votes = Column(Boolean, default=False, nullable=False)
 
     # relationship configuration
