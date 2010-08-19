@@ -71,7 +71,8 @@ def get_forum_privileges(user, forum_id):
 
 def get_privileges(user, forum_ids):
     """Return all privileges of the applied forums for the `user`"""
-    from inyoka.forum.models import user_group_table, Privilege
+    from inyoka.forum.models import Privilege
+    from inyoka.forum.compat import user_group_table
     privilege_table = Privilege.__table__
     if not forum_ids:
         return {}

@@ -43,7 +43,8 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
 from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.acl import filter_invisible
-from inyoka.forum.models import Forum, SAUser, Topic, Post, UBUNTU_VERSIONS
+from inyoka.forum.models import Forum, Topic, Post, UBUNTU_VERSIONS
+from inyoka.forum.compat import SAUser
 from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPSettingsForm, PrivateMessageForm, DeactivateUserForm, \
      LostPasswordForm, ChangePasswordForm, SubscriptionForm, \

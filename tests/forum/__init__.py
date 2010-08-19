@@ -9,7 +9,8 @@
     :license: GNU GPL.
 """
 from inyoka.conf import settings
-from inyoka.forum.models import Forum, Topic, Post, SAUser
+from inyoka.forum.models import Forum, Topic, Post
+from inyoka.forum.compat import SAUser
 from inyoka.utils.database import session
 
 # This is the global context that will be created

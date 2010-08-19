@@ -11,6 +11,7 @@
 """
 from py.test import raises
 from inyoka.forum.models import Forum, Topic, Post, SAUser
+from inyoka.forum.compat import SAUser
 from inyoka.utils.database import session
 
 '''

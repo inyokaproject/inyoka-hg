@@ -117,7 +117,7 @@ class ForumSearchAdapter(SearchAdapter):
         }
 
     def get_doc_ids(self):
-        pids = dbsession.query(Post.id).filter(Post.topic_id==Topic.id)
+        pids = session.query(Post.id).filter(Post.topic_id==Topic.id)
         for pid in pids:
             yield pid
 
