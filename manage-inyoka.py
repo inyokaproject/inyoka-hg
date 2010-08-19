@@ -129,7 +129,6 @@ def action_create_superuser(username='', email='', password=''):
             positive=bits,
             negative=0
         )
-        session.save(privilege)
     session.commit()
     session.flush()
     print 'created superuser'
