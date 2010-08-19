@@ -1099,7 +1099,7 @@ def group_edit(request, name=None):
 
             # clear permission cache of users if needed
             if changed_permissions:
-                c = user_group_table
+                c = user_group_table.c
                 keys = ['user_permissions/%s' % row[0] for row in
                     dbsession.execute(
                         select([c.user_id]).where(c.group_id == group.id)
