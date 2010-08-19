@@ -689,9 +689,9 @@ def users(request):
 @require_permission('user_edit')
 @templated('admin/userlist.html')
 def users_with_special_rights(request):
-    query = SAUser.query.filter(Privilege.user_id == User.id) \
+    query = SAUser.query.filter(Privilege.user_id == SAUser.id) \
                         .filter(Privilege.user_id != None) \
-                        .group_by(SAUser.id).order_by(User.username)
+                        .group_by(SAUser.id).order_by(SAUser.username)
     users = list(query)
     return {
         'users': users,
