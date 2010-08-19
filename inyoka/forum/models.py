@@ -27,7 +27,6 @@ from sqlalchemy.orm import eagerload, relationship, backref, MapperExtension, \
 from sqlalchemy.sql import select, func, and_
 
 from inyoka.conf import settings
-from inyoka.wiki.parser import parse, RenderContext
 from inyoka.utils.text import get_new_unique_filename
 from inyoka.utils.dates import timedelta_to_seconds
 from inyoka.utils.html import escape
@@ -1467,3 +1466,7 @@ class ReadStatus(object):
 
     def serialize(self):
         return cPickle.dumps(self.data)
+
+
+# Circular imports
+from inyoka.wiki.parser import parse, RenderContext

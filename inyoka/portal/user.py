@@ -593,6 +593,7 @@ class User(models.Model):
 
     @deferred
     def _readstatus(self):
+        from inyoka.forum.models import ReadStatus
         return ReadStatus(self.forum_read_status)
 
     @property
@@ -707,4 +708,3 @@ class User(models.Model):
 # circ imports
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.urls import href
-from inyoka.forum.models import ReadStatus

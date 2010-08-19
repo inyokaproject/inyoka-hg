@@ -15,5 +15,4 @@
 # THIS MODULE IS A STUB
 # WE NEED IT FOR NOW CAUSE OF IMPORT ERRORS
 import xapian
-from inyoka.portal.user import User
 from inyoka.utils.search import search_handler

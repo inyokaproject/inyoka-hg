@@ -14,7 +14,6 @@ from datetime import datetime
 from sqlalchemy import Table, Column, Integer, ForeignKey, Boolean, String, \
     DateTime, Text
 from sqlalchemy.orm import relationship
-from inyoka.wiki.parser import RenderContext, parse, render
 from inyoka.portal.user import DEFAULT_GROUP_ID
 from inyoka.utils.database import Model
 from inyoka.utils.urls import href
@@ -138,6 +137,7 @@ class SAUser(Model):
 
     def render_signature(self, request=None, format='html', nocache=False):
         """Render the user signature and cache it if `nocache` is `False`."""
+        from inyoka.wiki.parser import RenderContext, parse, render
         if request is None:
             request = current_request._get_current_object()
         context = RenderContext(request)

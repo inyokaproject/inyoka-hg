@@ -99,7 +99,6 @@ from inyoka.utils.html import escape
 from inyoka.utils.text import join_pagename, get_pagetitle
 from inyoka.utils.diff3 import generate_udiff, prepare_udiff, \
     get_close_matches
-from inyoka.forum.models import Topic
 from inyoka.portal.user import User
 
 
@@ -869,6 +868,7 @@ class Page(models.Model):
 
     @property
     def topic(self):
+        from inyoka.forum.models import Topic
         # XXX: own foreign-key mapping for django
         return self.topic_id and Topic.query.get(self.topic_id)
 

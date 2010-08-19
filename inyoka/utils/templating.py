@@ -64,6 +64,11 @@ def get_dtd():
 def populate_context_defaults(context):
     """Fill in context defaults."""
     from inyoka.forum.acl import have_privilege
+    from inyoka.forum.models import Topic
+    from inyoka.portal.models import PrivateMessageEntry
+    from inyoka.utils.storage import storage
+    from inyoka.ikhaya.models import Suggestion
+
     try:
         request = current_request._get_current_object()
     except RuntimeError:
@@ -206,7 +211,3 @@ jinja_env = InyokaEnvironment()
 
 
 # circular imports
-from inyoka.portal.models import PrivateMessageEntry
-from inyoka.forum.models import Topic
-from inyoka.utils.storage import storage
-from inyoka.ikhaya.models import Suggestion
