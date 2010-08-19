@@ -719,7 +719,8 @@ class PostRevision(Model):
     id = Column(Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey('forum_post.id'), nullable=False)
     text = Column(Text, nullable=False)
-    store_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    store_date = Column(DateTime(timezone=False), nullable=False,
+                        default=datetime.utcnow)
 
     def __repr__(self):
         return '<%s post=%d (%s), stored=%s>' % (
@@ -759,7 +760,8 @@ class Post(Model):
     id = Column(Integer, primary_key=True)
     position = Column(Integer, nullable=False, default=0)
     author_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
-    pub_date = Column(DateTime, nullable=False, index=True, default=datetime.utcnow)
+    pub_date = Column(DateTime(timezone=False), nullable=False, index=True,
+                      default=datetime.utcnow)
     topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=False)
     hidden = Column(Boolean, default=False, nullable=False)
     text = Column(Text, nullable=False)
@@ -1310,8 +1312,10 @@ class Poll(Model):
     question = Column(String(250), nullable=False)
     topic_id = Column(Integer, ForeignKey('forum_topic.id'), nullable=True,
                       index=True)
-    start_time = Column(DateTime, nullable=False, default=datetime.utcnow())
-    end_time = Column(DateTime, nullable=False, default=datetime.utcnow())
+    start_time = Column(DateTime(timezone=False), nullable=False,
+                        default=datetime.utcnow())
+    end_time = Column(DateTime(timezone=False), nullable=False,
+                      default=datetime.utcnow())
     multiple_votes = Column(Boolean, default=False, nullable=False)
 
     # relationship configuration
