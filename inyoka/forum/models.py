@@ -700,7 +700,6 @@ class Topic(Model):
         dbsession.commit()
         old_forum = self.forum
         self.forum = forum
-        dbsession.flush([self])
         dbsession.commit()
         ids = list(p.id for p in self.forum.parents)
         ids.append(self.forum.id)
@@ -1235,7 +1234,6 @@ class Attachment(Model):
                 f.write(content)
             finally:
                 f.close()
-            dbsession.save(attachment)
             return attachment
 
     def delete(self):
@@ -1525,8 +1523,6 @@ class WelcomeMessage(Model):
 
     def save(self):
         self.rendered_text = self.render_text()
-        dbsession.save(self)
-        dbsession.flush([self])
 
     def render_text(self, request=None, format='html'):
         if request is None:

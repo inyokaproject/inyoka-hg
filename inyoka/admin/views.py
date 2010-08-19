@@ -789,11 +789,9 @@ def user_edit(request, username):
                             user=user,
                             forum=Forum.query.get(int(forum_id))
                         )
-                        dbsession.save(privilege)
                     if negative or positive:
                         privilege.positive = positive
                         privilege.negative = negative
-                        dbsession.flush()
                     elif privilege is not None:
                         dbsession.delete(privilege)
 
@@ -1088,11 +1086,9 @@ def group_edit(request, name=None):
                         privilege = Privilege(
                             group=group,
                             forum=Forum.query.get(int(forum_id)))
-                        dbsession.save(privilege)
                     if negative or positive:
                         privilege.positive = positive
                         privilege.negative = negative
-                        dbsession.flush()
                     elif privilege is not None:
                         dbsession.delete(privilege)
 

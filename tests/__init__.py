@@ -108,9 +108,7 @@ class Context(object):
             positive=bits,
             negative=0
         )
-        session.save(privilege)
         session.commit()
-        session.flush()
 
     def teardown_instance(self):
         session.rollback()
