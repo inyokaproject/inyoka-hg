@@ -714,7 +714,7 @@ class PostRevision(Model):
     This saves old and current revisions of posts. It can be used to restore
     posts if something odd was done to them or to view changes.
     """
-    __tablename__ = 'post_postrevision'
+    __tablename__ = 'forum_postrevision'
 
     id = Column(Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey('forum_post.id'), nullable=False)
