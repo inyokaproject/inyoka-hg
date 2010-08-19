@@ -138,34 +138,5 @@ def _bootstrap():
                 break
     INYOKA_REVISION = hg_node
 
-    # set the SIGUSR1 signal to get some debugging values
-    def _sigusr1_handler(signum, frame):
-        #TODO: what to return to let the signal run again?
-        try:
-            from guppy import hpy
-            from inyoka.utils.logger import logger
-        except ImportError:
-            return SIG_DFL
-
-        pid = os.getpid()
-        heapy = hpy()
-        h = heapy.heap()
-        out = [
-            'Memory Usage of PID %d at %s'  % (os.getpid(), time.asctime()),
-            'heap():',
-            str(h),
-            '\nh.byrcs:',
-            str(h.byrcs),
-            '\nbyrcs[0].byid:',
-            str(h.byrcs[0].byid),
-            '\nget_rp():',
-            str(h.get_rp())
-        ]
-        heapy.setref()
-        logger.critical(u'\n\n'.join(out))
-        return SIG_DFL
-    signal(SIGUSR1, _sigusr1_handler)
-
-
 _bootstrap()
 del _bootstrap
