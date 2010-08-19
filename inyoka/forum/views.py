@@ -1441,7 +1441,7 @@ def topic_feed(request, slug=None, mode='short', count=20):
 def forum_feed(request, slug=None, mode='short', count=20):
     anonymous = User.objects.get_anonymous_user()
     if slug:
-        forum = Forum.query.get(slug)
+        forum = Forum.query.filter_by(slug=slug)
         if forum is None:
             raise PageNotFound()
         if not have_privilege(anonymous, forum, CAN_READ):
@@ -1510,7 +1510,7 @@ def markread(request, slug=None):
         flash(u'Bitte melde dich an, um Beiträge als gelesen zu markieren.')
         return HttpResponseRedirect(href('forum'))
     if slug:
-        forum = Forum.query.get(slug)
+        forum = Forum.query.filter_by(slug=slug)
         if not forum:
             raise PageNotFound()
         forum.mark_read(user)
