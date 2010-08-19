@@ -106,6 +106,9 @@ def index(request, category=None):
 
         cache.set(key, categories, 120)
 
+    merge = session.merge
+    categories = [merge(obj, load=False) for obj in categories]
+
     hidden_categories = []
     if request.user.is_authenticated:
         hidden_categories.extend(request.user.settings.get(
