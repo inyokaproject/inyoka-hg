@@ -151,6 +151,7 @@ class SlugGenerator(orm.MapperExtension):
         set_attribute(instance, self.slugfield,
             find_next_increment(getattr(instance.__class__, self.slugfield),
                                 slug, max_length))
+        return orm.EXT_CONTINUE
 
 
 def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):

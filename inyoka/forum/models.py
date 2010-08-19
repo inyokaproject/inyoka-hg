@@ -22,7 +22,8 @@ from mimetypes import guess_type
 from itertools import groupby
 from sqlalchemy import Table, Column, String, Text, Integer, \
         ForeignKey, DateTime, Boolean, Index
-from sqlalchemy.orm import eagerload, relationship, backref, MapperExtension
+from sqlalchemy.orm import eagerload, relationship, backref, MapperExtension, \
+    EXT_CONTINUE
 from sqlalchemy.sql import select, func, and_
 
 from inyoka.conf import settings
@@ -137,6 +138,7 @@ class ForumMapperExtension(MapperExtension):
         #XXX: since it's not possible to save the forum_id in the view
         # we store it twice, once with id and once with slug
         cache.delete('forum/forum/%s' % instance.slug)
+        return EXT_CONTINUE
 
 
 class TopicMapperExtension(MapperExtension):
@@ -146,13 +148,15 @@ class TopicMapperExtension(MapperExtension):
             instance.forum = Forum.query.get(int(instance.forum_id))
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
+        return EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
         parent_ids.append(instance.forum_id)
-        Forum.query.filter(Forum.id.in_(parent_ids)).update(values={
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
             'topic_count': Forum.topic_count + 1
-        })
+        }))
+        return EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
@@ -186,10 +190,13 @@ class TopicMapperExtension(MapperExtension):
             update wiki_page set topic_id = NULL where topic_id = %s;
         ''', [instance.id])
 
+        return EXT_CONTINUE
+
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
         cache.delete('forum/index')
         cache.delete('forum/reported_topic_count')
+        return EXT_CONTINUE
 
 
 class PostMapperExtension(MapperExtension):
@@ -203,6 +210,7 @@ class PostMapperExtension(MapperExtension):
             instance.position = connection.execute(select(
                 [func.max(Post.position)+1],
                 Post.topic_id == instance.topic_id)).fetchone()[0] or 0
+        return EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         if instance.topic.forum.user_count_posts:
@@ -229,15 +237,19 @@ class PostMapperExtension(MapperExtension):
         }))
         instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def after_update(self, mapper, connection, instance):
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def after_delete(self, mapper, connection, instance):
         search.queue('f', instance.id)
+        return EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         self.deregister(mapper, connection, instance)
+        return EXT_CONTINUE
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""

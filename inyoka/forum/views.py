@@ -386,7 +386,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             raise PageNotFound()
         forum = topic.forum
     elif forum_slug:
-        forum = Forum.query.get(forum_slug)
+        forum = Forum.query.filter_by(slug=forum_slug).first()
         if not forum or not forum.parent_id:
             raise PageNotFound()
         newtopic = firstpost = True
@@ -577,7 +577,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                or topic.ubuntu_version != d.get('ubuntu_version'):
                 topic.ubuntu_distro = d.get('ubuntu_distro')
                 topic.ubuntu_version = d.get('ubuntu_version')
-                topic.reindex()
             if check_privilege(privileges, 'sticky'):
                 topic.sticky = d['sticky']
             if check_privilege(privileges, 'create_poll'):
@@ -586,6 +585,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             session.commit()
 
             topic.forum.invalidate_topic_cache()
+            topic.reindex()
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
