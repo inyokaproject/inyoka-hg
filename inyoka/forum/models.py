@@ -490,7 +490,8 @@ class Forum(Model):
         backref=backref('parent', remote_side=[id]))
     last_post = relationship('Post', post_update=True)
 
-    __mapper_args__ = {'extension': ForumMapperExtension(),
+    __mapper_args__ = {'extension': (ForumMapperExtension(),
+                                     SlugGenerator('slug', 'name')),
                        'order_by': position}
 
     def get_absolute_url(self, action='show'):
