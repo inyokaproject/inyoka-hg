@@ -1,4 +1,5 @@
 def make_app():
+    import gc
     import inyoka.utils.http
     from inyoka.conf import settings
     from inyoka.application import application, StaticDomainHandler
