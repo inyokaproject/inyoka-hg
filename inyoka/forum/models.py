@@ -806,7 +806,7 @@ class Post(Model):
             Topic.id == Post.topic_id,
             Topic.id == (select([Post.topic_id], Post.id == id)),
             Post.id <= id
-        )).group_by(Topic.id).first()
+        )).group_by(Post.id).first()
         if not row:
             return None
         post_count, slug = row
