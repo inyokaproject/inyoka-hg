@@ -87,9 +87,9 @@ def index(request, category=None):
                                     eagerload('_children.last_post'),
                                     eagerload('_children.last_post.author'))
         if category:
-            category = query.get(category)
+            category = query.filter_by(slug=category).first()
             if not category or category.parent_id != None:
-                raise PageNotFound
+                raise PageNotFound()
 
             if have_privilege(User.ANONYMOUS_USER, category, 'read'):
                 set_session_info(request, *session_info)
@@ -143,6 +143,8 @@ def forum(request, slug, page=1):
 
         cache.set(key, f, 60)
 
+    f = session.merge(f, load=False)
+
     privs = get_forum_privileges(request.user, f.id)
     if not check_privilege(privs, 'read'):
         return abort_access_denied(request)
@@ -176,6 +178,10 @@ def forum(request, slug, page=1):
 
         if page < CACHE_PAGES_COUNT:
             cache.set(key, ctx, 60)
+    else:
+        merge = session.merge
+        ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
+
 
     if have_privilege(User.ANONYMOUS_USER, f, 'read'):
         set_session_info(request, u'sieht sich das Forum „<a href="%s">'
