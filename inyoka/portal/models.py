@@ -507,6 +507,10 @@ class Event(models.Model):
 class SearchQueueManager(models.Manager):
     def append(self, component, doc_id):
         """Append an item to the queue for later indexing."""
+        # Django vs. SQLAlchemy.  SQLAlchemy sometimes applies
+        # a NamedTuple instance so that we need to check that.
+        if not isinstance(doc_id, (int, long, float)):
+            doc_id = doc_id.id
         item = self.model()
         item.component = component
         item.doc_id = doc_id
