@@ -152,5 +152,3 @@ def filter_invisible(user, forums=[], priv=CAN_READ):
         if privileges.get(forum.id, DISALLOW_ALL) & priv != 0:
             result.append(forum)
     return result
-
-

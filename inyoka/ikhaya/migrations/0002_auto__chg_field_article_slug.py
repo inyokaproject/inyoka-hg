@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Changing field 'Article.slug'
         db.alter_column('ikhaya_article', 'slug', self.gf('django.db.models.fields.SlugField')(max_length=100))
 
@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing index on 'Article', fields ['slug']
         db.delete_index('ikhaya_article', ['slug'])
 
