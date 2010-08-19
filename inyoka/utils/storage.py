@@ -23,11 +23,11 @@ storage_table = Table('portal_storage', metadata,
 )
 
 update = storage_table.update(
-        storage_table.c.key==bindparam('key'),
+        storage_table.c.key==bindparam('skey'),
         values={'value':bindparam('value')})
 
 fetch = select([storage_table.c.value]) \
-    .where(storage_table.c.key==bindparam('key')) \
+    .where(storage_table.c.key==bindparam('skey')) \
     .limit(1)
 
 insert = storage_table.insert()
@@ -43,7 +43,7 @@ class CachedStorage(object):
         value = cache.get('storage/' + key)
         if value is not None:
             return value
-        results = session.execute(fetch, {'key': key}).fetchone()
+        results = session.execute(fetch, {'skey': key}).fetchone()
         if not results:
             return default
         else:
@@ -57,9 +57,9 @@ class CachedStorage(object):
         *timeout*.
         """
         #XXX: ugly check, find a more nice solution
-        rows = session.execute(fetch, {'key': key}).fetchall()
+        rows = session.execute(fetch, {'skey': key}).fetchall()
         if rows:
-            session.execute(update, {'key': key, 'value': value})
+            session.execute(update, {'skey': key, 'value': value})
             session.commit()
         else:
             try:
