@@ -132,7 +132,7 @@ def sync():
             if not author:
                 debug(' no author for entry %r found, skipping' % guid)
             author_homepage = author_detail and author_detail.get('href') \
-                              or blog.blog_url
+                              or url
 
             # create a new entry object based on the data collected or
             # update the old one.
