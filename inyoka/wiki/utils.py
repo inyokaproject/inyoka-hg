@@ -21,10 +21,7 @@ from cStringIO import StringIO
 from tempfile import TemporaryFile
 from hashlib import sha1
 from itertools import ifilter
-try:
-    from werkzeug.utils import url_quote
-except ImportError:
-    from werkzeug import url_quote
+from werkzeug import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
