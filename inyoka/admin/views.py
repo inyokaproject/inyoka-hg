@@ -554,7 +554,7 @@ def ikhaya_category_edit(request, category=None):
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.query, request.GET, 'name',
-        sqlalchemy=True, sa_column=forum_table.c.name,
+        sqlalchemy=True, sa_column=Forum.name,
         columns=['name', 'parent_id', 'position'])
     return {
         'table': sortable
@@ -570,7 +570,7 @@ def forum_edit(request, id=None):
     """
     def _add_field_choices():
         if id:
-            query = Forum.query.filter(forum_table.c.id!=id)
+            query = Forum.query.filter(Forum.id!=id)
         else:
             query = Forum.query.all()
         categories = [(c.id, c.name) for c in query]
@@ -688,9 +688,9 @@ def users(request):
 @require_permission('user_edit')
 @templated('admin/userlist.html')
 def users_with_special_rights(request):
-    query = SAUser.query.filter(privilege_table.c.user_id == user_table.c.id) \
-                        .filter(privilege_table.c.user_id != None) \
-                        .group_by(user_table.c.id).order_by(user_table.c.username)
+    query = SAUser.query.filter(Privilege.user_id == User.id) \
+                        .filter(Privilege.user_id != None) \
+                        .group_by(SAUser.id).order_by(User.username)
     users = list(query)
     return {
         'users': users,
@@ -780,9 +780,9 @@ def user_edit(request, username):
 
                     forum_id = key.split('_')[2]
                     privilege = privileges.filter(and_(
-                        privilege_table.c.forum_id==forum_id,
-                        privilege_table.c.group_id==None,
-                        privilege_table.c.user_id==user.id
+                        Privilege.forum_id==forum_id,
+                        Privilege.group_id==None,
+                        Privilege.user_id==user.id
                     )).first()
                     if privilege is None and (positive or negative):
                         privilege = Privilege(
@@ -844,8 +844,8 @@ def user_edit(request, username):
     forums = Forum.query.all()
     for forum in forums:
         privilege = Privilege.query.filter(and_(
-            privilege_table.c.forum_id==forum.id,
-            privilege_table.c.user_id==user.id
+            Privilege.forum_id==forum.id,
+            Privilege.user_id==user.id
         )).first()
 
         forum_privileges.append((
@@ -1080,9 +1080,9 @@ def group_edit(request, name=None):
 
                     forum_id = key.split('_')[2]
                     privilege = Privilege.query.filter(and_(
-                        privilege_table.c.forum_id==forum_id,
-                        privilege_table.c.user_id==None,
-                        privilege_table.c.group_id==group.id
+                        Privilege.forum_id==forum_id,
+                        Privilege.user_id==None,
+                        Privilege.group_id==group.id
                     )).first()
                     if privilege is None and (positive or negative):
                         privilege = Privilege(
@@ -1102,7 +1102,7 @@ def group_edit(request, name=None):
 
             # clear permission cache of users if needed
             if changed_permissions:
-                c = user_group_table.c
+                c = user_group_table
                 keys = ['user_permissions/%s' % row[0] for row in
                     dbsession.execute(
                         select([c.user_id]).where(c.group_id == group.id)
@@ -1131,8 +1131,8 @@ def group_edit(request, name=None):
     forums = Forum.query.all()
     for forum in forums:
         privilege = Privilege.query.filter(and_(
-            privilege_table.c.forum_id==forum.id,
-            privilege_table.c.group_id==group.id,
+            Privilege.forum_id==forum.id,
+            Privilege.group_id==group.id,
         )).first()
 
         forum_privileges.append((
