@@ -507,12 +507,10 @@ class Event(models.Model):
 class SearchQueueManager(models.Manager):
     def append(self, component, doc_id):
         """Append an item to the queue for later indexing."""
-        # XXX: This is a race condition and two queries
-        if not self.filter(component=component, doc_id=doc_id):
-            item = self.model()
-            item.component = component
-            item.doc_id = doc_id
-            item.save()
+        item = self.model()
+        item.component = component
+        item.doc_id = doc_id
+        item.save()
 
     def select_blocks(self, block_size=100):
         """
@@ -530,6 +528,16 @@ class SearchQueueManager(models.Manager):
                 yield (item.component, item.doc_id)
             SearchQueue.objects.remove(last_id)
             items = fetch()
+
+    def multi_insert(self, component, ids):
+        cursor = connection.cursor()
+        s = ('("' + component + '", %s)',)
+        cursor.execute('''
+            insert into portal_searchqueue (component, doc_id)
+                values %s;
+        ''' % ', '.join(s * len(ids)), ids)
+        cursor.close()
+        connection._commit()
 
     def remove(self, last_id):
         """

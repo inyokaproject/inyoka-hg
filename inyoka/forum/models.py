@@ -820,11 +820,7 @@ class Post(Model):
         """
         Updates the search index for quite a lot of posts with a single query.
         """
-        dbsession.execute('''
-            insert into portal_searchqueue (component, doc_id)
-                values %s;
-        ''' % ', '.join(('("f", %s)',) * len(ids)), ids)
-        dbsession.commit()
+        SearchQueue.objects.multi_insert('f', ids)
 
     def edit(self, request, text, is_plaintext=False):
         """
@@ -898,13 +894,14 @@ class Post(Model):
         }))
         dbsession.commit()
 
-        dbsession.execute('''set @rownum:=%s;''', [posts[0].position - 1])
-        dbsession.execute('''
+        connection = dbsession.connection()
+        connection.execute('''set @rownum:=%s;''', [posts[0].position - 1])
+        connection.execute('''
             update forum_post set position=(@rownum:=@rownum+1)
                               where topic_id=%s and position > %s order by id;
         ''', [old_topic.id, posts[0].position])
-        dbsession.execute('''set @rownum:=-1;''')
-        dbsession.execute('''
+        connection.execute('''set @rownum:=-1;''')
+        connection.execute('''
             update forum_post set position=(@rownum:=@rownum+1)
                               where topic_id=%s order by id;
         ''', [new_topic.id])
@@ -972,9 +969,9 @@ class Post(Model):
         else:
             if old_topic.has_poll:
                 new_topic.has_poll = True
-                dbsession.execute('''
-                    update forum_poll set topic_id = %s where topic_id = %s;
-                ''', [new_topic.id, old_topic.id])
+                dbsession.execute(Poll.__table__.update(
+                    Topic.id == old_topic.id,
+                    {'topic_id': new_topic.id}))
                 dbsession.commit()
             dbsession.delete(old_topic)
 
@@ -1472,3 +1469,4 @@ class ReadStatus(object):
 
 # Circular imports
 from inyoka.wiki.parser import parse, RenderContext
+from inyoka.portal.models import SearchQueue
