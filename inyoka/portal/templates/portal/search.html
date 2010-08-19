@@ -153,7 +153,9 @@
         {%- endif %}
       </h2>
       <p class="description">
+        {% if doc.excerpt %}
         {{ doc.excerpt }}
+        {% endif %}
       </p>
       <p class="meta">
         {%- if doc.component in ('Forum', 'Ikhaya', 'Planet') %}
