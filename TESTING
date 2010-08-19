@@ -1,3 +1,10 @@
+IMPORTANT NOTICE:  Our unittests are broken since a long time.
+				   The whole system needs to be renewed and rewritten.
+				   If you've enough time to do that, do it now!
+
+				   Currently the unittests does not even run!
+
+
 How To Install
 --------------
 
