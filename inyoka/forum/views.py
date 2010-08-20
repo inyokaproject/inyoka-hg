@@ -474,6 +474,19 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             url = href('forum', 'post', post.id)
         return HttpResponseRedirect(url)
 
+    # Cleanup errors in parent form if the main form was not send.
+    # This fixes some nasty things if someone adds just an attachment
+    # or a poll.
+    if request.method == 'POST' and not 'send' in request.POST:
+        # clean errors in parent form so that adding a poll
+        # does not raise any errors.  We also cleanup the surge
+        # protection timer so that we get no nasty hickups by just
+        # adding an attachment and sending the whole form
+        # afterwards.
+        form.errors.clear()
+        if 'sp' in request.session:
+            del request.session['sp']
+
     #  handle polls
     poll_ids = map(int, filter(bool, request.POST.get('polls', '').split(',')))
     if (newtopic or firstpost) and check_privilege(privileges, 'create_poll'):

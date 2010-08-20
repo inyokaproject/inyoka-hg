@@ -30,9 +30,6 @@ var set_quote_links = (function() {
 });
 $(set_quote_links);
 
-
-
-
 $(function () {
   $('th#recent_posts').append(' (<a href="#" id="recent_posts_reload">aktualisieren</a>)');
 
