@@ -266,6 +266,9 @@ table.topic td.post div.signature a {
 
 
 /* actions of a post */
+table.topic td.post div.linklist {
+    float: right;
+}
 
 .action {
     background-repeat: no-repeat;
@@ -477,7 +480,7 @@ span.pagination .pageselect:hover {
   text-align: center;
 }
 
-.reportlist_head .topic {
+.reportlist_head td.topic {
   text-align: left;
 }
 
