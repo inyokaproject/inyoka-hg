@@ -388,6 +388,7 @@ class EditForumForm(forms.Form):
     force_version = forms.BooleanField(label=u'Angabe der Ubuntu-Version erzwingen',
                                        required=False)
     count_posts = forms.BooleanField(label=u'Beiträge in diesem Forum werden gezählt',
+        help_text=u'Dieser Wert ist nur über das Webteam veränderbar',
         required=False, widget=forms.CheckboxInput({'readonly': True}))
 
 
