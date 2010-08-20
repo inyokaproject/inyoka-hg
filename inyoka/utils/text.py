@@ -308,10 +308,10 @@ def render_html(text_block, highlight_locations=None, start_offset=None, end_off
     # Don't forget the chunk after the last term
     highlighted_chunk += text[matched_so_far:]
 
-    if start_offset > 0:
+    if start_offset > 0 and highlighted_chunk:
         highlighted_chunk = '...%s' % highlighted_chunk
 
-    if end_offset < len(text_block):
+    if end_offset < len(text_block) and highlighted_chunk:
         highlighted_chunk = '%s...' % highlighted_chunk
 
     return highlighted_chunk
