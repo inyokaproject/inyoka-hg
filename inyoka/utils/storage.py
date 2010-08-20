@@ -82,6 +82,8 @@ class CachedStorage(object):
         #: a list of keys that aren't yet in the cache.
         #: They are queried using a database call.
         to_fetch = [k for k in keys if values.get(k) is None]
+        if not to_fetch:
+            return values
         # get the items that are not in cache using a database query
         query = select([storage_table.c.key, storage_table.c.value]) \
             .where(storage_table.c.key.in_(to_fetch))
