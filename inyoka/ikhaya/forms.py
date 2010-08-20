@@ -25,3 +25,9 @@ class EditCommentForm(forms.Form):
                u'kannst du <code>@kommentarnummer</code> verwenden.<br />'
                u'Dies wird automatisch eingefügt, wenn du bei einem Beitrag '
                u'auf „Antworten“ klickst.')
+
+    def clean_text(self):
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
+            raise forms.ValidationError('Text darf nicht leer sein')
+        return text

@@ -66,6 +66,12 @@ class EditPostForm(forms.Form):
                 self._errors.pop(k, None)
         return data
 
+    def clean_text(self):
+        text = self.cleaned_data.get('text', '')
+        if not text.strip():
+            raise forms.ValidationError('Text darf nicht leer sein')
+        return text
+
 
 class NewTopicForm(SurgeProtectionMixin, forms.Form):
     """
