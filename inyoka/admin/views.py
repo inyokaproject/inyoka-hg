@@ -656,6 +656,7 @@ def forum_edit(request, id=None):
                 'welcome_msg_subject': welcome_msg and welcome_msg.title or u'',
                 'welcome_msg_text': welcome_msg and welcome_msg.text or u'',
                 'force_version': forum.force_version,
+                'count_posts': forum.user_count_posts,
             })
         _add_field_choices()
     return {

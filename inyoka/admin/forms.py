@@ -387,6 +387,9 @@ class EditForumForm(forms.Form):
                                             required=False)
     force_version = forms.BooleanField(label=u'Angabe der Ubuntu-Version erzwingen',
                                        required=False)
+    count_posts = forms.BooleanField(label=u'Beiträge in diesem Forum werden gezählt',
+        required=False, widget=forms.CheckboxInput({'readonly': True}))
+
 
     def clean_welcome_msg_subject(self):
         data = self.cleaned_data
