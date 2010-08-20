@@ -1548,15 +1548,11 @@ def newposts(request, page=1):
     # filter old topics with id < "last read post in this forum"
     if any(e[0] for e in data.itervalues()):
         ids = filter(lambda id: data[id][0] is not None, data.keys())
-        where = or_(*[
-            (
-                (Forum.forum_id == id) &
-                (Topic.last_post_id > data[id][0])
-            ) for id in ids
-        ] + [
+        where = or_(*[(
+            (Topic.forum_id == id) &
+            (Topic.last_post_id > data[id][0])) for id in ids] +
             # don't filter in forums where "last read post" isn't set
-            not_(Topic.forum_id.in_(ids))
-        ])
+            [not_(Topic.forum_id.in_(ids))])
 
     # get single topics that are marked as "read"
     read_topics = []
@@ -1566,7 +1562,7 @@ def newposts(request, page=1):
     # filter read topics
     if read_topics:
         cond = not_(Topic.last_post_id.in_(read_topics))
-        if where:
+        if where is True:
             where &= cond
         else:
             where = cond
@@ -1591,7 +1587,7 @@ def newposts(request, page=1):
     if forbidden_forums:
         topics = topics.filter(not_(Topic.forum_id.in_(forbidden_forums)))
 
-    if where:
+    if where is True:
         topics = topics.filter(where)
 
     pagination = Pagination(request, topics, page, 25,
