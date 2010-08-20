@@ -82,9 +82,10 @@ def suggest(request):
             users = ikhaya_group.user_set.all()
             text = render_template('mails/planet_suggest.txt',
                                    form.cleaned_data)
-            send_mail('Neuer Blogvorschlag', text,
-                      settings.INYOKA_SYSTEM_USER_EMAIL,
-                      [u.email for u in users])
+            for user in users:
+                send_mail('Neuer Blogvorschlag', text,
+                          settings.INYOKA_SYSTEM_USER_EMAIL,
+                          [user.email])
             if not users:
                 flash(u'Es sind keine Benutzer als Planet-Administratoren '\
                       u'eingetragen', False)
