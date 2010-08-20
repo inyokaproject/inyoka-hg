@@ -20,8 +20,9 @@
    <colgroup>
       <col width="1%"/>
       <col width="50%"/>
-      <col width="25%"/>
-      <col width="25%"/>
+      <col width="20%"/>
+      <col width="20%"/>
+      <col width="10%"/>
     </colgroup>
     <thead>
       <tr>
@@ -29,6 +30,7 @@
         <th>Thema</th>
         <th>Gemeldet von</th>
         <th>In Bearbeitung von</th>
+        <th>Aktionen</th>
       </tr>
     </thead>
     <tbody>
@@ -37,12 +39,11 @@
         <td>
           <input type="checkbox" name="selected" value="{{ topic.id }}" />
         </td>
-        <td>
+        <td class="topic">
           <a href="{{ topic|url }}">{{ topic.title|e }}</a> ({{ topic.forum.name|e}})
         </td>
-        <td class="linklist">
-          <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a> |
-          <a href="{{ href('portal', 'privmsg', 'new', reply_to='reportedtopic:%s' % topic.slug) }}">PN schreiben</a>
+        <td>
+          <a href="{{ topic.reporter|url }}">{{ topic.reporter.username }}</a>
         </td>
         <td>
           {% if topic.report_claimed_by %}
@@ -51,9 +52,12 @@
             <a href="{{ href('forum', 'reported_topics', assign=USER, topic=topic.slug) }}">Mir zuweisen</a>
           {% endif %}
         </td>
+        <td>
+          <a href="{{ href('portal', 'privmsg', 'new', reply_to='reportedtopic:%s' % topic.slug) }}">PN schreiben</a>
+        </td>
       </tr>
       <tr>
-        <td colspan="4" style="white-space: pre-wrap">{{ topic.reported|e }}</td>
+        <td colspan="5" style="white-space: pre-wrap">{{ topic.reported|e }}</td>
       </tr>
       {%- else %}
       <tr>
