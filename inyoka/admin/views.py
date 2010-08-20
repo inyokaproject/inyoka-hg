@@ -905,9 +905,9 @@ def user_new(request):
                 email=data['email'],
                 password=data['password'],
                 send_mail=data['authenticate'])
-            flash(u'Der Benutzer „%s“ wurde erfolgreich erstellt'
+            flash(u'Der Benutzer „%s“ wurde erfolgreich erstellt. '
+                  u'Du kannst nun weitere Details bearbeiten.'
                   % escape(data['username']), True)
-            flash(u'Du kannst nun weitere Details bearbeiten')
             return HttpResponseRedirect(href('admin', 'users', 'edit',
                                              escape(data['username'])))
         else:
