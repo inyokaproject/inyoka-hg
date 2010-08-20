@@ -617,7 +617,7 @@ class Topic(Model):
                 Topic.forum_id == Forum.id))
         }))
 
-        dbsession.execute(Forum.update(Forum.id.in_(old_ids), {
+        dbsession.execute(Forum.__table__.update(Forum.id.in_(old_ids), {
             'last_post_id': select([func.max(Post.id)], and_(
                 Topic.id == Post.topic_id,
                 Topic.forum_id == Forum.id))
