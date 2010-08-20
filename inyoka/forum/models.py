@@ -803,19 +803,11 @@ class Post(Model):
 
     @staticmethod
     def url_for_post(id, paramstr=None):
-        #XXX: shouldn't we use post.position here?
-        row = dbsession.query(func.count(Post.id), Topic.slug).filter(and_(
-            Topic.id == Post.topic_id,
-            Topic.id == (select([Post.topic_id], Post.id == id)),
-            Post.id <= id
-        )).group_by(Post.id, Topic.slug).first()
-        if not row:
-            return None
-        post_count, slug = row
-        page = max(0, post_count - 1) // POSTS_PER_PAGE + 1
-        return ''.join((href('forum', 'topic', slug,
-            *(page != 1 and (page,) or ())),
-            paramstr and '?%s' % paramstr or '', '#post-%d' % id))
+        post = Post.query.get(id)
+        position, slug = post.position, post.topic.slug
+        page = max(0, position) // POSTS_PER_PAGE + 1
+        url = href('forum', 'topic', slug, *(page != 1 and (page,) or ()))
+        return u''.join((url, paramstr and '?%s' % paramstr or '', '#post-%d' % id))
 
     @staticmethod
     def multi_update_search(ids):
