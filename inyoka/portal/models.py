@@ -17,11 +17,6 @@ from inyoka.utils.dates import format_time, \
      date_time_to_datetime, natural_date, format_datetime
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
-from inyoka.wiki.models import Page
-from inyoka.forum.models import Forum, Topic
-from inyoka.forum.acl import have_privilege as have_forum_privilege
-from inyoka.wiki.parser import parse, render, RenderContext
-from inyoka.wiki.acl import has_privilege as have_wiki_privilege
 from inyoka.portal.user import User
 from werkzeug import cached_property
 
@@ -328,7 +323,7 @@ class Subscription(models.Model):
     topic_id = models.IntegerField(null=True)
     forum_id = models.IntegerField(null=True)
     ubuntu_version = models.CharField(max_length=5, null=True)
-    wiki_page = models.ForeignKey(Page, null=True)
+    wiki_page = models.ForeignKey('Page', null=True)
     notified = models.BooleanField('User was already notified',
                                    default=False)
 
@@ -571,3 +566,11 @@ class SearchQueue(models.Model):
 class Storage(models.Model):
     key = models.CharField(max_length=200, db_index=True)
     value = models.TextField()
+
+
+from inyoka.wiki.models import Page
+from inyoka.forum.models import Forum, Topic
+from inyoka.forum.acl import have_privilege as have_forum_privilege
+from inyoka.wiki.parser import parse, render, RenderContext
+from inyoka.wiki.acl import has_privilege as have_wiki_privilege
+
