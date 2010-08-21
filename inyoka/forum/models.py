@@ -23,7 +23,7 @@ from itertools import groupby
 from sqlalchemy import Column, String, Text, Integer, \
         ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import eagerload, relationship, backref, MapperExtension, \
-    EXT_CONTINUE
+    EXT_CONTINUE, validates
 from sqlalchemy.sql import select, func, and_
 
 from inyoka.conf import settings
@@ -1271,6 +1271,16 @@ class Privilege(Model):
         self.forum_id = forum.id
         self.positive = positive
         self.negative = negative
+
+    @validates('positive', 'negative')
+    def validate_postitive(self, key, value):
+        """Check that the value is not a - value as this
+        would raise nasty bugs in inyoka.forum.acl.  Change values
+        to positive integers everytime.
+        """
+        if value < 0:
+            return -(value)
+        return value
 
 
 class PollOption(Model):
