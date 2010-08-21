@@ -18,6 +18,7 @@ from inyoka.utils.dates import format_time, \
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
 from inyoka.portal.user import User
+from inyoka.wiki.models import Page
 from werkzeug import cached_property
 
 
@@ -568,9 +569,7 @@ class Storage(models.Model):
     value = models.TextField()
 
 
-from inyoka.wiki.models import Page
 from inyoka.forum.models import Forum, Topic
 from inyoka.forum.acl import have_privilege as have_forum_privilege
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.wiki.acl import has_privilege as have_wiki_privilege
-
