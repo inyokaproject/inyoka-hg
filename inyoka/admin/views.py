@@ -776,9 +776,9 @@ def user_edit(request, username):
                         except ValueError:
                             continue
                         if bit > 0:
-                            positive |= bit
+                            positive |= abs(bit)
                         else:
-                            negative |= bit * -1
+                            negative |= abs(bit)
 
                     forum_id = key.split('_')[2]
                     privilege = privileges.filter(and_(
@@ -1073,9 +1073,9 @@ def group_edit(request, name=None):
                         except ValueError:
                             continue
                         if bit > 0:
-                            positive |= bit
+                            positive |= abs(bit)
                         else:
-                            negative |= bit
+                            negative |= abs(bit)
 
                     forum_id = key.split('_')[2]
                     privilege = Privilege.query.filter(and_(
@@ -1083,6 +1083,7 @@ def group_edit(request, name=None):
                         Privilege.user_id==None,
                         Privilege.group_id==group.id
                     )).first()
+
                     if privilege is None and (positive or negative):
                         privilege = Privilege(
                             group=group,
