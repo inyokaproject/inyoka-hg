@@ -44,6 +44,7 @@ from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
     CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext, Privilege
+from inyoka.forum.compat import SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
@@ -198,7 +199,8 @@ def forum(request, slug, page=1):
         )).fetchall()
         subset = [r.user_id for r in cur if check_privilege(r.positive, 'moderate')]
         if subset:
-            supporters = User.objects.filter(id__in=subset).order_by('username').all()
+            supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
+                                     .order_by(SAUser.username).all()
         cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
     else:
         merge = session.merge
