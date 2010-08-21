@@ -1281,7 +1281,7 @@ class Privilege(Model):
         would raise nasty bugs in inyoka.forum.acl.  Change values
         to positive integers everytime.
         """
-        if value < 0:
+        if value is not None and value < 0:
             return abs(value)
         return value
 
