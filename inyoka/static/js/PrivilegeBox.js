@@ -10,6 +10,7 @@
       var name = forum[1];
       var positive = forum[2];
       var negative = forum[3];
+      var result;
       self.mapping[id] = positive.concat($.map(negative, function(o) { return o * -1}));
       var li = $('<li />').text(name).attr('id', 'forum_' + id)
       if (positive != '' || negative != '') {
@@ -37,9 +38,13 @@
           headline.text($('#forum_' + forum).text());
           $.each(privileges, function(id, name) {
             id = parseInt(id);
-            if ($.inArray(id, self.mapping[forum]) > -1) s = '1'
-            else if ($.inArray(id * -1, self.mapping[forum]) > -1) s = '-1'
-            else s = '0';
+            var s;
+            if ($.inArray(id, self.mapping[forum]) > -1)
+              s = '1'
+            else if ($.inArray(id * -1, self.mapping[forum]) > -1)
+              s = '-1'
+            else
+              s = '0';
             $('#priv_' + id + '_' + s).attr('checked', 'checked');
           });
         } else {
@@ -91,4 +96,4 @@
     $(list.children()[0]).click();
     content.append('<span class="note">Halte die Steuerungs-Taste gedrückt, um mehrere Foren auszuwählen.</span>')
   }
-})()
+})();
