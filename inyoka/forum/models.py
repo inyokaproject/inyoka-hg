@@ -804,6 +804,9 @@ class Post(Model):
     @staticmethod
     def url_for_post(id, paramstr=None):
         post = Post.query.get(id)
+        if post is None:
+            return
+
         position, slug = post.position, post.topic.slug
         page = max(0, position) // POSTS_PER_PAGE + 1
         url = href('forum', 'topic', slug, *(page != 1 and (page,) or ()))
