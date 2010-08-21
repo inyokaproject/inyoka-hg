@@ -1279,8 +1279,14 @@ class Privilege(Model):
         to positive integers everytime.
         """
         if value < 0:
-            return -(value)
+            return abs(value)
         return value
+
+    def __repr__(self):
+        gid, uid = self.group_id, self.user_id
+        return '<Privilege(id, %s, %s, %s)' % (
+            (self.group_id and 'gid:%s' % gid or 'uid:%s' % uid,
+             self.positive, self.negative))
 
 
 class PollOption(Model):

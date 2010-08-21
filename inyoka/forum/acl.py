@@ -34,6 +34,8 @@ for desc, bits in PRIVILEGES_BITS.iteritems():
     g['CAN_%s' % desc.upper()] = bits
 DISALLOW_ALL = 0
 
+del desc, bits
+
 
 def join_flags(*flags):
     """
