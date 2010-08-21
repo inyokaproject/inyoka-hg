@@ -414,6 +414,9 @@ class Forum(Model):
             if limit == settings.FORUM_TOPIC_CACHE:
                 topics = topics.all()
                 cache.set(key, topics)
+        else:
+            merge = dbsession.merge
+            topics = [merge(obj, load=False) for obj in topics]
 
         return (count < limit) and topics[:count] or topics
 

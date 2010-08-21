@@ -200,6 +200,9 @@ def forum(request, slug, page=1):
         if subset:
             supporters = User.objects.filter(id__in=subset).order_by('username').all()
         cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
+    else:
+        merge = session.merge
+        supporters = [merge(obj, load=False) for obj in supporters]
 
     ctx.update({
         'forum':         f,
