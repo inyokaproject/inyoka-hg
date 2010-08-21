@@ -13,6 +13,7 @@ from django.http import HttpResponse, HttpResponseRedirect, \
      HttpResponsePermanentRedirect, HttpResponseForbidden, \
      Http404 as PageNotFound
 from django.core.exceptions import ObjectDoesNotExist
+from sqlalchemy.orm.exc import NoResultFound
 from inyoka.conf import settings
 from inyoka.utils.decorators import patch_wrapper
 
@@ -37,7 +38,7 @@ def templated(template_name, status=None, modifier=None,
         def proxy(request, *args, **kwargs):
             try:
                 rv = f(request, *args, **kwargs)
-            except ObjectDoesNotExist:
+            except (ObjectDoesNotExist, NoResultFound):
                 raise PageNotFound()
             if isinstance(rv, HttpResponse):
                 return rv
@@ -56,7 +57,7 @@ def does_not_exist_is_404(f):
     def proxy(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, NoResultFound):
             raise PageNotFound()
     return patch_wrapper(proxy, f)
 
