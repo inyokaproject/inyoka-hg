@@ -692,7 +692,7 @@ def users(request):
 def users_with_special_rights(request):
     query = SAUser.query.filter(Privilege.user_id == SAUser.id) \
                         .filter(Privilege.user_id != None) \
-                        .group_by(SAUser.id).order_by(SAUser.username)
+                        .distinct().order_by(SAUser.username)
     users = list(query)
     return {
         'users': users,
