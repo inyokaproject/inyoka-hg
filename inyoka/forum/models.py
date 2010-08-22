@@ -155,19 +155,20 @@ class TopicMapperExtension(MapperExtension):
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
         parent_ids.append(instance.forum_id)
-        dbsession.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
-            'topic_count': Forum.topic_count + 1
-        }))
+        if parent_ids:
+            dbsession.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
+                'topic_count': Forum.topic_count + 1
+            }))
         return EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
             return
 
-        parent_ids = [p.id for p in instance.forum.parents]
-        parent_ids.append(instance.forum_id)
         ids = [p.id for p in instance.forum.parents[:-1]]
         ids.append(instance.forum_id)
+        if not ids:
+            return EXT_CONTINUE
 
         # set a new last_post_id because of integrity errors and
         # decrase the topic_count
@@ -1107,7 +1108,7 @@ class Attachment(Model):
             post_id
                 The new post id.
         """
-        if not att_ids:
+        if not att_ids or not post_id:
             return False
         new_path = path.join('forum', 'attachments', str(post_id))
         new_abs_path = path.join(settings.MEDIA_ROOT, new_path)

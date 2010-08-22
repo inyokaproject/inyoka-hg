@@ -541,10 +541,13 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if check_privilege(privileges, 'upload'):
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.
-        attachments = Attachment.query.filter(and_(
-            Attachment.id.in_(att_ids),
-            Attachment.post_id == bool(post)==True and post.id or None
-        )).all()
+        if att_is:
+            attachments = Attachment.query.filter(and_(
+                Attachment.id.in_(att_ids),
+                Attachment.post_id == bool(post)==True and post.id or None
+            )).all()
+        else:
+            attachments = []
         if 'attach' in request.POST:
             attach_form = AddAttachmentForm(request.POST, request.FILES)
         else:
@@ -1485,6 +1488,8 @@ def forum_feed(request, slug=None, mode='short', count=20):
         url = url_for(forum)
     else:
         allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.all())]
+        if not allowed_forums:
+            return abort_access_denied(request)
         topics = Topic.query.order_by(Topic.id.desc()).options(
             eagerload('first_post'), eagerload('author')
         ).filter(Topic.forum_id.in_(allowed_forums))[:count]
