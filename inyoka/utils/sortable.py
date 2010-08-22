@@ -124,8 +124,11 @@ class Sortable(object):
                 return self.objects.select_related()
             return self.objects.all()
 
-        if self.related and not self.is_sqlalchemy:
-            return self.objects.order_by(order).select_related()
+        if not self.is_sqlalchemy:
+            q = self.objects.order_by(order)
+            if self.related:
+                return q.select_related()
+            return q
         order = (asc, desc)[self.order.startswith('-')]
         return self.objects.order_by(order(self.sa_columns[ocol]))
 
