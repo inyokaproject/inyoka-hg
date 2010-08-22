@@ -273,7 +273,7 @@ class SearchSystem(object):
             try:
                 enq = xapian.Enquire(self.get_connection())
                 if sort == 'date':
-                    enq.set_sort_by_value_then_relevance(2, False)
+                    enq.set_sort_by_value_then_relevance(2, True)
                 else:
                     enq.set_sort_by_relevance_then_value(2, False)
                 if collapse:
