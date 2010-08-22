@@ -985,21 +985,10 @@ class Post(Model):
 
     @property
     def grouped_attachments(self):
-        #XXX: damn workaround for some PIL bugs... (e.g interlaced png)
         def expr(v):
-            if v.mimetype.startswith('image') and v.mimetype in SUPPORTED_IMAGE_TYPES:
-                try:
-                    img = Image.open(StringIO(v.contents))
-                    if img.format == 'PNG' and img.info.get('interlace'):
-                        # PIL raises an IOError if the PNG is interlaced
-                        # so we need that workaround for now...
-                        return u'Bilder (keine Vorschau möglich)'
-                except IOError:
-                    return u'Bilder (keine Vorschau möglich)'
-
-                return u'Bilder (Vorschau)'
-
-            return u''
+            return u'Bilder' if v.mimetype.startswith('image') and v.mimetype \
+                in SUPPORTED_IMAGE_TYPES else u''
+        
         attachments = sorted(self.attachments, key=expr)
         grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
                    for x in groupby(attachments, expr)]
@@ -1202,45 +1191,63 @@ class Attachment(Model):
             'show_thumbnails', False)
         show_preview = current_request.user.settings.get(
             'show_preview', False)
-        fallback = u'<a href="%s" type="%s">Anhang herunterladen</a>' % (
-            url, self.mimetype)
 
-        if not show_preview and self.mimetype not in SUPPORTED_IMAGE_TYPES:
-            return fallback
-        elif not show_preview or not show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
-            return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
-                url, self.mimetype, self.comment, self.name)
+        def isimage():
+            """
+            This helper returns True if this attachment is a supported image,
+            else False.
+            """
+            return True if self.mimetype in SUPPORTED_IMAGE_TYPES else False
 
-        if show_thumbnails and self.mimetype in SUPPORTED_IMAGE_TYPES:
-            # handle and cache thumbnails
+        def istext():
+            """
+            This helper returns True if this attachment is a text file with
+            at most 250 characters, else False.
+            """
+            return True if self.mimetype.startswith('text/') \
+                and len(self.contents) < 250 else False
+
+        def thumbnail():
+            """
+            This helper returns the thumbnail url of this attachment or None
+            if there is no way to create a thumbnail.
+            """
             ff = self.file.encode('utf-8')
             img_path = path.join(settings.MEDIA_ROOT,
                 'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
-                # create a new thumbnail
                 try:
                     img = Image.open(StringIO(self.contents))
-                    if img.format == 'PNG' and img.info.get('interlace'):
-                        return u'<a href="%s" type="%s" title="%s">%s ' \
-                            u'anschauen</a>' % (
-                            url, self.mimetype, self.comment, self.name)
-
-                    if img.size > settings.FORUM_THUMBNAIL_SIZE:
+                    if not (img.format == 'PNG' and img.info.get('interlace')) \
+                        and img.size > settings.FORUM_THUMBNAIL_SIZE:
                         img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
-                    img.save(img_path, img.format)
+                        img.save(img_path, img.format)
+                    elif not (img.format == 'PNG' and img.info.get('interlace')) \
+                        and img.size < settings.FORUM_THUMBNAIL_SIZE:
+                        return url
+                    else:
+                        return
                 except IOError:
-                    pass
-            thumb_url = href('media', 'forum/thumbnails/%s-%s'
-                             % (self.id, self.file.split('/')[-1]))
-            return u'<a href="%s"><img class="preview" src="%s" ' \
-                   u'alt="%s" title="%s"></a>' % (url, thumb_url, self.comment,
-                   self.comment)
+                    return
+            return href('media', 'forum/thumbnails/%s-%s'
+                % (self.id, self.file.split('/')[-1]))
 
-        elif self.mimetype.startswith('text/') and len(self.contents) < 250:
+        if show_preview and show_thumbnails and isimage():
+            thumb = thumbnail()
+            if thumb:
+                return u'<a href="%s"><img class="preview" src="%s" ' \
+                    u'alt="%s" title="%s"></a>' % (url, thumb, self.comment,
+                    self.comment)
+            else:
+                return u'<a href="%s" type="%s" title="%s">%s ansehen</a>' % (
+                    url, self.mimetype, self.comment, self.name)
+        elif show_preview and istext():
             return highlight_code(self.contents.decode('utf-8'),
                 mimetype=self.mimetype)
         else:
-            return fallback
+            return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
+                url, self.mimetype, self.comment, self.name)
+
 
     def open(self, mode='rb'):
         """
