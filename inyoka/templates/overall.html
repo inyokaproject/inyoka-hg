@@ -221,6 +221,7 @@
         </li>
       </ul>
     </div>{# .footer #}
+    <div style="clear: both;"></div>
    </div></div></div></div></div>
     {%- if not USER.is_authenticated %}
     <form action="{{ href('portal', 'login', next=CURRENT_URL) }}" method="post" id="js_login_form">
