@@ -494,7 +494,6 @@ table.syntaxtable td.linenos {
 
 .header {
   height: 106px;
-/*  background-image: url(../img/header.jpg);*/
 }
 
 .header img {
@@ -1128,10 +1127,6 @@ div.not_found img {
 	font: menu;
 	font-size: 12px;
 	overflow: hidden;
-}
-
-.ac_loading {
-	background : Window url('../img/indicator.gif') right center no-repeat;
 }
 
 .ac_over {
