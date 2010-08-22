@@ -205,7 +205,7 @@ def get_thumbnail(location, width=None, height=None, force=False):
                 dst.seek(0, 2)
                 pos = dst.tell()
                 results.append((pos, dst, format))
-            except IOError:
+            except (IOError, OSError):
                 continue
     finally:
         src.close()
