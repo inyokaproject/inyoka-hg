@@ -49,10 +49,8 @@ def get_stemmer(language_code=LANGUAGE):
         return stemmer
 
 
-
 _description_re = re.compile(r'([\w]+):\(pos=[\d+]\)')
 _tcpsrv_re = re.compile(r'tcpsrv://([\w\d\.]+):(\d+)/?')
-
 
 
 def get_human_readable_estimate(mset):
@@ -197,7 +195,7 @@ class SearchSystem(object):
 
     def parse_query(self, query):
         """Parse a query."""
-        query = re.sub(r'\b(UND\s+)?NICHT\b', 'AND NOT', query)
+        query = re.sub(r'\b(UND\s+)NICHT\b', 'AND NOT', query)
         query = re.sub(r'\bUND\b', 'AND', query)
         query = re.sub(r'\bODER\b', 'OR', query)
 
@@ -275,7 +273,7 @@ class SearchSystem(object):
             try:
                 enq = xapian.Enquire(self.get_connection())
                 if sort == 'date':
-                    enq.set_sort_by_value_then_relevance(2)
+                    enq.set_sort_by_value_then_relevance(2, False)
                 else:
                     enq.set_sort_by_relevance_then_value(2, False)
                 if collapse:
