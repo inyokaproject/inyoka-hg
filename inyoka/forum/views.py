@@ -541,7 +541,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     if check_privilege(privileges, 'upload'):
         # check for post = None to be sure that the user can't "hijack"
         # other attachments.
-        if att_is:
+        if att_ids:
             attachments = Attachment.query.filter(and_(
                 Attachment.id.in_(att_ids),
                 Attachment.post_id == bool(post)==True and post.id or None
