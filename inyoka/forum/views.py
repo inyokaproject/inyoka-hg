@@ -1167,7 +1167,6 @@ def splittopic(request, topic_slug, page=1):
                     ubuntu_distro=data['ubuntu_distro'],
                 )
                 new_topic.forum.topic_count += 1
-                session.flush([new_topic])
                 Post.split(posts, old_topic, new_topic)
             else:
                 new_topic = data['topic']

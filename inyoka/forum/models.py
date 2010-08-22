@@ -886,7 +886,6 @@ class Post(Model):
             new_topic.first_post = posts[0]
             new_topic.author = posts[0].author
 
-        dbsession.flush()
         ids = [p.id for p in posts]
         dbsession.execute(Post.__table__.update(
             Post.id.in_(ids), values={
