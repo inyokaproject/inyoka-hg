@@ -123,7 +123,7 @@ class SearchSystem(object):
     def index(self, component, docid):
         try:
             self.adapters[component].store(docid)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, AttributeError):
             self.delete(component, docid)
 
     def index_multi(self, component, docids):
