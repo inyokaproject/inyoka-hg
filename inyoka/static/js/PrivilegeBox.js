@@ -74,7 +74,6 @@
                 priv_data[priv_data.length] = result;
             }
           });
-          window.console.debug(priv_data);
           $.each(selected_forums, function(i, forum_id) {
             var name = 'forum_privileges_' + forum_id;
             var result = $('input[name=' + name + ']');

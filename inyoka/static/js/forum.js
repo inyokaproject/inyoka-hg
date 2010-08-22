@@ -31,7 +31,8 @@ $(function () {
                 'id="id_add_option" />');
       $('#id_add_option').click(addReply);
       return false;
-    })})();
+    });
+  })();
 
   /* expand and collapse button for categories */
   (function() {
@@ -44,10 +45,11 @@ $(function () {
         $('table.category_box tr.head').each(function() {
           toggleState[this.id.substr(9)] = $('a.collapsed', this).length > 0;
         });
-        var hidden = []
-        for (id in toggleState)
-          if (toggleState[id])
-            hidden.push(id);
+        var hidden = [];
+        for (state in toggleState) {
+          if (toggleState[state])
+            hidden.push(state);
+        }
         $.get('/?__service__=forum.toggle_categories', {hidden: hidden});
         return false;
       })
@@ -69,7 +71,6 @@ $(function () {
     // are in the same macro we just need to check for one buttons text at all.
     var action = "";
     var new_text = "";
-    // var action = $(tags[0]).text()=='abbestellen' ? 'unsubscribe' : 'subscribe';
 
     var text = $(tags[0]).text();
 
@@ -100,7 +101,6 @@ $(function () {
     }, function(data) {
       // Bind new events and change button's text.
       $(tags).fadeOut('fast');
-      //$(tags).text(action=='subscribe' ? 'abbestellen' : 'abonnieren');
       $(tags).text(new_text);
       $(tags).fadeIn('fast');
     });
@@ -113,13 +113,15 @@ $(function () {
       $(this).click(function() {
         doAction('topic', $(this).attr('id'), $('a.action_subscribe.subscribe_topic'));
         return false;
-    })});
+      });
+    });
 
     $('a.action_subscribe.subscribe_forum').each(function() {
       $(this).click(function() {
         doAction('forum', $(this).attr('id'), $('a.action_subscribe.subscribe_forum'));
         return false;
-    })});
+      });
+    });
 
     $('a.solve_topic').each(function() {
       $(this).click(function() {
@@ -128,23 +130,23 @@ $(function () {
         if ($('a.solve_topic').hasClass('action_solve')) {
           $('a.solve_topic').removeClass('action_solve');
           $('a.solve_topic').addClass('action_unsolve');
-	  with ($('span.status_unsolved')) {
-	    fadeOut('fast');
-	    removeClass('status_unsolved');
-	    addClass('status_solved');
-	    text('gelöst');
-	    fadeIn('fast');
-	  }
+          with ($('span.status_unsolved')) {
+            fadeOut('fast');
+            removeClass('status_unsolved');
+            addClass('status_solved');
+            text('gelöst');
+            fadeIn('fast');
+          }
         } else {
           $('a.solve_topic').removeClass('action_unsolve');
           $('a.solve_topic').addClass('action_solve');
-	  with ($('span.status_solved')) {
-	    fadeOut('fast');
-	    removeClass('status_solved');
-	    addClass('status_unsolved');
-	    text('ungelöst');
-	    fadeIn('fast');
-	  }
+          with ($('span.status_solved')) {
+            fadeOut('fast');
+            removeClass('status_solved');
+            addClass('status_unsolved');
+            text('ungelöst');
+            fadeIn('fast');
+          }
         }
         return false;
     })});
@@ -165,7 +167,7 @@ $(function () {
       $.getJSON(url, {
         version: version_str
       }, function(data) {
-        if (data.class == 'unstable') {
+        if (data.class_ == 'unstable') {
           $('span#version_info').attr('class', 'unstable')
             .html(with_link(text_unstable, data));
         } else if (data.lts) {
@@ -183,6 +185,3 @@ $(function () {
     })
   })();
 });
-
-
-

@@ -139,7 +139,7 @@ def on_get_version_details(request):
         'codename': obj.codename,
         'lts': obj.lts,
         'active': obj.active,
-        'class': obj.class_,
+        'class_': obj.class_,
         'current': obj.current,
         'link': obj.link
     }
