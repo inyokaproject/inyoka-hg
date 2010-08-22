@@ -1156,23 +1156,39 @@ def splittopic(request, topic_slug, page=1):
 
             posts = list(posts)
 
-            if data['action'] == 'new':
-                new_topic = Topic(
-                    title=data['title'],
-                    forum=data['forum'],
-                    slug=None,
-                    post_count=0,
-                    author_id=posts[0].author_id,
-                    ubuntu_version=data['ubuntu_version'],
-                    ubuntu_distro=data['ubuntu_distro'],
-                )
-                new_topic.forum.topic_count += 1
-                Post.split(posts, old_topic, new_topic)
-            else:
-                new_topic = data['topic']
-                Post.split(posts, old_topic, new_topic)
+            try:
+                if data['action'] == 'new':
+                    new_topic = Topic(
+                        title=data['title'],
+                        forum=data['forum'],
+                        slug=None,
+                        post_count=0,
+                        author_id=posts[0].author_id,
+                        ubuntu_version=data['ubuntu_version'],
+                        ubuntu_distro=data['ubuntu_distro'],
+                    )
+                    new_topic.forum.topic_count += 1
+                    Post.split(posts, old_topic, new_topic)
+                else:
+                    new_topic = data['topic']
+                    Post.split(posts, old_topic, new_topic)
 
-            session.commit()
+                session.commit()
+            except ValueError:
+                session.rollback()
+                flash(u'Du kannst ein Topic nicht in eine Kategorie verschieben. '
+                      u'Bitte wähle ein richtiges Forum aus.', False)
+                return {
+                    'topic': old_topic,
+                    'forum': old_topic.forum,
+                    'form':  form,
+                    'pagination': pagination.generate(),
+                    'posts': pagination.objects.all(),
+                    'current_page': page,
+                    'max_pages': pagination.max_pages,
+                    'selected_ids': [int(id) for id in request.POST.getlist('select')],
+                    'selected_start': int(request.POST.get('start') or 0)
+                }
 
             new_forum = new_topic.forum
             nargs = {
