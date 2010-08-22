@@ -70,24 +70,31 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from sqlalchemy import asc, desc
 from inyoka.utils.urls import href
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
+from inyoka.utils.html import escape
 
 
 class Sortable(object):
 
-    def __init__(self, objects, args, default, sqlalchemy=False,
-                 sa_column=None, columns=None):
+    def __init__(self, objects, args, default, sqlalchemy=False, columns=None):
         self.objects = objects
         self.order = args.get('order') or default
         self.order_column = self.order.startswith('-') and self.order[1:] or \
                             self.order
-        self.sa_column = sa_column
         self.related = args.get('related') or False
         self.default = default
         self.is_sqlalchemy = sqlalchemy
         self.columns = columns or []
+        self.sa_columns = []
+        if sqlalchemy:
+            # resolve the columns to give sqlalchemy the chance
+            # to sort correctly.
+            sa_cols = objects._mapper_zero().class_.__table__.columns
+            dc = dict((x.key, x) for x in sa_cols if columns and x.key in columns or True)
+            self.sa_columns = dc
 
     def get_html(self, key, value, related=False):
         if key == self.order_column:
@@ -108,17 +115,19 @@ class Sortable(object):
 
     def get_objects(self):
         order = self.order
-        if self.columns and not order.strip('-') in self.columns:
+        ocol = escape(order.lstrip('-'))
+        if self.columns and not ocol in self.columns:
             # safes us for some bad usage that raises an exception
             flash(u'Die ausgewählte Kriterie zum sortieren („%s“) ist '
-                  u'nicht verfügbar' % order.strip('-'))
+                  u'nicht verfügbar' % ocol)
             if self.related and not self.is_sqlalchemy:
                 return self.objects.select_related()
             return self.objects.all()
 
         if self.related and not self.is_sqlalchemy:
             return self.objects.order_by(order).select_related()
-        return self.objects.order_by(order)
+        order = (asc, desc)[self.order.startswith('-')]
+        return self.objects.order_by(order(self.sa_columns[ocol]))
 
 
 ACTIONS = {

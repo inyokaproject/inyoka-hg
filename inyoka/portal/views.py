@@ -1055,7 +1055,6 @@ def memberlist(request, page=1):
     `page` represents the current page in the pagination.
     """
     sortable = Sortable(SAUser.query, request.GET, 'id', sqlalchemy=True,
-                        sa_column=SAUser.id,
                         columns=['id', 'username', 'location', 'date_joined',
                                  'post_count'])
     filterable = Filterable(SAUser, sortable.get_objects(), {
