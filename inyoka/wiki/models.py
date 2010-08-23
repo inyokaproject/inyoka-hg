@@ -668,7 +668,7 @@ class Text(models.Model):
     """
     objects = TextManager()
     value = models.TextField()
-    hash = models.CharField(max_length=40, unique=True)
+    hash = models.CharField(max_length=40, unique=True, db_index=True)
     html_render_instructions = models.TextField(null=True)
 
     def parse(self, template_context=None, transformers=None):
@@ -781,7 +781,7 @@ class Page(models.Model):
             If the page is bound this points to a `Revision` otherwise `None`.
     """
     objects = PageManager()
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True, db_index=True)
     topic_id = models.IntegerField(null=True)
 
     #: this points to a revision if created with a query method
@@ -1256,7 +1256,7 @@ class Revision(models.Model):
     text = models.ForeignKey(Text, related_name='revisions')
     user = models.ForeignKey(User, related_name='wiki_revisions', null=True,
                              blank=True)
-    change_date = models.DateTimeField()
+    change_date = models.DateTimeField(db_index=True)
     note = models.CharField(max_length=512)
     deleted = models.BooleanField()
     remote_addr = models.CharField(max_length=200, null=True)
@@ -1336,8 +1336,8 @@ class MetaData(models.Model):
     by the `Page.metadata` property and the `Page.update_meta` method.
     """
     page = models.ForeignKey(Page)
-    key = models.CharField(max_length=30)
-    value = models.CharField(max_length=512)
+    key = models.CharField(max_length=30, db_index=True)
+    value = models.CharField(max_length=512, db_index=True)
 
 
 # imported here because of circular references
