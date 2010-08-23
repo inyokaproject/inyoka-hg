@@ -225,7 +225,7 @@ def send_new_user_password(user):
 
 
 class Group(models.Model):
-    name = models.CharField('Name', max_length=80, unique=True)
+    name = models.CharField('Name', max_length=80, unique=True, db_index=True)
     is_public = models.BooleanField(u'Öffentliches Profil')
     _default_group = None
     permissions = models.IntegerField('Berechtigungen', default=0)
@@ -427,8 +427,8 @@ class User(models.Model):
     """User model that contains all informations about an user."""
     objects = UserManager()
 
-    username = models.CharField('Benutzername', max_length=30, unique=True)
-    email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50)
+    username = models.CharField('Benutzername', max_length=30, unique=True, db_index=True)
+    email = models.EmailField('E-Mail-Adresse', unique=True, max_length=50, db_index=True)
     password = models.CharField('Passwort', max_length=128)
     status = models.IntegerField('Aktiv', default=0)
     last_login = models.DateTimeField('Letzter Login', default=datetime.utcnow)

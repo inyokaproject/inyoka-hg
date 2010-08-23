@@ -101,15 +101,14 @@ class SessionInfo(models.Model):
     active has a session info that is updated every request.  The
     management functions for this model are in `inyoka.utils.sessions`.
     """
-    key = models.CharField(max_length=200, unique=True)
-    last_change = models.DateTimeField()
+    key = models.CharField(max_length=200, unique=True, db_index=True)
+    last_change = models.DateTimeField(db_index=True)
     subject_text = models.CharField(max_length=100, null=True)
     subject_type = models.CharField(max_length=20)
     subject_link = models.CharField(max_length=200, null=True)
     action = models.CharField(max_length=500)
     action_link = models.CharField(max_length=200, null=True)
     category = models.CharField(max_length=200, null=True)
-
 
 
 
@@ -129,7 +128,6 @@ class PrivateMessage(models.Model):
     Private messages allow users to communicate with each other privately.
     This model represent one of these messages.
     """
-    #objects = PrivateMessageManager()
     author = models.ForeignKey(User)
     subject = models.CharField(u'Titel', max_length=255)
     pub_date = models.DateTimeField(u'Datum')
@@ -271,8 +269,8 @@ class StaticPage(models.Model):
     Stores static pages (imprint, license, etc.)
     """
     key = models.SlugField(u'Schlüssel', max_length=25, primary_key=True,
-          unique=True, help_text=u'Wird für die URL verwendet.'\
-                                 u' Kann nicht verändert werden.')
+          unique=True, db_index=True,
+          help_text=u'Wird für die URL verwendet. Kann nicht verändert werden.')
     title = models.CharField(u'Titel', max_length=200)
     content = models.TextField(u'Inhalt',
         help_text=(u'Muss valides XHTML sein. Überschriften ab h3 abwärts.')
@@ -302,7 +300,7 @@ class StaticPage(models.Model):
 
 
 class StaticFile(models.Model):
-    identifier = models.CharField('Identifier', max_length=100, unique=True)
+    identifier = models.CharField('Identifier', max_length=100, unique=True, db_index=True)
     file = models.FileField(upload_to='portal/files')
     is_ikhaya_icon = models.BooleanField('Ist Ikhaya-Icon', default=False)
 
@@ -374,10 +372,10 @@ class Subscription(models.Model):
 
 class Event(models.Model):
     name = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True) # this may change !!
+    slug = models.SlugField(unique=True, db_index=True)
     changed = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     time = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField(blank=True)
     author = models.ForeignKey(User)
