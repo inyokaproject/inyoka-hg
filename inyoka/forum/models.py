@@ -340,7 +340,7 @@ class Forum(Model):
     name = Column(String(100), nullable=False)
     slug = Column(String(100), nullable=False, unique=True, index=True)
     description = Column(String(500), nullable=False, default='')
-    parent_id = Column(Integer, ForeignKey('forum_forum.id'), nullable=True, index=True)
+    parent_id = Column(Integer, ForeignKey('forum_forum.id'), nullable=True)
     position = Column(Integer, nullable=False, default=0)
     last_post_id = Column(Integer, ForeignKey('forum_post.id',
                           use_alter=True, name='forum_forum_lastpost_id'),
@@ -522,7 +522,7 @@ class Topic(Model):
     slug = Column(String(50), nullable=False, index=True)
     view_count = Column(Integer, default=0, nullable=False)
     post_count = Column(Integer, default=0, nullable=False)
-    sticky = Column(Boolean, default=False, nullable=False)
+    sticky = Column(Boolean, default=False, nullable=False, index=True)
     solved = Column(Boolean, default=False, nullable=False)
     locked = Column(Boolean, default=False, nullable=False)
     reported = Column(Text, nullable=False)
@@ -762,7 +762,7 @@ class Post(Model):
     __mapper_args__ = {'extension': PostMapperExtension()}
 
     id = Column(Integer, primary_key=True)
-    position = Column(Integer, nullable=False, default=0)
+    position = Column(Integer, nullable=False, default=0, index=True)
     author_id = Column(Integer, ForeignKey('portal_user.id'), nullable=False)
     pub_date = Column(DateTime(timezone=False), nullable=False, index=True,
                       default=datetime.utcnow)
@@ -988,7 +988,7 @@ class Post(Model):
         def expr(v):
             return u'Bilder' if v.mimetype.startswith('image') and v.mimetype \
                 in SUPPORTED_IMAGE_TYPES else u''
-        
+
         attachments = sorted(self.attachments, key=expr)
         grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
                    for x in groupby(attachments, expr)]
@@ -1264,7 +1264,7 @@ class Privilege(Model):
     __tablename__ = 'forum_privilege'
 
     id = Column(Integer, primary_key=True)
-    group_id = Column(Integer, nullable=True)
+    group_id = Column(Integer, ForeignKey('portal_group.id'), nullable=True)
     user_id = Column(Integer, ForeignKey('portal_user.id'), nullable=True)
     forum_id = Column(Integer, ForeignKey('forum_forum.id'), nullable=False)
     positive = Column(Integer, nullable=True)

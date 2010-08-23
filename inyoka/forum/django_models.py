@@ -21,7 +21,7 @@ class Welcomemessage(models.Model):
 
 class Forum(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.CharField(unique=True, max_length=100)
+    slug = models.CharField(unique=True, max_length=100, db_index=True)
     description = models.TextField()
     parent = models.ForeignKey('self', null=True, blank=True)
     position = models.IntegerField()
@@ -37,10 +37,10 @@ class Forum(models.Model):
 class Topic(models.Model):
     forum = models.ForeignKey(Forum)
     title = models.CharField(max_length=100)
-    slug = models.CharField(unique=True, max_length=50)
+    slug = models.CharField(unique=True, max_length=50, db_index=True)
     view_count = models.IntegerField()
     post_count = models.IntegerField()
-    sticky = models.BooleanField()
+    sticky = models.BooleanField(db_index=True)
     solved = models.BooleanField()
     locked = models.BooleanField()
     reported = models.TextField(blank=True, null=True)
@@ -60,9 +60,9 @@ class Topic(models.Model):
 
 
 class Post(models.Model):
-    position = models.IntegerField()
+    position = models.IntegerField(db_index=True)
     author = models.ForeignKey(User)
-    pub_date = models.DateTimeField()
+    pub_date = models.DateTimeField(db_index=True)
     topic = models.ForeignKey(Topic)
     hidden = models.BooleanField()
     text = models.TextField(blank=True)
@@ -107,6 +107,6 @@ class Privilege(models.Model):
     negative = models.IntegerField(null=True, blank=True)
 
 
-class Voter(models.Model):
+class PollVoter(models.Model):
     voter = models.ForeignKey(User)
     poll = models.ForeignKey(Poll)
