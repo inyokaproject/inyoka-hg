@@ -21,7 +21,7 @@ class Entry(models.Model):
     lang = models.CharField('Sprache', max_length=20)
     code = models.TextField('Code')
     rendered_code = models.TextField('Gerenderter Code')
-    pub_date = models.DateTimeField('Datum')
+    pub_date = models.DateTimeField('Datum', db_index=True)
     author = models.ForeignKey(User, verbose_name='Autor')
     referrer = models.TextField('Verweisende Seiten', blank=True)
 
