@@ -81,7 +81,7 @@ class Blog(models.Model):
 
 class Entry(models.Model):
     blog = models.ForeignKey(Blog)
-    guid = models.CharField(max_length=200, unique=True)
+    guid = models.CharField(max_length=200, unique=True, db_index=True)
     title = models.CharField(max_length=140)
     url = models.URLField()
     text = models.TextField()
