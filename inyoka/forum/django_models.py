@@ -107,6 +107,6 @@ class Privilege(models.Model):
     negative = models.IntegerField(null=True, blank=True)
 
 
-class PollVoter(models.Model):
+class Voter(models.Model):
     voter = models.ForeignKey(User)
     poll = models.ForeignKey(Poll)
