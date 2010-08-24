@@ -57,7 +57,7 @@ engine = create_engine('%s://%s:%s@%s/%s%s' % (
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
-    autoflush=True, autocommit=False))
+    autoflush=True, autocommit=False, autoexpire=True))
 
 
 def mapper(model, table, **options):
