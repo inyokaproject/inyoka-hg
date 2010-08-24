@@ -11,6 +11,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import time
 from sqlalchemy import orm
 from sqlalchemy import MetaData, create_engine, String, Unicode
 from sqlalchemy.orm import scoped_session, create_session
@@ -18,9 +19,28 @@ from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import get_attribute, set_attribute
+from sqlalchemy.interfaces import ConnectionProxy
 from inyoka.conf import settings
 from inyoka.utils.text import get_next_increment, slugify
 from inyoka.utils.collections import flatten_iterator
+from inyoka.utils.debug import find_calling_context
+from inyoka.utils.local import current_request
+
+
+
+class ConnectionDebugProxy(ConnectionProxy):
+    """Helps debugging the database."""
+
+    def cursor_execute(self, execute, cursor, statement, parameters,
+                       context, executemany):
+        start = time.time()
+        try:
+            return execute(cursor, statement, parameters, context)
+        finally:
+            request = current_request._get_current_object()
+            if request is not None:
+                request.queries.append((statement, parameters, start,
+                                        time.time(), find_calling_context()))
 
 
 rdbm = 'mysql'
@@ -33,18 +53,11 @@ engine = create_engine('%s://%s:%s@%s/%s%s' % (
     rdbm, settings.DATABASE_USER, settings.DATABASE_PASSWORD,
     settings.DATABASE_HOST, settings.DATABASE_NAME, extra
 ), pool_recycle=25, echo=False,
-   poolclass=NullPool)
+   poolclass=NullPool, proxy=ConnectionDebugProxy())
 metadata = MetaData(bind=engine)
 
 session = scoped_session(lambda: create_session(engine,
     autoflush=True, autocommit=False))
-
-
-if settings.DATABASE_DEBUG:
-    import logging
-    engine_logger = logging.getLogger('sqlalchemy.engine')
-    engine_logger.setLevel(logging.INFO)
-    engine_logger.addHandler(logging.FileHandler('db.log'))
 
 
 def mapper(model, table, **options):
@@ -149,7 +162,6 @@ class SlugGenerator(orm.MapperExtension):
             find_next_increment(getattr(instance.__class__, self.slugfield),
                                 slug, max_length))
         return orm.EXT_CONTINUE
-
 
 def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
     """Execute a query blockwise to prevent lack of ram"""

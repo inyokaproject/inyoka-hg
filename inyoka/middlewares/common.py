@@ -15,6 +15,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import re
 from django.db import connection
 from django.middleware.common import CommonMiddleware
 from inyoka import INYOKA_REVISION
@@ -25,6 +26,11 @@ from inyoka.utils.database import session
 from inyoka.utils.flashing import has_flashed_messages
 from inyoka.utils.local import local, local_manager, request_cache
 from inyoka.utils.timer import StopWatch
+from inyoka.utils.debug import inject_query_info
+
+
+
+re_htmlmime = re.compile(r'^text/x?html')
 
 
 class CommonServicesMiddleware(CommonMiddleware):
@@ -45,6 +51,8 @@ class CommonServicesMiddleware(CommonMiddleware):
             request_cache._get_current_object()
         except RuntimeError:
             local.cache = {}
+
+        request.queries = []
 
         # Start time tracker
         request.watch = StopWatch()
@@ -117,6 +125,7 @@ class CommonServicesMiddleware(CommonMiddleware):
                 for line in wrap(comma_re.sub(', ', q['sql']), cols - 6):
                     p << '    %s\n' % line.rstrip()
             p.bold << '=' * cols << '\n'
+            inject_query_info(request, response)
         return response
 
 
