@@ -10,10 +10,13 @@
 """
 import re
 import sys
+from textwrap import wrap
 from werkzeug import escape, html
+from django.db import connection
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')
+_comma_re = re.compile(r',(?=\S)')
 
 
 def debug_repr(obj):
@@ -52,8 +55,9 @@ def find_calling_context(skip=2, module='inyoka'):
     return '<unknown>'
 
 
-def render_query_table(queries):
+def render_query_table(request):
     """Renders a nice table of all queries in the page."""
+    queries = request.queries
     total = 0
 
     qresult = []
@@ -67,9 +71,17 @@ def render_query_table(queries):
             escape(calling_context),
             (end - start) * 1000
         ))
+
+    # render django queries into the debug toolbar
+    for query in connection.queries:
+        qresult.append(u'<li><pre>%s</pre><pre>Issued from Django-Application</pre>'
+                       u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
+                       % (u''.join(query['sql'].split()), float(query['time'])))
+        total += float(query['time'])
+
     result = [u'<div id="database_debug_table">']
     stat = (u'<strong>(%d queries in %.2f ms)</strong>'
-            % (len(queries), total * 1000))
+            % (len(queries) + len(connection.queries), total * 1000))
     result.append(stat)
     result.append(u'<div id="database_debug_table_inner"><ul>')
     result.extend(qresult)
@@ -91,9 +103,9 @@ def render_query_table(queries):
 
 def inject_query_info(request, response):
     """Injects the collected queries into the response."""
-    if not request.queries:
+    if not request.queries and not connection.queries:
         return
-    debug_info = render_query_table(request.queries).encode('utf-8')
+    debug_info = render_query_table(request).encode('utf-8')
 
     body = response.content
     match = _body_end_re.search(body)

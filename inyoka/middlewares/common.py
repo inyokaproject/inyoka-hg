@@ -52,7 +52,8 @@ class CommonServicesMiddleware(CommonMiddleware):
         except RuntimeError:
             local.cache = {}
 
-        request.queries = []
+        if not hasattr(request, 'queries'):
+            request.queries = []
 
         # Start time tracker
         request.watch = StopWatch()
@@ -104,28 +105,13 @@ class CommonServicesMiddleware(CommonMiddleware):
            or has_flashed_messages():
             response['Cache-Control'] = 'no-cache'
 
+        if settings.DATABASE_DEBUG:
+            inject_query_info(request, response)
+
         # clean up after the local manager
         local_manager.cleanup()
         session.remove()
 
-        if settings.DATABASE_DEBUG:
-            import sys
-            import re
-            from textwrap import wrap
-            from inyoka.utils.terminal import get_dimensions, FancyPrinter
-            p = FancyPrinter(sys.stderr)
-            comma_re = re.compile(r',(?=\S)')
-            cols, rows = get_dimensions()
-
-            p.bold << '=' * cols << '\n'
-            p.red << 'DATABASE QUERIES (%s)\n' % len(connection.queries)
-            p.bold << '-' * cols << '\n'
-            for idx, q in enumerate(connection.queries):
-                p.green << '%s%s:\n' % (idx and '\n' or '', q['time'])
-                for line in wrap(comma_re.sub(', ', q['sql']), cols - 6):
-                    p << '    %s\n' % line.rstrip()
-            p.bold << '=' * cols << '\n'
-            inject_query_info(request, response)
         return response
 
 
