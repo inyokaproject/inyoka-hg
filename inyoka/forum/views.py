@@ -128,34 +128,22 @@ def forum(request, slug, page=1):
     """
     Return a single forum to show a topic list.
     """
-    key = 'forum/forum/%s' % slug
-    f = cache.get(key)
+    forum = Forum.query.get(slug)
+    # if the forum is a category we raise PageNotFound. Categories have
+    # their own url at /category.
+    if not forum or forum.parent_id is None:
+        raise PageNotFound()
 
-    if f is None:
-        f = Forum.query.options(eagerload('_children'),
-                                eagerload('_children.last_post'),
-                                eagerload('_children.last_post.author')) \
-                .filter_by(slug=slug).first()
-
-        # if the forum is a category we raise PageNotFound. Categories have
-        # their own url at /category.
-        if not f or f.parent_id is None:
-            raise PageNotFound()
-
-        cache.set(key, f, 60)
-
-    f = session.merge(f, load=False)
-
-    privs = get_forum_privileges(request.user, f.id)
+    privs = get_forum_privileges(request.user, forum.id)
     if not check_privilege(privs, 'read'):
         return abort_access_denied(request)
 
-    fmsg = f.find_welcome(request.user)
+    fmsg = forum.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
 
     if page < CACHE_PAGES_COUNT:
-        key = 'forum/topics/%d/%d' % (f.id, int(page))
+        key = 'forum/topics/%d/%d' % (forum.id, int(page))
         ctx = cache.get(key)
     else:
         ctx = None
@@ -164,7 +152,7 @@ def forum(request, slug, page=1):
         topics = Topic.query.options(eagerload('author'),
                                      eagerload('last_post'),
                                      eagerload('last_post.author')) \
-            .filter_by(forum_id=f.id) \
+            .filter_by(forum_id=forum.id) \
             .order_by(Topic.sticky.desc(),
                       Topic.last_post_id.desc())
 
@@ -186,29 +174,29 @@ def forum(request, slug, page=1):
 
     if have_privilege(User.ANONYMOUS_USER, f, 'read'):
         set_session_info(request, u'sieht sich das Forum „<a href="%s">'
-                         u'%s</a>“ an' % (escape(url_for(f)), escape(f.name)),
+                         u'%s</a>“ an' % (escape(url_for(f)), escape(forum.name)),
                          'besuche das Forum')
 
-    supporters = cache.get('forum/forum/supporters-%s' % f.id)
+    supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
         p = Privilege
         supporters = []
         cur = session.execute(select([p.user_id, p.positive],
-            (p.forum_id == f.id) &
+            (p.forum_id == forum.id) &
             (p.user_id != None)
         )).fetchall()
         subset = [r.user_id for r in cur if check_privilege(r.positive, 'moderate')]
         if subset:
             supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
-        cache.set('forum/forum/supporters-%s' % f.id, supporters, 600)
+        cache.set('forum/forum/supporters-%s' % forum.id, supporters, 600)
     else:
         merge = session.merge
         supporters = [merge(obj, load=False) for obj in supporters]
 
     ctx.update({
         'forum':         f,
-        'subforums':     filter_invisible(request.user, f._children),
+        'subforums':     filter_invisible(request.user, forum._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                               forum=f),
         'can_moderate':  check_privilege(privs, 'moderate'),
