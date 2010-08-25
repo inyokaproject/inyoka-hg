@@ -32,7 +32,6 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
-from inyoka.utils.collections import BidiMap
 
 from inyoka.forum.acl import filter_invisible
 from inyoka.forum.compat import SAUser
@@ -118,13 +117,13 @@ class ForumQuery(db.Query):
 
         slug_map = cache.get('forum/slugs')
         if slug_map is None:
-            slug_map = dict(db.session.query(Forum.slug, Forum.id).all())
+            slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
             cache.set('forum/slugs', slug_map)
-        slug_map = BidiMap(slug_map)
+        reversed = dict((str(v), k) for k, v in slug_map.iteritems())
 
         if isinstance(ident, basestring):
             cache_key = 'forum/forum/%s' % ident
-            ident = slug_map.get(ident)
+            ident = reversed.get(ident)
         else:
             cache_key = 'forum/forum/%s' % slug_map.get(ident)
 
