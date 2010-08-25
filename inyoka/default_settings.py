@@ -173,7 +173,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.http.ConditionalGetMiddleware',
     'inyoka.middlewares.highlighter.HighlighterMiddleware',
     'inyoka.middlewares.security.SecurityMiddleware',
-    'inyoka.middlewares.profiler.MemoryProfilerMiddleware',
+#    'inyoka.middlewares.profiler.MemoryProfilerMiddleware',
 )
 
 # Only upload via memory and just 2.5mb, until we kick django
