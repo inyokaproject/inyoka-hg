@@ -157,7 +157,7 @@ def forum(request, slug, page=1):
                       Topic.last_post_id.desc())
 
 
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(f))
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(forum))
 
         ctx = {
             'topics':           list(pagination.objects),
@@ -172,9 +172,9 @@ def forum(request, slug, page=1):
         ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
 
 
-    if have_privilege(User.ANONYMOUS_USER, f, 'read'):
+    if have_privilege(User.ANONYMOUS_USER, forum, 'read'):
         set_session_info(request, u'sieht sich das Forum „<a href="%s">'
-                         u'%s</a>“ an' % (escape(url_for(f)), escape(forum.name)),
+                         u'%s</a>“ an' % (escape(url_for(forum)), escape(forum.name)),
                          'besuche das Forum')
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
@@ -195,10 +195,10 @@ def forum(request, slug, page=1):
         supporters = [merge(obj, load=False) for obj in supporters]
 
     ctx.update({
-        'forum':         f,
+        'forum':         forum,
         'subforums':     filter_invisible(request.user, forum._children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
-                                                              forum=f),
+                                                              forum=forum),
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
         'supporters':     supporters
