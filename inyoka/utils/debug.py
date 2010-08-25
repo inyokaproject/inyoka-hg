@@ -74,9 +74,10 @@ def render_query_table(request):
 
     # render django queries into the debug toolbar
     for query in connection.queries:
+        sql = u'\n'.join(wrap(u'\n'.join(x.rstrip() for x in query['sql'].split('\n')), 120))
         qresult.append(u'<li><pre>%s</pre><pre>Issued from Django-Application</pre>'
                        u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
-                       % (u''.join(query['sql'].split()), float(query['time'])))
+                       % (sql, float(query['time'])))
         total += float(query['time'])
 
     result = [u'<div id="database_debug_table">']
