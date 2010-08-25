@@ -11,8 +11,13 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from __future__ import with_statement
+import sys
 import time
-from sqlalchemy import orm
+from types import ModuleType
+from threading import Lock
+import sqlalchemy
+from sqlalchemy import orm, sql, exc
 from sqlalchemy import MetaData, create_engine, String, Unicode
 from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
@@ -20,12 +25,109 @@ from sqlalchemy.util import to_list
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import get_attribute, set_attribute
 from sqlalchemy.interfaces import ConnectionProxy
+from sqlalchemy.orm.session import Session as SASession
+from sqlalchemy.orm.interfaces import AttributeExtension
 from inyoka.conf import settings
 from inyoka.utils.text import get_next_increment, slugify
 from inyoka.utils.collections import flatten_iterator
 from inyoka.utils.debug import find_calling_context
 from inyoka.utils.local import current_request
 
+
+
+_engine = None
+_engine_lock = Lock()
+
+
+def get_engine():
+    """Creates the engine if it does not exist and returns
+    the current engine.
+    """
+    global _engine
+    with _engine_lock:
+        if _engine is None:
+            rdbm = 'mysql'
+            extra = '?charset=utf8&use_unicode=1'
+            if 'postgresql' in settings.DATABASE_ENGINE:
+                rdbm = 'postgresql+psycopg2'
+                extra = ''
+
+            options = {}
+            if settings.DEBUG:
+                options['proxy'] = ConnectionDebugProxy()
+
+            #XXX: We don't use a connection pool because of fancy mysql
+            #     timeout settings on the ubuntu-eu servers so that
+            #     our php applications don't kill the server with open
+            #     connections.
+            _engine = create_engine('%s://%s:%s@%s/%s%s' % (
+                rdbm, settings.DATABASE_USER, settings.DATABASE_PASSWORD,
+                settings.DATABASE_HOST, settings.DATABASE_NAME, extra
+            ), pool_recycle=25, echo=False, poolclass=NullPool, **options)
+
+        return _engine
+
+
+class InyokaSession(SASession):
+    """Session that binds the engine as late as possible"""
+
+    def __init__(self):
+        SASession.__init__(self, get_engine(), autoflush=True,
+                           autocommit=False)
+
+
+metadata = MetaData()
+session = orm.scoped_session(InyokaSession)
+
+
+def refresh_engine():
+    """Gets rid of the existing engine.  Useful for unittesting, use with care.
+    Do not call this function if there are multiple threads accessing the
+    engine.  Only do that in single-threaded test environments or console
+    sessions.
+    """
+    global _engine
+    with _engine_lock:
+        session.remove()
+        if _engine is not None:
+            _engine.dispose()
+        _engine = None
+
+
+def atomic_add(obj, column, delta, expire=False, primary_key_field=None):
+    """Performs an atomic add (or subtract) of the given column on the
+    object.  This updates the object in place for reflection but does
+    the real add on the server to avoid race conditions.  This assumes
+    that the database's '+' operation is atomic.
+
+    If `expire` is set to `True`, the value is expired and reloaded instead
+    of added of the local value.  This is a good idea if the value should
+    be used for reflection. The `primary_key_field` should only get passed in,
+    if the mapped table is a join between two tables.
+    """
+    obj_mapper = orm.object_mapper(obj)
+    primary_key = obj_mapper.primary_key_from_instance(obj)
+    assert len(primary_key) == 1, 'atomic_add not supported for '\
+        'classes with more than one primary key'
+
+    table = obj_mapper.columns[column].table
+
+    if primary_key_field:
+        assert table.c[primary_key_field].primary_key == True, 'no primary key field'
+
+    primary_key_field = table.c[primary_key_field] if primary_key_field is not None \
+                         else obj_mapper.primary_key[0]
+    stmt = sql.update(table, primary_key_field == primary_key[0], {
+        column:     table.c[column] + delta
+    })
+    get_engine().execute(stmt)
+
+    val = orm.attributes.get_attribute(obj, column)
+    if expire:
+        orm.attributes.instance_state(obj).expire_attributes(
+            orm.attributes.instance_dict(obj), [column])
+    else:
+        orm.attributes.set_committed_value(obj, column, val + delta)
 
 
 class ConnectionDebugProxy(ConnectionProxy):
@@ -41,23 +143,6 @@ class ConnectionDebugProxy(ConnectionProxy):
             if request is not None:
                 request.queries.append((statement, parameters, start,
                                         time.time(), find_calling_context()))
-
-
-rdbm = 'mysql'
-extra = '?charset=utf8&use_unicode=1'
-if 'postgresql' in settings.DATABASE_ENGINE:
-    rdbm = 'postgresql+psycopg2'
-    extra = ''
-
-engine = create_engine('%s://%s:%s@%s/%s%s' % (
-    rdbm, settings.DATABASE_USER, settings.DATABASE_PASSWORD,
-    settings.DATABASE_HOST, settings.DATABASE_NAME, extra
-), pool_recycle=25, echo=False,
-   poolclass=NullPool, proxy=ConnectionDebugProxy())
-metadata = MetaData(bind=engine)
-
-session = scoped_session(lambda: create_session(engine,
-    autoflush=True, autocommit=False, autoexpire=True))
 
 
 def mapper(model, table, **options):
@@ -85,6 +170,13 @@ class Query(orm.Query):
             cache.set(key, data, timeout=timeout)
         data = list(self.merge_result(data, load=False))
         return data
+
+    def lightweight(self, deferred=None, lazy=None):
+        """Send a lightweight query which deferes some more expensive
+        things such as comment queries or even text and parser data.
+        """
+        args = map(db.lazyload, lazy or ()) + map(db.defer, deferred or ())
+        return self.options(*args)
 
 
 class ModelBase(object):
@@ -163,6 +255,7 @@ class SlugGenerator(orm.MapperExtension):
                                 slug, max_length))
         return orm.EXT_CONTINUE
 
+
 def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
     """Execute a query blockwise to prevent lack of ram"""
     range = (start_with, start_with + block_size)
@@ -188,3 +281,32 @@ def find_next_increment(column, string, max_length=None):
     """
     existing = session.query(column).filter(column.like('%s%%' % string)).all()
     return get_next_increment(flatten_iterator(existing), string, max_length)
+
+
+def _make_module():
+    db = ModuleType('db')
+    for mod in sqlalchemy, orm:
+        for key, value in mod.__dict__.iteritems():
+            if key in mod.__all__:
+                setattr(db, key, value)
+
+    # support for postgresql array type
+    from sqlalchemy.dialects.postgresql.base import PGArray
+    db.PGArray = PGArray
+
+    db.get_engine = get_engine
+    db.session = session
+    db.metadata = metadata
+    db.mapper = mapper
+    db.atomic_add = atomic_add
+    db.find_next_increment = find_next_increment
+    db.Model = Model
+    db.Query = Query
+    db.SlugGenerator = SlugGenerator
+    db.AttributeExtension = AttributeExtension
+    db.ColumnProperty = orm.ColumnProperty
+    db.NoResultFound = orm.exc.NoResultFound
+    db.SQLAlchemyError = exc.SQLAlchemyError
+    return db
+
+sys.modules['inyoka.core.database.db'] = db = _make_module()
