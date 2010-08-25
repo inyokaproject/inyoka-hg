@@ -132,7 +132,7 @@ class ForumMapperExtension(MapperExtension):
                 key, ident, **kwargs)
             cache.set(cache_key, forum)
         else:
-            forum = query.session.merge(forum, dont_load=True)
+            forum = query.session.merge(forum, load=False)
         return forum
 
     def after_update(self, mapper, connection, instance):
