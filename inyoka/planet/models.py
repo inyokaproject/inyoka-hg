@@ -118,7 +118,7 @@ class Entry(models.Model):
     def save(self, force_insert=False, force_update=False):
         super(Entry, self).save(force_insert, force_update)
         blog = self.blog
-        if blog.last_sync and self.updated > bblog.last_sync and log.active:
+        if blog.last_sync and self.updated > blog.last_sync and blog.active:
             self.update_search()
 
     def delete(self):
