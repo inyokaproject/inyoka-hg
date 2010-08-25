@@ -139,10 +139,11 @@ class ConnectionDebugProxy(ConnectionProxy):
         try:
             return execute(cursor, statement, parameters, context)
         finally:
-            request = current_request._get_current_object()
-            if request is not None:
-                request.queries.append((statement, parameters, start,
-                                        time.time(), find_calling_context()))
+            if current_request:
+                request = current_request._get_current_object()
+                if request is not None:
+                    request.queries.append((statement, parameters, start,
+                                            time.time(), find_calling_context()))
 
 
 def mapper(model, table, **options):
