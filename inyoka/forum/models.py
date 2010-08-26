@@ -122,23 +122,17 @@ class ForumQuery(db.Query):
         reversed = dict((str(v), k) for k, v in slug_map.iteritems())
 
         if isinstance(ident, basestring):
-            cache_key = 'forum/forum/%s' % ident
             ident = reversed.get(ident)
-        else:
-            cache_key = 'forum/forum/%s' % slug_map.get(ident)
 
         if ident is None:
             return None
 
-        key = mapper.identity_key_from_primary_key(ident)
-        forum = cache.get(cache_key)
-        if not forum:
-            forum = self.options(db.eagerload('last_post.author')) \
-                        ._get(key, ident)
-            cache.set(cache_key, forum)
-        else:
-            forum = db.session.merge(forum, load=False)
-        return forum
+        forums = self.get_all_forums_cached()
+        return [forum for forum in forums if forum.id == ident][0]
+
+    def get_all_forums_cached(self):
+        return Forum.query.options(db.eagerload('last_post'), db.eagerload('last_post.author')) \
+            .cached('forum/forums')
 
 
 class ForumMapperExtension(db.MapperExtension):
@@ -384,22 +378,19 @@ class Forum(db.Model):
     def parents(self):
         """Return a list of all parent forums up to the root level."""
         parents = []
+        forums = Forum.query
+        qdct = dict((f.parent_id, f) for f in forums)
+
         forum = self
         while forum.parent_id:
-            forum = Forum.query.get(forum.parent_id)
+            forum = qdct[forum.parent_id]
             parents.append(forum)
         return parents
 
     @property
     def children(self):
-        cache_key = 'forum/children/%d' % self.id
-        children_ids = cache.get(cache_key)
-        if children_ids is None:
-            children_ids = db.session.query(Forum.id) \
-                                     .filter(Forum.parent_id == self.id) \
-                                     .order_by(Forum.position).all()
-            cache.set(cache_key, children_ids)
-        children = [Forum.query.get(child.id) for child in children_ids]
+        forums = Forum.query.get_all_forums_cached()
+        children = [forum for forum in forums if forum.parent_id == self.id]
         return children
 
     def get_children_filtered(self, user):

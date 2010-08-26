@@ -10,6 +10,7 @@
 """
 from sqlalchemy.sql import select
 from inyoka.utils.database import session
+from inyoka.utils.cache import cache
 
 
 PRIVILEGES_DETAILS = [

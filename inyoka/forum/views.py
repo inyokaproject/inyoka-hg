@@ -32,7 +32,7 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification, notify_about_subscription
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.utils.database import session
+from inyoka.utils.database import session, db
 from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -73,42 +73,32 @@ def index(request, category=None):
     These forums are treated as categories but not as real forums.
     """
     if category:
-        key = 'forum/category/%s' % category
         session_info = ((u'sieht sich die Forenübersicht der '
                             u'Kategorie „%s“ an' % category),
                         u'Kategorieübersicht')
     else:
-        key = 'forum/index'
         session_info = (u'sieht sich die Forenübersicht an.',
                         u'Forenübersicht')
 
-    categories = cache.get(key)
-    if categories is None:
-        query = Forum.query.options(eagerload('_children'),
-                                    eagerload('_children.last_post'),
-                                    eagerload('_children.last_post.author'))
-        if category:
-            category = query.filter_by(slug=category).first()
-            if not category or category.parent_id != None:
-                raise PageNotFound()
+    forums = Forum.query.get_all_forums_cached()
 
-            if have_privilege(User.ANONYMOUS_USER, category, 'read'):
-                set_session_info(request, *session_info)
-            categories = [category]
+    if category:
+        category = [forum for forum in forums if forum.slug == category]
+        if not category or category[0].parent_id != None:
+            raise PageNotFound()
+        category = category[0]
 
-            fmsg = category.find_welcome(request.user)
-            if fmsg is not None:
-                return welcome(request, fmsg.slug, request.path)
-        else:
-            categories = query.filter(Forum.parent_id == None) \
-                              .order_by(Forum.position).all()
-            # forum-overview can be set without any acl check ;)
+        if have_privilege(User.ANONYMOUS_USER, category, 'read'):
             set_session_info(request, *session_info)
+        categories = [category]
 
-        cache.set(key, categories, 120)
-
-    merge = session.merge
-    categories = [merge(obj, load=False) for obj in categories]
+        fmsg = category.find_welcome(request.user)
+        if fmsg is not None:
+            return welcome(request, fmsg.slug, request.path)
+    else:
+        categories = [forum for forum in forums if forum.parent_id == None]
+        # forum-overview can be set without any acl check ;)
+        set_session_info(request, *session_info)
 
     hidden_categories = []
     if request.user.is_authenticated:
