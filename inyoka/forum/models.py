@@ -399,7 +399,7 @@ class Forum(db.Model):
                                      .filter(Forum.parent_id == self.id) \
                                      .order_by(Forum.position).all()
             cache.set(cache_key, children_ids)
-        children = [Forum.query.get(id) for id in children_ids]
+        children = [Forum.query.get(child.id) for child in children_ids]
         return children
 
     def get_children_filtered(self, user):
@@ -710,9 +710,9 @@ class Topic(db.Model):
 
     def reindex(self):
         """Mark the whole topic for reindexing."""
-        ids = db.session.query(Post.id).filter(Post.topic_id==self.id)
-        for post_id in ids:
-            search.queue('f', post_id)
+        posts = db.session.query(Post.id).filter(Post.topic_id==self.id)
+        for post in posts:
+            search.queue('f', post.id)
 
     def __unicode__(self):
         return self.title
