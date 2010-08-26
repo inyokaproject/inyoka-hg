@@ -555,8 +555,7 @@ def ikhaya_category_edit(request, category=None):
 @templated('admin/forums.html')
 def forums(request):
     sortable = Sortable(Forum.query, request.GET, 'name',
-        sqlalchemy=True, sa_column=Forum.name,
-        columns=['name', 'parent_id', 'position'])
+        sqlalchemy=True, columns=['name', 'parent_id', 'position'])
     return {
         'table': sortable
     }
