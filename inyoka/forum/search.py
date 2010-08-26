@@ -9,13 +9,12 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import gc
-from sqlalchemy.orm import eagerload
 from inyoka.forum.acl import get_privileges, check_privilege
 from inyoka.forum.models import Post, Forum, Topic
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.decorators import deferred
-from inyoka.utils.database import session
+from inyoka.utils.database import db
 
 
 class ForumSearchAuthDecider(object):
@@ -44,8 +43,8 @@ class ForumSearchAdapter(SearchAdapter):
     support_multi = True
 
     def store(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('author'),
-                                  eagerload('topic.forum'))
+        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
+                                  db.eagerload('topic.forum'))
         post = post.get(post_id)
         if post is None:
             return
@@ -77,23 +76,23 @@ class ForumSearchAdapter(SearchAdapter):
                 ids = post_ids[i:i+range]
             except IndexError:
                 ids = post_ids[i:]
-            posts = Post.query.options(eagerload('topic'), eagerload('author'),
-                                       eagerload('topic.forum')) \
+            posts = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
+                                       db.eagerload('topic.forum')) \
                     .filter(Post.id.in_(ids)).all()
             for post in posts:
                 self._store_post(post)
             # cleanup some stuff
             search.flush()
-            session.commit()
-            session.clear()
-            session.remove()
+            db.session.commit()
+            db.session.clear()
+            db.session.remove()
             gc.collect()
             # count up the index
             i += range
 
     def recv(self, post_id):
-        post = Post.query.options(eagerload('topic'), eagerload('author'),
-                                  eagerload('topic.forum'))
+        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
+                                  db.eagerload('topic.forum'))
         post = post.get(post_id)
         if post is None:
             return
@@ -116,7 +115,7 @@ class ForumSearchAdapter(SearchAdapter):
         }
 
     def get_doc_ids(self):
-        pids = session.query(Post.id).filter(Post.topic_id==Topic.id)
+        pids = db.session.query(Post.id).filter(Post.topic_id==Topic.id)
         for pid in pids:
             yield pid
 
