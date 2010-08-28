@@ -22,8 +22,6 @@ from werkzeug import import_string, url_encode, url_decode, url_quote, \
 _append_slash_map = {'static': False, 'media': False}
 _url_reverse_map = dict((v.split('.')[1], k) for k, v in
                         settings.SUBDOMAIN_MAP.iteritems())
-_url_reverse_map['static'] = 'static'
-_url_reverse_map['media'] = 'media'
 _resolvers = {}
 _schema_re = re.compile(r'[a-z]+://')
 
@@ -37,12 +35,20 @@ def href(_module='portal', *parts, **query):
         _append_slash_map[_module] = append_slash
     else:
         append_slash = _append_slash_map[_module]
-    subdomain = _url_reverse_map[_module]
     path = '/'.join(url_quote(x) for x in parts if x is not None)
 
-    return 'http://%s%s/%s%s%s%s' % (
-        subdomain and subdomain + '.' or '',
-        settings.BASE_DOMAIN_NAME,
+    base_url = 'http://%s' % settings.BASE_DOMAIN_NAME
+    if _module in ('media', 'static'):
+        base_url = {
+            'media': settings.MEDIA_URL,
+            'static': settings.STATIC_URL,
+        }[_module].rstrip('/')
+    else:
+        subdomain = _url_reverse_map[_module]
+        base_url = 'http://%s%s' % (subdomain + '.' if subdomain else '', settings.BASE_DOMAIN_NAME)
+
+    return '%s/%s%s%s%s' % (
+        base_url,
         path,
         append_slash and path and not path.endswith('/') and '/' or '',
         query and '?' + url_encode(query) or '',
