@@ -13,7 +13,7 @@ from django.conf.urls.defaults import patterns
 
 urlpatterns = patterns('inyoka.portal.views',
     (r'^$', 'index'),
-    (r'^markup.css', 'markup_styles'),
+    (r'^markup.css$', 'markup_styles'),
     (r'^login/$', 'login'),
     (r'^logout/$', 'logout'),
     (r'^search/$', 'search'),
