@@ -50,8 +50,7 @@
         $SIDEBAR_HIDDEN = {{ USER.settings.sidebar_hidden and 'true' or 'false' }};
     /*]]>*/
     </script>
-    {%- for script in ['jQuery.js', 'jQuery.Dimensions.js', 'jQuery.extensions.js',
-                       'overall.js'] + scripts|default([]) %}
+    {%- for script in ['jQuery.js', 'jQuery.extensions.js', 'overall.js'] + scripts|default([]) %}
     <script type="text/javascript" src="{{ href('static', 'js/' + script) }}"></script>
     {%- endfor %}
     {%- endblock %}
