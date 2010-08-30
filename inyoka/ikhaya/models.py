@@ -264,7 +264,7 @@ class Article(models.Model):
             self.slug = '%s-%s' % (slug, self.id)
             cur = connection.cursor()
             cur.execute('''
-                update ikhaya_article a set a.slug = %s where a.id = %s
+                update ikhaya_article as a set a.slug = %s where a.id = %s
             ''', [self.slug, self.id])
         cache.delete('ikhaya/archive')
         cache.delete('ikhaya/short_archive')
