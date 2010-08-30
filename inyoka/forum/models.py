@@ -149,7 +149,7 @@ class TopicMapperExtension(db.MapperExtension):
             instance.forum = Forum.query.get(int(instance.forum_id))
         if not instance.forum or instance.forum.parent_id is None:
             raise ValueError('Invalid Forum')
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         parent_ids = list(p.id for p in instance.forum.parents)
@@ -158,7 +158,7 @@ class TopicMapperExtension(db.MapperExtension):
             db.session.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
                 'topic_count': Forum.topic_count + 1
             }))
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         if not instance.forum:
@@ -167,7 +167,7 @@ class TopicMapperExtension(db.MapperExtension):
         ids = [p.id for p in instance.forum.parents[:-1]]
         ids.append(instance.forum_id)
         if not ids:
-            return EXT_CONTINUE
+            return db.EXT_CONTINUE
 
         # set a new last_post_id because of integrity errors and
         # decrase the topic_count
@@ -198,7 +198,7 @@ class TopicMapperExtension(db.MapperExtension):
         instance.reindex()
         cache.delete('forum/index')
         cache.delete('forum/reported_topic_count')
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
 
 class PostMapperExtension(db.MapperExtension):
@@ -212,7 +212,7 @@ class PostMapperExtension(db.MapperExtension):
             instance.position = connection.execute(db.select(
                 [db.func.max(Post.position)+1],
                 Post.topic_id == instance.topic_id)).fetchone()[0] or 0
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         if instance.topic.forum.user_count_posts:
@@ -239,19 +239,19 @@ class PostMapperExtension(db.MapperExtension):
         }))
         instance.topic.forum.invalidate_topic_cache()
         search.queue('f', instance.id)
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def after_update(self, mapper, connection, instance):
         search.queue('f', instance.id)
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def after_delete(self, mapper, connection, instance):
         search.queue('f', instance.id)
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def before_delete(self, mapper, connection, instance):
         self.deregister(mapper, connection, instance)
-        return EXT_CONTINUE
+        return db.EXT_CONTINUE
 
     def deregister(self, mapper, connection, instance):
         """Remove references and decrement post counts for this topic."""
