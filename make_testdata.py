@@ -195,7 +195,6 @@ def make_forum():
             except IndexError:
                 pass
         f = Forum(name=name, parent=parent)
-        session.flush()
         forums.append(f)
         session.commit()
         if parent:
@@ -214,7 +213,6 @@ def make_forum():
     # all about the wiki - forum (and diskussions subforum)
     f = Forum(name=u'Rund ums Wiki', parent=None)
     d = Forum(name=u'Diskussionen', slug=settings.WIKI_DISCUSSION_FORUM, parent=f)
-    session.flush()
     forums.append(f)
     forums.append(d)
     session.commit()
