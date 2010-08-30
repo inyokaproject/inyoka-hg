@@ -84,9 +84,9 @@ def index(request, category=None):
 
     if category:
         category = Forum.query.get_cached(category)
-        if not category or category[0].parent_id != None:
+        if not category or category.parent_id != None:
             raise PageNotFound()
-        category = category[0]
+        category = category
 
         if have_privilege(User.ANONYMOUS_USER, category, 'read'):
             set_session_info(request, *session_info)
