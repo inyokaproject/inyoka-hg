@@ -110,35 +110,79 @@ def fix_plaintext(text):
 
 class ForumQuery(db.Query):
 
-    def get(self, ident):
-        # We unify the usage internally to query the id but accept an slug too.
-        # To cache the result we use the slug as it's used in the forum view too
-        mapper = self._mapper_zero()
-
+    def _get_slugs(self):
         slug_map = cache.get('forum/slugs')
         if slug_map is None:
             slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
             cache.set('forum/slugs', slug_map)
-        reversed = dict((str(v), k) for k, v in slug_map.iteritems())
+        return slug_map
 
-        if isinstance(ident, basestring):
-            ident = reversed.get(ident)
+    def get(self, ident):
+        # We unify the usage internally to query the id but accept an slug too.
+        # To cache the result we use the slug as it's used in the forum view too
+        mapper = self._mapper_zero()
+        slugs = self._get_slugs()
+
+        if isinstance(ident, (int, float, long)):
+            ident = slugs.get(ident)
 
         if ident is None:
             return None
 
-        forums = self.get_all_forums_cached()
-        return [forum for forum in forums if forum.id == ident][0]
+        forums = self.get_all_forums_cached(ident)
+        return forums
+
+    def get_eager(self):
+        return Forum.query.options(
+            db.eagerload('last_post'), db.eagerload('last_post.author'))
 
     def get_all_forums_cached(self):
-        return Forum.query.options(db.eagerload('last_post'), db.eagerload('last_post.author')) \
-            .cached('forum/forums')
+        slugs = self._get_slugs()
+        reverted = dict((y, x) for x, y in slugs.iteritems())
+        cache_keys = ['forum/forums/%s' % s for s in reverted]
+        forums = cache.get_dict(*cache_keys)
+
+        # fill forum cache
+        _needs_set = False
+        for key, value in forums.iteritems():
+            if value is None:
+                # query the forum if it's not yet in the cache
+                slug = key.split('/')[-1]
+                value = self.get_eager().filter_by(slug=slug).one()
+                forums[key] = value
+                _needs_set = True
+
+        if _needs_set:
+            cache.set_many(forums)
+
+        return forums
+
+    def get_cached(self, slug=None):
+        if slug:
+            # we only select one forum and query only one if it's
+            # not cached yet.
+            forum = cache.get('forum/forums/%s' % slug)
+            if forum is None:
+                forum = self.get_eager().filter_by(slug=slug).one()
+                cache.set('forum/forums/%s' % slug, forum)
+            return forum
+        # return all forums instead
+        return self.get_all_forums_cached().itervalues()
 
 
 class ForumMapperExtension(db.MapperExtension):
 
     def after_update(self, mapper, connection, instance):
-        cache.delete('forum/forum/%s' % instance.slug)
+        cache.delete('forum/forums/%s' % instance.slug)
+        return db.EXT_CONTINUE
+
+    def after_insert(self, mapper, connection, instance):
+        cache.delete('forum/forums/%s' % instance.slug)
+        cache.delete('forum/slugs')
+        return db.EXT_CONTINUE
+
+    def after_delete(self, mapper, connection, instance):
+        self.after_insert(self, mapper, connection, instance)
         return db.EXT_CONTINUE
 
 
@@ -196,7 +240,6 @@ class TopicMapperExtension(db.MapperExtension):
 
     def after_delete(self, mapper, connection, instance):
         instance.reindex()
-        cache.delete('forum/index')
         cache.delete('forum/reported_topic_count')
         return db.EXT_CONTINUE
 
@@ -378,18 +421,18 @@ class Forum(db.Model):
     def parents(self):
         """Return a list of all parent forums up to the root level."""
         parents = []
-        forums = Forum.query
-        qdct = dict((f.parent_id, f) for f in forums)
+        forums = Forum.query.get_cached()
+        qdct = dict((f.id, f) for f in forums)
 
         forum = self
-        while forum.parent_id:
+        while forum.parent_id is not None:
             forum = qdct[forum.parent_id]
             parents.append(forum)
         return parents
 
     @property
     def children(self):
-        forums = Forum.query.get_all_forums_cached()
+        forums = Forum.query.get_cached()
         children = [forum for forum in forums if forum.parent_id == self.id]
         return children
 

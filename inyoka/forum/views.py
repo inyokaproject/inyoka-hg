@@ -80,10 +80,10 @@ def index(request, category=None):
         session_info = (u'sieht sich die Forenübersicht an.',
                         u'Forenübersicht')
 
-    forums = Forum.query.get_all_forums_cached()
+    forums = Forum.query.get_cached()
 
     if category:
-        category = [forum for forum in forums if forum.slug == category]
+        category = Forum.query.get_cached(category)
         if not category or category[0].parent_id != None:
             raise PageNotFound()
         category = category[0]
