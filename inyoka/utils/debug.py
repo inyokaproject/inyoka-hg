@@ -74,6 +74,8 @@ def render_query_table(request):
 
     # render django queries into the debug toolbar
     for query in connection.queries:
+        if not isinstance(query['sql'], unicode):
+            query['sql'] = query['sql'].decode('utf8')
         sql = u'\n'.join(wrap(u'\n'.join(x.rstrip() for x in query['sql'].split('\n')), 120))
         qresult.append(u'<li><pre>%s</pre><pre>Issued from Django-Application</pre>'
                        u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
