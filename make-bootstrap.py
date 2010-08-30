@@ -20,7 +20,7 @@ except ImportError:
 EXTRA_TEXT = """
 import tempfile, shutil
 
-xapian_version = '1.2.2'
+xapian_version = '1.2.3'
 pil_version = '1.1.7'
 
 def easy_install(package, home_dir, optional_args=None):
@@ -92,8 +92,6 @@ def after_install(options, home_dir):
     easy_install('html5lib==0.90', home_dir)
     easy_install('dnspython==1.7.1', home_dir)
     easy_install('wsgiref', home_dir)
-#    easy_install('MySQL-python==1.2.3', home_dir)
-    easy_install('http://downloads.sourceforge.net/project/mysql-python/mysql-python/1.2.3/MySQL-python-1.2.3.tar.gz?use_mirror=mesh&ts=1279197622', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('Django==1.2.1', home_dir)
     easy_install('python-memcached', home_dir)
