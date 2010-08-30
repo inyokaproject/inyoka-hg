@@ -8,8 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from sqlalchemy.sql import select
-from inyoka.utils.database import session
+from inyoka.utils.database import db
 from inyoka.utils.cache import cache
 
 
@@ -77,22 +76,21 @@ def get_privileges(user, forum_ids):
     from inyoka.forum.models import Privilege
     from inyoka.forum.compat import user_group_table
     from inyoka.portal.user import DEFAULT_GROUP_ID
-    privilege_table = Privilege.__table__
     if not forum_ids:
         return {}
-    p, ug = privilege_table.c, user_group_table.c
-    # select all privileges belonging to the user or to a group the user's in
-    cur = list(session.execute(
-        select([p.forum_id, p.positive, p.negative, p.user_id],
-            p.forum_id.in_(forum_ids) & (
-                (p.user_id == user.id) |
-                p.group_id.in_(
-                    select([ug.group_id], ug.user_id == user.id)
-                ) |
-                (p.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
-            )
-        )
-    ))
+    ug = user_group_table.c
+
+    groups = db.select([ug.group_id], ug.user_id == user.id)
+
+    cols = (Privilege.forum_id, Privilege.positive, Privilege.negative,
+            Privilege.user_id)
+
+    cur = db.session.query(*cols).filter(db.and_(
+        Privilege.forum_id.in_(forum_ids),
+        db.or_(Privilege.user_id == user.id,
+               Privilege.group_id.in_(groups),
+               Privilege.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
+    )).all()
 
     def join_bits(result, rows):
         """
