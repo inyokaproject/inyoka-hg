@@ -143,16 +143,14 @@ class ForumQuery(db.Query):
         forums = cache.get_dict(*cache_keys)
 
         # fill forum cache
-        _needs_set = False
-        for key, value in forums.iteritems():
-            if value is None:
-                # query the forum if it's not yet in the cache
-                slug = key.split('/')[-1]
-                value = self.get_eager().filter_by(slug=slug).one()
-                forums[key] = value
-                _needs_set = True
-
-        if _needs_set:
+        missing = [key.split('/')[-1] for key, value in forums.iteritems()
+                                       if value is None]
+        if missing:
+            query = self.get_eager().filter(Forum.slug.in_(missing))
+            missing_objects = dict((x.slug, x) for x in query)
+            for key, value in forums.iteritems():
+                if value is None:
+                    forums[key] = missing_objects[key.split('/')[-1]]
             cache.set_many(forums)
 
         return forums
