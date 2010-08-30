@@ -117,6 +117,8 @@ def do_show(request, name):
             s.save()
 
     if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
+        # set only session info if the wiki page can be seen by anonymous
+        # users.
         set_session_info(request, u'betrachtet Wiki-Artikel „<a '
                          u'href="%s">%s</a>“' % (
                             escape(url_for(page)),

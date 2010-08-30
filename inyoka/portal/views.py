@@ -122,7 +122,7 @@ def whoisonline(request):
     if registered_users is None:
         registered_users = int(User.objects.count())
         cache.set('portal/registered_users', registered_users, 1000)
-    set_session_info(request, _(u'schaut sich an, wer online ist'),
+    set_session_info(request, _(u'sieht sich an, wer online ist'),
                      _(u'Wer ist online'))
     record, record_time = get_user_record()
     return {
@@ -187,8 +187,6 @@ def register(request):
             request.session.pop('captcha_solution', None)
             return HttpResponseRedirect(redirect)
 
-    set_session_info(request, u'registriert sich',
-                     'registriere dich auch!')
     return {
         'form':         form,
         'cookie_error': cookie_error_link is not None,
@@ -393,7 +391,7 @@ def logout(request):
 @templated('portal/search.html')
 def search(request):
     """Search dialog for the Xapian search engine."""
-    set_session_info(request, u'sucht gerade nach etwas.', 'Suche')
+    set_session_info(request, u'sucht gerade', 'Suche')
 
     if 'query' in request.GET:
         f = SearchForm(request.REQUEST, user=request.user)
@@ -472,7 +470,7 @@ def profile(request, username):
         content = wikipage.rev.rendered_text
     except WikiPage.DoesNotExist:
         content = u''
-    set_session_info(request, u'schaut sich das Benutzerprofil von '
+    set_session_info(request, u'sieht sich das Benutzerprofil von '
                      u'„<a href="%s">%s</a>“ an.' % (
         escape(url_for(user)),
         escape(user.username),
@@ -494,7 +492,7 @@ def profile(request, username):
 @templated('portal/usercp/index.html')
 def usercp(request):
     """User control panel index page"""
-    set_session_info(request, 'schaut sich sein Verwaltungscenter an')
+    set_session_info(request, 'sieht sich sein Verwaltungscenter an')
     user = request.user
     return {
         'user': user,
@@ -1070,7 +1068,7 @@ def memberlist(request, page=1):
     if pagination.needs_redirect_to:
         return pagination.needs_redirect_to()
 
-    set_session_info(request, u'schaut sich die Mitgliederliste an.',
+    set_session_info(request, u'sieht sich die Mitgliederliste an.',
                      'Mitgliederliste')
     return {
         'users':        list(pagination.objects),
@@ -1097,7 +1095,7 @@ def grouplist(request, page=1):
                      columns=['id', 'name'])
     pagination = Pagination(request, table.get_objects(), page, 15,
                             link=href('portal', 'groups'))
-    set_session_info(request, u'schaut sich die Gruppenliste an.',
+    set_session_info(request, u'sieht sich die Gruppenliste an.',
                      'Gruppenliste')
     return {
         'groups':      list(pagination.objects),
@@ -1120,7 +1118,7 @@ def group(request, name, page=1):
         columns=['id', 'username', 'location', 'date_joined', 'post_count'])
     pagination = Pagination(request, table.get_objects(), page, 15,
                             link=href('portal', 'group', name))
-    set_session_info(request, u'schaut sich die Gruppe '
+    set_session_info(request, u'sieht sich die Gruppe '
                      u'„<a href="%s">%s</a>“ an.' % (
         href('portal', 'group', escape(name)),
         escape(name)
@@ -1136,7 +1134,7 @@ def group(request, name, page=1):
 
 @templated('portal/usermap.html')
 def usermap(request):
-    set_session_info(request, u'schaut sich die Benutzerkarte an.',
+    set_session_info(request, u'sieht sich die Benutzerkarte an.',
                      'Benutzerkarte')
     return {
         'apikey':       settings.GOOGLE_MAPS_APIKEY,

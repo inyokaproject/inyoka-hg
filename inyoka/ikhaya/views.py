@@ -98,14 +98,18 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         articles = Article.objects.all()
         link = ()
 
-    if not request.user.can('article_read'):
+    can_read = request.user.can('article_read')
+    if not can_read:
+        now = datetime.utcnow()
         articles = articles.filter(public=True) \
-                           .filter(Q(pub_date__lt=datetime.utcnow().date())|
-                                   Q(pub_date = datetime.utcnow().date(), pub_time__lte = datetime.utcnow().time()))
+                           .filter(Q(pub_date__lt=now.date())|
+                                   Q(pub_date = now.date(), pub_time__lte = now.time()))
 
     link = href('ikhaya', *link)
-    set_session_info(request, u'sieht sich die <a href="%s">'
-                              u'Artikelübersicht</a> an' % link)
+
+    if User.objects.get_anonymous_user().can('article_read'):
+        set_session_info(request, u'sieht sich die <a href="%s">'
+                                  u'Artikelübersicht</a> an' % link)
 
     articles = articles.order_by('public', '-updated').select_related()
 
