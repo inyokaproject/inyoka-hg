@@ -129,7 +129,7 @@ class ForumQuery(db.Query):
         if ident is None:
             return None
 
-        forums = self.get_all_forums_cached(ident)
+        forums = self.get_cached(ident)
         return forums
 
     def get_eager(self):
@@ -367,6 +367,26 @@ class PostMapperExtension(db.MapperExtension):
                 'position': Post.position - 1
             }
         ))
+
+
+class PrivilegeMapperExtension(db.MapperExtension):
+
+    def _erase_anonymous_cache(self, instance):
+        if instance.user_id and instance.user_id == 1:
+            # anonymous user, erase cache
+            cache.delete('forum/acls/anonymous')
+
+    def after_update(self, mapper, connection, instance):
+        self._erase_anonymous_cache(instance)
+        return db.EXT_CONTINUE
+
+    def after_insert(self, mapper, connection, instance):
+        self._erase_anonymous_cache(instance)
+        return db.EXT_CONTINUE
+
+    def after_delete(self, mapper, connection, instance):
+        self._erase_anonymous_cache(instance)
+        return db.EXT_CONTINUE
 
 
 class Forum(db.Model):
@@ -1308,6 +1328,7 @@ class Attachment(db.Model):
 
 class Privilege(db.Model):
     __tablename__ = 'forum_privilege'
+    __mapper_args__ = {'extension': PrivilegeMapperExtension()}
 
     id = db.Column(db.Integer, primary_key=True)
     group_id = db.Column(db.Integer, db.ForeignKey('portal_group.id'), nullable=True)
@@ -1343,9 +1364,9 @@ class Privilege(db.Model):
 
     def __repr__(self):
         gid, uid = self.group_id, self.user_id
-        return '<Privilege(id, %s, %s, %s)' % (
+        return '<Privilege(id, %s, fid:%s, %s, %s)' % (
             (self.group_id and 'gid:%s' % gid or 'uid:%s' % uid,
-             self.positive, self.negative))
+             self.forum_id, self.positive, self.negative))
 
 
 class PollOption(db.Model):

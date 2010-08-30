@@ -71,26 +71,42 @@ def get_forum_privileges(user, forum_id):
     return get_privileges(user, forum_ids=[forum_id])[forum_id]
 
 
-def get_privileges(user, forum_ids):
-    """Return all privileges of the applied forums for the `user`"""
-    from inyoka.forum.models import Privilege
-    from inyoka.forum.compat import user_group_table
-    from inyoka.portal.user import DEFAULT_GROUP_ID
-    if not forum_ids:
-        return {}
+def _get_privilege_map(user, forum_ids):
     ug = user_group_table.c
-
     groups = db.select([ug.group_id], ug.user_id == user.id)
 
-    cols = (Privilege.forum_id, Privilege.positive, Privilege.negative,
-            Privilege.user_id)
+    P = Privilege
+    cols = (P.forum_id, P.positive, P.negative, P.user_id)
 
-    cur = db.session.query(*cols).filter(db.and_(
+    # construct the query, but do not execute it yet for caching reasons
+    query = db.session.query(*cols).filter(db.and_(
         Privilege.forum_id.in_(forum_ids),
         db.or_(Privilege.user_id == user.id,
                Privilege.group_id.in_(groups),
                Privilege.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
-    )).all()
+    ))
+
+    # If we have an anonymous user we can cache the results
+    cache_key = 'forum/acls/anonymous/%s' % ''.join((str(id) for id in sorted(forum_ids)))
+    if user.is_anonymous:
+        result = cache.get(cache_key)
+        if result is None:
+            privilege_map = query.all()
+            cache.set(cache_key, privilege_map)
+        else:
+            privilege_map = list(query.merge_result(result, False))
+    else:
+        privilege_map = query.all()
+
+    return privilege_map
+
+
+def get_privileges(user, forum_ids):
+    """Return all privileges of the applied forums for the `user`"""
+    if not forum_ids:
+        return {}
+
+    privilege_map = _get_privilege_map(user, forum_ids)
 
     def join_bits(result, rows):
         """
@@ -109,9 +125,9 @@ def get_privileges(user, forum_ids):
 
     result = dict(map(lambda a: (a, DISALLOW_ALL), forum_ids))
     # first join the group privileges
-    result = join_bits(result, filter(lambda row: not row.user_id, cur))
+    result = join_bits(result, [row for row in privilege_map if not row.user_id])
     # now join the user privileges (this allows to override group privileges)
-    result = join_bits(result, filter(lambda row: row.user_id, cur))
+    result = join_bits(result, [row for row in privilege_map if row.user_id])
     return result
 
 
@@ -153,3 +169,9 @@ def filter_invisible(user, forums=[], priv=CAN_READ):
         if privileges.get(forum.id, DISALLOW_ALL) & priv != 0:
             result.append(forum)
     return result
+
+
+# circular imports
+from inyoka.forum.models import Privilege
+from inyoka.forum.compat import user_group_table
+from inyoka.portal.user import DEFAULT_GROUP_ID
