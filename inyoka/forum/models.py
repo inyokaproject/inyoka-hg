@@ -37,7 +37,7 @@ from inyoka.forum.acl import filter_invisible
 from inyoka.forum.compat import SAUser
 
 # Import Django models here so that South can find them
-from inyoka.forum.django_models import *
+#from inyoka.forum.django_models import *
 
 
 # initialize PIL to make Image.ID available
@@ -222,7 +222,7 @@ class TopicMapperExtension(db.MapperExtension):
         # set a new last_post_id because of integrity errors and
         # decrase the topic_count
         connection.execute(Forum.__table__.update(Forum.id.in_(ids), {
-            'last_post_id': select([func.max(Post.id)], and_(
+            'last_post_id': db.select([db.func.max(Post.id)], db.and_(
                 Post.topic_id != instance.id,
                 Topic.forum_id.in_(ids),
                 Topic.id == Post.topic_id)),
@@ -663,11 +663,11 @@ class Topic(db.Model):
                 op = operator.sub
 
             db.session.execute(SAUser.__table__.update(
-                SAUser.id.in_(select([Post.author_id], Post.topic_id == self.id)),
+                SAUser.id.in_(db.select([Post.author_id], Post.topic_id == self.id)),
                 values={'post_count': op(
                     SAUser.post_count,
-                    select(
-                        [func.count()],
+                    db.select(
+                        [db.func.count()],
                         ((Post.topic_id == self.id) &
                          (Post.author_id == SAUser.id)),
                         Post.__table__)
@@ -676,7 +676,7 @@ class Topic(db.Model):
             ))
             db.session.commit()
 
-            q = select([Post.author_id], Post.topic_id == self.id, distinct=True)
+            q = db.select([Post.author_id], Post.topic_id == self.id, distinct=True)
             for x in db.session.execute(q).fetchall():
                 cache.delete('portal/user/%d' % x[0])
 
@@ -688,13 +688,13 @@ class Topic(db.Model):
 
         # search for a new last post in the old and the new forum
         db.session.execute(Forum.__table__.update(Forum.id.in_(new_ids), {
-            'last_post_id': select([func.max(Post.id)], and_(
+            'last_post_id': db.select([db.func.max(Post.id)], db.and_(
                 Topic.id == Post.topic_id,
                 Topic.forum_id == Forum.id))
         }))
 
         db.session.execute(Forum.__table__.update(Forum.id.in_(old_ids), {
-            'last_post_id': select([func.max(Post.id)], and_(
+            'last_post_id': db.select([db.func.max(Post.id)], db.and_(
                 Topic.id == Post.topic_id,
                 Topic.forum_id == Forum.id))
         }))
@@ -989,7 +989,7 @@ class Post(db.Model):
                posts[-1].id > new_topic.forum.last_post.id:
                 new_topic.forum.last_post = posts[-1]
             if posts[-1].id == old_topic.forum.last_post.id:
-                last_post = Post.query.filter(and_(
+                last_post = Post.query.filter(db.and_(
                     Post.topic_id==Topic.id,
                     Topic.forum_id==old_topic.forum_id
                 )).first()
@@ -1006,9 +1006,9 @@ class Post(db.Model):
                     op = operator.sub
 
                 db.session.execute(SAUser.__table__.update(
-                    SAUser.id.in_(select([Post.author_id], Post.topic_id == old_topic.id)),
+                    SAUser.id.in_(db.select([Post.author_id], Post.topic_id == old_topic.id)),
                     values={'post_count': op(
-                        SAUser.post_count, select([func.count()],
+                        SAUser.post_count, db.select([db.func.count()],
                             ((Post.topic_id == old_topic.id) &
                              (Post.author_id == SAUser.id)),
                             Post.__table)
@@ -1017,7 +1017,7 @@ class Post(db.Model):
                 ))
                 db.session.commit()
 
-                q = select([Post.author_id], Post.topic_id == old_topic.id, distinct=True)
+                q = db.select([Post.author_id], Post.topic_id == old_topic.id, distinct=True)
                 for x in db.session.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
 
@@ -1026,7 +1026,7 @@ class Post(db.Model):
         if not remove_topic:
             old_topic.post_count -= len(posts)
             if old_topic.last_post.id == posts[-1].id:
-                post = Post.query.filter(and_(
+                post = Post.query.filter(db.and_(
                     Post.topic_id == old_topic.id,
                     Post.id != old_topic.last_post_id
                 )).order_by(Post.id.desc()).first()
@@ -1188,7 +1188,7 @@ class Attachment(db.Model):
         if not path.exists(new_abs_path):
             os.mkdir(new_abs_path)
 
-        attachments = db.session.execute(Attachment.__table__.select(and_(
+        attachments = db.session.execute(Attachment.__table__.select(db.and_(
             Attachment.id.in_(att_ids),
             Attachment.post_id == None
         ))).fetchall()
@@ -1209,7 +1209,7 @@ class Attachment(db.Model):
             # delete the temp-file
             os.remove(path.join(settings.MEDIA_ROOT, old_fn))
             at = Attachment.__table__
-            db.session.execute(at.update(and_(
+            db.session.execute(at.update(db.and_(
                 at.c.id == id,
                 at.c.post_id == None
             ), values={'post_id': post_id,
@@ -1433,7 +1433,7 @@ class Poll(db.Model):
         """Bind the polls given in poll_ids to the given topic id."""
         if not poll_ids:
             return False
-        db.session.execute(Poll.__table__.update(and_(
+        db.session.execute(Poll.__table__.update(db.and_(
             Poll.id.in_(poll_ids),
             Poll.topic_id == None), values={
                 'topic_id': topic_id
@@ -1446,7 +1446,7 @@ class Poll(db.Model):
 
     def has_participated(self, user=None):
         user = user or current_request.user
-        return bool(db.session.execute(select([1],
+        return bool(db.session.execute(db.select([1],
             (PollVote.poll_id == self.id) &
             (PollVote.voter_id == user.id))).fetchone())
 
@@ -1548,7 +1548,7 @@ class ReadStatus(object):
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,
             [self(c) for c in item.forum.children], True) and not \
-            db.session.execute(select([1], and_(Forum.id == forum_id,
+            db.session.execute(db.select([1], db.and_(Forum.id == forum_id,
                 Forum.last_post_id > (row[0] or -1),
                 ~Forum.last_post_id.in_(row[1]))).limit(1)).fetchone():
             self.mark(item.forum)
