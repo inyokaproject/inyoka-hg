@@ -129,12 +129,12 @@ class ForumQuery(db.Query):
         if ident is None:
             return None
 
-        forums = self.get_cached(ident)
-        return forums
+        forum = self.get_cached(ident)
+        return forum
 
     def get_eager(self):
-        return Forum.query.options(
-            db.eagerload('last_post'), db.eagerload('last_post.author'))
+        options = (db.eagerload('last_post'), db.eagerload('last_post.author'))
+        return db.session.query(Forum).options(*options)
 
     def get_all_forums_cached(self):
         slugs = self._get_slugs()
@@ -145,13 +145,18 @@ class ForumQuery(db.Query):
         # fill forum cache
         missing = [key.split('/')[-1] for key, value in forums.iteritems()
                                        if value is None]
+        query = self.get_eager().filter(Forum.slug.in_(missing))
         if missing:
-            query = self.get_eager().filter(Forum.slug.in_(missing))
             missing_objects = dict((x.slug, x) for x in query)
             for key, value in forums.iteritems():
                 if value is None:
                     forums[key] = missing_objects[key.split('/')[-1]]
             cache.set_many(forums)
+        else:
+            # merge forums into sqlalchemy session again
+            objects = forums.itervalues()
+            for key, value in forums.iteritems():
+                forums[key] = db.session.merge(value, load=False)
 
         return forums
 
@@ -159,10 +164,13 @@ class ForumQuery(db.Query):
         if slug:
             # we only select one forum and query only one if it's
             # not cached yet.
+            query = self.get_eager().filter_by(slug=slug)
             forum = cache.get('forum/forums/%s' % slug)
             if forum is None:
-                forum = self.get_eager().filter_by(slug=slug).one()
+                forum = query.one()
                 cache.set('forum/forums/%s' % slug, forum)
+            else:
+                forum = db.session.merge(forum, load=False)
             return forum
         # return all forums instead
         return self.get_all_forums_cached().itervalues()
@@ -417,8 +425,8 @@ class Forum(db.Model):
 
     # db.relationship configuration
     topics = db.relationship('Topic', lazy='dynamic')
-    _children = db.relationship('Forum',
-        backref=db.backref('parent', remote_side=[id]))
+    _children = db.relationship('Forum', cascade='all',
+        backref=db.backref('parent', remote_side=[id], cascade='all'))
     last_post = db.relationship('Post', post_update=True)
 
     __mapper_args__ = {'extension': (ForumMapperExtension(),
@@ -615,7 +623,7 @@ class Topic(db.Model):
         primaryjoin='Topic.first_post_id == Post.id')
 
     forum = db.relationship(Forum)
-    polls = db.relationship('Poll', backref='topic', cascade='save-update')
+    polls = db.relationship('Poll', backref='topic')
     posts = db.relationship('Post', backref='topic', cascade='all, delete-orphan',
         primaryjoin='Topic.id == Post.topic_id', lazy='dynamic',
         passive_deletes=True)
