@@ -66,6 +66,7 @@ def on_toggle_categories(request):
     request.user.save()
     return True
 
+
 @transaction.autocommit
 def on_subscribe(request):
     type = request.POST['type']

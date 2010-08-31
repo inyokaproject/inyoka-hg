@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding index on 'User', fields ['email']
         db.create_index('portal_user', ['email'])
 
@@ -31,7 +31,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing index on 'Event', fields ['date']
         db.delete_index('portal_event', ['date'])
 

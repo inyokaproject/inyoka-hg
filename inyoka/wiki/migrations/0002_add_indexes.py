@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding index on 'Revision', fields ['change_date']
         db.create_index('wiki_revision', ['change_date'])
 
@@ -25,7 +25,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing index on 'Page', fields ['name']
         db.delete_index('wiki_page', ['name'])
 

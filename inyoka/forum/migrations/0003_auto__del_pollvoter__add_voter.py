@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Deleting model 'PollVoter'
         db.delete_table('forum_pollvoter')
 
@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Adding model 'PollVoter'
         db.create_table('forum_pollvoter', (
             ('poll', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['forum.Poll'])),
