@@ -22,10 +22,12 @@ def test():
 def staging():
     env.hosts = ['staging.ubuntuusers.de']
     env.repository = staging_repo
+    env.target_dir = '~/virtualenvs/inyoka-prod-sa06'
 
 def production():
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
     env.repository = inyoka_repo
+    env.target_dir = '~/virtualenv/inyoka'
 
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
@@ -44,13 +46,13 @@ def bootstrap():
 def deploy():
     """Update Inyoka and touch the wsgi file"""
     require('hosts', provided_by = [test, staging, production])
-    run('cd %s/inyoka; hg pull -u %s' % (target_dir, env.repository))
+    run('cd %s/inyoka; hg pull -u %s' % (env.target_dir, env.repository))
 
 def easy_install():
     """Run easy_install on the server"""
     require('hosts', provided_by = [test, staging, production])
     prompt('ez', 'easy_install parameters')
-    run('unlet PYTHONPATH; source %s/bin/activate; easy_install $(ez)' % target_dir)
+    run('unlet PYTHONPATH; source %s/bin/activate; easy_install $(ez)' % env.target_dir)
 
 _APPS = ['forum', 'portal', 'wiki', 'ikhaya', 'admin', 'utils', 'pastebin', 'planet']
 
