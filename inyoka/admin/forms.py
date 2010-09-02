@@ -88,8 +88,7 @@ class EditArticleForm(forms.Form):
                   u'als Autor eingetragen.')
     category_id = forms.ChoiceField(label=u'Kategorie')
     icon_id = forms.ChoiceField(label=u'Icon', required=False,
-            help_text=u'Wenn du dieses Feld leer lässt, wird automatisch das '
-                      u'Icon der Kategorie ausgewählt.')
+            help_text=u'Wähle das Icon aus.')
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, help_text=u'Wenn das Datum in '
         u'der Zukunft liegt, wird der Artikel bis zu diesem Zeitpunkt nicht '
