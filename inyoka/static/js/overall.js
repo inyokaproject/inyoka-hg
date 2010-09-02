@@ -377,19 +377,20 @@ $(document).ready(function() {
     var SHORT_NOTATION_VERSIONS = new Array('karmic', 'lucid');
 
     var set_version = function (link) {
-      group = $(link).parent().parent();
-      version = $(link).text().toLowerCase();
+      var link = $(link);
+      group = link.parent().parent();
+      version = link.text().toLowerCase();
       group.find('.ppa-code').remove();
       sel = group.find('.selector');
 
-      $(link).addClass('active').siblings('a').removeClass('active');
+      link.addClass('active').siblings('a').removeClass('active');
 
       sel.after('<pre class="ppa-code">' +
-          group.data['long_notation_text'].replace(/VERSION/, version) + '</div></pre>');
+          group.data('long_notation_text').replace(/VERSION/, version) + '</div></pre>');
       if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
         sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
         sel.after('<p class="ppa-code">' +
-            group.data['short_notation_text'] + '</p>');
+            group.data('short_notation_text') + '</p>');
       }
       return false;
     };
@@ -409,8 +410,8 @@ $(document).ready(function() {
         }
       }
 
-      $this.data['short_notation_text'] = $this.find('.ppa-list-short-code .contents p').html();
-      $this.data['long_notation_text'] = $this.find('.ppa-list-long-code .contents pre').html();
+      $this.data('short_notation_text', $this.find('.ppa-list-short-code .contents p').html());
+      $this.data('long_notation_text', $this.find('.ppa-list-long-code .contents pre').html());
 
       $this.children('.contents').remove();
       sel = $('<p class="selector">').appendTo($this);
@@ -433,7 +434,7 @@ $(document).ready(function() {
       version = $(link).text().toLowerCase();
       $(link).addClass('active').siblings('a').removeClass('active');
       sel = $(link).parent();
-      sel.siblings('pre').text(sel.data['deb-url-orig'].replace(/VERSION/, version));
+      sel.siblings('pre').text(sel.data('deb-url-orig').replace(/VERSION/, version));
       return false;
       
       group = $(link).parent().parent();
@@ -444,11 +445,11 @@ $(document).ready(function() {
       $(link).addClass('active').siblings('a').removeClass('active');
 
       sel.after('<pre class="ppa-code">' +
-          group.data['long_notation_text'].replace(/VERSION/, version) + '</div></pre>');
+          group.data('long_notation_text').replace(/VERSION/, version) + '</div></pre>');
       if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
         sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
         sel.after('<p class="ppa-code">' +
-            group.data['short_notation_text'] + '</p>');
+            group.data('short_notation_text') + '</p>');
       }
       return false;
     };
@@ -465,7 +466,7 @@ $(document).ready(function() {
       sel = $('<div class="selector">').insertBefore($(this).find('.contents pre'));
       sel
         .prepend('<strong>Version: </strong>')
-        .data['deb-url-orig'] = $(this).find('.contents pre').text();
+        .data('deb-url-orig', $(this).find('.contents pre').text());
       for (var i=0; i < versions.length; i++) {
         var last_link = $('<a href="#">')
           .text(versions[i].substr(0,1).toUpperCase() + versions[i].substr(1))
