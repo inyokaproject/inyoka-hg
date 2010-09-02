@@ -1650,9 +1650,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         title = u'Themen von %s' % (escape(user.username))
     elif action == 'author':
         user = user and User.objects.get(user) or request.user
-        if user == User.objects.get_anonymous_user():
+        if user.is_anonymous:
             flash(u'Für diese Funktion musst du eingeloggt sein')
-            return HttpResponseRedirect(href('portal', 'login'))
+            return abort_access_denied(request)
         # get the ids of the topics the user has written posts in
         # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
         topic_ids = select([Topic.id],
