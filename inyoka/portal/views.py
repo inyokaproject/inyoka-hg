@@ -179,7 +179,7 @@ def register(request):
                 user.save()
 
             flash(u'Der Benutzer „%s“ wurde erfolgreich registriert. '
-                  u'Es wurde eine E-Mail an „%s“ gesendet, in der du deinen '
+                  u'Es wurde eine E-Mail an „%s“ gesendet, mit der du deinen '
                   u'Account aktivieren kannst.' % (
                         escape(data['username']), escape(data['email'])), True)
 
@@ -517,7 +517,7 @@ def usercp_profile(request):
                 setattr(user, key, data[key] or '')
             if data['email'] != user.email:
                 send_new_email_confirmation(user, data['email'])
-                flash(u'Dir wurde eine E-Mail geschickt, in der du deine neue '
+                flash(u'Dir wurde eine E-Mail geschickt, mit der du deine neue '
                       u'E-Mail-Adresse bestätigen kannst.')
             if data['coordinates']:
                 user.coordinates_lat, user.coordinates_long = \
