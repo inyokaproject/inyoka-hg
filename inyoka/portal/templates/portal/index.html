@@ -64,7 +64,13 @@
   <div class="articles">
     {%- for article in ikhaya_latest %}
     <div class="article">
-      <div class="meta"><a href="{{ article|url }}">{{ article.pub_datetime|datetimeformat }}</a>
+      <div class="meta">
+        {%- if article.pub_datetime == article.updated %}
+        <a href="{{ article|url }}">{{ article.updated|datetimeformat }}</a>
+        {%- else %}
+        <a href="{{ article|url }}" title="Letzte Aktualisierung {{article.updated|specificdatetimeformat(true) 
+           }} / Erstellt am {{ article.pub_datetime|datetimeformat }}">{{ article.updated|datetimeformat }}</a>
+        {%- endif %}
         {%- if article.comments_enabled %}
           <br /><a href="{{ article|url('comments') }}" class="comments">
           {%- if article.comment_count == 0 %} Keine Kommentare
