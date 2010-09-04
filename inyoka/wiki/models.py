@@ -982,9 +982,9 @@ class Page(models.Model):
                     select distinct text_id from wiki_revision
                       join (
                             select page_id, max(id) as id
-                            from wiki_revision
+                            from wiki_revision as t
                             where page_id in (%s)
-                            group by page_id, id
+                            group by page_id, t.id
                         ) as d1 using (id);
                 ''' % ', '.join(map(str, related_pages)))
                 cur.execute('''
