@@ -9,7 +9,7 @@
     :license: GNU GPL.
 """
 from fabric.api import env,run,local,put,require,prompt
-from tempfile import mktemp
+from tempfile import mktemp as _mktemp
 
 env.user = 'ubuntu_de'
 inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
@@ -17,14 +17,23 @@ staging_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod-sa06/'
 target_dir = '~/virtualenv'
 
 def test():
+    """
+    Fabric target for localhost
+    """
     env.hosts = ['127.0.0.1']
 
 def staging():
+    """
+    Fabric target for statging.ubuntuusers.de
+    """
     env.hosts = ['staging.ubuntuusers.de']
     env.repository = staging_repo
     env.target_dir = '~/virtualenvs/inyoka-prod-sa06'
 
 def production():
+    """
+    Fabric target for ubuntu-eu.org production servers
+    """
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
     env.repository = inyoka_repo
     env.target_dir = '~/virtualenv/inyoka'
@@ -34,7 +43,7 @@ def bootstrap():
     env.hosts = [x.strip() for x in raw_input('Servers: ').split(',')],
     python_interpreter = raw_input('Python-executable (default: python2.5): ').strip() or 'python2.5',
     target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv',
-    bootstrap = mktemp(".py", "fabric_")
+    bootstrap = _mktemp(".py", "fabric_")
     run('mkdir %s' % target_dir)
     run('hg clone %s %s/inyoka' % (inyoka_repo, target_dir))
     local("%s make-bootstrap.py > '%s'" % (python_interpreter, bootstrap))
@@ -109,6 +118,9 @@ def shell():
     local("python manage-inyoka.py shell", capture=False)
 
 def mysql():
+    """
+    Start a MySQL Shell for the configured database
+    """
     local("python manage-inyoka.py mysql", capture=False)
 
 def clean_files():
