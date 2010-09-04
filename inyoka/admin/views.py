@@ -1215,6 +1215,7 @@ def event_edit(request, id=None):
                 event.location_long = data['location_long']
             event.save()
             flash(u'Die Veranstaltung wurde gespeichert.', True)
+            event = Event.objects.get(id=event.id) # get truncated slug
             return HttpResponseRedirect(url_for(event))
         else:
             event = None
