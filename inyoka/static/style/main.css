@@ -1321,6 +1321,7 @@ div#database_debug_table a {
   color: #90A818;
 }
 
+
 div#database_debug_table strong {
   font-family: Arial, sans-serif;
   margin: -10px 0 0;
@@ -1362,4 +1363,20 @@ div#database_debug_table table {
   text-align: left;
   word-wrap: break;
   overflow: auto;
+}
+
+div#database_debug_table .topic {
+  cursor: pointer;
+  padding: 5px;
+  padding-right: 15px;
+  margin-left: -10px;
+  width: 100%;
+}
+
+div#database_debug_table .topic:hover {
+  background-color: #f9f6f2;
+}
+
+div#database_debug_table .odd {
+  background: #b7bd96;
 }

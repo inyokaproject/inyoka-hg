@@ -21,23 +21,25 @@ _comma_re = re.compile(r',(?=\S)')
 
 
 TEMPLATE = u'''
-<li><div class="topic"><em>{{ topic }}</em> |
+<li><div class="topic{% if odd %} odd{% endif %}"><em>{{ topic }}</em> |
         <strong>took {{ "%.3f"|format(duration) }} ms</strong>
     </div>
-    <pre>{{ sql }}</pre><pre>Parameters: {{ parameters }}</pre>
-    <div class="explain">
-    {% if explain_result %}
-    <strong>EXPLAIN Information</strong>
-    <table>
-        <tr><th>id</th><th>select_type</th><th>table</th><th>type</th><th>possible_key</th>
-            <th>key</th><th>key_len</th><th>ref</th><th>rows</th><th>Extra</th></tr>
-        {% for t in explain_result %}
-        <tr><td>{{ t[0] }}</td><td>{{ t[1] }}</td><td>{{ t[2] }}</td><td>{{ t[3] }}</td>
-            <td>{{ t[4] }}</td><td>{{ t[5] }}</td><td>{{ t[6] }}</td><td>{{ t[7] }}</td>
-            <td>{{ t[8] }}</td><td>{{ t[9] }}</td></tr>
-        {% endfor %}
-    </table>
-    {% endif %}
+    <div class="extra">
+        <pre>{{ sql }}</pre><pre>Parameters: {{ parameters }}</pre>
+        <div class="explain">
+        {% if explain_result %}
+        <strong>EXPLAIN Information</strong>
+        <table>
+            <tr><th>id</th><th>select_type</th><th>table</th><th>type</th><th>possible_key</th>
+                <th>key</th><th>key_len</th><th>ref</th><th>rows</th><th>Extra</th></tr>
+            {% for t in explain_result %}
+            <tr><td>{{ t[0] }}</td><td>{{ t[1] }}</td><td>{{ t[2] }}</td><td>{{ t[3] }}</td>
+                <td>{{ t[4] }}</td><td>{{ t[5] }}</td><td>{{ t[6] }}</td><td>{{ t[7] }}</td>
+                <td>{{ t[8] }}</td><td>{{ t[9] }}</td></tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        </div>
     </div>
 </li>'''
 
@@ -87,6 +89,7 @@ def render_query_table(request):
     total = 0
 
     qresult = []
+    _odd = False
     for statement, parameters, start, end, calling_context, explain in queries:
         total += (end - start)
         qresult.append(render_string(TEMPLATE, {
@@ -94,8 +97,10 @@ def render_query_table(request):
             'duration': (end - start) * 1000,
             'sql': statement,
             'parameters': parameters,
-            'explain_result': explain
+            'explain_result': explain,
+            'odd': _odd
         }))
+        _odd = not _odd
 
     # render django queries into the debug toolbar
     for query in connection.queries:
@@ -123,6 +128,11 @@ def render_query_table(request):
             $('<a href="#database_debug_table">Show/Hide Log</a>').click(toggleLog)
                 .prependTo($('#database_debug_table'));
             toggleLog();
+
+            $('div.topic').click(function() {
+                $(this).nextUntil('div.topic').toggle();
+            });
+            $('div.extra').hide();
         });
         """, type='text/javascript'))
 
