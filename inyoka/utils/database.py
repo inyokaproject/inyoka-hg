@@ -294,6 +294,22 @@ def find_next_increment(column, string, max_length=None):
     return get_next_increment(flatten_iterator(existing), string, max_length)
 
 
+def find_next_django_increment(model, column, string):
+    """Get the next incremented string based on `column` and string`.
+    This function is the port of `find_next_increment` for Django models.
+
+    Example::
+
+        find_next_increment(Article, 'slug', 'article name')
+    """
+    field = model._meta.get_field_by_name(column)
+    max_length = field.max_length if hasattr(field, 'max_length') else None
+    slug = string[:max_length-10] if max_length is not None else string
+    query = model.objects.filter(**{'%s__startswith' % column: slug})
+    existing = [getattr(obj, column) for obj in query.all()]
+    return get_next_increment(flatten_iterator(existing), slug, max_length)
+
+
 class explain(Executable, ClauseElement):
     def __init__(self, stmt, analyze=False):
         self.statement = _literal_as_text(stmt)
