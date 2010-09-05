@@ -159,7 +159,7 @@ def forum(request, slug, page=1):
             cache.set(key, ctx, 60)
     else:
         merge = session.merge
-        ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
+        ctx['topics'] = [merge(obj, load=True) for obj in ctx['topics']]
 
 
     if have_privilege(User.ANONYMOUS_USER, forum, 'read'):

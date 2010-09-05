@@ -41,12 +41,12 @@ page_names = []
 forums = []
 
 GROUPS_COUNT = 30
-USERS_COUNT = 300
+USERS_COUNT = 150000
 FORUMS_COUNT = 20
-MAX_TOPIC_COUNT = 20
-MAX_TOPIC_POST_COUNT = 28
-IKHAYA_ARTICLE_COUNT = 30
-WIKI_PAGES_COUNT = 200
+MAX_TOPIC_COUNT = 2000
+MAX_TOPIC_POST_COUNT = 1530
+IKHAYA_ARTICLE_COUNT = 1800
+WIKI_PAGES_COUNT = 2000
 
 
 # original from Jochen Kupperschmidt with some modifications
@@ -265,9 +265,11 @@ def make_wiki():
 
 if __name__ == '__main__':
     page_names = ['Startseite'] + list(create_names(WIKI_PAGES_COUNT))
-    make_groups()
-    make_users()
-    make_wiki()
+    from inyoka.portal.user import User
+    users = User.objects.all()
+#    make_groups()
+#    make_users()
+#    make_wiki()
     make_ikhaya()
     make_forum()
     print "created test data"

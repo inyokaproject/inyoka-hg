@@ -27,6 +27,7 @@ from inyoka.utils.dates import date_time_to_datetime, datetime_to_timezone
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
+from inyoka.utils.database import find_next_django_increment
 
 
 class ArticleManager(models.Manager):
@@ -86,7 +87,7 @@ class Category(models.Model):
         }[action])
 
     def save(self, force_insert=False, force_update=False):
-        self.slug = slugify(self.name)
+        self.slug = find_next_django_increment(Category, 'slug', slugify(self.name))
         super(Category, self).save(force_insert, force_update)
         cache.delete('ikhaya/categories')
 
@@ -231,25 +232,8 @@ class Article(models.Model):
                 self.icon = self.category.icon
 
             # new article
-            slug = slugify(self.subject)
-
-            if slug.split('-')[-1].isdigit():
-                suffix_id = True
-            else:
-                try:
-                    Article.objects.get(slug=slug, pub_date=self.pub_date)
-                except Article.DoesNotExist:
-                    suffix_id = False
-                else:
-                    suffix_id = True
-            if not suffix_id:
-                self.slug = slug
-            else:
-                # create a unique id until we can fill the real slug in
-                self.slug = '%sX%s' % (
-                    random.random(),
-                    random.random()
-                )[:50]
+            slug = find_next_django_increment(Article, 'slug',
+                slugify(self.subject), pub_date=self.pub_date)
 
         # Force to use a valid slug
         slugified = slugify(self.slug)
