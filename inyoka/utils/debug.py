@@ -13,7 +13,6 @@ import sys
 from textwrap import wrap
 from werkzeug import escape, html
 from django.db import connection
-from inyoka.utils.templating import render_string
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')
@@ -88,6 +87,7 @@ def find_calling_context(skip=2, module='inyoka'):
 
 def render_query_table(request):
     """Renders a nice table of all queries in the page."""
+    from inyoka.utils.templating import render_string
     queries = request.queries
     total = 0
 
