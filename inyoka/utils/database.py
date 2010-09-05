@@ -294,7 +294,7 @@ def find_next_increment(column, string, max_length=None):
     return get_next_increment(flatten_iterator(existing), string, max_length)
 
 
-def find_next_django_increment(model, column, string):
+def find_next_django_increment(model, column, string, **query_opts):
     """Get the next incremented string based on `column` and string`.
     This function is the port of `find_next_increment` for Django models.
 
@@ -305,6 +305,8 @@ def find_next_django_increment(model, column, string):
     field = model._meta.get_field_by_name(column)
     max_length = field.max_length if hasattr(field, 'max_length') else None
     slug = string[:max_length-10] if max_length is not None else string
+    filter = {'%s__startswith' % column: slug}
+    filter.update(query_opts)
     query = model.objects.filter(**{'%s__startswith' % column: slug})
     existing = [getattr(obj, column) for obj in query.all()]
     return get_next_increment(flatten_iterator(existing), slug, max_length)
