@@ -13,10 +13,33 @@ import sys
 from textwrap import wrap
 from werkzeug import escape, html
 from django.db import connection
+from inyoka.utils.templating import render_string
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')
 _comma_re = re.compile(r',(?=\S)')
+
+
+TEMPLATE = u'''
+<li><div class="topic"><em>{{ topic }}</em> |
+        <strong>took {{ "%.3f"|format(duration) }} ms</strong>
+    </div>
+    <pre>{{ sql }}</pre><pre>Parameters: {{ parameters }}</pre>
+    <div class="explain">
+    {% if explain_result %}
+    <strong>EXPLAIN Information</strong>
+    <table>
+        <tr><th>id</th><th>select_type</th><th>table</th><th>type</th><th>possible_key</th>
+            <th>key</th><th>key_len</th><th>ref</th><th>rows</th><th>Extra</th></tr>
+        {% for t in explain_result %}
+        <tr><td>{{ t[0] }}</td><td>{{ t[1] }}</td><td>{{ t[2] }}</td><td>{{ t[3] }}</td>
+            <td>{{ t[4] }}</td><td>{{ t[5] }}</td><td>{{ t[6] }}</td><td>{{ t[7] }}</td>
+            <td>{{ t[8] }}</td><td>{{ t[9] }}</td></tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    </div>
+</li>'''
 
 
 def debug_repr(obj):
@@ -36,6 +59,7 @@ def debug_repr(obj):
 def find_calling_context(skip=2, module='inyoka'):
     """Finds the calling context."""
     frame = sys._getframe(skip)
+    results = []
     while frame.f_back is not None:
         name = frame.f_globals.get('__name__')
         if name and (name == module or name.startswith(module + '.')):
@@ -46,13 +70,15 @@ def find_calling_context(skip=2, module='inyoka'):
                     funcname,
                     hex(id(frame.f_locals['self']))
                 )
-            return '%s:%s (%s)' % (
+            results.append('%s:%s (%s)' % (
                 frame.f_code.co_filename,
                 frame.f_lineno,
                 funcname
-            )
+            ))
         frame = frame.f_back
-    return '<unknown>'
+    if results:
+        return results
+    return ['<unknown>']
 
 
 def render_query_table(request):
@@ -61,16 +87,15 @@ def render_query_table(request):
     total = 0
 
     qresult = []
-    for statement, parameters, start, end, calling_context in queries:
+    for statement, parameters, start, end, calling_context, explain in queries:
         total += (end - start)
-        qresult.append(u'<li><pre>%s</pre><pre>Parameters: %s</pre>'
-                      u'<div class="detail"><em>%s</em> | '
-                      u'<strong>took %.3f ms</strong></div></li>' % (
-            statement,
-            parameters,
-            escape(calling_context),
-            (end - start) * 1000
-        ))
+        qresult.append(render_string(TEMPLATE, {
+            'topic': escape(calling_context[len(calling_context) / 2]),
+            'duration': (end - start) * 1000,
+            'sql': statement,
+            'parameters': parameters,
+            'explain_result': explain
+        }))
 
     # render django queries into the debug toolbar
     for query in connection.queries:

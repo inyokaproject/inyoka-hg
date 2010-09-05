@@ -19,6 +19,8 @@ from threading import Lock
 import sqlalchemy
 from sqlalchemy import orm, sql, exc
 from sqlalchemy import MetaData, create_engine, String, Unicode
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
 from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
@@ -139,11 +141,19 @@ class ConnectionDebugProxy(ConnectionProxy):
         try:
             return execute(cursor, statement, parameters, context)
         finally:
+            end = time.time()
             if current_request:
                 request = current_request._get_current_object()
                 if request is not None:
-                    request.queries.append((statement, parameters, start,
-                                            time.time(), find_calling_context()))
+                    explain = getattr(self, '_explain', None)
+                    request.queries.append((statement, parameters, start, end,
+                                            find_calling_context(), explain))
+                    self._explain = None
+
+    def execute(self, conn, execute, clause, *multiparams, **params):
+        if not u'EXPLAIN' in unicode(clause):
+            self._explain =db.session.execute(explain(clause), *multiparams, **params).fetchall()
+        return execute(clause, *multiparams, **params)
 
 
 def mapper(model, table, **options):
@@ -282,6 +292,28 @@ def find_next_increment(column, string, max_length=None):
     """
     existing = session.query(column).filter(column.like('%s%%' % string)).all()
     return get_next_increment(flatten_iterator(existing), string, max_length)
+
+
+class explain(Executable, ClauseElement):
+    def __init__(self, stmt, analyze=False):
+        self.statement = _literal_as_text(stmt)
+        self.analyze = analyze
+
+
+@compiles(explain)
+def visit_explain(element, compiler, **kw):
+    text = 'EXPLAIN '
+    text += compiler.process(element.statement)
+    return text
+
+
+@compiles(explain, 'postgresql')
+def visit_explain(element, compiler, **kw):
+    text = 'EXPLAIN '
+    if element.analyze:
+        tetx += 'ANALYZE '
+    text += compiler.process(element.statement)
+    return text
 
 
 def _make_module():

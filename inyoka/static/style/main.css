@@ -1350,16 +1350,16 @@ div#database_debug_table ul li div.detail em {
   font-style: normal;
 }
 
-div#database_debug_table ul li pre {
+div#database_debug_table ul li pre,
+div#database_debug_table table {
   background-color: #f9f6f2;
   border-bottom: 1px solid #a87818;
   border-top: 1px solid #523a0b;
   font-family: Consolas, 'Deja Vu Mono', 'Bitstream Vera Sans Mono', monospace;
   font-size: 1em;
   margin: 0 -10px;
-  padding: 2px 10px;
+  padding: 10px;
   text-align: left;
   word-wrap: break;
   overflow: auto;
 }
-

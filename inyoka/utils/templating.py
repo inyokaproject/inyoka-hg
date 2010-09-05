@@ -124,6 +124,11 @@ def render_template(template_name, context):
     return tmpl.render(context)
 
 
+def render_string(source, context):
+    tmpl = jinja_env.from_string(source)
+    return tmpl.render(context)
+
+
 def urlencode_filter(value):
     """URL encode a string or dict."""
     if isinstance(value, dict):
