@@ -142,7 +142,7 @@ class ConnectionDebugProxy(ConnectionProxy):
             return execute(cursor, statement, parameters, context)
         finally:
             end = time.time()
-            if current_request:
+            if current_request and not 'EXPLAIN' in statement:
                 request = current_request._get_current_object()
                 if request is not None:
                     explain = getattr(self, '_explain', None)
