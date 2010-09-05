@@ -226,14 +226,14 @@ class Article(models.Model):
         suffix_id = False
         if not self.updated or self.updated < self.pub_datetime:
             self.updated = self.pub_datetime
-        if not self.slug:
-            if not self.icon:
-                # use the category's icon if available
-                self.icon = self.category.icon
 
-            # new article
-            slug = find_next_django_increment(Article, 'slug',
+        if not self.slug:
+            self.slug = find_next_django_increment(Article, 'slug',
                 slugify(self.subject), pub_date=self.pub_date)
+
+        if not self.icon:
+            # use the category's icon if available
+            self.icon = self.category.icon
 
         # Force to use a valid slug
         slugified = slugify(self.slug)
