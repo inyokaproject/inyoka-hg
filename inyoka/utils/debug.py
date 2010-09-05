@@ -72,6 +72,9 @@ def find_calling_context(skip=2, module='inyoka'):
                     funcname,
                     hex(id(frame.f_locals['self']))
                 )
+            elif 'template_name' in frame.f_locals:
+                funcname = 'in template %s' % frame.f_locals['template_name']
+
             results.append('%s:%s (%s)' % (
                 frame.f_code.co_filename,
                 frame.f_lineno,
@@ -92,8 +95,15 @@ def render_query_table(request):
     _odd = False
     for statement, parameters, start, end, calling_context, explain in queries:
         total += (end - start)
+        # find the proper calling context
+        for frame in calling_context:
+            if 'views' in frame:
+                break
+            elif 'template' in frame.lower():
+                break
+
         qresult.append(render_string(TEMPLATE, {
-            'topic': escape(calling_context[len(calling_context) / 2]),
+            'topic': escape(frame),
             'duration': (end - start) * 1000,
             'sql': statement,
             'parameters': parameters,
