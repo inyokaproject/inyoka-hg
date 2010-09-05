@@ -39,7 +39,7 @@ def increment_string(s):
         next = str(int(m.group(1))+1)
         start, end = m.span(1)
         return s[:max(end - len(next), start)] + next + s[end:]
-    return s + '2'
+    return s + '-2'
 
 
 def get_random_password():
