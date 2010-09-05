@@ -59,8 +59,12 @@ def action_runserver(hostname='', port=8080, server='simple'):
         from cherrypy.wsgiserver import CherryPyWSGIServer
         server = CherryPyWSGIServer((hostname, port), app,
             server_name=settings.BASE_DOMAIN_NAME,
-            request_queue_size=500)
-        server.start()
+            request_queue_size=500, numthreads=20)
+
+        try:
+            server.start()
+        except KeyboardInterrupt:
+            server.stop()
 
     def _tornado():
         from tornado import httpserver, ioloop, wsgi
@@ -168,18 +172,6 @@ def action_dropdb():
     for table in tables:
         db.delete_table(table)
     db.commit_transaction()
-
-
-def _dowse():
-    try:
-        from dozer import Dozer
-        app = Dozer(make_app())
-    except ImportError:
-        app = make_app()
-
-    return app
-action_dozer = script.make_runserver(_dowse, '', 8080, use_reloader=True)
-
 
 if __name__ == '__main__':
     script.run()
