@@ -132,6 +132,7 @@ def forum(request, slug, page=1):
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
 
+    #TODO: move that cache logic to model
     if page < CACHE_PAGES_COUNT:
         key = 'forum/topics/%d/%d' % (forum.id, int(page))
         ctx = cache.get(key)
@@ -139,14 +140,7 @@ def forum(request, slug, page=1):
         ctx = None
 
     if ctx is None:
-        topics = Topic.query.options(eagerload('author'),
-                                     eagerload('last_post'),
-                                     eagerload('last_post.author')) \
-            .filter_by(forum_id=forum.id) \
-            .order_by(Topic.sticky.desc(),
-                      Topic.last_post_id.desc())
-
-
+        topics = Topic.query.filter_overview(forum.id)
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(forum))
 
         ctx = {
@@ -159,7 +153,7 @@ def forum(request, slug, page=1):
             cache.set(key, ctx, 60)
     else:
         merge = session.merge
-        ctx['topics'] = [merge(obj, load=True) for obj in ctx['topics']]
+        ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
 
 
     if have_privilege(User.ANONYMOUS_USER, forum, 'read'):

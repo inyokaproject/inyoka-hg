@@ -192,6 +192,15 @@ class ForumMapperExtension(db.MapperExtension):
         return db.EXT_CONTINUE
 
 
+class TopicQuery(db.Query):
+
+    def filter_overview(self, forum_id):
+        options = (db.eagerload('author'), db.eagerload_all('last_post.author'),
+                   db.eagerload_all('first_post.author'))
+        order = (Topic.sticky.desc(), Topic.last_post_id.desc())
+        return self.options(*options).filter_by(forum_id=forum_id).order_by(*order)
+
+
 class TopicMapperExtension(db.MapperExtension):
 
     def before_insert(self, mapper, connection, instance):
@@ -587,6 +596,8 @@ class Topic(db.Model):
     __tablename__ = 'forum_topic'
     __mapper_args__ = {'extension': (TopicMapperExtension(),
                                      db.SlugGenerator('slug', 'title'))}
+
+    query = db.session.query_property(TopicQuery)
 
     id = db.Column(db.Integer, primary_key=True)
     forum_id = db.Column(db.Integer, db.ForeignKey('forum_forum.id'))
