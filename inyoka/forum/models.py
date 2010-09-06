@@ -144,7 +144,7 @@ class ForumQuery(db.Query):
 
         # fill forum cache
         missing = [key.split('/')[-1] for key, value in forums.iteritems()
-                                       if value is None]
+                                      if value is None]
         if missing:
             query = self.get_eager().filter(Forum.slug.in_(missing))
             missing_objects = dict((x.slug, x) for x in query)
