@@ -202,7 +202,7 @@ def viewtopic(request, topic_slug, page=1):
     t = Topic.query.filter_by(slug=topic_slug).first()
     if not t:
         raise PageNotFound('no such topic')
-    privileges = get_forum_privileges(request.user, t.forum.id)
+    privileges = get_forum_privileges(request.user, t.forum_id)
     if not check_privilege(privileges, 'read'):
         return abort_access_denied(request)
     if t.hidden:
