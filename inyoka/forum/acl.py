@@ -80,14 +80,15 @@ def _get_privilege_map(user, forum_ids):
 
     # construct the query, but do not execute it yet for caching reasons
     query = db.session.query(*cols).filter(db.and_(
-        Privilege.forum_id.in_(forum_ids),
         db.or_(Privilege.user_id == user.id,
                Privilege.group_id.in_(groups),
                Privilege.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
     ))
 
     # If we have an anonymous user we can cache the results
-    cache_key = 'forum/acls/anonymous/%s' % ''.join((str(id) for id in sorted(forum_ids)))
+    # We do that for all forums, this makes it possible to cache the privileges.
+    # Once we get an authenticated user we filter for the ids requested.
+    cache_key = 'forum/acls/anonymous'
     if user.is_anonymous:
         result = cache.get(cache_key)
         if result is None:
@@ -95,8 +96,11 @@ def _get_privilege_map(user, forum_ids):
             cache.set(cache_key, privilege_map)
         else:
             privilege_map = list(query.merge_result(result, False))
+        # filter the privilege_map for ids not requested (api compatibility)
+        privilege_map = [row for row in privilege_map if row.forum_id in forum_ids]
     else:
-        privilege_map = query.all()
+        # we filter for the privilege ids if we don't have an anonymous user
+        privilege_map = query.filter(Privilege.forum_id.in_(forum_ids)).all()
 
     return privilege_map
 
