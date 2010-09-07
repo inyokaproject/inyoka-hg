@@ -41,8 +41,8 @@ def production():
 def bootstrap():
     """Create a virtual environment.  Call this once on every new server."""
     env.hosts = [x.strip() for x in raw_input('Servers: ').split(',')],
-    python_interpreter = raw_input('Python-executable (default: python2.5): ').strip() or 'python2.5',
-    target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv',
+    python_interpreter = raw_input('Python-executable (default: python2.5): ').strip() or 'python2.5'
+    target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv'
     bootstrap = _mktemp(".py", "fabric_")
     run('mkdir %s' % target_dir)
     run('hg clone %s %s/inyoka' % (inyoka_repo, target_dir))
