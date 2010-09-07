@@ -45,7 +45,7 @@ def bootstrap():
     target_dir = raw_input('Location (default: ~/virtualenv): ').strip().rstrip('/') or '~/virtualenv'
     bootstrap = _mktemp(".py", "fabric_")
     run('mkdir %s' % target_dir)
-    run('hg clone %s %s/inyoka' % (inyoka_repo, target_dir))
+    run('hg clone %s %s/inyoka' % (env.repository, target_dir))
     run("%s %s/inyoka/make-bootstrap.py > %s/bootstrap.py" % (
         python_interpreter, target_dir, target_dir
     ))
