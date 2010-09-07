@@ -88,7 +88,9 @@ def _set_cache(obj):
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
-        _set_cache(InyokaMemcachedCache(settings.MEMCACHE_SERVERS))
+        _set_cache(InyokaMemcachedCache(
+            settings.MEMCACHE_SERVERS, key_prefix=settings.CACHE_PREFIX
+        ))
     else:
         _set_cache(SimpleCache())
 
