@@ -14,7 +14,6 @@ from tempfile import mktemp as _mktemp
 env.user = 'ubuntu_de'
 inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
 staging_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod-sa06/'
-target_dir = '~/virtualenv'
 
 def test():
     """
@@ -29,6 +28,14 @@ def staging():
     env.hosts = ['staging.ubuntuusers.de']
     env.repository = staging_repo
     env.target_dir = '~/virtualenvs/inyoka-prod-sa06'
+
+def edge():
+    """
+    Fabric target for edge.ubuntuusers.de
+    """
+    env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
+    env.repository = staging_repo
+    env.target_dir = '~/edge_virtualenv/inyoka'
 
 def production():
     """
