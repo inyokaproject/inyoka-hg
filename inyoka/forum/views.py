@@ -1068,11 +1068,10 @@ def movetopic(request, topic_slug):
 def splittopic(request, topic_slug, page=1):
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
+        forums = Forum.get_children_recursive(Forum.query.get_cached())
         form.fields['forum'].choices = (
-            (f.id, u'  ' * offset + f.name)
-            for offset, f in Forum.get_children_recursive(Forum.query.all())
-        )
-
+            (f.id, f.name[0] + u' ' + (u'   ' * offset) + f.name)
+            for offset, f in forums)
         form.fields['start'].choices = form.fields['select'].choices = \
             [(p.id, u'') for p in old_posts]
 
