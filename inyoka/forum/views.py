@@ -10,6 +10,7 @@
 """
 import re
 from datetime import datetime, timedelta
+from operator import attrgetter
 
 from django.utils.text import truncate_html_words
 from django.db import transaction
@@ -97,7 +98,8 @@ def index(request, category=None):
         if fmsg is not None:
             return welcome(request, fmsg.slug, request.path)
     else:
-        categories = [forum for forum in forums if forum.parent_id == None]
+        categories = sorted((forum for forum in forums if forum.parent_id == None),
+                            key=attrgetter('position'))
         # forum-overview can be set without any acl check ;)
         set_session_info(request, *session_info)
 
@@ -107,9 +109,9 @@ def index(request, category=None):
             'hidden_forum_categories', ())
         )
 
-    forum_map = OrderedDict(
-        (category, category.filter_children(forums))
-        for category in categories)
+    forum_map = OrderedDict((category,
+        sorted(category.filter_children(forums), key=attrgetter('position'))
+    ) for category in categories)
 
     return {
         'categories':           categories,
