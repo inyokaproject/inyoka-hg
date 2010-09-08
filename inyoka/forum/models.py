@@ -143,10 +143,10 @@ class ForumQuery(db.Query):
         forums = cache.get_dict(*cache_keys)
 
         # fill forum cache
-        missing = [key.split('/')[-1] for key, value in forums.iteritems()
-                                      if value is None]
+        missing = [reverted[key.split('/')[-1]] for key, value in forums.iteritems()
+                   if value is None]
         if missing:
-            query = self.get_eager().filter(Forum.slug.in_(missing))
+            query = self.get_eager().filter(Forum.id.in_(missing))
             missing_objects = dict((x.slug, x) for x in query)
             for key, value in forums.iteritems():
                 if value is None:
