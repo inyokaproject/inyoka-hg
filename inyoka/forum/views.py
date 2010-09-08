@@ -1573,7 +1573,8 @@ def newposts(request, page=1):
         db.eagerload_all('last_post.author'),
         db.eagerload('first_post'),
     ).filter(Topic.sticky == False) \
-     .order_by(Topic.last_post_id.desc())
+     .order_by(Topic.last_post_id.desc()) \
+     .with_hint(Topic, 'FORCE INDEX (forum_topic_last_post_id)', 'mysql')
 
     if 'version' in request.GET:
         topics = topics.filter_by(ubuntu_version=request.GET['version'])
