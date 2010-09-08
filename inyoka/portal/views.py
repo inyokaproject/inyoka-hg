@@ -1141,35 +1141,42 @@ def usermap(request):
     }
 
 
+app_feed_forms = {
+    'forum': ForumFeedSelectorForm,
+    'ikhaya': IkhayaFeedSelectorForm,
+    'planet': PlanetFeedSelectorForm,
+    'wiki': WikiFeedSelectorForm
+}
+
+
 @templated('portal/feedselector.html')
 def feedselector(request, app=None):
     anonymous_user = User.objects.get_anonymous_user()
+    forms = {}
     for fapp in ('forum', 'ikhaya', 'planet', 'wiki'):
         if app in (fapp, None):
-            globals()['%s_form' % fapp] = request.POST \
-                and globals()['%sFeedSelectorForm' % fapp.capitalize()] \
-                    (request.POST, auto_id='id_%s_%%s' % fapp)\
-                or globals()['%sFeedSelectorForm' % fapp.capitalize()] \
-                    (auto_id='id_%s_%%s' % fapp)
+            args = {'data': request.POST, 'auto_id': 'id_%s_%%s' % fapp}
+            forms[fapp] = (request.POST and app_feed_forms[fapp](**args)
+                           or app_feed_forms[fapp](auto_id='id_%s_%%s' % fapp))
         else:
-            globals()['%s_form' % fapp] = None
-    if forum_form is not None:
+            forms[fapp] = None
+    if forms['forum'] is not None:
         forums = filter_invisible(anonymous_user, Forum.query.all())
-        forum_form.fields['forum'].choices = [('', u'Bitte auswählen')] + \
+        forms['forum'].fields['forum'].choices = [('', u'Bitte auswählen')] + \
             [(f.slug, f.name) for f in forums]
-    if ikhaya_form is not None:
-        ikhaya_form.fields['category'].choices = [('*', u'Alle')] + \
+    if forms['ikhaya'] is not None:
+        forms['ikhaya'].fields['category'].choices = [('*', u'Alle')] + \
             [(c.slug, c.name) for c in Category.objects.all()]
-    if wiki_form is not None:
+    if forms['wiki'] is not None:
         wiki_pages = cache.get('feedselector/wiki/pages')
         if not wiki_pages:
             wiki_pages = WikiPage.objects.get_page_list()
             cache.set('feedselector/wiki/pages', wiki_pages)
-        wiki_form.fields['page'].choices = [('*', u'Alle')] + \
+        forms['wiki'].fields['page'].choices = [('*', u'Alle')] + \
             [(p, p) for p in wiki_pages]
 
     if request.method == 'POST':
-        form = globals()['%s_form' % app]
+        form = forms[app]
         if form.is_valid():
             data = form.cleaned_data
             if app == 'forum':
@@ -1202,10 +1209,10 @@ def feedselector(request, app=None):
 
     return {
         'app':         app,
-        'forum_form':  forum_form,
-        'ikhaya_form': ikhaya_form,
-        'planet_form': planet_form,
-        'wiki_form':   wiki_form,
+        'forum_form':  forms['forum'],
+        'ikhaya_form': forms['ikhaya'],
+        'planet_form': forms['planet'],
+        'wiki_form':   forms['wiki'],
     }
 
 

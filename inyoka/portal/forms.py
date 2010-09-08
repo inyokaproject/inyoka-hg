@@ -527,10 +527,11 @@ class FeedSelectorForm(forms.Form):
                 label=u'Anzahl der Einträge im Feed',
                 help_text=u'Die Anzahl wird gerundet, um die Serverlast '
                           u'gering zu halten')
-    mode = forms.ChoiceField(choices=(('full',  u'Ganzer Beitrag'),
-                                      ('short', u'Nur Einleitung'),
-                                      ('title', u'Nur Titel')),
-                             widget=forms.RadioSelect(attrs={'class':'radioul'}))
+    mode = forms.ChoiceField(initial='short',
+        choices=(('full',  u'Ganzer Beitrag'),
+                 ('short', u'Nur Einleitung'),
+                 ('title', u'Nur Titel')),
+        widget=forms.RadioSelect(attrs={'class':'radioul'}))
 
     def clean(self):
         data = self.cleaned_data
@@ -539,8 +540,8 @@ class FeedSelectorForm(forms.Form):
 
 
 class ForumFeedSelectorForm(FeedSelectorForm):
-    component = forms.ChoiceField(choices=(('*', u''), ('forum', u''),
-                                           ('topic', u'')))
+    component = forms.ChoiceField(initial='forum',
+        choices=(('*', u''), ('forum', u''), ('topic', u'')))
     forum = forms.ChoiceField(required=False)
 
     def clean_forum(self):
