@@ -401,8 +401,7 @@ class SearchForm(forms.Form):
 
         self.fields['forums'].choices = [('support', u'Alle Support-Foren'),
             ('all', u'Alle Foren')]
-        forums = filter_invisible(self.user, Forum.query.
-                                  order_by(Forum.position.asc()).all())
+        forums = filter_invisible(self.user, Forum.query.get_cached())
         for offset, forum in Forum.get_children_recursive(forums):
             self.fields['forums'].choices.append((forum.slug, u'  ' * offset + forum.name))
 

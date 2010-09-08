@@ -180,7 +180,7 @@ def forum(request, slug, page=1):
 
     ctx.update({
         'forum':         forum,
-        'subforums':     filter_invisible(request.user, forum._children),
+        'subforums':     filter_invisible(request.user, forum.children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
                                                               forum=forum),
         'can_moderate':  check_privilege(privs, 'moderate'),
@@ -1000,10 +1000,10 @@ def movetopic(request, topic_slug):
     """Move a topic into another forum"""
     def _add_field_choices():
         """Add dynamic field choices to the move topic formular"""
+        forums = Forum.get_children_recursive(Forum.query.get_cached())
         form.fields['forum_id'].choices = (
             (f.id, f.name[0] + u' ' + (u'   ' * offset) + f.name)
-            for offset, f in Forum.get_children_recursive(Forum.query.all())
-        )
+            for offset, f in forums)
         #TODO: add disabled="disabled" to categories and current forum
         #      (django doesn't feature that atm)
 
