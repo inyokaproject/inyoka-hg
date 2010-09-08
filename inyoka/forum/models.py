@@ -33,7 +33,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
 
-from inyoka.forum.acl import filter_invisible
+from inyoka.forum.acl import filter_invisible, get_privileges
 from inyoka.forum.compat import SAUser
 
 # Import Django models here so that South can find them
@@ -174,6 +174,11 @@ class ForumQuery(db.Query):
             return forum
         # return all forums instead
         return self.get_all_forums_cached().values()
+
+    def get_forums_filtered(self, user):
+        forums = self.get_cached()
+        privileges = get_privileges(user, [f.id for f in forums])
+        return filter_invisible(user, forums, privileges=privileges)
 
 
 class ForumMapperExtension(db.MapperExtension):
@@ -451,7 +456,6 @@ class Forum(db.Model):
             return href('forum', 'forum', self.slug, action)
         if action == 'edit':
             return href('admin', 'forum', 'edit', self.id)
-
     @property
     def parents(self):
         """Return a list of all parent forums up to the root level."""
@@ -473,7 +477,11 @@ class Forum(db.Model):
 
     def get_children_filtered(self, user):
         """Same as children, but check for acls if a user is given"""
-        return filter_invisible(user, self.children)
+        visible_forums = Forum.query.get_forums_filtered(user)
+        return self.filter_children(visible_forums)
+
+    def filter_children(self, forums):
+        return [forum for forum in forums if forum.parent_id == self.id]
 
     def get_latest_topics(self, count=None):
         """

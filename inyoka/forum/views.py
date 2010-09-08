@@ -33,6 +33,7 @@ from inyoka.utils.notification import send_notification, notify_about_subscripti
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session, db
+from inyoka.utils.parsertools import OrderedDict
 from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -80,7 +81,7 @@ def index(request, category=None):
         session_info = (u'sieht sich die Forenübersicht an.',
                         u'Forenübersicht')
 
-    forums = Forum.query.get_cached()
+    forums = Forum.query.get_forums_filtered(request.user)
 
     if category:
         category = Forum.query.get_cached(category)
@@ -106,10 +107,15 @@ def index(request, category=None):
             'hidden_forum_categories', ())
         )
 
+    forum_map = OrderedDict(
+        (category, category.filter_children(forums))
+        for category in categories)
+
     return {
-        'categories':           filter_invisible(request.user, categories),
+        'categories':           categories,
         'is_index':             not category,
-        'hidden_categories':    hidden_categories
+        'hidden_categories':    hidden_categories,
+        'forum_map': forum_map
     }
 
 
