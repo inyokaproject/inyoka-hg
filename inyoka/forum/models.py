@@ -173,7 +173,7 @@ class ForumQuery(db.Query):
                 forum = db.session.merge(forum, load=False)
             return forum
         # return all forums instead
-        return self.get_all_forums_cached().itervalues()
+        return self.get_all_forums_cached().values()
 
 
 class ForumMapperExtension(db.MapperExtension):
