@@ -1450,7 +1450,7 @@ def topic_feed(request, slug=None, mode='short', count=20):
 def forum_feed(request, slug=None, mode='short', count=20):
     anonymous = User.objects.get_anonymous_user()
     if slug:
-        forum = Forum.query.filter_by(slug=slug).first()
+        forum = Forum.query.get_cached(slug=slug).first()
         if forum is None:
             raise PageNotFound()
         if not have_privilege(anonymous, forum, CAN_READ):
@@ -1460,7 +1460,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         title = u'ubuntuusers Forum – „%s“' % forum.name
         url = url_for(forum)
     else:
-        allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.all())]
+        allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.get_cached())]
         if not allowed_forums:
             return abort_access_denied(request)
         topics = Topic.query.order_by(Topic.id.desc()).options(
