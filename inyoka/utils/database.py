@@ -151,8 +151,11 @@ class ConnectionDebugProxy(ConnectionProxy):
                     self._explain = None
 
     def execute(self, conn, execute, clause, *multiparams, **params):
-        if not u'EXPLAIN' in unicode(clause):
-            self._explain =db.session.execute(explain(clause), *multiparams, **params).fetchall()
+        uclause = unicode(clause)
+        if not u'EXPLAIN' in uclause and u'SELECT' in uclause:
+            self._explain = db.session.execute(
+                explain(clause), *multiparams, **params
+            ).fetchall()
         return execute(clause, *multiparams, **params)
 
 
