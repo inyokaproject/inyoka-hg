@@ -22,7 +22,7 @@
     <meta name="robots" content="{% if deny_robots == true %}noindex, nofollow{% else %}{{ deny_robots }}{% endif %}" />
     {%- endif %}
     {#- This way the local stylesheets can override styles without problems. #}
-    {%- set styles = ['main.css', 'markup.css'] + styles|default([]) -%}
+    {%- set styles = ['main-sprite.css', 'markup.css'] + styles|default([]) -%}
     {%- for style in styles %}
     <link rel="stylesheet" type="text/css" href="{{ href('static', 'style', style) }}" />
     {%- endfor %}

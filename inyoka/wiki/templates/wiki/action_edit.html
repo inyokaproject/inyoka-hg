@@ -13,7 +13,7 @@
 {% set title = page.title if page else name %}
 {% set title_trace = [title|e, 'Bearbeiten'] %}
 {% set scripts = ['WikiEditor.js'] %}
-{% set styles = ['editor.css'] %}
+{% set styles = ['editor-sprite.css'] %}
 {% set action = 'edit' %}
 {% block wiki_content %}
   <form enctype="multipart/form-data" action="?action=edit" method="post">
