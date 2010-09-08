@@ -1569,7 +1569,7 @@ def newposts(request, page=1):
 
     topics = Topic.query.options(
         db.eagerload('forum'),
-        db.eagerload_all('author.groups'),
+        db.eagerload_all('author'),
         db.eagerload_all('last_post.author'),
         db.eagerload('first_post'),
     ).filter(Topic.sticky == False) \
@@ -1713,10 +1713,10 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
 
     # check for moderatation permissions
     moderatable_forums = [forum.id for forum in
-        Forum.query.get_forums_filtered(request.user, CAN_MODERATE)
+        Forum.query.get_forums_filtered(request.user, CAN_MODERATE, reverse=True)
     ]
     def can_moderate(topic):
-        return topic.forum_id in moderatable_forums
+        return topic.forum_id not in moderatable_forums
 
     return {
         'topics':       list(topics),

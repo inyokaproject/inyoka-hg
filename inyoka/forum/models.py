@@ -111,18 +111,21 @@ def fix_plaintext(text):
 
 class ForumQuery(db.Query):
 
-    def _get_slugs(self):
+    def get_slugs(self):
         slug_map = cache.get('forum/slugs')
         if slug_map is None:
             slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
             cache.set('forum/slugs', slug_map)
         return slug_map
 
+    def get_ids(self):
+        return [id for id in self.get_slugs().iterkeys()]
+
     def get(self, ident):
         # We unify the usage internally to query the id but accept an slug too.
         # To cache the result we use the slug as it's used in the forum view too
         mapper = self._mapper_zero()
-        slugs = self._get_slugs()
+        slugs = self.get_slugs()
 
         if isinstance(ident, (int, float, long)):
             ident = slugs.get(ident)
@@ -138,7 +141,7 @@ class ForumQuery(db.Query):
         return db.session.query(Forum).options(*options)
 
     def get_all_forums_cached(self):
-        slugs = self._get_slugs()
+        slugs = self.get_slugs()
         reverted = dict((y, x) for x, y in slugs.iteritems())
         cache_keys = ['forum/forums/%s' % s for s in reverted]
         forums = cache.get_dict(*cache_keys)

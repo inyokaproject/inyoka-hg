@@ -100,7 +100,12 @@ def _get_privilege_map(user, forum_ids):
         privilege_map = [row for row in privilege_map if row.forum_id in forum_ids]
     else:
         # we filter for the privilege ids if we don't have an anonymous user
-        privilege_map = query.filter(Privilege.forum_id.in_(forum_ids)).all()
+        all_ids = Forum.query.get_ids()
+        # Do only filter IN if required.  This is not required most of the time
+        # so that this saves a bit bandwith and quite a few time for the query
+        if len(forum_ids) != len(all_ids):
+            privilege_map = query.filter(Privilege.forum_id.in_(forum_ids))
+        privilege_map = query.all()
 
     return privilege_map
 
@@ -187,6 +192,6 @@ def filter_visible(user, forums=None, priv=CAN_READ, privileges=None):
 
 
 # circular imports
-from inyoka.forum.models import Privilege
+from inyoka.forum.models import Privilege, Forum
 from inyoka.forum.compat import user_group_table
 from inyoka.portal.user import DEFAULT_GROUP_ID
