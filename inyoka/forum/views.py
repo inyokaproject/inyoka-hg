@@ -229,7 +229,8 @@ def viewtopic(request, topic_slug, page=1):
 
     discussions = Page.objects.filter(topic_id=t.id)
 
-    posts = t.posts.options(db.joinedload('author', innerjoin=True),
+    posts = t.posts.options(db.joinedload('author'),
+                            db.joinedload('author.groups'),
                             db.joinedload('attachments')) \
                    .order_by(Post.position)
 
