@@ -1161,7 +1161,7 @@ def feedselector(request, app=None):
         else:
             forms[fapp] = None
     if forms['forum'] is not None:
-        forums = filter_invisible(anonymous_user, Forum.query.all())
+        forums = filter_invisible(anonymous_user, Forum.query.get_cached())
         forms['forum'].fields['forum'].choices = [('', u'Bitte auswählen')] + \
             [(f.slug, f.name) for f in forums]
     if forms['ikhaya'] is not None:
