@@ -1592,7 +1592,8 @@ def newposts(request, page=1):
     if where is True:
         topics = topics.filter(where)
 
-    total = db.session.execute(db.select([db.func.count(Topic.id)])).fetchone()[0]
+    total = db.session.execute(db.select([db.func.count(Topic.id)]
+        ).with_hint(Topic.__table__, 'FORCE INDEX (PRIMARY)', 'mysql')).fetchone()[0]
     pagination = Pagination(request, topics, page, 25,
         href('forum', 'newposts'), total)
 
