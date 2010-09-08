@@ -71,14 +71,14 @@ def populate_context_defaults(context):
         key = 'portal/pm_count/%s' % request.user.id
         pms = cache.get(key)
         if pms is None:
-            pms = PrivateMessageEntry.objects.filter(user__id=request.user.id,
-                                                  read=False).count()
+            pms = PrivateMessageEntry.objects \
+                .filter(user__id=request.user.id, read=False).count()
             cache.set(key, pms)
         if request.user.can('manage_topics'):
             key = 'forum/reported_topic_count'
             reported = cache.get(key)
             if reported is None:
-                reported = Topic.query.filter(Topic.reported != None).count()
+                reported = Topic.query.filter(Topic.reporter_id != None).count()
                 cache.set(key, reported)
         else:
             reported = 0
