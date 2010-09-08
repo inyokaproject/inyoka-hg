@@ -282,7 +282,7 @@ def viewtopic(request, topic_slug, page=1):
                 .filter(user=request.user, topic_id=t.id).get()
             subscription.notified = False
             subscription.save()
-        except Subscription.ObjectNotExist:
+        except Subscription.DoesNotExist:
             subscribed = False
 
     post_objects = pagination.objects.all()
