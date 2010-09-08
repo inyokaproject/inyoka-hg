@@ -1545,7 +1545,7 @@ def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
-    forum_ids = [f[0] for f in select([Forum.id]).execute()]
+    forum_ids = [forum.id for forum in Forum.query.get_cached()]
     # get read status data
     data = request.user._readstatus.data
 
@@ -1658,16 +1658,15 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             return abort_access_denied(request)
         # get the ids of the topics the user has written posts in
         # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
-        topic_ids = select([Topic.id],
-            exists([Post.topic_id],
-                (Post.author_id == user.id) &
+        topic_ids = db.session.query(Topic.id).filter(db.exists(
+            [Post.topic_id], db.and_(
+                (Post.author_id == user.id),
                 (Post.topic_id == Topic.id)
-            )
-        ).order_by(Topic.last_post_id.desc()) \
-         .offset((page - 1) * TOPICS_PER_PAGE) \
-         .limit(TOPICS_PER_PAGE + 1)
+        ))).order_by(Topic.last_post_id.desc()) \
+           .offset((page - 1) * TOPICS_PER_PAGE) \
+           .limit(TOPICS_PER_PAGE + 1).all()
+        topic_ids = [topic.id for topic in topic_ids]
 
-        topic_ids = [i[0] for i in topic_ids.execute().fetchall()]
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
         topic_ids = topic_ids[:TOPICS_PER_PAGE]
         topics = filter(lambda x: have_privilege(request.user, x, 'read'),
