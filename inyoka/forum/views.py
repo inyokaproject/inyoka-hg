@@ -1554,15 +1554,6 @@ def newposts(request, page=1):
     #: sql where clause
     where = None
 
-    # filter old topics with id < "last read post in this forum"
-    if any(e[0] for e in data.itervalues()):
-        ids = filter(lambda id: data[id][0] is not None, data.keys())
-        where = or_(*[(
-            (Topic.forum_id == id) &
-            (Topic.last_post_id > data[id][0])) for id in ids] +
-            # don't filter in forums where "last read post" isn't set
-            [not_(Topic.forum_id.in_(ids))])
-
     # get single topics that are marked as "read"
     read_topics = []
     for id in forum_ids:
