@@ -33,7 +33,8 @@ from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
 
-from inyoka.forum.acl import filter_invisible, get_privileges
+from inyoka.forum.acl import filter_invisible, get_privileges, CAN_READ, \
+    filter_visible
 from inyoka.forum.compat import SAUser
 
 # Import Django models here so that South can find them
@@ -175,10 +176,12 @@ class ForumQuery(db.Query):
         # return all forums instead
         return self.get_all_forums_cached().values()
 
-    def get_forums_filtered(self, user):
+    def get_forums_filtered(self, user, priv=CAN_READ, reverse=False):
         forums = self.get_cached()
         privileges = get_privileges(user, [f.id for f in forums])
-        return filter_invisible(user, forums, privileges=privileges)
+        if reverse:
+            return filter_visible(user, forums, priv, privileges)
+        return filter_invisible(user, forums, priv, privileges)
 
 
 class ForumMapperExtension(db.MapperExtension):
@@ -475,9 +478,9 @@ class Forum(db.Model):
         children = [forum for forum in forums if forum.parent_id == self.id]
         return children
 
-    def get_children_filtered(self, user):
+    def get_children_filtered(self, user, priv=CAN_READ):
         """Same as children, but check for acls if a user is given"""
-        visible_forums = Forum.query.get_forums_filtered(user)
+        visible_forums = Forum.query.get_forums_filtered(user, priv=priv)
         return self.filter_children(visible_forums)
 
     def filter_children(self, forums):

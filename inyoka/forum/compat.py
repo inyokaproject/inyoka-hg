@@ -113,7 +113,7 @@ class SAUser(Model):
     primary_group_id = Column(Integer, ForeignKey('portal_group.id'), nullable=True)
 
     # relationship configuration
-    groups = relationship(SAGroup, secondary=user_group_table, lazy='subquery')
+    groups = relationship(SAGroup, secondary=user_group_table)
 
     # Shortcut properties
     is_anonymous = property(lambda x: x.id == 1)

@@ -1540,6 +1540,7 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
+#TODO: integrate with topiclist function
 @templated('forum/topiclist.html')
 def newposts(request, page=1):
     """
@@ -1548,13 +1549,6 @@ def newposts(request, page=1):
     forum_ids = [forum.id for forum in Forum.query.get_cached()]
     # get read status data
     data = request.user._readstatus.data
-
-    def any(l):
-        #TODO: Remove this when python version is 2.5+
-        for e in l:
-            if bool(e):
-                return True
-        return False
 
     #: sql where clause
     where = None
@@ -1581,38 +1575,51 @@ def newposts(request, page=1):
         else:
             where = cond
 
-    topics = Topic.query.options(eagerload('author'), eagerload('last_post'),
-                                 eagerload('last_post.author')) \
-        .filter(Topic.sticky == False) \
-        .order_by(Topic.last_post_id.desc())
+    topics = Topic.query.options(
+        db.eagerload('forum'),
+        db.eagerload_all('author.groups'),
+        db.eagerload_all('last_post.author'),
+        db.eagerload('first_post'),
+    ).filter(Topic.sticky == False) \
+     .order_by(Topic.last_post_id.desc())
 
     if 'version' in request.GET:
         topics = topics.filter_by(ubuntu_version=request.GET['version'])
 
     # get the forums the user is not allowed to see
-    forbidden_forums = []
-    privs = get_privileges(request.user, forum_ids)
-    for id in forum_ids:
-        if privs.get(id, DISALLOW_ALL) & CAN_READ == 0:
-            forbidden_forums.append(id)
+    invisible_forums = [f.id for f in
+        Forum.query.get_forums_filtered(request.user, reverse=True)
+    ]
 
     # don't show topics of forums where the user doesn't have CAN_READ
     # permission
-    if forbidden_forums:
-        topics = topics.filter(not_(Topic.forum_id.in_(forbidden_forums)))
+    if invisible_forums:
+        topics = topics.filter(Topic.forum_id.in_(invisible_forums))
 
     if where is True:
         topics = topics.filter(where)
 
+    total = db.session.execute(db.select([db.func.count(Topic.id)])).fetchone()[0]
     pagination = Pagination(request, topics, page, 25,
-        href('forum', 'newposts'))
+        href('forum', 'newposts'), total)
+
+    def _get_read_status(post_id):
+        user = request.user
+        return user.is_authenticated and user._readstatus(post_id=post_id)
+
+    # check for moderatation permissions
+    moderatable_forums = [forum.id for forum in
+        Forum.query.get_forums_filtered(request.user, CAN_MODERATE)
+    ]
+    def can_moderate(topic):
+        return topic.forum_id in moderatable_forums
 
     return {
         'topics':     list(pagination.objects),
         'pagination': pagination.generate('right'),
         'title':      u'Neue Beiträge',
-        'get_read_status':  lambda post_id: request.user.is_authenticated \
-                  and request.user._readstatus(forum_id=f.id, post_id=post_id),
+        'get_read_status': _get_read_status,
+        'can_moderate': can_moderate
     }
 
 
@@ -1620,10 +1627,10 @@ def newposts(request, page=1):
 def topiclist(request, page=1, action='newposts', hours=24, user=None):
     page = int(page)
     topics = Topic.query.order_by(Topic.last_post_id.desc()) \
-                  .options(eagerload('forum'),
-                           eagerload('author'),
-                           eagerload('last_post'),
-                           eagerload('last_post.author'))
+                  .options(db.eagerload('forum'),
+                           db.eagerload('author'),
+                           db.eagerload_all('last_post.author'),
+                           db.eagerload('first_post'))
 
     if 'version' in request.GET:
         topics = topics.filter_by(ubuntu_version=request.GET['version'])
@@ -1658,19 +1665,17 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             return abort_access_denied(request)
         # get the ids of the topics the user has written posts in
         # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
-        topic_ids = db.session.query(Topic.id).filter(db.exists(
-            [Post.topic_id], db.and_(
-                (Post.author_id == user.id),
-                (Post.topic_id == Topic.id)
-        ))).order_by(Topic.last_post_id.desc()) \
-           .offset((page - 1) * TOPICS_PER_PAGE) \
+        topics = topics.filter(db.exists([Post.topic_id], db.and_(
+            (Post.author_id == user.id),
+            (Post.topic_id == Topic.id)
+        ))).offset((page - 1) * TOPICS_PER_PAGE) \
            .limit(TOPICS_PER_PAGE + 1).all()
-        topic_ids = [topic.id for topic in topic_ids]
+        topic_ids = [topic.id for topic in topics]
 
         next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
         topic_ids = topic_ids[:TOPICS_PER_PAGE]
-        topics = filter(lambda x: have_privilege(request.user, x, 'read'),
-                        list(topics.filter(Topic.id.in_(topic_ids))))
+        visible_forums = [f.id for f in Forum.query.get_forums_filtered(request.user)]
+        topics = [topic for topic in topics if topic.forum_id in visible_forums]
         pagination = []
         normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
         disabled = u'<span class="disabled next">%(text)s</span>'
@@ -1703,19 +1708,30 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         pagination = u''.join(pagination)
 
     if action != 'author':
-        forum_ids = [f.id for f in filter_invisible(request.user,
-                                                    Forum.query.all())]
-        topics = topics.filter(Topic.forum_id.in_(forum_ids))
+        invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
+        if invisible:
+            topics = topics.filter(db.not_(Topic.forum_id.in_(forum_ids)))
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
         topics = pagination.objects
         pagination = pagination.generate()
+
+    def _get_read_status(post_id):
+        user = request.user
+        return user.is_authenticated and user._readstatus(post_id=post_id)
+
+    # check for moderatation permissions
+    moderatable_forums = [forum.id for forum in
+        Forum.query.get_forums_filtered(request.user, CAN_MODERATE)
+    ]
+    def can_moderate(topic):
+        return topic.forum_id in moderatable_forums
 
     return {
         'topics':       list(topics),
         'pagination':   pagination,
         'title':        title,
-        'get_read_status':  lambda post_id: request.user.is_authenticated \
-                  and request.user._readstatus(post_id=post_id),
+        'get_read_status':  _get_read_status,
+        'can_moderate': can_moderate
     }
 
 

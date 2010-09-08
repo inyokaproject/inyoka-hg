@@ -35,10 +35,10 @@
         <th class="last_post">Letzte Antwort</th>
       </tr>
 
-      {%- for topic in topics if not (topic.hidden and not have_privilege(USER, topic, 'moderate')) %}
+      {%- for topic in topics if not (topic.hidden and not can_moderate(topic)) %}
       {%- set classes = [] %}
-      {%- if have_privilege(USER, topic, 'moderate') and topic.hidden %}{% do classes.append('hidden') %}{% endif %}
-      {%- if have_privilege(USER, topic, 'moderate') and topic.reported %}{% do classes.append('reported') %}{% endif %}
+      {%- if can_moderate(topic) and topic.hidden %}{% do classes.append('hidden') %}{% endif %}
+      {%- if can_moderate(topic) and topic.reported %}{% do classes.append('reported') %}{% endif %}
       {%- if topic.get_ubuntu_version().class_ %}{% do classes.append(topic.get_ubuntu_version().class_) %}{% endif %}
       <tr{% if classes %} class="{{ classes|join(' ') }}"{% endif %}>
         <td class="icon">
@@ -48,8 +48,8 @@
           <p class="topic_title">
             {%- if topic.sticky %}<strong>Wichtig: </strong>{% endif -%}
             {%- if topic.has_poll %} <strong>[Umfrage]</strong> {% endif -%}
-            {%- if have_privilege(USER, topic, 'moderate') and topic.hidden %} [Verborgen] {% endif %}
-            {%- if have_privilege(USER, topic, 'moderate') and topic.reported %} [Gemeldet] {% endif %}
+            {%- if can_moderate(topic) and topic.hidden %} [Verborgen] {% endif %}
+            {%- if can_moderate(topic) and topic.reported %} [Gemeldet] {% endif %}
             <a href="{{ topic|url }}">{{ topic.title|e }}</a>
             {%- if not topic.get_read_status(USER) %}
             <a href="{{ topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">
