@@ -273,18 +273,16 @@ def viewtopic(request, topic_slug, page=1):
         set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
             u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
 
-    subscribed = False
+    subscribed = True
     if request.user.is_authenticated:
         t.mark_read(request.user)
         request.user.save()
-
-        s = Subscription.objects.filter(user=request.user,
-                                        topic_id=t.id)
-        if s:
-            subscribed = True
-            s[0].notified = False
-            s[0].save()
-        else:
+        try:
+            subscription = Subscription.objects \
+                .filter(user=request.user, topic_id=t.id).get()
+            subscription.notified = False
+            subscription.save()
+        except Subscription.ObjectNotExist:
             subscribed = False
 
     post_objects = pagination.objects.all()
