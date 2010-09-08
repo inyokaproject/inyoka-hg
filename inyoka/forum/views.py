@@ -373,7 +373,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             raise PageNotFound()
         forum = topic.forum
     elif forum_slug:
-        forum = Forum.query.filter_by(slug=forum_slug).first()
+        forum = Forum.query.get_cached(slug=forum_slug)
         if not forum or not forum.parent_id:
             raise PageNotFound()
         newtopic = firstpost = True
@@ -1013,8 +1013,9 @@ def movetopic(request, topic_slug):
     if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
-    forums = filter_invisible(request.user, Forum.query.filter(and_(
-        Forum.parent_id != None, Forum.id != topic.forum_id)))
+    forums = filter_invisible(request.user,
+        [forum for forum in Forum.query.get_cached() if
+            forum.parent_id != None and forum.id != topic.forum_id])
     mapping = dict((x.id, x) for x in forums)
     if not mapping:
         return abort_access_denied(request)
