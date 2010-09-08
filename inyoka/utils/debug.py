@@ -104,7 +104,7 @@ def render_query_table(request):
 
         qresult.append(render_string(TEMPLATE, {
             'topic': escape(frame),
-            'duration': (end - start) * 1000,
+            'duration': (end - start) * 1000.0,
             'sql': statement,
             'parameters': parameters,
             'explain_result': explain,
@@ -119,12 +119,12 @@ def render_query_table(request):
         sql = u'\n'.join(wrap(u'\n'.join(x.rstrip() for x in query['sql'].split('\n')), 120))
         qresult.append(u'<li><pre>%s</pre><pre>Issued from Django-Application</pre>'
                        u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
-                       % (sql, float(query['time'])))
+                       % (sql, float(query['time']) * 1000.0))
         total += float(query['time'])
 
     result = [u'<div id="database_debug_table">']
     stat = (u'<strong>(%d queries in %.2f ms)</strong>'
-            % (len(queries) + len(connection.queries), total * 1000))
+            % (len(queries) + len(connection.queries), total * 1000.0))
     result.append(stat)
     result.append(u'<div id="database_debug_table_inner"><ul>')
     result.extend(qresult)
