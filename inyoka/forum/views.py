@@ -221,11 +221,7 @@ def viewtopic(request, topic_slug, page=1):
     fmsg = t.forum.find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
-    try:
-        t.touch()
-        session.commit()
-    except OperationalError:
-        pass
+    t.touch()
 
     discussions = Page.objects.filter(topic_id=t.id)
 
