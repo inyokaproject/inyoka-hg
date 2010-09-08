@@ -28,7 +28,7 @@ class ForumSearchAuthDecider(object):
         # the privileges are set on first call and not on init because this
         # would create one useless query if the user e.g. just searched the
         # wiki.
-        privs = get_privileges(self.user, [f.id for f in Forum.query.all()])
+        privs = get_privileges(self.user, [f.id for f in Forum.query.get_cached()])
         return dict((id, check_privilege(priv, 'read'))
             for id, priv in privs.iteritems())
 
