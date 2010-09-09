@@ -454,8 +454,7 @@ class Forum(db.Model):
     last_post = db.relationship('Post', post_update=True)
 
     __mapper_args__ = {'extension': (ForumMapperExtension(),
-                                     db.SlugGenerator('slug', 'name')),
-                       'order_by': position}
+                                     db.SlugGenerator('slug', 'name'))}
 
     def get_absolute_url(self, action='show'):
         if action == 'show':
