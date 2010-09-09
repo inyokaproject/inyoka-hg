@@ -23,6 +23,7 @@ from inyoka import INYOKA_REVISION
 from inyoka.conf import settings
 
 try:
+    from pymongo import ASCENDING, DESCENDING
     from pymongo.connection import Connection
     from pymongo.errors import AutoReconnect
 except ImportError:
@@ -179,6 +180,9 @@ class MongoHandler(logging.Handler):
             return
         collection = database[self.collection]
 
+        # ensure the indexes exists
+        collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
+        collection.ensure_index([('hash', ASCENDING)], unique=True)
 
         # check if the hash already exists, if so increment
         # the occured counter.

@@ -1299,9 +1299,13 @@ def styles(request):
 @require_permission('manage_stats')
 @templated('admin/monitoring.html')
 def monitoring(request):
-    from pymongo import DESCENDING
+    from pymongo import DESCENDING, ASCENDING
     database = get_mdb_database(True)
     collection = database['errors']
+
+    # ensure the indexes exists
+    collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
+    collection.ensure_index([('hash', ASCENDING)], unique=True)
 
     if 'close' in request.GET:
         hash = request.GET.get('close')

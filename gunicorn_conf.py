@@ -70,7 +70,7 @@ backlog = 2048
 # A positive integer. Generally set in the 1-5 seconds range.
 #
 
-workers = 1
+workers = 2
 worker_class = 'egg:gunicorn#gevent'
 worker_connections = 1000
 timeout = 30
@@ -153,8 +153,8 @@ tmp_upload_dir = None
 # A string of "debug", "info", "warning", "error", "critical"
 #
 
-logfile = '-'
-loglevel = 'info'
+logfile = '/dev/null'
+loglevel = 'error'
 
 #
 # Process naming
