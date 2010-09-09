@@ -150,7 +150,11 @@ class ForumQuery(db.Query):
         missing = [reverted[key.split('/')[-1]] for key, value in forums.iteritems()
                    if value is None]
         if missing:
-            query = self.get_eager().filter(Forum.id.in_(missing))
+            query = self.get_eager()
+            # If we query all forums, and all forums are missing we don't
+            # need to use an IN (...) expression, allows us to use indexed scans.
+            if not len(missing) == len(slugs):
+                query = self.get_eager().filter(Forum.id.in_(missing))
             missing_objects = dict((x.slug, x) for x in query)
             for key, value in forums.iteritems():
                 if value is None:
