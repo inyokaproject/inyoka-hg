@@ -105,7 +105,7 @@ def _get_privilege_map(user, forum_ids):
         # so that this saves a bit bandwith and quite a few time for the query
         if len(forum_ids) != len(all_ids):
             privilege_map = query.filter(Privilege.forum_id.in_(forum_ids))
-        privilege_map = query.all()
+        privilege_map = privilege_map.all()
 
     return privilege_map
 
