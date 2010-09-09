@@ -140,4 +140,4 @@ def clean_files():
     local("find . -name '*~' -exec rm -f {} +")
     local("find . -name '*.orig' -exec rm -f {} +")
     local("find . -name '*.orig.*' -exec rm -f {} +")
-    local("find . -name '*.py.fej' -exec rm -f {} +")
+    local("find . -name '*.rej' -exec rm -f {} +")
