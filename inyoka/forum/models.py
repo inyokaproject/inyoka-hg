@@ -435,7 +435,7 @@ class Forum(db.Model):
     slug = db.Column(db.String(100), nullable=False, unique=True, index=True)
     description = db.Column(db.String(500), nullable=False, default='')
     parent_id = db.Column(db.Integer, db.ForeignKey('forum_forum.id'), nullable=True)
-    position = db.Column(db.Integer, nullable=False, default=0)
+    position = db.Column(db.Integer, nullable=False, default=0, index=True)
     last_post_id = db.Column(db.Integer, db.ForeignKey('forum_post.id',
                           use_alter=True, name='forum_forum_lastpost_id'),
                           nullable=True)

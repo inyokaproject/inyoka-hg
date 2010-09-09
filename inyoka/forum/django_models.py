@@ -24,7 +24,7 @@ class Forum(models.Model):
     slug = models.CharField(unique=True, max_length=100, db_index=True)
     description = models.TextField()
     parent = models.ForeignKey('self', null=True, blank=True)
-    position = models.IntegerField()
+    position = models.IntegerField(db_index=True)
     last_post = models.ForeignKey('Post', null=True, blank=True)
     post_count = models.IntegerField()
     topic_count = models.IntegerField()
