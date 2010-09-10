@@ -15,6 +15,7 @@ from os import path
 from PIL import Image
 from StringIO import StringIO
 from sqlalchemy import and_, select
+from sqlalchemy.util import to_list
 from datetime import date, time as dt_time
 from django.db.models import Max
 from django.forms.models import model_to_dict
@@ -563,16 +564,13 @@ def forums(request):
 
 @require_permission('forum_edit')
 @templated('admin/forum_edit.html')
-def forum_edit(request, id=None):
+def forum_edit(request, slug=None):
     """
     Display an interface to let the user create or edit an forum.
     If `id` is given, the forum with id `id` will be edited.
     """
     def _add_field_choices():
-        if id:
-            query = Forum.query.filter(Forum.id!=id)
-        else:
-            query = Forum.query.all()
+        query = to_list(Forum.query.get_cached(slug))
         categories = [(c.id, c.name) for c in query]
         form.fields['parent'].choices = [(-1, "-")] + categories
 

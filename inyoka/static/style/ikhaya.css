@@ -31,7 +31,7 @@ ul.articles {
 
 .article {
   border: solid 1px #ccc;
-  background-image:url(../img/ikhaya/article1px.jpg);
+  background-image:url(../img/ikhaya/article1px.png);
   background-repeat:repeat-x;
   background-position:-8px 0px;;
   margin-bottom: 1em;
