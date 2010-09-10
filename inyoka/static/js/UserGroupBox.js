@@ -57,6 +57,6 @@
     },
     move: function(from, to) {
       from.find('option:selected').remove().appendTo(to);
-    },
-  }
+    }
+  };
 })()
