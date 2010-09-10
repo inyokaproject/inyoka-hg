@@ -274,8 +274,7 @@
         item('[[TagWolke(%s)]]', 'Tag-Wolke'),
         item('[[LetzteÄnderungen(%s)]]', 'Letzte Änderungen'),
         item('[[VerwaisteSeiten(%s)]]', 'Verwaiste Seiten'),
-        item('[[NeueSeiten(%s)]]', 'Neue Seiten'),
-      ],
+        item('[[NeueSeiten(%s)]]', 'Neue Seiten')],
       function(evt) {
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
@@ -289,8 +288,7 @@
         item('[[Vorlage(Getestet, %s)]]', 'Getestet'),
         item('[[Vorlage(Fremd, Paket, "%s")]]', 'Fremdpakete-Warnung'),
         item('[[Vorlage(Fremd, Quelle, "%s")]]', 'Fremdquelle-Warnung'),
-        item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info'),
-      ],
+        item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info')],
       function(evt) {
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
