@@ -106,7 +106,9 @@ class CommonServicesMiddleware(CommonMiddleware):
             response['Cache-Control'] = 'no-cache'
 
         path = request.path
-        if settings.DEBUG and not '.js' in path or '.css' in path:
+        excludes = ('.js', '.css')
+        exclude = any(x in path for x in excludes)
+        if settings.DEBUG and not exclude and not '__service__' in request.GET:
             inject_query_info(request, response)
 
         # clean up after the local manager
