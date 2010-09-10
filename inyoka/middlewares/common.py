@@ -105,7 +105,8 @@ class CommonServicesMiddleware(CommonMiddleware):
            or has_flashed_messages():
             response['Cache-Control'] = 'no-cache'
 
-        if settings.DEBUG:
+        path = request.path
+        if settings.DEBUG and not '.js' in path or '.css' in path:
             inject_query_info(request, response)
 
         # clean up after the local manager
