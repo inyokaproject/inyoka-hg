@@ -14,7 +14,7 @@
 {% set navigation_trace = [(href('forum'), 'Forum')] + navigation_trace|default([]) %}
 {% set active_app = 'forum' %}
 {% set styles = ['forum-sprite.css', 'highlight.css'] + styles|default([]) %}
-{% set scripts = ['forum.js'] + scripts|default([]) %}
+{% set scripts = ['forum.min.js'] + scripts|default([]) %}
 {% set navi_type = 'tabbar'%}
 
 {% block appheader %}

@@ -12,7 +12,7 @@
 
 {% set title_trace = [article.subject|e] %}
 {% set styles = ['editor-sprite.css']%}
-{% set scripts = ['ikhaya.js', 'WikiEditor.js'] %}
+{% set scripts = ['ikhaya.min.js', 'WikiEditor.min.js'] %}
 {% set feed = 'feeds/comments/%s/%%s/20'|format(article.id) %}
 {% set feeds = [
   ('Kommentare - Nur Überschrift', href('ikhaya', feed|format('title'))),
