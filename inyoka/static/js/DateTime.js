@@ -100,7 +100,7 @@ $(document).click(function() {
       var self = this;
       var set_vars = function(year, month, day, time) {
         self.currentYear = parseInt(year, 10);
-        self.currentMonth = parseInt(month, 10),
+        self.currentMonth = parseInt(month, 10);
         self.currentDay = parseInt(day, 10);
         self.currentTime = time;
       };
