@@ -1152,10 +1152,6 @@ div.not_found img {
 	overflow: hidden;
 }
 
-.ac_loading {
-	background : Window url('../img/indicator.gif') right center no-repeat;
-}
-
 .ac_over {
 	background-color: Highlight;
 	color: HighlightText;
