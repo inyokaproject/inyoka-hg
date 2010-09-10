@@ -8,6 +8,7 @@
     :copyright: Copyright 2008 by Florian Apolloner.
     :license: GNU GPL.
 """
+import os as _os
 from fabric.api import env,run,local,put,require,prompt
 from tempfile import mktemp as _mktemp
 
@@ -141,3 +142,19 @@ def clean_files():
     local("find . -name '*.orig' -exec rm -f {} +")
     local("find . -name '*.orig.*' -exec rm -f {} +")
     local("find . -name '*.rej' -exec rm -f {} +")
+
+
+def check_js():
+    rhino = 'java -jar extra/js.jar'
+    local("%s extra/jslint-check.js" % rhino, capture=False)
+
+
+def compile_js():
+    rhino = 'java -jar extra/js.jar'
+    minjar = 'java -jar extra/google-compiler.jar'
+    #TODO: find some way to preserve comments on top
+    files = _os.listdir('inyoka/static/js')
+    files = [fn for fn in files if not 'min' in fn and not 'jquery-' in fn]
+    for file in files:
+        local("%s --js inyoka/static/js/%s --warning_level QUIET > inyoka/static/js/%s" %
+            (minjar, file, file.split('.js')[0] + '.min.js'), capture=False)
