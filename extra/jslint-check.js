@@ -3,10 +3,9 @@
 
 load("extra/jslint.js");
 
-var files = ["DateTime.js", "FeedSelector.js", "forum.js", "GMarkerManager.js",
-             "ikhaya.js", "jquery.autocomplete.js", "jquery.cookie.js",
-             "jquery.extensions.js", "jquery.tokenfield.js", "jquery.visualize.js",
-             "NewTopic.js", "overall.js", "Pastebin.js", "PrivilegeBox.js",
+var files = ["DateTime.js", "FeedSelector.js", "forum.js", "ikhaya.js",
+             "jquery.extensions.js", "NewTopic.js", "overall.js",
+             "Pastebin.js", "PrivilegeBox.js",
              "UserGroupBox.js", "UserMap.js", "WikiEditor.js"]
 
 for (var file in files) {
