@@ -1,21 +1,24 @@
 (function() {
   PrivilegeBox = function(container, forums, privileges) {
-    this.mapping = {}
-    var selected_forums = [];
+    this.mapping = {};
+    var id, name, positive, negative, result,
+      selected_forums = [],
+      self = this,
+      list = $('<ul class="forums" />');
     this.container = $(container);
-    var self = this;
-    var list = $('<ul class="forums" />');
     $.each(forums, function(i, forum) {
       var id = forum[0];
       var name = forum[1];
       var positive = forum[2];
       var negative = forum[3];
       var result;
-      self.mapping[id] = positive.concat($.map(negative, function(o) { return o * -1}));
-      var li = $('<li />').text(name).attr('id', 'forum_' + id)
+      self.mapping[id] = positive.concat($.map(negative,
+        function(o) { return o * -1; }
+      ));
+      var li = $('<li />').text(name).attr('id', 'forum_' + id);
       if (positive != '' || negative != '') {
         li.css('color', '#E00');
-      };
+      }
       list.append(li.click(function(evt) {
         var id = $(this).attr('id').split('_')[1];
         if (evt.ctrlKey) {
@@ -40,9 +43,9 @@
             id = parseInt(id);
             var s;
             if ($.inArray(id, self.mapping[forum]) > -1)
-              s = '1'
+              s = '1';
             else if ($.inArray(id * -1, self.mapping[forum]) > -1)
-              s = '-1'
+              s = '-1';
             else
               s = '0';
             $('#priv_' + id + '_' + s).attr('checked', 'checked');
@@ -77,7 +80,7 @@
           $.each(selected_forums, function(i, forum_id) {
             var name = 'forum_privileges_' + forum_id;
             var result = $('input[name=' + name + ']');
-            if (result.length == 0)
+            if (result.length === 0)
               result = $('<input type="hidden" />').attr('name', name).appendTo(self.container);
             self.mapping[forum_id] = priv_data;
             result.val(priv_data.join(','));
@@ -93,6 +96,6 @@
       );
     });
     $(list.children()[0]).click();
-    content.append('<span class="note">Halte die Steuerungs-Taste gedrückt, um mehrere Foren auszuwählen.</span>')
-  }
+    content.append('<span class="note">Halte die Steuerungs-Taste gedrückt, um mehrere Foren auszuwählen.</span>');
+  };
 })();

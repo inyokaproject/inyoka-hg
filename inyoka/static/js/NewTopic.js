@@ -10,7 +10,7 @@
 
 var set_quote_links = (function() {
   $('table.topic div.postinfo').each(function() {
-    if ( $(this).children('div.linklist.floatright').length == 0 ) {
+    if ( $(this).children('div.linklist.floatright').length === 0 ) {
       var post_id = $(this).parent().parent()[0].id.substring(5);
       $('<a href="#" class="action action_quote">Zitat einfügen</a>')
         .click(function() {
@@ -43,7 +43,7 @@ $(function () {
 
   var add_new_posts = function (data) {
     if ( data ) {
-      $('.latest_posts tbody').prepend(data)
+      $('.latest_posts tbody').prepend(data);
       $('#recent_posts_reload').data('loading', false);
       set_quote_links();
     } else {
@@ -55,7 +55,7 @@ $(function () {
       window.setTimeout(remove_note, 5000);
       $('#no_recent_posts_note').click(remove_note);
     }
-    return false
+    return false;
   };
 
   $('#recent_posts_reload').click(function () {

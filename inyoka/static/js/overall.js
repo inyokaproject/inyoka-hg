@@ -33,7 +33,7 @@ $(document).ready(function() {
         $(this).parent().slideUp('slow');
         return false;
       })
-    )
+    );
   });
 
   // hide search words on click
@@ -75,7 +75,7 @@ $(document).ready(function() {
     $('.toc').each(function () {
       toc = $(this);
       // find out depth of old toc, so we can make ours look the same in the beginning 
-      var _classes = this.className.split(/\s+/)
+      var _classes = this.className.split(/\s+/);
       for(var i=0; i < _classes.length; i++) {
         if(_classes[i].match(/^toc-depth-(\d+)$/)) {
           tocDepth = parseInt(_classes[i].slice(10));
@@ -103,10 +103,10 @@ $(document).ready(function() {
         var thisClass = $(headerLinks[i]).parent().parent().attr("class");
 
         if ( i < headerLinks.length-1 ) {
-          nextClass = $(headerLinks[i+1]).parent().parent().attr("class")
+          nextClass = $(headerLinks[i+1]).parent().parent().attr("class");
         } else {
-          nextClass = "section_1"
-        };
+          nextClass = "section_1";
+        }
 
         nextLevel = parseInt(nextClass.match(/^section_(\d+)$/)[1]);
         if ( nextLevel > level) {
@@ -114,14 +114,15 @@ $(document).ready(function() {
           tocTree +='<li><a href="#' + link + '" class="crosslink">' + linkText + '</a>';
           tocTree += '<ol class="arabic toc-item-depth-' + level + '">';
           level ++;
-        } else { 			//There is no deeper level
+        } else {
+          //  There is no deeper level
           tocTree += '<li><a href="#' + link + '">' + linkText + '</a></li>';
           while( nextLevel < level ) {
             tocTree += '</ol></li>';
             level --;
-          };
-        };
-      };
+          }
+        }
+      }
       newtoc.append(tocTree);
       
       //we have to hide all sublevels, create [+/-], and the click-event
@@ -135,7 +136,7 @@ $(document).ready(function() {
           }
         ).insertBefore($(this));
 
-        var _classes = this.className.split(/\s+/)
+        var _classes = this.className.split(/\s+/);
         for(var i=0; i < _classes.length; i++) {
           if(_classes[i].match(/^toc-item-depth-(\d+)$/)) {
             curDepth = parseInt(_classes[i].slice(15));
@@ -143,8 +144,8 @@ $(document).ready(function() {
           }
         }
         if(curDepth >= tocDepth){
-          $(this).parent().find('.toctoggle').click()
-        };
+          $(this).parent().find('.toctoggle').click();
+        }
 
       });
 
@@ -158,7 +159,7 @@ $(document).ready(function() {
   // like a firefox search thingy and apply some behavior
   (function() {
     if (navigator.appName.toLowerCase() == 'konqueror')
-      return
+      return;
     var
       initialized = false,
       $currentSearchArea = $('select.search_area').val(),
@@ -194,7 +195,7 @@ $(document).ready(function() {
                   $('.search_query').removeClass('area_' + $currentSearchArea);
                   $currentSearchArea = currentArea;
                   $currentAreaName = $('select.search_area option[value=' +
-                                       $currentSearchArea + ']').html()
+                                       $currentSearchArea + ']').html();
                   $('.search_query').addClass('area_' + $currentSearchArea);
                   $('li', areaPopup).each(function() {
                     $(this).removeClass('active');
@@ -288,7 +289,7 @@ $(document).ready(function() {
       }), ' ',
       $('<a>apturl</a>').attr('href', 'apt://' + $.trim($(apt).text())
         .split(' ').slice(3).join(','))
-    )
+    );
   });
 /*
   function reset_pagination() {
@@ -357,7 +358,7 @@ $(document).ready(function() {
 
   (function() {
     if (navigator.appName.toLowerCase() == 'konqueror')
-      return
+      return;
     $('.codeblock_resizer').click(function () {
       $codeblock = $(this).prev();
       if (!$codeblock.hasClass('codeblock_expanded')) {
@@ -374,10 +375,10 @@ $(document).ready(function() {
 
   // Add a version switcher to the `PPA` template.
   (function () {
-    var SHORT_NOTATION_VERSIONS = new Array('karmic', 'lucid');
+    var SHORT_NOTATION_VERSIONS = ['karmic', 'lucid'];
 
-    var set_version = function (link) {
-      var link = $(link);
+    var set_version = function (dom) {
+      var link = $(dom);
       group = link.parent().parent();
       version = link.text().toLowerCase();
       group.find('.ppa-code').remove();
@@ -387,8 +388,8 @@ $(document).ready(function() {
 
       sel.after('<pre class="ppa-code">' +
           group.data('long_notation_text').replace(/VERSION/, version) + '</div></pre>');
-      if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
-        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
+      if ($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
+        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>');
         sel.after('<p class="ppa-code">' +
             group.data('short_notation_text') + '</p>');
       }
@@ -397,16 +398,12 @@ $(document).ready(function() {
 
     $('.ppa-list-outer').each(function () {
       $this = $(this);
-      versions = new Array();
-      var need_short_notation = false;
+      var versions = [], version;
       classes = this.className.split(/\s+/);
-      for(var i=0; i < classes.length; i++) {
-        if(classes[i].match(/^ppa-version-/)) {
-          version = classes[i].slice(12)
+      for (var i=0; i < classes.length; i++) {
+        if (classes[i].match(/^ppa-version-/)) {
+          version = classes[i].slice(12);
           versions.push(version);
-          if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
-            var need_short_notation = true;
-          }
         }
       }
 
@@ -416,16 +413,17 @@ $(document).ready(function() {
       $this.children('.contents').remove();
       sel = $('<p class="selector">').appendTo($this);
       sel.prepend('<strong>Version: </strong>');
+      var set_version_callback = function() { return set_version(this); };
       for(var i=0; i < versions.length; i++) {
-        var version = versions[i];
+        version = versions[i];
         latest_link = $('<a href="#">')
           .text(version.substr(0,1).toUpperCase() + version.substr(1))
-          .click(function(){ return set_version(this); })
+          .click(set_version_callback)
           .appendTo(sel).after('<span class="linklist"> | </span>');
       }
       latest_link.next('.linklist').remove(); // remove last |
       set_version(latest_link[0]);
-    })
+    });
   })();
 
   // Add a version switcher to the `Fremdquelle` template.
@@ -447,7 +445,7 @@ $(document).ready(function() {
       sel.after('<pre class="ppa-code">' +
           group.data('long_notation_text').replace(/VERSION/, version) + '</div></pre>');
       if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
-        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>')
+        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>');
         sel.after('<p class="ppa-code">' +
             group.data('short_notation_text') + '</p>');
       }
@@ -455,11 +453,13 @@ $(document).ready(function() {
     };
       
     $('.thirdpartyrepo-outer').each(function () {
-      versions = new Array();
+      var versions = [],
+          set_version_callback = function() { return set_version(this); },
+          last_link;
       classes = this.className.split(/\s+/);
       for(var i=0; i < classes.length; i++) {
         if(classes[i].match(/^thirdpartyrepo-version-/)) {
-          version = classes[i].slice(23)
+          version = classes[i].slice(23);
           versions.push(version);
         }
       }
@@ -468,23 +468,21 @@ $(document).ready(function() {
         .prepend('<strong>Version: </strong>')
         .data('deb-url-orig', $(this).find('.contents pre').text());
       for (var i=0; i < versions.length; i++) {
-        var last_link = $('<a href="#">')
+        last_link = $('<a href="#">')
           .text(versions[i].substr(0,1).toUpperCase() + versions[i].substr(1))
-          .click(function() { return set_version(this); })
+          .click(set_version_callback)
           .appendTo(sel).after('<span class="linklist"> | </span>');
       }
       last_link.next().remove(); // remove last |
       set_version(last_link[0]);
       return true;
-    })
+    });
   })();
 
 });
 
-
-
 String.prototype.htmlEscape = function () {
   return this.replace(/&/g, "&amp;").replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;").replace(/"/, "&quot;");
-}
+             .replace(/>/g, "&gt;").replace(/"/, "&quot;");
+};
 

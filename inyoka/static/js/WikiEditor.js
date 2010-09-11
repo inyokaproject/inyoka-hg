@@ -46,7 +46,7 @@
     'sourceslist': 'sources.list',
     'sql': 'SQL',
     'xml': 'XML'
-  }
+  };
   /**
    * Helper function that creates a button object.
    */
@@ -71,7 +71,7 @@
             evt.preventDefault();
             return callback.call(editor, evt);
           });
-    }
+    };
   };
 
   /**
@@ -101,23 +101,24 @@
       });
       dropdown[0].selectedIndex = 0;
       return dropdown;
-    }
-  }
+    };
+  };
 
   /**
    * one item in a dropdown
    */
   var item = function(value, title) {
     return $('<option />').val(value).text(title || value);
-  }
+  };
 
   /**
    * factory function for combined usage with "button".
    */
   var insert = function(format, def) {
     return function(evt) {
-      return this.insertTag(format, (typeof def == 'undefined')
-                            ? 'Formatierter Text' : def);
+      return this.insertTag(format,
+        (typeof def == 'undefined') ? 'Formatierter Text' : def
+      );
     };
   }
 
@@ -129,7 +130,7 @@
     return function(evt) {
       //this.helpbar.text(message);
     };
-  }
+  };
 
   /**
    * Helper function that formats a `Date` object into a iso8601
@@ -137,8 +138,7 @@
    */
   var formatISO8601 = function(date) {
     var t;
-    return (
-      date.getUTCFullYear() + '-' +
+    return (date.getUTCFullYear() + '-' +
       (t = date.getUTCMonth(), t < 9 ? '0' : '') + (t + 1) + '-' +
       (t = date.getUTCDate(), t < 10 ? '0' : '') + t + 'T' +
       (t = date.getUTCHours(), t < 10 ? '0' : '') + t + ':' +

@@ -19,7 +19,7 @@
     this.user_not_joined = $('select[name="user_groups_not_joined"]');
     
     // Groups the user joined
-    this.user_joined = $('select[name="user_groups_joined"]')
+    this.user_joined = $('select[name="user_groups_joined"]');
 
     // add items to the select boxes
     this.rebuildBoxes(user_joined, user_not_joined);
@@ -42,7 +42,7 @@
     $('img.item_remove').click(function() {
       self.move(self.user_joined, self.user_not_joined);
     });
-  }
+  };
 
   GroupBox.prototype = {
     rebuildBoxes: function(joined, not_joined) {
@@ -59,4 +59,4 @@
       from.find('option:selected').remove().appendTo(to);
     }
   };
-})()
+})();
