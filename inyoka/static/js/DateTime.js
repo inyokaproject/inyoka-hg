@@ -17,9 +17,9 @@ $(function() {
   $('input').each(function() {
     var type = this.getAttribute('valuetype');
     if (type == 'datetime')
-      new DateTimeField(this, true);
+      DateTimeField(this, true);
     else if (type == 'date')
-      new DateTimeField(this, true, true);
+      DateTimeField(this, true, true);
   });
 });
 
@@ -37,7 +37,7 @@ $(document).click(function() {
   var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
 
   function isLeapYear(year) {
-    return (((year % 4) == 0) && ((year % 100) != 0) || ((year % 400) == 0));
+    return (((year % 4) === 0) && ((year % 100) !== 0) || ((year % 400) === 0));
   }
 
   function getDaysInMonth(month, year) {
@@ -81,7 +81,7 @@ $(document).click(function() {
       this.currentTime = '00:00:00';
     }
     this.input.after(this.container);
-  }
+  };
 
   DateTimeField.prototype = {
     show: function() {
@@ -104,7 +104,7 @@ $(document).click(function() {
         self.currentDay = parseInt(day, 10);
         self.currentTime = time;
       };
-      var dateTimeRegex = /(\d{4})-(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2}):(\d{2})/
+      var dateTimeRegex = /(\d{4})-(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2}):(\d{2})/;
       var input_value = this.input.val();
       var found = dateTimeRegex.exec(input_value);
       if (input_value == '' || !found) {
@@ -117,9 +117,9 @@ $(document).click(function() {
       }
     },
     writeDateTime: function() {
-      this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay)
+      this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay);
       if (!this.only_date)
-        this.input.val(this.input.val() + ' ' + this.currentTime)
+        this.input.val(this.input.val() + ' ' + this.currentTime);
     },
     drawTimetable: function() {
       var self = this;
@@ -143,8 +143,8 @@ $(document).click(function() {
             return false;
           })
         )));
-      })
-      var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable))
+      });
+      var col = $('<td></td>').appendTo($('<tr></tr>').appendTo(timetable));
       if (this.auto_show) {
         $('<a class="close">Schließen</a>').click(function() {
           self.container.hide();
@@ -173,13 +173,13 @@ $(document).click(function() {
                 $('<input type="text" />')
                   .val(month + '-' + year)
                   .change(function() {
-                    var dayRegex = /(\d{1,2})-(\d{1,2})-(\d+)/
-                    dayRegex.exec($(this).val())
+                    var dayRegex = /(\d{1,2})-(\d{1,2})-(\d+)/;
+                    dayRegex.exec($(this).val());
                     if (RegExp.$1)
                       self.drawDate(RegExp.$3, RegExp.$2, RegExp.$1);
                     else {
-                      var monthRegex = /(\d{1,2})-(\d+)/
-                      monthRegex.exec($(this).val())
+                      var monthRegex = /(\d{1,2})-(\d+)/;
+                      monthRegex.exec($(this).val());
                       if (RegExp.$1) {
                         self.drawDate(RegExp.$2, RegExp.$1);
                       }
@@ -204,7 +204,7 @@ $(document).click(function() {
       // draw days-of-week header
       $.each(days_of_week, function(i, d) {
         row.append($('<th class="weekday"></th>').text(d));
-      })
+      });
 
       var starting_pos = new Date(year, month-1, 1).getDay();
       var days = getDaysInMonth(month, year);
@@ -216,19 +216,20 @@ $(document).click(function() {
 
       // Draw days of month
       var currentDay = 1;
+      var day_click_callback = function() {
+        $('.selected', $(this).parent().parent().parent()).removeClass('selected');
+        $(this).parent().addClass('selected');
+        self.currentDay = $(this).text();
+        self.currentMonth = month;
+        self.currentYear = year;
+        self.writeDateTime();
+        return false;
+      };
       for (var i = starting_pos; currentDay <= days; i++) {
-        if (i % 7 == 0 && currentDay != 1)
+        if (i % 7 === 0 && currentDay != 1)
           row = $('<tr></tr>').appendTo(tbody);
         var td = $('<td></td>').append(
-          $('<a></a>').text(currentDay).click(function() {
-            $('.selected', $(this).parent().parent().parent()).removeClass('selected');
-            $(this).parent().addClass('selected');
-            self.currentDay = $(this).text();
-            self.currentMonth = month;
-            self.currentYear = year;
-            self.writeDateTime();
-            return false;
-          })
+          $('<a></a>').text(currentDay).click(day_click_callback)
         ).appendTo(row);
         if (year == this.currentYear && month == this.currentMonth &&
             currentDay == this.currentDay)
@@ -288,5 +289,5 @@ $(document).click(function() {
       this.container.remove();
       this.input.show();
     }
-  }
+  };
 })();
