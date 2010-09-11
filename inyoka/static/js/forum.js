@@ -46,7 +46,7 @@ $(function () {
           toggleState[this.id.substr(9)] = $('a.collapsed', this).length > 0;
         });
         var hidden = [];
-        for (state in toggleState) {
+        for (var state in toggleState) {
           if (toggleState[state])
             hidden.push(state);
         }
@@ -106,7 +106,7 @@ $(function () {
     });
 
     return false;
-  };
+  }
 
   (function() {
     $('a.action_subscribe.subscribe_topic').each(function() {
@@ -130,26 +130,25 @@ $(function () {
         if ($('a.solve_topic').hasClass('action_solve')) {
           $('a.solve_topic').removeClass('action_solve');
           $('a.solve_topic').addClass('action_unsolve');
-          with ($('span.status_unsolved')) {
-            fadeOut('fast');
-            removeClass('status_unsolved');
-            addClass('status_solved');
-            text('gelöst');
-            fadeIn('fast');
-          }
+          var span = $('span.status_unsolved');
+          span.fadeOut('fast');
+          span.removeClass('status_unsolved');
+          span.addClass('status_solved');
+          span.text('gelöst');
+          span.fadeIn('fast');
         } else {
           $('a.solve_topic').removeClass('action_unsolve');
           $('a.solve_topic').addClass('action_solve');
-          with ($('span.status_solved')) {
-            fadeOut('fast');
-            removeClass('status_solved');
-            addClass('status_unsolved');
-            text('ungelöst');
-            fadeIn('fast');
-          }
+          var span = $('span.status_solved');
+          span.fadeOut('fast');
+          span.removeClass('status_solved');
+          span.addClass('status_unsolved');
+          span.text('ungelöst');
+          span.fadeIn('fast');
         }
         return false;
-    })});
+      });
+    });
   })();
 
 
@@ -182,6 +181,6 @@ $(function () {
       });
 
       return false;
-    })
+    });
   })();
 });

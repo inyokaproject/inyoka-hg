@@ -10,7 +10,7 @@
 
 (function() {
   if (navigator.userAgent.indexOf('KHTML') >= 0)
-    return
+    return;
 
   var FEED_COUNTS = [10, 20, 30, 50, 75, 100];
   var FORUM_URL = 'http://forum.' + $BASE_DOMAIN_NAME + '/';
@@ -30,7 +30,7 @@
       .append('<img class="feed_count_increase" src="' + $STATIC_URL +
               'img/arrow-up.gif" />')
       .append('<img class="feed_count_decrease" src="' + $STATIC_URL +
-              'img/arrow-down.gif" />')
+              'img/arrow-down.gif" />');
     $('.feed_count_increase')
       .click(function() {
         var count = document.getElementById($(this).parent().siblings()[0].htmlFor);
@@ -78,7 +78,7 @@
         feed_url = FORUM_URL + 'feeds/' + data.component + '/' + data.forum + '/' +
                    data.mode + '/' + data.count + '/';
       if (!$.browser.opera) {
-        if ($('#forum_feed_url').length == 0) {
+        if ($('#forum_feed_url').length === 0) {
           $('#forum_submit_p input').hide();
           $('#forum_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
             '<a id="forum_feed_url" href="about:blank>-</a></span> ');
@@ -135,8 +135,8 @@
     if (OK) {
       feed_url = PLANET_URL + 'feeds/' + data.mode + '/' + data.count + '/';
       if (navigator.userAgent.substring(0,5).toLowerCase() != 'opera') {
-        if ($('#planet_feed_url').length == 0) {
-          $('#planet_submit_p input').hide()
+        if ($('#planet_feed_url').length === 0) {
+          $('#planet_submit_p input').hide();
           $('#planet_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
             '<a id="planet_feed_url" href="about:blank>-</a></span> ');
         }
@@ -175,7 +175,7 @@
   function _getCountMode(form, data, errors) {
     // fetches count and mode from form, putting the data into ``data`` and adding error messages to ``errors``
     for (var i = 0; i < form.mode.length; ++i) {
-      if (form.mode[i].checked == true)
+      if (form.mode[i].checked)
         data.mode = form.mode[i].value;
     }
     if (!data.mode)
