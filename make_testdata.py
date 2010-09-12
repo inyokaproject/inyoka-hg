@@ -265,8 +265,6 @@ def make_wiki():
 
 if __name__ == '__main__':
     page_names = ['Startseite'] + list(create_names(WIKI_PAGES_COUNT))
-    from inyoka.portal.user import User
-    users = User.objects.all()
     make_groups()
     make_users()
     make_wiki()
