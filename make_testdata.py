@@ -41,11 +41,11 @@ page_names = []
 forums = []
 
 GROUPS_COUNT = 30
-USERS_COUNT = 150000
+USERS_COUNT = 15000
 FORUMS_COUNT = 20
 MAX_TOPIC_COUNT = 2000
 MAX_TOPIC_POST_COUNT = 1530
-IKHAYA_ARTICLE_COUNT = 1800
+IKHAYA_CATEGORY_COUNT = 20
 WIKI_PAGES_COUNT = 2000
 
 
@@ -222,7 +222,7 @@ def make_forum():
 def make_ikhaya():
     print 'Creating ikhaya test data'
     pb = ProgressBar(40)
-    for percent, name in izip(percentize(IKHAYA_ARTICLE_COUNT), create_names(IKHAYA_ARTICLE_COUNT, title)):
+    for percent, name in izip(percentize(IKHAYA_CATEGORY_COUNT), create_names(IKHAYA_CATEGORY_COUNT, title)):
         c = Category(name=name)
         c.save()
         for name in create_names(30, title):
@@ -239,7 +239,7 @@ def make_ikhaya():
                 is_xhtml=False
             )
             a.save()
-            for i, name in enumerate(create_names(randint(0, 5), title)):
+            for i, name in enumerate(create_names(randint(0, 20), title)):
                 text = sentences(min=1, max=5)
                 if i > 0 and randint(0, 1) == 0:
                     text = '@%d: %s' % (randint(1, i), text)
@@ -267,9 +267,9 @@ if __name__ == '__main__':
     page_names = ['Startseite'] + list(create_names(WIKI_PAGES_COUNT))
     from inyoka.portal.user import User
     users = User.objects.all()
-#    make_groups()
-#    make_users()
-#    make_wiki()
+    make_groups()
+    make_users()
+    make_wiki()
     make_ikhaya()
     make_forum()
     print "created test data"
