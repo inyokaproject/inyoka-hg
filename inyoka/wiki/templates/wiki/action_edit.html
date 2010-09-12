@@ -21,13 +21,13 @@
       Durch Anklicken von „Speichern“ stellst du deine Änderungen unter unsere <a href="{{ href('wiki', 'Wiki/Lizenz') }}">Lizenz</a>. Wenn du das nicht willst, klicke auf „Abbrechen“, um deine Änderungen zu verwerfen. Hilfe zum Editieren findest du unter <a href="{{ href('wiki', 'Wiki/Referenz') }}">Wiki/Referenz</a> und <a href="{{ href('wiki', 'Wiki/Syntax') }}">Wiki/Syntax</a>.
     </p>
     <div class="editor">{{ form.text }}</div>
-    <p>Änderungsnotiz: {{ form.note }}</p>
     {{ form.errors.text }}
     {%- if storage['license_note_rendered'] %}
     <div class="license_note">{{ storage['license_note_rendered'] }}</div>
     {%- endif %}
     {{ form.errors.__all__ }}
     <div class="actions">
+      Änderungsnotiz: {{ form.note }}
       <input type="hidden" name="edit_time" value="{{ edit_time }}" />
       <input type="hidden" name="rev" value="{{ rev }}" />
       <input type="submit" name="preview" value="Vorschau" />
