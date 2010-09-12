@@ -27,7 +27,7 @@
   {%- endif %}>
     <p class="username">
       <a href="{{ user|url }}">{{ user.username|e }}</a>
-      {%- if user.primary_group and user.primary_group.icon %}
+      {%- if user.primary_group_id and user.primary_group.icon %}
       <img class="teamicon" src="{{ user.primary_group.icon_url }}" alt="Teamicon" />
       {%- endif %}
       {%- if user.member_title %}
