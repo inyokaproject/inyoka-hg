@@ -97,8 +97,9 @@ def get_user_record():
     where number is an integer with the number of online users and
     timestamp a datetime object.
     """
-    record = int(storage.get('session_record', 1))
-    timestamp = storage.get('session_record_time')
+    keys = storage.get_many(('session_record', 'session_record_time'))
+    record, timestamp = (int(keys['session_record'] or 1),
+                         keys['session_record_time'])
     if timestamp is None:
         timestamp = datetime.utcnow()
     else:
