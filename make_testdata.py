@@ -41,10 +41,10 @@ page_names = []
 forums = []
 
 GROUPS_COUNT = 30
-USERS_COUNT = 15000
+USERS_COUNT = 1500
 FORUMS_COUNT = 20
-MAX_TOPIC_COUNT = 2000
-MAX_TOPIC_POST_COUNT = 1530
+MAX_TOPIC_COUNT = 200
+MAX_TOPIC_POST_COUNT = 153
 IKHAYA_CATEGORY_COUNT = 20
 WIKI_PAGES_COUNT = 2000
 
@@ -239,7 +239,7 @@ def make_ikhaya():
                 is_xhtml=False
             )
             a.save()
-            for i, name in enumerate(create_names(randint(0, 20), title)):
+            for i, name in enumerate(create_names(randint(0, 100), title)):
                 text = sentences(min=1, max=5)
                 if i > 0 and randint(0, 1) == 0:
                     text = '@%d: %s' % (randint(1, i), text)
