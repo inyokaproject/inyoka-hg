@@ -38,7 +38,7 @@ def increment_string(s):
     if m:
         next = str(int(m.group(1))+1)
         start, end = m.span(1)
-        return s[:max(end - len(next), start)] + next + s[end:]
+        return u'%s-%s%s' % (s[:max(end - len(next), start)], next, s[end:])
     return s + '-2'
 
 
@@ -337,7 +337,7 @@ def create_excerpt(text, terms, length=350):
     return render_html(escape(text), highlight_locations, start_offset, end_offset)
 
 
-def get_next_increment(values, string, max_length=None):
+def get_next_increment(values, string, max_length=None, stripdate=False):
     """Return the next usable incremented string.
 
     Usage Example::
@@ -358,7 +358,21 @@ def get_next_increment(values, string, max_length=None):
         u'101'
 
     """
-    values = list(values)
+    def _stripdate(value):
+        #XXX: not too intelligent, but works for now since we use / to seperate
+        #     date values from slug values.  We can think about a more
+        #     complete implementation later.
+        parts = value.split('/')
+        return parts[:-1], parts[-1]
+
+    def _get_value(value):
+        if stripdate:
+            stripped = _stripdate(value)
+            return u'%s/%s' % (u'/'.join(stripped[0]), increment_string(stripped[1]))
+        return increment_string(value)
+
+    values = list(_stripdate(x)[1] if stripdate else x for x in values)
+
     if not values:
         return string[:max_length] if max_length is not None else string
 
@@ -369,7 +383,7 @@ def get_next_increment(values, string, max_length=None):
             base = int(match.group(1))
 
     gs = (lambda s: s if base is None else s + unicode(base))
-    poi = increment_string(gs(string))
+    poi = _get_value(gs(string))
     if max_length is None:
         return poi
 
@@ -377,7 +391,7 @@ def get_next_increment(values, string, max_length=None):
         # we need to shorten the string a bit so that we don't break any rules
         strip = max_length - len(poi)
         string = string[:strip]
-    return increment_string(gs(string))
+    return _get_value(gs(string))
 
 
 # circular imports

@@ -17,6 +17,7 @@ from inyoka.utils.dates import format_time, \
      date_time_to_datetime, natural_date, format_datetime
 from inyoka.utils.html import escape
 from inyoka.utils.cache import cache
+from inyoka.utils.database import find_next_django_increment
 from inyoka.portal.user import User
 from inyoka.wiki.models import Page
 from werkzeug import cached_property
@@ -409,19 +410,8 @@ class Event(models.Model):
         return render(instructions, context)
 
     def save(self, force_insert=False, force_update=False):
-        i = 0
-        while True:
-            slug = self.date.strftime('%Y/%m/%d/') + slugify(self.name) + \
-                   (i and '-%d' % i or '')
-            try:
-                event = Event.objects.get(slug=slug)
-            except Event.DoesNotExist:
-                break
-            else:
-                if event.id == self.id:
-                    break
-                i += 1
-        self.slug = slug
+        name = self.date.strftime('%Y/%m/%d/') + slugify(self.name)
+        self.slug = find_next_django_increment(Event, 'slug', name, stripdate=True)
         super(self.__class__, self).save(force_insert, force_update)
         cache.delete('ikhaya/event/%s' % self.id)
 

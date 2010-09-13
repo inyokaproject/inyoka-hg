@@ -262,7 +262,7 @@ class SlugGenerator(orm.MapperExtension):
         fields = filter(None, fields)
         slug = self.separator.join(map(slugify, fields))
         # strip the string if max_length is applied
-        slug = slug[:max_length-10] if max_length is not None else slug
+        slug = slug[:max_length-4] if max_length is not None else slug
 
         set_attribute(instance, self.slugfield,
             find_next_increment(getattr(instance.__class__, self.slugfield),
@@ -297,7 +297,7 @@ def find_next_increment(column, string, max_length=None):
     return get_next_increment(flatten_iterator(existing), string, max_length)
 
 
-def find_next_django_increment(model, column, string, **query_opts):
+def find_next_django_increment(model, column, string, stripdate=False, **query_opts):
     """Get the next incremented string based on `column` and string`.
     This function is the port of `find_next_increment` for Django models.
 
@@ -307,12 +307,13 @@ def find_next_django_increment(model, column, string, **query_opts):
     """
     field = model._meta.get_field_by_name(column)
     max_length = field.max_length if hasattr(field, 'max_length') else None
-    slug = string[:max_length-10] if max_length is not None else string
+    slug = string[:max_length-4] if max_length is not None else string
     filter = {'%s__startswith' % column: slug}
     filter.update(query_opts)
-    query = model.objects.filter(**{'%s__startswith' % column: slug})
+    query = model.objects.filter(**filter)
     existing = [getattr(obj, column) for obj in query.all()]
-    return get_next_increment(flatten_iterator(existing), slug, max_length)
+    return get_next_increment(flatten_iterator(existing), slug, max_length,
+                              stripdate=stripdate)
 
 
 class explain(Executable, ClauseElement):
