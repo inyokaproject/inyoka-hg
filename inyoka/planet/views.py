@@ -154,6 +154,8 @@ def hide_entry(request, id):
             flash(u'Aktion wurde abgebrochen')
         else:
             entry.hidden = False if entry.hidden else True
+            if entry.hidden:
+                entry.hidden_by = request.user
             entry.save()
             msg = (u'Der Eintrag „%s” wurde erfolgreich %s' %
                 (entry.title, 'versteckt' if entry.hidden else 'wiederhergestellt'))

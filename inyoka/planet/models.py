@@ -17,6 +17,7 @@ from inyoka.conf import settings
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.html import striptags
+from inyoka.portal.user import User
 
 
 class Blog(models.Model):
@@ -90,6 +91,8 @@ class Entry(models.Model):
     author = models.CharField(max_length=50)
     author_homepage = models.URLField(blank=True, null=True)
     hidden = models.BooleanField()
+    hidden_by = models.ForeignKey(User, blank=True, null=True,
+                                  related_name='hidden_planet_posts')
 
     def __unicode__(self):
         return u'%s / %s' % (
@@ -118,7 +121,7 @@ class Entry(models.Model):
     def save(self, force_insert=False, force_update=False):
         super(Entry, self).save(force_insert, force_update)
         blog = self.blog
-        if blog.last_sync and self.updated > blog.last_sync and blog.active:
+        if (not blog.last_sync or self.updated > blog.last_sync) and blog.active:
             self.update_search()
 
     def delete(self):
