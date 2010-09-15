@@ -46,8 +46,8 @@ NOTIFICATION_CHOICES = (
 
 SEARCH_AREA_CHOICES = (
     ('all', 'Überall'),
-    ('wiki', 'Wiki'),
     ('forum', 'Forum'),
+    ('wiki', 'Wiki'),
     ('ikhaya', 'Ikhaya'),
     ('planet', 'Planet'),
 )
