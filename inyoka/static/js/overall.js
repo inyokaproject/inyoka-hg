@@ -216,7 +216,7 @@ $(document).ready(function() {
       $('.search_query').addClass('search_query_js')
         .blur(function() {
           var e = $(this);
-          if (e.val() == '')
+          if (e.val() == '' || e.val() == $currentAreaName)
             e.addClass('default_value').val($currentAreaName);
         })
         .focus(function() {
