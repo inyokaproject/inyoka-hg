@@ -174,9 +174,7 @@ $(document).ready(function() {
         if ($('input.search_query').hasClass('default_value'))
           tmp = '';
         if (tmp) {
-          url += '?query=' + encodeURIComponent(tmp);
-          if ($currentSearchArea != 'all')
-            url += '&area=' + $currentSearchArea;
+          url += '?query=' + encodeURIComponent(tmp) + '&area=' + $currentSearchArea;
         }
         document.location.href = url;
         return false;
