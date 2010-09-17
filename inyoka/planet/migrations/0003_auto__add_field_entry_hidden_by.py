@@ -35,7 +35,7 @@ class Migration(SchemaMigration):
             'author': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'author_homepage': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'blog': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['planet.Blog']"}),
-            'guid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
+            'guid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200', 'db_index': 'True'}),
             'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'hidden_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'hidden_planet_posts'", 'null': 'True', 'to': "orm['portal.User']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

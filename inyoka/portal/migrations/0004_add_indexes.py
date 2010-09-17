@@ -76,7 +76,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Group'},
             'icon': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80', 'db_index': 'True'}),
             'permissions': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
@@ -94,7 +94,7 @@ class Migration(SchemaMigration):
             'folder': ('django.db.models.fields.SmallIntegerField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.PrivateMessage']"}),
-            'read': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'read': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.User']"})
         },
         'portal.searchqueue': {
@@ -120,7 +120,7 @@ class Migration(SchemaMigration):
             'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'identifier': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
-            'is_ikhaya_icon': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
+            'is_ikhaya_icon': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'})
         },
         'portal.staticpage': {
             'Meta': {'object_name': 'StaticPage'},
@@ -138,7 +138,7 @@ class Migration(SchemaMigration):
             'Meta': {'unique_together': "(('topic_id', 'user'), ('forum_id', 'user'), ('wiki_page', 'user'))", 'object_name': 'Subscription'},
             'forum_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'notified': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'notified': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'topic_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
             'ubuntu_version': ('django.db.models.fields.CharField', [], {'max_length': '5', 'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.User']"}),

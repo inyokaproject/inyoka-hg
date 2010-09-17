@@ -8,17 +8,6 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Deleting model 'Voter'
-        db.delete_table('forum_voter')
-
-        # Adding model 'PollVoter'
-        db.create_table('forum_pollvoter', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('voter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.User'])),
-            ('poll', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['forum.Poll'])),
-        ))
-        db.send_create_signal('forum', ['PollVoter'])
-
         # Adding index on 'Post', fields ['position']
         db.create_index('forum_post', ['position'])
 
@@ -52,17 +41,6 @@ class Migration(SchemaMigration):
         # Removing index on 'Post', fields ['position']
         db.delete_index('forum_post', ['position'])
 
-        # Adding model 'Voter'
-        db.create_table('forum_voter', (
-            ('poll', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['forum.Poll'])),
-            ('voter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.User'])),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-        ))
-        db.send_create_signal('forum', ['Voter'])
-
-        # Deleting model 'PollVoter'
-        db.delete_table('forum_pollvoter')
-
 
     models = {
         'forum.attachment': {
@@ -77,7 +55,7 @@ class Migration(SchemaMigration):
         'forum.forum': {
             'Meta': {'object_name': 'Forum'},
             'description': ('django.db.models.fields.TextField', [], {}),
-            'force_version': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'force_version': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_post': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Post']", 'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -87,14 +65,14 @@ class Migration(SchemaMigration):
             'post_count': ('django.db.models.fields.IntegerField', [], {}),
             'slug': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
             'topic_count': ('django.db.models.fields.IntegerField', [], {}),
-            'user_count_posts': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'user_count_posts': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'welcome_message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Welcomemessage']", 'null': 'True', 'blank': 'True'})
         },
         'forum.poll': {
             'Meta': {'object_name': 'Poll'},
             'end_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'multiple_votes': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'multiple_votes': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'question': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
             'start_time': ('django.db.models.fields.DateTimeField', [], {}),
             'topic': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Topic']", 'null': 'True', 'blank': 'True'})
@@ -106,8 +84,8 @@ class Migration(SchemaMigration):
             'poll': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Poll']"}),
             'votes': ('django.db.models.fields.IntegerField', [], {})
         },
-        'forum.pollvoter': {
-            'Meta': {'object_name': 'PollVoter'},
+        'forum.voter': {
+            'Meta': {'object_name': 'Voter'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'poll': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Poll']"}),
             'voter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.User']"})
@@ -115,10 +93,10 @@ class Migration(SchemaMigration):
         'forum.post': {
             'Meta': {'object_name': 'Post'},
             'author': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.User']"}),
-            'has_revision': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'has_revision': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_plaintext': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_plaintext': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'position': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'}),
             'pub_date': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
             'rendered_text': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -146,18 +124,18 @@ class Migration(SchemaMigration):
             'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_topics'", 'to': "orm['portal.User']"}),
             'first_post': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'topic_set'", 'null': 'True', 'to': "orm['forum.Post']"}),
             'forum': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['forum.Forum']"}),
-            'has_poll': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'has_poll': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_post': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'topic_set2'", 'null': 'True', 'to': "orm['forum.Post']"}),
-            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'post_count': ('django.db.models.fields.IntegerField', [], {}),
             'report_claimed_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'claimed_topics'", 'null': 'True', 'to': "orm['portal.User']"}),
             'reported': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'reporter': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'reported_topics'", 'null': 'True', 'to': "orm['portal.User']"}),
             'slug': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'solved': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'sticky': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
+            'solved': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'sticky': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'ubuntu_distro': ('django.db.models.fields.CharField', [], {'max_length': '40', 'null': 'True', 'blank': 'True'}),
             'ubuntu_version': ('django.db.models.fields.CharField', [], {'max_length': '5', 'null': 'True', 'blank': 'True'}),
@@ -174,7 +152,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Group'},
             'icon': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
             'permissions': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },

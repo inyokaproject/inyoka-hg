@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
     models = {
         'planet.blog': {
             'Meta': {'ordering': "('name',)", 'object_name': 'Blog'},
-            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
             'blog_url': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'feed_url': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
@@ -36,7 +36,7 @@ class Migration(SchemaMigration):
             'author_homepage': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'blog': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['planet.Blog']"}),
             'guid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200', 'db_index': 'True'}),
-            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'pub_date': ('django.db.models.fields.DateTimeField', [], {}),
             'text': ('django.db.models.fields.TextField', [], {}),
