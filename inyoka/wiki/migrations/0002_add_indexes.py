@@ -4,6 +4,12 @@ from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
+# TODO: do we really need an index on wiki_metadata.value, mysql doesn't 
+# like indexes for Varchars(>255) if charset is multibyte.
+# Tell mysqldb to not warn us, so south can continue
+import warnings
+warnings.filterwarnings("ignore", ".*Specified key was too long.*")
+
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
