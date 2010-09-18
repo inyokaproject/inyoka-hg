@@ -8,8 +8,7 @@
     :license: GNU GPL, see LICENSE for more details.
 */
 
-
-$(function () {
+$(function() {
   /* collapsable elements for the input forms */
   $('dt.collapse').each(function() {
     $(this).nextWhile('dd').hide().addClass('collapse_enabled');
@@ -50,7 +49,7 @@ $(function () {
           if (toggleState[state])
             hidden.push(state);
         }
-        $.get('/?__service__=forum.toggle_categories', {hidden: hidden});
+        $.get('/', { __service__ : 'forum.toggle_categories', hidden: hidden});
         return false;
       })
       .prependTo('table.category_box tr.head a');
@@ -58,7 +57,7 @@ $(function () {
     /* this function is used by the index template */
     hideForumCategories = function(hidden_categories) {
       $('table.category_box tr.head').each(function() {
-        if ($.inArray(this.id.substr(9), hidden_categories) >= 0) {
+        if ($.inArray(parseInt(this.id.substr(9), 10), hidden_categories) >= 0) {
           $(this).nextUntil('tr.head').hide();
           $('a.collapse', this).addClass('collapsed');
         }

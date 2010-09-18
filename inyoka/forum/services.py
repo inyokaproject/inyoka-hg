@@ -54,7 +54,7 @@ def on_toggle_categories(request):
     if request.user.is_anonymous:
         return False
     hidden_categories = set()
-    for id in request.GET.getlist('hidden'):
+    for id in request.GET.getlist('hidden[]'):
         try:
             hidden_categories.add(int(id))
         except ValueError:
