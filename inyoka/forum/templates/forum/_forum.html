@@ -13,9 +13,10 @@
       {%- if forum.description %}
       <p class="description">{{ forum.description|e }}</p> 
       {%- endif %}
-      {%- if forum.children %}
+      {% set children = forum.get_children_filtered(REQUEST.user) %}
+      {%- if children %}
       <p class="subforums">Unterforen:
-      {%- for subforum in forum.children %}
+      {%- for subforum in children %}
         {%- if not subforum.get_read_status(REQUEST.user) %}
         <img src="{{ href('static', 'img/forum/subforum_unread.png') }}" alt="Neue Beiträge im Forum" />
         {%- endif %}
