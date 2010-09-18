@@ -570,7 +570,7 @@ def forum_edit(request, slug=None):
     If `id` is given, the forum with id `id` will be edited.
     """
     def _add_field_choices():
-        query = to_list(Forum.query.get_cached(slug))
+        query = to_list(Forum.query.get_cached())
         categories = [(c.id, c.name) for c in query]
         form.fields['parent'].choices = [(-1, "-")] + categories
 
