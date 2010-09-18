@@ -43,7 +43,7 @@ def production():
     Fabric target for ubuntu-eu.org production servers
     """
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
-    env.repository = inyoka_repo
+    env.repository = staging_repo
     env.target_dir = '~/virtualenv/inyoka'
 
 def bootstrap():
