@@ -16,7 +16,7 @@
    helper functions and variables.  The only thing that is defined as
    a global is the `DateTimeField`. */
 
-$(function() {
+(function() {
   var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
                 'August', 'September', 'Oktober', 'November', 'Dezember'];
   var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
@@ -39,7 +39,7 @@ $(function() {
   }
 
 
-  var DateTimeField = Class.$extend({
+  DateTimeField = Class.$extend({
     __init__ : function(editor, auto_show, only_date) {
       var self = this;
       this.input = $(editor).click(function() {
@@ -302,4 +302,4 @@ $(function() {
     $('table.datetime.auto_show').hide();
   });
 
-});
+})();
