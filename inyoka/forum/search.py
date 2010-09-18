@@ -51,20 +51,23 @@ class ForumSearchAdapter(SearchAdapter):
         self._store_post(post)
 
     def _store_post(self, post):
-        search.store(
-            component='f',
-            uid=post.id,
-            title=post.topic.title,
-            user=post.author_id,
-            date=post.pub_date,
-            collapse=post.topic_id,
-            category=[p.slug for p in post.topic.forum.parents] + \
-                [post.topic.forum.slug],
-            auth=[post.topic.forum_id, post.topic.hidden],
-            text=post.text,
-            solved='1' if post.topic.solved else '0',
-            version=post.topic.get_version_info(default=None),
-        )
+        try:
+            search.store(
+                component='f',
+                uid=post.id,
+                title=post.topic.title,
+                user=post.author_id,
+                date=post.pub_date,
+                collapse=post.topic_id,
+                category=[p.slug for p in post.topic.forum.parents] + \
+                    [post.topic.forum.slug],
+                auth=[post.topic.forum_id, post.topic.hidden],
+                text=post.text,
+                solved='1' if post.topic.solved else '0',
+                version=post.topic.get_version_info(default=None),
+            )
+        except AttributeError:
+            pass
 
     def store_multi(self, post_ids):
         range = 500
