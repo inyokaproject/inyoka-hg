@@ -637,7 +637,7 @@ def forum_edit(request, slug=None):
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
 
     else:
-        if id is None:
+        if slug is None:
             form = EditForumForm()
         else:
             welcome_msg = None
