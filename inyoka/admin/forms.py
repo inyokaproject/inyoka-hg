@@ -268,7 +268,6 @@ class EditUserForm(forms.Form):
     delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
 
     primary_group = forms.CharField(label=u'Primäre Gruppe', required=False,
-        widget=forms.TextInput({'readonly': 'readonly'}),
         help_text=u'Wird unter anderem für das anzeigen des Team-Icons verwendet')
 
     def clean_gpgkey(self):

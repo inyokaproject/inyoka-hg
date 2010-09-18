@@ -10,7 +10,8 @@
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 {% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js'] %}
+{% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js',
+                  'jquery.autocomplete.min.js'] %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
@@ -149,6 +150,11 @@
     $('input[name="primary_group"]').val("");
     return false;
   });
+
+  $('input[name="primary_group"]').autocomplete("/?__service__=admin.get_group_autocompletion", {
+    delay: 40, maxItemsToShow: 10, limit: 10, minChars: 1
+  });
+
   /* ]]> */
 </script>
 {% endblock %}
