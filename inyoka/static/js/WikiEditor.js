@@ -332,7 +332,7 @@
 
       /* create toolbar based on button layout */
       t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
-      var bar = toolbar(), x;
+      var bar = toolbar(), x, link;
       for (var i = 0, n = bar.length; i != n; ++i)
         x = bar[1](self);
         if (x)
