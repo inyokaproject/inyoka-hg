@@ -113,7 +113,7 @@ def index(request, category=None):
         return sorted(parent.filter_children(forums), key=attrgetter('position'))
 
     forum_map = OrderedDict()
-    for forum in categories:
+    for forum in sorted(categories, key=attrgetter('position')):
         if not forum in forum_map:
             forum_map[forum] = OrderedDict()
         for child in _get_children_filtered(forum):
