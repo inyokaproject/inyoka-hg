@@ -1593,7 +1593,7 @@ def newposts(request, page=1):
     # don't show topics of forums where the user doesn't have CAN_READ
     # permission
     if invisible_forums:
-        topics = topics.filter(Topic.forum_id.in_(invisible_forums))
+        topics = topics.filter(db.not_(Topic.forum_id.in_(invisible_forums)))
 
     if where is True:
         topics = topics.filter(where)
