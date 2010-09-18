@@ -11,27 +11,12 @@
  * :license: GNU GPL, see LICENSE for more details.
  */
 
-/* Get all inputs with type date or datetime and create a DateTimeField for
- * them. */
-$(function() {
-  $('input').each(function() {
-    var type = this.getAttribute('valuetype');
-    if (type == 'datetime')
-      DateTimeField(this, true);
-    else if (type == 'date')
-      DateTimeField(this, true, true);
-  });
-});
-
-$(document).click(function() {
-  $('table.datetime.auto_show').hide();
-});
 
 /* create a closure for all of our stuff so that we don't export the
    helper functions and variables.  The only thing that is defined as
    a global is the `DateTimeField`. */
 
-(function() {
+$(function() {
   var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
                 'August', 'September', 'Oktober', 'November', 'Dezember'];
   var days_of_week = ['S', 'M', 'D', 'M', 'D', 'F', 'S'];
@@ -53,38 +38,39 @@ $(document).click(function() {
     return days;
   }
 
-  DateTimeField = function(editor, auto_show, only_date) {
-    var self = this;
-    this.input = $(editor).click(function() {
-      $('table.datetime').each(function() {
-        if (self.container[0] !== this)
-          $(this).hide();
-        else
-          self.show();
-      });
-      return false; 
-    });
-    this.auto_show = auto_show || false;
-    this.only_date = only_date || false;
-    this.readDateTime();
-    this.container = $('<table class="datetime"></table>').click(function() {
-        return false;
-    });
-    auto_show ? this.container.hide().addClass('auto_show') : this.input.hide();
-    var row = $('<tr></tr>').appendTo(this.container);
-    this.calendar = $('<td></td>').appendTo(row);
-    this.timetable = $('<td></td>').appendTo(row);
-    this.drawDate(this.currentYear, this.currentMonth);
-    this.drawTimetable();
-    if (only_date) {
-      this.timetable.hide();
-      this.currentTime = '00:00:00';
-    }
-    this.input.after(this.container);
-  };
 
-  DateTimeField.prototype = {
-    show: function() {
+  var DateTimeField = Class.$extend({
+    __init__ : function(editor, auto_show, only_date) {
+      var self = this;
+      this.input = $(editor).click(function() {
+        $('table.datetime').each(function() {
+          if (self.container[0] !== this)
+            $(this).hide();
+          else
+            self.show();
+        });
+        return false; 
+      });
+      this.auto_show = auto_show || false;
+      this.only_date = only_date || false;
+      this.readDateTime();
+      this.container = $('<table class="datetime"></table>').click(function() {
+          return false;
+      });
+      auto_show ? this.container.hide().addClass('auto_show') : this.input.hide();
+      var row = $('<tr></tr>').appendTo(this.container);
+      this.calendar = $('<td></td>').appendTo(row);
+      this.timetable = $('<td></td>').appendTo(row);
+      this.drawDate(this.currentYear, this.currentMonth);
+      this.drawTimetable();
+      if (only_date) {
+        this.timetable.hide();
+        this.currentTime = '00:00:00';
+      }
+      this.input.after(this.container);
+    },
+
+    show : function() {
       this.readDateTime();
       this.drawDate(this.currentYear, this.currentMonth);
       this.container.css({
@@ -96,7 +82,8 @@ $(document).click(function() {
         this.currentTime = '00:00:00';
       }
     },
-    readDateTime: function() {
+
+    readDateTime : function() {
       var self = this;
       var set_vars = function(year, month, day, time) {
         self.currentYear = parseInt(year, 10);
@@ -116,11 +103,13 @@ $(document).click(function() {
                  [RegExp.$4, RegExp.$5, RegExp.$6].join(':'));
       }
     },
-    writeDateTime: function() {
+
+    writeDateTime : function() {
       this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay);
       if (!this.only_date)
         this.input.val(this.input.val() + ' ' + this.currentTime);
     },
+
     drawTimetable: function() {
       var self = this;
       var timetable = $('<table class="timetable"></table>').append(
@@ -152,6 +141,7 @@ $(document).click(function() {
         }).appendTo(col);
       }
     },
+
     drawCalendar: function() {
       var self = this;
       var month = parseInt(this.calendarMonth);
@@ -243,6 +233,7 @@ $(document).click(function() {
 
       this.calendar.append(calendar);
     },
+
     drawDate: function(year, month, day) {
       day = parseInt(day);
       month = parseInt(month);
@@ -258,6 +249,7 @@ $(document).click(function() {
         this.drawCalendar();
       }
     },
+
     drawPreviousMonth: function() {
       if (this.calendarMonth == 1) {
         this.calendarMonth = 12;
@@ -267,6 +259,7 @@ $(document).click(function() {
       }
       this.drawCalendar();
     },
+
     drawNextMonth: function() {
       if (this.calendarMonth == 12) {
         this.calendarMonth = 1;
@@ -276,18 +269,37 @@ $(document).click(function() {
       }
       this.drawCalendar();
     },
+
     drawPreviousYear: function() {
       this.calendarYear--;
       this.drawCalendar();
     },
+
     drawNextYear: function() {
       this.calendarYear++;
       this.drawCalendar();
     },
+
     destroy: function() {
       this.writeDateTime();
       this.container.remove();
       this.input.show();
     }
-  };
-})();
+  });
+
+  /* Get all inputs with type date or datetime and create a DateTimeField for
+   * them. */
+
+  $('input').each(function() {
+    var type = this.getAttribute('valuetype');
+    if (type == 'datetime')
+      DateTimeField(this, true);
+    else if (type == 'date')
+      DateTimeField(this, true, true);
+  });
+
+  $(document).click(function() {
+    $('table.datetime.auto_show').hide();
+  });
+
+});
