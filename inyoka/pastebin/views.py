@@ -8,7 +8,6 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from datetime import datetime
 from inyoka.utils.urls import global_not_found
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.sessions import set_session_info
@@ -33,11 +32,7 @@ def index(request):
         form = AddPasteForm(request.POST)
         if form.is_valid() and 'renew_captcha' not in request.POST:
             data = form.cleaned_data
-            entry = Entry(title=data['title'] or 'Unbenannt',
-                          author=request.user,
-                          lang=data['language'], code=data['code'],
-                          pub_date=datetime.utcnow())
-            entry.save()
+            entry = form.save(request.user)
             flash(u'Dein Eintrag wurde erfolgreich gespeichert. Du kannst '
                   u'folgenden Code verwenden, um ihn einzubinden: '
                   u'<code>[paste:%s:%s]</code>' % (entry.id, entry.title),

@@ -8,8 +8,11 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from datetime import datetime
 from urlparse import urlparse
+
 from django.db import models
+
 from inyoka.portal.user import User
 from inyoka.utils.urls import href, is_safe_domain
 from inyoka.utils.decorators import deferred
@@ -21,7 +24,8 @@ class Entry(models.Model):
     lang = models.CharField('Sprache', max_length=20)
     code = models.TextField('Code')
     rendered_code = models.TextField('Gerenderter Code')
-    pub_date = models.DateTimeField('Datum', db_index=True)
+    pub_date = models.DateTimeField('Datum', db_index=True,
+                                    default=datetime.utcnow)
     author = models.ForeignKey(User, verbose_name='Autor')
     referrer = models.TextField('Verweisende Seiten', blank=True)
 

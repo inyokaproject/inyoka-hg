@@ -9,7 +9,9 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django import forms
+
 from inyoka.utils.forms import CaptchaField
+from inyoka.pastebin.models import Entry
 
 
 # languages for highlighting. We do not use the full list of pygments
@@ -57,9 +59,23 @@ LANGUAGES = [
 ]
 
 
-class AddPasteForm(forms.Form):
+class AddPasteForm(forms.ModelForm):
     title = forms.CharField(max_length=40, required=False, label='Titel')
-    language = forms.ChoiceField(widget=forms.Select, label='Sprache',
-                                 choices=LANGUAGES)
-    code = forms.CharField(widget=forms.Textarea, label='Code')
+    lang = forms.ChoiceField(widget=forms.Select, label='Sprache',
+                             choices=LANGUAGES)
     captcha = CaptchaField(label='CAPTCHA', only_anonymous=True)
+
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        return title or 'Unbenannt'
+
+    def save(self, user, commit=True):
+        entry = super(AddPasteForm, self).save(commit=False)
+        entry.author = user
+        if commit:
+            entry.save()
+        return entry
+
+    class Meta:
+        model = Entry
+        fields = ('title', 'lang', 'code')

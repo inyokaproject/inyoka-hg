@@ -28,7 +28,7 @@
         Sprache aus. Dann kopierst du die URL in das Thema bzw. den Channel. Genaueres zu unserer
         Ablage („No Paste Service“) findest du im <a href="{{ href('wiki', 'No_Paste_Service') }}">Wiki</a>.
       </dd>
-      {{ render_form(form, ['title', 'language', 'code'], inline=True) }}
+      {{ render_form(form, ['title', 'lang', 'code'], inline=True) }}
       {%- if not USER.is_authenticated %}
       {{ render_form(form, ['captcha'], inline=True) }}
       {%- endif %}
