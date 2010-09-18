@@ -47,6 +47,7 @@
     'sql': 'SQL',
     'xml': 'XML'
   };
+
   /**
    * Helper function that creates a button object.
    */
@@ -308,214 +309,217 @@
    * Represents the wiki editor.  It's created with a jQuery object
    * or expression for the textarea.
    */
-  WikiEditor = function(editor, profile) {
-    var self = this, t;
-    this.profile = profile || 'small';
-    this.username = $CURRENT_USER || 'Anonymous';
-    this.smilies = null;
+  WikiEditor = Class.$extend({
+    __init__ : function(editor, profile) {
+      var self = this, t;
+      this.profile = profile || 'small';
+      this.username = $CURRENT_USER || 'Anonymous';
+      this.smilies = null;
 
-    this.textarea = $(editor);
-    this.textarea[0].inyokaWikiEditor = this;
+      this.textarea = $(editor);
+      this.textarea[0].inyokaWikiEditor = this;
+      $(this.textarea).keydown(function(evt) { self.keycodes(self, evt) });
 
-    /* helpbar with some syntax informations */
-    //this.helpbar = $('<span class="toolbar_help note" />');
 
-    /* create toolbar based on button layout */
-    t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
-    var bar = toolbar();
-    for (var i = 0, n = bar.length, x; i != n; ++i)
-      if (x = bar[i](self))
-        x.appendTo($('<li />').appendTo(t))
+      /* helpbar with some syntax informations */
+      //this.helpbar = $('<span class="toolbar_help note" />');
 
-    /* Helpbar */
-    //this.helpbar.appendTo($('<li />').appendTo(t)).hide();
-    if (profile == 'wiki') {
-      link = 'http://wiki.ubuntuusers.de/Wiki/Syntax';
-    } else {
-      link = 'http://wiki.ubuntuusers.de/Forum/Syntax';
-    }
-    $('<span class="syntax_help note"><a href="' + link + '">Hilfe zur Syntax</a></span>')
-      .appendTo($('<li />').appendTo(t));
-  };
+      /* create toolbar based on button layout */
+      t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
+      var bar = toolbar();
+      for (var i = 0, n = bar.length, x; i != n; ++i)
+        if (x = bar[i](self))
+          x.appendTo($('<li />').appendTo(t))
 
-  /**
-   * This method is called whenever a user presses a key.
-   */
-  WikiEditor.prototype.onKeyDown = function(evt) {
-    /* on newline continue the current list or keep the indentation */
-    if (evt.keyCode == 13) {
-      var match = this.getCurrentLine()
-                      .match(/^(\s*(?:\*|- |[01aAiI]\.)?\s*)(.*?)$/);
-      if (match[1].length) {
+      /* Helpbar */
+      //this.helpbar.appendTo($('<li />').appendTo(t)).hide();
+      if (profile == 'wiki') {
+        link = 'http://wiki.ubuntuusers.de/Wiki/Syntax';
+      } else {
+        link = 'http://wiki.ubuntuusers.de/Forum/Syntax';
+      }
+      $('<span class="syntax_help note"><a href="' + link + '">Hilfe zur Syntax</a></span>')
+        .appendTo($('<li />').appendTo(t));
+    },
+
+    /**
+     * This method is called whenever a user presses a key.
+     */
+    keycodes : function(cls, evt) {
+      /* on newline continue the current list or keep the indentation */
+      if (evt.keyCode == 13) {
+        var match = cls.getCurrentLine()
+                       .match(/^(\s*(?:\*|- |[01aAiI]\.)?\s*)(.*?)$/);
+        if (match[1].length) {
+          evt.preventDefault();
+          /* continue indention / list */
+          if (match[2].length)
+            this.insertText('\n' + match[1]);
+          /* or remove current list item too */
+          else
+            this.setCurrentLine('\n');
+        }
+      }
+      /* on tab indent to a multiple of INDENTATION
+         TODO: indent selected lines.
+         TODO: ignore if shift+tab
+         FIXME: how can a user without mouse navigate? */
+      else if (evt.keyCode == 9) {
         evt.preventDefault();
-        /* continue indention / list */
-        if (match[2].length)
-          this.insertText('\n' + match[1]);
-        /* or remove current list item too */
+        var pos = cls.getCurrentLine().length;
+        var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
+        for (var s = ''; pos < indent && (s += ' '); ++pos);
+        this.insertText(s);
+      }
+    },
+
+    /**
+     * Insert a tag around a selection.  (Or if no value is selected then it
+     * inserts a default text and marks it).  This does not use the
+     * `getSelection` and `setSelection` for performance reasons.
+     */
+    insertTag : function(format, def) {
+      var
+        t = this.textarea[0],
+        args = (format instanceof Array) ? format : format.split('%s', 2);
+
+      var
+        before = args[0] || '',
+        after = args[1] || '';
+
+      scroll = t.scrollTop;
+
+      if (typeof t.selectionStart != 'undefined') {
+        var
+          start = t.selectionStart,
+          end = t.selectionEnd;
+        var
+          s1 = t.value.substring(0, start),
+          s2 = t.value.substring(start, end),
+          s3 = t.value.substring(end);
+
+        s2 = (end != start) ? before + s2 + after : before + def + after;
+        t.value = s1 + s2 + s3;
+        t.focus();
+        t.selectionStart = start + before.length;
+        t.selectionEnd = start + (s2.length - after.length);
+      }
+      else if (typeof document.selection != 'undefined') {
+        t.focus();
+        var range = document.selection.createRange();
+        var text = range.text;
+        range.text = before + (text.length > 0 ? text : def) + after;
+      }
+      t.scrollTop = scroll;
+    },
+
+    /**
+     * Get the currently selected text.
+     */
+    getSelection : function() {
+      var t = this.textarea[0];
+      if (typeof t.selectionStart != 'undefined') {
+        var
+          start = t.selectionStart,
+          end = t.selectionEnd;
+        return (start == end) ? '' : t.value.substring(start, end);
+      }
+      else if (typeof document.selection != 'undefined') {
+        var range = document.selection.createRange();
+        return range.text;
+      }
+    },
+
+    /**
+     * Replace the current selection with a new text.
+     */
+    setSelection : function(text, reselect) {
+      var t = this.textarea[0];
+      if (typeof t.selectionStart != 'undefined') {
+        var
+          start = t.selectionStart,
+          end = t.selectionEnd;
+        var
+          s1 = t.value.substring(0, start),
+          s2 = t.value.substring(end);
+
+        t.value = s1 + text + s2;
+        t.focus();
+        if (reselect) {
+          t.selectionStart = start;
+          t.selectionEnd = start + text.length;
+        }
         else
-          this.setCurrentLine('\n');
+          t.selectionEnd = t.selectionStart = start + text.length;
       }
-    }
-    /* on tab indent to a multiple of INDENTATION
-       TODO: indent selected lines.
-       TODO: ignore if shift+tab
-       FIXME: how can a user without mouse navigate? */
-    else if (evt.keyCode == 9) {
-      evt.preventDefault();
-      var pos = this.getCurrentLine().length;
-      var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
-      for (var s = ''; pos < indent && (s += ' '); ++pos);
-      this.insertText(s);
-    }
-  };
-
-  /**
-   * Insert a tag around a selection.  (Or if no value is selected then it
-   * inserts a default text and marks it).  This does not use the
-   * `getSelection` and `setSelection` for performance reasons.
-   */
-  WikiEditor.prototype.insertTag = function(format, def) {
-    var
-      t = this.textarea[0],
-      args = (format instanceof Array) ? format : format.split('%s', 2);
-
-    var
-      before = args[0] || '',
-      after = args[1] || '';
-
-    scroll = t.scrollTop;
-
-    if (typeof t.selectionStart != 'undefined') {
-      var
-        start = t.selectionStart,
-        end = t.selectionEnd;
-      var
-        s1 = t.value.substring(0, start),
-        s2 = t.value.substring(start, end),
-        s3 = t.value.substring(end);
-
-      s2 = (end != start) ? before + s2 + after : before + def + after;
-      t.value = s1 + s2 + s3;
-      t.focus();
-      t.selectionStart = start + before.length;
-      t.selectionEnd = start + (s2.length - after.length);
-    }
-    else if (typeof document.selection != 'undefined') {
-      t.focus();
-      var range = document.selection.createRange();
-      var text = range.text;
-      range.text = before + (text.length > 0 ? text : def) + after;
-    }
-    t.scrollTop = scroll;
-  };
-
-  /**
-   * Get the currently selected text.
-   */
-  WikiEditor.prototype.getSelection = function() {
-    var t = this.textarea[0];
-    if (typeof t.selectionStart != 'undefined') {
-      var
-        start = t.selectionStart,
-        end = t.selectionEnd;
-      return (start == end) ? '' : t.value.substring(start, end);
-    }
-    else if (typeof document.selection != 'undefined') {
-      var range = document.selection.createRange();
-      return range.text;
-    }
-  };
-
-  /**
-   * Replace the current selection with a new text.
-   */
-  WikiEditor.prototype.setSelection = function(text, reselect) {
-    var t = this.textarea[0];
-    if (typeof t.selectionStart != 'undefined') {
-      var
-        start = t.selectionStart,
-        end = t.selectionEnd;
-      var
-        s1 = t.value.substring(0, start),
-        s2 = t.value.substring(end);
-
-      t.value = s1 + text + s2;
-      t.focus();
-      if (reselect) {
-        t.selectionStart = start;
-        t.selectionEnd = start + text.length;
+      else if (typeof document.selection != 'undefined') {
+        t.focus();
+        var range = document.selection.createRange();
+        range.text = text;
+        /* BUG: reselect? */
       }
-      else
-        t.selectionEnd = t.selectionStart = start + text.length;
-    }
-    else if (typeof document.selection != 'undefined') {
-      t.focus();
-      var range = document.selection.createRange();
-      range.text = text;
-      /* BUG: reselect? */
-    }
-  };
+    },
 
-  /**
-   * Insert text at the cursor position.  This works pretty much like
-   * `setSelection` just that it deselects first.
-   */
-  WikiEditor.prototype.insertText = function(text) {
-    var t = this.textarea[0];
-    if (typeof t.selectionStart != 'undefined') {
-      t.selectionStart = t.selectionEnd;
-    }
-    this.setSelection(text);
-  };
+    /**
+     * Insert text at the cursor position.  This works pretty much like
+     * `setSelection` just that it deselects first.
+     */
+    insertText : function(text) {
+      var t = this.textarea[0];
+      if (typeof t.selectionStart != 'undefined') {
+        t.selectionStart = t.selectionEnd;
+      }
+      this.setSelection(text);
+    },
 
-  /**
-   * Get the current line as string.
-   */
-  WikiEditor.prototype.getCurrentLine = function() {
-    var t = this.textarea[0], i, c;
-    if (typeof t.selectionStart != 'undefined') {
-      var buffer = [];
-      for (i = t.selectionEnd - 1; (c = t.value.charAt(i)) != '\n' && c; i--)
-        buffer.push(c);
-      buffer.reverse();
-      for (i = t.selectionEnd; (c = t.value.charAt(i)) != '\n' && c; i++)
-        buffer.push(c);
-      return buffer.join('');
-    }
-    // XXX: IE-Version
-    return '';
-  };
-
-  /**
-   * Set the current line to a new value.
-   */
-  WikiEditor.prototype.setCurrentLine = function(text) {
-    var t = this.textarea[0];
-    if (typeof t.selectionStart != 'undefined') {
-      var start, end, c;
-      for (start = t.selectionEnd - 1;
-           (c = t.value.charAt(start)) != '\n' && c;
-           start--);
-      for (end = t.selectionEnd;
-           (c = t.value.charAt(end)) != '\n' && c;
-           end++);
-      t.value = t.value.substring(0, start) + text + t.value.substring(end);
-      t.selectionStart = t.selectionEnd = start + text.length;
-    }
-    // XXX: IE-Version
-  };
-
-  /**
-   * Quote a given text.
-   */
-  WikiEditor.prototype.quoteText = function(text) {
-    if (!text)
+    /**
+     * Get the current line as string.
+     */
+    getCurrentLine : function() {
+      var t = this.textarea[0], i, c;
+      if (typeof t.selectionStart != 'undefined') {
+        var buffer = [];
+        for (i = t.selectionEnd - 1; (c = t.value.charAt(i)) != '\n' && c; i--)
+          buffer.push(c);
+        buffer.reverse();
+        for (i = t.selectionEnd; (c = t.value.charAt(i)) != '\n' && c; i++)
+          buffer.push(c);
+        return buffer.join('');
+      }
+      // XXX: IE-Version
       return '';
-    var lines = [];
-    $.each(text.split(/\r\n|\r|\n/), function() {
-      lines.push('>' + (this.charAt(0) != '>' ? ' ' : '') + this);
-    });
-    return lines.join('\n') + '\n';
-  };
+    },
 
+    /**
+     * Set the current line to a new value.
+     */
+    setCurrentLine : function(text) {
+      var t = this.textarea[0];
+      if (typeof t.selectionStart != 'undefined') {
+        var start, end, c;
+        for (start = t.selectionEnd - 1;
+             (c = t.value.charAt(start)) != '\n' && c;
+             start--);
+        for (end = t.selectionEnd;
+             (c = t.value.charAt(end)) != '\n' && c;
+             end++);
+        t.value = t.value.substring(0, start) + text + t.value.substring(end);
+        t.selectionStart = t.selectionEnd = start + text.length;
+      }
+      // XXX: IE-Version
+    },
+
+    /**
+     * Quote a given text.
+     */
+    quoteText : function(text) {
+      if (!text)
+        return '';
+      var lines = [];
+      $.each(text.split(/\r\n|\r|\n/), function() {
+        lines.push('>' + (this.charAt(0) != '>' ? ' ' : '') + this);
+      });
+      return lines.join('\n') + '\n';
+    }
+  });
 })();
