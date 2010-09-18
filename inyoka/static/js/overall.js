@@ -78,7 +78,7 @@ $(document).ready(function() {
       var _classes = this.className.split(/\s+/);
       for(var i=0; i < _classes.length; i++) {
         if(_classes[i].match(/^toc-depth-(\d+)$/)) {
-          tocDepth = parseInt(_classes[i].slice(10));
+          tocDepth = parseInt(_classes[i].slice(10), 10);
           break;
         }
       }
@@ -108,7 +108,7 @@ $(document).ready(function() {
           nextClass = "section_1";
         }
 
-        nextLevel = parseInt(nextClass.match(/^section_(\d+)$/)[1]);
+        nextLevel = parseInt(nextClass.match(/^section_(\d+)$/)[1], 10);
         if ( nextLevel > level) {
           // append "<li><ol>" !! without closing tags !!
           tocTree +='<li><a href="#' + link + '" class="crosslink">' + linkText + '</a>';
@@ -139,7 +139,7 @@ $(document).ready(function() {
         var _classes = this.className.split(/\s+/);
         for(var i=0; i < _classes.length; i++) {
           if(_classes[i].match(/^toc-item-depth-(\d+)$/)) {
-            curDepth = parseInt(_classes[i].slice(15));
+            curDepth = parseInt(_classes[i].slice(15), 10);
             break;
           }
         }
@@ -289,41 +289,7 @@ $(document).ready(function() {
         .split(' ').slice(3).join(','))
     );
   });
-/*
-  function reset_pagination() {
-    $('.pagination .ellipsis').html(' … ');
-  }
 
-  $('.pagination .ellipsis')
-    .replaceWith('<a href="#" class="ellipsis"> … </a>');
-  $('.pagination .ellipsis')
-    .attr('title', 'Klicken, um Seitenzahl einzugeben')
-    .click(function () {
-      var $ellipsis = $(this)
-      $ellipsis.html('<input>');
-      $ellipsis.find('input')
-        .attr('size', 3)
-        .focus()
-        .blur(reset_pagination)
-        .keypress(function (e) {
-          if (e.keyCode==13) { // enter
-            var a = $ellipsis.parent().find('input')[0].value.toString();
-            a = (a[a.length-1] == '/') ? a : (a + '/');
-
-            var n = parseInt(this.value);
-            if (isNaN(n) || n < 0) {
-              this.value = '';
-              return false;
-            }
-            window.location = a + n + '/';
-          }
-          else if (e.keyCode == 27) { // escape
-            this.blur();
-          }
-        });
-      return false;
-    });
-*/
   // the javascript powered login form
   (function() {
     $('#login_link').click(function() {
@@ -431,22 +397,6 @@ $(document).ready(function() {
       $(link).addClass('active').siblings('a').removeClass('active');
       sel = $(link).parent();
       sel.siblings('pre').text(sel.data('deb-url-orig').replace(/VERSION/, version));
-      return false;
-      
-      group = $(link).parent().parent();
-      version = $(link).text().toLowerCase();
-      group.find('.ppa-code').remove();
-      sel = group.find('.selector');
-
-      $(link).addClass('active').siblings('a').removeClass('active');
-
-      sel.after('<pre class="ppa-code">' +
-          group.data('long_notation_text').replace(/VERSION/, version) + '</div></pre>');
-      if($.inArray(version, SHORT_NOTATION_VERSIONS) > -1) {
-        sel.after('<p class="ppa-code">Für die <strong>sources.list</strong>:</p>');
-        sel.after('<p class="ppa-code">' +
-            group.data('short_notation_text') + '</p>');
-      }
       return false;
     };
       

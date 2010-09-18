@@ -121,7 +121,7 @@
         (typeof def == 'undefined') ? 'Formatierter Text' : def
       );
     };
-  }
+  };
 
   /**
    * factory duncrion for combined usage with "button".
@@ -136,17 +136,21 @@
   /**
    * Helper function that formats a `Date` object into a iso8601
    * format string.
+   *
    */
-  var formatISO8601 = function(date) {
-    var t;
-    return (date.getUTCFullYear() + '-' +
-      (t = date.getUTCMonth(), t < 9 ? '0' : '') + (t + 1) + '-' +
-      (t = date.getUTCDate(), t < 10 ? '0' : '') + t + 'T' +
-      (t = date.getUTCHours(), t < 10 ? '0' : '') + t + ':' +
-      (t = date.getUTCMinutes(), t < 10 ? '0' : '') + t + ':' +
-      (t = date.getUTCSeconds(), t < 10 ? '0' : '') + t + 'Z'
-    );
-  }
+  var formatISO8601 = function(orig) {
+    var year = orig.getUTCFullYear(),
+        month = orig.getUTCMonth(),
+        date = orig.getUTCDate(),
+        hours = orig.getUTCHours(),
+        minutes = orig.getUTCHours(),
+        seconds = orig.getUTCSeconds();
+    return (year + '-' + (month < 9 ? '0' : '') + (month + 1) + '-' +
+                         (date < 10 ? '0' : '') + date + 'T' +
+                         (hours < 10 ? '0' : '') + hours + ':' + 
+                         (minutes < 10 ? '0' : '') + minutes + ':' +
+                         (seconds < 10 ? '0' : '') + seconds + 'Z');
+  };
 
   /**
    * The toolbar
@@ -195,7 +199,7 @@
            ['wiki', 'forum'], help("{{{ Code }}}")),
     (function(editor) {
       if (editor.profile == 'small') {
-        return
+        return;
       }
       var result = $('<div />');
       button('code', 'Code', function(evt) {
@@ -205,13 +209,13 @@
       var codebox = $('<table class="codebox" />').appendTo(result).hide();
       codebox[0].style.display = 'none'; //hide box in safari
       var tds = [$('<td>Rohtext</td>').click(function() {
-        editor.insertTag('{{{\n%s\n}}}', 'Code')
+        editor.insertTag('{{{\n%s\n}}}', 'Code');
       })];
       $.each(CODES, function(k, v) {
         tds.push($('<td>' + v + '</td>')
           .click(function() {
             editor.insertTag('{{{#!code ' + k + '\n%s\n}}}', 'Code');
-          }))
+          }));
       });
       for (var i = 0; i < tds.length / 2; i++) {
         $('<tr />')
@@ -301,8 +305,8 @@
     }, ['forum', 'wiki'], help("Eingabefeld verkleinern")),
     button('enlarge', 'Eingabefeld vergrößern', function(evt) {
       this.textarea.height(this.textarea.height() + 50).focus();
-    }, ['forum', 'wiki'], help("Eingabefeld vergrößern"))
-  ]};
+    }, ['forum', 'wiki'], help("Eingabefeld vergrößern"))];
+  };
 
 
   /**
@@ -318,7 +322,9 @@
 
       this.textarea = $(editor);
       this.textarea[0].inyokaWikiEditor = this;
-      $(this.textarea).keydown(function(evt) { self.keycodes(self, evt) });
+      $(this.textarea).keydown(function(evt) {
+        self.keycodes(self, evt);
+      });
 
 
       /* helpbar with some syntax informations */
@@ -326,10 +332,11 @@
 
       /* create toolbar based on button layout */
       t = $('<ul class="toolbar" />').prependTo(this.textarea.parent());
-      var bar = toolbar();
-      for (var i = 0, n = bar.length, x; i != n; ++i)
-        if (x = bar[i](self))
-          x.appendTo($('<li />').appendTo(t))
+      var bar = toolbar(), x;
+      for (var i = 0, n = bar.length; i != n; ++i)
+        x = bar[1](self);
+        if (x)
+          x.appendTo($('<li />').appendTo(t));
 
       /* Helpbar */
       //this.helpbar.appendTo($('<li />').appendTo(t)).hide();
@@ -368,7 +375,7 @@
         evt.preventDefault();
         var pos = cls.getCurrentLine().length;
         var indent = (Math.floor(pos / INDENTATION) + 1) * INDENTATION;
-        for (var s = ''; pos < indent && (s += ' '); ++pos);
+        for (var s = ''; pos < indent && (s += ' '); ++pos)
         this.insertText(s);
       }
     },
@@ -499,10 +506,10 @@
         var start, end, c;
         for (start = t.selectionEnd - 1;
              (c = t.value.charAt(start)) != '\n' && c;
-             start--);
+             start--)
         for (end = t.selectionEnd;
              (c = t.value.charAt(end)) != '\n' && c;
-             end++);
+             end++)
         t.value = t.value.substring(0, start) + text + t.value.substring(end);
         t.selectionStart = t.selectionEnd = start + text.length;
       }

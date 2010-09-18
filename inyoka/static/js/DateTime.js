@@ -144,8 +144,8 @@
 
     drawCalendar: function() {
       var self = this;
-      var month = parseInt(this.calendarMonth);
-      var year = parseInt(this.calendarYear);
+      var month = parseInt(this.calendarMonth, 10);
+      var year = parseInt(this.calendarYear, 10);
       this.calendar.children().remove();
       var calendar = $('<table class="calendar"></table>').append(
         $('<tr></tr>').append(
@@ -235,9 +235,9 @@
     },
 
     drawDate: function(year, month, day) {
-      day = parseInt(day);
-      month = parseInt(month);
-      year = parseInt(year);
+      day = parseInt(day, 10);
+      month = parseInt(month, 10);
+      year = parseInt(year, 10);
       if (month > 0 && month < 13) { 
         this.calendarMonth = month;
         this.calendarYear = year;

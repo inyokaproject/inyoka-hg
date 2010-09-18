@@ -40,7 +40,7 @@
           var forum = selected_forums[0];
           headline.text($('#forum_' + forum).text());
           $.each(privileges, function(id, name) {
-            id = parseInt(id);
+            id = parseInt(id, 10);
             var s;
             if ($.inArray(id, self.mapping[forum]) > -1)
               s = '1';
@@ -71,8 +71,8 @@
           var priv_data = [];
           self.container.find('input').each(function(i, field) {
             if (field.name.substring(0, 5) == 'priv_' && field.checked) {
-              var priv_id = parseInt(field.name.substring(5));
-              result = (parseInt(field.value) * priv_id);
+              var priv_id = parseInt(field.name.substring(5), 10);
+              result = (parseInt(field.value, 10) * priv_id);
               if (result)
                 priv_data[priv_data.length] = result;
             }

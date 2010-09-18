@@ -273,7 +273,7 @@ $.autocomplete = function(input, options) {
 		var iWidth = (options.width > 0) ? options.width : $input.width();
 		// reposition
 		$results.css({
-			width: parseInt(iWidth) + "px",
+			width: parseInt(iWidth, 10) + "px",
 			top: (pos.y + input.offsetHeight) + "px",
 			left: pos.x + "px"
 		}).show();
