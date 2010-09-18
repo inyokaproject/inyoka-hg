@@ -149,12 +149,15 @@ def check_js():
     local("%s extra/jslint-check.js" % rhino, capture=False)
 
 
-def compile_js():
+def compile_js(file=None):
     rhino = 'java -jar extra/js.jar'
     minjar = 'java -jar extra/google-compiler.jar'
     #TODO: find some way to preserve comments on top
-    files = _os.listdir('inyoka/static/js')
-    files = [fn for fn in files if not 'min' in fn and not 'jquery-' in fn]
+    if file is None:
+        files = _os.listdir('inyoka/static/js')
+        files = [fn for fn in files if not 'min' in fn and not 'jquery-' in fn]
+    else:
+        files = [file]
     for file in files:
         local("%s --js inyoka/static/js/%s --warning_level QUIET > inyoka/static/js/%s" %
             (minjar, file, file.split('.js')[0] + '.min.js'), capture=False)
