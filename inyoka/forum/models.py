@@ -464,7 +464,7 @@ class Forum(db.Model):
                       'markread'):
             return href('forum', 'forum', self.slug, action)
         if action == 'edit':
-            return href('admin', 'forum', 'edit', self.id)
+            return href('admin', 'forum', 'edit', self.slug)
     @property
     def parents(self):
         """Return a list of all parent forums up to the root level."""

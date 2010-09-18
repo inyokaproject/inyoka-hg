@@ -577,8 +577,8 @@ def forum_edit(request, slug=None):
     forum = None
     errors = False
 
-    if id:
-        forum = Forum.query.get(int(id))
+    if slug:
+        forum = Forum.query.get_cached(slug)
         if forum is None:
             raise PageNotFound()
 
@@ -587,11 +587,11 @@ def forum_edit(request, slug=None):
         _add_field_choices()
         if form.is_valid():
             data = form.cleaned_data
-            slug = data['slug']
-            if Forum.query.filter(and_(Forum.slug==slug, Forum.id!=id)).first():
+            new_slug = data['slug']
+            if new_slug != slug and Forum.query.filter(and_(Forum.slug==new_slug)).first():
                 form.errors['slug'] = ErrorList(
                     [u'Bitte einen anderen Slug angeben, „%s“ ist schon '
-                     u'vergeben.' % escape(slug)])
+                     u'vergeben.' % escape(new_slug)])
             if int(data['parent']) != -1:
                 parent = Forum.query.get(int(data['parent']))
                 if not parent:
@@ -605,7 +605,7 @@ def forum_edit(request, slug=None):
             forum.name = data['name']
             forum.position = data['position']
             old_slug = forum.slug
-            forum.slug = slug
+            forum.slug = new_slug
             forum.description = data['description']
             if int(data['parent']) != -1:
                 forum.parent = parent
