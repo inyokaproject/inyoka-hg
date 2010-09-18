@@ -34,7 +34,6 @@ from inyoka.utils.notification import send_notification, notify_about_subscripti
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session, db
-from inyoka.utils.parsertools import OrderedDict
 from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -82,7 +81,7 @@ def index(request, category=None):
         session_info = (u'sieht sich die Forenübersicht an.',
                         u'Forenübersicht')
 
-    forums = Forum.query.get_forums_filtered(request.user)
+    forums = Forum.query.get_forums_filtered(request.user, sort=True)
 
     if category:
         category = Forum.query.get_cached(category)
@@ -98,8 +97,7 @@ def index(request, category=None):
         if fmsg is not None:
             return welcome(request, fmsg.slug, request.path)
     else:
-        categories = sorted((forum for forum in forums if forum.parent_id == None),
-                            key=attrgetter('position'))
+        categories = tuple(forum for forum in forums if forum.parent_id == None)
         # forum-overview can be set without any acl check ;)
         set_session_info(request, *session_info)
 
@@ -109,21 +107,18 @@ def index(request, category=None):
             'hidden_forum_categories', ())
         )
 
-    def _get_children_filtered(parent):
-        return sorted(parent.filter_children(forums), key=attrgetter('position'))
-
-    forum_map = OrderedDict()
-    for forum in sorted(categories, key=attrgetter('position')):
-        if not forum in forum_map:
-            forum_map[forum] = OrderedDict()
-        for child in _get_children_filtered(forum):
-            forum_map[forum][child] = _get_children_filtered(child)
+    forum_hierarchy = []
+    for category in categories:
+        category_forums = []
+        for forum in category.filter_children(forums):
+            category_forums.append((forum, forum.filter_children(forums)))
+        forum_hierarchy.append((category, category_forums))
 
     return {
         'categories':           categories,
         'is_index':             not category,
         'hidden_categories':    hidden_categories,
-        'forum_map': forum_map
+        'forum_hierarchy':      forum_hierarchy,
     }
 
 

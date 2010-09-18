@@ -11,7 +11,7 @@
 #}
 {%- extends 'forum/page.html' %}
 {% set scripts = ['jquery.cookie.min.js'] %}
-{% from 'forum/_forum.html' import render_forum_map %}
+{% from 'forum/_forum.html' import render_forum %}
 {% if not is_index and categories %}
   {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% set navigation_trace = [
@@ -29,12 +29,12 @@
 {% block forum_content %}
   {%- if categories %}
   <table class="forum{% if is_index %} category_box{% endif %}">
-  {%- for category in categories %}
+  {%- for category, forums in forum_hierarchy %}
   <tr class="head" id="category-{{ category.id }}">
     <th colspan="5"><a href="{{ category|url
       }}">{{ category.name|e }}</a></th></tr>
-    {%- for forum in forum_map[category] -%}
-      {{ render_forum_map(forum, forum_map[category][forum]) }}
+    {%- for forum, subforums in forums -%}
+      {{ render_forum(forum, subforums) }}
     {%- else %}
     <tr class="empty category-{{ category.id }}">
       <td colspan="5">Diese Kategorie enthält keine Foren.</td></tr>

@@ -20,10 +20,11 @@ from StringIO import StringIO
 from datetime import datetime
 from mimetypes import guess_type
 from itertools import groupby
-from inyoka.utils.database import db
+from operator import attrgetter
 
 from inyoka.conf import settings
 from inyoka.utils.text import get_new_unique_filename
+from inyoka.utils.database import db
 from inyoka.utils.dates import timedelta_to_seconds
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href
@@ -183,12 +184,16 @@ class ForumQuery(db.Query):
         # return all forums instead
         return self.get_all_forums_cached().values()
 
-    def get_forums_filtered(self, user, priv=CAN_READ, reverse=False):
+    def get_forums_filtered(self, user, priv=CAN_READ, reverse=False, sort=False):
         forums = self.get_cached()
         privileges = get_privileges(user, [f.id for f in forums])
         if reverse:
-            return filter_visible(user, forums, priv, privileges)
-        return filter_invisible(user, forums, priv, privileges)
+            r = filter_visible(user, forums, priv, privileges)
+        else:
+            r = filter_invisible(user, forums, priv, privileges)
+        if sort:
+            return sorted(r, key=attrgetter('position'))
+        return r
 
 
 class ForumMapperExtension(db.MapperExtension):
@@ -484,9 +489,12 @@ class Forum(db.Model):
         children = [forum for forum in forums if forum.parent_id == self.id]
         return children
 
-    def get_children_filtered(self, user, priv=CAN_READ):
-        """Same as children, but check for acls if a user is given"""
-        visible_forums = Forum.query.get_forums_filtered(user, priv=priv)
+    def get_children_filtered(self, user, priv=CAN_READ, sort=False):
+        """
+        Same as children, but check for acls if a user is given.
+        If 1=`sort` is True, sort by the position attribute.
+        """
+        visible_forums = Forum.query.get_forums_filtered(user, priv=priv, sort=sort)
         return self.filter_children(visible_forums)
 
     def filter_children(self, forums):
@@ -596,11 +604,11 @@ class Forum(db.Model):
         return self.name
 
     def __repr__(self):
-        return '<%s id=%s slug=%s name=%s>' % (
+        return '<%s #%s slug=%s pos=%d>' % (
             self.__class__.__name__,
             self.id,
             self.slug.encode('utf-8'),
-            self.name.encode('utf-8')
+            self.position,
         )
 
 
