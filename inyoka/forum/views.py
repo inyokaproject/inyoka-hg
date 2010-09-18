@@ -109,9 +109,15 @@ def index(request, category=None):
             'hidden_forum_categories', ())
         )
 
-    forum_map = OrderedDict((category,
-        sorted(category.filter_children(forums), key=attrgetter('position'))
-    ) for category in categories)
+    def _get_children_filtered(parent):
+        return sorted(parent.filter_children(forums), key=attrgetter('position'))
+
+    forum_map = OrderedDict()
+    for forum in categories:
+        if not forum in forum_map:
+            forum_map[forum] = OrderedDict()
+        for child in _get_children_filtered(forum):
+            forum_map[forum][child] = _get_children_filtered(child)
 
     return {
         'categories':           categories,

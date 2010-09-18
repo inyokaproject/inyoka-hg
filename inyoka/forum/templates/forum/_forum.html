@@ -1,4 +1,4 @@
-{% macro render_forum(forum) %}
+{% macro render_forum_map(forum, children) %}
   <tr class="entry category-{{ forum.parent_id }}">
     <td class="icon">
       {%- if forum.get_read_status(REQUEST.user) %}
@@ -13,7 +13,6 @@
       {%- if forum.description %}
       <p class="description">{{ forum.description|e }}</p> 
       {%- endif %}
-      {% set children = forum.get_children_filtered(REQUEST.user) %}
       {%- if children %}
       <p class="subforums">Unterforen:
       {%- for subforum in children %}
