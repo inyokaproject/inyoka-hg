@@ -600,7 +600,7 @@ def forum_edit(request, slug=None):
                          % escape(data['parent'])])
 
         if form.is_valid():
-            if not id:
+            if not slug:
                 forum = Forum()
             forum.name = data['name']
             forum.position = data['position']
@@ -631,7 +631,7 @@ def forum_edit(request, slug=None):
                     keys.append('forum/forum/' + old_slug)
                 cache.delete_many(*keys)
                 flash(u'Das Forum „%s“ wurde erfolgreich %s' % (
-                      escape(forum.name), not id and 'angelegt' or 'editiert'), True)
+                      escape(forum.name), not slug and 'angelegt' or 'editiert'), True)
                 return HttpResponseRedirect(href('admin', 'forum'))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie.', False)
