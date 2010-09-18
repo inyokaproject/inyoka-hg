@@ -65,13 +65,10 @@ class AddPasteForm(forms.ModelForm):
                              choices=LANGUAGES)
     captcha = CaptchaField(label='CAPTCHA', only_anonymous=True)
 
-    def clean_title(self):
-        title = self.cleaned_data.get('title')
-        return title or 'Unbenannt'
-
     def save(self, user, commit=True):
         entry = super(AddPasteForm, self).save(commit=False)
         entry.author = user
+        entry.title = entry.title or 'Unbenannt'
         if commit:
             entry.save()
         return entry
