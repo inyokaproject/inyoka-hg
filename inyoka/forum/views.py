@@ -73,13 +73,14 @@ def index(request, category=None):
     Return all forums without parents.
     These forums are treated as categories but not as real forums.
     """
-    if category:
+    is_index = category is None
+    if is_index:
+        session_info = (u'sieht sich die Forenübersicht an.',
+                        u'Forenübersicht')
+    else:
         session_info = ((u'sieht sich die Forenübersicht der '
                             u'Kategorie „%s“ an' % category),
                         u'Kategorieübersicht')
-    else:
-        session_info = (u'sieht sich die Forenübersicht an.',
-                        u'Forenübersicht')
 
     forums = Forum.query.get_forums_filtered(request.user, sort=True)
 
@@ -116,7 +117,7 @@ def index(request, category=None):
 
     return {
         'categories':           categories,
-        'is_index':             not category,
+        'is_index':             is_index,
         'hidden_categories':    hidden_categories,
         'forum_hierarchy':      forum_hierarchy,
     }
