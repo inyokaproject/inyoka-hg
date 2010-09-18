@@ -8,7 +8,7 @@
     :license: GNU GPL, see LICENSE for more details.
 #}
 {%- extends 'forum/page.html' %}
-{% from 'forum/_forum.html' import render_forum, topic_icon with context %}
+{% from 'forum/_forum.html' import render_forum_map, topic_icon with context %}
 
 {% macro generate_subscription_link(do='subscribe') %}
   {{ href('forum', 'forum', forum.slug, do, continue=CURRENT_URL)|e }}
@@ -71,7 +71,7 @@
     </thead>
     <tbody>
     {%- for subforum in subforums %}
-      {{ render_forum(subforum) }}
+      {{ render_forum_map(subforum, subforum.children) }}
     {%- endfor %}
     <tr>
       <th class="topic" colspan="2">Thema</th>
