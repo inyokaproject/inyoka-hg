@@ -1623,10 +1623,16 @@ def newposts(request, page=1):
         'hide_sticky': True
     }
 
+MAX_PAGES_TOPICLIST = 50
 
 @templated('forum/topiclist.html')
 def topiclist(request, page=1, action='newposts', hours=24, user=None):
     page = int(page)
+
+    if action != 'author' and page > MAX_PAGES_TOPICLIST:
+        flash(u'Du kannst maximal die letzten %s Seiten anzeigen lassen' % MAX_PAGES_TOPICLIST)
+        return HttpResponseRedirect(href('forum'))
+
     topics = Topic.query.order_by(Topic.last_post_id.desc()) \
                   .options(db.eagerload('forum'),
                            db.eagerload('author'),
@@ -1712,7 +1718,9 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
         if invisible:
             topics = topics.filter(db.not_(Topic.forum_id.in_(invisible)))
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
+        total_topics = topics.limit(TOPICS_PER_PAGE * MAX_PAGES_TOPICLIST).count()
+        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url,
+                                total=total_topics)
         topics = pagination.objects
         pagination = pagination.generate()
 
