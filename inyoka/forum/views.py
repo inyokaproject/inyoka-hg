@@ -1673,25 +1673,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         if user.is_anonymous:
             flash(u'Für diese Funktion musst du eingeloggt sein')
             return abort_access_denied(request)
-        # get the ids of the topics the user has written posts in
-        # we select TOPICS_PER_PAGE + 1 ones to see if there's another page.
-        topics = topics.filter(db.exists([Post.topic_id], db.and_(
-            (Post.author_id == user.id),
-            (Post.topic_id == Topic.id)
-        ))).offset((page - 1) * TOPICS_PER_PAGE) \
-           .limit(TOPICS_PER_PAGE + 1).all()
-        topic_ids = [topic.id for topic in topics]
-
-        next_page = len(topic_ids) == TOPICS_PER_PAGE + 1
-        topic_ids = topic_ids[:TOPICS_PER_PAGE]
-        visible_forums = [f.id for f in Forum.query.get_forums_filtered(request.user)]
-        topics = [topic for topic in topics if topic.forum_id in visible_forums]
-        pagination = []
-        normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
-        disabled = u'<span class="disabled next">%(text)s</span>'
-        active = u'<span class="pageselect active">%(text)s</span>'
-        pagination = [u'<div class="pagination pagination_right">']
-        add = pagination.append
 
         if user != request.user:
             title = u'Beiträge von %s' % escape(user.username)
@@ -1700,32 +1681,14 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
             title = u'Eigene Beiträge'
             url = href('forum', 'egosearch')
 
-        def _link(page):
-            return '%s%d' % (url, page)
-
-        add(((page == 1) and disabled or normal) % {
-            'href': _link(page - 1),
-            'text': u'« Zurück',
-        })
-        add(active % {
-            'text': u'Seite %d' % page
-        })
-        add((next_page and normal or disabled) % {
-            'href': _link(page + 1),
-            'text': u'Weiter »'
-        })
-        add(u'<div style="clear: both"></div></div>')
-        pagination = u''.join(pagination)
-
-    if action != 'author':
-        invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
-        if invisible:
-            topics = topics.filter(db.not_(Topic.forum_id.in_(invisible)))
-        total_topics = topics.limit(TOPICS_PER_PAGE * MAX_PAGES_TOPICLIST).count()
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url,
-                                total=total_topics)
-        topics = pagination.objects
-        pagination = pagination.generate()
+    invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
+    if invisible:
+        topics = topics.filter(db.not_(Topic.forum_id.in_(invisible)))
+    total_topics = topics.limit(TOPICS_PER_PAGE * MAX_PAGES_TOPICLIST).count()
+    pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url,
+                            total=total_topics)
+    topics = pagination.objects
+    pagination = pagination.generate()
 
     def _get_read_status(post_id):
         user = request.user
