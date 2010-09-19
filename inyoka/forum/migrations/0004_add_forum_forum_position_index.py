@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding index on 'Forum', fields ['position']
         db.create_index('forum_forum', ['position'])
 
 
     def backwards(self, orm):
-        
+
         # Removing index on 'Forum', fields ['position']
         db.delete_index('forum_forum', ['position'])
 

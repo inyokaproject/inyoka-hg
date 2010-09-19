@@ -7,13 +7,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Entry.hidden_by'
         db.add_column('planet_entry', 'hidden_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='hidden_planet_posts', null=True, to=orm['portal.User']), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'Entry.hidden_by'
         db.delete_column('planet_entry', 'hidden_by_id')
 
