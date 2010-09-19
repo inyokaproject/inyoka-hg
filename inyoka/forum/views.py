@@ -1570,12 +1570,11 @@ def newposts(request, page=1):
             where = cond
 
     topics = Topic.query.options(
-        db.eagerload('forum'),
-        db.eagerload_all('author'),
-        db.eagerload_all('last_post.author'),
-        db.eagerload('first_post'),
-    ).filter(Topic.sticky == False) \
-     .order_by(Topic.last_post_id.desc()) \
+        db.eagerload('forum', innerjoin=True),
+        db.eagerload_all('author', innerjoin=True),
+        db.eagerload_all('last_post.author', innerjoin=True),
+        db.eagerload('first_post', innerjoin=True),
+    ).order_by(Topic.last_post_id.desc()) \
      .with_hint(Topic, 'FORCE INDEX (forum_topic_last_post_id)', 'mysql')
 
     if 'version' in request.GET:
@@ -1614,7 +1613,8 @@ def newposts(request, page=1):
         'pagination': pagination.generate('right'),
         'title':      u'Neue Beiträge',
         'get_read_status': _get_read_status,
-        'can_moderate': can_moderate
+        'can_moderate': can_moderate,
+        'hide_sticky': True
     }
 
 
@@ -1726,7 +1726,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'pagination':   pagination,
         'title':        title,
         'get_read_status':  _get_read_status,
-        'can_moderate': can_moderate
+        'can_moderate': can_moderate,
+        'hide_sticky': False
     }
 
 

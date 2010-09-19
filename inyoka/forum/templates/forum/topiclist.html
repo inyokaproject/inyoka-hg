@@ -35,7 +35,7 @@
         <th class="last_post">Letzte Antwort</th>
       </tr>
 
-      {%- for topic in topics if not (topic.hidden and not can_moderate(topic)) %}
+      {%- for topic in topics if not (topic.hidden and not can_moderate(topic)) and not (hide_sticky and topic.sticky) %}
       {%- set classes = [] %}
       {%- if can_moderate(topic) and topic.hidden %}{% do classes.append('hidden') %}{% endif %}
       {%- if can_moderate(topic) and topic.reported %}{% do classes.append('reported') %}{% endif %}
