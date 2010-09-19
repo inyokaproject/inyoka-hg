@@ -100,13 +100,13 @@
     <strong>{{ registered }}</strong> Angemeldeter
     {% pluralize %}
     <strong>{{ registered }}</strong> Angemeldete
-    {% endtrans %}
+    {% endtrans %}{# guests won't count anymore for now, saves a lot of traffic.
     und
     {% trans guests=sessions.anonymous %}
     <strong>{{ guests }}</strong> Gast.
     {% pluralize %}
     <strong>{{ guests }}</strong> Gäste.
-  {% endtrans %}<br />
+  {% endtrans %}#}<br />
   Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern {{ record_time|specificdatetimeformat(true) }}.
   </p>
   <p>Registrierte Benutzer:
