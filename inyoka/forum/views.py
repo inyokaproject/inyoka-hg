@@ -34,7 +34,7 @@ from inyoka.utils.notification import send_notification, notify_about_subscripti
 from inyoka.utils.collections import flatten_iterator
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.utils.database import session, db
+from inyoka.utils.database import db
 from inyoka.utils.storage import storage
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -163,7 +163,7 @@ def forum(request, slug, page=1):
         if page < CACHE_PAGES_COUNT:
             cache.set(key, ctx, 60)
     else:
-        merge = session.merge
+        merge = db.session.merge
         ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
 
 
@@ -176,7 +176,7 @@ def forum(request, slug, page=1):
     if supporters is None:
         p = Privilege
         supporters = []
-        cur = session.execute(select([p.user_id, p.positive],
+        cur = db.session.execute(select([p.user_id, p.positive],
             (p.forum_id == forum.id) &
             (p.user_id != None)
         )).fetchall()
@@ -186,7 +186,7 @@ def forum(request, slug, page=1):
                                      .order_by(SAUser.username).all()
         cache.set('forum/forum/supporters-%s' % forum.id, supporters, 600)
     else:
-        merge = session.merge
+        merge = db.session.merge
         supporters = [merge(obj, load=False) for obj in supporters]
 
     ctx.update({
@@ -228,9 +228,8 @@ def viewtopic(request, topic_slug, page=1):
 
     discussions = Page.objects.filter(topic_id=t.id)
 
-    posts = t.posts.options(db.joinedload('author'),
-                            db.joinedload('author.groups'),
-                            db.joinedload('attachments')) \
+    posts = t.posts.options(db.eagerload_all('author.groups'),
+                            db.eagerload('attachments')) \
                    .order_by(Post.position)
 
     if t.has_poll:
@@ -255,16 +254,16 @@ def viewtopic(request, topic_slug, page=1):
                         flash(u'Die Abstimmung ist bereits zu Ende.', False)
                         continue
                     poll.votings.append(PollVote(voter_id=request.user.id))
-                    session.execute(PollOption.__table__.update(
+                    db.session.execute(PollOption.__table__.update(
                         PollOption.id.in_(votes) &
                         (PollOption.poll_id == poll.id), values={
                             'votes': PollOption.votes + 1
                     }))
                     flash(u'Deine Stimme wurde gespeichert.', True)
-            session.commit()
+            db.session.commit()
             for poll in polls:
                 for option in poll.options:
-                    session.refresh(option)
+                    db.session.refresh(option)
 
     else:
         polls = None
@@ -294,7 +293,7 @@ def viewtopic(request, topic_slug, page=1):
         if not post.rendered_text and not post.is_plaintext:
             try:
                 post.rendered_text = post.render_text(force_existing=True)
-                session.commit()
+                db.session.commit()
             except OperationalError:
                 pass
 
@@ -314,7 +313,7 @@ def viewtopic(request, topic_slug, page=1):
         and post.check_ownpost_limit('delete')
     voted_all = not (polls and bool([True for p in polls if p.can_vote]))
 
-    session.commit()
+    db.session.commit()
 
     return {
         'topic':             t,
@@ -490,10 +489,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             poll = Poll(topic=topic, question=d['question'],
                 multiple_votes=d['multiple'], options=options,
                 start_time=now, end_time=end_time)
-            session.commit()
+            db.session.commit()
             if topic:
                 topic.has_poll = True
-                session.commit()
+                db.session.commit()
                 topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
@@ -507,11 +506,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 topic=topic).first()
             if poll is not None:
                 flash(u'Die Umfrage "%s" wurde gelöscht' % poll.question)
-                topic.has_poll = bool(session.execute(select([1],
+                topic.has_poll = bool(db.session.execute(select([1],
                     (Poll.topic_id == topic.id) & (Poll.id != poll.id)) \
                     .limit(1)).fetchone())
-                session.delete(poll)
-                session.commit()
+                db.session.delete(poll)
+                db.session.commit()
                 topic.forum.invalidate_topic_cache()
         polls = Poll.query.filter(Poll.id.in_(poll_ids) | (Poll.topic_id ==
             (topic and topic.id or -1))).all()
@@ -549,7 +548,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                     flash(u'Ein Anhang „%s“ existiert bereits' % att_name, False)
                 else:
                     attachment.comment = d['comment']
-                    session.commit()
+                    db.session.commit()
                     attachments.append(attachment)
                     att_ids.append(attachment.id)
                     flash(u'Der Anhang „%s“ wurde erfolgreich hinzugefügt'
@@ -559,7 +558,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             id = int(request.POST['delete_attachment'])
             attachment = filter(lambda a: a.id==id, attachments)[0]
             attachment.delete()
-            session.commit()
+            db.session.commit()
             attachments.remove(attachment)
             att_ids.remove(attachment.id)
             flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
@@ -594,7 +593,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if check_privilege(privileges, 'create_poll'):
                 topic.polls = polls
                 topic.has_poll = bool(polls)
-            session.commit()
+            db.session.commit()
 
             topic.forum.invalidate_topic_cache()
             topic.reindex()
@@ -604,11 +603,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if newtopic:
                 post.position = 0
         post.edit(request, d['text'], d['is_plaintext'])
-        session.commit()
+        db.session.commit()
 
         if attachments:
             Attachment.update_post_ids(att_ids, post.id)
-        session.commit()
+        db.session.commit()
 
         if newtopic:
             notified_user = []
@@ -750,12 +749,12 @@ def change_status(request, topic_slug, solved=None, locked=None):
     if solved is not None:
         topic.solved = solved
         topic.reindex()
-        session.commit()
+        db.session.commit()
         flash(u'Das Thema wurde als %s markiert' % (solved and u'gelöst' or \
                                                     u'ungelöst'), True)
     if locked is not None:
         topic.locked = locked
-        session.commit()
+        db.session.commit()
         flash(u'Das Thema wurde %s' % (locked and u'gesperrt' or
                                        u'entsperrt'))
     topic.forum.invalidate_topic_cache()
@@ -869,7 +868,7 @@ def report(request, topic_slug):
             data = form.cleaned_data
             topic.reported = data['text']
             topic.reporter_id = request.user.id
-            session.commit()
+            db.session.commit()
 
             users = (User.objects.get(id=int(i)) for i in
                     storage['reported_topics_subscribers'].split(',') if i)
@@ -901,7 +900,7 @@ def reportlist(request):
     if 'assign' in request.GET and 'topic' in request.GET:
         topic = Topic.query.filter(Topic.slug == request.GET['topic']).one()
         topic.report_claimed_by_id = request.user.id
-        session.commit()
+        db.session.commit()
         return HttpResponseRedirect(href('forum', 'reported_topics'))
 
     topics = Topic.query.filter(Topic.reported != None)
@@ -910,13 +909,13 @@ def reportlist(request):
         _add_field_choices()
         if form.is_valid():
             d = form.cleaned_data
-            session.execute(Topic.__table__.update(
+            db.session.execute(Topic.__table__.update(
                 Topic.id.in_(d['selected']), values={
                     'reported': None,
                     'reporter_id': None,
                     'report_claimed_by_id': None
             }))
-            session.commit()
+            db.session.commit()
             cache.delete('forum/reported_topic_count')
             topics = filter(lambda t: str(t.id) not in d['selected'], topics)
             flash(u'Die gewählten Themen wurden als bearbeitet markiert.',
@@ -1025,7 +1024,7 @@ def movetopic(request, topic_slug):
             if forum is None:
                 return abort_access_denied(request)
             topic.move(forum)
-            session.commit()
+            db.session.commit()
             # send a notification to the topic author to inform him about
             # the new forum.
             nargs = {
@@ -1145,9 +1144,9 @@ def splittopic(request, topic_slug, page=1):
                     new_topic = data['topic']
                     Post.split(posts, old_topic, new_topic)
 
-                session.commit()
+                db.session.commit()
             except ValueError:
-                session.rollback()
+                db.session.rollback()
                 flash(u'Du kannst ein Topic nicht in eine Kategorie verschieben. '
                       u'Bitte wähle ein richtiges Forum aus.', False)
                 return {
@@ -1228,7 +1227,7 @@ def hide_post(request, post_id):
               u'werden', success=False)
     else:
         post.hidden = True
-        session.commit()
+        db.session.commit()
         flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
               u'gemacht.' % (url_for(post), escape(post.author.username)),
               success=True)
@@ -1246,7 +1245,7 @@ def restore_post(request, post_id):
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     post.hidden = False
-    session.commit()
+    db.session.commit()
     flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde wieder sichtbar '
           u'gemacht.' % (url_for(post), escape(post.author.username)),
           success=True)
@@ -1279,12 +1278,12 @@ def delete_post(request, post_id):
                 flash(u'Das Löschen wurde abgebrochen.')
             else:
                 author = post.author
-                session.delete(post)
-                session.commit()
+                db.session.delete(post)
+                db.session.commit()
                 last_post = Post.query.filter_by(topic_id=post.topic_id) \
                                       .order_by('-id').first()
                 post.topic.last_post_id = last_post.id
-                session.commit()
+                db.session.commit()
                 flash(u'Der Beitrag von <a href="%s">%s</a> wurde gelöscht.'
                       % (url_for(author), escape(author.username)),
                       success=True)
@@ -1317,7 +1316,7 @@ def restore_revision(request, rev_id):
     if not have_privilege(request.user, rev.post.topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     rev.restore(request)
-    session.commit()
+    db.session.commit()
     flash(u'Eine alte Version des Beitrags wurde wiederhergestellt.', True)
     return HttpResponseRedirect(href('forum', 'post', rev.post_id))
 
@@ -1333,7 +1332,7 @@ def hide_topic(request, topic_slug):
     if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     topic.hidden = True
-    session.commit()
+    db.session.commit()
     flash(u'Das Thema „%s“ wurde unsichtbar gemacht.' % topic.title,
           success=True)
     topic.forum.invalidate_topic_cache()
@@ -1351,7 +1350,7 @@ def restore_topic(request, topic_slug):
     if not have_privilege(request.user, topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
     topic.hidden = False
-    session.commit()
+    db.session.commit()
     flash(u'Das Thema „%s“ wurde wieder sichtbar gemacht.' % topic.title,
           success=True)
     topic.forum.invalidate_topic_cache()
@@ -1386,8 +1385,8 @@ def delete_topic(request, topic_slug):
                 }
                 notify_about_subscription(subscription, 'topic_deleted',
                     u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
-            session.delete(topic)
-            session.commit()
+            db.session.delete(topic)
+            db.session.commit()
             flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
                   success=True)
             return HttpResponseRedirect(redirect)
@@ -1647,7 +1646,7 @@ def welcome(request, slug, path=None):
     if request.method == 'POST':
         accepted = request.POST.get('accept', False) and True
         forum.read_welcome(request.user, accepted)
-        session.commit()
+        db.session.commit()
         if accepted:
             return HttpResponseRedirect(request.POST.get('goto_url'))
         else:
