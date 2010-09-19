@@ -174,13 +174,11 @@ def forum(request, slug, page=1):
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
-        p = Privilege
         supporters = []
-        cur = db.session.execute(select([p.user_id, p.positive],
-            (p.forum_id == forum.id) &
-            (p.user_id != None)
-        )).fetchall()
-        subset = [r.user_id for r in cur if check_privilege(r.positive, 'moderate')]
+        query = db.session.query(Privilege.user_id, Privilege.positive) \
+                          .filter(db.and_(Privilege.forum_id == forum.id,
+                                          Privilege.user_id != None)).all()
+        subset = [r.user_id for r in query if check_privilege(r.positive, 'moderate')]
         if subset:
             supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
