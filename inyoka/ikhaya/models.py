@@ -245,7 +245,7 @@ class Article(models.Model):
 
         # now that we have the article id we can put it into the slug
         if suffix_id:
-            self.slug = '%s-%s' % (slug, self.id)
+            self.slug = '%s-%s' % (self.slug, self.id)
             cur = connection.cursor()
             cur.execute('''
                 update ikhaya_article set slug = %s where id = %s
