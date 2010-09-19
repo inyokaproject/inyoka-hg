@@ -1543,12 +1543,18 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
+MAXPAGE = 5
+
 #TODO: integrate with topiclist function
 @templated('forum/topiclist.html')
 def newposts(request, page=1):
     """
     Return a list of the latest posts.
     """
+    if int(page) > MAXPAGE:
+        flash(u'Du kannst maximal die letzten 5 Seiten anzeigen lassen')
+        return HttpResponseRedirect(href('forum', 'newposts', 5))
+
     forum_ids = [forum.id for forum in Forum.query.get_cached()]
     # get read status data
     data = request.user._readstatus.data
@@ -1593,9 +1599,9 @@ def newposts(request, page=1):
     if where is True:
         topics = topics.filter(where)
 
-    total = db.session.execute(db.select([db.func.count(Topic.id)])).fetchone()[0]
-    pagination = Pagination(request, topics, page, 25,
-        href('forum', 'newposts'), total)
+    total_topics = topics.limit(TOPICS_PER_PAGE * MAXPAGE).count()
+    pagination = Pagination(request, topics, int(page), TOPICS_PER_PAGE,
+        href('forum', 'newposts'), total=total_topics)
 
     def _get_read_status(post_id):
         user = request.user
@@ -1705,7 +1711,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     if action != 'author':
         invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
         if invisible:
-            topics = topics.filter(db.not_(Topic.forum_id.in_(forum_ids)))
+            topics = topics.filter(db.not_(Topic.forum_id.in_(invisible)))
         pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url)
         topics = pagination.objects
         pagination = pagination.generate()
