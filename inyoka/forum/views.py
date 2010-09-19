@@ -313,8 +313,6 @@ def viewtopic(request, topic_slug, page=1):
         and post.check_ownpost_limit('delete')
     voted_all = not (polls and bool([True for p in polls if p.can_vote]))
 
-    db.session.commit()
-
     return {
         'topic':             t,
         'forum':             t.forum,
