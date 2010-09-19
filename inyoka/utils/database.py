@@ -333,7 +333,7 @@ def visit_explain(element, compiler, **kw):
 def visit_explain(element, compiler, **kw):
     text = 'EXPLAIN '
     if element.analyze:
-        tetx += 'ANALYZE '
+        text += 'ANALYZE '
     text += compiler.process(element.statement)
     return text
 
