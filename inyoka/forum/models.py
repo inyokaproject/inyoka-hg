@@ -666,7 +666,7 @@ class Topic(db.Model):
 
     def touch(self):
         """Increment the view count in a safe way."""
-        self.view_count = Topic.view_count + 1
+        db.atomic_add(self, 'view_count', 1)
 
     def move(self, forum):
         """Move the topic to an other forum."""
