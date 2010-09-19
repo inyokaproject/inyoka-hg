@@ -1608,7 +1608,8 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         read_topics = tuple(flatten_iterator(
             read_status.get(id, [None, []])[1] for id in forum_ids
         ))
-        topics = topics.filter(db.not_(Topic.last_post_id.in_(read_topics)))
+        if read_topics:
+            topics = topics.filter(db.not_(Topic.last_post_id.in_(read_topics)))
         url = href('forum', 'newposts')
         title = u'Neue Beiträge'
 
