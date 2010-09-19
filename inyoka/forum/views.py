@@ -31,6 +31,7 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification, notify_about_subscription
+from inyoka.utils.collections import flatten_iterator
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.database import session, db
@@ -1546,86 +1547,6 @@ def markread(request, slug=None):
     return HttpResponseRedirect(href('forum'))
 
 
-MAXPAGE = 5
-
-#TODO: integrate with topiclist function
-@templated('forum/topiclist.html')
-def newposts(request, page=1):
-    """
-    Return a list of the latest posts.
-    """
-    if int(page) > MAXPAGE:
-        flash(u'Du kannst maximal die letzten 5 Seiten anzeigen lassen')
-        return HttpResponseRedirect(href('forum', 'newposts', 5))
-
-    forum_ids = [forum.id for forum in Forum.query.get_cached()]
-    # get read status data
-    data = request.user._readstatus.data
-
-    #: sql where clause
-    where = None
-
-    # get single topics that are marked as "read"
-    read_topics = []
-    for id in forum_ids:
-        read_topics.extend(data.get(id, [None, []])[1])
-
-    # filter read topics
-    if read_topics:
-        cond = not_(Topic.last_post_id.in_(read_topics))
-        if where is True:
-            where &= cond
-        else:
-            where = cond
-
-    topics = Topic.query.options(
-        db.eagerload('forum', innerjoin=True),
-        db.eagerload_all('author', innerjoin=True),
-        db.eagerload_all('last_post.author', innerjoin=True),
-        db.eagerload('first_post', innerjoin=True),
-    ).order_by(Topic.last_post_id.desc()) \
-     .with_hint(Topic, 'FORCE INDEX (forum_topic_last_post_id)', 'mysql')
-
-    if 'version' in request.GET:
-        topics = topics.filter_by(ubuntu_version=request.GET['version'])
-
-    # get the forums the user is not allowed to see
-    invisible_forums = [f.id for f in
-        Forum.query.get_forums_filtered(request.user, reverse=True)
-    ]
-
-    # don't show topics of forums where the user doesn't have CAN_READ
-    # permission
-    if invisible_forums:
-        topics = topics.filter(db.not_(Topic.forum_id.in_(invisible_forums)))
-
-    if where is True:
-        topics = topics.filter(where)
-
-    total_topics = topics.limit(TOPICS_PER_PAGE * MAXPAGE).count()
-    pagination = Pagination(request, topics, int(page), TOPICS_PER_PAGE,
-        href('forum', 'newposts'), total=total_topics)
-
-    def _get_read_status(post_id):
-        user = request.user
-        return user.is_authenticated and user._readstatus(post_id=post_id)
-
-    # check for moderatation permissions
-    moderatable_forums = [forum.id for forum in
-        Forum.query.get_forums_filtered(request.user, CAN_MODERATE)
-    ]
-    def can_moderate(topic):
-        return topic.forum_id in moderatable_forums
-
-    return {
-        'topics':     list(pagination.objects),
-        'pagination': pagination.generate('right'),
-        'title':      u'Neue Beiträge',
-        'get_read_status': _get_read_status,
-        'can_moderate': can_moderate,
-        'hide_sticky': True
-    }
-
 MAX_PAGES_TOPICLIST = 50
 
 @templated('forum/topiclist.html')
@@ -1680,6 +1601,16 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         else:
             title = u'Eigene Beiträge'
             url = href('forum', 'egosearch')
+    elif action == 'newposts':
+        forum_ids = tuple(forum.id for forum in Forum.query.get_cached())
+        # get read status data
+        read_status = request.user._readstatus.data
+        read_topics = tuple(flatten_iterator(
+            read_status.get(id, [None, []])[1] for id in forum_ids
+        ))
+        topics = topics.filter(db.not_(Topic.last_post_id.in_(read_topics)))
+        url = href('forum', 'newposts')
+        title = u'Neue Beiträge'
 
     invisible = [f.id for f in Forum.query.get_forums_filtered(request.user, reverse=True)]
     if invisible:
