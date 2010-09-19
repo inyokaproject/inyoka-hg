@@ -968,40 +968,26 @@ def first_unread_post(request, topic_slug):
     """
     Redirect the user to the first unread post in a special topic.
     """
-    t = Topic.__table__.c
-    p = Post.__table__.c
-    try:
-        topic_id, forum_id = select([t.id, t.forum_id],
-            t.slug == topic_slug).execute().fetchone()
-    except TypeError:
+    topic_id, forum_id = db.session.query(Topic.id, Forum.id) \
+                                   .filter(Topic.slug==topic_slug).first()
+    if not topic_id or not forum_id:
         # there's no topic with such a slug
         raise PageNotFound()
 
     data = request.user._readstatus.data.get(forum_id, [None, []])
-    query = select([p.id], p.topic_id == topic_id)
+    query = db.session.query(Post.id).filter(Post.topic_id == topic_id)
 
-    if data[0] is not None:
-        query = query.where(p.id > data[0])
+    last_pid, ids = data
+    if last_pid is not None:
+        query.filter(Post.id > last_pid)
 
-    if data[1]:
-        try:
-            #: the id of the latest read post in this topic
-            post_id = max(p[0] for p in select([p.id],
-                    (p.topic_id == topic_id) &
-                    (p.id.in_(data[1]))
-                ).execute().fetchall()
-            )
-        except ValueError:
-            pass
-        else:
-            query = query.where(p.id > post_id)
+    if ids:
+        post_id = max(p.id for p in db.session.query(Post.id) \
+            .filter(db.and_(Post.topic_id == topic_id,
+                            Post.id.in_(ids))).all())
+        query = query.filter(Post.id > post_id)
 
-    try:
-        post_id = query.order_by(p.id).limit(1).execute().fetchone()[0]
-    except TypeError:
-        # something strange happened :/
-        # just redirect to the begin of the topic
-        return HttpResponseRedirect(href('forum', 'topic', topic_slug))
+    post_id = query.order_by(Post.id).limit(1).first().id
     return HttpResponseRedirect(Post.url_for_post(post_id))
 
 
