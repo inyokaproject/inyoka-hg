@@ -312,6 +312,9 @@ def viewtopic(request, topic_slug, page=1):
     can_delete = lambda post: can_reply and post.author_id == request.user.id \
         and post.check_ownpost_limit('delete')
     voted_all = not (polls and bool([True for p in polls if p.can_vote]))
+
+    session.commit()
+
     return {
         'topic':             t,
         'forum':             t.forum,
