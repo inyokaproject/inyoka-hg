@@ -959,7 +959,7 @@ def join_array(array, delimiter):
 BINARY_FUNCTIONS = {
     'contain':          lambda a, b: b in a,
     'contains':         lambda a, b: b in a,
-    'has_key':          lambda a, b: a.has_key(b),
+    'has_key':          lambda a, b: b in a,
     'starts_with':      lambda a, b: unicode(a).startswith(b),
     'ends_with':        lambda a, b: unicode(a).endswith(b),
     'matches':          lambda a, b: simple_match(b, unicode(a)),
