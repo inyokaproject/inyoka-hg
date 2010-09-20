@@ -261,6 +261,8 @@ $(document).ready(function() {
   (function() {
     var submitted = false;
     $('form').submit(function() {
+      if ($(this).hasClass('nosubmitprotect'))
+        return true;
       if (submitted)
         return false;
       $('input[type="submit"]').addClass('disabled');

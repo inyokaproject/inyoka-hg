@@ -47,7 +47,7 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
             raise forms.ValidationError(u'Im Text befinden sich zu tief '
                                         u'verschachtelte Elemente.')
         if has_conflicts(tree):
-            raise forms.ValidationError(u'Im Text befinden sich Konflikt '
+            raise forms.ValidationError(u'Im Text befinden sich Konflikt-'
                                         u'Markierungen.')
         elif self.user is not None and not \
              test_changes_allowed(self.user, self.page_name, self.old_text,
