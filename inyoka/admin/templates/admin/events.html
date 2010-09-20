@@ -20,11 +20,15 @@
 {% block admin_content %}
 <h3>Veranstaltungen</h3>
 <p class="linklist">
-<a href="{{ href('admin', 'events', 'new') }}">Neue Veranstaltung eintragen</a> |
-{%- if show_all %}
-<a href="{{ href('admin', 'events') }}">Nur zukünftige Veranstaltungen anzeigen</a>
-{%- else %}
-<a href="{{ href('admin', 'events', 'all') }}">Auch vergangene Veranstaltungen anzeigen</a>
+<a href="{{ href('admin', 'events', 'new') }}">Neue Veranstaltung eintragen</a>
+{%- if not show_all %}
+| <a href="{{ href('admin', 'events', 'all') }}">Auch vergangene Veranstaltungen anzeigen</a>
+{%- endif %}
+{%- if not invisible %}
+| <a href="{{ href('admin', 'events', 'invisible') }}">Nur nicht sichtbare Veranstaltungen anzeigen</a>
+{%- endif %}
+{%- if invisible or show_all %}
+| <a href="{{ href('admin', 'events') }}">Nur zukünftige Veranstaltungen anzeigen</a>
 {%- endif %}
 </p>
 <table class="events">

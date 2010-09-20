@@ -62,6 +62,7 @@ def populate_context_defaults(context):
     from inyoka.portal.models import PrivateMessageEntry
     from inyoka.utils.storage import storage
     from inyoka.ikhaya.models import Suggestion
+    from inyoka.portal.models import Event
 
     try:
         request = current_request._get_current_object()
@@ -90,6 +91,14 @@ def populate_context_defaults(context):
                 cache.set(key, suggestions)
         else:
             suggestions = 0
+        if request.user.can('event_edit'):
+            key = 'ikhaya/event_count'
+            events = cache.get(key)
+            if events is None:
+                events = Event.objects.filter(visible=False).all().count()
+                cache.set(key, events)
+        else:
+            events = 0
     else:
         reported = pms = suggestions = 0
 
@@ -113,6 +122,7 @@ def populate_context_defaults(context):
         pm_count=pms,
         report_count=reported,
         suggestion_count=suggestions,
+        event_count=events,
         have_privilege=have_privilege,
     )
 

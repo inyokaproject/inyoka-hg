@@ -410,7 +410,7 @@ class EditStyleForm(forms.Form):
                              attrs={'rows': 20}), required=False)
 
 
-class EditEventForm(forms.Form):
+class NewEventForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=50)
     date = forms.DateField(label=u'Datum (Von)', input_formats=DATE_INPUT_FORMATS)
     time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
@@ -428,6 +428,10 @@ class EditEventForm(forms.Form):
                                       min_value=-90, max_value=90)
     duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
         input_formats=DATETIME_INPUT_FORMATS, required=False)
+
+
+class EditEventForm(NewEventForm):
+    visible = forms.BooleanField(label=u'Kalendereintrag sichtbar?', required=False)
 
 
 class UserMailForm(forms.Form):

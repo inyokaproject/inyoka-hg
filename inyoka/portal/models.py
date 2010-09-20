@@ -387,6 +387,7 @@ class Event(models.Model):
     location_long = models.FloatField('Koordinaten (Breite)',
                                       blank=True, null=True)
     duration = models.DateTimeField(blank=True, null=True)
+    visible = models.BooleanField(default=False)
 
 
     def get_absolute_url(self, action='show'):

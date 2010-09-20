@@ -87,7 +87,7 @@ def index(request):
     """
     ikhaya_latest = Article.published.order_by('-updated').all()[:10]
     events = Event.objects.order_by('date').filter(
-        date__gte=datetime.utcnow())[:4]
+        date__gte=datetime.utcnow(), visible=True)[:4]
     set_session_info(request, u'ist am Portal', 'Portal')
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
@@ -1259,7 +1259,8 @@ def calendar_month(request, year, month):
 
 @templated('portal/calendar_overview.html')
 def calendar_overview(request):
-    events = Event.objects.order_by('date').filter(date__gte=datetime.utcnow())[:10]
+    events = Event.objects.order_by('date').filter(date__gte=datetime.utcnow(),\
+        visible=True)[:10]
     set_session_info(request, u'sieht sich den Kalender an')
     return {
         'events': events,

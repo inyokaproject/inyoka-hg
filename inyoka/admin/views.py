@@ -1151,17 +1151,20 @@ def group_edit(request, name=None):
 
 @require_permission('event_edit')
 @templated('admin/events.html')
-def events(request, show_all=False):
+def events(request, show_all=False, invisible=False):
     if show_all:
-        objects = Event.objects.all()
+        objects = Event.objects.filter(visible=True).all()
+    elif invisible:
+        objects = Event.objects.filter(visible=False).all()
     else:
-        objects = Event.objects.filter(date__gt=date.today())
+        objects = Event.objects.filter(date__gt=date.today(),visible=True)
     sortable = Sortable(objects, request.GET, '-date',
         columns=['name', 'date'])
     return {
         'table': sortable,
         'events': sortable.get_objects(),
         'show_all': show_all,
+        'invisible': invisible,
     }
 
 
@@ -1211,9 +1214,11 @@ def event_edit(request, id=None):
             if data['location_lat'] and data['location_long']:
                 event.location_lat = data['location_lat']
                 event.location_long = data['location_long']
+            event.visible = data['visible']
             event.save()
             flash(u'Die Veranstaltung wurde gespeichert.', True)
             event = Event.objects.get(id=event.id) # get truncated slug
+            cache.delete('ikhaya/event_count')
             return HttpResponseRedirect(url_for(event))
         else:
             event = None
@@ -1247,6 +1252,7 @@ def event_edit(request, id=None):
                 'location': event.location,
                 'location_lat': event.location_lat,
                 'location_long': event.location_long,
+                'visible': event.visible,
             })
         else:
             form = EditEventForm()
@@ -1268,6 +1274,7 @@ def event_delete(request, id):
     if request.method == 'POST':
         if 'confirm' in request.POST:
             event.delete()
+            cache.delete('ikhaya/event_count')
             flash(u'Die Veranstaltung „%s“ wurde gelöscht.'
                   % escape(event.name), True)
         else:

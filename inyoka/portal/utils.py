@@ -91,7 +91,7 @@ def calendar_entries_for_month(year, month):
     end_date = date(year=year, month=month, day=month_range[-1])
     events = Event.objects.filter(
         Q(date__range=(start_date, end_date)) |
-        Q(duration__range=(start_date, end_date))).all()
+        Q(duration__range=(start_date, end_date)),visible=True).all()
 
     for event in events:
         if event.duration is not None:

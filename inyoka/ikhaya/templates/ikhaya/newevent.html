@@ -1,33 +1,28 @@
 {#
-    templates.admin.event_edit
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
+    ikhaya/newevent.html
+    ~~~~~~~~~~~~~~~~~~~~
 
-    Template for editing or creating an event.
+    This page is for new calendar events.
 
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 #}
-{%- extends 'admin/overall.html' %}
-{% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.min.js', 'DateTime.min.js'] %}
-
-{% set navigation_trace = [
-    (href('admin', 'ikhaya'), 'Ikhaya'),
-    (href('admin', 'events'), 'Veranstaltungen'),
+{%- extends 'ikhaya/page.html' %}
+{% from 'macros.html' import render_form %}
+{% set navigation_trace =  [
+  (href('ikhaya', 'newevent'), 'Veranstaltung vorschlagen')
   ] %}
-{% if not date %}
-  {% do navigation_trace.append([
-      href('admin', 'ikhaya', 'dates', 'new'), 'Veranstaltung eintragen'
-    ]) %}
-{% else %}
-  {% do navigation_trace.append([
-      date|url('edit'), 'Veranstaltung „%s“ bearbeiten'|format(date.title|e)
-    ]) %}
-{% endif %}
-
-{% block admin_content %}
-<h2>{{ title_trace[0] }}</h2>
-
+{% set title_trace = ['Veranstaltung vorschlagen'] %}
+{% set scripts = ['WikiEditor.min.js','DateTime.min.js'] %}
+{% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
+{% block ikhaya_content %}
+<div class="content_sidebar_bk">
+  <h2>Veranstaltung vorschlagen</h2>
+  <p>
+    Mit diesem Formular kannst du uns einen neuen Eintrag für unseren
+    <a href="{{ href('portal','calendar') }}">Kalender</a> vorschlagen. Ein Kollege vom
+    Ikhaya Team wird sich zeitnah um eine freischaltung des Eintrages bemühen.
+  </p>
 <form action="" method="post" enctype="multipart/form-data">
   {%- if form.errors %}
   <ul>{{ form.errors }}</ul>
@@ -47,8 +42,6 @@
   <dt>Koordinaten:</dt>
   <dd><label for="id_location_long">Breite:</label> {{ form.location_long }}</dd>
   <dd><label for="id_location_lat">Länge:</label> {{ form.location_lat }}</dd>
-  <dt>Allgemeines:</dt>
-  <dd><label for="id_visible">Eintrag sichtbar:</label> {{ form.visible }}</dd>
 
   <p><input type="submit" value="Speichern" /></p>
 </form>
@@ -60,4 +53,5 @@
   var text = new WikiEditor('#id_description');
   /* ]]> */
 </script>
+</div>
 {% endblock %}
