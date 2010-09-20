@@ -34,7 +34,7 @@ def edge():
     """
     Fabric target for edge.ubuntuusers.de
     """
-    env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org',] #'oya.ubuntu-eu.org']
+    env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
     env.repository = staging_repo
     env.target_dir = '~/edge_virtualenv/inyoka'
 
@@ -42,7 +42,7 @@ def production():
     """
     Fabric target for ubuntu-eu.org production servers
     """
-    env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org',] #'oya.ubuntu-eu.org']
+    env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
     env.repository = staging_repo
     env.target_dir = '~/virtualenv/inyoka'
 
