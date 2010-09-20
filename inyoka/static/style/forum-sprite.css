@@ -506,7 +506,12 @@ span.pagination .pageselect:hover {
 }
 
 .reportlist_head {
-background-color: #EEE;
+  background-color: #EEE;
+  text-align: center;
+}
+
+.reportlist_head td.topic {
+  text-align: left;
 }
 
 /* Attachment styles */

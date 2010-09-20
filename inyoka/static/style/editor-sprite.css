@@ -63,80 +63,80 @@ ul.toolbar li select option.title {
 }
 
 ul.toolbar li #button-bold { 
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -0px;
 }
 ul.toolbar li #button-italic {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -26px;
 }
 ul.toolbar li #button-underlined {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -52px;
 }
 ul.toolbar li #button-code {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -78px;
 }
 ul.toolbar li #button-stroke {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -104px;
 }
 ul.toolbar li #button-monospace {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
   background-position: left -130px;
 }
 ul.toolbar li #button-mark {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -150px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -156px;
 }
 ul.toolbar li #button-wiki-link {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -176px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -182px;
 }
 ul.toolbar li #button-external-link {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -202px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -208px;
 }
 ul.toolbar li #button-user-link {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -228px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -234px;
 }
 ul.toolbar li #button-quote {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -254px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -260px;
 }
 ul.toolbar li #button-pre {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -280px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -286px;
 }
 ul.toolbar li #button-picture {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -306px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -312px;
 }
 ul.toolbar li #button-color {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -332px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -338px;
 }
 ul.toolbar li #button-smilies {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -358px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -364px;
 }
 ul.toolbar li #button-date {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -384px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -390px;
 }
 ul.toolbar li #button-sig {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -410px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -416px;
 }
 ul.toolbar li #button-shrink {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -436px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -442px;
   height: 12px; }
 ul.toolbar li #button-enlarge {
-  background-image: url('../img/icons/editor-sprite.png?7ceaebd847bbfa88b46980e869ccfc72');
-  background-position: left -448px;
+  background-image: url('../img/icons/editor-sprite.png?e5204274c1e55eda76a4addb007dd072');
+  background-position: left -454px;
   height: 12px; position: relative; left:-30px; top:15px 
 }
 
