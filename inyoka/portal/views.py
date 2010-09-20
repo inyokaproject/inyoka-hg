@@ -11,7 +11,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug import parse_accept_header
-from pytz import country_timezones
+from pytz import country_timezones, utc
 from datetime import timedelta, datetime, date
 
 from django import forms
@@ -21,8 +21,10 @@ from django.utils.translation import ugettext as _
 
 from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data
-from inyoka.utils.text import get_random_password, human_number, normalize_pagename
-from inyoka.utils.dates import MONTHS, WEEKDAYS, get_user_timezone
+from inyoka.utils.text import get_random_password, human_number, \
+    normalize_pagename
+from inyoka.utils.dates import MONTHS, WEEKDAYS, DEFAULT_TIMEZONE, \
+    get_user_timezone, date_time_to_datetime
 from inyoka.utils.http import templated, HttpResponse, \
      PageNotFound, does_not_exist_is_404, HttpResponseRedirect
 from inyoka.utils.sessions import get_sessions, set_session_info, \
@@ -35,7 +37,6 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
-from inyoka.utils.dates import DEFAULT_TIMEZONE
 from inyoka.utils.storage import storage
 from inyoka.utils.user import check_activation_key
 from inyoka.wiki.utils import quote_text
@@ -51,6 +52,7 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
      UserCPProfileForm, SetNewPasswordForm, ForumFeedSelectorForm, \
      IkhayaFeedSelectorForm, PlanetFeedSelectorForm, WikiFeedSelectorForm, \
      NOTIFICATION_CHOICES, PrivateMessageIndexForm, PrivateMessageFormProtected
+from inyoka.admin.forms import NewEventForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
 from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
@@ -1235,6 +1237,51 @@ def about_inyoka(request):
     """Render a inyoka information page."""
     set_session_info(request, u'informiert sich über <a href="%s">'
                      u'Inyoka</a>' % href('portal', 'inyoka'))
+
+
+@templated('portal/newevent.html')
+def event_new(request):
+    """
+    User form which creates new Events for the Calendar.
+    """
+    if request.method == 'POST':
+        form = NewEventForm(request.POST)
+        if form.is_valid():
+            event = Event()
+            convert = (lambda v: get_user_timezone().localize(v) \
+                                .astimezone(utc).replace(tzinfo=None))
+            data = form.cleaned_data
+            event.name = data['name']
+            if data['date'] and data['time']:
+                d = convert(date_time_to_datetime(
+                    data['date'],
+                    data['time'] or dt_time(0)
+                ))
+                event.date = d.date()
+                event.time = d.time()
+            else:
+                event.date = data['date']
+                event.time = None
+            if data['duration']:
+                event.duration = convert(data['duration'])
+            event.description = data['description']
+            event.author = request.user
+            event.location = data['location']
+            event.location_town = data['location_town']
+            if data['location_lat'] and data['location_long']:
+                event.location_lat = data['location_lat']
+                event.location_long = data['location_long']
+            event.save()
+            cache.inc('ikhaya/event_count')
+            flash(u'Die Veranstaltung wurde gespeichert. Er wird demnächst von einem Moderator freigeschaltet.', True)
+            event = Event.objects.get(id=event.id) # get truncated slug
+            return HttpResponseRedirect(url_for(event))
+    else:
+        form = NewEventForm()
+
+    return {
+        'form': form,
+    }
 
 
 @templated('portal/calendar_month.html')

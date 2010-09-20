@@ -8,7 +8,6 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import pytz
 from datetime import datetime, date
 from django.utils.text import truncate_html_words
 from django.db.models import Q
@@ -20,7 +19,7 @@ from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
-from inyoka.utils.dates import MONTHS, get_user_timezone, date_time_to_datetime
+from inyoka.utils.dates import MONTHS
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
@@ -29,8 +28,6 @@ from inyoka.portal.user import User
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
-from inyoka.admin.forms import NewEventForm
-from inyoka.portal.models import Event
 
 
 IKHAYA_DESCRIPTION = u'Ikhaya ist der Nachrichtenblog der ubuntuusers-' \
@@ -247,50 +244,6 @@ def suggest(request):
         form = SuggestArticleForm()
     return {
         'form': form
-    }
-
-
-@templated('ikhaya/newevent.html')
-def event_new(request):
-    """
-    User form which creates new Events for the Calendar.
-    """
-    if request.method == 'POST':
-        form = NewEventForm(request.POST)
-        if form.is_valid():
-            event = Event()
-            convert = (lambda v: get_user_timezone().localize(v) \
-                                .astimezone(pytz.utc).replace(tzinfo=None))
-            data = form.cleaned_data
-            event.name = data['name']
-            if data['date'] and data['time']:
-                d = convert(date_time_to_datetime(
-                    data['date'],
-                    data['time'] or dt_time(0)
-                ))
-                event.date = d.date()
-                event.time = d.time()
-            else:
-                event.date = data['date']
-                event.time = None
-            if data['duration']:
-                event.duration = convert(data['duration'])
-            event.description = data['description']
-            event.author = request.user
-            event.location = data['location']
-            event.location_town = data['location_town']
-            if data['location_lat'] and data['location_long']:
-                event.location_lat = data['location_lat']
-                event.location_long = data['location_long']
-            event.save()
-            flash(u'Die Veranstaltung wurde gespeichert. Er wird demnächst von einem Moderator freigeschaltet.', True)
-            event = Event.objects.get(id=event.id) # get truncated slug
-            return HttpResponseRedirect(url_for(event))
-    else:
-        form = NewEventForm()
-
-    return {
-        'form': form,
     }
 
 

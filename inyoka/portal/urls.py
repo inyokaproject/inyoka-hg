@@ -45,6 +45,7 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^map/$', 'usermap'),
     (r'^whoisonline/$', 'whoisonline'),
     (r'^inyoka/$', 'about_inyoka'),
+    (r'^newevent/$', 'event_new'),
     (r'^register/$', 'register'),
     (r'^(?P<action>activate|delete)/(?P<username>[^/]+)/'
      r'(?P<activation_key>.*?)/$', 'activate'),
