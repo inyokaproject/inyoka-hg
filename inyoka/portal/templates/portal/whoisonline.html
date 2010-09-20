@@ -17,6 +17,12 @@
 {% block portal_content %}
   <h3>Wer ist online?</h3>
   <p>
+    {% trans registered=sessions.registered %}
+    Momentan ist <strong>{{ registered }}</strong> angemeldeter Benutzer online.
+    {% pluralize %}
+    Momentan sind <strong>{{ registered }}</strong> angemeldete Benutzer online.
+    {% endtrans %}
+    {# Guests won't count anymore, saves a lot of traffic.
     {% trans all=sessions.all %}
     Momentan ist <strong>{{ all }}</strong> Benutzer online,
     {% pluralize %}
@@ -27,8 +33,7 @@
     <strong>{{ registered }}</strong> Angemeldeter
     {% pluralize %}
     <strong>{{ registered }}</strong> Angemeldete
-    {% endtrans %}{# Guests won't count anymore, saves a lot of traffic.
-    und
+    {% endtrans %}    und
     {% trans guests=sessions.anonymous %}
     <strong>{{ guests }}</strong> Gast.
     {% pluralize %}
