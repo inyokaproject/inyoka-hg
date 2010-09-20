@@ -977,10 +977,16 @@ def first_unread_post(request, topic_slug):
         query.filter(Post.id > last_pid)
 
     if ids:
-        post_id = max(p.id for p in db.session.query(Post.id) \
-            .filter(db.and_(Post.topic_id == topic_id,
-                            Post.id.in_(ids))).all())
-        query = query.filter(Post.id > post_id)
+        # We need a try/catch here, cause the post don't have to exist
+        # any longer.
+        try:
+            post_id = max(p.id for p in db.session.query(Post.id) \
+                .filter(db.and_(Post.topic_id == topic_id,
+                                Post.id.in_(ids))).all())
+        except ValueError:
+            pass
+        else:
+            query = query.filter(Post.id > post_id)
 
     post_id = query.order_by(Post.id).limit(1).first().id
     return HttpResponseRedirect(Post.url_for_post(post_id))
