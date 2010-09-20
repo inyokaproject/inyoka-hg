@@ -1394,13 +1394,17 @@ def delete_topic(request, topic_slug):
 
 @atom_feed()
 def topic_feed(request, slug=None, mode='short', count=20):
+    # We have one feed, so we use ANONYMOUS_USER to cache the correct feed.
     anonymous = User.objects.get_anonymous_user()
 
     topic = Topic.query.filter_by(slug=slug).first()
 
     if topic is None or topic.hidden:
         raise PageNotFound()
-    if not have_privilege(anonymous, topic.forum, CAN_READ):
+    # We check if request.user has CAN_READ, though we only display
+    # the anonymous feed; this is to allow logged in users to view 
+    # the feeds (eg in firefox).
+    if not have_privilege(request.user, topic.forum, CAN_READ):
         return abort_access_denied(request)
 
     posts = topic.posts.options(eagerload('author')) \
@@ -1439,12 +1443,17 @@ def topic_feed(request, slug=None, mode='short', count=20):
 
 @atom_feed('forum/feeds/forum/%(slug)s/%(mode)s/%(count)s')
 def forum_feed(request, slug=None, mode='short', count=20):
+    # We have one feed, so we use ANONYMOUS_USER to cache the correct feed.
     anonymous = User.objects.get_anonymous_user()
+
     if slug:
-        forum = Forum.query.get_cached(slug=slug).first()
+        forum = Forum.query.get_cached(slug=slug)
         if forum is None:
             raise PageNotFound()
-        if not have_privilege(anonymous, forum, CAN_READ):
+        # We check if request.user has CAN_READ, though we only display
+        # the anonymous feed; this is to allow logged in users to view 
+        # the feeds (eg in firefox).
+        if not have_privilege(request.user, forum, CAN_READ):
             return abort_access_denied(request)
 
         topics = forum.get_latest_topics(count=count)
