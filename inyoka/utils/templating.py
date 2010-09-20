@@ -100,7 +100,7 @@ def populate_context_defaults(context):
         else:
             events = 0
     else:
-        reported = pms = suggestions = 0
+        reported = pms = suggestions = events = 0
 
     # we don't have to use cache here because storage does this for us
     global_message = storage['global_message']
