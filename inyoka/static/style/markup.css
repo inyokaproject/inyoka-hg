@@ -127,6 +127,12 @@ div.bash pre {
   padding: 0 0.3em;
 }
 
+div.bash + pre { /* style .bash plus pre as one box */
+border-top:0 none;
+margin-top:-0.3em;
+}
+
+
 /* Boxes of page templates */
 
 div.box {
