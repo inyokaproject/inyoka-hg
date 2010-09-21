@@ -9,16 +9,20 @@
 #}
 
 
-<form action="{{ topic|url('delete')|e }}" method="post">
+<form action="{{ topic|url(action)|e }}" method="post">
   <p>
-    Möchtest du das Thema „<a href="{{ topic|url('show')|e }}">{{ topic.title|e }}</a>“ wirklich löschen?<br />
-    Dabei gehen alle Beiträge unwiderruflich verloren!
+    Möchtest du das Thema „<a href="{{ topic|url('show')|e }}">{{ topic.title|e }}</a>“ wirklich 
+    {% if action=='delete' %}löschen{% else %}verbergen{% endif %}?
+    {% if action=='delete' %}<br/> Dabei gehen alle Beiträge unwiderruflich verloren!{% endif %}
   </p>
+  {% if action=='delete' %}
   <p>
     <label for="delete_topic_reason">Grund:</label>
     <input name="reason" id="delete_topic_reason" />
+  </p>
+  {% endif %}
   <p>
-    <input type="submit" value="Löschen" />
+    <input type="submit" value="{% if action=='delete' %}Löschen{% else %}Verbergen{% endif %}" />
     <input type="submit" name="cancel" value="Abbrechen" />
   </p>
 </form>

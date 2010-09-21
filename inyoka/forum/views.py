@@ -1265,7 +1265,7 @@ def delete_post(request, post_id, action='hide'):
                           success=True)
                     db.session.commit()
                     return HttpResponseRedirect(url_for(post))
-                if action == 'delete':
+                elif action == 'delete':
                     author = post.author
                     db.session.delete(post)
                     db.session.commit()
@@ -1313,24 +1313,6 @@ def restore_revision(request, rev_id):
     return HttpResponseRedirect(href('forum', 'post', rev.post_id))
 
 
-def hide_topic(request, topic_slug):
-    """
-    Sets the hidden flag of a topic to True which has the effect that normal
-    users can't see it anymore (moderators still can).
-    """
-    topic = Topic.query.filter_by(slug=topic_slug).first()
-    if not topic:
-        raise PageNotFound
-    if not have_privilege(request.user, topic.forum, CAN_MODERATE):
-        return abort_access_denied(request)
-    topic.hidden = True
-    db.session.commit()
-    flash(u'Das Thema „%s“ wurde unsichtbar gemacht.' % topic.title,
-          success=True)
-    topic.forum.invalidate_topic_cache()
-    return HttpResponseRedirect(url_for(topic))
-
-
 def restore_topic(request, topic_slug):
     """
     This function removes the hidden flag of a topic to make it visible for
@@ -1349,10 +1331,11 @@ def restore_topic(request, topic_slug):
     return HttpResponseRedirect(url_for(topic))
 
 
-def delete_topic(request, topic_slug):
+def delete_topic(request, topic_slug, action='hide'):
     """
-    In contrast to `hide_topic` this function does really remove the topic.
-    This action is irrevocable and can only get executed by administrators.
+    Sets the hidden flag of a topic to True if action=='hide', which has the
+    effect that normal users can't see it anymore (moderators still can).
+    Completely deletes the topic if action=='delete'.
     """
     topic = Topic.query.filter_by(slug=topic_slug).first()
     if not topic:
@@ -1365,26 +1348,35 @@ def delete_topic(request, topic_slug):
         if 'cancel' in request.POST:
             flash(u'Löschen des Themas „%s“ wurde abgebrochen' % topic.title)
         else:
-            redirect = url_for(topic.forum)
-            subscriptions = Subscription.objects.filter(topic_id=topic.id)
-            sids = [s.id for s in subscriptions]
-            for subscription in subscriptions:
-                nargs = {
-                    'username' : subscription.user.username,
-                    'mod'      : request.user.username,
-                    'topic'    : topic,
-                    'reason'   : request.POST.get('reason', None),
-                }
-                notify_about_subscription(subscription, 'topic_deleted',
-                    u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
-            db.session.delete(topic)
+            if action == 'hide':
+                redirect = url_for(topic)
+                topic.hidden = True
+                flash(u'Das Thema „%s“ wurde unsichtbar gemacht.' % topic.title,
+                      success=True)
+
+            elif action == 'delete':
+                redirect = url_for(topic.forum)
+                subscriptions = Subscription.objects.filter(topic_id=topic.id)
+                sids = [s.id for s in subscriptions]
+                for subscription in subscriptions:
+                    nargs = {
+                        'username' : subscription.user.username,
+                        'mod'      : request.user.username,
+                        'topic'    : topic,
+                        'reason'   : request.POST.get('reason', None),
+                    }
+                    notify_about_subscription(subscription, 'topic_deleted',
+                        u'Das Thema „%s“ wurde gelöscht' % topic.title, nargs)
+                db.session.delete(topic)
+                flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
+                      success=True)
+
             db.session.commit()
-            flash(u'Das Thema „%s“ wurde erfolgreich gelöscht' % topic.title,
-                  success=True)
+            topic.forum.invalidate_topic_cache()
             return HttpResponseRedirect(redirect)
     else:
-        flash(render_template('forum/delete_topic.html', {'topic': topic}))
-    topic.forum.invalidate_topic_cache()
+        flash(render_template('forum/delete_topic.html', {'topic': topic, 'action': action}))
+
     return HttpResponseRedirect(url_for(topic))
 
 
