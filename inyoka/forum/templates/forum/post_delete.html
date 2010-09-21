@@ -9,10 +9,10 @@
 #}
 
 
-<form action="{{ post|url('delete')|e }}" method="post">
-  <p>Möchtest du den <a href="{{ post|url('show')|e }}">Beitrag von {{ post.author.username|e }}</a> unwiderruflich löschen?</p>
+<form action="{{ post|url(action)|e }}" method="post">
+  <p>Möchtest du den <a href="{{ post|url('show')|e }}">Beitrag von {{ post.author.username|e }}</a> {% if action=='delete' %}unwiderruflich löschen{% else %}verbergen{% endif %}?</p>
   <p>
-    <input type="submit" value="Löschen" />
+    <input type="submit" value="{% if action=='delete' %}Löschen{% else %}Verbergen{% endif %}" />
     <input type="submit" name="cancel" value="Abbrechen" />
   </p>
 </form>

@@ -1211,31 +1211,6 @@ def splittopic(request, topic_slug, page=1):
     }
 
 
-def hide_post(request, post_id):
-    """
-    Sets the hidden flag of a post to True which has the effect that normal
-    users can't see it anymore (moderators still can).
-    """
-    post = Post.query.get(post_id)
-    if not post:
-        raise PageNotFound
-    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE):
-        return abort_access_denied(request)
-    if post.id == post.topic.first_post.id:
-        if post.topic.post_count == 1:
-            return HttpResponseRedirect(href('forum', 'topic',
-                                             post.topic.slug, 'hide'))
-        flash(u'Der erste Beitrag eines Themas darf nicht unsichtbar gemacht '
-              u'werden', success=False)
-    else:
-        post.hidden = True
-        db.session.commit()
-        flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
-              u'gemacht.' % (url_for(post), escape(post.author.username)),
-              success=True)
-    return HttpResponseRedirect(url_for(post).split('#')[0])
-
-
 def restore_post(request, post_id):
     """
     This function removes the hidden flag of a post to make it visible for
@@ -1254,45 +1229,60 @@ def restore_post(request, post_id):
     return HttpResponseRedirect(url_for(post).split('#')[0])
 
 
-def delete_post(request, post_id):
+def delete_post(request, post_id, action='hide'):
     """
-    In contrast to `hide_post` this function does really remove this post.
-    This action is irrevocable and can only get executed by moderators.
+    Sets the hidden flag of a post to True if action == 'hide'. which has the 
+    effect that normal users can't see it anymore (moderators still can). If
+    action == 'delete' really deletes the post.
     """
     post = Post.query.get(post_id)
     if not post:
         raise PageNotFound
+
     if not have_privilege(request.user, post.topic.forum, CAN_MODERATE) and not\
        (post.author_id==request.user.id and post.check_ownpost_limit('delete')):
         flash(u'Du darfst diesen Beitrag nicht löschen!', False)
         return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
                                          post.page))
+
     if post.id == post.topic.first_post.id:
         if post.topic.post_count == 1:
             return HttpResponseRedirect(href('forum', 'topic',
-                                             post.topic.slug, 'delete'))
-        flash(u'Der erste Beitrag eines Themas darf nicht gelöscht werden!',
+                                             post.topic.slug, action))
+        t = u'gelöscht' if action=='delete' else u'unsichtbar gemacht'
+        flash(u'Der erste Beitrag eines Themas darf nicht %s werden' % t,
               success=False)
-
     else:
         if request.method == 'POST':
             if 'cancel' in request.POST:
-                flash(u'Das Löschen wurde abgebrochen.')
+                t = 'Löschen' if action == 'delete' else 'Verbergen'
+                flash(u'Das %s wurde abgebrochen.' % t)
             else:
-                author = post.author
-                db.session.delete(post)
-                db.session.commit()
-                last_post = Post.query.filter_by(topic_id=post.topic_id) \
-                                      .order_by('-id').first()
-                post.topic.last_post_id = last_post.id
-                db.session.commit()
-                flash(u'Der Beitrag von <a href="%s">%s</a> wurde gelöscht.'
-                      % (url_for(author), escape(author.username)),
-                      success=True)
+                if action == 'hide':
+                    post.hidden = True
+                    flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
+                          u'gemacht.' % (url_for(post), escape(post.author.username)),
+                          success=True)
+                    db.session.commit()
+                    return HttpResponseRedirect(url_for(post))
+                if action == 'delete':
+                    author = post.author
+                    db.session.delete(post)
+                    db.session.commit()
+                    last_post = Post.query.filter_by(topic_id=post.topic_id) \
+                                          .order_by('-id').first()
+                    post.topic.last_post_id = last_post.id
+                    flash(u'Der Beitrag von <a href="%s">%s</a> wurde gelöscht.'
+                          % (url_for(author), escape(author.username)),
+                          success=True)
+                    db.session.commit()
         else:
-            flash(render_template('forum/post_delete.html', {'post': post}))
+            flash(render_template('forum/post_delete.html',
+                                  {'post': post, 'action': action}))
+
     return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
                                      post.page))
+
 
 
 @templated('forum/revisions.html')
