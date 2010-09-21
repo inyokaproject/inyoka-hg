@@ -862,7 +862,7 @@ def report(request, topic_slug):
         form = ReportTopicForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            topic.reported = data['text']
+            topic.reported = parse(data['text']).render(None,'html')
             topic.reporter_id = request.user.id
             db.session.commit()
 
