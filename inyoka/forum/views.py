@@ -871,7 +871,7 @@ def report(request, topic_slug):
             for user in users:
                 send_notification(user, 'new_reported_topic',
                                   u'Thema gemeldet: %s' % topic.title,
-                                  {'topic': topic})
+                                  {'topic': topic, 'text':data['text']})
 
             cache.delete('forum/reported_topic_count')
             flash(u'Dieses Thema wurde den Moderatoren gemeldet. '
