@@ -322,9 +322,9 @@
 
       this.textarea = $(editor);
       this.textarea[0].inyokaWikiEditor = this;
-      $(this.textarea).keydown(function(evt) {
-        self.keycodes(self, evt);
-      });
+//      $(this.textarea).keydown(function(evt) {
+//        self.keycodes(self, evt);
+//      });
 
 
       /* helpbar with some syntax informations */
