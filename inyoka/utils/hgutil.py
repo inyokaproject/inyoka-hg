@@ -24,4 +24,3 @@ class iui(hgui.ui):
     def write(self, *args, **kwargs):
         """Simple overwrite that returns the output as a string"""
         self._output.extend(args)
-

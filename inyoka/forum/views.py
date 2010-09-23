@@ -1234,7 +1234,7 @@ def restore_post(request, post_id):
 
 def delete_post(request, post_id, action='hide'):
     """
-    Sets the hidden flag of a post to True if action == 'hide'. which has the 
+    Sets the hidden flag of a post to True if action == 'hide'. which has the
     effect that normal users can't see it anymore (moderators still can). If
     action == 'delete' really deletes the post.
     """
@@ -1393,7 +1393,7 @@ def topic_feed(request, slug=None, mode='short', count=20):
     if topic is None or topic.hidden:
         raise PageNotFound()
     # We check if request.user has CAN_READ, though we only display
-    # the anonymous feed; this is to allow logged in users to view 
+    # the anonymous feed; this is to allow logged in users to view
     # the feeds (eg in firefox).
     if not have_privilege(request.user, topic.forum, CAN_READ):
         return abort_access_denied(request)
@@ -1442,7 +1442,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         if forum is None:
             raise PageNotFound()
         # We check if request.user has CAN_READ, though we only display
-        # the anonymous feed; this is to allow logged in users to view 
+        # the anonymous feed; this is to allow logged in users to view
         # the feeds (eg in firefox).
         if not have_privilege(request.user, forum, CAN_READ):
             return abort_access_denied(request)

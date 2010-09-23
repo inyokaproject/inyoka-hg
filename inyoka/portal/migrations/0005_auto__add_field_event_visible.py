@@ -5,13 +5,13 @@ from south.v2 import SchemaMigration
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Event.visible'
         db.add_column('portal_event', 'visible', self.gf('django.db.models.fields.BooleanField')(default=True, blank=True), keep_default=False)
 
 
     def backwards(self, orm):
-        
+
         # Deleting field 'Event.visible'
         db.delete_column('portal_event', 'visible')
 
