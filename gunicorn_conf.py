@@ -11,14 +11,14 @@ workers = 5
 worker_class = 'egg:gunicorn#gevent'
 worker_connections = 1000
 timeout = 30
-keepalive = 2
+keepalive = 5
 # preload code
 preload = True
 
 debug = False
 spew = False
 
-daemon = True
+daemon = False
 pidfile = '/tmp/gunicorn_inyoka.pid'
 umask = 0
 user = 'ubuntu_de'
@@ -40,7 +40,7 @@ tmp_upload_dir = '/tmp'
 logfile = '-'
 loglevel = 'debug'
 
-proc_name = 'inyoka.gunicorn'
+proc_name = 'ubuntuusers'
 
 
 def after_fork(server, worker):
@@ -68,7 +68,6 @@ def when_ready(server):
                 logging.info("%s modified; restarting server", path)
                 os.kill(os.getpid(), signal.SIGHUP)
                 modify_times = {}
-                break
             gevent.sleep(1)
 
     import gevent
