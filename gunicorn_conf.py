@@ -18,7 +18,7 @@ preload = True
 debug = False
 spew = False
 
-daemon = False
+daemon = True
 pidfile = '/tmp/gunicorn_inyoka.pid'
 umask = 0
 user = 'ubuntu_de'
@@ -37,8 +37,8 @@ tmp_upload_dir = '/tmp'
 # A string of "debug", "info", "warning", "error", "critical"
 #
 
-logfile = '-'
-loglevel = 'debug'
+logfile = '/var/log/www/de/www.ubuntuusers.de/gunicorn.log'
+loglevel = 'error'
 
 proc_name = 'ubuntuusers'
 
