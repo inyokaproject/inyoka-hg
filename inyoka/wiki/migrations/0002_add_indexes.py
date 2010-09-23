@@ -1,8 +1,6 @@
 # encoding: utf-8
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 # TODO: do we really need an index on wiki_metadata.value, mysql doesn't
 # like indexes for Varchars(>255) if charset is multibyte.

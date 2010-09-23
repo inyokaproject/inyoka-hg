@@ -10,14 +10,13 @@
 """
 import re
 from datetime import datetime, timedelta
-from operator import attrgetter
 
 from django.utils.text import truncate_html_words
 from django.db import transaction
 from django.db.models import Q
 from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
-from sqlalchemy.sql import and_, or_, select, not_, exists
+from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError, OperationalError
 
 from inyoka.conf import settings
@@ -51,8 +50,8 @@ from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
     AddAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
-    have_privilege, get_privileges, CAN_READ, CAN_MODERATE, \
-    check_privilege, DISALLOW_ALL
+    have_privilege, CAN_READ, CAN_MODERATE, \
+    check_privilege
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 

@@ -11,10 +11,7 @@
 import math
 from os import path, rmdir, mkdir
 import cPickle
-try:
-    from hashlib import sha1
-except ImportError:
-    from sha import sha as sha1
+from hashlib import sha1
 from inyoka.conf import settings
 
 

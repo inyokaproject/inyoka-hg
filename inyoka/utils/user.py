@@ -11,12 +11,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import re
-try:
-    from hashlib import md5, sha1
-except ImportError:
-    from md5 import md5
-    from sha import sha as sha1
-
+from hashlib import md5, sha1
 from inyoka.conf import settings
 
 

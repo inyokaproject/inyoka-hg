@@ -16,7 +16,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import re
-from django.db import connection
 from django.middleware.common import CommonMiddleware
 from inyoka import INYOKA_REVISION
 from inyoka.conf import settings

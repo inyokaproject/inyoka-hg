@@ -9,5 +9,3 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 # These imports are required to unravel circular imports
-import inyoka.wiki.utils
-import inyoka.portal.user

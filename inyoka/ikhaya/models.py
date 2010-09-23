@@ -8,11 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import random
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import new as md5
+from hashlib import md5
 from datetime import datetime
 from django.db import models, connection
 from django.db.models import Q

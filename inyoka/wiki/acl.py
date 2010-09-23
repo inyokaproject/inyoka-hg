@@ -108,7 +108,6 @@ class GroupContainer(object):
 
     def load(self):
         """Load the data from the database."""
-        from inyoka.wiki.models import Page
         self.cache = set(x.name for x in self.user.get_groups())
         for item in Page.objects.get_owners(self.page):
             if item == self.user.username or \

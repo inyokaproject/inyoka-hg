@@ -9,7 +9,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import logging
-from logging.handlers import SMTPHandler
 from inyoka.conf import settings
 
 
@@ -17,14 +16,6 @@ logger = logging.getLogger('inyoka')
 
 
 if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
-    #from inyoka.utils.tracreporter import TracHandler
-    #logging_handler = TracHandler()
-    #logging_handler.setLevel(logging.ERROR)
-#    from inyoka.utils.tracreporter import TBLoggerHandler, ErrorStackHandler
-#    logging_handler = TBLoggerHandler()
-#    logging_handler.setLevel(logging.ERROR)
-#    logging_handler = ErrorStackHandler()
-#    logging_handler.setLevel(logging.ERROR)
     from inyoka.utils.mongolog import MongoHandler
     logging_handler = MongoHandler()
     logging_handler.setLevel(logging.ERROR)

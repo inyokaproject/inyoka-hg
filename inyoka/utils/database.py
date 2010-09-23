@@ -21,7 +21,6 @@ from sqlalchemy import orm, sql, exc
 from sqlalchemy import MetaData, create_engine, String, Unicode
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement, _literal_as_text
-from sqlalchemy.orm import scoped_session, create_session
 from sqlalchemy.pool import NullPool
 from sqlalchemy.util import to_list
 from sqlalchemy.ext.declarative import declarative_base

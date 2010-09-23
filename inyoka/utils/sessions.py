@@ -84,10 +84,10 @@ class SurgeProtectionMixin(object):
         if self.is_valid():
             identifier = self.source_protection_identifier or \
                          self.__class__.__module__.split('.')[1]
-            storage = current_request.session.setdefault('sp', {})
-            if storage.get(identifier, 0) >= time():
+            protection = current_request.session.setdefault('sp', {})
+            if protection.get(identifier, 0) >= time():
                 raise ValidationError(self.source_protection_message)
-            storage[identifier] = time() + self.source_protection_timeout
+            protection[identifier] = time() + self.source_protection_timeout
         return super(SurgeProtectionMixin, self).clean()
 
 

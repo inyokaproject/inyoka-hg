@@ -18,11 +18,7 @@ from datetime import date
 from inyoka.conf import settings
 from inyoka.utils.urls import url_encode
 from inyoka import INYOKA_REVISION
-
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import new as md5
+from hashlib import md5
 from logging import Handler, Formatter, CRITICAL, ERROR, WARNING, \
      INFO, DEBUG
 import logging.handlers
