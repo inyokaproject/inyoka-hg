@@ -1,16 +1,29 @@
 import logging
 import os
 import signal
+import socket
 import sys
 
 #bind = BASE_DOMAIN_NAME
 bind = '0.0.0.0:8000'
 backlog = 2048
 
+# default workers, special configuration is below
 workers = 5
+
+# special server config
+_hostname = socket.gethostname()
+if _hostname == 'oya':
+    workers = 10
+elif _hostname == 'unkul':
+    workers = 12
+elif _hostname == 'dongo':
+    workers = 15
+
+
 worker_class = 'egg:gunicorn#gevent'
 worker_connections = 1000
-timeout = 30
+timeout = 60
 keepalive = 5
 # preload code
 preload = True
