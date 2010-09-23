@@ -22,7 +22,7 @@ elif _hostname == 'dongo':
 
 
 worker_class = 'egg:gunicorn#gevent'
-worker_connections = 1000
+worker_connections = 20
 timeout = 60
 keepalive = 5
 # preload code
