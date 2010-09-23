@@ -20,8 +20,8 @@ spew = False
 daemon = False
 pidfile = None
 umask = 0
-user = 'ente'
-group = 'ente'
+user = 'ubuntu_de'
+group = 'ubuntu_de'
 tmp_upload_dir = '/tmp'
 
 #
