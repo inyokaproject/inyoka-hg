@@ -50,8 +50,8 @@ class Pagination(object):
 
         idx = (self.page - 1) * self.per_page
         if rownum_column:
-            result = query.filter(rownum_column.between(idx,
-                                        idx + self.per_page - 1))
+            expr = rownum_column.between(idx, idx + self.per_page)
+            result = query.filter(expr)
         else:
             result = query[idx:idx + self.per_page]
 

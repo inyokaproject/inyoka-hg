@@ -661,7 +661,7 @@ class Topic(db.Model):
     forum = db.relationship(Forum)
     polls = db.relationship('Poll', backref='topic')
     posts = db.relationship('Post', backref='topic', cascade='all, delete-orphan',
-        primaryjoin='Topic.id == Post.topic_id', lazy='dynamic',
+        primaryjoin='Post.topic_id == Topic.id', lazy='dynamic',
         passive_deletes=True)
 
     def touch(self):
