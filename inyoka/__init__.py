@@ -109,28 +109,34 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from os.path import realpath, join, dirname
-from inyoka.utils.hgutil import iui, hgcmd
-
-#: Inyoka revision present in the current mercurial working copy
-INYOKA_REVISION = 'unknown'
-
 
 def _bootstrap():
-    """Get the Inyoka version and store it."""
+    """
+    Get the inyoka version, store it and
+    set some debugging things.
+    """
+    # set the inyoka revision
     global INYOKA_REVISION
+    import inyoka
+    from os import path
+    from subprocess import Popen, PIPE
 
-    # the path to the contents of the Inyoka module
-    conts = realpath(join(dirname(__file__)))
-
-    # get the `INYOKA_REVISION` using the mercurial python api
-    ui = iui()
-    hgcmd.identify(ui, None, join(conts, '..'), num=True, id=True)
-    rev = ui.get_output()
-    id, num = rev.split()
-    INYOKA_REVISION = '%(num)s:%(id)s' % {
-        'num': num.rstrip('+'), 'id': id.rstrip('+')
-    }
+    # get inyoka revision
+    hg = Popen(['hg', 'tip'], stdout=PIPE, stderr=PIPE, stdin=PIPE,
+               cwd=path.dirname(inyoka.__file__))
+    hg.stdin.close()
+    hg.stderr.close()
+    rv = hg.stdout.read()
+    hg.stdout.close()
+    hg.wait()
+    hg_node = None
+    if hg.wait() == 0:
+        for line in rv.splitlines():
+            p = line.split(':', 1)
+            if len(p) == 2 and p[0].lower().strip() == 'changeset':
+                hg_node = p[1].strip()
+                break
+    INYOKA_REVISION = hg_node
 
 
 _bootstrap()
