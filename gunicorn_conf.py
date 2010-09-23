@@ -21,8 +21,8 @@ elif _hostname == 'dongo':
     workers = 15
 
 
-worker_class = 'egg:gunicorn#sync'
-worker_connections = 20
+worker_class = 'egg:gunicorn#gevent'
+worker_connections = 100
 timeout = 60
 keepalive = 5
 # preload code
@@ -65,23 +65,23 @@ def before_fork(server, worker):
 def before_exec(server):
     server.log.info("Forked child, re-executing.")
 
-#def when_ready(server):
-#    def monitor():
-#        modify_times = {}
-#        while True:
-#            path = 'gunicorn.trigger'
-#            try:
-#                modified = os.stat(path).st_mtime
-#            except:
-#                continue
-#            if path not in modify_times:
-#                modify_times[path] = modified
-#                continue
-#            if modify_times[path] != modified:
-#                logging.info("%s modified; restarting server", path)
-#                os.kill(os.getpid(), signal.SIGHUP)
-#                modify_times = {}
-#            gevent.sleep(1)
-#
-#    import gevent
-#    gevent.spawn(monitor)
+def when_ready(server):
+    def monitor():
+        modify_times = {}
+        while True:
+            path = 'gunicorn.trigger'
+            try:
+                modified = os.stat(path).st_mtime
+            except:
+                continue
+            if path not in modify_times:
+                modify_times[path] = modified
+                continue
+            if modify_times[path] != modified:
+                logging.info("%s modified; restarting server", path)
+                os.kill(os.getpid(), signal.SIGHUP)
+                modify_times = {}
+            gevent.sleep(1)
+
+    import gevent
+    gevent.spawn(monitor)
