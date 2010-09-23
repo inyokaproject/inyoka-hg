@@ -18,8 +18,8 @@ preload = True
 debug = False
 spew = False
 
-daemon = False
-pidfile = None
+daemon = True
+pidfile = '/tmp/gunicorn_inyoka.pid'
 umask = 0
 user = 'ubuntu_de'
 group = 'ubuntu_de'
