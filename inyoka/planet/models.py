@@ -17,6 +17,7 @@ from inyoka.conf import settings
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.html import striptags
+from inyoka.utils.async import write_data_to_file
 from inyoka.portal.user import User
 
 
@@ -50,7 +51,8 @@ class Blog(models.Model):
 
     def save_icon(self, img):
         """Save the icon to the file system."""
-        icon = Image.open(StringIO(img.read()))
+        data = img.read()
+        icon = Image.open(StringIO(data))
         actual_path = self.icon.name
         ext = path.splitext(img.name)[1][1:]
         fn = 'planet/icons/icon_%d.%s' % (self.id, ext)
@@ -58,8 +60,7 @@ class Blog(models.Model):
             pth = path.join(settings.MEDIA_ROOT, fn)
         else:
             pth = self.icon.path
-        ext = path.splitext(img.name)[1]
-        icon.save(pth, "PNG")
+        write_data_to_file(pth, data, 'wb')
         self.icon = fn
 
     def __unicode__(self):

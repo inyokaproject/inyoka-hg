@@ -33,6 +33,7 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
+from inyoka.utils.async import write_data_to_file, get_file_descriptor
 
 from inyoka.forum.acl import filter_invisible, get_privileges, CAN_READ, \
     filter_visible
@@ -1190,11 +1191,7 @@ class Attachment(db.Model):
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
             attachment = Attachment(name=name, file=fn, _mimetype=mime,
                                     **kwargs)
-            f = open(path.join(settings.MEDIA_ROOT, fn), 'w')
-            try:
-                f.write(content)
-            finally:
-                f.close()
+            write_data_to_file(path.join(settings.MEDIA_ROOT, fn), content, 'wb')
             return attachment
 
     def delete(self):
@@ -1231,12 +1228,12 @@ class Attachment(db.Model):
 
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
-            old_fo = open(path.join(settings.MEDIA_ROOT, old_fn), 'r')
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
             name = os.path.basename(name)
             name = get_new_unique_filename(name, path=new_abs_path, length=100-len(new_path)-len(os.sep))
-            new_fo = open(path.join(new_abs_path, name), 'w')
+            new_fo = get_file_descriptor(path.join(new_abs_path, name), 'wb')
+            old_fo = get_file_descriptor(path.join(settings.MEDIA_ROOT, old_fn), 'rb')
             try:
                 new_fo.write(old_fo.read())
             finally:
@@ -1362,7 +1359,7 @@ class Attachment(db.Model):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return file(self.filename.encode('utf-8'), mode)
+        return get_file_descriptor(self.filename.encode('utf-8'), mode)
 
     def get_absolute_url(self, action=None):
         return href('media', self.file)

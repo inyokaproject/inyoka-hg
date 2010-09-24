@@ -20,8 +20,10 @@ def get_file_descriptor(fname, mode='r', bufsize=-1):
     return open(fname, mode, bufsize)
 
 
-#TODO: implement a silent and a non-silent version
-def write_data_to_fd(fname, data, mode='w', bufsize=-1):
+#TODO:
+#      * implement a silent and a non-silent version
+#      * implement easy error catching
+def write_data_to_file(fname, data, mode='w', bufsize=-1):
     fd = get_file_descriptor(fname, mode, bufsize)
     try:
         fd.write(data)

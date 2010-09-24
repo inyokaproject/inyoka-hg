@@ -37,7 +37,7 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime
 from inyoka.utils.mongolog import get_mdb_database
-from inyoka.utils.async import get_file_descriptor, write_data_to_fd
+from inyoka.utils.async import get_file_descriptor, write_data_to_file
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -105,7 +105,7 @@ def config(request):
                 if path.exists(imgp):
                     os.remove(imgp)
 
-                write_data_to_fd(imgp, img_data, 'wb')
+                write_data_to_file(imgp, img_data, 'wb')
 
                 storage['team_icon'] = team_icon = fn
 
