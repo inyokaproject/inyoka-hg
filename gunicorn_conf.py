@@ -25,8 +25,7 @@ worker_class = 'egg:gunicorn#gevent'
 worker_connections = 100
 timeout = 60
 keepalive = 5
-# preload code
-preload = True
+preload = False
 
 debug = False
 spew = False
