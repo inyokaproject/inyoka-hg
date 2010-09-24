@@ -45,6 +45,7 @@ _connection_lock = Lock()
 def get_mdb_database(authenticate=True):
     global _connection
     data = settings.MONGODB_DATA
+    database = None
     if not data['host'] or not data['db']:
         return
 
