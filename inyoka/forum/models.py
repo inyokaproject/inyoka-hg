@@ -1322,11 +1322,11 @@ class Attachment(db.Model):
                 'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
                 try:
-                    img = Image.open(StringIO(self.contents))
+                    img = Image.open(self.filename)
                     if not (img.format == 'PNG' and img.info.get('interlace')) \
                         and img.size > settings.FORUM_THUMBNAIL_SIZE:
                         img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
-                        img.save(img_path, img.format)
+                        img.save(get_file_descriptor(img_path, 'wb'), img.format)
                     elif not (img.format == 'PNG' and img.info.get('interlace')) \
                         and img.size < settings.FORUM_THUMBNAIL_SIZE:
                         return url
