@@ -16,7 +16,6 @@ import os
 import re
 import shutil
 import urllib
-from subprocess import Popen, PIPE
 from cStringIO import StringIO
 from tempfile import TemporaryFile
 from hashlib import sha1
@@ -26,6 +25,10 @@ from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
 from inyoka.portal.user import User
+try:
+    from eventlet.green.subprocess import Popen, PIPE
+except ImportError:
+    from subprocess import Popen, PIPE
 
 
 
