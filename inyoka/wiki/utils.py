@@ -24,6 +24,7 @@ from werkzeug import url_quote
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
+from inyoka.utils.async import get_file_descriptor
 from inyoka.portal.user import User
 try:
     from eventlet.green.subprocess import Popen, PIPE
@@ -182,7 +183,7 @@ def get_thumbnail(location, width=None, height=None, force=False):
         except IOError:
             return
     else:
-        src = file(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
+        src = get_file_descriptor(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
 
 
     # convert into the PNG and JPEG using imagemagick. Right now this
@@ -234,7 +235,7 @@ def get_thumbnail(location, width=None, height=None, force=False):
 
     # rewind the descriptor and copy the data over to the target filename.
     fp.seek(0)
-    f = file(real_filename, 'wb')
+    f = get_file_descriptor(real_filename, 'wb')
     try:
         shutil.copyfileobj(fp, f)
     finally:
