@@ -21,7 +21,7 @@
     {{ render_form(form, ['global_message', 'blocked_hosts', 'wiki_newpage_template', 'wiki_newpage_root', 'license_note'], inline=true) }}
     {% if team_icon_url %}<dd><img class="admin_teamicon" src="{{ team_icon_url }}" alt="Team Icon" /></dd>{% endif %}
     <dt>{{ form.team_icon.label }}</dt>
-    <dd>{{ form.team_icon }}</dd>
+    <dd>{{ form.team_icon }} {{ form.errors.team_icon }}</dd>
   </dl>
   <h3>Verschiedene Richtgrößen</h3>
   <dl>

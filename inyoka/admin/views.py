@@ -37,6 +37,7 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime
 from inyoka.utils.mongolog import get_mdb_database
+from inyoka.utils.async import get_file_descriptor, write_data_to_fd
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -104,13 +105,9 @@ def config(request):
                 if path.exists(imgp):
                     os.remove(imgp)
 
-                f = open(imgp, 'wb')
-                try:
-                    f.write(img_data)
-                finally:
-                    f.close()
+                write_data_to_fd(imgp, img_data, 'wb')
 
-                storage['team_icon'] = fn
+                storage['team_icon'] = team_icon = fn
 
             if data['license_note']:
                 context = RenderContext(request, simplified=True)
@@ -118,6 +115,8 @@ def config(request):
                 storage['license_note_rendered'] = node.render(context, 'html')
 
             flash(u'Die Einstellungen wurden gespeichert.', True)
+        else:
+            flash(u'Es sind Fehler aufgetreten!', False)
     else:
         form = ConfigurationForm(initial=storage.get_many(keys +
                                                 ['global_message']))
@@ -1038,8 +1037,8 @@ def group_edit(request, name=None):
                 icon_path = 'portal/team_icons/team_%s.%s' % (group.name,
                             storage['team_icon'].split('.')[-1])
                 if storage['team_icon']:
-                    global_icon = open(path.join(settings.MEDIA_ROOT, storage['team_icon']))
-                    icon_fo = open(path.join(settings.MEDIA_ROOT, icon_path), 'w')
+                    global_icon = get_file_descriptor(path.join(settings.MEDIA_ROOT, storage['team_icon']), 'rb')
+                    icon_fd = get_file_descriptor(path.join(settings.MEDIA_ROOT, icon_path), 'wb')
                     try:
                         icon_fo.write(global_icon.read())
                         group.icon = icon_path
