@@ -258,10 +258,10 @@ class Group(models.Model):
         resized = False
         if image.size > max_size:
             image = image.resize(max_size)
-            image.save(get_file_descriptor(image_path, 'wb'))
+            image.save(image_path)
             resized = True
         else:
-            image.save(get_file_descriptor(image_path, 'wb'))
+            image.save(image_path)
         self.icon = fn
 
         return resized
@@ -651,7 +651,7 @@ class User(models.Model):
             image.save(image_path)
             resized = True
         else:
-            image.save(get_file_descriptor(image_path, 'wb'))
+            image.save(image_path)
         self.avatar = fn
 
         return resized

@@ -8,7 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from __future__ import division
+from __future__ import division, with_statement
 import os
 import cPickle
 import operator
@@ -33,7 +33,6 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
-from inyoka.utils.async import write_data_to_file, get_file_descriptor
 
 from inyoka.forum.acl import filter_invisible, get_privileges, CAN_READ, \
     filter_visible
@@ -1191,7 +1190,8 @@ class Attachment(db.Model):
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
             attachment = Attachment(name=name, file=fn, _mimetype=mime,
                                     **kwargs)
-            write_data_to_file(path.join(settings.MEDIA_ROOT, fn), content, 'wb')
+            with open(path.join(settings.MEDIA_ROOT, fn), 'wb') as fobj:
+                fobj.write(content)
             return attachment
 
     def delete(self):
@@ -1230,15 +1230,12 @@ class Attachment(db.Model):
             id, old_fn, name, comment, pid, mime = row
             if isinstance(name, unicode):
                 name = name.encode('utf-8')
-            name = os.path.basename(name)
-            name = get_new_unique_filename(name, path=new_abs_path, length=100-len(new_path)-len(os.sep))
-            new_fo = get_file_descriptor(path.join(new_abs_path, name), 'wb')
-            old_fo = get_file_descriptor(path.join(settings.MEDIA_ROOT, old_fn), 'rb')
-            try:
-                new_fo.write(old_fo.read())
-            finally:
-                new_fo.close()
-                old_fo.close()
+            name = os.path.basename(get_new_unique_filename(
+                name, path=new_abs_path, length=100-len(new_path) - len(os.sep)
+            ))
+            with open(path.join(new_abs_path, name), 'wb') as nfo:
+                with open(path.join(settings.MEDIA_ROOT, old_fn), 'rb') as ofo:
+                    nfo.write(ofo.read())
             # delete the temp-file
             os.remove(path.join(settings.MEDIA_ROOT, old_fn))
             at = Attachment.__table__
@@ -1326,7 +1323,7 @@ class Attachment(db.Model):
                     if not (img.format == 'PNG' and img.info.get('interlace')) \
                         and img.size > settings.FORUM_THUMBNAIL_SIZE:
                         img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
-                        img.save(get_file_descriptor(img_path, 'wb'), img.format)
+                        img.save(img_path, img.format)
                     elif not (img.format == 'PNG' and img.info.get('interlace')) \
                         and img.size < settings.FORUM_THUMBNAIL_SIZE:
                         return url
@@ -1359,7 +1356,7 @@ class Attachment(db.Model):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return get_file_descriptor(self.filename.encode('utf-8'), mode)
+        return open(self.filename.encode('utf-8'), mode)
 
     def get_absolute_url(self, action=None):
         return href('media', self.file)

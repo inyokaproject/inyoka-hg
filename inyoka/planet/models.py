@@ -17,7 +17,6 @@ from inyoka.conf import settings
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.html import striptags
-from inyoka.utils.async import get_file_descriptor
 from inyoka.portal.user import User
 
 
@@ -59,7 +58,7 @@ class Blog(models.Model):
             pth = path.join(settings.MEDIA_ROOT, fn)
         else:
             pth = self.icon.path
-        icon.save(get_file_descriptor(pth, 'wb'))
+        icon.save(pth)
         self.icon = fn
 
     def __unicode__(self):

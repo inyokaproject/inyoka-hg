@@ -11,10 +11,7 @@
 import re
 from email.mime.text import MIMEText
 from email.header import Header
-try:
-    from eventlet.green.subprocess import Popen, PIPE
-except ImportError:
-    from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE
 from dns.resolver import query as dns_query
 from dns.exception import DNSException
 from inyoka.utils.storage import storage

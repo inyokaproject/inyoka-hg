@@ -99,7 +99,6 @@ from inyoka.utils.html import escape
 from inyoka.utils.text import join_pagename, get_pagetitle
 from inyoka.utils.diff3 import generate_udiff, prepare_udiff, \
     get_close_matches
-from inyoka.utils.async import get_file_descriptor
 from inyoka.portal.user import User
 
 
@@ -1201,7 +1200,7 @@ class Attachment(models.Model):
         Open the file as file descriptor.  Don't forget to close this file
         descriptor accordingly.
         """
-        return get_file_descriptor(self.file.path, mode)
+        return open(self.file.path, mode)
 
     def get_absolute_url(self, action=None):
         return self.file.url

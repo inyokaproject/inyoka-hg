@@ -8,6 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from __future__ import with_statement
 import os
 import pytz
 import time
@@ -37,7 +38,6 @@ from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime
 from inyoka.utils.mongolog import get_mdb_database
-from inyoka.utils.async import get_file_descriptor, write_data_to_file
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
@@ -105,7 +105,7 @@ def config(request):
                 if path.exists(imgp):
                     os.remove(imgp)
 
-                write_data_to_file(imgp, img_data, 'wb')
+                icon.save(imgp)
 
                 storage['team_icon'] = team_icon = fn
 
@@ -1032,19 +1032,18 @@ def group_edit(request, name=None):
                           % (icon_mh, icon_mw))
 
             if data['import_icon_from_global']:
-                group.delete_icon()
+                if group.icon:
+                    group.delete_icon()
 
                 icon_path = 'portal/team_icons/team_%s.%s' % (group.name,
                             storage['team_icon'].split('.')[-1])
                 if storage['team_icon']:
-                    global_icon = get_file_descriptor(path.join(settings.MEDIA_ROOT, storage['team_icon']), 'rb')
-                    icon_fd = get_file_descriptor(path.join(settings.MEDIA_ROOT, icon_path), 'wb')
-                    try:
-                        icon_fo.write(global_icon.read())
-                        group.icon = icon_path
-                    finally:
-                        global_icon.close()
-                        icon_fo.close()
+                    global_icon_name = path.join(settings.MEDIA_ROOT, storage['team_icon'])
+                    icon_name = path.join(settings.MEDIA_ROOT, icon_path)
+                    with open(global_icon_name, 'rb') as gicon:
+                        with open(icon_name, 'wb') as icon:
+                            icon.write(gicon.read())
+                            group.icon = icon_path
                 else:
                     flash(u'Es wurde noch kein globales Team-Icon definiert', False)
 
