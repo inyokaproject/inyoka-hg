@@ -13,8 +13,7 @@ from fabric.api import env,run,local,put,require,prompt
 from tempfile import mktemp as _mktemp
 
 env.user = 'ubuntu_de'
-inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod/'
-staging_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod-sa06/'
+inyoka_repo = 'ssh://hg@bitbucket.org/EnTeQuAk/inyoka-prod-sa06/'
 
 def test():
     """
@@ -27,7 +26,7 @@ def staging():
     Fabric target for statging.ubuntuusers.de
     """
     env.hosts = ['staging.ubuntuusers.de']
-    env.repository = staging_repo
+    env.repository = inyoka_repo
     env.target_dir = '~/virtualenvs/inyoka-prod-sa06'
 
 def edge():
@@ -35,15 +34,24 @@ def edge():
     Fabric target for edge.ubuntuusers.de
     """
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
-    env.repository = staging_repo
+    env.repository = inyoka_repo
     env.target_dir = '~/edge_virtualenv/inyoka'
+
+def static():
+    """
+    Fabric target for static files
+    """
+    env.hosts = ['lisa.ubuntu-eu.org']
+    env.repository = inyoka_repo
+    env.target_dir = '/home/ubuntu_de_static'
+    env.user = 'apollo13'
 
 def production():
     """
     Fabric target for ubuntu-eu.org production servers
     """
     env.hosts = ['dongo.ubuntu-eu.org', 'unkul.ubuntu-eu.org', 'oya.ubuntu-eu.org']
-    env.repository = staging_repo
+    env.repository = inyoka_repo
     env.target_dir = '~/virtualenv/inyoka'
 
 def bootstrap():
