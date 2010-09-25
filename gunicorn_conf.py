@@ -17,11 +17,11 @@ workers = 5
 # special server config
 _hostname = socket.gethostname()
 if _hostname == 'oya':
-    workers = 8
+    workers = 4
 elif _hostname == 'unkul':
-    workers = 10
+    workers = 8
 elif _hostname == 'dongo':
-    workers = 15
+    workers = 16
 
 
 worker_class = 'egg:gunicorn#sync'
