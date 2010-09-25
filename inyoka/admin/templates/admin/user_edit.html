@@ -92,7 +92,6 @@
     <dt>Forum-Privilegien:</dt>
     <dd id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</dd>
     {{ render_form(form, ['date_joined'], inline=true) }}
-    <dd class="note_link date_joined_ui_switcher">grafischen Editor aktivieren</dd>
   </dl>
   <h3>Persönliche Details von {{ user.username|e }}</h3>
   {{ render_form(form, ['website', 'launchpad', 'interests', 'location']) }}
@@ -118,19 +117,6 @@
     {{ joined_groups|sort|jsonencode }},
     {{ not_joined_groups|sort|jsonencode }}
   );
-
-  var date_joined = null;
-  var dj_ui_switcher = $('.date_joined_ui_switcher')
-    .click(function() {
-      if (date_joined instanceof DateTimeField) {
-        date_joined.destroy();
-        date_joined = null;
-        dj_ui_switcher.text('grafischen Editor aktivieren');
-      } else {
-        date_joined = new DateTimeField('input[name="date_joined"]');
-        dj_ui_switcher.text('grafischen Editor deaktivieren');
-      }
-    });
 
   $('input[name="group_titles"]').change(function() {
     var value = "";

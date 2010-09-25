@@ -40,7 +40,7 @@
 
 
   DateTimeField = Class.$extend({
-    __init__ : function(editor, auto_show, only_date) {
+    __init__ : function(editor, auto_show, only_date, only_time) {
       var self = this;
       this.input = $(editor).click(function() {
         $('table.datetime').each(function() {
@@ -53,6 +53,7 @@
       });
       this.auto_show = auto_show || false;
       this.only_date = only_date || false;
+      this.only_time = only_time || false;
       this.readDateTime();
       this.container = $('<table class="datetime"></table>').click(function() {
           return false;
@@ -67,12 +68,14 @@
         this.timetable.hide();
         this.currentTime = '00:00:00';
       }
+      if (only_time) {
+        this.calendar.hide();
+      }
       this.input.after(this.container);
     },
 
     show : function() {
       this.readDateTime();
-      this.drawDate(this.currentYear, this.currentMonth);
       this.container.css({
         position: 'absolute',
         left:     this.input.offset().left
@@ -80,6 +83,9 @@
       if (this.only_date) {
         this.timetable.hide();
         this.currentTime = '00:00:00';
+      }
+      if (this.only_time) {
+        this.calendar.hide();
       }
     },
 
@@ -108,6 +114,8 @@
       this.input.val(this.currentYear + '-' + this.currentMonth + '-' + this.currentDay);
       if (!this.only_date)
         this.input.val(this.input.val() + ' ' + this.currentTime);
+      if (this.only_time)
+        this.input.val(this.currentTime);
     },
 
     drawTimetable: function() {
@@ -297,6 +305,8 @@
         DateTimeField(this, true);
       } else if (type == 'date') {
         DateTimeField(this, true, true);
+      } else if (type == 'time') {
+        DateTimeField(this, true, false, true);
       }
     });
   });

@@ -11,8 +11,8 @@
 import datetime
 from django import forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
-                               DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, \
-                               DateTimeWidget, EmailField
+    DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, DateTimeWidget, EmailField, \
+    DateWidget, TimeWidget
 from inyoka.utils.html import cleanup_html
 from inyoka.utils.user import normalize_username, is_valid_username
 from inyoka.portal.models import StaticFile
@@ -230,8 +230,10 @@ class EditUserForm(forms.Form):
                                        u'gebannt',
                                        u'hat sich selbst gelöscht']))
     banned_until = forms.DateTimeField(label=u'Automatisch entsperren', required=False,
-                       help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
-    date_joined = forms.DateTimeField(label=u'Angemeldet', required=False)
+        widget=DateTimeWidget,
+        help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
+    date_joined = forms.DateTimeField(label=u'Angemeldet', required=False,
+        widget=DateTimeWidget)
 
     post_count = forms.IntegerField(label=u'Beiträge', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
@@ -412,9 +414,10 @@ class EditStyleForm(forms.Form):
 
 class NewEventForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=50)
-    date = forms.DateField(label=u'Datum (Von)', input_formats=DATE_INPUT_FORMATS)
+    date = forms.DateField(label=u'Datum (Von)', input_formats=DATE_INPUT_FORMATS,
+        widget=DateWidget)
     time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
-                           required=False)
+                           required=False, widget=TimeWidget)
     description = forms.CharField(label=u'Details', required=False,
                                   widget=forms.Textarea(attrs={'rows': 6}))
     location_town = forms.CharField(label=u'Ort', max_length=20, required=False)
@@ -427,7 +430,8 @@ class NewEventForm(forms.Form):
                                       required=False,
                                       min_value=-90, max_value=90)
     duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
-        input_formats=DATETIME_INPUT_FORMATS, required=False)
+        input_formats=DATETIME_INPUT_FORMATS, required=False,
+        widget=DateTimeWidget)
 
 
 class EditEventForm(NewEventForm):

@@ -122,7 +122,17 @@ class DateWidget(Input):
     def render(self, name, value, attrs=None):
         if attrs is None:
             attrs = {}
-        attrs['valuetype'] = 'datetime'
+        attrs['valuetype'] = 'date'
+        return Input.render(self, name, value, attrs)
+
+
+class TimeWidget(Input):
+    input_type = 'text'
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        attrs['valuetype'] = 'time'
         return Input.render(self, name, value, attrs)
 
 
