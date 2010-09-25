@@ -4,6 +4,9 @@ import signal
 import socket
 import sys
 
+# override pickle
+sys.modules['cPickle'] = __import__('pickle')
+
 #bind = BASE_DOMAIN_NAME
 bind = '0.0.0.0:8000'
 backlog = 2048
@@ -21,7 +24,7 @@ elif _hostname == 'dongo':
     workers = 15
 
 
-worker_class = 'egg:gunicorn#gevent'
+worker_class = 'egg:gunicorn#sync'
 worker_connections = 100
 timeout = 60
 keepalive = 5
@@ -35,7 +38,7 @@ pidfile = '/tmp/gunicorn_inyoka.pid'
 umask = 0
 user = 'ubuntu_de'
 group = 'ubuntu_de'
-tmp_upload_dir = '/tmp'
+tmp_upload_dir = None
 
 #
 # Logging
@@ -50,7 +53,8 @@ tmp_upload_dir = '/tmp'
 #
 
 logfile = '/var/log/www/de/gunicorn/error.log'
-loglevel = 'error'
+#logfile = '-'
+loglevel = 'debug'
 
 proc_name = 'ubuntuusers'
 

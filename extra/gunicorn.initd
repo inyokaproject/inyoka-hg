@@ -2,7 +2,11 @@
 
 USER=ubuntu_de
 NAME="inyoka"
-GUNICORN_RUN="gunicorn -c gunicorn_conf.py app_wrapper:application"
+PYTHONPATH="/nfs/www/de/"
+DJANGO_SETTINGS_MODULE="inyoka_settings"
+PYTHON="/home/ubuntu_de/virtualenv/bin/python"
+GUNICORN_EXE="/home/ubuntu_de/virtualenv/bin/gunicorn"
+GUNICORN_RUN="-c gunicorn_conf.py inyoka.application:application"
 CONFDIR="/home/ubuntu_de/virtualenv/inyoka"
 VENV_ACTIVATION=". ../bin/activate && . init.sh"
 RETVAL=0
@@ -13,7 +17,7 @@ start()
 {
     echo "Starting $NAME."
     cd $CONFDIR;
-    su -c "$VENV_ACTIVATION; $GUNICORN_RUN" $USER && echo "OK" || echo "failed";
+    su -c "PYTHONPATH=$PYTHONPATH DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE $PYTHON $GUNICORN_EXE $GUNICORN_RUN" $USER && echo "OK" || echo "failed";
 }
 
 stop()
