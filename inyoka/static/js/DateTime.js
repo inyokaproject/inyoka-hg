@@ -290,12 +290,15 @@
   /* Get all inputs with type date or datetime and create a DateTimeField for
    * them. */
 
-  $('input').each(function() {
-    var type = this.getAttribute('valuetype');
-    if (type == 'datetime')
-      DateTimeField(this, true);
-    else if (type == 'date')
-      DateTimeField(this, true, true);
+  $(document).ready(function() {
+    $('input').each(function() {
+      var type = this.getAttribute('valuetype');
+      if (type == 'datetime') {
+        DateTimeField(this, true);
+      } else if (type == 'date') {
+        DateTimeField(this, true, true);
+      }
+    });
   });
 
   $(document).click(function() {
