@@ -89,7 +89,7 @@
           {%- if event_count %}
           <li><strong><a href="{{ href('admin','events','invisible') }}">Veranstaltungsvorschläge ({{ event_count}})</a></strong></li>
           {%- else %}
-          <li><strong><a href="{{ href('admin','events') }}">Veranstaltungsvorschläge</a></strong></a></li>
+          <li><strong><a href="{{ href('admin','events') }}">Veranstaltungsvorschläge</a></strong></li>
           {%- endif %}
           {%- endif %}
           {%- if USER.can('admin_panel') %}
