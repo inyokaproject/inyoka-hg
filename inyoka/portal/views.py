@@ -81,6 +81,11 @@ def not_found(request, err_message=None):
     return global_not_found(request, 'portal', err_message)
 
 
+
+def alive(request):
+    return HttpResponse(u'I\'m alive!')
+
+
 @templated('portal/index.html')
 def index(request):
     """
