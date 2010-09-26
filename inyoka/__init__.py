@@ -113,10 +113,6 @@ import socket
 from os.path import realpath, join, dirname
 import inyoka
 from inyoka.utils.hgutil import iui, hgcmd
-from inyoka.conf import settings
-
-# set the global socket timeout
-socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
 
 #: Inyoka revision present in the current mercurial working copy
 INYOKA_REVISION = 'unknown'
@@ -137,6 +133,10 @@ def _bootstrap():
     INYOKA_REVISION = '%(num)s:%(id)s' % {
         'num': num.rstrip('+'), 'id': id.rstrip('+')
     }
+
+    from inyoka.conf import settings
+    # set the global socket timeout
+    socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
 
 
 _bootstrap()
