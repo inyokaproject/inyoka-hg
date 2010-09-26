@@ -26,7 +26,7 @@ elif _hostname == 'dongo':
 
 worker_class = 'egg:gunicorn#sync'
 worker_connections = 1000
-timeout = 30
+timeout = 60
 keepalive = 5
 preload = True
 
