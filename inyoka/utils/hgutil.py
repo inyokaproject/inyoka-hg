@@ -8,6 +8,11 @@
     :copyright: 2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+
+import os
+# Don't read ~/.hgrc, as extensions aren't available in the venvs
+os.environ['HGRCPATH'] = ''
+
 from mercurial import ui as hgui
 from mercurial import commands as hgcmd
 
