@@ -15,7 +15,7 @@
 import os
 import re
 import shutil
-import urllib
+import urllib2
 from cStringIO import StringIO
 from tempfile import TemporaryFile
 from hashlib import sha1
@@ -170,12 +170,12 @@ def get_thumbnail(location, width=None, height=None, force=False):
             return fn
 
     # get the source stream. if the location is an url we load it using
-    # the urllib and convert it into a StringIO so that we can fetch the
+    # the urllib2 and convert it into a StringIO so that we can fetch the
     # data multiple times. If we are operating on a wiki page we load the
     # most recent revision and get the attachment as stream.
     if external:
         try:
-            src = StringIO(urllib.urlopen(location).read())
+            src = StringIO(urllib2.urlopen(location).read())
         except IOError:
             return
     else:
