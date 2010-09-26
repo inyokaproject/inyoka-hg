@@ -981,7 +981,7 @@ def first_unread_post(request, topic_slug):
 
     last_pid, ids = data
     if last_pid is not None:
-        query.filter(Post.id > last_pid)
+        query = query.filter(Post.id > last_pid)
 
     if ids:
         # We need a try/catch here, cause the post don't have to exist
@@ -995,8 +995,15 @@ def first_unread_post(request, topic_slug):
         else:
             query = query.filter(Post.id > post_id)
 
-    post_id = query.order_by(Post.id).limit(1).first().id
-    return HttpResponseRedirect(Post.url_for_post(post_id))
+    first_unread_post = query.order_by(Post.id).limit(1).first()
+    if first_unread_post is not None:
+        redirect = Post.url_for_post(first_unread_post.id)
+    else:
+        # No new post, this also means the user called first_unread himself
+        # as the icon won't show up in that case, hence we just return to
+        # page one of the topic.
+        redirect = href('forum', 'topic', topic_slug)
+    return HttpResponseRedirect(redirect)
 
 
 @templated('forum/movetopic.html')
