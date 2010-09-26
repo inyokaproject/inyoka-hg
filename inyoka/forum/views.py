@@ -10,6 +10,7 @@
 """
 import re
 from datetime import datetime, timedelta
+from operator import attrgetter
 
 from django.utils.text import truncate_html_words
 from django.db import transaction
@@ -1538,11 +1539,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         flash(u'Du kannst maximal die letzten %s Seiten anzeigen lassen' % MAX_PAGES_TOPICLIST)
         return HttpResponseRedirect(href('forum'))
 
-    topics = Topic.query.order_by(Topic.last_post_id.desc()) \
-                  .options(db.eagerload('forum'),
-                           db.eagerload('author'),
-                           db.eagerload_all('last_post.author'),
-                           db.eagerload('first_post'))
+    topics = db.session.query(Topic.id).order_by(Topic.last_post_id.desc())
 
     if 'version' in request.GET:
         topics = topics.filter_by(ubuntu_version=request.GET['version'])
@@ -1604,7 +1601,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     total_topics = topics.limit(TOPICS_PER_PAGE * MAX_PAGES_TOPICLIST).count()
     pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url,
                             total=total_topics)
-    topics = pagination.objects
+    topic_ids = (obj.id for obj in pagination.objects)
     pagination = pagination.generate()
 
     def _get_read_status(post_id):
@@ -1618,8 +1615,15 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     def can_moderate(topic):
         return topic.forum_id not in moderatable_forums
 
+    topics = Topic.query.filter(Topic.id.in_(topic_ids)) \
+                .options(db.eagerload('forum'),
+                         db.eagerload('author'),
+                         db.eagerload_all('last_post.author'),
+                         db.eagerload('first_post')).all()
+    topics.sort(key=attrgetter('last_post_id'), reverse=True)
+
     return {
-        'topics':       list(topics),
+        'topics':       topics,
         'pagination':   pagination,
         'title':        title,
         'get_read_status':  _get_read_status,
