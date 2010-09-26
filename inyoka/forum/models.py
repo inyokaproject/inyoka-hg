@@ -1564,8 +1564,9 @@ class ReadStatus(object):
         """
         if self(item):
             return False
-        forum_id = isinstance(item, Forum) and item.id or item.forum_id
+        forum_id = item.id if isinstance(item, Forum) else item.forum_id
         post_id = item.last_post_id
+
         if isinstance(item, Forum):
             self.data[forum_id] = (post_id, set())
             for child in item.children:
@@ -1574,6 +1575,7 @@ class ReadStatus(object):
                 [self(c) for c in item.parent.children], True):
                 self.mark(item.parent)
             return True
+
         row = self.data.get(forum_id, (None, set()))
         row[1].add(post_id)
         if reduce(lambda a, b: a and b,

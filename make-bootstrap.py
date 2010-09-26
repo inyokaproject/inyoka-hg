@@ -97,6 +97,7 @@ def after_install(options, home_dir):
     easy_install('python-memcached', home_dir)
     easy_install('cssutils==0.9.7b3', home_dir)
     easy_install('South', home_dir)
+    easy_install('mercurial', home_dir)
     xapian_install(os.path.abspath(home_dir))
     pil_install(os.path.abspath(home_dir))
 """
