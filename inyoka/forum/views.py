@@ -866,7 +866,7 @@ def report(request, topic_slug):
         form = ReportTopicForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            topic.reported = parse(data['text']).render(None,'html')
+            topic.reported = data['text']
             topic.reporter_id = request.user.id
             db.session.commit()
 
@@ -902,6 +902,7 @@ def reportlist(request):
         topic.report_claimed_by_id = request.user.id
         db.session.commit()
         return HttpResponseRedirect(href('forum', 'reported_topics'))
+
 
     topics = Topic.query.filter(Topic.reported != None)
     if request.method == 'POST':

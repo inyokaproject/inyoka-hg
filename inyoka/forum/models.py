@@ -664,6 +664,10 @@ class Topic(db.Model):
         primaryjoin='Post.topic_id == Topic.id', lazy='dynamic',
         passive_deletes=True)
 
+    @property
+    def rendered_report_text(self):
+        return parse(self.reported).render(None,'html')
+
     def touch(self):
         """Increment the view count in a safe way."""
         db.atomic_add(self, 'view_count', 1)
