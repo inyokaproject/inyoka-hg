@@ -109,9 +109,14 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import socket
 from os.path import realpath, join, dirname
 import inyoka
 from inyoka.utils.hgutil import iui, hgcmd
+from inyoka.conf import settings
+
+# set the global socket timeout
+socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
 
 #: Inyoka revision present in the current mercurial working copy
 INYOKA_REVISION = 'unknown'

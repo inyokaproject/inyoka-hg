@@ -166,6 +166,14 @@ MEMCACHE_SERVERS = []
 # key collision.
 CACHE_PREFIX = 'ubuntu_de/'
 
+# This value defines the timeout for sockets in seconds.  Per default python
+# sockets do never timeout and as such we have blocking workers.  We make
+# this configurable because it can be useful to finetune this later.
+# Socket timeouts are set globally within the whole application.
+# The value *must* be a floating point value.
+SOCKET_TIMEOUT = 10.0
+
+
 MIDDLEWARE_CLASSES = (
     'inyoka.middlewares.common.CommonServicesMiddleware',
     'inyoka.middlewares.session.AdvancedSessionMiddleware',
