@@ -909,17 +909,20 @@ def reportlist(request):
         _add_field_choices()
         if form.is_valid():
             d = form.cleaned_data
-            db.session.execute(Topic.__table__.update(
-                Topic.id.in_(d['selected']), values={
-                    'reported': None,
-                    'reporter_id': None,
-                    'report_claimed_by_id': None
-            }))
-            db.session.commit()
-            cache.delete('forum/reported_topic_count')
-            topics = filter(lambda t: str(t.id) not in d['selected'], topics)
-            flash(u'Die gewählten Themen wurden als bearbeitet markiert.',
-                  True)
+            if not d['selected']:
+                flash(u'Du hast keine Themen ausgewählt', False)
+            else:
+                db.session.execute(Topic.__table__.update(
+                    Topic.id.in_(d['selected']), values={
+                        'reported': None,
+                        'reporter_id': None,
+                        'report_claimed_by_id': None
+                }))
+                db.session.commit()
+                cache.delete('forum/reported_topic_count')
+                topics = filter(lambda t: str(t.id) not in d['selected'], topics)
+                flash(u'Die gewählten Themen wurden als bearbeitet markiert.',
+                      True)
     else:
         form = ReportListForm()
         _add_field_choices()
@@ -1615,12 +1618,15 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     def can_moderate(topic):
         return topic.forum_id not in moderatable_forums
 
-    topics = Topic.query.filter(Topic.id.in_(topic_ids)) \
-                .options(db.eagerload('forum'),
-                         db.eagerload('author'),
-                         db.eagerload_all('last_post.author'),
-                         db.eagerload('first_post')).all()
-    topics.sort(key=attrgetter('last_post_id'), reverse=True)
+    if topic_ids:
+        topics = Topic.query.filter(Topic.id.in_(topic_ids)) \
+                    .options(db.eagerload('forum'),
+                             db.eagerload('author'),
+                             db.eagerload_all('last_post.author'),
+                             db.eagerload('first_post')).all()
+        topics.sort(key=attrgetter('last_post_id'), reverse=True)
+    else:
+        topics = []
 
     return {
         'topics':       topics,

@@ -79,6 +79,8 @@ class ForumSearchAdapter(SearchAdapter):
                 ids = post_ids[i:i+range]
             except IndexError:
                 ids = post_ids[i:]
+            if not ids:
+                break
             posts = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
                                        db.eagerload('topic.forum')) \
                     .filter(Post.id.in_(ids)).all()
