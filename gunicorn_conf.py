@@ -54,7 +54,7 @@ tmp_upload_dir = None
 
 logfile = '/var/log/www/de/gunicorn/error.log'
 #logfile = '-'
-loglevel = 'warning'
+loglevel = 'info'
 
 proc_name = 'ubuntuusers'
 
