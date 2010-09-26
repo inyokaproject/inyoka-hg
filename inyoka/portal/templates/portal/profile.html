@@ -20,7 +20,7 @@
 {% macro show_item(item) %}
   {%- if user[item] and user.settings['show_'+item] -%}
   <td>{{ user[item]|e }}</td>
-  {%- elif user[item] and REQUEST.user.is_manager -%}
+  {%- elif user[item] and REQUEST.user.can('user_edit') -%}
   <td class="hidden">{{ user[item]|e }}</td>
   {%- else -%}
   <td>–</td>
@@ -114,7 +114,7 @@
       <td>{{ user.sip|e or '–' }}</td>
       {% if user.jabber and user.settings['show_jabber'] -%}
       <td><a href="{{ user.jabber_url|e }}">{{ user.jabber|e }}</a></td>
-      {%- elif user.jabber and REQUEST.user.is_manager -%}
+      {%- elif user.jabber and REQUEST.user.can('user_edit') -%}
       <td class="hidden">{{ user.jabber_url|e }}</td>
       {%- else -%}
       <td>–</td>
