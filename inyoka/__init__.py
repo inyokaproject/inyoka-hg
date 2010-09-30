@@ -134,9 +134,11 @@ def _bootstrap():
         'num': num.rstrip('+'), 'id': id.rstrip('+')
     }
 
-    from inyoka.conf import settings
-    # set the global socket timeout
-    socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
+    # This value defines the timeout for sockets in seconds.  Per default python
+    # sockets do never timeout and as such we have blocking workers.
+    # Socket timeouts are set globally within the whole application.
+    # The value *must* be a floating point value.
+    socket.setdefaulttimeout(10.0)
 
 
 _bootstrap()
