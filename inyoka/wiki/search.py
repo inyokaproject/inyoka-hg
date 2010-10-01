@@ -44,15 +44,13 @@ class WikiSearchAdapter(SearchAdapter):
                 'user_url': url_for(rev.user)}
 
     def recv(self, page_id):
-        rev = Revision.objects.select_related(depth=1) \
+        rev = Revision.objects.select_related(depth=2) \
                 .filter(page__id=page_id).latest()
         return self.extract_data(rev)
 
     def recv_multi(self, page_ids):
-        query = Revision.objects.select_related(depth=1) \
-                        .filter(page__id__in=page_ids)
-        revs = [r.latest() for r in query]
-        return [self.extract_data(revision) for revision in revs]
+        #TODO: make this efficient...
+        return [self.recv(id) for id in page_ids]
 
     def store(self, page_id):
         rev = Revision.objects.select_related(depth=1) \
