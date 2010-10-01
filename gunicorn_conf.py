@@ -17,11 +17,11 @@ workers = 5
 # special server config
 _hostname = socket.gethostname()
 if _hostname == 'oya':
-    workers = 4
-elif _hostname == 'unkul':
-    workers = 6
-elif _hostname == 'dongo':
     workers = 8
+elif _hostname == 'unkul':
+    workers = 14
+elif _hostname == 'dongo':
+    workers = 16
 
 worker_connections = 600
 worker_class = 'egg:gunicorn#sync'
