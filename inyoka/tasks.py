@@ -12,6 +12,8 @@ import os
 import re
 import shutil
 import urllib2
+from email.mime.text import MIMEText
+from email.header import Header
 from cStringIO import StringIO
 from tempfile import TemporaryFile
 from hashlib import sha1
@@ -93,3 +95,29 @@ def generate_thumbnail(location, dimension, destination, force=False, external=F
     finally:
         fp.close()
         f.close()
+
+
+@task
+def send_mail(subject, message_, from_, to):
+    assert len(to) == 1
+    if to[0].endswith('.invalid'):
+        return
+
+    message = u'From: %s\nTo: %s' % (from_ , to[0])
+    # Ignore für den Fall, dass wir hier blöde emailadressen bekommen…
+    # TODO: non ascii adressen erlauben
+    message = message.encode('ascii', 'ignore')
+    message += '\nSubject: ' + Header(subject, 'utf-8', header_name='Subject').encode() + '\n'
+    message += MIMEText(message_.encode('utf-8'), _charset='utf-8').as_string()
+
+    try:
+        proc = Popen(['/usr/sbin/sendmail', '-t'], stdin=PIPE)
+        proc.stdin.write(message)
+        proc.stdin.close()
+        # replace with os.wait() in a outer level to not wait to much?!
+        proc.wait()
+    except OSError:
+        if settings.DEBUG:
+            print message
+        else:
+            raise

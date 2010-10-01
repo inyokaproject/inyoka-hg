@@ -14,6 +14,7 @@ from email.header import Header
 from subprocess import Popen, PIPE
 from inyoka.utils.storage import storage
 from inyoka.conf import settings
+from inyoka.tasks import send_mail as send_mail_task
 
 _mail_re = re.compile(r'''(?xi)
     (?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+
@@ -23,28 +24,7 @@ _mail_re = re.compile(r'''(?xi)
 ''')
 
 def send_mail(subject, message_, from_, to):
-    assert len(to) == 1
-    if to[0].endswith('.invalid'):
-        return
-
-    message = u'From: %s\nTo: %s' % (from_ , to[0])
-    # Ignore für den Fall, dass wir hier blöde emailadressen bekommen…
-    # TODO: non ascii adressen erlauben
-    message = message.encode('ascii', 'ignore')
-    message += '\nSubject: ' + Header(subject, 'utf-8', header_name='Subject').encode() + '\n'
-    message += MIMEText(message_.encode('utf-8'), _charset='utf-8').as_string()
-
-    try:
-        proc = Popen(['/usr/sbin/sendmail', '-t'], stdin=PIPE)
-        proc.stdin.write(message)
-        proc.stdin.close()
-        # replace with os.wait() in a outer level to not wait to much?!
-        proc.wait()
-    except OSError:
-        if settings.DEBUG:
-            print message
-        else:
-            raise
+    return send_mail_task.delay(subject, message_, from_, to)
 
 
 def may_be_valid_mail(email):
