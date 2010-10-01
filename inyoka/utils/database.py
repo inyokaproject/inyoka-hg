@@ -47,7 +47,7 @@ def get_engine():
     global _engine
     with _engine_lock:
         if _engine is None:
-            rdbm = 'mysql+oursql'
+            rdbm = 'mysql'
             extra = '?charset=utf8&use_unicode=1'
             if 'postgresql' in settings.DATABASE_ENGINE:
                 rdbm = 'postgresql+psycopg2'
