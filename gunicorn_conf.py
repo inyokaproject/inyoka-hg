@@ -18,14 +18,16 @@ workers = 5
 _hostname = socket.gethostname()
 if _hostname == 'oya':
     workers = 2
+    worker_connections = 200
 elif _hostname == 'unkul':
     workers = 4
+    worker_connections = 400
 elif _hostname == 'dongo':
     workers = 6
+    worker_connections = 600
 
 
 worker_class = 'egg:meinheld#gunicorn_worker'
-worker_connections = 1000
 timeout = 30
 keepalive = 2
 preload = True
