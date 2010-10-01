@@ -24,7 +24,7 @@ elif _hostname == 'dongo':
     workers = 16
 
 
-worker_class = 'egg:gunicorn#gevent'
+worker_class = 'egg:gunicorn#gevent_pywsgi'
 worker_connections = 1000
 timeout = 30
 keepalive = 2
