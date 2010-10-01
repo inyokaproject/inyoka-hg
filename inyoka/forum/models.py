@@ -1007,7 +1007,6 @@ class Post(db.Model):
             Post.id.in_(ids), values={
                 'topic_id': new_topic.id
         }))
-        db.session.commit()
 
         connection = db.session.connection()
         connection.execute('''set @rownum:=%s;''', [posts[0].position - 1])
@@ -1020,7 +1019,6 @@ class Post(db.Model):
             update forum_post set position=(@rownum:=@rownum+1)
                               where topic_id=%s order by id;
         ''', [new_topic.id])
-        db.session.commit()
 
 
         if old_topic.forum.id != new_topic.forum.id:
@@ -1058,13 +1056,10 @@ class Post(db.Model):
                         )
                     }
                 ))
-                db.session.commit()
 
                 q = db.select([Post.author_id], Post.topic_id == old_topic.id, distinct=True)
                 for x in db.session.execute(q).fetchall():
                     cache.delete('portal/user/%d' % x[0])
-
-        db.session.commit()
 
         if not remove_topic:
             old_topic.post_count -= len(posts)
@@ -1087,10 +1082,8 @@ class Post(db.Model):
                 db.session.execute(Poll.__table__.update(
                     Topic.id == old_topic.id,
                     {'topic_id': new_topic.id}))
-                db.session.commit()
             db.session.delete(old_topic)
-
-        db.session.commit()
+            db.session.commit()
 
         # update the search index which has the post --> topic mapping indexed
         Post.multi_update_search([post.id for post in posts])
