@@ -11,6 +11,7 @@ from inyoka.utils.mail import send_mail
 from inyoka.utils.jabber import send as send_jabber
 from inyoka.utils.templating import render_template
 
+
 def send_notification(user, template_name=None, subject=None, args=None):
     """
     Send a message to the user using the person's favourite method(s)

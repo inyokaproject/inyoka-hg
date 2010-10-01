@@ -11,6 +11,7 @@
 import os
 import re
 import shutil
+import socket
 import urllib2
 from email.mime.text import MIMEText
 from email.header import Header
@@ -18,10 +19,11 @@ from cStringIO import StringIO
 from tempfile import TemporaryFile
 from hashlib import sha1
 from itertools import ifilter
+from subprocess import Popen, PIPE
+from xmlrpclib import ServerProxy, Fault
+from celery.decorators import task
 from inyoka.conf import settings
 from inyoka.utils.urls import href, is_external_target
-from subprocess import Popen, PIPE
-from celery.decorators import task
 
 
 @task
@@ -121,3 +123,15 @@ def send_mail(subject, message_, from_, to):
             print message
         else:
             raise
+
+@task
+def send_jabber(jid, message, xhtml=True):
+    proxy = ServerProxy('http://%s/' % settings.JABBER_BOT_SERVER)
+    try:
+        (proxy.jabber.sendMessage, proxy.jabber.sendRawMessage) \
+        [not xhtml](jid, message)
+    except Fault, e:
+        raise ValueError(e.faultString)
+    except socket.error:
+        return False
+    return True
