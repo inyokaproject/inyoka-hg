@@ -627,7 +627,7 @@ class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     forum_id = db.Column(db.Integer, db.ForeignKey('forum_forum.id'))
     title = db.Column(db.String(100), nullable=False)
-    slug = db.Column(db.String(50), nullable=False, index=True)
+    slug = db.Column(db.String(50), nullable=False, index=True, unique=True)
     view_count = db.Column(db.Integer, default=0, nullable=False)
     post_count = db.Column(db.Integer, default=0, nullable=False)
     sticky = db.Column(db.Boolean, default=False, nullable=False, index=True)
