@@ -82,6 +82,8 @@ class SearchResult(object):
 
         for adapter, instance in adapters.iteritems():
             to_load = [id[1] for id in results if id[0] == adapter]
+            if not to_load:
+                continue
             values = instance.recv_multi(to_load)
             if values is None:
                 continue
