@@ -52,7 +52,7 @@ tmp_upload_dir = None
 # A string of "debug", "info", "warning", "error", "critical"
 #
 
-logfile = '/var/log/www/de/gunicorn/error.log'
+logfile = '/var/log/www/de/www.ubuntuusers.de/error.gunicorn_log'
 #logfile = '-'
 loglevel = 'info'
 
