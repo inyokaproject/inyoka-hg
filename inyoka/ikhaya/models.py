@@ -372,22 +372,27 @@ class IkhayaSearchAdapter(SearchAdapter):
             text=[article.text, article.intro]
         )
 
+    def extract_data(self, article):
+        return {'title': article.subject,
+                'user': article.author.username,
+                'date': article.pub_datetime,
+                'url': url_for(article),
+                'component': u'Ikhaya',
+                'group': article.category.name,
+                'group_url': url_for(article.category),
+                'highlight': True,
+                'text': u'%s %s' % (article.simplified_intro,
+                                    article.simplified_text),
+                'hidden': article.hidden,
+                'user_url': url_for(article.author)}
+
     def recv(self, docid):
         article = Article.objects.select_related(depth=1).get(id=docid)
-        return {
-            'title': article.subject,
-            'user': article.author.username,
-            'date': article.pub_datetime,
-            'url': url_for(article),
-            'component': u'Ikhaya',
-            'group': article.category.name,
-            'group_url': url_for(article.category),
-            'highlight': True,
-            'text': u'%s %s' % (article.simplified_intro,
-                                article.simplified_text),
-            'hidden': article.hidden,
-            'user_url': url_for(article.author),
-        }
+        return self.extract_data(article)
+
+    def recv_multi(self, docids):
+        articles = Article.objects.select_related(depth=1).filter(id__in=docids)
+        return [extract_data(article) for article in articles]
 
     def get_doc_ids(self):
         cur = connection.cursor()

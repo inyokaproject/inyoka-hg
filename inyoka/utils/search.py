@@ -22,6 +22,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
 from inyoka.utils import get_significant_digits
 from inyoka.utils.text import create_excerpt
+from inyoka.utils.parsertools import OrderedDict
 
 
 LANGUAGE = 'de'
@@ -60,35 +61,47 @@ def get_human_readable_estimate(mset):
     return get_significant_digits(est, lower, upper)
 
 
+def get_full_id(match):
+    return match.document.get_value(0).split(':')
+
+
 class SearchResult(object):
     """
     This class holds all search results.
     """
 
-    def __init__(self, mset, enq, query, page, per_page, adapters={}):
+    def __init__(self, mset, enq, query, page, per_page, adapters=None):
         self.page = page
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
-        self.results = []
         terms = _description_re.findall(str(query))
+        results = OrderedDict()
         for match in mset:
-            full_id = match.document.get_value(0).split(':')
-            adapter = adapters[full_id[0]]
-            try:
-                data = adapter.recv(full_id[1])
-            except ObjectDoesNotExist:
+            adapter, id = match.document.get_value(0).split(':')
+            results[(adapter, int(id))] = match
+
+        for adapter, instance in adapters.iteritems():
+            to_load = [id[1] for id in results if id[0] == adapter]
+            values = instance.recv_multi(to_load)
+            if values is None:
                 continue
-            if data is None:
-                continue
-            try:
-                text = data.pop('text')
-            except KeyError:
-                text = None
-            if text:
-                data['excerpt'] = create_excerpt(text, terms)
-            data['title'] = data['title']
-            data['score'] = match.percent
-            self.results.append(data)
+
+            for data in values:
+                match = results[(adapter, data['id'])]
+                if data is None:
+                    continue
+                try:
+                    text = data.pop('text')
+                except KeyError:
+                    text = None
+                if text:
+                    data['excerpt'] = create_excerpt(text, terms)
+                data['title'] = data['title']
+                data['score'] = match.percent
+                orig = results[(adapter, data['id'])]
+                results[(adapter, data['id'])] = data
+        self.results = [data for data in results.itervalues()]
+
         self.terms = []
         t = query.get_terms_begin()
         while t != query.get_terms_end():
@@ -411,6 +424,9 @@ class SearchAdapter(object):
 
     def recv(self, docid):
         raise NotImplementedError('recv')
+
+    def recv_multi(self, docids):
+        raise NotImplementedError('recv_multi')
 
     def get_doc_ids(self):
         raise NotImplementedError('get_doc_ids')

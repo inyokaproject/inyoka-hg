@@ -29,22 +29,30 @@ class WikiSearchAdapter(SearchAdapter):
     type_id = 'w'
     auth_decider = WikiSearchAuthDecider
 
+    def extract_data(self, rev):
+        return {'id': rev.id,
+                'title': rev.page.name,
+                'user': rev.user.username,
+                'date': rev.change_date,
+                'url': url_for(rev.page),
+                'component': u'Wiki',
+                'group': u'Wiki',
+                'group_url': href('wiki'),
+                'highlight': True,
+                'text': rev.rendered_text,
+                'hidden': rev.deleted,
+                'user_url': url_for(rev.user)}
+
     def recv(self, page_id):
         rev = Revision.objects.select_related(depth=1) \
                 .filter(page__id=page_id).latest()
-        return {
-            'title': rev.page.name,
-            'user': rev.user.username,
-            'date': rev.change_date,
-            'url': url_for(rev.page),
-            'component': u'Wiki',
-            'group': u'Wiki',
-            'group_url': href('wiki'),
-            'highlight': True,
-            'text': rev.rendered_text,
-            'hidden': rev.deleted,
-            'user_url': url_for(rev.user),
-        }
+        return self.extract_data(rev)
+
+    def recv_multi(self, page_ids):
+        query = Revision.objects.select_related(depth=1) \
+                        .filter(page__id__in=page_ids)
+        revs = [r.latest() for r in query]
+        return [self.extract_data(revision) for revision in revs]
 
     def store(self, page_id):
         rev = Revision.objects.select_related(depth=1) \

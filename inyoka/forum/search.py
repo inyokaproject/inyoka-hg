@@ -92,28 +92,33 @@ class ForumSearchAdapter(SearchAdapter):
             # count up the index
             i += range
 
+    def extract_data(self, post):
+        return {'id': post.id,
+                'title': post.topic.title,
+                'user': post.author.username,
+                'date': post.pub_date,
+                'url': href('forum', 'post', post.id),
+                'component': u'Forum',
+                'group': post.topic.cached_forum().name,
+                'group_url': url_for(post.topic.cached_forum()),
+                'highlight': True,
+                'text': post.get_text(),
+                'solved': post.topic.solved,
+                'version': post.topic.get_version_info(False),
+                'hidden': post.hidden or post.topic.hidden,
+                'user_url': url_for(post.author)}
+
     def recv(self, post_id):
         post = Post.query.options(db.eagerload('topic'), db.eagerload('author'))
         post = post.get(post_id)
         if post is None:
             return
+        return self.extract_data(post)
 
-        return {
-            'title': post.topic.title,
-            'user': post.author.username,
-            'date': post.pub_date,
-            'url': href('forum', 'post', post.id),
-            'component': u'Forum',
-            'group': post.topic.cached_forum().name,
-            'group_url': url_for(post.topic.cached_forum()),
-            'highlight': True,
-            'text': post.get_text(),
-            'solved': post.topic.solved,
-            'version': post.topic.get_version_info(False),
-            'hidden': post.hidden or post.topic.hidden,
-            'last_post_url': url_for(post.topic.last_post),
-            'user_url': url_for(post.author)
-        }
+    def recv_multi(self, post_ids):
+        posts = Post.query.options(db.eagerload('topic'), db.eagerload('author')) \
+                    .filter(Post.id.in_(post_ids)).all()
+        return [self.extract_data(post) for post in posts]
 
     def get_doc_ids(self):
         pids = db.session.query(Post.id).filter(Post.topic_id==Topic.id)

@@ -138,20 +138,26 @@ class Entry(models.Model):
 class PlanetSearchAdapter(SearchAdapter):
     type_id = 'p'
 
+    def extract_data(self, entry_id):
+        return {'id': entry.id,
+                'title': entry.title,
+                'user': entry.blog.name,
+                'user_url': entry.blog.blog_url,
+                'date': entry.pub_date,
+                'url': url_for(entry),
+                'component': u'Planet',
+                'group': entry.blog.name,
+                'group_url': url_for(entry.blog),
+                'text': entry.text,
+                'hidden': entry.hidden}
+
     def recv(self, entry_id):
         entry = Entry.objects.select_related(depth=1).get(id=entry_id)
-        return {
-            'title': entry.title,
-            'user': entry.blog.name,
-            'user_url': entry.blog.blog_url,
-            'date': entry.pub_date,
-            'url': url_for(entry),
-            'component': u'Planet',
-            'group': entry.blog.name,
-            'group_url': url_for(entry.blog),
-            'text': entry.text,
-            'hidden': entry.hidden,
-        }
+        return self.extract_data(entry)
+
+    def recv_multi(self, entry_ids):
+        entries = Entry.objects.select_related(depth=1).filter(id__in=entry_ids)
+        return [self.extract_data(entry) for entry in entries]
 
     def store(self, entry_id):
         entry = Entry.objects.select_related(depth=1).get(id=entry_id)
