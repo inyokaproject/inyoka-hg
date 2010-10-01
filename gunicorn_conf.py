@@ -17,14 +17,14 @@ workers = 5
 # special server config
 _hostname = socket.gethostname()
 if _hostname == 'oya':
-    workers = 4
+    workers = 2
 elif _hostname == 'unkul':
-    workers = 8
+    workers = 4
 elif _hostname == 'dongo':
-    workers = 16
+    workers = 6
 
 
-worker_class = 'egg:gunicorn#gevent_pywsgi'
+worker_class = 'egg:meinheld#gunicorn_worker'
 worker_connections = 1000
 timeout = 30
 keepalive = 2
