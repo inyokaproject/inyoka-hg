@@ -17,17 +17,14 @@ workers = 5
 # special server config
 _hostname = socket.gethostname()
 if _hostname == 'oya':
-    workers = 2
-    worker_connections = 200
-elif _hostname == 'unkul':
     workers = 4
-    worker_connections = 400
-elif _hostname == 'dongo':
+elif _hostname == 'unkul':
     workers = 6
-    worker_connections = 600
+elif _hostname == 'dongo':
+    workers = 8
 
-
-worker_class = 'egg:gunicorn#gevent_pywsgi'
+worker_connections = 600
+worker_class = 'egg:gunicorn#sync'
 timeout = 30
 keepalive = 2
 preload = True
