@@ -392,7 +392,7 @@ class IkhayaSearchAdapter(SearchAdapter):
 
     def recv_multi(self, docids):
         articles = Article.objects.select_related(depth=1).filter(id__in=docids)
-        return [extract_data(article) for article in articles]
+        return [self.extract_data(article) for article in articles]
 
     def get_doc_ids(self):
         cur = connection.cursor()
