@@ -26,6 +26,7 @@ from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
 from inyoka.portal.user import User
 from subprocess import Popen, PIPE
+from inyoka.tasks import generate_thumbnail
 
 
 
@@ -142,6 +143,7 @@ def get_thumbnail(location, width=None, height=None, force=False):
         if isinstance(location, unicode):
             location = location.encode('utf-8')
         partial_hash = sha1(location).hexdigest()
+        page_filename = None
     else:
         from inyoka.wiki.models import Page
         page_filename = Page.objects.attachment_for_page(location)
@@ -162,81 +164,9 @@ def get_thumbnail(location, width=None, height=None, force=False):
     )
     base_filename = os.path.join('wiki', 'thumbnails', hash[:1],
                                  hash[:2], hash)
-    filenames = [base_filename + '.png', base_filename + '.jpeg']
+    filename = base_filename + '.png'
 
-    # check if we already have a thumbnail for this hash
-    for fn in filenames:
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, fn)):
-            return fn
-
-    # get the source stream. if the location is an url we load it using
-    # the urllib2 and convert it into a StringIO so that we can fetch the
-    # data multiple times. If we are operating on a wiki page we load the
-    # most recent revision and get the attachment as stream.
-    if external:
-        try:
-            src = StringIO(urllib2.urlopen(location).read())
-        except IOError:
-            return
-    else:
-        src = open(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
-
-
-    # convert into the PNG and JPEG using imagemagick. Right now this
-    # rethumbnails for every format. This should be improved that it
-    # generates the thumbnail first into a raw format and convert to
-    # png/jpeg from there.
-    base_params = [os.path.join(settings.IMAGEMAGICK_PATH, 'convert'),
-                   '-', '-resize', dimension, '-sharpen', '0.5', '-format']
-
-    results = []
-    try:
-        for format, quality in ('png', '100'), ('jpeg', '80'):
-            try:
-                dst = TemporaryFile()
-                client = Popen(base_params + [format, '-quality', quality, '-'],
-                               stdin=PIPE, stdout=dst, stderr=PIPE)
-                src.seek(0)
-                shutil.copyfileobj(src, client.stdin)
-                client.stdin.close()
-                client.stderr.close()
-                if client.wait():
-                    return
-                dst.seek(0, 2)
-                pos = dst.tell()
-                results.append((pos, dst, format))
-            except (IOError, OSError):
-                continue
-    finally:
-        src.close()
-
-    # Return none if there were errors in thumbnail rendering, that way we can
-    # raise 404 exceptions instead of raising 500 exceptions for the user.
-    if not results:
-        return None
-
-    # select the smaller of the two versions and copy and get the filename for
-    # that format. Then ensure that the target folder exists
-    results.sort()
-    pos, fp, extension = results[0]
-    filename = '%s.%s' % (
-        base_filename,
-        extension
-    )
-    real_filename = os.path.join(settings.MEDIA_ROOT, filename)
-    try:
-        os.makedirs(os.path.dirname(real_filename))
-    except OSError:
-        pass
-
-    # rewind the descriptor and copy the data over to the target filename.
-    fp.seek(0)
-    f = open(real_filename, 'wb')
-    try:
-        shutil.copyfileobj(fp, f)
-    finally:
-        fp.close()
-        f.close()
+    generate_thumbnail.delay(page_filename or location, dimension, filename, force, external)
 
     return filename
 

@@ -136,6 +136,13 @@ def shell():
     """Start development shell"""
     local("python manage-inyoka.py shell", capture=False)
 
+def celeryd():
+    """
+    Start a celery worker, using our config.
+    """
+    cmd = ('celeryd --loglevel=INFO')
+    local(cmd, capture=False)
+
 def mysql():
     """
     Start a MySQL Shell for the configured database
