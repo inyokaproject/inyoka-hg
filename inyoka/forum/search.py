@@ -90,8 +90,6 @@ class ForumSearchAdapter(SearchAdapter):
             search.flush()
             db.session.commit()
             db.session.clear()
-            db.session.remove()
-            gc.collect()
             # count up the index
             i += range
 
