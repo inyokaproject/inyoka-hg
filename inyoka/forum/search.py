@@ -106,6 +106,7 @@ class ForumSearchAdapter(SearchAdapter):
                 'solved': post.topic.solved,
                 'version': post.topic.get_version_info(False),
                 'hidden': post.hidden or post.topic.hidden,
+                'last_post_url': href('forum', 'post', post.topic.last_post_id),
                 'user_url': url_for(post.author)}
 
     def recv(self, post_id):
