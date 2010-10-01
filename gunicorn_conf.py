@@ -27,7 +27,7 @@ elif _hostname == 'dongo':
     worker_connections = 600
 
 
-worker_class = 'egg:meinheld#gunicorn_worker'
+worker_class = 'egg:gunicorn#gevent_wsgi'
 timeout = 30
 keepalive = 2
 preload = True
