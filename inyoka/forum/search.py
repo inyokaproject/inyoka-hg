@@ -43,8 +43,7 @@ class ForumSearchAdapter(SearchAdapter):
     support_multi = True
 
     def store(self, post_id):
-        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
-                                  db.eagerload('topic.forum'))
+        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'))
         post = post.get(post_id)
         if post is None:
             return
@@ -52,6 +51,7 @@ class ForumSearchAdapter(SearchAdapter):
 
     def _store_post(self, post):
         try:
+            forum = post.topic.cached_forum()
             search.store(
                 component='f',
                 uid=post.id,
@@ -59,8 +59,8 @@ class ForumSearchAdapter(SearchAdapter):
                 user=post.author_id,
                 date=post.pub_date,
                 collapse=post.topic_id,
-                category=[p.slug for p in post.topic.forum.parents] + \
-                    [post.topic.forum.slug],
+                category=[p.slug for p in forum.parents] + \
+                    [forum.slug],
                 auth=[post.topic.forum_id, post.topic.hidden],
                 text=post.text,
                 solved='1' if post.topic.solved else '0',
@@ -81,9 +81,8 @@ class ForumSearchAdapter(SearchAdapter):
                 ids = post_ids[i:]
             if not ids:
                 break
-            posts = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
-                                       db.eagerload('topic.forum')) \
-                    .filter(Post.id.in_(ids)).all()
+            posts = Post.query.options(db.eagerload('topic'), db.eagerload('author')) \
+                              .filter(Post.id.in_(ids)).all()
             for post in posts:
                 self._store_post(post)
             # cleanup some stuff
@@ -94,8 +93,7 @@ class ForumSearchAdapter(SearchAdapter):
             i += range
 
     def recv(self, post_id):
-        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'),
-                                  db.eagerload('topic.forum'))
+        post = Post.query.options(db.eagerload('topic'), db.eagerload('author'))
         post = post.get(post_id)
         if post is None:
             return
@@ -106,8 +104,8 @@ class ForumSearchAdapter(SearchAdapter):
             'date': post.pub_date,
             'url': href('forum', 'post', post.id),
             'component': u'Forum',
-            'group': post.topic.forum.name,
-            'group_url': url_for(post.topic.forum),
+            'group': post.topic.cached_forum().name,
+            'group_url': url_for(post.topic.cached_forum()),
             'highlight': True,
             'text': post.get_text(),
             'solved': post.topic.solved,

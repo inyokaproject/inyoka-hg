@@ -208,8 +208,9 @@ def viewtopic(request, topic_slug, page=1):
     topic is deleted and is redirected to the topic's forum.  Moderators can
     see these topics.
     """
-    t = Topic.query.filter_by(slug=topic_slug).first()
-    if not t:
+    try:
+        t = Topic.query.filter_by(slug=topic_slug).one()
+    except db.NoResultFound:
         raise PageNotFound('no such topic')
     privileges = get_forum_privileges(request.user, t.forum_id)
     if not check_privilege(privileges, 'read'):
@@ -217,9 +218,9 @@ def viewtopic(request, topic_slug, page=1):
     if t.hidden:
         if not check_privilege(privileges, 'moderate'):
             flash(u'Dieses Thema wurde von einem Moderator gelöscht.')
-            return HttpResponseRedirect(url_for(t.forum))
+            return HttpResponseRedirect(url_for(t.cached_forum()))
         flash(u'Dieses Thema ist unsichtbar für normale Benutzer.')
-    fmsg = t.forum.find_welcome(request.user)
+    fmsg = t.cached_forum().find_welcome(request.user)
     if fmsg is not None:
         return welcome(request, fmsg.slug, request.path)
     t.touch()
@@ -313,7 +314,7 @@ def viewtopic(request, topic_slug, page=1):
 
     return {
         'topic':             t,
-        'forum':             t.forum,
+        'forum':             t.cached_forum(),
         'posts':             post_objects,
         'is_subscribed':     subscribed,
         'pagination':        pagination,
