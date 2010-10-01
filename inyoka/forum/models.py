@@ -293,7 +293,7 @@ class PostMapperExtension(db.MapperExtension):
         return db.EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
-        if instance.topic.forum.user_count_posts:
+        if instance.topic.cached_forum().user_count_posts:
             connection.execute(SAUser.__table__.update(
                 SAUser.id==instance.author_id, values={
                 'post_count': SAUser.post_count + 1
@@ -308,14 +308,14 @@ class PostMapperExtension(db.MapperExtension):
         connection.execute(Topic.__table__.update(
             Topic.id==instance.topic_id, values=values
         ))
-        parent_ids = list(p.id for p in instance.topic.forum.parents)
+        parent_ids = list(p.id for p in instance.topic.cached_forum().parents)
         parent_ids.append(instance.topic.forum_id)
         connection.execute(Forum.__table__.update(
             Forum.id.in_(parent_ids), values={
             'post_count': Forum.post_count + 1,
             'last_post_id': instance.id
         }))
-        instance.topic.forum.invalidate_topic_cache()
+        instance.topic.cached_forum().invalidate_topic_cache()
         search.queue('f', instance.id)
         return db.EXT_CONTINUE
 
@@ -667,6 +667,9 @@ class Topic(db.Model):
     @property
     def rendered_report_text(self):
         return parse(self.reported).render(None,'html')
+
+    def cached_forum(self):
+        return Forum.query.get(self.forum_id)
 
     def touch(self):
         """Increment the view count in a safe way."""
