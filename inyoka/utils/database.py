@@ -81,20 +81,6 @@ metadata = MetaData()
 session = orm.scoped_session(InyokaSession)
 
 
-def refresh_engine():
-    """Gets rid of the existing engine.  Useful for unittesting, use with care.
-    Do not call this function if there are multiple threads accessing the
-    engine.  Only do that in single-threaded test environments or console
-    sessions.
-    """
-    global _engine
-    with _engine_lock:
-        session.remove()
-        if _engine is not None:
-            _engine.dispose()
-        _engine = None
-
-
 def atomic_add(obj, column, delta, expire=False, primary_key_field=None):
     """Performs an atomic add (or subtract) of the given column on the
     object.  This updates the object in place for reflection but does
