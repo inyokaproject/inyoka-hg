@@ -90,7 +90,6 @@ def after_install(options, home_dir):
     easy_install('simplejson==2.1.1', home_dir)
     easy_install('pytz==2010l', home_dir)
     easy_install('html5lib==0.90', home_dir)
-    easy_install('dnspython==1.7.1', home_dir)
     easy_install('wsgiref', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('Django==1.2.3', home_dir)
