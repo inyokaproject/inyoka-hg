@@ -24,6 +24,11 @@ _url_reverse_map = dict((v.split('.')[1], k) for k, v in
                         settings.SUBDOMAIN_MAP.iteritems())
 _resolvers = {}
 _schema_re = re.compile(r'[a-z]+://')
+acceptable_protocols = set([
+    'ed2k', 'ftp', 'http', 'https', 'irc', 'mailto', 'news', 'gopher',
+    'nntp', 'telnet', 'webcal', 'xmpp', 'callto', 'feed', 'urn',
+    'aim', 'rsync', 'tag', 'ssh', 'sftp', 'rtsp', 'afs', 'git', 'msn'
+])
 
 
 def href(_module='portal', *parts, **query):
@@ -72,7 +77,7 @@ def url_for(obj, action=None):
 def is_safe_domain(url):
     """Check whether `url` points to the same host as inyoka"""
     scheme, netloc = urlparse(url)[:2]
-    if scheme not in ('http', 'https', 'ftp'):
+    if scheme not in acceptable_protocols:
         return False
     return ('.' + netloc).endswith('.' + settings.BASE_DOMAIN_NAME)
 
