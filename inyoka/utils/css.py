@@ -7,120 +7,73 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import re
-import xml.dom
-import logging
-import cssutils
-from cssutils.css import CSSStyleDeclaration as CSSStyleDeclarationBase
-from cssutils.serialize import CSSSerializer as CSSSerializerBase, \
-    Preferences as CSSPreferences, Out
+from urlparse import urlparse
+from inyoka.utils.html import escape
 from inyoka.utils.urls import is_safe_domain
 
 
-cssutils.log.setLevel(logging.NOTSET)
+acceptable_css_properties = frozenset([
+    'azimuth', 'background-color', 'border-bottom-color',
+    'border-collapse', 'border-color', 'border-left-color',
+    'border-right-color', 'border-top-color', 'clear', 'color',
+    'cursor', 'direction', 'display', 'elevation', 'float', 'font',
+    'font-family', 'font-size', 'font-style', 'font-variant',
+    'font-weight', 'height', 'letter-spacing', 'line-height', 'overflow',
+    'pause', 'pause-after', 'pause-before', 'pitch', 'pitch-range',
+    'richness', 'speak', 'speak-header', 'speak-numeral',
+    'speak-punctuation', 'speech-rate', 'stress', 'text-align',
+    'text-decoration', 'text-indent', 'unicode-bidi', 'vertical-align',
+    'voice-family', 'volume', 'white-space', 'width'
+])
 
-property_list = [
-    'border', 'clear', 'float', 'font.*?', 'height', 'line-height',
-    'margin.*?', 'max-height', 'max-width', 'min-height', 'min-width',
-    'outline.*?', 'overflow', 'padding.*?', 'position', 'quotes', 'size',
-    'table-layout', 'text-.*?', 'vertical-align', 'width',
-    'color', 'background-color', 'background-image',
-]
+acceptable_css_keywords = frozenset([
+    'auto', 'aqua', 'black', 'block', 'blue', 'bold', 'both', 'bottom',
+    'brown', 'center', 'collapse', 'dashed', 'dotted', 'fuchsia',
+    'gray', 'green', '!important', 'italic', 'left', 'lime', 'maroon',
+    'medium', 'none', 'navy', 'normal', 'nowrap', 'olive', 'pointer',
+    'purple', 'red', 'right', 'solid', 'silver', 'teal', 'top',
+    'transparent', 'underline', 'white', 'yellow'
+])
 
-_url_pattern = (
-    # allowed urls with netloc
-    r'(?:(?:https?|ftps?|)://)'
-)
-_url_re = re.compile(r'url\(.*?\)')
-_allowed_url_re = re.compile(r'url\([\'"]?(%s[^\s\'"]+)[\'"]?\)' % _url_pattern)
-_allowed_properties_re = re.compile(r'|'.join(property_list))
-
-
-class CSSSerializer(CSSSerializerBase):
-
-    def __init__(self):
-        CSSSerializerBase.__init__(self, CSSPreferences(
-            keepComments=False, keepAllProperties=True,
-            lineSeparator=u''
-        ))
-
-    def _valid(self, x):
-        if not x.value:
-            return False
-        elif not _allowed_properties_re.match(x.name):
-            return False
-        elif _url_re.match(x.value):
-            m = _allowed_url_re.match(x.value)
-            if not m or not is_safe_domain(m.groups()[0]):
-                return False
-            return True
-        else:
-            return True
-
-    def do_css_CSSStyleDeclaration(self, style, separator=None):
-        """
-        Overload of the CSSSerializer's method to get some
-        special behaviour.
-        """
-        # may be comments only
-        if len(style.seq) > 0:
-            if separator is None:
-                separator = self.prefs.lineSeparator
-
-            if self.prefs.keepAllProperties:
-                # all
-                seq = style.seq
-            else:
-                # only effective ones
-                _effective = style.getProperties()
-                seq = [item for item in style.seq
-                         if (isinstance(item.value, cssutils.css.Property)
-                             and item.value in _effective)
-                         or not isinstance(item.value, cssutils.css.Property)]
-
-            out = Out(cssutils.ser)
-            for i, item in enumerate(seq):
-                typ, val = item.type, item.value
-                if isinstance(val, cssutils.css.CSSComment):
-                    # CSSComment
-                    out.append(val.cssText, 'COMMENT')
-                elif isinstance(val, cssutils.css.Property):
-                    out.append(val, 'Property')
-                    # PropertySimilarNameList
-                    if not (self.prefs.omitLastSemicolon and i==len(seq)-1):
-                        out.append(u';')
-                elif isinstance(val, cssutils.css.CSSUnknownRule):
-                    out.append(val, cssutils.css.CssRule.UNKNOWN_RULE)
-
-            return u''.join(x.strip() for x in out.out).strip('; ')
-
-        else:
-            return u''
-
-cssutils.setSerializer(CSSSerializer())
-
-
-class CSSStyleDeclaration(CSSStyleDeclarationBase):
-    def _parse(self, expected, seq, tokenizer, productions, default=None,
-               new=None):
-        # this method raises a damn SyntaxErr on some property
-        # we don't need...
-        wellformed = True
-        if tokenizer:
-            prods = self._adddefaultproductions(productions, new)
-            for token in tokenizer:
-                p = prods.get(token[0], default)
-                if p:
-                    try:
-                        expected = p(expected, seq, token, tokenizer)
-                    except xml.dom.SyntaxErr:
-                        wellformed = False
-                else:
-                    wellformed = False
-        return wellformed, expected
+_css_url_re = re.compile(r'url\s*\(\s*[^\s)]+?\s*\)\s*')
+_css_sanity_check_re = re.compile(r'''(?x)
+    ^(
+        [:,;#%.\sa-zA-Z0-9!]
+      |  \w-\w
+      | '[\s\w]+'|"[\s\w]+"
+      | \([\d,\s]+\)
+    )*$
+''')
+_css_pair_re = re.compile(r'([-\w]+)\s*:\s*([^:;]*)')
+_css_unit_re = re.compile(r'''(?x)
+    ^(
+        #[0-9a-f]+
+      | rgb\(\d+%?,\d*%?,?\d*%?\)?
+      | \d{0,2}\.?\d{0,2}(cm|em|ex|in|mm|pc|pt|px|%|,|\))?
+    )$
+''')
 
 
 def filter_style(css):
     if css is None:
         return None
-    sheet = CSSStyleDeclaration(css)
-    return sheet.getCssText(u'')
+
+    css = _css_url_re.sub(u' ', css)
+    if _css_sanity_check_re.match(css) is None:
+        return u''
+
+    clean = []
+    for prop, value in _css_pair_re.findall(css):
+        if not value:
+            continue
+        if prop.lower() in acceptable_css_properties:
+            clean.append('%s: %s' % (prop, value))
+        elif prop.split('-', 1)[0].lower() in \
+             ('background', 'border', 'margin', 'padding'):
+            for keyword in value.split():
+                if not keyword in acceptable_css_keywords and \
+                   not _css_unit_re.match(keyword):
+                    break
+            else:
+                clean.append('%s: %s' % (prop, value))
+    return u'; '.join(clean)
