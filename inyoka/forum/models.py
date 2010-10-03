@@ -14,6 +14,7 @@ import cPickle
 import operator
 from os import path
 from hashlib import md5
+from PIL import Image
 from time import time
 from StringIO import StringIO
 from datetime import datetime
@@ -22,7 +23,6 @@ from itertools import groupby
 from operator import attrgetter
 
 from inyoka.conf import settings
-from inyoka.tasks import generate_thumbnail
 from inyoka.utils.text import get_new_unique_filename
 from inyoka.utils.database import db
 from inyoka.utils.dates import timedelta_to_seconds
@@ -41,6 +41,10 @@ from inyoka.forum.compat import SAUser
 # Import Django models here so that South can find them
 from inyoka.forum.django_models import *
 
+
+# initialize PIL to make Image.ID available
+Image.init()
+SUPPORTED_IMAGE_TYPES = ['image/%s' % m.lower() for m in Image.ID]
 
 POSTS_PER_PAGE = 15
 TOPICS_PER_PAGE = 30
@@ -1090,7 +1094,8 @@ class Post(db.Model):
     @property
     def grouped_attachments(self):
         def expr(v):
-            return u'Bilder' if v.mimetype.startswith('image') else u''
+            return u'Bilder' if v.mimetype.startswith('image') and v.mimetype \
+                in SUPPORTED_IMAGE_TYPES else u''
 
         attachments = sorted(self.attachments, key=expr)
         grouped = [(x[0], list(x[1]), u'möglich' in x[0] and 'broken' or '') \
@@ -1289,6 +1294,13 @@ class Attachment(db.Model):
         show_preview = current_request.user.settings.get(
             'show_preview', False)
 
+        def isimage():
+            """
+            This helper returns True if this attachment is a supported image,
+            else False.
+            """
+            return True if self.mimetype in SUPPORTED_IMAGE_TYPES else False
+
         def istext():
             """
             This helper returns True if this attachment is a text file with
@@ -1297,21 +1309,40 @@ class Attachment(db.Model):
             return True if self.mimetype.startswith('text/') \
                 and len(self.contents) < 250 else False
 
-        if show_preview and show_thumbnails and not istext():
+        def thumbnail():
+            """
+            This helper returns the thumbnail url of this attachment or None
+            if there is no way to create a thumbnail.
+            """
             ff = self.file.encode('utf-8')
-            thumb =  'forum/thumbnails/%s-%s.png' % (self.id, ff.split('/')[-1].rsplit('.', 1)[0])
-            img_path = path.join(settings.MEDIA_ROOT, thumb)
-            width, height = settings.FORUM_THUMBNAIL_SIZE
-            dimension = '%sx%s' % (
-                width and int(width) or '',
-                height and int(height) or '',
-            )
+            img_path = path.join(settings.MEDIA_ROOT,
+                'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
+            if not path.exists(path.abspath(img_path)):
+                try:
+                    img = Image.open(self.filename)
+                    if not (img.format == 'PNG' and img.info.get('interlace')) \
+                        and img.size > settings.FORUM_THUMBNAIL_SIZE:
+                        img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
+                        img.save(img_path, img.format)
+                    elif not (img.format == 'PNG' and img.info.get('interlace')) \
+                        and img.size < settings.FORUM_THUMBNAIL_SIZE:
+                        return url
+                    else:
+                        return
+                except IOError:
+                    return
+            return href('media', 'forum/thumbnails/%s-%s'
+                % (self.id, self.file.split('/')[-1]))
 
-            generate_thumbnail.delay(self.filename, dimension, img_path)
-
-            return u'<a href="%s"><img class="preview" src="%s" ' \
-                u'alt="%s" title="%s"></a>' % (url, href('media', thumb), self.comment,
-                self.comment)
+        if show_preview and show_thumbnails and isimage():
+            thumb = thumbnail()
+            if thumb:
+                return u'<a href="%s"><img class="preview" src="%s" ' \
+                    u'alt="%s" title="%s"></a>' % (url, thumb, self.comment,
+                    self.comment)
+            else:
+                return u'<a href="%s" type="%s" title="%s">%s ansehen</a>' % (
+                    url, self.mimetype, self.comment, self.name)
         elif show_preview and istext():
             return highlight_code(self.contents.decode('utf-8'),
                 mimetype=self.mimetype)

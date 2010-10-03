@@ -10,9 +10,12 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import re
+import socket
+from xmlrpclib import ServerProxy, Fault
 from inyoka.conf import settings
-from inyoka.tasks import send_jabber
 
+
+_proxy = None
 
 #XXX: according to rfc4622 a nodeid is optional. But we require one
 #     'cause nobody should enter a service-jid in the jabber field.
@@ -35,4 +38,14 @@ def send(jid, message, xhtml=True):
     If the bot is offline this function fails silently and returns `False`,
     otherwise the return value is `True`.
     """
-    return send_jabber.delay(jid, message, xhtml)
+    global _proxy
+    if _proxy is None:
+        _proxy = ServerProxy('http://%s/' % settings.JABBER_BOT_SERVER)
+    try:
+        (_proxy.jabber.sendMessage, _proxy.jabber.sendRawMessage) \
+        [not xhtml](jid, message)
+    except Fault, e:
+        raise ValueError(e.faultString)
+    except socket.error:
+        return False
+    return True
