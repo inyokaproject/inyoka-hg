@@ -413,7 +413,7 @@ class SearchForm(forms.Form):
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
     date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
-        required=False)
+        required=False, initial='date')
     forums = forms.ChoiceField(label=u'Foren', initial='support',
         required=False)
     show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
