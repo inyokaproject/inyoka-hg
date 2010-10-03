@@ -88,8 +88,10 @@ class SearchResult(object):
             if values is None:
                 continue
 
-            for data in values:
-                match = results[(adapter, data['id'])]
+            mapping = zip(results, values)
+
+            for mq, data in mapping:
+                match = results[mq]
                 if data is None:
                     continue
                 try:
@@ -100,8 +102,7 @@ class SearchResult(object):
                     data['excerpt'] = create_excerpt(text, terms)
                 data['title'] = data['title']
                 data['score'] = match.percent
-                orig = results[(adapter, data['id'])]
-                results[(adapter, data['id'])] = data
+                results[mq] = data
         self.results = [data for data in results.itervalues()]
 
         self.terms = []
