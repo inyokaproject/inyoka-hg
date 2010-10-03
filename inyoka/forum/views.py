@@ -151,11 +151,15 @@ def forum(request, slug, page=1):
         ctx = None
 
     if ctx is None:
-        topics = Topic.query.filter_overview(forum.id)
-        pagination = Pagination(request, topics, page, TOPICS_PER_PAGE, url_for(forum))
+        topic_ids = db.session.query(Topic.id) \
+                              .filter_by(forum_id=forum.id) \
+                              .order_by(Topic.sticky.desc(), Topic.last_post_id.desc())
+        pagination = Pagination(request, topic_ids, page, TOPICS_PER_PAGE, url_for(forum))
+        required_ids = [obj.id for obj in pagination.objects]
+        topics = Topic.query.filter_overview(forum.id).filter(Topic.id.in_(required_ids)).all()
 
         ctx = {
-            'topics':           list(pagination.objects),
+            'topics':           topics,
             'pagination_left':  pagination.generate(),
             'pagination_right': pagination.generate('right')
         }

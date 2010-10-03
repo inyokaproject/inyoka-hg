@@ -341,7 +341,7 @@ $(document).ready(function() {
 
   // Add a version switcher to the `PPA` template.
   (function () {
-    var SHORT_NOTATION_VERSIONS = ['karmic', 'lucid'];
+    var SHORT_NOTATION_VERSIONS = ['karmic', 'lucid', 'maverick'];
 
     var set_version = function (dom) {
       var link = $(dom);
