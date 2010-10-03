@@ -93,8 +93,7 @@ class ForumSearchAdapter(SearchAdapter):
             i += range
 
     def extract_data(self, post):
-        return {'id': post.id,
-                'title': post.topic.title,
+        return {'title': post.topic.title,
                 'user': post.author.username,
                 'date': post.pub_date,
                 'url': href('forum', 'post', post.id),

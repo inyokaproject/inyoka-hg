@@ -30,8 +30,7 @@ class WikiSearchAdapter(SearchAdapter):
     auth_decider = WikiSearchAuthDecider
 
     def extract_data(self, rev):
-        return {'id': rev.id,
-                'title': rev.page.name,
+        return {'title': rev.page.name,
                 'user': rev.user.username,
                 'date': rev.change_date,
                 'url': url_for(rev.page),

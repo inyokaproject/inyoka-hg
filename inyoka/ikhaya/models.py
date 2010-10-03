@@ -373,8 +373,7 @@ class IkhayaSearchAdapter(SearchAdapter):
         )
 
     def extract_data(self, article):
-        return {'id': article.id,
-                'title': article.subject,
+        return {'title': article.subject,
                 'user': article.author.username,
                 'date': article.pub_datetime,
                 'url': url_for(article),
