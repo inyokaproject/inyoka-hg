@@ -1589,7 +1589,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         if user.is_anonymous:
             flash(u'Für diese Funktion musst du eingeloggt sein')
             return abort_access_denied(request)
-        topics = topics.join((Post, Post.topic_id == Topic.id)).filter(Post.author_id == user.id)
+        topics = topics.join((Post, db.and_(Post.author_id == user.id, Post.topic_id == Topic.id)))
 
         if user != request.user:
             title = u'Beiträge von %s' % escape(user.username)
