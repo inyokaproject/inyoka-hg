@@ -31,7 +31,10 @@
     <dd>{{ entry.pub_date|datetimeformat }}</dd>
     <dt>Aktionen:</dt>
     <dd class="paste_actions">
-      <ul><li><a href="{{ entry|url('raw') }}">Eintrag als Text anzeigen</a></li></ul>
+      <ul><li><a href="{{ entry|url('raw') }}">Eintrag als Text anzeigen</a></li>
+      {%- if USER.can('manage_pastebin') %}
+      <li><a href="{{ entry|url('delete') }}">Eintrag löschen</a></li></ul>
+      {%- endif %}
     </dd>
     {%- if entry.referrer_list %}
     <dt>Seiten, die auf diesen Eintrag verweisen:</dt>

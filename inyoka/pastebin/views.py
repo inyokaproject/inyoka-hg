@@ -8,14 +8,15 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from inyoka.utils.urls import global_not_found
-from inyoka.utils.urls import href, url_for
+from inyoka.utils.urls import global_not_found, href, url_for
 from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse, \
         PageNotFound
 from inyoka.utils.flashing import flash
+from inyoka.utils.templating import render_template
 from inyoka.pastebin.forms import AddPasteForm
 from inyoka.pastebin.models import Entry
+from inyoka.portal.utils import require_permission
 
 
 def not_found(request, err_message=None):
@@ -70,6 +71,27 @@ def display(request, entry_id):
         'entry': entry,
         'page':  'browse'
     }
+
+
+@require_permission('manage_pastebin')
+def delete(request, entry_id):
+    """
+    Request Handler for Pastebin delete requests.
+    """
+    entry = Entry.objects.get(id=entry_id)
+    if not entry:
+        raise PageNotFound
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            flash(u'Das löschen wurde abgebrochen.')
+        else:
+            entry.delete()
+            flash(u'Der Eintrag in der Ablage wurde gelöscht.')
+            return HttpResponseRedirect(href('pastebin'))
+    else:
+        flash(render_template('pastebin/delete_entry.html',
+                              {'entry':entry}))
+    return HttpResponseRedirect(href('pastebin',entry.id))
 
 
 def raw(request, entry_id):

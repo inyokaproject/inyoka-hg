@@ -54,6 +54,7 @@ PERMISSIONS = [(2 ** i, p[0], p[1]) for i, p in enumerate([
     ('delete_topic', u'Forum | darf Themen löschen'),
     ('article_read', u'Ikhaya | darf unveröffentlichten Artikel lesen'),
     ('manage_stats', u'Admin | darf Statistiken verwalten'),
+    ('manage_pastebin', u'Portal | darf Ablage verwalten'),
 ])]
 PERMISSION_NAMES = dict((i, desc) for i, name, desc in PERMISSIONS)
 PERMISSION_MAPPING = dict((name, i) for i, name, desc in PERMISSIONS)

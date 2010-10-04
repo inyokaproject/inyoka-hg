@@ -58,7 +58,8 @@ class Entry(models.Model):
     def get_absolute_url(self, action='show'):
         return href(*{
             'show': ('pastebin', self.id),
-            'raw': ('pastebin', 'raw', self.id)
+            'raw': ('pastebin', 'raw', self.id),
+            'delete': ('pastebin', 'delete', self.id)
         }[action])
 
     def save(self, force_insert=False, force_update=False):
