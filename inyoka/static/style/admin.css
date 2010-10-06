@@ -206,6 +206,7 @@ div.errorlist h4 {
   background-color: #eee;
   -moz-border-radius: 0.6em;
   -webkit-border-radius: 0.6em;
+  border-radius: 0.6em;
 }
 
 div.errorlist h4:hover {

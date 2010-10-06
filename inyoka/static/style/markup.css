@@ -140,6 +140,8 @@ div.box {
   margin: 0.5em 0em;
   border: 1px solid #bbb;
   -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
   clear: none;
   overflow: auto;
 }
@@ -156,6 +158,8 @@ div.box h3 {
   background-color: #bbb;
   padding: 0 1em;
   -moz-border-radius: 3px 3px 0px 0px;
+  -webkit-border-radius: 3px 3px 0px 0px;
+  border-radius: 3px 3px 3px 0px 0px;
 }
 
 div.improvable {
