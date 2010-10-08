@@ -12,7 +12,7 @@ import datetime
 from django import forms
 from inyoka.utils.forms import UserField, DATETIME_INPUT_FORMATS, \
     DATE_INPUT_FORMATS, TIME_INPUT_FORMATS, DateTimeWidget, EmailField, \
-    DateWidget, TimeWidget
+    DateWidget, TimeWidget, SlugField
 from inyoka.utils.html import cleanup_html
 from inyoka.utils.user import normalize_username, is_valid_username
 from inyoka.portal.models import StaticFile
@@ -98,7 +98,7 @@ class EditArticleForm(forms.Form):
         widget=DateTimeWidget, required=False, help_text=u'Wenn du diesed Feld '
         u'leer lässt, wird automatisch das Veröffentlichungsdatum verwendet.')
     public = forms.BooleanField(label=u'Veröffentlicht', required=False)
-    slug = forms.CharField(label=u'Slug', max_length=100, required=False,
+    slug = forms.SlugField(label=u'Slug', max_length=100, required=False,
         help_text=u'Dies ist die URL, unter der der Artikel liegt. Lasse das '
                   u'Feld frei, um ihn automatisch generieren zu lassen '
                   u'(empfohlen). Nach der Veröffentlichung nicht mehr ändern!')
@@ -111,7 +111,7 @@ class EditPublicArticleForm(EditArticleForm):
     pub_date = forms.DateTimeField(label=u'Datum der Veröffentlichung',
         input_formats=DATETIME_INPUT_FORMATS, widget=DateTimeWidget(
             attrs={'disabled': 'disabled'}), required=False)
-    slug = forms.CharField(label=u'Slug', max_length=100, required=False,
+    slug = forms.SlugField(label=u'Slug', max_length=100, required=False,
         widget=forms.TextInput(attrs={'disabled': 'disabled'}))
 
 
@@ -372,7 +372,7 @@ class CreateGroupForm(EditGroupForm):
 
 class EditForumForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=100)
-    slug = forms.CharField(label=u'Slug', max_length=100, required=False)
+    slug = forms.SlugField(label=u'Slug', max_length=100, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}),
                                   label=u'Beschreibung', required=False)
     parent = forms.ChoiceField(label=u'Elternforum', required=False)

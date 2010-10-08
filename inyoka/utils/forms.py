@@ -21,6 +21,7 @@ from inyoka.utils.local import current_request
 from inyoka.utils.mail import may_be_valid_mail, is_blocked_host
 from inyoka.utils.jabber import may_be_valid_jabber
 from inyoka.utils.flashing import flash
+from inyoka.utils.text import slugify
 
 
 DATETIME_INPUT_FORMATS = (
@@ -201,4 +202,14 @@ class JabberField(forms.CharField):
                 Die von dir angegebene Jabber-Adresse ist ungültig.  Bitte
                 überprüfe die Eingabe.
             '''.strip())
+        return value
+
+
+class SlugField(forms.CharField):
+
+    def clean(self, value):
+        value = slugify(value)
+        value = value.strip()
+        if not value:
+            return
         return value
