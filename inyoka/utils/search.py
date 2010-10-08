@@ -88,7 +88,7 @@ class SearchResult(object):
             if values is None:
                 continue
 
-            mapping = zip(results, values)
+            mapping = zip((res for res in results if res[0] == adapter), values)
 
             for mq, data in mapping:
                 match = results[mq]
@@ -103,7 +103,7 @@ class SearchResult(object):
                 data['title'] = data['title']
                 data['score'] = match.percent
                 results[mq] = data
-        self.results = [data for data in results.itervalues()]
+        self.results = results.values()
 
         self.terms = []
         t = query.get_terms_begin()
