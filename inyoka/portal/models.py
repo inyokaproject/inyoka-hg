@@ -382,9 +382,9 @@ class Event(models.Model):
     author = models.ForeignKey(User)
     location = models.CharField(max_length=25, blank=True)
     location_town = models.CharField(max_length=20, blank=True)
-    location_lat = models.FloatField(u'Koordinaten (Länge)',
+    location_lat = models.FloatField(u'Koordinaten (Breite)',
                                      blank=True, null=True)
-    location_long = models.FloatField('Koordinaten (Breite)',
+    location_long = models.FloatField('Koordinaten (Länge)',
                                       blank=True, null=True)
     duration = models.DateTimeField(blank=True, null=True)
     visible = models.BooleanField(default=False)

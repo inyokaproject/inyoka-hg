@@ -423,10 +423,10 @@ class NewEventForm(forms.Form):
     location_town = forms.CharField(label=u'Ort', max_length=20, required=False)
     location = forms.CharField(label=u'Veranstaltungsort', max_length=50,
                                required=False)
-    location_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+    location_lat = forms.DecimalField(label=u'Koordinaten (Breite)',
                                       required=False,
                                       min_value=-180, max_value=180)
-    location_long = forms.DecimalField(label=u'Koordinaten (Breite)',
+    location_long = forms.DecimalField(label=u'Koordinaten (Länge)',
                                       required=False,
                                       min_value=-90, max_value=90)
     duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
