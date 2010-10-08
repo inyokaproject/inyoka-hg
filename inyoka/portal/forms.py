@@ -53,9 +53,11 @@ SEARCH_AREA_CHOICES = (
 )
 
 SEARCH_SORT_CHOICES = (
+    ('date', 'Datum'),
     ('relevance', 'Relevanz'),
-    ('date', 'Datum')
 )
+
+DEFAULT_SEARCH_PARAMETER = 'date'
 
 VERSION_CHOICES = [(v.number, str(v)) for v in UBUNTU_VERSIONS if v.active]
 
@@ -452,7 +454,7 @@ class SearchForm(forms.Form):
             date_end=datetime_to_timezone(d['date_end'], enforce_utc=True),
             component=SEARCH_AREAS.get(d['area']),
             exclude=exclude,
-            sort=d['sort']
+            sort=d['sort'] or DEFAULT_SEARCH_PARAMETER
         )
 
 

@@ -258,7 +258,7 @@ class SearchSystem(object):
 
     def query(self, user, query, page=1, per_page=20, date_begin=None,
               date_end=None, collapse=True, component=None, exclude=[],
-              sort='relevance'):
+              sort='date'):
         """Search for something."""
         auth = AuthMatchDecider(user, self.auth_deciders)
         qry = self.parse_query(query)
