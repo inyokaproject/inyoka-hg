@@ -1240,11 +1240,17 @@ def event_edit(request, id=None):
             else:
                 dt_date = event.date
                 time_ = None
+
+            # fix duration to user timezone
+            duration = datetime_to_timezone(event.duration)
+            if duration:
+                duration.replace(tzinfo=None)
+
             form = EditEventForm({
                 'name': event.name,
                 'date': dt_date,
                 'time': time_,
-                'duration': datetime_to_timezone(event.duration).replace(tzinfo=None),
+                'duration': duration,
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
