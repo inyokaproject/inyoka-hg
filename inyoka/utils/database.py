@@ -12,6 +12,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import with_statement
+import re
 import sys
 import time
 from types import ModuleType
@@ -38,6 +39,7 @@ from inyoka.utils.local import current_request
 
 _engine = None
 _engine_lock = Lock()
+_ending_numbers = re.compile(r'([^\d]+)(\d+)$')
 
 
 def get_engine():
@@ -271,6 +273,16 @@ def select_blocks(query, pk, block_size=1000, start_with=0, max_fails=10):
         range = range[1] + 1, range[1] + block_size
 
 
+def _strip_ending_nums(string):
+    # check for ending numbers to split with.  If we do that our LIKE statement
+    # will also match all possible threads that may end with numbers but do not
+    # match the LIKE statement and as such raise IntegrityErrors
+    if string[-1].isdigit():
+        ending_nums = _ending_numbers.search(string).group(2)
+        string = string[:-len(ending_nums)]
+    return string
+
+
 def find_next_increment(column, string, max_length=None):
     """Get the next incremented string based on `column` and `string`.
 
@@ -278,6 +290,7 @@ def find_next_increment(column, string, max_length=None):
 
         find_next_increment(Category.slug, 'category name')
     """
+    string = _strip_ending_nums(string)
     existing = session.query(column).filter(column.like('%s%%' % string)).all()
     return get_next_increment(flatten_iterator(existing), string, max_length)
 
@@ -292,6 +305,7 @@ def find_next_django_increment(model, column, string, stripdate=False, **query_o
     """
     field = model._meta.get_field_by_name(column)
     max_length = field.max_length if hasattr(field, 'max_length') else None
+    string = _strip_ending_nums(string)
     slug = string[:max_length-4] if max_length is not None else string
     filter = {'%s__startswith' % column: slug}
     filter.update(query_opts)

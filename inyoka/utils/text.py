@@ -39,8 +39,7 @@ def increment_string(s):
         next = str(int(m.group(1))+1)
         start, end = m.span(1)
         if start or end:
-            ss, es = s[:max(end - len(next), start)], s[end:]
-            return u'%s%s%s%s' % (ss, ss.endswith('-') and '' or '-', next, es)
+            return u'%s-%s%s' % (s[:max(end - len(next), start)], next, s[end:])
     return s + '-2'
 
 
