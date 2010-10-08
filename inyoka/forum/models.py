@@ -923,7 +923,7 @@ class Post(db.Model):
     @staticmethod
     def url_for_post(id, paramstr=None):
         post = Post.query.get(id)
-        if post is None:
+        if post is None or post.topic is None:
             return
 
         position, slug = post.position, post.topic.slug

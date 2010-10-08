@@ -111,14 +111,14 @@ class ForumSearchAdapter(SearchAdapter):
     def recv(self, post_id):
         post = Post.query.options(db.eagerload('topic'), db.eagerload('author'))
         post = post.get(post_id)
-        if post is None:
+        if post is None or post.topic is None:
             return
         return self.extract_data(post)
 
     def recv_multi(self, post_ids):
         posts = Post.query.options(db.eagerload('topic'), db.eagerload('author')) \
                     .filter(Post.id.in_(post_ids)).all()
-        return [self.extract_data(post) for post in posts]
+        return [self.extract_data(post) for post in posts if post and post.topic]
 
     def get_doc_ids(self):
         pids = db.session.query(Post.id).filter(Post.topic_id==Topic.id)
