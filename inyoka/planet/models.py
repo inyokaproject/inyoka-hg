@@ -138,7 +138,7 @@ class Entry(models.Model):
 class PlanetSearchAdapter(SearchAdapter):
     type_id = 'p'
 
-    def extract_data(self, entry_id):
+    def extract_data(self, entry):
         return {'title': entry.title,
                 'user': entry.blog.name,
                 'user_url': entry.blog.blog_url,
