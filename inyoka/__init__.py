@@ -110,12 +110,18 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import socket
+import os
 from os.path import realpath, join, dirname
 import inyoka
-from inyoka.utils.hgutil import iui, hgcmd
+from mercurial import ui as hgui
+from mercurial.localrepo import localrepository
+from mercurial.node import short as shorthex
 
 #: Inyoka revision present in the current mercurial working copy
 INYOKA_REVISION = 'unknown'
+
+# Don't read ~/.hgrc, as extensions aren't available in the venvs
+os.environ['HGRCPATH'] = ''
 
 
 def _bootstrap():
@@ -126,12 +132,11 @@ def _bootstrap():
     conts = realpath(join(dirname(inyoka.__file__)))
 
     # get the `INYOKA_REVISION` using the mercurial python api
-    ui = iui()
-    hgcmd.identify(ui, None, join(conts, '..'), num=True, id=True)
-    rev = ui.get_output()
-    id, num = rev.split()
+    ui = hgui.ui()
+    repository = localrepository(ui, join(conts, '..'))
+    ctx = repository['tip']
     INYOKA_REVISION = '%(num)s:%(id)s' % {
-        'num': num.rstrip('+'), 'id': id.rstrip('+')
+        'num': ctx.rev(), 'id': shorthex(ctx.node())
     }
 
     # This value defines the timeout for sockets in seconds.  Per default python
