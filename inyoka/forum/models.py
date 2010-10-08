@@ -1319,7 +1319,7 @@ class Attachment(db.Model):
                 'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
             if not path.exists(path.abspath(img_path)):
                 try:
-                    img = Image.open(self.filename)
+                    img = Image.open(self.filename.encode('utf-8'))
                     if not (img.format == 'PNG' and img.info.get('interlace')) \
                         and img.size > settings.FORUM_THUMBNAIL_SIZE:
                         img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
