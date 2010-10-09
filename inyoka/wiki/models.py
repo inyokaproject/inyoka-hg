@@ -743,10 +743,17 @@ class Text(models.Model):
 
     def update_html_render_instructions(self, nosave=False):
         """Puts the render instructions for this text in the database and saves."""
-        self.html_render_instructions = pickle.dumps(self.parse().
+        self.html_render_instructions = instructions = pickle.dumps(self.parse().
             compile('html'), protocol=0).encode('base64')
         if not nosave:
-            self.save()
+            Text.objects.filter(id=self.id).update(**{
+                'html_render_instructions': instructions
+            })
+
+    def save(self, *args, **kwargs):
+        self.html_render_instructions = None
+        models.Model.save(self)
+        self.update_html_render_instructions()
 
     def __unicode__(self):
         return self.render()
