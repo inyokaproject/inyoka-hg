@@ -237,7 +237,9 @@ class PageManager(models.Manager):
                     if not existing_only or not x[1] and not x[3])
         if parent is not None:
             parent += u'/'
-            filtered = (x for x in filtered if x.startswith(parent))
+            parents = set(parent.split('/'))
+            filtered = (x for x in filtered if x.startswith(parent) and not
+                        set(x.split('/')[:-1]) - parents)
         return list(filtered)
 
     def get_page_count(self, existing_only=True, nocache=False):
