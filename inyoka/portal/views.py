@@ -39,6 +39,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.storage import storage
 from inyoka.utils.user import check_activation_key
+from inyoka.utils.database import db
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.models import Page as WikiPage
@@ -1059,7 +1060,7 @@ def memberlist(request, page=1):
 
     `page` represents the current page in the pagination.
     """
-    sortable = Sortable(SAUser.query, request.GET, 'id', sqlalchemy=True,
+    sortable = Sortable(db.session.query(SAUser.id), request.GET, 'id', sqlalchemy=True,
                         columns=['id', 'username', 'location', 'date_joined',
                                  'post_count'])
     filterable = Filterable(SAUser, sortable.get_objects(), {
@@ -1077,8 +1078,11 @@ def memberlist(request, page=1):
 
     set_session_info(request, u'sieht sich die Mitgliederliste an.',
                      'Mitgliederliste')
+
+    users = SAUser.query.filter(SAUser.id.in_(obj.id for obj in pagination.objects)).all()
+
     return {
-        'users':        list(pagination.objects),
+        'users':        users,
         'pagination':   pagination,
         'table':        sortable,
         'filterable':   filterable,
