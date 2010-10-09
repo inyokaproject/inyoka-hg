@@ -1119,13 +1119,13 @@ class Page(models.Model):
            (not deleted and rev and rev.deleted):
             cache.delete('wiki/object_list')
 
-    def get_absolute_url(self, action='show'):
+    def get_absolute_url(self, action='show', **kwargs):
         if action in ('edit', 'subscribe', 'unsubscribe'):
-            return href('wiki', self.name, action=action)
+            return href('wiki', self.name, action=action, **kwargs)
         if action == 'show_no_redirect':
-            return href('wiki', self.name, redirect='no')
+            return href('wiki', self.name, redirect='no', **kwargs)
         if action == 'show':
-            return href('wiki', self.name)
+            return href('wiki', self.name, **kwargs)
         raise KeyError
 
     def __unicode__(self):

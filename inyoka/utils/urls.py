@@ -61,7 +61,7 @@ def href(_module='portal', *parts, **query):
     )
 
 
-def url_for(obj, action=None):
+def url_for(obj, action=None, **kwargs):
     """
     Get the URL for an object.  As we are not using django contrib stuff
     any more this method is not useful any more but no it isn't because
@@ -69,8 +69,8 @@ def url_for(obj, action=None):
     """
     if hasattr(obj, 'get_absolute_url'):
         if action is not None:
-            return obj.get_absolute_url(action)
-        return obj.get_absolute_url()
+            return obj.get_absolute_url(action, **kwargs)
+        return obj.get_absolute_url(**kwargs)
     raise TypeError('type %r has no url' % obj.__class__)
 
 
