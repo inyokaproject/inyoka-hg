@@ -19,6 +19,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from datetime import datetime
+from django.db import models
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
      TemplateResponse, AccessDeniedResponse, PageNotFound, \
@@ -240,7 +241,9 @@ def do_rename(request, name):
     """Rename all revisions."""
     page = Page.objects.get_by_name(name, raise_on_deleted=True)
     new_name = request.GET.get('page_name') or page.name
+    force = request.GET.get('force', False)
     if request.method == 'POST':
+        force = request.POST.get('force', False)
         new_name = normalize_pagename(request.POST.get('new_name', ''))
         if not new_name:
             flash(u'Kein Seitenname eingegeben.', success=False)
@@ -248,6 +251,27 @@ def do_rename(request, name):
             try:
                 Page.objects.get_by_name(new_name)
             except Page.DoesNotExist:
+                # check that there are no dublicate attachments existing
+                # pointing to the new page name.
+                new_page_attachments = (p.split('/')[-1] for p in
+                                        Page.objects.get_attachment_list(new_name, False))
+                old_page_attachments = (p.split('/')[-1] for p in
+                                        Page.objects.get_attachment_list(page.name, False))
+                dublicate = set(new_page_attachments).intersection(set(old_page_attachments))
+                if dublicate and not force:
+                    linklist = u', '.join('<a href="%s">%s</a>' %
+                        (join_pagename(new_name, name), name.split('/')[-1])
+                        for name in dublicate)
+                    flash(u'Folgende Anhänge sind bereits dem neuen Seitennamen zugeordnet: %s.'
+                          u' Bitte stelle sicher das diese nicht mehr benötigt werden. '
+                          u' <a href="%s">Umbenennen und Löschung doppelter Anhänge erzwingen</a>'
+                          % (linklist, href('wiki', page.name, action='rename', force=True)), False)
+                    return HttpResponseRedirect(url_for(page))
+                elif dublicate and force:
+                    for attachment in dublicate:
+                        obj = Page.objects.get_by_name(join_pagename(new_name, attachment))
+                        models.Model.delete(obj)
+
                 page.name = new_name
                 page.edit(note=u'Umbenannt von %s' % name, user=request.user,
                           remote_addr=request.META.get('REMOTE_ADDR'))
@@ -281,7 +305,8 @@ def do_rename(request, name):
         return HttpResponseRedirect(url_for(page))
     flash(render_template('wiki/action_rename.html', {
         'page':         page,
-        'new_name':     new_name
+        'new_name':     new_name,
+        'force':        force
     }))
     return HttpResponseRedirect(url_for(page, 'show_no_redirect'))
 
