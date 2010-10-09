@@ -516,7 +516,7 @@ def _feed_count_cleanup(n):
         return n
     if n < COUNTS[0]:
         return COUNTS[0]
-    for i in xrange(len(COUNTS)):
+    for i in range(len(COUNTS)):
         if n < COUNTS[i]:
             return n - COUNTS[i-1] < COUNTS[i] - n and COUNTS[i-1] or COUNTS[i]
     return COUNTS[-1]
