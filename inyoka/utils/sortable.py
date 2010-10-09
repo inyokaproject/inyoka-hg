@@ -121,8 +121,8 @@ class Sortable(object):
             flash(u'Die ausgewählte Kriterie zum sortieren („%s“) ist '
                   u'nicht verfügbar' % ocol)
             if self.related and not self.is_sqlalchemy:
-                return self.objects.select_related()
-            return self.objects.all()
+                return self.objects
+            return self.objects
 
         if not self.is_sqlalchemy:
             q = self.objects.order_by(order)
@@ -176,7 +176,6 @@ class Filterable(object):
         new_filter = args.get('new_filter')
         if 'add_filter' in args and new_filter and new_filter in fields:
             self.filters[new_filter] = 'is', ''
-
 
     def get_html(self):
         return render_template('utils/filterable.html', {
