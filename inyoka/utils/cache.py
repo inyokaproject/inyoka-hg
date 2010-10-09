@@ -23,6 +23,9 @@ class InyokaMemcachedCache(MemcachedCache):
         MemcachedCache.__init__(self, servers, default_timeout, key_prefix)
 
     def get(self, key):
+        if not key:
+            return
+
         if isinstance(key, unicode):
             key = key.encode('utf-8')
         if self.key_prefix:
