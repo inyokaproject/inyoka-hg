@@ -762,9 +762,6 @@ def do_attach(request, name):
                     note=d.get('note', u''),
                     attachment_filename=filename,
                     attachment=d['attachment'])
-        attachments = Page.objects.get_attachment_list(name, nocache=True)
-        attachments = [Page.objects.get_by_name(i) for i in attachments]
-        context['attachments'] = attachments
         flash(u'Der Dateianhang wurde erfolgreich gespeichert.', True)
         if ap.metadata.get('weiterleitung'):
             url = href('wiki', ap, redirect='no')
