@@ -1491,7 +1491,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         post = topic.first_post
 
         #XXX: this way there might be less than `count` items
-        if topic.hidden:
+        if topic.hidden or post is None:
             continue
 
         if post.rendered_text is None and not post.is_plaintext:
