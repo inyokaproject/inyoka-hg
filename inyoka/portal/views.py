@@ -100,6 +100,8 @@ def index(request):
     record, record_time = get_user_record()
     storage_keys = storage.get_many(('get_ubuntu_link',
         'get_ubuntu_description'))
+    # Used to invalidate the cache for the countdown image
+    today = str(date.today())
 
     return {
         'ikhaya_latest':            list(ikhaya_latest),
@@ -109,6 +111,7 @@ def index(request):
         'get_ubuntu_link':          storage_keys.get('get_ubuntu_link', '') or '',
         'get_ubuntu_description':   storage_keys.get('get_ubuntu_description', '') or '',
         'calendar_events':          events,
+        'countdown_hash':            today,
     }
 
 
