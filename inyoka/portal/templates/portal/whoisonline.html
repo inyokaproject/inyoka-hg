@@ -22,7 +22,6 @@
     {% pluralize %}
     Momentan sind <strong>{{ registered }}</strong> angemeldete Benutzer online.
     {% endtrans %}
-    {# Guests won't count anymore, saves a lot of traffic.
     {% trans all=sessions.all %}
     Momentan ist <strong>{{ all }}</strong> Benutzer online,
     {% pluralize %}
@@ -38,7 +37,7 @@
     <strong>{{ guests }}</strong> Gast.
     {% pluralize %}
     <strong>{{ guests }}</strong> Gäste.
-    {% endtrans %}#}
+    {% endtrans %}
   </p>
   <p>
     Der Rekord liegt bei <strong>{{ record }}</strong> Benutzern, die

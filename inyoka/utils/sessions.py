@@ -29,7 +29,7 @@ def set_session_info(request, action, category=None):
     # if the session is new we don't add an entry.  It could be that
     # the user has no cookie support and that would fill our session
     # table with dozens of entries
-    if request.session.new or not request.user.is_authenticated:
+    if request.session.new:
         transaction.rollback()
         return
 
@@ -44,6 +44,13 @@ def set_session_info(request, action, category=None):
             'subject_text': request.user.username,
             'subject_type': user_type,
             'subject_link': url_for(request.user)
+        }
+    else:
+        key = request.session.session_key
+        args = {
+            'subject_text': None,
+            'subject_type': 'anonymous',
+            'subject_link': None
         }
 
     args.update({
