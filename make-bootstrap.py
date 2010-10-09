@@ -83,7 +83,8 @@ def after_install(options, home_dir):
     print '  apt-get build-dep python-mysqldb python-imaging libxapian15'
     print
     easy_install('distribute', home_dir)
-    easy_install('Jinja2==2.5', home_dir)
+    easy_install('Jinja2==2.5.2', home_dir)
+    easy_install('markupsafe', home_dir) # speedups for jinja2 as of jinja2 2.5.1
     easy_install('Werkzeug==0.6.2', home_dir)
     easy_install('Pygments==1.3.1', home_dir)
     easy_install('SQLAlchemy==0.6.4', home_dir)
