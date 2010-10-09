@@ -84,7 +84,7 @@ def calendar_entries_for_month(year, month):
     """
     from inyoka.portal.models import Event
     days = {}
-    month_range = range(1, calendar.monthrange(year, month)[1] + 1)
+    month_range = xrange(1, calendar.monthrange(year, month)[1] + 1)
     for i in month_range:
         days[i] = []
     start_date = date(year=year, month=month, day=month_range[0])
@@ -101,7 +101,7 @@ def calendar_entries_for_month(year, month):
             else:
                 delta = event.duration.date() - event.date
                 base = event.date.day
-            for day in range(delta.days+1):
+            for day in xrange(delta.days+1):
                 if base + day in days:
                     days[base+day].append(event)
         else:
