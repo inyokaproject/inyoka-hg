@@ -909,7 +909,7 @@ def reportlist(request):
         return HttpResponseRedirect(href('forum', 'reported_topics'))
 
 
-    topics = Topic.query.filter(Topic.reported != None)
+    topics = Topic.query.filter(Topic.reported != None).all()
     if request.method == 'POST':
         form = ReportListForm(request.POST)
         _add_field_choices()
@@ -937,7 +937,7 @@ def reportlist(request):
             storage['reported_topics_subscribers'].split(',')
 
     return {
-        'topics':     list(topics),
+        'topics':     topics,
         'form':       form,
         'subscribed': subscribed,
     }
