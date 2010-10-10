@@ -143,7 +143,7 @@ class ForumQuery(db.Query):
 
     def get_all_forums_cached(self):
         slugs = self.get_slugs()
-        reverted = dict((y, x) for x, y in slugs.iteritems())
+        reverted = dict((str(y), x) for x, y in slugs.iteritems())
         cache_keys = ['forum/forums/%s' % s for s in reverted]
         forums = cache.get_dict(*cache_keys)
 
@@ -156,7 +156,7 @@ class ForumQuery(db.Query):
             # need to use an IN (...) expression, allows us to use indexed scans.
             if not len(missing) == len(slugs):
                 query = self.get_eager().filter(Forum.id.in_(missing))
-            missing_objects = dict((x.slug, x) for x in query)
+            missing_objects = dict((str(x.slug), x) for x in query)
             for key, value in forums.iteritems():
                 if value is None:
                     forums[key] = missing_objects[key.split('/')[-1]]
