@@ -132,12 +132,16 @@ def _bootstrap():
     conts = realpath(join(dirname(inyoka.__file__)))
 
     # get the `INYOKA_REVISION` using the mercurial python api
-    ui = hgui.ui()
-    repository = localrepository(ui, join(conts, '..'))
-    ctx = repository['tip']
-    INYOKA_REVISION = '%(num)s:%(id)s' % {
-        'num': ctx.rev(), 'id': shorthex(ctx.node())
-    }
+    try:
+        ui = hgui.ui()
+        repository = localrepository(ui, join(conts, '..'))
+        ctx = repository['tip']
+        INYOKA_REVISION = '%(num)s:%(id)s' % {
+            'num': ctx.rev(), 'id': shorthex(ctx.node())
+        }
+    except TypeError:
+        # fail silently
+        pass
 
     # This value defines the timeout for sockets in seconds.  Per default python
     # sockets do never timeout and as such we have blocking workers.
