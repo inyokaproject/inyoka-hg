@@ -753,7 +753,8 @@ class Text(models.Model):
     def save(self, *args, **kwargs):
         self.html_render_instructions = None
         models.Model.save(self, *args, **kwargs)
-        self.update_html_render_instructions()
+        # self.update_html_render_instructions() <-- We do that lazyly for now
+        # page updates work better with that.
 
     def __unicode__(self):
         return self.render()
