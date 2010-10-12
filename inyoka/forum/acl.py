@@ -93,7 +93,7 @@ def _get_privilege_map(user, forum_ids):
         result = cache.get(cache_key)
         if result is None:
             privilege_map = query.all()
-            cache.set(cache_key, privilege_map)
+            cache.set(cache_key, privilege_map, 86400)
         else:
             privilege_map = list(query.merge_result(result, False))
         # filter the privilege_map for ids not requested (api compatibility)

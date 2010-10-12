@@ -186,7 +186,7 @@ def forum(request, slug, page=1):
         if subset:
             supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
-        cache.set('forum/forum/supporters-%s' % forum.id, supporters, 600)
+        cache.set('forum/forum/supporters-%s' % forum.id, supporters, 86400)
     else:
         merge = db.session.merge
         supporters = [merge(obj, load=False) for obj in supporters]

@@ -116,7 +116,7 @@ class ForumQuery(db.Query):
         slug_map = cache.get('forum/slugs')
         if slug_map is None:
             slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
-            cache.set('forum/slugs', slug_map)
+            cache.set('forum/slugs', slug_map, 86400)
         return slug_map
 
     def get_ids(self):
@@ -160,7 +160,7 @@ class ForumQuery(db.Query):
             for key, value in forums.iteritems():
                 if value is None:
                     forums[key] = missing_objects[key.split('/')[-1]]
-            cache.set_many(forums)
+            cache.set_many(forums, 86400)
         else:
             # merge forums into sqlalchemy session again
             objects = forums.itervalues()
@@ -177,7 +177,7 @@ class ForumQuery(db.Query):
             forum = cache.get('forum/forums/%s' % slug)
             if forum is None:
                 forum = query.one()
-                cache.set('forum/forums/%s' % slug, forum)
+                cache.set('forum/forums/%s' % slug, forum, 86400)
             else:
                 forum = db.session.merge(forum, load=False)
             return forum
@@ -520,7 +520,7 @@ class Forum(db.Model):
                 .limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
                 topics = topics.all()
-                cache.set(key, topics)
+                cache.set(key, topics, 300)
         else:
             merge = db.session.merge
             topics = [merge(obj, load=False) for obj in topics]

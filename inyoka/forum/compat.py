@@ -147,7 +147,7 @@ class SAUser(Model):
         instructions = cache.get(key)
         if instructions is None:
             instructions = parse(self.signature).compile(format)
-            cache.set(key, instructions)
+            cache.set(key, instructions, 3600)
         return render(instructions, context)
 
     @deferred
