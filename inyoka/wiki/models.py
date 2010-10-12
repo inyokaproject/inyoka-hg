@@ -966,43 +966,49 @@ class Page(models.Model):
             cache.delete('wiki/object_list')
         models.Model.save(self)
 
-        related_pages = set()
-        cur = connection.cursor()
-        try:
-            cur.execute('''
-                select distinct p.name, p.id
-                  from wiki_page p, wiki_metadata m
-                 where (m.key = 'X-Link' or m.key = 'X-Attach')
-                   and m.value = %s and m.page_id = p.id
-            ''', [self.name])
-            for row in cur.fetchall():
-                cache.delete('wiki/page/' + row[0])
-                related_pages.add(row[1])
-            cache.delete('wiki/page/' + self.name)
-
-            if related_pages:
-                # too lazy to do proper escaping here but that is not a
-                # problem because the only variable part is a list of
-                # integers which are guaranteed to be integers
-                # XXX: two queries because of a possible mysql bug.
-                # moving the first select into a subselect in the
-                # where of the update() disables optimizing in mysql
-                cur.execute('''
-                    select distinct text_id from wiki_revision
-                      join (
-                            select page_id, max(id) as id
-                            from wiki_revision as t
-                            where page_id in (%s)
-                            group by page_id, t.id
-                        ) as d1 using (id);
-                ''' % ', '.join(map(str, related_pages)))
-                cur.execute('''
-                    update wiki_text
-                       set html_render_instructions = null
-                     where id in (%s)
-                ''' % ', '.join(str(x[0]) for x in cur.fetchall()))
-        finally:
-            cur.close()
+        # This kills kinda everything on the wrong article, rethink that!
+        # Right now it seems that this is required to update reference-links and such
+        # things.  I don't know how that system works right now, but I try to
+        # investigate some time into it -- entequak (11:40 12.10.10)
+#        related_pages = set()
+#        cur = connection.cursor()
+#        try:
+#            cur.execute('''
+#                select distinct p.name, p.id
+#                  from wiki_page p, wiki_metadata m
+#                 where (m.key = 'X-Link' or m.key = 'X-Attach')
+#                   and m.value = %s and m.page_id = p.id
+#            ''', [self.name])
+#            for row in cur.fetchall():
+#                cache.delete('wiki/page/' + row[0])
+#                related_pages.add(row[1])
+#            cache.delete('wiki/page/' + self.name)
+#
+#            if related_pages:
+#                # too lazy to do proper escaping here but that is not a
+#                # problem because the only variable part is a list of
+#                # integers which are guaranteed to be integers
+#                # XXX: two queries because of a possible mysql bug.
+#                # moving the first select into a subselect in the
+#                # where of the update() disables optimizing in mysql
+#                cur.execute('''
+#                    select distinct text_id from wiki_revision
+#                      join (
+#                            select page_id, max(id) as id
+#                            from wiki_revision as t
+#                            where page_id in (%s)
+#                            group by page_id, t.id
+#                        ) as d1 using (id);
+#                ''' % ', '.join(map(str, related_pages)))
+#                all = [str(x[0]) for x in cur.fetchall()]
+#                print len(all)
+#                cur.execute('''
+#                    update wiki_text
+#                       set html_render_instructions = null
+#                     where id in (%s)
+#                ''' % ', '.join(all))
+#        finally:
+#            cur.close()
 
         if self.rev is not None:
             self.rev.save()
