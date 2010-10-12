@@ -1282,7 +1282,7 @@ class Revision(models.Model):
             format_specific_datetime(self.change_date)
         )
 
-    @deferred
+    @property
     def rendered_text(self):
         """
         The rendered version of the `text` attribute.  This is equivalent
