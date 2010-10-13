@@ -1276,7 +1276,7 @@ def delete_post(request, post_id, action='hide'):
     else:
         if request.method == 'POST':
             if 'cancel' in request.POST:
-                t = 'Löschen' if action == 'delete' else 'Verbergen'
+                t = u'Löschen' if action == u'delete' else u'Verbergen'
                 flash(u'Das %s wurde abgebrochen.' % t)
             else:
                 if action == 'hide':
