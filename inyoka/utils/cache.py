@@ -9,7 +9,11 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
-
+try:
+    from pylibmc import Client
+    _pylibmc_available = True
+except ImportError:
+    _pylibmc_available = False
 from inyoka.conf import settings
 
 
@@ -24,9 +28,11 @@ def _set_cache(obj):
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
-        _set_cache(MemcachedCache(
-            settings.MEMCACHE_SERVERS, key_prefix=settings.CACHE_PREFIX
-        ))
+        if _pylibmc_available:
+            servers = Client(settings.MEMCACHE_SERVERS, binary=True)
+        else:
+            servers = settings.MEMCACHE_SERVERS
+        _set_cache(MemcachedCache(servers, key_prefix=settings.CACHE_PREFIX))
     else:
         _set_cache(SimpleCache())
 
