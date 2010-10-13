@@ -30,6 +30,7 @@ def set_real_cache():
     if settings.MEMCACHE_SERVERS:
         if _pylibmc_available:
             servers = Client(settings.MEMCACHE_SERVERS, binary=True)
+            servers.set_behaviors({'tcp_nodelay': True, 'no_block': True})
         else:
             servers = settings.MEMCACHE_SERVERS
         _set_cache(MemcachedCache(servers, key_prefix=settings.CACHE_PREFIX))
