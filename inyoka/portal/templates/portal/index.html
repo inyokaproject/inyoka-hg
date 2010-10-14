@@ -96,11 +96,6 @@
   {%- endif %}
   <h3>Wer ist online?</h3>
   <p>
-    {% trans registered=sessions.registered %}
-    Momentan ist <strong>{{ registered }}</strong> angemeldeter Benutzer online.
-    {% pluralize %}
-    Momentan sind <strong>{{ registered }}</strong> angemeldete Benutzer online.
-    {% endtrans %}
     {% trans all=sessions.all %}
     Momentan ist <strong>{{ all }}</strong> Benutzer online,
     {% pluralize %}
