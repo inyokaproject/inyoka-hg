@@ -150,13 +150,14 @@ class CaptchaField(forms.Field):
         solution = current_request.session.get('captcha_solution')
         if not solution:
             flash(u'Du musst Cookies aktivieren!', False)
-        h = md5(settings.SECRET_KEY)
-        if isinstance(value, unicode):
-            # md5 doesn't like to have non-ascii containing unicode strings
-            value = value.encode('utf-8')
-        h.update(value)
-        if h.digest() == solution:
-            return True
+        elif value:
+            h = md5(settings.SECRET_KEY)
+            if isinstance(value, unicode):
+                # md5 doesn't like to have non-ascii containing unicode strings
+                value = value.encode('utf-8')
+            h.update(value)
+            if h.digest() == solution:
+                return True
         raise forms.ValidationError(u'Die Eingabe des Captchas war nicht '
                                     u'korrekt')
 
