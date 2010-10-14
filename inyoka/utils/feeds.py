@@ -47,7 +47,7 @@ def atom_feed(cache_key=None):
                 raise PageNotFound()
 
             kwargs['count'] = int(kwargs['count'])
-            if kwargs['count'] not in (10, 20, 30, 50, 75, 100):
+            if kwargs['count'] not in (10, 20, 30, 50):
                 raise PageNotFound()
 
             if cache_key is not None:

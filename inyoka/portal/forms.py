@@ -511,7 +511,7 @@ class UserErrorReportForm(forms.Form):
 
 
 def _feed_count_cleanup(n):
-    COUNTS = (10, 20, 30, 50, 75, 100)
+    COUNTS = (10, 20, 30, 50)
     if n in COUNTS:
         return n
     if n < COUNTS[0]:
