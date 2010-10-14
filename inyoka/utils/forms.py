@@ -155,7 +155,8 @@ class CaptchaField(forms.Field):
             if isinstance(value, unicode):
                 # md5 doesn't like to have non-ascii containing unicode strings
                 value = value.encode('utf-8')
-            h.update(value)
+            if value:
+                h.update(value)
             if h.digest() == solution:
                 return True
         raise forms.ValidationError(u'Die Eingabe des Captchas war nicht '
