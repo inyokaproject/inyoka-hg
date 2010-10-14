@@ -189,36 +189,34 @@ def get_thumbnail(location, width=None, height=None, force=False):
     base_params = [os.path.join(settings.IMAGEMAGICK_PATH, 'convert'),
                    '-', '-resize', dimension, '-sharpen', '0.5', '-format']
 
-    results = []
+    result = []
+    format, quality = ('png', '100')
     try:
-        for format, quality in ('png', '100'), ('jpeg', '80'):
-            try:
-                dst = TemporaryFile()
-                client = Popen(base_params + [format, '-quality', quality, '-'],
-                               stdin=PIPE, stdout=dst, stderr=PIPE)
-                src.seek(0)
-                shutil.copyfileobj(src, client.stdin)
-                client.stdin.close()
-                client.stderr.close()
-                if client.wait():
-                    return
-                dst.seek(0, 2)
-                pos = dst.tell()
-                results.append((pos, dst, format))
-            except (IOError, OSError):
-                continue
+        dst = TemporaryFile()
+        client = Popen(base_params + [format, '-quality', quality, '-'],
+                       stdin=PIPE, stdout=dst, stderr=PIPE)
+        src.seek(0)
+        shutil.copyfileobj(src, client.stdin)
+        client.stdin.close()
+        client.stderr.close()
+        if client.wait():
+            return
+        dst.seek(0, 2)
+        pos = dst.tell()
+        result = (pos, dst, format)
+    except (IOError, OSError):
+        pass
     finally:
         src.close()
 
     # Return none if there were errors in thumbnail rendering, that way we can
     # raise 404 exceptions instead of raising 500 exceptions for the user.
-    if not results:
+    if not result:
         return None
 
     # select the smaller of the two versions and copy and get the filename for
     # that format. Then ensure that the target folder exists
-    results.sort()
-    pos, fp, extension = results[0]
+    pos, fp, extension = result
     filename = '%s.%s' % (
         base_filename,
         extension
