@@ -224,9 +224,6 @@ class RecentChanges(Macro):
         cache_key = 'wiki/recent_changes/%d-%d' % (max_days, page_num)
         data = cache.get(cache_key)
         if data is None:
-            #XXX: for every user url one query is send. select_related(depth=4+)
-            #     doesn't fix that.... for now it's not that bad (because of caching),
-            #     but should be optimized.
             revisions = Revision.objects.filter(
                 change_date__gt=(datetime.utcnow()-timedelta(days=max_days))
             ).select_related()
@@ -284,26 +281,26 @@ class RecentChanges(Macro):
                             nodes.Text(u')')
                         ])]))
 
-                    page_notes = nodes.List('unordered', [], class_='note_list')
-                    for rev in revs:
-                        if rev.user:
-                            page_notes.children.append(nodes.ListItem([
-                                nodes.Text(rev.note or ''),
-                                nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
-                                nodes.Link(href('portal', 'user', rev.user.username), [
-                                    nodes.Text(rev.user.username)]),
-                                nodes.Text(rev.note and u')' or '')
-                            ]))
-                        else:
-                            page_notes.children.append(nodes.ListItem([
-                                nodes.Text(rev.note),
-                                nodes.Text(u'%svon ' % (rev.note and u'(' or '')),
-                                nodes.Text(rev.remote_addr),
-                                nodes.Text(rev.note and u')' or '')]))
-                    table.children[-1].children.extend([
-                        nodes.TableCell(
-                            page_notes.children and [page_notes] or \
-                            [nodes.Text(u'')], class_='note')])
+#                    page_notes = nodes.List('unordered', [], class_='note_list')
+#                    for rev in revs:
+#                        if rev.user_id:
+#                            page_notes.children.append(nodes.ListItem([
+#                                nodes.Text(rev.note or ''),
+#                                nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
+#                                nodes.Link(href('portal', 'user', rev.user_id), [
+#                                    nodes.Text(rev.user.username)]),
+#                                nodes.Text(rev.note and u')' or '')
+#                            ]))
+#                        else:
+#                            page_notes.children.append(nodes.ListItem([
+#                                nodes.Text(rev.note),
+#                                nodes.Text(u'%svon ' % (rev.note and u'(' or '')),
+#                                nodes.Text(rev.remote_addr),
+#                                nodes.Text(rev.note and u')' or '')]))
+#                    table.children[-1].children.extend([
+#                        nodes.TableCell(
+#                            page_notes.children and [page_notes] or \
+#                            [nodes.Text(u'')], class_='note')])
             data = {
                 'nodes':      table,
                 'pagination': pagination.generate()
