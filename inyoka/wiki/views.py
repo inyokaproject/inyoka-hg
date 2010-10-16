@@ -174,8 +174,7 @@ def feed(request, page_name=None, count=20):
 
     new_cache = False
     if page_name:
-        cache_key = 'wiki/feeds/%s' % normalize_pagename(page_name) \
-                .encode('utf-8')
+        cache_key = 'wiki/feeds/%s' % normalize_pagename(page_name)
         feed = cache.get(cache_key)
         if feed is None:
             feed = FeedBuilder(
