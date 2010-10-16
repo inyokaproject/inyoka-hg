@@ -10,9 +10,13 @@
 """
 import re
 import sys
+from datetime import datetime
 from textwrap import wrap
 from werkzeug import escape, html
 from django.db import connection
+from django.db.backends import util
+from django.utils import simplejson
+from django.utils.encoding import force_unicode
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')
@@ -88,6 +92,7 @@ def find_calling_context(skip=2, module='inyoka'):
 def render_query_table(request):
     """Renders a nice table of all queries in the page."""
     from inyoka.utils.templating import render_string
+
     queries = request.queries
     total = 0
 
@@ -103,24 +108,44 @@ def render_query_table(request):
                 break
 
         qresult.append(render_string(TEMPLATE, {
-            'topic': escape(frame),
+            'topic': '%s %s' % (escape(frame), 'from SA'),
             'duration': (end - start) * 1000.0,
             'query': statement,
             'data': u'Parameters: %r' % (parameters,),
             'explain_result': explain,
-            'odd': _odd
+            'odd': _odd,
         }))
         _odd = not _odd
 
     # render django queries into the debug toolbar
-    for query in connection.queries:
-        if not isinstance(query['sql'], unicode):
-            query['sql'] = query['sql'].decode('utf8')
-        sql = u'\n'.join(wrap(u'\n'.join(x.rstrip() for x in query['sql'].split('\n')), 120))
-        qresult.append(u'<li><pre>%s</pre><pre>Issued from Django-Application</pre>'
-                       u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
-                       % (sql, float(query['time']) * 1000.0))
-        total += float(query['time'])
+    django_queries = connection.queries[:]
+    for query in django_queries:
+        sql = u'\n'.join(wrap(u'\n'.join(x.rstrip() for x in query['raw_sql'].split('\n')), 120))
+
+        explain_result = ""
+        if sql.lower().strip().startswith('select'):
+            cursor = connection.cursor()
+            cursor.execute('EXPLAIN %s' % (sql,), query['params'])
+            explain_result = cursor.fetchall()
+
+        # find the proper calling context
+        for frame in query['calling_context']:
+            if 'views' in frame:
+                break
+            elif 'template' in frame.lower():
+                break
+
+        qresult.append(render_string(TEMPLATE, {
+            'duration': query['time'],
+            'query': sql,
+            'explain_result': False,
+            'data': u'Parameters: %s' % (query['params'],),
+            'topic': '%s %s' % (escape(frame), 'from Django'),
+            'odd': _odd,
+            'explain_result': explain_result,
+        }))
+        _odd = not _odd
+        total += float(query['time'] / 1000.0)
 
     # add cache queries
     if hasattr(request, 'cache_queries'):
@@ -136,7 +161,7 @@ def render_query_table(request):
 
     result = [u'<div id="database_debug_table">']
     stat = (u'<strong>(%d queries in %.2f ms)</strong>'
-            % (len(queries) + len(connection.queries), total * 1000.0))
+            % (len(queries) + len(django_queries), total * 1000.0))
     result.append(stat)
     result.append(u'<div id="database_debug_table_inner"><ul>')
     result.extend(qresult)
@@ -176,3 +201,35 @@ def inject_query_info(request, response):
         response.content = body + '<hr>' + debug_info
     if 'content-length' in response:
         response['content-length'] = len(response.content)
+
+
+def ms_from_timedelta(td):
+    """
+    Given a timedelta object, returns a float representing milliseconds
+    """
+    return (td.seconds * 1000) + (td.microseconds / 1000.0)
+
+
+class DatabaseStatTracker(util.CursorDebugWrapper):
+    """
+        Replacement for CursorDebugWrapper which stores additional information
+        in `connection.queries`.
+    """
+    def execute(self, sql, params=()):
+        start = datetime.now()
+        try:
+            return self.cursor.execute(sql, params)
+        finally:
+            stop = datetime.now()
+            duration = ms_from_timedelta(stop - start)
+            # We keep `sql` to maintain backwards compatibility
+            self.db.queries.append({
+                'sql': self.db.ops.last_executed_query(self.cursor, sql, params),
+                'time': duration,
+                'raw_sql': sql,
+                'params': params,
+                'calling_context': find_calling_context()
+            })
+
+
+util.CursorDebugWrapper = DatabaseStatTracker

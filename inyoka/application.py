@@ -117,5 +117,4 @@ class InyokaHandler(WSGIHandler):
             # yet.
             session.remove()
 
-
 application = InyokaHandler()
