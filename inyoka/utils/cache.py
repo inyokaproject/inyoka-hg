@@ -60,54 +60,55 @@ class CacheDebugProxy(object):
         if not hasattr(request, 'cache_queries'):
             request.cache_queries = list()
         ctx = find_calling_context(3)
-        request.cache_queries.append((ctx, force_unicode(query), result))
+        request.cache_queries.append((ctx, map(force_unicode, query), result))
         return result
 
     def __init__(self, cache):
         self.cache = cache
 
     def add(self, key, value, timeout=None):
-        return self._log('ADD %r %r (%r)' % (key, value, timeout),
+        return self._log(u'ADD %r %s (%r)' % (key, value, timeout),
             self.cache.add(key, value, timeout))
 
     def clear(self):
-        return self._log('CLEAR',
+        return self._log(u'CLEAR',
             self.cache.clear())
 
     def dec(self, key, delta=1):
-        return self._log('DEC %r %r' % (key, delta),
+        return self._log(u'DEC %r %r' % (key, delta),
             self.cache.dec(key, delta))
 
     def delete(self, key):
-        return self._log('DELETE %r' % key,
+        return self._log(u'DELETE %r' % key,
             self.cache.delete(key))
 
     def delete_many(self, *keys):
-        return self._log('DELETE MANY %r' % (keys,),
+        return self._log(u'DELETE MANY %r' % (keys,),
             self.cache.delete_many(*keys))
 
     def get(self, key):
-        return self._log('GET %r' % key,
+        return self._log(u'GET %r' % key,
             self.cache.get(key))
 
     def get_dict(self, *keys):
-        return self._log('GET DICT %r' % (keys,),
+        return self._log(u'GET DICT %r' % (keys,),
             self.cache.get_dict(*keys))
 
     def get_many(self, *keys):
-        return self._log('GET MANY %r' % (keys,),
+        return self._log(u'GET MANY %r' % (keys,),
             self.cache.get_many(*keys))
 
     def inc(self, key, delta=1):
-        return self._log('INC %r %r' % (key, delta),
+        return self._log(u'INC %r %r' % (key, delta),
             self.cache.inc(key, delta))
 
     def set(self, key, value, timeout=None):
-        return self._log('SET %r %r (%r)' % (key, value, timeout),
+        return self._log(u'SET %r %s (%r)' % (key, force_unicode(value), timeout),
             self.cache.set(key, value, timeout))
 
     def set_many(self, mapping, timeout=None):
-        return self._log('SET MANY %r (%r)' % (mapping, timeout),
+        _mapping = dict(map(lambda item: (item[0], force_unicode(x[1])), mapping.iteritems()))
+        return self._log(u'SET MANY %s (%r)' % (_mapping, timeout),
             self.cache.set_many(mapping, timeout))
 
 # enable the real cache by default
