@@ -40,14 +40,14 @@ def _make_text_block(name, content, content_type=None):
     )
 
 
-def atom_feed(cache_key=None):
+def atom_feed(cache_key=None, available_counts=(10, 20, 30, 50)):
     def decorator(f):
         def func(*args, **kwargs):
             if kwargs.get('mode') not in ('full', 'short', 'title'):
                 raise PageNotFound()
 
             kwargs['count'] = int(kwargs['count'])
-            if kwargs['count'] not in (10, 20, 30, 50):
+            if kwargs['count'] not in available_counts:
                 raise PageNotFound()
 
             if cache_key is not None:
