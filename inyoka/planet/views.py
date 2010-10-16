@@ -54,7 +54,7 @@ def index(request, page=1):
         entries = Entry.objects.select_related(depth=1).filter(hidden=False)
     else:
         entries = Entry.objects.select_related(depth=1)
-    pagination = Pagination(request, entries, page, 30, href('planet'))
+    pagination = Pagination(request, entries, page, 25, href('planet'))
     set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
                      href('planet'), 'Planet')
     return {
