@@ -24,7 +24,7 @@ TEMPLATE = u'''
         <strong>took {{ "%.3f"|format(duration) }} ms</strong>
     </div>
     <div class="extra">
-        <pre>{{ sql }}</pre><pre>Parameters: {{ parameters }}</pre>
+        <pre>{{ query }}</pre><pre>{{ data }}</pre>
         <div class="explain">
         {% if explain_result %}
         <strong>EXPLAIN Information</strong>
@@ -105,8 +105,8 @@ def render_query_table(request):
         qresult.append(render_string(TEMPLATE, {
             'topic': escape(frame),
             'duration': (end - start) * 1000.0,
-            'sql': statement,
-            'parameters': parameters,
+            'query': statement,
+            'data': u'Parameters: %r' % (parameters,),
             'explain_result': explain,
             'odd': _odd
         }))
@@ -121,6 +121,18 @@ def render_query_table(request):
                        u'<div class="detail"><strong>took %.3f ms</strong></div></li>'
                        % (sql, float(query['time']) * 1000.0))
         total += float(query['time'])
+
+    # add cache queries
+    if hasattr(request, 'cache_queries'):
+        for query in request.cache_queries:
+            qresult.append(render_string(TEMPLATE, {
+                'topic': escape(query[0][0]),
+                'query': u'Cache: %s' % escape(query[1]),
+                'data': escape(repr(query[2])),
+                'duration': 0,
+                'odd': _odd
+            }))
+            _odd = not _odd
 
     result = [u'<div id="database_debug_table">']
     stat = (u'<strong>(%d queries in %.2f ms)</strong>'
