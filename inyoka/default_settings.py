@@ -195,12 +195,6 @@ INSTALLED_APPS = (
     'inyoka.admin',
 )
 
-try:
-    import south
-    INSTALLED_APPS += ('south',)
-    del south
-except ImportError:
-    pass
 
 # some terms to exclude by default to maintain readability
 SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch']
