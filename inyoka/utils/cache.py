@@ -56,11 +56,12 @@ class CacheDebugProxy(object):
 
 
     def _log(self, query, result):
-        request = current_request._get_current_object()
-        if not hasattr(request, 'cache_queries'):
-            request.cache_queries = list()
-        ctx = find_calling_context(3)
-        request.cache_queries.append((ctx, force_unicode(query), force_unicode(result)))
+        if current_request:
+            request = current_request._get_current_object()
+            if not hasattr(request, 'cache_queries'):
+                request.cache_queries = list()
+            ctx = find_calling_context(3)
+            request.cache_queries.append((ctx, force_unicode(query), force_unicode(result)))
         return result
 
     def __init__(self, cache):
