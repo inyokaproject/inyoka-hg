@@ -60,7 +60,7 @@ class CacheDebugProxy(object):
         if not hasattr(request, 'cache_queries'):
             request.cache_queries = list()
         ctx = find_calling_context(3)
-        request.cache_queries.append((ctx, map(force_unicode, query), result))
+        request.cache_queries.append((ctx, force_unicode(query), force_unicode(result)))
         return result
 
     def __init__(self, cache):
@@ -103,12 +103,12 @@ class CacheDebugProxy(object):
             self.cache.inc(key, delta))
 
     def set(self, key, value, timeout=None):
-        return self._log(u'SET %r %s (%r)' % (key, force_unicode(value), timeout),
+        return self._log(u'SET %r %s (%s)' % (key, force_unicode(repr(value)), timeout),
             self.cache.set(key, value, timeout))
 
     def set_many(self, mapping, timeout=None):
-        _mapping = dict(map(lambda item: (item[0], force_unicode(item[1])), mapping.iteritems()))
-        return self._log(u'SET MANY %s (%r)' % (_mapping, timeout),
+        _mapping = force_unicode(repr(mapping))
+        return self._log(u'SET MANY %s (%s)' % (_mapping, timeout),
             self.cache.set_many(mapping, timeout))
 
 # enable the real cache by default

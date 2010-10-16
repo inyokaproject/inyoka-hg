@@ -153,7 +153,7 @@ def render_query_table(request):
             qresult.append(render_string(TEMPLATE, {
                 'topic': escape(u'%s from Cache' % query[0][0]),
                 'query': escape(query[1]),
-                'data': escape(repr(query[2])),
+                'data': escape(query[2]),
                 'duration': 0,
                 'odd': _odd
             }))
