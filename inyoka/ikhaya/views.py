@@ -305,8 +305,8 @@ def suggestion_assign_to(request, suggestion, username):
     return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
 
-@atom_feed('ikhaya/feeds/articles/%(slug)s/%(mode)s/%(count)s')
-def article_feed(request, slug=None, mode='short', count=20):
+@atom_feed('ikhaya/feeds/articles/%(slug)s/%(mode)s/%(count)s', (25,))
+def article_feed(request, slug=None, mode='short', count=25):
     """
     Shows the ikhaya entries that match the given criteria in an atom feed.
     """
@@ -354,9 +354,9 @@ def article_feed(request, slug=None, mode='short', count=20):
     return feed
 
 
-@atom_feed('ikhaya/feeds/comments/%(id)s/%(mode)s/%(count)s')
+@atom_feed('ikhaya/feeds/comments/%(id)s/%(mode)s/%(count)s', (25,))
 @does_not_exist_is_404
-def comment_feed(request, id=None, mode='short', count=20):
+def comment_feed(request, id=None, mode='short', count=25):
     """
     Shows the ikhaya comments that match the given criteria in an atom feed.
     """
