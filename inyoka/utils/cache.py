@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
+from django.utils.encoding import force_unicode
 from inyoka.utils.local import current_request
 from inyoka.utils.debug import find_calling_context
 
@@ -59,7 +60,7 @@ class CacheDebugProxy(object):
         if not hasattr(request, 'cache_queries'):
             request.cache_queries = list()
         ctx = find_calling_context(3)
-        request.cache_queries.append((ctx, query, result))
+        request.cache_queries.append((ctx, force_unicode(query), result))
         return result
 
     def __init__(self, cache):
