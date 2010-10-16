@@ -513,12 +513,15 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 db.session.delete(poll)
                 db.session.commit()
                 topic.forum.invalidate_topic_cache()
-        polls = []
+        conds = []
         if poll_ids:
-            polls = Poll.query.filter(db.or_(
-                Poll.id.in_(poll_ids),
-                Poll.topic_id == (topic and topic.id or -1)
-            )).all()
+            conds.append(Poll.id.in_(poll_ids))
+        if topic:
+            conds.append(Poll.topic_id == topic.id)
+        if conds:
+            polls = Poll.query.filter(db.or_(*conds)).all() if conds else []
+
+
 
     # handle attachments
     att_ids = map(int, filter(bool,
