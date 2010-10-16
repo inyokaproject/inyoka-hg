@@ -1083,6 +1083,8 @@ def memberlist(request, page=1):
                      'Mitgliederliste')
 
     users = SAUser.query.filter(SAUser.id.in_(obj.id for obj in pagination.objects)).all()
+    pagination_object_ids = [u.id for u in pagination.objects]
+    users.sort(key=lambda u: pagination_object_ids.index(u.id))
 
     return {
         'users':        users,
