@@ -1401,8 +1401,8 @@ def delete_topic(request, topic_slug, action='hide'):
     return HttpResponseRedirect(url_for(topic))
 
 
-@atom_feed()
-def topic_feed(request, slug=None, mode='short', count=20):
+@atom_feed('forum/feeds/topic/%(slug)s/%(mode)s/%(count)s)')
+def topic_feed(request, slug=None, mode='short', count=25):
     # We have one feed, so we use ANONYMOUS_USER to cache the correct feed.
     anonymous = User.objects.get_anonymous_user()
 
