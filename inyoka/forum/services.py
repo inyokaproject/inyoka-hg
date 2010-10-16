@@ -81,7 +81,8 @@ def on_subscribe(request):
     col = str((type in ('forum', 'topic') and type+'_id' or type))
 
     obj = cls.query.filter(cls.slug==slug).one()
-    if not have_privilege(request.user, obj, 'read'):
+    if request.user.is_anonymous \
+       or not have_privilege(request.user, obj, 'read'):
         #XXX: we should raise here, because it's nearly impossible
         #     to cach that in JS.
         return abort_access_denied(request)
@@ -105,7 +106,8 @@ def on_unsubscribe(request):
     col = str((type in ('forum', 'topic') and type+'_id' or type))
 
     obj = cls.query.filter(cls.slug==slug).one()
-    if not have_privilege(request.user, obj, 'read'):
+    if request.user.is_anonymous \
+       or not have_privilege(request.user, obj, 'read'):
         #XXX: we should raise here, because it's nearly impossible
         #     to catch that in JS.
         return abort_access_denied(request)
@@ -122,7 +124,8 @@ def on_change_status(request, solved=None):
     topic = Topic.query.filter_by(slug=request.POST['slug']).first()
     if not topic:
         return
-    elif not have_privilege(request.user, topic.forum, 'read'):
+    elif request.user.is_anonymous \
+         or not have_privilege(request.user, topic.forum, 'read'):
         return abort_access_denied(request)
     if solved is not None:
         topic.solved = solved

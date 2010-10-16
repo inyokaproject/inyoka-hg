@@ -10,6 +10,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from inyoka.utils.http import HttpResponse
 
 
 class SimpleDispatcher(object):
@@ -27,5 +28,9 @@ class SimpleDispatcher(object):
         return decorator
 
     def __call__(self, request, name):
-        if name in self.methods:
+        if name not in self.methods:
+            return HttpResponse('Service not found.', status=404)
+        try:
             return self.methods[name](request)
+        except:
+            return HttpResponse('Exception occured while running service', status=500)

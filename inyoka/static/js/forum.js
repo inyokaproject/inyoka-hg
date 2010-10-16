@@ -65,7 +65,7 @@ $(function() {
     };
   })();
 
-  function doAction(type, slug, tags) {
+  function doAction(type, slug, tags, callback) {
     // Get the matching string for replacement. Since the two buttons (top and bottom)
     // are in the same macro we just need to check for one buttons text at all.
     var action = "";
@@ -97,14 +97,17 @@ $(function() {
     $.post(url, {
       type: type,
       slug: slug
-    }, function(data) {
+    }, function(data, status, xhr) {
       // Bind new events and change button's text.
-      $(tags).fadeOut('fast');
-      $(tags).text(new_text);
-      $(tags).fadeIn('fast');
+      if (xhr.status == 200) {
+        $(tags).fadeOut('fast');
+        $(tags).text(new_text);
+        $(tags).fadeIn('fast');
+        console.debug(callback);
+        if (typeof callback == 'function')
+          callback();
+      }
     });
-
-    return false;
   }
 
   (function() {
@@ -124,27 +127,29 @@ $(function() {
 
     $('a.solve_topic').each(function() {
       $(this).click(function() {
-        doAction('topic', $(this).attr('id'), $('a.solve_topic'));
-        // switch classes
-        if ($('a.solve_topic').hasClass('action_solve')) {
-          $('a.solve_topic').removeClass('action_solve');
-          $('a.solve_topic').addClass('action_unsolve');
-          var span = $('span.status_unsolved');
-          span.fadeOut('fast');
-          span.removeClass('status_unsolved');
-          span.addClass('status_solved');
-          span.text('gelöst');
-          span.fadeIn('fast');
-        } else {
-          $('a.solve_topic').removeClass('action_unsolve');
-          $('a.solve_topic').addClass('action_solve');
-          var span = $('span.status_solved');
-          span.fadeOut('fast');
-          span.removeClass('status_solved');
-          span.addClass('status_unsolved');
-          span.text('ungelöst');
-          span.fadeIn('fast');
-        }
+        doAction('topic', $(this).attr('id'), $('a.solve_topic'), function() {
+          // switch classes
+          console.debug('success');
+          if ($('a.solve_topic').hasClass('action_solve')) {
+            $('a.solve_topic').removeClass('action_solve');
+            $('a.solve_topic').addClass('action_unsolve');
+            var span = $('span.status_unsolved');
+            span.fadeOut('fast');
+            span.removeClass('status_unsolved');
+            span.addClass('status_solved');
+            span.text('gelöst');
+            span.fadeIn('fast');
+          } else {
+            $('a.solve_topic').removeClass('action_unsolve');
+            $('a.solve_topic').addClass('action_solve');
+            var span = $('span.status_solved');
+            span.fadeOut('fast');
+            span.removeClass('status_solved');
+            span.addClass('status_unsolved');
+            span.text('ungelöst');
+            span.fadeIn('fast');
+          }
+        });
         return false;
       });
     });
