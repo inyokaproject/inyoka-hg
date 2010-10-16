@@ -107,7 +107,7 @@ class CacheDebugProxy(object):
             self.cache.set(key, value, timeout))
 
     def set_many(self, mapping, timeout=None):
-        _mapping = dict(map(lambda item: (item[0], force_unicode(x[1])), mapping.iteritems()))
+        _mapping = dict(map(lambda item: (item[0], force_unicode(item[1])), mapping.iteritems()))
         return self._log(u'SET MANY %s (%r)' % (_mapping, timeout),
             self.cache.set_many(mapping, timeout))
 

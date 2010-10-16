@@ -256,6 +256,7 @@ def suggestionlist(request):
         'suggestions': list(suggestions)
     }
 
+
 @require_permission('article_edit')
 def suggestion_delete(request, suggestion):
     if request.method == 'POST':
