@@ -225,7 +225,7 @@ def make_ikhaya():
     for percent, name in izip(percentize(IKHAYA_CATEGORY_COUNT), create_names(IKHAYA_CATEGORY_COUNT, title)):
         c = Category(name=name)
         c.save()
-        for name in create_names(30, title):
+        for name in create_names(6, title):
             dt = randtime()
             a = Article(
                 pub_date=dt.date(),
@@ -239,7 +239,7 @@ def make_ikhaya():
                 is_xhtml=False
             )
             a.save()
-            for i, name in enumerate(create_names(randint(0, 100), title)):
+            for i, name in enumerate(create_names(randint(0, 5), title)):
                 text = sentences(min=1, max=5)
                 if i > 0 and randint(0, 1) == 0:
                     text = '@%d: %s' % (randint(1, i), text)
