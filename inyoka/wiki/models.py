@@ -93,7 +93,7 @@ from inyoka.utils.search import search
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.templating import render_template
 from inyoka.utils.collections import MultiMap
-from inyoka.utils.cache import cache
+from inyoka.utils.cache import cache, request_cache
 from inyoka.utils.local import current_request
 from inyoka.utils.html import escape
 from inyoka.utils.text import join_pagename, get_pagetitle
@@ -197,7 +197,7 @@ class PageManager(models.Manager):
         key = 'wiki/object_list'
         pagelist = None
         if not nocache:
-            pagelist = cache.get(key)
+            pagelist = request_cache.get(key)
 
         if pagelist is None:
             cur = connection.cursor()
@@ -213,7 +213,7 @@ class PageManager(models.Manager):
             cur.close()
             # we cache that also if the user wants something uncached
             # because if we are already fetching it we can cache it.
-            cache.set(key, pagelist, 10000)
+            request_cache.set(key, pagelist, 10000)
         return pagelist
 
     def get_page_list(self, existing_only=True, nocache=False):

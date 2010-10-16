@@ -22,4 +22,4 @@ from werkzeug import Local, LocalManager
 local = Local()
 local_manager = LocalManager(local)
 current_request = local('request')
-request_cache = local('cache')
+_request_cache = local('cache')

@@ -43,7 +43,7 @@ import re
 from urlparse import urljoin
 from django.db import connection
 from inyoka.conf import settings
-from inyoka.utils.cache import cache
+from inyoka.utils.cache import cache, request_cache
 
 
 _block_re = re.compile(r'\{\{\{(?:\n?#.*?$)?(.*?)\}\}\}(?sm)')
@@ -80,7 +80,7 @@ class BaseStorage(object):
 
     def __init__(self):
         key = 'wiki/storage/' + self.behavior_key
-        self.data = cache.get(key)
+        self.data = request_cache.get(key)
         if self.data is not None:
             return
 
@@ -111,7 +111,7 @@ class BaseStorage(object):
         cur.close()
 
         self.data = self.combine_data(objects)
-        cache.set(key, self.data, 10000)
+        request_cache.set(key, self.data, 10000)
 
     def find_block(self, text):
         """Helper method that finds a processable block in the text."""

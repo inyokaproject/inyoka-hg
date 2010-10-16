@@ -23,7 +23,7 @@ from inyoka.utils.http import HttpResponsePermanentRedirect, HttpResponseForbidd
 from inyoka.utils.urls import get_resolver
 from inyoka.utils.database import session
 from inyoka.utils.flashing import has_flashed_messages
-from inyoka.utils.local import local, local_manager, request_cache
+from inyoka.utils.local import local, local_manager, _request_cache
 from inyoka.utils.timer import StopWatch
 from inyoka.utils.debug import inject_query_info
 
@@ -47,7 +47,7 @@ class CommonServicesMiddleware(CommonMiddleware):
         # create local cache object if it does not exist
         # (so that our cache is not overwriting it every time...)
         try:
-            request_cache._get_current_object()
+            _request_cache._get_current_object()
         except RuntimeError:
             local.cache = {}
 

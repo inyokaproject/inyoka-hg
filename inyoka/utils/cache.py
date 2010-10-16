@@ -10,7 +10,7 @@
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 from django.utils.encoding import force_unicode
-from inyoka.utils.local import current_request
+from inyoka.utils.local import current_request, _request_cache
 from inyoka.utils.debug import find_calling_context
 
 try:
@@ -22,6 +22,7 @@ from inyoka.conf import settings
 
 
 cache = (type('UnconfiguredCache', (object,), {}))()
+request_cache = None
 
 
 def _set_cache(obj):
@@ -40,14 +41,39 @@ def set_real_cache():
         _set_cache(MemcachedCache(servers, key_prefix=settings.CACHE_PREFIX))
     else:
         _set_cache(SimpleCache())
+
     if settings.DEBUG:
         global cache
         cache = CacheDebugProxy(cache)
+
+    global request_cache
+    request_cache = RequestCache(cache)
 
 
 def set_test_cache():
     """Enable a simple cache for unittests."""
     _set_cache(SimpleCache())
+
+
+class RequestCache(object):
+    """A helper cache to cache the requested stuff in a threadlocal."""
+    def __init__(self, real_cache):
+        self.real_cache = real_cache
+        self.request_cache = _request_cache
+
+    def get(self, key):
+        try:
+            return self.request_cache[key]
+        except KeyError:
+            val = self.real_cache.get(key)
+            if val is not None:
+                self.request_cache[key] = val
+
+            return val
+
+    def set(self, key, value, timeout=None):
+        self.request_cache[key] = value
+        return self.real_cache.set(key, value, timeout)
 
 
 class CacheDebugProxy(object):
