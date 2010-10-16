@@ -8,8 +8,10 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from os.path import join
 from inyoka.utils.html import escape
-from inyoka.utils.http import HttpResponse, PageNotFound
+from inyoka.utils.http import HttpResponse, PageNotFound, \
+    HttpResponsePermanentRedirect
 from inyoka.utils.cache import cache
 
 
@@ -48,7 +50,16 @@ def atom_feed(cache_key=None, available_counts=AVAILABLE_FEED_COUNTS):
             if kwargs.get('mode') not in ('full', 'short', 'title'):
                 raise PageNotFound()
 
-            kwargs['count'] = int(kwargs['count'])
+            kwargs['count'] = count = int(kwargs['count'])
+
+            #: Legacy: We changed the available feeds to only 25 items because
+            #:         of performance problems.  This exists to properly
+            #:         redirect users feedreaders to the new views.
+            if count in (10, 20, 30, 50, 75, 100) and count not in available_counts:
+                base_uri = u'/'.join(args[0].path.split('/')[:-2])
+                redirect_uri = join(base_uri, str(max(available_counts)))
+                return HttpResponsePermanentRedirect(redirect_uri)
+
             if kwargs['count'] not in available_counts:
                 raise PageNotFound()
 
