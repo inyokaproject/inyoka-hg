@@ -151,8 +151,8 @@ def render_query_table(request):
     if hasattr(request, 'cache_queries'):
         for query in request.cache_queries:
             qresult.append(render_string(TEMPLATE, {
-                'topic': escape(query[0][0]),
-                'query': u'Cache: %s' % escape(query[1]),
+                'topic': escape(u'%s from Cache' % query[0][0]),
+                'query': escape(query[1]),
                 'data': escape(repr(query[2])),
                 'duration': 0,
                 'odd': _odd
