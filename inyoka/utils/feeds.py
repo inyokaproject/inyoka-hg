@@ -13,6 +13,8 @@ from inyoka.utils.http import HttpResponse, PageNotFound
 from inyoka.utils.cache import cache
 
 
+AVAILABLE_FEED_COUNTS = (25,)
+
 # XXX: this module is in a slightly modified version part of
 # werkzeug.contrib.atom.  We should consider replacing it as
 # soon as the werkzeug switch is done
@@ -40,7 +42,7 @@ def _make_text_block(name, content, content_type=None):
     )
 
 
-def atom_feed(cache_key=None, available_counts=(10, 20, 30, 50)):
+def atom_feed(cache_key=None, available_counts=AVAILABLE_FEED_COUNTS):
     def decorator(f):
         def func(*args, **kwargs):
             if kwargs.get('mode') not in ('full', 'short', 'title'):

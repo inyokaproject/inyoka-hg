@@ -24,7 +24,7 @@ from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
     AccessDeniedResponse
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.utils.feeds import FeedBuilder
+from inyoka.utils.feeds import FeedBuilder, AVAILABLE_FEED_COUNTS
 from inyoka.utils.flashing import flash
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.actions import PAGE_ACTIONS
@@ -163,13 +163,13 @@ def get_image_resource(request):
     return HttpResponseRedirect(target)
 
 
-def feed(request, page_name=None, count=20):
+def feed(request, page_name=None, count=25):
     """
     Shows the wiki pages or all revisions of one page that match
     the given criteria in an atom feed.
     """
     count = int(count)
-    if count not in (10, 20, 30, 50, 50, 75, 100):
+    if count not in AVAILABLE_FEED_COUNTS:
         raise PageNotFound()
 
     new_cache = False

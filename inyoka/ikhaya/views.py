@@ -354,7 +354,7 @@ def article_feed(request, slug=None, mode='short', count=25):
     return feed
 
 
-@atom_feed('ikhaya/feeds/comments/%(id)s/%(mode)s/%(count)s', (25,))
+@atom_feed('ikhaya/feeds/comments/%(id)s/%(mode)s/%(count)s')
 @does_not_exist_is_404
 def comment_feed(request, id=None, mode='short', count=25):
     """

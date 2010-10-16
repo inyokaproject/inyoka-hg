@@ -100,8 +100,8 @@ def suggest(request):
     }
 
 
-@atom_feed('planet/feed/%(mode)s/%(count)s', (25,))
-def feed(request, mode='short', count=20):
+@atom_feed('planet/feed/%(mode)s/%(count)s')
+def feed(request, mode='short', count=25):
     """show the feeds for the planet"""
     feed = FeedBuilder(
         title=u'ubuntuusers Planet',
