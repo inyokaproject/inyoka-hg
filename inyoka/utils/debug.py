@@ -160,8 +160,9 @@ def render_query_table(request):
             _odd = not _odd
 
     result = [u'<div id="database_debug_table">']
-    stat = (u'<strong>(%d queries in %.2f ms)</strong>'
-            % (len(queries) + len(django_queries), total * 1000.0))
+    stat = (u'<strong>(%d queries in %.2f ms + %d cache requests)</strong>'
+            % (len(queries) + len(django_queries), total * 1000.0,
+              len(request.cache_queries)))
     result.append(stat)
     result.append(u'<div id="database_debug_table_inner"><ul>')
     result.extend(qresult)

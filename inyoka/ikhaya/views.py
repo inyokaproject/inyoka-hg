@@ -85,18 +85,16 @@ def index(request, year=None, month=None, category_slug=None, page=1):
     """Shows a few articles by different criteria"""
     category = None
     if year and month:
-        articles = Article.objects.filter(
-            pub_date__year=year,
-            pub_date__month=month
-        )
+        articles = Article.objects.only('pub_date', 'slug') \
+            .filter(pub_date__year=year, pub_date__month=month)
         link = (year, month)
     elif category_slug:
         category = Category.objects.get(slug=category_slug)
-        articles = category.article_set.all()
+        articles = Article.objects.filter(category=category).only('pub_date', 'slug')
         link = ('category', category_slug)
     else:
-        articles = Article.objects.all()
-        link = ()
+        articles = Article.objects.only('pub_date', 'slug').all()
+        link = tuple()
 
     can_read = request.user.can('article_read')
     if not can_read:
@@ -111,12 +109,15 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         set_session_info(request, u'sieht sich die <a href="%s">'
                                   u'Artikelübersicht</a> an' % link)
 
-    articles = articles.order_by('public', '-updated').select_related()
+    articles = articles.order_by('public', '-updated')
 
+    article_list = []
     pagination = Pagination(request, articles, page, 15, link)
+    for article in pagination.objects:
+        article_list.append(Article.objects.get_cached(article.pub_date, article.slug))
 
     return {
-        'articles':      list(pagination.objects),
+        'articles':      article_list,
         'pagination':    pagination,
         'category':      category
     }
@@ -125,9 +126,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 @templated('ikhaya/detail.html', modifier=context_modifier)
 def detail(request, year, month, day, slug):
     """Shows a single article."""
-    article = Article.objects.select_related().get(
-        pub_date=date(int(year), int(month), int(day)),
-        slug=slug)
+    article = Article.objects.get_cached(date(int(year), int(month), int(day)), slug)
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_read'):

@@ -50,6 +50,19 @@ class ArticleManager(models.Manager):
         #     we first need to delete referenced comments...
         super(ArticleManager, self).delete()
 
+    def get_cached(self, pub_date, slug):
+        article = cache.get('ikhaya/article/%s/%s' % (pub_date, slug))
+        if article is None:
+            article = self.select_related('author__username', 'category').get(slug=slug)
+            # render text and intro (and replace the getter to make caching
+            # possible)
+            article._rendered_text = unicode(article.rendered_text)
+            article._rendered_intro = unicode(article.rendered_intro)
+            article.text = None
+            article.intro = None
+            cache.set('ikhaya/article/%s/%s' % (pub_date, slug), article)
+        return article
+
 
 class SuggestionManager(models.Manager):
 
@@ -93,7 +106,7 @@ class Category(models.Model):
 
 
 class Article(models.Model):
-    objects = models.Manager()
+    objects = ArticleManager(all=True)
     published = ArticleManager(public=True)
     drafts = ArticleManager(public=False)
 
@@ -143,18 +156,19 @@ class Article(models.Model):
         if self.is_xhtml:
             return text
         context = RenderContext(current_request)
-        instructions = cache.get(key)
-        if instructions is None:
-            instructions = parse(text).compile('html')
-            cache.set(key, instructions)
+        instructions = parse(text).compile('html')
         return render(instructions, context)
 
     @property
     def rendered_text(self):
+        if hasattr(self, '_rendered_text'):
+            return self._rendered_text
         return self._render(self.text, 'ikhaya/article_text/%s' % self.id)
 
     @property
     def rendered_intro(self):
+        if hasattr(self, '_rendered_intro'):
+            return self._rendered_intro
         return self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
 
     @property
@@ -252,6 +266,7 @@ class Article(models.Model):
         cache.delete('ikhaya/article_intro/%s' % self.id)
         cache.delete('ikhaya/simple_text/%s' % self.id)
         cache.delete('ikhaya/simple_intro/%s' % self.id)
+        cache.delete('ikhaya/article/%s' % self.slug)
 
     def delete(self):
         """
