@@ -1055,8 +1055,6 @@ def group_edit(request, name=None):
                 changed_permissions = True
                 group.permissions = permissions
 
-            group.save()
-
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges_'):
