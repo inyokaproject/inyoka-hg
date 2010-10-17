@@ -518,8 +518,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             conds.append(Poll.id.in_(poll_ids))
         if topic:
             conds.append(Poll.topic_id == topic.id)
-        if conds:
-            polls = Poll.query.filter(db.or_(*conds)).all() if conds else []
+        polls = Poll.query.filter(db.or_(*conds)).all() if conds else []
 
 
 
