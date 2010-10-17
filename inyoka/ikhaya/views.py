@@ -111,13 +111,12 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 
     articles = articles.order_by('public', '-updated')
 
-    article_list = []
     pagination = Pagination(request, articles, page, 15, link)
-    for article in pagination.objects:
-        article_list.append(Article.objects.get_cached(article.pub_date, article.slug))
+    articles = Article.objects.get_cached([(a.pub_date, a.slug) for a in
+        pagination.objects])
 
     return {
-        'articles':      article_list,
+        'articles':      articles,
         'pagination':    pagination,
         'category':      category
     }
@@ -126,7 +125,11 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 @templated('ikhaya/detail.html', modifier=context_modifier)
 def detail(request, year, month, day, slug):
     """Shows a single article."""
-    article = Article.objects.get_cached(date(int(year), int(month), int(day)), slug)
+    try:
+        article = Article.objects.get_cached([(date(int(year), int(month),
+            int(day)), slug)])[0]
+    except KeyError:
+        raise PageNotFound
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_read'):

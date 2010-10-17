@@ -50,18 +50,25 @@ class ArticleManager(models.Manager):
         #     we first need to delete referenced comments...
         super(ArticleManager, self).delete()
 
-    def get_cached(self, pub_date, slug):
-        article = cache.get('ikhaya/article/%s/%s' % (pub_date, slug))
-        if article is None:
-            article = self.select_related('author__username', 'category').get(slug=slug)
-            # render text and intro (and replace the getter to make caching
-            # possible)
-            article._rendered_text = unicode(article.rendered_text)
-            article._rendered_intro = unicode(article.rendered_intro)
-            article.text = None
-            article.intro = None
-            cache.set('ikhaya/article/%s/%s' % (pub_date, slug), article)
-        return article
+    def get_cached(self, keys):
+        keys = map(lambda x: ('ikhaya/article/%s/%s' % x, x[0], x[1]), keys)
+        articles = cache.get_many(*[k[0] for k in keys])
+        for i, (key, pub_date, slug) in enumerate(keys):
+            if articles[i] is None:
+                try:
+                    articles[i] = article = self.select_related('author__username',
+                        'category').get(slug=slug, pub_date=pub_date)
+                except self.model.DoesNotExist:
+                    articles[i] = None
+                    continue
+                # render text and intro (and replace the getter to make caching
+                # possible)
+                article._rendered_text = unicode(article.rendered_text)
+                article._rendered_intro = unicode(article.rendered_intro)
+                article.text = None
+                article.intro = None
+                cache.set(key, article)
+        return filter(None, articles)
 
 
 class SuggestionManager(models.Manager):
@@ -233,6 +240,10 @@ class Article(models.Model):
         """
         This increases the edit count by 1 and updates the xapian database.
         """
+        if self.text is None or self.intro is None:
+            # might happen, because cached objects are setting text and
+            # intro to None to save some space
+            raise ValueError(u'text and intro must not be null')
         suffix_id = False
         if not self.updated or self.updated < self.pub_datetime:
             self.updated = self.pub_datetime
@@ -344,8 +355,8 @@ class Comment(models.Model):
 
     def save(self, force_insert=False, force_update=False):
         if self.id is None:
-            self.article.comment_count += 1
-            self.article.save()
+            Article.objects.filter(id=self.article.id) \
+                .update(comment_count=models.F('comment_count')+1)
         context = RenderContext(current_request)
         node = parse(self.text, wiki_force_existing=False)
         self.rendered_text = node.render(context, 'html')
