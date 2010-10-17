@@ -370,7 +370,7 @@ class PageManager(models.Manager):
             rev = cache.get(key)
         if rev is None:
             try:
-                rev = Revision.objects.select_related(depth=2) \
+                rev = Revision.objects.select_related('page', 'text', 'user') \
                                       .filter(page__name__exact=name) \
                                       .latest()
             except Revision.DoesNotExist:
@@ -395,7 +395,8 @@ class PageManager(models.Manager):
         """
         if rev is None:
             return self.get_by_name(name, True, raise_on_deleted)
-        rev = Revision.objects.select_related(depth=2).get(id=int(rev))
+        rev = Revision.objects.select_related('page', 'test', 'user').\
+                get(id=int(rev))
         # XXX: comparison of .lower() is right for us because of our mysql
         #      charset, but is it right for everyone?
         if rev.page.name.lower() != name.lower() or \
