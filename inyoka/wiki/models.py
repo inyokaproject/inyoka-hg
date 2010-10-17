@@ -204,9 +204,7 @@ class PageManager(models.Manager):
             cur.execute('''
                 select p.name, r.deleted, r.id, r.attachment_id is null
                   from wiki_page p, wiki_revision r
-                 where p.id = r.page_id and r.id = (
-                 select max(id) from wiki_revision
-                 where page_id = p.id)
+                 where p.id = r.page_id and r.id = p.last_rev_id
                  order by p.name
             ''')
             pagelist = cur.fetchall()
@@ -336,9 +334,7 @@ class PageManager(models.Manager):
                 select m.value from wiki_metadata m, wiki_page p,
                         wiki_revision r
                     where m.key = 'X-Link' and m.value = p.name and r.deleted
-                        and p.id = r.page_id and r.id = (
-                            select max(id) from wiki_revision
-                                where page_id = p.id)
+                        and p.id = r.page_id and r.id = p.last_rev_id = r.id
                 ''')
             pages.union(x[0] for x in cur.fetchall())
         finally:
@@ -375,13 +371,13 @@ class PageManager(models.Manager):
                                       .latest()
             except Revision.DoesNotExist:
                 raise Page.DoesNotExist()
-        if not nocache:
-            try:
-                cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
-            except (IndexError, ValueError):
-                cachetime = None
-            rev.prepare_for_caching()
-            cache.set(key, rev, cachetime)
+            if not nocache:
+                try:
+                    cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
+                except (IndexError, ValueError):
+                    cachetime = None
+                rev.prepare_for_caching()
+                cache.set(key, rev, cachetime)
         page = rev.page
         page.rev = rev
         if rev.deleted and raise_on_deleted:
@@ -530,7 +526,7 @@ class PageManager(models.Manager):
                 displays in the revision log if the `note` is not changed to
                 something reasonable.
 
-            remote_addr
+            remote_addrblub
                 The remote address of the user that created this page.  Either
                 remote_addr or user is required.  This decision was made so
                 that no confusion comes up when creating page objects in the
@@ -565,6 +561,8 @@ class PageManager(models.Manager):
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
         page.rev.save()
+        page.last_rev_id = page.rev.id
+        page.save()
         if update_meta:
             page.update_meta()
         return page
@@ -794,6 +792,8 @@ class Page(models.Model):
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True, db_index=True)
     topic_id = models.IntegerField(null=True)
+    last_rev_id = models.IntegerField(models.ForeignKey('revision.id'),
+            null=True)
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -1129,6 +1129,8 @@ class Page(models.Model):
                             change_date=change_date, note=note,
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
+        self.rev.save()
+        self.last_rev_id = self.rev.id
         self.save(update_meta=update_meta)
         if (deleted and rev and not rev.deleted) or \
            (not deleted and rev and rev.deleted):
@@ -1307,13 +1309,17 @@ class Revision(models.Model):
         note = (note and note + ' ' or '') + '[Revision vom ' + \
                datetime_to_timezone(self.change_date).strftime(
                    '%d.%m.%Y %H:%M %Z') + \
-               (' von %s wiederhergestellt]' % self.user.username)
-        new_rev = Revision(page=self.page, text=self.text, user=user or
-                           self.user, change_date=datetime.utcnow(),
+               (' von %s wiederhergestellt]' % (
+                   self.user.username if self.user else self.remote_addr))
+        new_rev = Revision(page=self.page, text=self.text,
+                           user=(user if user.is_authenticated else None),
+                           change_date=datetime.utcnow(),
                            note=note, deleted=False, remote_addr=
                            remote_addr or '127.0.0.1',
                            attachment=self.attachment)
         new_rev.save()
+        self.page.last_rev_id = new_rev.id
+        self.page.save()
         return new_rev
 
     def save(self, force_insert=False, force_update=False):
