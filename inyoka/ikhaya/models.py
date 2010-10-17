@@ -51,6 +51,16 @@ class ArticleManager(models.Manager):
         super(ArticleManager, self).delete()
 
     def get_cached(self, keys):
+        """Get some articles from the cache. `keys` must be a list with
+        (pub_date, slug) pairs. Missing entries from the cache are
+        automatically fetched from the database. This method should be
+        also used for retrieving single objects.
+
+        ATTENTION: All articles which are returned from this function
+        don't contain any text or intro (but they will contain rendered_text
+        and rendered_intro). So do NEVER save any article returned by
+        this function.
+        """
         keys = map(lambda x: ('ikhaya/article/%s/%s' % x, x[0], x[1]), keys)
         articles = cache.get_many(*[k[0] for k in keys])
         for i, (key, pub_date, slug) in enumerate(keys):
