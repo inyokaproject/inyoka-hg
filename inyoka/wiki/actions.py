@@ -391,7 +391,8 @@ def do_edit(request, name):
     # conflict.  We do that before the actual form processing
     merged_this_request = False
     try:
-        edit_time = datetime.utcfromtimestamp(int(request.POST['edit_time']))
+        # Don't change to utcfromtimestamp, the data is already in utc.
+        edit_time = datetime.fromtimestamp(int(request.POST['edit_time']))
     except (KeyError, ValueError):
         edit_time = datetime.utcnow()
     if rev is None:
