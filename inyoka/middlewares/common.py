@@ -51,9 +51,6 @@ class CommonServicesMiddleware(CommonMiddleware):
         except RuntimeError:
             local.cache = {}
 
-        if not hasattr(request, 'queries'):
-            request.queries = []
-
         # Start time tracker
         request.watch = StopWatch()
         request.watch.start()

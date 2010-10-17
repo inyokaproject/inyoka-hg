@@ -131,11 +131,12 @@ class ConnectionDebugProxy(ConnectionProxy):
             end = time.time()
             if current_request and not 'EXPLAIN' in statement:
                 request = current_request._get_current_object()
-                if request is not None:
-                    explain = getattr(self, '_explain', None)
-                    request.queries.append((statement, parameters, start, end,
-                                            find_calling_context(), explain))
-                    self._explain = None
+                if not hasattr(request, 'queries'):
+                    request.queries = list()
+                explain = getattr(self, '_explain', None)
+                request.queries.append((statement, parameters, start, end,
+                                        find_calling_context(), explain))
+                self._explain = None
 
     def execute(self, conn, execute, clause, *multiparams, **params):
         uclause = unicode(clause)

@@ -93,7 +93,10 @@ def render_query_table(request):
     """Renders a nice table of all queries in the page."""
     from inyoka.utils.templating import render_string
 
-    queries = request.queries
+    queries = request.queries if hasattr(request, 'queries') else []
+    cache_queries = request.cache_queries if\
+                         hasattr(request, 'cache_queries') else []
+
     total = 0
 
     qresult = []
@@ -148,21 +151,20 @@ def render_query_table(request):
         total += float(query['time'] / 1000.0)
 
     # add cache queries
-    if hasattr(request, 'cache_queries'):
-        for query in request.cache_queries:
-            qresult.append(render_string(TEMPLATE, {
-                'topic': escape(u'%s from Cache' % query[0][0]),
-                'query': escape(query[1]),
-                'data': escape(query[2]),
-                'duration': 0,
-                'odd': _odd
-            }))
-            _odd = not _odd
+    for query in cache_queries:
+        qresult.append(render_string(TEMPLATE, {
+            'topic': escape(u'%s from Cache' % query[0][0]),
+            'query': escape(query[1]),
+            'data': escape(query[2]),
+            'duration': 0,
+            'odd': _odd
+        }))
+        _odd = not _odd
 
     result = [u'<div id="database_debug_table">']
     stat = (u'<strong>(%d queries in %.2f ms + %d cache requests)</strong>'
             % (len(queries) + len(django_queries), total * 1000.0,
-              len(request.cache_queries)))
+               len(cache_queries)))
     result.append(stat)
     result.append(u'<div id="database_debug_table_inner"><ul>')
     result.extend(qresult)
@@ -189,8 +191,7 @@ def render_query_table(request):
 
 def inject_query_info(request, response):
     """Injects the collected queries into the response."""
-    if not request.queries and not connection.queries:
-        return
+
     debug_info = render_query_table(request).encode('utf-8')
 
     body = response.content
