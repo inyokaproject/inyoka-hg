@@ -79,11 +79,11 @@ def _get_privilege_map(user, forum_ids):
     cols = (P.forum_id, P.positive, P.negative, P.user_id)
 
     # construct the query, but do not execute it yet for caching reasons
-    query = db.session.query(*cols).filter(db.and_(
+    query = db.session.query(*cols).filter(
         db.or_(Privilege.user_id == user.id,
                Privilege.group_id.in_(groups),
                Privilege.group_id == (user.is_anonymous and -1 or DEFAULT_GROUP_ID))
-    ))
+    )
 
     # If we have an anonymous user we can cache the results
     # We do that for all forums, this makes it possible to cache the privileges.
