@@ -166,9 +166,11 @@ class PrivateMessage(models.Model):
     def get_absolute_url(self, action='show'):
         if action == 'show':
             return href('portal', 'privmsg', self.id)
-        if action == 'reply':
+        elif action == 'reply':
             return href('portal', 'privmsg', 'new', reply_to=self.id)
-        if action == 'forward':
+        elif action == 'reply_to_all':
+            return href('portal', 'privmsg', 'new', reply_to_all=self.id)
+        elif action == 'forward':
             return href('portal', 'privmsg', 'new', forward=self.id)
 
 
@@ -202,6 +204,8 @@ class PrivateMessageEntry(models.Model):
                         self.id)
         elif action == 'reply':
             return href('portal', 'privmsg', 'new', reply_to=self.message_id)
+        elif action == 'reply_to_all':
+            return href('portal', 'privmsg', 'new', reply_to_all=self.message_id)
         elif action == 'forward':
             return href('portal', 'privmsg', 'new', forward=self.message_id)
 

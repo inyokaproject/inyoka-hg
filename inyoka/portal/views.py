@@ -994,12 +994,13 @@ def privmsg_new(request, username=None):
     else:
         data = {}
         reply_to = request.GET.get('reply_to', '')
+        reply_to_all = request.GET.get('reply_to_all', '')
         forward = request.GET.get('forward', '')
         try:
-            int(reply_to or forward)
+            int(reply_to or reply_to_all or forward)
         except ValueError:
-            if ':' in (reply_to or forward):
-                x = reply_to or forward
+            if ':' in (reply_to or reply_to_all or forward):
+                x = reply_to or reply_to_all or forward
                 REPLIABLES = {
                     'suggestion': (
                         lambda id: Suggestion.objects.get(id=int(id)),
@@ -1038,12 +1039,14 @@ def privmsg_new(request, username=None):
         else:
             try:
                 entry = PrivateMessageEntry.objects.get(user=request.user,
-                    message=int(reply_to or forward))
+                    message=int(reply_to or reply_to_all or forward))
                 msg = entry.message
                 data['subject'] = msg.subject.lower().startswith(u're: ') and \
                                   msg.subject or u'Re: %s' % msg.subject
-                if reply_to:
+                if reply_to or reply_to_all:
                     data['recipient'] = msg.author.username
+                if reply_to_all:
+                    data['recipient'] += ';'+';'.join(x.username for x in msg.recipients if x != request.user)
                 data['text'] = quote_text(msg.text, msg.author) + '\n'
                 form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist):
