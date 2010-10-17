@@ -63,11 +63,13 @@ class ArticleManager(models.Manager):
         """
         keys = map(lambda x: ('ikhaya/article/%s/%s' % x, x[0], x[1]), keys)
         articles = cache.get_many(*[k[0] for k in keys])
+        cache_vals = {}
         for i, (key, pub_date, slug) in enumerate(keys):
             if articles[i] is None:
                 try:
-                    articles[i] = article = self.select_related('author__username',
-                        'category').get(slug=slug, pub_date=pub_date)
+                    cache_vals[key] = articles[i] = article = \
+                        self.select_related('author__username', 'category').get(
+                            slug=slug, pub_date=pub_date)
                 except self.model.DoesNotExist:
                     articles[i] = None
                     continue
@@ -77,7 +79,7 @@ class ArticleManager(models.Manager):
                 article._rendered_intro = unicode(article.rendered_intro)
                 article.text = None
                 article.intro = None
-                cache.set(key, article)
+        if len(cache_vals): cache.set_many(cache_vals)
         return filter(None, articles)
 
 
