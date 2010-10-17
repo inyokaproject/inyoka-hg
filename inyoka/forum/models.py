@@ -1439,8 +1439,7 @@ class Poll(db.Model):
                       index=True)
     start_time = db.Column(db.DateTime(timezone=False), nullable=False,
                         default=datetime.utcnow())
-    end_time = db.Column(db.DateTime(timezone=False), nullable=False,
-                      default=datetime.utcnow())
+    end_time = db.Column(db.DateTime(timezone=False), nullable=True)
     multiple_votes = db.Column(db.Boolean, default=False, nullable=False)
 
     # relationship configuration
