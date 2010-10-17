@@ -355,11 +355,7 @@ class PageManager(models.Manager):
                 AND    m.value = p.name
                 AND    r.deleted
                 AND    p.id = r.page_id
-                AND    r.id =
-                       ( SELECT MAX(id)
-                       FROM    wiki_revision
-                       WHERE   page_id = p.id
-                       );
+                AND    r.id = p.lasT_rev_id
                 ''')
             pages.union(x[0] for x in cur.fetchall())
         finally:
@@ -561,7 +557,7 @@ class PageManager(models.Manager):
                 displays in the revision log if the `note` is not changed to
                 something reasonable.
 
-            remote_addr
+            remote_addrblub
                 The remote address of the user that created this page.  Either
                 remote_addr or user is required.  This decision was made so
                 that no confusion comes up when creating page objects in the
