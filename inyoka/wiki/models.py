@@ -557,7 +557,7 @@ class PageManager(models.Manager):
                 displays in the revision log if the `note` is not changed to
                 something reasonable.
 
-            remote_addr
+            remote_addrblub
                 The remote address of the user that created this page.  Either
                 remote_addr or user is required.  This decision was made so
                 that no confusion comes up when creating page objects in the
