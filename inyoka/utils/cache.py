@@ -62,17 +62,22 @@ class RequestCache(object):
         self.request_cache = _request_cache
 
     def get(self, key):
-        try:
-            return self.request_cache[key]
-        except KeyError:
-            val = self.real_cache.get(key)
-            if val is not None:
-                self.request_cache[key] = val
+        if self.request_cache:
+            try:
+                return self.request_cache[key]
+            except KeyError:
+                val = self.real_cache.get(key)
+                if val is not None:
+                    self.request_cache[key] = val
 
-            return val
+                return val
+        else:
+            return self.real_cache.get(key)
+
 
     def set(self, key, value, timeout=None):
-        self.request_cache[key] = value
+        if self.request_cache:
+            self.request_cache[key] = value
         return self.real_cache.set(key, value, timeout)
 
 
