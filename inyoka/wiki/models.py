@@ -355,7 +355,7 @@ class PageManager(models.Manager):
                 AND    m.value = p.name
                 AND    r.deleted
                 AND    p.id = r.page_id
-                AND    r.id = p.lasT_rev_id
+                AND    r.id = p.last_rev_id;
                 ''')
             pages.union(x[0] for x in cur.fetchall())
         finally:
