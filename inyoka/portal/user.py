@@ -491,7 +491,7 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
-    is_anonymous = property(lambda x: x.username == INYOKA_ANONYMOUS_USER)
+    is_anonymous = property(lambda x: x.username == settings.INYOKA_ANONYMOUS_USER)
     is_authenticated = property(lambda x: not x.is_anonymous)
     is_active = property(lambda x: x.status == 1)
     is_banned = property(lambda x: x.status == 2)
