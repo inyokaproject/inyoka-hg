@@ -92,6 +92,13 @@
   <hr class="divider" />
   <div class="search_results">
   {%- if query %}
+    {%- if wiki_result %}
+      <p>
+        Es wurde ein Artikel gefunden, der genau dem Suchbegriff entspricht:
+        <img src="{{ href('static', 'img/icons/small/wiki.png') }}" alt="Wiki" title="Wiki" />
+        <a href="{{ wiki_result.url }}">{{ wiki_result.title }}</a>
+      </p>
+    {%- endif %}
   {% if results.results %}{{ pagination }}{% endif %}
   <ul class="search_results">
     {%- for doc in results.results if not doc.hidden %}
