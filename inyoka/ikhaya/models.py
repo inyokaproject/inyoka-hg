@@ -91,8 +91,9 @@ class SuggestionManager(models.Manager):
         """
         cur = connection.cursor()
         cur.execute('''
-            delete from ikhaya_suggestion
-             where id in (%s)
+            DELETE
+            FROM   ikhaya_suggestion
+            WHERE  id IN (%s);
         ''' % ', '.join(['%s'] * len(ids)), list(ids))
         cur.close()
         connection._commit()
@@ -281,7 +282,9 @@ class Article(models.Model):
             self.slug = '%s-%s' % (self.slug, self.id)
             cur = connection.cursor()
             cur.execute('''
-                update ikhaya_article set slug = %s where id = %s
+                UPDATE ikhaya_article
+                SET    slug = %s
+                WHERE  id   = %s;
             ''', [self.slug, self.id])
         cache.delete('ikhaya/archive')
         cache.delete('ikhaya/short_archive')
@@ -434,7 +437,7 @@ class IkhayaSearchAdapter(SearchAdapter):
 
     def get_doc_ids(self):
         cur = connection.cursor()
-        cur.execute('select id from ikhaya_article')
+        cur.execute('SELECT id FROM ikhaya_article;')
         for row in cur.fetchall():
             yield row[0]
         cur.close()

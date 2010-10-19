@@ -511,9 +511,9 @@ class User(models.Model):
         """Increment the post count in a safe way."""
         cur = connection.cursor()
         cur.execute('''
-            update portal_user
-               set post_count = post_count + 1
-             where id = %s;
+            UPDATE portal_user
+            SET    post_count = post_count + 1
+            WHERE  id         = %s;
         ''', [self.id])
         cur.close()
         connection._commit()

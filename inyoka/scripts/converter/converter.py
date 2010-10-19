@@ -708,7 +708,7 @@ def convert_attachments():
           attachment_table.c.post_id != 0))
 
     att_dict = {}
-    conn.execute('set session transaction isolation level read committed')
+    conn.execute('SET session transaction ISOLATION level read committed')
 #    for row in select_blocks(sel):
     for row in conn.execute(sel):
         try:
@@ -723,7 +723,7 @@ def convert_attachments():
         session.commit()
 
     cur = connection.cursor()
-    cur.execute('set session transaction isolation level read committed')
+    cur.execute('SET session transaction ISOLATION level read committed')
     cur.execute('UPDATE forum_attachment SET post_id = null')
     connection._commit()
 

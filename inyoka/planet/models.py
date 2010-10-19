@@ -171,7 +171,7 @@ class PlanetSearchAdapter(SearchAdapter):
 
     def get_doc_ids(self):
         cur = connection.cursor()
-        cur.execute('select id from planet_entry')
+        cur.execute('SELECT id FROM planet_entry;')
         for row in cur.fetchall():
             yield row[0]
         cur.close()
