@@ -67,7 +67,7 @@ class WikiSearchAdapter(SearchAdapter):
 
     def get_doc_ids(self):
         cur = connection.cursor()
-        cur.execute('select id from wiki_page')
+        cur.execute('SELECT id FROM wiki_page;')
         for row in cur.fetchall():
             yield row[0]
         cur.close()

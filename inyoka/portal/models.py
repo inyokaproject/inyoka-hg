@@ -48,8 +48,10 @@ class SubscriptionManager(models.Manager):
             raise TypeError('user_subscribed takes exactly 3 arguments (2 given)')
         cursor = connection.cursor()
         cursor.execute('''
-            select 1 from portal_subscription
-             where user_id = %%s and %s = %%s
+            SELECT 1
+            FROM   portal_subscription
+            WHERE  user_id = %%s
+            AND    %s      = %%s;
         ''' % column, [user.id, ident])
         row = cursor.fetchone()
         cursor.close()
@@ -62,8 +64,10 @@ class SubscriptionManager(models.Manager):
         cur = connection.cursor()
 
         query = '''
-            delete from portal_subscription
-             where id in (%(id_list)s) and user_id = %(user_id)d
+            DELETE
+            FROM   portal_subscription
+            WHERE  id IN (%(id_list)s)
+            AND    user_id = %(user_id)d;
         ''' % {'id_list': ','.join(['%s'] * len(ids)),
                'user_id': int(user_id)}
 
@@ -80,9 +84,10 @@ class SubscriptionManager(models.Manager):
         cur = connection.cursor()
 
         query = '''
-            update portal_subscription
-            set notified = 0
-            where id in (%(id_list)s) and user_id = %(user_id)d
+            UPDATE portal_subscription
+            SET    notified = 0
+            WHERE  id IN (%(id_list)s)
+            AND    user_id = %(user_id)d;
             ''' % {
                 'id_list': ','.join(['%s'] * len(ids)),
                 'user_id': int(user_id)
@@ -217,18 +222,21 @@ class PrivateMessageEntry(models.Model):
 
         trash = PRIVMSG_FOLDERS['trash'][0]
         query = u'''
-            update portal_privatemessageentry p
-                set p.folder = case
-                        when p.folder = %(trash)s
-                        then null
-                        else %(trash)s
-                        end,
-                    p.read = case
-                        when p.folder = %(trash)s
-                        then true
-                        else p.read
-                        end
-                where p.id in (%(ids)s) and p.user_id = %(user_id)s;
+            UPDATE portal_privatemessageentry p
+            SET    p.folder =
+                   CASE
+                        WHEN p.folder = %(trash)s
+                        THEN NULL
+                        ELSE %(trash)s
+                   END,
+                   p.read =
+                   CASE
+                        WHEN p.folder = %(trash)s
+                        THEN true
+                        ELSE p.read
+                   END
+            WHERE  p.id IN (%(ids)s)
+            AND    p.user_id = %(user_id)s;
         ''' % {'ids':    ','.join(['%s']*len(ids)),
                'trash': trash,
                'user_id': user_id}
@@ -526,8 +534,13 @@ class SearchQueueManager(models.Manager):
         cursor = connection.cursor()
         s = ('("' + component + '", %s)',)
         cursor.execute('''
-            insert into portal_searchqueue (component, doc_id)
-                values %s;
+            INSERT
+            INTO   portal_searchqueue
+                   (
+                        component,
+                        doc_id
+                   )
+                   VALUES %s;
         ''' % ', '.join(s * len(ids)), ids)
         cursor.close()
         connection._commit()
@@ -537,9 +550,7 @@ class SearchQueueManager(models.Manager):
         Remove all elements, which are smaller (or equal)
         than last_id from the queue."""
         cursor = connection.cursor()
-        cursor.execute('''
-            delete from portal_searchqueue
-                  where id <= %d
+        cursor.execute('''DELETE FROM portal_searchqueue WHERE id <= %d;
         ''' % last_id)
         cursor.close()
         connection._commit()

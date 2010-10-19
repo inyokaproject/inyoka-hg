@@ -86,22 +86,27 @@ class BaseStorage(object):
 
         cur = connection.cursor()
         cur.execute('''
-            select t.value, p.name
-              from wiki_page p,
-                   wiki_revision r,
-                   wiki_text t,
-                   wiki_metadata m
-             where p.id = r.page_id and
-                   p.id = m.page_id and
-                   t.id = r.text_id and
-                   r.id = (select max(id)
-                             from wiki_revision
-                            where page_id = p.id) and
-                   not r.deleted and
-                   m.key = 'X-Behave' and
-                   m.value = %s
-          group by r.id, t.value, p.name
-          order by p.name
+            SELECT   t.value,
+                     p.name
+            FROM     wiki_page p    ,
+                     wiki_revision r,
+                     wiki_text t    ,
+                     wiki_metadata m
+            WHERE    p.id = r.page_id
+            AND      p.id = m.page_id
+            AND      t.id = r.text_id
+            AND      r.id =
+                     (SELECT MAX(id)
+                     FROM    wiki_revision
+                     WHERE   page_id = p.id
+                     )
+            AND      NOT r.deleted
+            AND      m.key   = 'X-Behave'
+            AND      m.value = %s
+            GROUP BY r.id   ,
+                     t.value,
+                     p.name
+            ORDER BY p.name;
         ''', [self.behavior_key])
 
         objects = []
@@ -195,18 +200,21 @@ class SmileyMap(DictStorage):
 
         cur = connection.cursor()
         cur.execute('''
-            select a.file, p.name
-              from wiki_page p,
+            SELECT a.file,
+                   p.name
+            FROM   wiki_page p    ,
                    wiki_revision r,
                    wiki_attachment a
-             where p.name in (%s)
-               and r.page_id = p.id
-               and r.id = (select max(id)
-                             from wiki_revision
-                            where page_id = p.id)
-               and not r.deleted
-               and r.attachment_id = a.id
-         ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
+            WHERE  p.name IN (%s)
+            AND    r.page_id = p.id
+            AND    r.id      =
+                   (SELECT MAX(id)
+                   FROM    wiki_revision
+                   WHERE   page_id = p.id
+                   )
+            AND    NOT r.deleted
+            AND    r.attachment_id = a.id;
+        ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
 
         result = []
         for filename, page in cur.fetchall():

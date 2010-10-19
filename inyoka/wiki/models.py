@@ -129,11 +129,13 @@ class PageManager(models.Manager):
         """
         cur = connection.cursor()
         cur.execute('''
-            select r.id
-              from wiki_revision r, wiki_page p
-             where p.name = %s and p.id = r.page_id
-          order by r.id desc
-             limit 1, %s;
+            SELECT   r.id
+            FROM     wiki_revision r,
+                     wiki_page p
+            WHERE    p.name = %s
+            AND      p.id   = r.page_id
+            ORDER BY r.id DESC
+            LIMIT    1, %s;
         ''', [name, abs(offset)])
         row = cur.fetchone()
         cur.close()
@@ -161,11 +163,12 @@ class PageManager(models.Manager):
         cur = connection.cursor()
         count_field = connection.ops.quote_name('count')
         cur.execute('''
-            select w.value, count(w.value) as %s
-              from wiki_metadata w
-             where w.key = 'tag'
-          group by w.value
-          order by %s desc %s;
+            SELECT   w.value,
+            COUNT(w.value) AS %s
+            FROM     wiki_metadata w
+            WHERE    w.key = 'tag'
+            GROUP BY w.value
+            ORDER BY %s DESC %s;
         ''' % (count_field, count_field , (max is not None and 'limit %d' % max or '')))
         try:
             return [{
@@ -202,12 +205,19 @@ class PageManager(models.Manager):
         if pagelist is None:
             cur = connection.cursor()
             cur.execute('''
-                select p.name, r.deleted, r.id, r.attachment_id is null
-                  from wiki_page p, wiki_revision r
-                 where p.id = r.page_id and r.id = (
-                 select max(id) from wiki_revision
-                 where page_id = p.id)
-                 order by p.name
+                SELECT   p.name   ,
+                         r.deleted,
+                         r.id     ,
+                         r.attachment_id IS NULL
+                FROM     wiki_page p,
+                         wiki_revision r
+                WHERE    p.id = r.page_id
+                AND      r.id =
+                         ( SELECT MAX(id)
+                         FROM    wiki_revision
+                         WHERE   page_id = p.id
+                         )
+                ORDER BY p.name;
             ''')
             pagelist = cur.fetchall()
             cur.close()
@@ -265,9 +275,12 @@ class PageManager(models.Manager):
         """
         cursor = connection.cursor()
         cursor.execute('''
-            select m.value from wiki_metadata m, wiki_page p
-             where m.key = 'X-Owner' and m.page_id = p.id and
-                   p.name = %s;
+            SELECT m.value
+            FROM   wiki_metadata m,
+                   wiki_page p
+            WHERE  m.key     = 'X-Owner'
+            AND    m.page_id = p.id
+            AND    p.name    = %s;
         ''', [page_name])
         try:
             return set(x[0] for x in cursor.fetchall())
@@ -285,9 +298,12 @@ class PageManager(models.Manager):
             return []
         cursor = connection.cursor()
         cursor.execute('''
-            select p.name from wiki_metadata m, wiki_page p
-             where m.key = 'X-Owner' and m.page_id = p.id and
-                   m.value in (%s);
+        SELECT p.name
+        FROM   wiki_metadata m,
+               wiki_page p
+        WHERE  m.key     = 'X-Owner'
+        AND    m.page_id = p.id
+        AND    m.value IN (%s);
         ''' % ', '.join(['%s'] * len(owners)), list(owners))
         try:
             return set(x[0] for x in cursor.fetchall())
@@ -303,15 +319,23 @@ class PageManager(models.Manager):
         ignore = set([settings.WIKI_MAIN_PAGE])
         cur = connection.cursor()
         cur.execute('''
-            select p.name, r.id from wiki_page p
-                left outer join wiki_metadata m
-                    on m.key = 'X-Link' and p.name = m.value,
-                wiki_revision r
-            where r.page_id = p.id and r.attachment_id is NULL
-                and m.id is NULL and r.id = (select max(id)
-                    from wiki_revision where page_id = p.id)
-                and r.deleted = 0
-            order by p.name
+        SELECT   p.name,
+                 r.id
+        FROM     wiki_page p
+                 LEFT OUTER JOIN wiki_metadata m
+                 ON       m.key  = 'X-Link'
+                 AND      p.name = m.value,
+                          wiki_revision r
+        WHERE    r.page_id             = p.id
+        AND      r.attachment_id IS NULL
+        AND      m.id            IS NULL
+        AND      r.id                  =
+                 (SELECT MAX(id)
+                 FROM    wiki_revision
+                 WHERE   page_id = p.id
+                 )
+        AND      r.deleted = 0
+        ORDER BY p.name;
         ''')
         try:
             return [x[0] for x in cur.fetchall() if x[0] not in ignore]
@@ -327,18 +351,28 @@ class PageManager(models.Manager):
         cur = connection.cursor()
         try:
             cur.execute('''
-                select m.value from wiki_metadata m
-                    left outer join wiki_page p on m.value = p.name
-                    where m.key = 'X-Link' and p.id is NULL
+                SELECT m.value
+                FROM   wiki_metadata m
+                       LEFT OUTER JOIN wiki_page p
+                       ON     m.value = p.name
+                WHERE  m.key          = 'X-Link'
+                AND    p.id     IS NULL;
                 ''')
             pages = set(x[0] for x in cur.fetchall())
             cur.execute('''
-                select m.value from wiki_metadata m, wiki_page p,
-                        wiki_revision r
-                    where m.key = 'X-Link' and m.value = p.name and r.deleted
-                        and p.id = r.page_id and r.id = (
-                            select max(id) from wiki_revision
-                                where page_id = p.id)
+                SELECT m.value
+                FROM   wiki_metadata m,
+                       wiki_page p    ,
+                       wiki_revision r
+                WHERE  m.key   = 'X-Link'
+                AND    m.value = p.name
+                AND    r.deleted
+                AND    p.id = r.page_id
+                AND    r.id =
+                       ( SELECT MAX(id)
+                       FROM    wiki_revision
+                       WHERE   page_id = p.id
+                       );
                 ''')
             pages.union(x[0] for x in cur.fetchall())
         finally:
@@ -422,9 +456,12 @@ class PageManager(models.Manager):
         """Return a list of page names tagged with `tag`."""
         cur = connection.cursor()
         cur.execute('''
-            select p.name
-              from wiki_page p, wiki_metadata m
-             where m.key = 'tag' and m.value=%s and m.page_id = p.id;
+            SELECT p.name
+            FROM   wiki_page p,
+                   wiki_metadata m
+            WHERE  m.key     = 'tag'
+            AND    m.value   =%s
+            AND    m.page_id = p.id;
         ''', (tag,))
         try:
             return [x[0] for x in cur.fetchall()]
@@ -439,11 +476,18 @@ class PageManager(models.Manager):
         """
         cursor = connection.cursor()
         cursor.execute('''
-            select a.file, max(r.id)
-              from wiki_attachment a, wiki_revision r, wiki_page p
-             where r.page_id = p.id and r.attachment_id = a.id and
-                   p.name = %s and not r.deleted
-          group by a.file, r.id order by r.id desc;
+            SELECT   a.file,
+                     MAX(r.id)
+            FROM     wiki_attachment a,
+                     wiki_revision r  ,
+                     wiki_page p
+            WHERE    r.page_id       = p.id
+            AND      r.attachment_id = a.id
+            AND      p.name          = %s
+            AND      NOT r.deleted
+            GROUP BY a.file,
+                     r.id
+            ORDER BY r.id DESC;
         ''', [page_name])
         row = cursor.fetchone()
         if row:
@@ -850,9 +894,10 @@ class Page(models.Model):
         """
         cur = connection.cursor()
         cur.execute('''
-            select m.value
-              from wiki_metadata m
-             where m.page_id = %s and m.key = 'X-Link'
+            SELECT m.value
+            FROM   wiki_metadata m
+            WHERE  m.page_id = %s
+            AND    m.key     = 'X-Link'
         ''', [self.id])
         try:
             return [x[0] for x in cur.fetchall()]
@@ -868,9 +913,10 @@ class Page(models.Model):
         """
         cur = connection.cursor()
         cur.execute('''
-            select m.key, m.value
-              from wiki_metadata m
-             where m.page_id = %s
+            SELECT m.key,
+                   m.value
+            FROM   wiki_metadata m
+            WHERE  m.page_id = %s;
         ''', [self.id])
         try:
             return MultiMap(cur.fetchall())
@@ -925,9 +971,11 @@ class Page(models.Model):
 
         cur = connection.cursor()
         cur.execute('''
-            select m.id, m.key, m.value
-              from wiki_metadata m
-             where m.page_id = %s
+            SELECT m.id ,
+                   m.key,
+                   m.value
+            FROM   wiki_metadata m
+            WHERE  m.page_id = %s;
         ''', [self.id])
         to_remove = []
 
@@ -940,8 +988,9 @@ class Page(models.Model):
 
         if to_remove:
             cur.execute('''
-                delete from wiki_metadata
-                 where id in (%s)
+                DELETE
+                FROM   wiki_metadata
+                WHERE  id IN (%s);
             ''' % ', '.join(['%s'] * len(to_remove)), list(to_remove))
         cur.close()
 
