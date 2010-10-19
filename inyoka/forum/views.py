@@ -1102,11 +1102,11 @@ def splittopic(request, topic_slug, page=1):
     if not have_privilege(request.user, old_topic.forum, CAN_MODERATE):
         return abort_access_denied(request)
 
-    pagination = Pagination(request, old_topic.posts, page, POSTS_PER_PAGE,
+    old_posts = old_topic.posts.order_by(Post.pub_date.asc())
+
+    pagination = Pagination(request, old_posts, page, POSTS_PER_PAGE,
         url_for(old_topic, action='split'), total=old_topic.post_count,
         rownum_column=Post.position)
-
-    old_posts = old_topic.posts
 
     if request.method == 'POST' and ('switch1' in request.POST or
                                      'switch2' in request.POST):
