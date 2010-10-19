@@ -1121,7 +1121,7 @@ class Post(db.Model):
             return False
         if t == -1:
             return True
-        delta = datetime.utcnow() - self.pub_date
+        delta = datetime.utcnow() - self.pub_date.replace(tzinfo=None)
         return timedelta_to_seconds(delta) < t
 
     def __unicode__(self):
