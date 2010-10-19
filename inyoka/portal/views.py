@@ -42,7 +42,7 @@ from inyoka.utils.user import check_activation_key
 from inyoka.utils.database import db
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
-from inyoka.wiki.models import Page as WikiPage
+from inyoka.wiki.models import Page as WikiPage, Revision
 from inyoka.ikhaya.models import Article, Category, Suggestion
 from inyoka.forum.acl import filter_invisible
 from inyoka.forum.models import Forum, Topic, Post, UBUNTU_VERSIONS
@@ -442,12 +442,21 @@ def search(request):
         highlight = None
         if request.user.settings.get('highlight_search', True):
             highlight = results.highlight_string
-
+        wiki_result = None
+        if d['area'] in ('wiki', 'all'):
+            try:
+                wiki_page = WikiPage.objects.filter(name=d['query']).get()
+                rev = Revision.objects.select_related(depth=2) \
+                        .filter(page__id=wiki_page.id).latest()
+                wiki_result = {'title': wiki_page.title, 'url': url_for(rev.page)}
+            except WikiPage.DoesNotExist:
+                pass
         rv = {
             'area':             d['area'],
             'query':            d['query'],
             'highlight':        highlight,
             'results':          results,
+            'wiki_result':      wiki_result,
             'pagination':       u''.join(pagination),
             'sort':             d['sort'],
         }
