@@ -53,6 +53,7 @@ SEARCH_AREA_CHOICES = (
 )
 
 SEARCH_SORT_CHOICES = (
+    ('', 'Bereichsvorgabe verwenden'),
     ('date', 'Datum'),
     ('relevance', 'Relevanz'),
 )
@@ -415,7 +416,7 @@ class SearchForm(forms.Form):
     date_begin = forms.DateTimeField(required=False, widget=DateTimeWidget)
     date_end = forms.DateTimeField(required=False, widget=DateTimeWidget)
     sort = forms.ChoiceField(label='Sortieren:', choices=SEARCH_SORT_CHOICES,
-        required=False, initial='date')
+        required=False)
     forums = forms.ChoiceField(label=u'Foren', initial='support',
         required=False)
     show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
@@ -424,6 +425,16 @@ class SearchForm(forms.Form):
     def clean_area(self):
         # Select all areas when no area was specified explicitely
         return self.cleaned_data.get('area') or 'all'
+
+    def clean(self):
+        # Default search order depends on the search area.
+        cleaned_data = self.cleaned_data
+        if not cleaned_data.get('sort'):
+            if cleaned_data['area'] == 'forum':
+                cleaned_data['sort'] = 'date'
+            else:
+                cleaned_data['sort'] = 'relevance'
+        return cleaned_data
 
     def search(self):
         """Performs the actual query and return the results"""
