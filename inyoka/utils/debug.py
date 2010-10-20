@@ -152,8 +152,10 @@ def render_query_table(request):
 
     # add cache queries
     for query in cache_queries:
+        ctx_list = [x for x in query[0] if 'inyoka/utils/cache.py' not in x]
+        ctx = ctx_list[0] if len(ctx_list) else u'No stack info found'
         qresult.append(render_string(TEMPLATE, {
-            'topic': escape(u'%s from Cache' % query[0][0]),
+            'topic': escape(u'%s from Cache' % ctx),
             'query': escape(query[1]),
             'data': escape(query[2]),
             'duration': 0,
