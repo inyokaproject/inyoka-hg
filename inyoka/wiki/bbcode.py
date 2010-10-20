@@ -421,7 +421,7 @@ class Parser(object):
             list_type = {
                 '1':        'arabic',
                 'a':        'alphalower',
-                'A':        'alphalower',
+                'A':        'alphaupper',
                 '*':        'unordered'
             }.get(t.attr)
         if list_type is None:
