@@ -203,6 +203,8 @@ class PageManager(models.Manager):
             pagelist = Page.objects.all().select_related('last_rev')\
                 .order_by('name').values_list('name', 'last_rev__deleted',
                     'last_rev__id', 'last_rev__attachment__id')
+            # force a list, can't pickle ValueQueryset that way
+            pagelist = list(pagelist)
             # we cache that also if the user wants something uncached
             # because if we are already fetching it we can cache it.
             request_cache.set(key, pagelist, 10000)
