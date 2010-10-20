@@ -227,7 +227,7 @@ def do_revert(request, name):
             new_revision = page.rev.revert(request.POST.get('note'),
                                            request.user,
                                            request.META.get('REMOTE_ADDR'))
-            page.last_rev_id = new_revision.id
+            page.last_rev = new_revision
             flash(u'Die %s wurde erfolgreich wiederhergestellt.' %
                   escape(page.rev.title), success=True)
             url = href('wiki', name)

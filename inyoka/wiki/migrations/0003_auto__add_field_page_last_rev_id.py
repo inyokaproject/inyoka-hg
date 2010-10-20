@@ -8,8 +8,9 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Adding field 'Page.last_rev_id'
-        db.add_column('wiki_page', 'last_rev_id', self.gf('django.db.models.fields.IntegerField')(null=True), keep_default=False)
+        # Adding field 'Page.last_rev'
+        db.add_column('wiki_page', 'last_rev', self.gf('django.db.models.fields.related.ForeignKey')(related_name='unneded_dummy', null=True, to=orm['wiki.Revision']), keep_default=False)
+
         db.execute('''
             update wiki_page p set p.last_rev_id = (
                 select max(r.id) from wiki_revision r
@@ -20,7 +21,7 @@ class Migration(SchemaMigration):
 
     def backwards(self, orm):
 
-        # Deleting field 'Page.last_rev_id'
+        # Deleting field 'Page.last_rev'
         db.delete_column('wiki_page', 'last_rev_id')
 
 
@@ -87,7 +88,7 @@ class Migration(SchemaMigration):
         'wiki.page': {
             'Meta': {'ordering': "['name']", 'object_name': 'Page'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_rev_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
+            'last_rev': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'unneded_dummy'", 'null': 'True', 'to': "orm['wiki.Revision']"}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200', 'db_index': 'True'}),
             'topic_id': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
         },

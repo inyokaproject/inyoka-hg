@@ -200,15 +200,9 @@ class PageManager(models.Manager):
             pagelist = request_cache.get(key)
 
         if pagelist is None:
-            cur = connection.cursor()
-            cur.execute('''
-                select p.name, r.deleted, r.id, r.attachment_id is null
-                  from wiki_page p, wiki_revision r
-                 where p.id = r.page_id and r.id = p.last_rev_id
-                 order by p.name
-            ''')
-            pagelist = cur.fetchall()
-            cur.close()
+            pagelist = Page.objects.all().select_related('last_rev')\
+                .order_by('name').values_list('name', 'last_rev__deleted',
+                    'last_rev__id', 'last_rev__attachment__id')
             # we cache that also if the user wants something uncached
             # because if we are already fetching it we can cache it.
             request_cache.set(key, pagelist, 10000)
@@ -361,8 +355,8 @@ class PageManager(models.Manager):
         the caching backend by passing `nocache` = True.
         """
         rev = None
+        key = 'wiki/page/' + name
         if not nocache:
-            key = 'wiki/page/' + name
             rev = cache.get(key)
         if rev is None:
             try:
@@ -561,7 +555,7 @@ class PageManager(models.Manager):
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
         page.rev.save()
-        page.last_rev_id = page.rev.id
+        page.last_rev = page.rev
         page.save()
         if update_meta:
             page.update_meta()
@@ -792,8 +786,7 @@ class Page(models.Model):
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True, db_index=True)
     topic_id = models.IntegerField(null=True)
-    last_rev_id = models.IntegerField(models.ForeignKey('revision.id'),
-            null=True)
+    last_rev = models.ForeignKey('Revision', null=True, related_name='unneded_dummy')
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -1130,7 +1123,7 @@ class Page(models.Model):
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
         self.rev.save()
-        self.last_rev_id = self.rev.id
+        self.last_rev = self.rev
         self.save(update_meta=update_meta)
         if (deleted and rev and not rev.deleted) or \
            (not deleted and rev and rev.deleted):
@@ -1318,7 +1311,7 @@ class Revision(models.Model):
                            remote_addr or '127.0.0.1',
                            attachment=self.attachment)
         new_rev.save()
-        self.page.last_rev_id = new_rev.id
+        self.page.last_rev = new_rev
         self.page.save()
         return new_rev
 

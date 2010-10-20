@@ -226,7 +226,7 @@ class RecentChanges(Macro):
         if data is None:
             revisions = Revision.objects.filter(
                 change_date__gt=(datetime.utcnow()-timedelta(days=max_days))
-            ).select_related()
+            ).select_related('user', 'page')
             pagination = Pagination(context.request, revisions,
                                     page_num, self.per_page, link_func)
 
@@ -281,26 +281,26 @@ class RecentChanges(Macro):
                             nodes.Text(u')')
                         ])]))
 
-#                    page_notes = nodes.List('unordered', [], class_='note_list')
-#                    for rev in revs:
-#                        if rev.user_id:
-#                            page_notes.children.append(nodes.ListItem([
-#                                nodes.Text(rev.note or ''),
-#                                nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
-#                                nodes.Link(href('portal', 'user', rev.user_id), [
-#                                    nodes.Text(rev.user.username)]),
-#                                nodes.Text(rev.note and u')' or '')
-#                            ]))
-#                        else:
-#                            page_notes.children.append(nodes.ListItem([
-#                                nodes.Text(rev.note),
-#                                nodes.Text(u'%svon ' % (rev.note and u'(' or '')),
-#                                nodes.Text(rev.remote_addr),
-#                                nodes.Text(rev.note and u')' or '')]))
-#                    table.children[-1].children.extend([
-#                        nodes.TableCell(
-#                            page_notes.children and [page_notes] or \
-#                            [nodes.Text(u'')], class_='note')])
+                    page_notes = nodes.List('unordered', [], class_='note_list')
+                    for rev in revs:
+                        if rev.user_id:
+                            page_notes.children.append(nodes.ListItem([
+                                nodes.Text(rev.note or ''),
+                                nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
+                                nodes.Link(href('portal', 'user', rev.user_id), [
+                                    nodes.Text(rev.user.username)]),
+                                nodes.Text(rev.note and u')' or '')
+                            ]))
+                        else:
+                            page_notes.children.append(nodes.ListItem([
+                                nodes.Text(rev.note),
+                                nodes.Text(u'%svon ' % (rev.note and u'(' or '')),
+                                nodes.Text(rev.remote_addr),
+                                nodes.Text(rev.note and u')' or '')]))
+                    table.children[-1].children.extend([
+                        nodes.TableCell(
+                            page_notes.children and [page_notes] or \
+                            [nodes.Text(u'')], class_='note')])
             data = {
                 'nodes':      table,
                 'pagination': pagination.generate()
