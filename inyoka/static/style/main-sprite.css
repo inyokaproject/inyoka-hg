@@ -252,6 +252,18 @@ li p + p {
   margin-top: 0.5em!important;
 }
 
+ol.arabic {
+    list-style-type: decimal;
+}
+
+ol.alphalower {
+    list-style-type: lower-alpha;
+}
+
+ol.alphaupper {
+    list-style-type: upper-alpha;
+}
+
 /*** Pagination *************************************************************/
 div.pagination_right {
     float: right;
@@ -532,7 +544,7 @@ table.syntaxtable td.linenos {
 }
 
 .tabbar li {
-  list-style: none;  
+  list-style: none;
   float: left;
   padding: 4px 0 6px 0;
   background-position: center bottom;
@@ -604,7 +616,7 @@ table.syntaxtable td.linenos {
 
 .content {
   clear: right;
-  border: solid 1px #ccc; 
+  border: solid 1px #ccc;
   background-color: #fff;
   padding: 15px 20px;
 }
@@ -1099,7 +1111,7 @@ div.not_found img {
 
 .hidden *, .hidden { /* this is for hidden topics, etc.  use .hide to really hide stuff */
   color: #888 !important;
-} 
+}
 
 .hide {
   display: none;
