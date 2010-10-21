@@ -446,7 +446,7 @@ def search(request):
         if d['area'] in ('wiki', 'all'):
             try:
                 wiki_page = WikiPage.objects.filter(name=d['query']).get()
-                rev = Revision.objects.select_related(depth=2) \
+                rev = Revision.objects.select_related('page') \
                         .filter(page__id=wiki_page.id).latest()
                 wiki_result = {'title': wiki_page.title, 'url': url_for(rev.page)}
             except WikiPage.DoesNotExist:
