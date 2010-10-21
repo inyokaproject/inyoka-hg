@@ -31,8 +31,8 @@
   <h3>{{ user.username|e }}</h3>
   {%- if user in (User.objects.get_system_user(), User.objects.get_anonymous_user()) %}
   {{ user.username|e }} ist ein Systembenutzer.
-  {%- elif user.is_deleted %}
-  {{ user.username|e }} hat sich gelöscht.
+  {%- elif user.is_deleted or user.is_banned %}
+  {{ user.username|e }} ist nicht mehr verfügbar.
   {%- else %}
   <table class="userinfo">
     <tr>
