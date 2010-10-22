@@ -213,6 +213,41 @@ class CreateUserForm(forms.Form):
             )
 
 
+class EditUserProfileForm(forms.Form):
+    username = forms.CharField(label=u'Benutzername', max_length=30)
+    avatar = forms.ImageField(label=u'Avatar', required=False)
+    delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
+
+    # notification informations
+    email = forms.CharField(label=u'E-Mail', required=True)
+    jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
+    icq = forms.CharField(label=u'ICQ', max_length=16, required=False)
+    msn = forms.CharField(label=u'MSN', max_length=200, required=False)
+    aim = forms.CharField(label=u'AIM', max_length=200, required=False)
+    yim = forms.CharField(label=u'YIM', max_length=200, required=False)
+    skype = forms.CharField(label=u'Skype', required=False)
+    wengophone = forms.CharField(label=u'WengoPhone', required=False)
+    sip = forms.CharField(label=u'SIP', required=False)
+
+    # misc other things
+    signature = forms.CharField(label=u'Signatur', required=False,
+                                widget=forms.Textarea)
+    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
+                       required=False, min_value=-90, max_value=90)
+    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180)
+    location = forms.CharField(label=u'Wohnort', max_length=200,
+                               required=False)
+    interests = forms.CharField(label=u'Interessen', max_length=200,
+                                required=False)
+    website = forms.URLField(label=u'Webseite', required=False)
+    launchpad = forms.CharField(label=u'Launchpad-Nickname', required=False)
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
+                              label=u'GPG-Schlüssel',  max_length=10)
+
+class EditUserSettingsForm(forms.Form):
+    pass
+
 class EditUserForm(forms.Form):
     # personal informations
     username = forms.CharField(label=u'Benutzername', max_length=30)

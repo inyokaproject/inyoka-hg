@@ -41,16 +41,19 @@ from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
+     EditUserProfileForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
      EditPublicArticleForm
-from inyoka.portal.models import StaticPage, Event, StaticFile
+from inyoka.portal.forms import UserCPSettingsForm as EditUserSettingsForm, \
+     NOTIFICATION_CHOICES
+from inyoka.portal.models import StaticPage, Event, StaticFile, Subscription
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
     PRIVILEGES_DETAILS
-from inyoka.forum.models import Forum, Privilege, WelcomeMessage
+from inyoka.forum.models import Forum, Privilege, WelcomeMessage, UBUNTU_VERSIONS
 from inyoka.forum.compat import SAUser, user_group_table
 from inyoka.wiki.parser import parse, RenderContext
 
@@ -894,19 +897,14 @@ def user_edit(request, username):
 @require_permission('user_edit')
 @templated('admin/user_edit_profile.html')
 def user_edit_profile(request, username):
-    print 'hu'
     user = get_user(username)
     if username != user.urlsafe_username:
         return HttpResponseRedirect(user.get_absolute_url('admin'))
 
     initial = model_to_dict(user)
-    if initial['_primary_group']:
-        initial.update({
-            'primary_group': Group.objects.get(id=initial['_primary_group']).name
-        })
-    form = EditUserForm(initial=initial)
+    form = EditUserProfileForm(initial=initial)
     if request.method == 'POST':
-        form = EditUserForm(request.POST, request.FILES)
+        form = EditUserProfileForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
             if data['username'] != user.username:
@@ -945,6 +943,59 @@ def user_edit_profile(request, username):
             # redirect to the new username if given
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
+    return {
+        'user': user,
+        'form': form,
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_settings.html')
+def user_edit_settings(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    ubuntu_version = [s.ubuntu_version for s in Subscription.objects.\
+                      filter(user=request.user, ubuntu_version__isnull=False)]
+    try:
+        timezone = pytz.timezone(user.settings.get('timezone', ''))
+    except pytz.UnknownTimeZoneError:
+        timezone = pytz.timezone('Europe/Berlin')
+    initial = {
+        'notify': user.settings.get('notify', ['mail']),
+        'notifications': user.settings.get('notifications', [c[0] for c in
+                                                NOTIFICATION_CHOICES]),
+        'ubuntu_version': ubuntu_version,
+        'timezone': timezone,
+        'hide_avatars': user.settings.get('hide_avatars', False),
+        'hide_signatures': user.settings.get('hide_signatures', False),
+        'hide_profile': user.settings.get('hide_profile', False),
+        'autosubscribe': user.settings.get('autosubscribe', True),
+        'show_preview': user.settings.get('show_preview', False),
+        'show_thumbnails': user.settings.get('show_thumbnails', False),
+        'highlight_search': user.settings.get('highlight_search', True),
+        'mark_read_on_logout': user.settings.get('mark_read_on_logout', False)
+    }
+    form = EditUserSettingsForm(initial=initial)
+    if request.method == 'POST':
+        form = EditUserSettingsForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            new_versions = data.pop('ubuntu_version')
+            old_versions = [s.ubuntu_version for s in Subscription.objects \
+                          .filter(user=user).exclude(ubuntu_version__isnull=True)]
+            for version in [v.number for v in UBUNTU_VERSIONS]:
+                if version in new_versions and version not in old_versions:
+                    Subscription(user=user, ubuntu_version=version).save()
+                elif version not in new_versions and version in old_versions:
+                    Subscription.objects.filter(user=user,
+                                                ubuntu_version=version).delete()
+            for key, value in data.iteritems():
+                user.settings[key] = data[key]
+            dbsession.commit()
+            user.save()
+            flash(u'Die Benutzereinstellungen von "%s" wurden erfolgreich aktualisiert!'
+                      % escape(user.username), True)
     return {
         'user': user,
         'form': form,
