@@ -230,6 +230,3 @@ class InyokaEnvironment(Environment):
 
 # setup the template environment
 jinja_env = InyokaEnvironment()
-
-
-# circular imports
