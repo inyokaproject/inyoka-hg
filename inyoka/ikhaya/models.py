@@ -68,7 +68,8 @@ class ArticleManager(models.Manager):
             if articles[i] is None:
                 try:
                     cache_vals[key] = articles[i] = article = \
-                        self.select_related('author__username', 'category').get(
+                        self.select_related('author__username', 'category',
+                                            'category__icon', 'icon').get(
                             slug=slug, pub_date=pub_date)
                 except self.model.DoesNotExist:
                     articles[i] = None
