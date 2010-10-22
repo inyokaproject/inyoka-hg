@@ -70,39 +70,50 @@ def populate_context_defaults(context):
         request = None
 
     user = request.user
+    reported = pms = suggestions = events = 0
     if request and user.is_authenticated:
+        can = {'manage_topics': user.can('manage_topics'),
+               'article_edit': user.can('article_edit'),
+               'event_edit': user.can('event_edit')}
+
+        keys = ['portal/pm_count/%s' % user.id]
+
+        if can['manage_topics']:
+            keys.append('forum/reported_topic_count')
+        if can['article_edit']:
+            keys.append('ikhaya/suggestion_count')
+        if can['event_edit']:
+            keys.append('ikhaya/event_count')
+
+        cached_values = cache.get_dict(*keys)
+        to_update = {}
+
         key = 'portal/pm_count/%s' % user.id
-        pms = cache.get(key)
+        pms = cached_values.get(key)
         if pms is None:
             pms = PrivateMessageEntry.objects \
                 .filter(user__id=user.id, read=False).count()
-            cache.set(key, pms)
-        if user.can('manage_topics'):
+            to_update[key] = pms
+        if can['manage_topics']:
             key = 'forum/reported_topic_count'
-            reported = cache.get(key)
+            reported = cached_values.get(key)
             if reported is None:
                 reported = Topic.query.filter(Topic.reporter_id != None).count()
-                cache.set(key, reported)
-        else:
-            reported = 0
-        if user.can('article_edit'):
+                to_update[key] = reported
+        if can['article_edit']:
             key = 'ikhaya/suggestion_count'
-            suggestions = cache.get(key)
+            suggestions = cached_values.get(key)
             if suggestions is None:
                 suggestions = Suggestion.objects.all().count()
-                cache.set(key, suggestions)
-        else:
-            suggestions = 0
-        if user.can('event_edit'):
+                to_update[key] = suggestions
+        if can['event_edit']:
             key = 'ikhaya/event_count'
-            events = cache.get(key)
+            events = cached_values.get(key)
             if events is None:
                 events = Event.objects.filter(visible=False).all().count()
-                cache.set(key, events)
-        else:
-            events = 0
-    else:
-        reported = pms = suggestions = events = 0
+                to_update[key] = events
+
+        cache.set_many(to_update)
 
     # we don't have to use cache here because storage does this for us
     global_message = storage['global_message']
