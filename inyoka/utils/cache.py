@@ -14,7 +14,7 @@ from inyoka.utils.local import current_request, _request_cache
 from inyoka.utils.debug import find_calling_context
 
 try:
-    from pylibmc import Client
+    from pylibmc import Client, NotFound
     _pylibmc_available = True
 except ImportError:
     _pylibmc_available = False
@@ -30,11 +30,30 @@ def _set_cache(obj):
     cache.__dict__ = obj.__dict__
 
 
+class CustomizedPylibmcClient(Client):
+    """This client implements some simplifications
+    to ease the application code.
+    """
+
+    def incr(self, key, delta=1):
+        """Set the delta value if there's no key yet."""
+        try:
+            Client.incr(self, key, delta)
+        except NotFound:
+            Client.set(self, key, delta)
+
+    def decr(self, key, delta=1):
+        try:
+            Client.incr(self, key, delta)
+        except NotFound:
+            Client.set(self, key, delta)
+
+
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
         if _pylibmc_available:
-            servers = Client(settings.MEMCACHE_SERVERS, binary=True)
+            servers = CustomizedPylibmcClient(settings.MEMCACHE_SERVERS, binary=True)
             servers.set_behaviors({'tcp_nodelay': True, 'no_block': True})
         else:
             servers = settings.MEMCACHE_SERVERS
