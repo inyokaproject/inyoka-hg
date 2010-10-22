@@ -93,11 +93,14 @@ class RequestCache(object):
         else:
             return self.real_cache.get(key)
 
-
     def set(self, key, value, timeout=None):
         if self.request_cache:
             self.request_cache[key] = value
         return self.real_cache.set(key, value, timeout)
+
+    def delete(self, key):
+        self.request_cache.pop(key)
+        self.real_cache.delete(key)
 
 
 class CacheDebugProxy(object):

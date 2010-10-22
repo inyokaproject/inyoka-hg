@@ -65,7 +65,7 @@ class StorageManager(object):
     def clear_cache(self):
         """Clear all active caches."""
         for obj in self.storages.itervalues():
-            cache.delete('wiki/storage/' + obj.behavior_key)
+            request_cache.delete('wiki/storage/' + obj.behavior_key)
 
 
 class BaseStorage(object):
