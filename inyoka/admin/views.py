@@ -943,6 +943,8 @@ def user_edit_profile(request, username):
             # redirect to the new username if given
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     return {
         'user': user,
         'form': form,

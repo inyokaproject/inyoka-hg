@@ -245,8 +245,20 @@ class EditUserProfileForm(forms.Form):
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
-class EditUserSettingsForm(forms.Form):
-    pass
+    def clean_avatar(self):
+        """
+        Keep the user form setting avatar to a too big size.
+        """
+        data = self.cleaned_data
+        if data['avatar'] is None:
+            return
+        st = int(storage.get('max_avatar_size'))
+        if st and data['avatar'].size > st * 1024:
+            raise forms.ValidationError(
+                u'Der von dir ausgewählte Avatar konnte nicht '
+                u'hochgeladen werden, da er zu groß ist. Bitte '
+                u'wähle einen anderen Avatar.')
+        return data['avatar']
 
 class EditUserForm(forms.Form):
     # personal informations
