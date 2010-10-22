@@ -26,7 +26,6 @@ from inyoka.utils.http import templated, does_not_exist_is_404, \
      HttpResponseRedirect, HttpResponse
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
-from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import notify_about_subscription
 from inyoka.utils.pagination import Pagination
@@ -120,13 +119,6 @@ def do_show(request, name):
             s.notified = False
             s.save()
 
-    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
-        # set only session info if the wiki page can be seen by anonymous
-        # users.
-        set_session_info(request, u'betrachtet Wiki-Artikel „<a '
-                         u'href="%s">%s</a>“' % (
-                            escape(url_for(page)),
-                            escape(page.title)))
     return {
         'page':         page,
         'tags':         page.metadata['tag'],
@@ -498,9 +490,6 @@ def do_edit(request, name):
         else:
             session_page = escape(get_pagetitle(name))
 
-        set_session_info(request, u'bearbeitet den Wiki-Artikel %s' %
-                         session_page)
-
     return {
         'name':         name,
         'page':         page,
@@ -583,14 +572,6 @@ def do_log(request, name):
 
     pagination = Pagination(request, page.revisions.all(), pagination_page,
                             20, link_func)
-
-    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
-        set_session_info(request, u'betrachtet die Revisionen des Artkels „<a '
-                         u'href="%s">%s</a>“' % (
-                            escape(url_for(page)),
-                            escape(page.title)),
-                        "%s' Revisionen" % escape(page.title))
-
     return {
         'page':         page,
         'revisions':    list(pagination.objects),
@@ -615,11 +596,6 @@ def do_diff(request, name):
     if request.GET.get('format') == 'udiff':
         return HttpResponse(diff.udiff, mimetype='text/plain; charset=utf-8')
 
-    if has_privilege(User.ANONYMOUS_USER, name, 'read'):
-        set_session_info(request, u'vergleicht zwei Revisionen des Wiki-Artikels '
-                         u' „<a href="%s">%s</a>“' % (
-                            escape(url_for(diff.page)),
-                            escape(diff.page.title)))
     return {
         'diff':         diff,
         'page':         diff.page,
@@ -639,11 +615,6 @@ def do_backlinks(request, name):
     """
     page = Page.objects.get_by_name(name)
 
-    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
-        set_session_info(request, u'vergleicht die Backlinks des Wiki-Artikels '
-                         u' „<a href="%s">%s</a>“' % (
-                            escape(url_for(page)),
-                            escape(page.title)))
     return {
         'page': page,
         'deny_robots':  True,
@@ -795,11 +766,6 @@ def do_attach(request, name):
             url = href('wiki', ap)
         return HttpResponseRedirect(url)
 
-    if has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
-        set_session_info(request, u'verwaltet die Anhänge des Wiki-Artikels '
-                         u' „<a href="%s">%s</a>“' % (
-                            escape(url_for(page)),
-                            escape(page.title)))
     context['deny_robots'] = 'noindex'
     return context
 

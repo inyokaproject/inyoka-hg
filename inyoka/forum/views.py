@@ -24,7 +24,6 @@ from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
-from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect
 from inyoka.utils.feeds import FeedBuilder, atom_feed
 from inyoka.utils.flashing import flash
@@ -90,9 +89,6 @@ def index(request, category=None):
         if not category or category.parent_id != None:
             raise PageNotFound()
         category = category
-
-        if have_privilege(User.ANONYMOUS_USER, category, 'read'):
-            set_session_info(request, *session_info)
         categories = [category]
 
         fmsg = category.find_welcome(request.user)
@@ -100,8 +96,6 @@ def index(request, category=None):
             return welcome(request, fmsg.slug, request.path)
     else:
         categories = tuple(forum for forum in forums if forum.parent_id == None)
-        # forum-overview can be set without any acl check ;)
-        set_session_info(request, *session_info)
 
     hidden_categories = []
     if request.user.is_authenticated:
@@ -169,12 +163,6 @@ def forum(request, slug, page=1):
     else:
         merge = db.session.merge
         ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
-
-
-    if have_privilege(User.ANONYMOUS_USER, forum, 'read'):
-        set_session_info(request, u'sieht sich das Forum „<a href="%s">'
-                         u'%s</a>“ an' % (escape(url_for(forum)), escape(forum.name)),
-                         'besuche das Forum')
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
@@ -273,10 +261,6 @@ def viewtopic(request, topic_slug, page=1):
 
     pagination = Pagination(request, posts, page, POSTS_PER_PAGE, url_for(t),
                      total=t.post_count, rownum_column=Post.position)
-
-    if have_privilege(User.ANONYMOUS_USER, t, 'read'):
-        set_session_info(request, u'sieht sich das Thema „<a href="%s">%s'
-            u'</a>“ an' % (url_for(t), escape(t.title)), 'besuche Thema')
 
     subscribed = True
     if request.user.is_authenticated:

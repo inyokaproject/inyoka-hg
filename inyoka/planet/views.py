@@ -13,7 +13,6 @@ from inyoka.conf import settings
 from inyoka.portal.user import Group
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.utils.urls import href
-from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, HttpResponseRedirect, \
                               does_not_exist_is_404
 from inyoka.utils.html import escape
@@ -55,8 +54,6 @@ def index(request, page=1):
     else:
         entries = Entry.objects.select_related(depth=1)
     pagination = Pagination(request, entries, page, 25, href('planet'))
-    set_session_info(request, u'betrachtet den <a href="%s">Planeten</a>' %
-                     href('planet'), 'Planet')
     return {
         'days':         group_by_day(pagination.objects),
         'articles':     pagination.objects,

@@ -9,7 +9,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from inyoka.utils.urls import global_not_found, href, url_for
-from inyoka.utils.sessions import set_session_info
 from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse, \
         PageNotFound
 from inyoka.utils.flashing import flash
@@ -43,8 +42,6 @@ def index(request):
             del form.errors['captcha']
     else:
         form = AddPasteForm()
-    set_session_info(request, u'erstellt gerade ein neues Paste.',
-                     'Paste')
     return {
         'form': form,
         'page': 'add'
@@ -61,12 +58,6 @@ def display(request, entry_id):
     referrer = request.META.get('HTTP_REFERER')
     if referrer and entry.add_referrer(referrer):
         entry.save()
-    set_session_info(request,
-        u'schaut sich Paste-Eintrag <a href="%s">%s</a> an.' % (
-            url_for(entry),
-            entry.title or entry.id),
-        u'besuche den Eintrag'
-    )
     return {
         'entry': entry,
         'page':  'browse'
@@ -104,8 +95,6 @@ def raw(request, entry_id):
 
 @templated('pastebin/browse.html')
 def browse(request):
-    set_session_info(request, u'schaut sich die Paste-Liste an.',
-                     'Paste-Liste')
     return {
         'entries':      list(Entry.objects.all()[:50]),
         'page':         'browse'

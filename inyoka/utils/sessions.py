@@ -24,7 +24,7 @@ SESSION_DELTA = 300
 
 
 @transaction.commit_manually
-def set_session_info(request, action, category=None):
+def set_session_info(request):
     """Set the session info."""
     # if the session is new we don't add an entry.  It could be that
     # the user has no cookie support and that would fill our session
@@ -55,9 +55,6 @@ def set_session_info(request, action, category=None):
 
     args.update({
         'last_change': datetime.utcnow(),
-        'action': action,
-        'action_link': request.build_absolute_uri(),
-        'category': category
     })
 
     affected_rows = SessionInfo.objects.filter(key=key).update(**args)
@@ -125,10 +122,7 @@ def get_sessions(order_by='-last_change'):
             'text':         item.subject_text,
             'type':         item.subject_type,
             'link':         item.subject_link,
-            'action':       item.action,
-            'action_link':  item.action_link,
             'last_change':  item.last_change,
-            'category':     item.category,
         })
 
     anonymous = sum(x['anonymous'] for x in sessions)
