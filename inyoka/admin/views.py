@@ -695,11 +695,8 @@ def users_with_special_rights(request):
         'count': len(users),
     }
 
-
-@require_permission('user_edit')
-@templated('admin/user_edit.html')
-def user_edit(request, username):
-    #: check if the user exists
+def get_user(username):
+    """Check if the user exists and return it"""
     try:
         if '@' in username:
             user = User.objects.get(email__iexact=username)
@@ -707,6 +704,12 @@ def user_edit(request, username):
             user = User.objects.get(username)
     except User.DoesNotExist:
         raise PageNotFound
+    return user
+
+@require_permission('user_edit')
+@templated('admin/user_edit.html')
+def user_edit(request, username):
+    user = get_user(username)
     if username != user.urlsafe_username:
         return HttpResponseRedirect(user.get_absolute_url('admin'))
 
@@ -888,6 +891,64 @@ def user_edit(request, username):
         'activation_link': activation_link,
     }
 
+@require_permission('user_edit')
+@templated('admin/user_edit_profile.html')
+def user_edit_profile(request, username):
+    print 'hu'
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    initial = model_to_dict(user)
+    if initial['_primary_group']:
+        initial.update({
+            'primary_group': Group.objects.get(id=initial['_primary_group']).name
+        })
+    form = EditUserForm(initial=initial)
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            if data['username'] != user.username:
+                try:
+                    User.objects.get(data['username'])
+                except User.DoesNotExist:
+                    user.username = data['username']
+                else:
+                    form.errors['username'] = ErrorList(
+                        [u'Ein Benutzer mit diesem Namen existiert bereits']
+                    )
+        if form.is_valid():
+            for key in ('website', 'interests', 'location', 'jabber', 'icq',
+                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
+                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
+                         'wengophone', 'launchpad'):
+                setattr(user, key, data[key])
+            if data['delete_avatar']:
+                user.delete_avatar()
+
+            if data['avatar']:
+                avatar_resized = user.save_avatar(data['avatar'])
+                if avatar_resized:
+                    ava_mh, ava_mw = storage.get_many(('max_avatar_height',
+                        'max_avatar_width')).itervalues()
+                    flash(u'Der von dir hochgeladene Avatar wurde auf '
+                          u'%sx%s Pixel skaliert. Dadurch könnten '
+                          u'Qualitätseinbußen aufgetreten sein. '
+                          u'Bitte beachte dies.'
+                          % (ava_mh, ava_mw))
+
+            dbsession.commit()
+            user.save()
+            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
+                      % escape(user.username), True)
+            # redirect to the new username if given
+            if user.username != username:
+                return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
+    return {
+        'user': user,
+        'form': form,
+    }
 
 @require_permission('user_edit')
 @templated('admin/user_new.html')

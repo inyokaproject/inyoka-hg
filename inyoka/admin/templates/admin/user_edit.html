@@ -9,7 +9,17 @@
 #}
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
-{% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
+
+{% macro user_edit_button(link, icon, name) %}
+  <li>
+    <span><a href="{{ link }}">
+      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      {{ name }}
+    </a></span>
+  </li>
+{% endmacro %}
+
+{% set styles = ['editor-sprite.css', 'datetimefield.css', 'portal.css'] %}
 {% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js',
                   'jquery.autocomplete.min.js'] %}
 
@@ -26,6 +36,18 @@
 
 {% block admin_content %}
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
+  <div class="usercp_control">
+    <ul>
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'profile'), 'profile', 'Profilinformationen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'preferences', 'Benutzereinstellungen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'groups'), 'preferences', 'Gruppen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'privileges'), 'preferences', 'Privilegien') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'password'), 'password', 'Passwort ändern') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'subscriptions'), 'subscriptions', 'Abonnements') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'deactivate'), 'deactivate', 'Benutzer deaktivieren') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'userpage'), 'wikipage', 'Benutzerseite') }}
+    </ul>
+  </div>
   <h3>Benutzer bearbeiten</h3>
   <dl>
     {{ render_form(form, ['username'], inline=true) }}
