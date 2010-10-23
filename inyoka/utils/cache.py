@@ -10,7 +10,7 @@
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 from django.utils.encoding import force_unicode
-from inyoka.utils.local import current_request, _request_cache
+from inyoka.utils.local import current_request, _request_cache, has_local_key
 from inyoka.utils.debug import find_calling_context
 
 try:
@@ -81,7 +81,7 @@ class RequestCache(object):
         self.request_cache = _request_cache
 
     def get(self, key):
-        if self.request_cache:
+        if has_local_key('cache'):
             try:
                 return self.request_cache[key]
             except KeyError:
@@ -94,12 +94,13 @@ class RequestCache(object):
             return self.real_cache.get(key)
 
     def set(self, key, value, timeout=None):
-        if self.request_cache:
+        if has_local_key('cache'):
             self.request_cache[key] = value
         return self.real_cache.set(key, value, timeout)
 
     def delete(self, key):
-        self.request_cache.pop(key)
+        if has_local_key('cache'):
+            self.request_cache.pop(key)
         self.real_cache.delete(key)
 
 

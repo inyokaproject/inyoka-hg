@@ -19,6 +19,11 @@
 """
 from werkzeug import Local, LocalManager
 
+
+def has_local_key(key):
+    return hasattr(local, key)
+
+
 local = Local()
 local_manager = LocalManager(local)
 current_request = local('request')
