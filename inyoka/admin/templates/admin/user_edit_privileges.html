@@ -1,0 +1,59 @@
+{#
+    admin/user_edit_privileges.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Manage the privileges of a user.
+
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
+#}
+{%- extends 'admin/overall.html' %}
+{% from 'macros.html' import render_form %}
+
+{% macro user_edit_button(link, icon, name) %}
+  <li>
+    <span><a href="{{ link }}">
+      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      {{ name }}
+    </a></span>
+  </li>
+{% endmacro %}
+
+{% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
+{% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js',
+                  'jquery.autocomplete.min.js'] %}
+
+{% set navigation_trace = [
+    (href('admin', 'users'), 'Benutzer'),
+    (href('admin', 'users', 'edit', user.username), 'Benutzer „%s“ editieren'|format(user.username|e)),
+    (href('admin', 'users', 'edit', user.username, 'privileges'), 'Privilegien')
+] %}
+
+{% block appheader %}
+<h1><a href="{{ href('admin') }}">Administration</a></h1>
+<h2><a href="{{ href('admin', 'users') }}">Benutzer</a></h2>
+{% endblock %}
+
+{% block admin_content %}
+<form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
+  <h3>Privilegien</h3>
+    {%- for id, name, checked, derived in permissions %}
+      <input type="checkbox" name="permissions" value="{{ id }}" id="perm_{{ id }}"
+             {%- if checked %} checked="checked"{% endif %} />
+      <label for="perm_{{ id }}">{{ name|e }}</label>
+      {%- if derived %}<span class="note"> (Geerbt von {% for group in derived %}<a href="{{ group|url }}">{{ group.name|e }}</a>{% if not loop.last %}, {% endif %}</span>{% endfor %})
+      {%- endif -%}
+      <br />
+    {%- endfor %}
+    {{ form.permissions.errors }}
+  <h3>Forum-Privilegien</h3>
+  <div id="forum_rights">Javascript muss aktiviert sein, um die Privilegien zu editieren!</div>
+  <p><input type="submit" value="Speichern" /></p>
+</form>
+<script type="text/javascript">
+  /* <![CDATA[ */
+  var forum_rights = new PrivilegeBox('#forum_rights', {{ user_forum_privileges|jsonencode }},
+    {{ forum_privileges|jsonencode }});
+  /* ]]> */
+</script>
+{% endblock %}
