@@ -133,7 +133,7 @@ class Article(models.Model):
 
     pub_date = models.DateField('Datum', db_index=True)
     pub_time = models.TimeField('Zeit')
-    updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
+    updated = models.DateTimeField('Letzte Änderung', blank=True, null=True, db_index=True)
     author = models.ForeignKey(User, related_name='article_set',
                                verbose_name='Autor')
     subject = models.CharField('Überschrift', max_length=180)
