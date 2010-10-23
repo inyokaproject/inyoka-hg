@@ -246,6 +246,12 @@ class EditUserProfileForm(forms.Form):
     gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
                               label=u'GPG-Schlüssel',  max_length=10)
 
+    def clean_gpgkey(self):
+        gpgkey = self.cleaned_data.get('gpgkey', '').upper()
+        if gpgkey.startswith('0X'):
+            gpgkey = gpgkey[2:]
+        return gpgkey
+    
     def clean_avatar(self):
         """
         Keep the user form setting avatar to a too big size.
@@ -379,6 +385,36 @@ class EditUserForm(forms.Form):
 class EditUserGroupsForm(forms.Form):
     primary_group = forms.CharField(label=u'Primäre Gruppe', required=False,
         help_text=u'Wird unter anderem für das anzeigen des Team-Icons verwendet')
+
+class EditUserStatusForm(forms.Form):
+    status = forms.ChoiceField(label=u'Status', required=False,
+                                   choices=enumerate([
+                                       u'noch nicht aktiviert',
+                                       u'aktiv',
+                                       u'gebannt',
+                                       u'hat sich selbst gelöscht']))
+    banned_until = forms.DateTimeField(label=u'Automatisch entsperren', required=False,
+        widget=DateTimeWidget,
+        help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
+    
+    def clean_banned_until(self):
+        """
+        Keep the user from setting banned_until if status is not banned.
+        This is to avoid confusion because this was previously possible.
+        """
+        data = self.cleaned_data
+        if data['banned_until'] is None:
+            return
+        if data['status'] not in (2, '2'):
+            raise forms.ValidationError(
+                u'Der Benutzer ist gar nicht gebannt'
+            )
+        if data['banned_until'] < datetime.datetime.now():
+            #XXX: timezone does not work. but those few hours … :)
+            raise forms.ValidationError(
+                u'Der Zeitpunkt liegt in der Vergangenheit'
+            )
+        return data['banned_until']
 
 class EditUserPasswordForm(forms.Form):
     new_password = forms.CharField(label=u'Neues Passwort',

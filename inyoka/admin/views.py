@@ -42,7 +42,7 @@ from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
      EditUserProfileForm, EditUserGroupsForm, EditUserPrivilegesForm, \
-     EditUserPasswordForm, \
+     EditUserPasswordForm, EditUserStatusForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
      EditPublicArticleForm
 from inyoka.portal.forms import UserCPSettingsForm as EditUserSettingsForm, \
@@ -940,7 +940,7 @@ def user_edit_profile(request, username):
             dbsession.commit()
             user.save()
             flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
-                      % escape(user.username), True)
+                  % escape(user.username), True)
             # redirect to the new username if given
             if user.username != username:
                 return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
@@ -998,7 +998,7 @@ def user_edit_settings(request, username):
             dbsession.commit()
             user.save()
             flash(u'Die Benutzereinstellungen von "%s" wurden erfolgreich aktualisiert!'
-                      % escape(user.username), True)
+                  % escape(user.username), True)
     return {
         'user': user,
         'form': form
@@ -1044,7 +1044,7 @@ def user_edit_groups(request, username):
             dbsession.commit()
             user.save()
             flash(u'Die Gruppen von "%s" wurden erfolgreich aktualisiert!'
-                      % escape(user.username), True)
+                  % escape(user.username), True)
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     groups_joined, groups_not_joined = ([], [])
@@ -1056,6 +1056,35 @@ def user_edit_groups(request, username):
         'form': form,
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined],
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_status.html')
+def user_edit_status(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    initial = model_to_dict(user)
+    form = EditUserStatusForm(initial=initial)
+    if request.method == 'POST':
+        form = EditUserStatusForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            for key in ('status', 'banned_until',):
+                setattr(user, key, data[key])
+            dbsession.commit()
+            user.save()
+            flash(u'Die Gruppen von "%s" wurden erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+    if user.status > 0:
+        activation_link = None
+    else:
+        activation_link = user.get_absolute_url('activate')
+    return {
+        'user': user,
+        'form': form,
+        'activation_link': activation_link
     }
 
 @require_permission('user_edit')
@@ -1177,7 +1206,7 @@ def user_edit_password(request, username):
         dbsession.commit()
         user.save()
         flash(u'Das Passwort von "%s" wurde erfolgreich geändert!'
-                  % escape(user.username), True)
+              % escape(user.username), True)
     return {
         'user': user,
         'form': form
