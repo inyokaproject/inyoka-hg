@@ -10,11 +10,11 @@
 """
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 from django.utils.encoding import force_unicode
-from inyoka.utils.local import current_request, _request_cache
+from inyoka.utils.local import current_request, _request_cache, has_local_key
 from inyoka.utils.debug import find_calling_context
 
 try:
-    from pylibmc import Client
+    from pylibmc import Client, NotFound
     _pylibmc_available = True
 except ImportError:
     _pylibmc_available = False
@@ -30,11 +30,30 @@ def _set_cache(obj):
     cache.__dict__ = obj.__dict__
 
 
+class CustomizedPylibmcClient(Client):
+    """This client implements some simplifications
+    to ease the application code.
+    """
+
+    def incr(self, key, delta=1):
+        """Set the delta value if there's no key yet."""
+        try:
+            Client.incr(self, key, delta)
+        except NotFound:
+            Client.set(self, key, delta)
+
+    def decr(self, key, delta=1):
+        try:
+            Client.incr(self, key, delta)
+        except NotFound:
+            Client.set(self, key, delta)
+
+
 def set_real_cache():
     """Set the cache according to the settings."""
     if settings.MEMCACHE_SERVERS:
         if _pylibmc_available:
-            servers = Client(settings.MEMCACHE_SERVERS, binary=True)
+            servers = CustomizedPylibmcClient(settings.MEMCACHE_SERVERS, binary=True)
             servers.set_behaviors({'tcp_nodelay': True, 'no_block': True})
         else:
             servers = settings.MEMCACHE_SERVERS
@@ -62,7 +81,7 @@ class RequestCache(object):
         self.request_cache = _request_cache
 
     def get(self, key):
-        if self.request_cache:
+        if has_local_key('cache'):
             try:
                 return self.request_cache[key]
             except KeyError:
@@ -74,11 +93,15 @@ class RequestCache(object):
         else:
             return self.real_cache.get(key)
 
-
     def set(self, key, value, timeout=None):
-        if self.request_cache:
+        if has_local_key('cache'):
             self.request_cache[key] = value
         return self.real_cache.set(key, value, timeout)
+
+    def delete(self, key):
+        if has_local_key('cache'):
+            self.request_cache.pop(key)
+        self.real_cache.delete(key)
 
 
 class CacheDebugProxy(object):

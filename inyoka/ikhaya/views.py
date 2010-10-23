@@ -20,7 +20,6 @@ from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import MONTHS
-from inyoka.utils.sessions import set_session_info
 from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.portal.utils import check_login, require_permission
@@ -105,10 +104,6 @@ def index(request, year=None, month=None, category_slug=None, page=1):
 
     link = href('ikhaya', *link)
 
-    if User.objects.get_anonymous_user().can('article_read'):
-        set_session_info(request, u'sieht sich die <a href="%s">'
-                                  u'Artikelübersicht</a> an' % link)
-
     articles = articles.order_by('public', '-updated')
 
     pagination = Pagination(request, articles, page, 15, link)
@@ -135,9 +130,6 @@ def detail(request, year, month, day, slug):
         if not request.user.can('article_read'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
-    else:
-        set_session_info(request, u'sieht sich den Artikel „<a href="%s">%s'
-                         u'</a>“' % (url_for(article), escape(article.subject)))
     if article.comments_enabled and request.method == 'POST':
         form = EditCommentForm(request.POST)
         if 'preview' in request.POST:
@@ -214,8 +206,6 @@ def edit_comment(request, comment_id):
 @templated('ikhaya/archive.html', modifier=context_modifier)
 def archive(request):
     """Shows the archive index."""
-    set_session_info(request, u'sieht sich das <a href="%s">Archiv</a> an' %
-                     href('ikhaya', 'archive'))
     months = Article.published.dates('pub_date', 'month')
     return {
         'months': months

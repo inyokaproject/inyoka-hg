@@ -235,7 +235,7 @@ class TopicMapperExtension(db.MapperExtension):
         parent_ids = list(p.id for p in instance.forum.parents)
         parent_ids.append(instance.forum_id)
         if parent_ids:
-            db.session.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
+            connection.execute(Forum.__table__.update(Forum.id.in_(parent_ids), {
                 'topic_count': Forum.topic_count + 1
             }))
         return db.EXT_CONTINUE

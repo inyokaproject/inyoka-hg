@@ -68,7 +68,8 @@ class ArticleManager(models.Manager):
             if articles[i] is None:
                 try:
                     cache_vals[key] = articles[i] = article = \
-                        self.select_related('author__username', 'category').get(
+                        self.select_related('author__username', 'category',
+                                            'category__icon', 'icon').get(
                             slug=slug, pub_date=pub_date)
                 except self.model.DoesNotExist:
                     articles[i] = None
@@ -132,7 +133,7 @@ class Article(models.Model):
 
     pub_date = models.DateField('Datum', db_index=True)
     pub_time = models.TimeField('Zeit')
-    updated = models.DateTimeField('Letzte Änderung', blank=True, null=True)
+    updated = models.DateTimeField('Letzte Änderung', blank=True, null=True, db_index=True)
     author = models.ForeignKey(User, related_name='article_set',
                                verbose_name='Autor')
     subject = models.CharField('Überschrift', max_length=180)
@@ -181,15 +182,15 @@ class Article(models.Model):
 
     @property
     def rendered_text(self):
-        if hasattr(self, '_rendered_text'):
-            return self._rendered_text
-        return self._render(self.text, 'ikhaya/article_text/%s' % self.id)
+        if not hasattr(self, '_rendered_text'):
+            self._rendered_text = self._render(self.text, 'ikhaya/article_text/%s' % self.id)
+        return self._rendered_text
 
     @property
     def rendered_intro(self):
-        if hasattr(self, '_rendered_intro'):
-            return self._rendered_intro
-        return self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
+        if not hasattr(self, '_rendered_intro'):
+            self._rendered_intro = self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
+        return self._rendered_intro
 
     @property
     def simplified_text(self):

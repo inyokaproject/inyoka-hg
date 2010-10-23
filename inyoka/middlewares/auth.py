@@ -11,6 +11,7 @@
 from inyoka.portal.user import User
 from inyoka.utils.flashing import flash
 from inyoka.utils.html import escape
+from inyoka.utils.sessions import set_session_info
 
 
 class AuthMiddleware(object):
@@ -37,3 +38,4 @@ class AuthMiddleware(object):
             user = User.objects.get_anonymous_user()
 
         request.user = user
+        set_session_info(request)
