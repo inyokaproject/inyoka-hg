@@ -17,6 +17,7 @@ try:
     from pylibmc import Client, NotFound
     _pylibmc_available = True
 except ImportError:
+    Client = type('Client', (object,), {})
     _pylibmc_available = False
 from inyoka.conf import settings
 
