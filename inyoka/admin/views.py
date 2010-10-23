@@ -891,7 +891,7 @@ def user_edit(request, username):
         'avatar_height': storage_data['max_avatar_height'],
         'avatar_width': storage_data['max_avatar_width'],
         'permissions': sorted(permissions, key=lambda p: p[1]),
-        'activation_link': activation_link,
+        'activation_link': activation_link
     }
 
 @require_permission('user_edit')
@@ -947,7 +947,7 @@ def user_edit_profile(request, username):
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     return {
         'user': user,
-        'form': form,
+        'form': form
     }
 
 @require_permission('user_edit')
@@ -980,7 +980,7 @@ def user_edit_settings(request, username):
     }
     form = EditUserSettingsForm(initial=initial)
     if request.method == 'POST':
-        form = EditUserSettingsForm(request.POST, request.FILES)
+        form = EditUserSettingsForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             new_versions = data.pop('ubuntu_version')
@@ -1000,7 +1000,31 @@ def user_edit_settings(request, username):
                       % escape(user.username), True)
     return {
         'user': user,
-        'form': form,
+        'form': form
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_groups.html')
+def user_edit_groups(request, username):
+    user = get_user(username)
+    groups = dict((g.name, g) for g in Group.objects.all())
+    if request.method == 'POST':
+        groups_joined = [groups[gn] for gn in
+                         request.POST.getlist('user_groups_joined')]
+        groups_not_joined = [groups[gn] for gn in
+                            request.POST.getlist('user_groups_not_joined')]
+        user.groups.remove(*groups_not_joined)
+        user.groups.add(*groups_joined)
+        dbsession.commit()
+        user.save()
+    groups_joined, groups_not_joined = ([], [])
+    groups_joined = groups_joined or user.groups.all()
+    groups_not_joined = groups_not_joined or \
+                        [x for x in groups.itervalues() if not x in groups_joined]
+    return {
+        'user': user,
+        'joined_groups': [g.name for g in groups_joined],
+        'not_joined_groups': [g.name for g in groups_not_joined],
     }
 
 @require_permission('user_edit')
