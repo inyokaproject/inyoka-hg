@@ -44,18 +44,17 @@
     {{ record_time|specificdatetimeformat(true) }} gleichzeitig online waren.<br />
     Insgesamt sind {{ global_registered_users }} Benutzer auf ubuntuusers.de registriert.<br />
   </p>
+
+  <p>Registrierte Benutzer:
+  {% for session in sessions.registered_sessions %}
+    {%- if session.link -%}
+      <a href="{{ session.link|e }}" class="{{ session.type }}">{{ session.text|e }}</a>{% else %}
+      <span class="{{ session.type }}">{{ session.text|e }}</span>{%- endif %}{%- if not loop.last %}, {% endif %}
+  {%- else %}
+    keine
+  {%- endfor %}
+  </p>
   <p>
     <strong>Legende:</strong> Benutzer mit einem <img src="{{ href('static', 'img', 'team.png') }}" alt="Team-Icon" /> Icon gehören zum Ubuntuusers.de Team.
   </p>
-  {%- if sessions.sessions %}
-  <ul>
-    {%- for session in sessions.sessions %}
-      {%- if session.link %}
-      <li>
-        <a href="{{ session.link }}" class="{{ session.type }}" title="{{ session.type|capitalize }}">{{ (session.text or 'Gast')|e }}</a>
-      </li>
-      {%- endif %}
-    {%- endfor %}
-  </ul>
-  {%- endif %}
 {% endblock %}

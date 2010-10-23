@@ -149,4 +149,7 @@
   </p>
   {%- endif %}
   {%- endif %}
+  {%- if request.user.can('user_edit') %}
+    <a href="{{ href('admin', 'users', 'edit', user.username) }}">Nutzer bearbeiten</a>
+  {%- endif %}
 {% endblock %}

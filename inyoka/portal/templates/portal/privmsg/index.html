@@ -32,7 +32,7 @@
       </div>
       <div class="linklist pn_actions">
         <a class="pn_reply" href="{{ message|url('reply') }}">Antworten</a> |
-        <a class="pn_reply" href="{{ message|url('reply_to_all') }}">An alle antworten</a> |
+        <a class="pn_reply_all" href="{{ message|url('reply_to_all') }}">An alle antworten</a> |
         <a class="pn_forward" href="{{ message|url('forward') }}">Weiterleiten</a> |
         {%- if folder.id == 'trash' %}
         <a class="pn_restore" href="?action=restore">Wiederherstellen</a> |
@@ -80,6 +80,9 @@
             {%- if not entry.is_own_message %}
             <a href="{{ entry|url('reply') }}" title="Antworten">
               <img src="{{ href('static', 'img/icons/small/msg-reply.png') }}" alt="Antworten" />
+            </a>
+            <a href="{{ entry|url('reply_to_all') }}" title="An alle antworten">
+              <img src="{{ href('static', 'img/icons/small/msg-reply-all.png') }}" alt="An alle antworten" />
             </a>
             {%- endif %}
             <a href="{{ entry|url('forward') }}" title="Weiterleiten">

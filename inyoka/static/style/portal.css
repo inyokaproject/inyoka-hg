@@ -386,7 +386,7 @@ table tr td.pn_delete input {
   margin-top: .2em;
 }
 
-a.pn_restore, a.pn_archive, a.pn_reply, a.pn_forward {
+a.pn_restore, a.pn_archive, a.pn_reply, a.pn_reply_all, a.pn_forward {
   padding-left: 20px;
   background: no-repeat left center;
 }
@@ -394,6 +394,7 @@ a.pn_restore, a.pn_archive, a.pn_reply, a.pn_forward {
 a.pn_restore { background-image: url(../img/icons/small/msg-restore.png); }
 a.pn_archive { background-image: url(../img/icons/small/archive.png); }
 a.pn_reply { background-image: url(../img/icons/small/msg-reply.png); }
+a.pn_reply_all { background-image: url(../img/icons/small/msg-reply-all.png); }
 a.pn_forward { background-image: url(../img/icons/small/msg-forward.png); }
 
 table th.delete {

@@ -213,6 +213,60 @@ class CreateUserForm(forms.Form):
             )
 
 
+class EditUserProfileForm(forms.Form):
+    username = forms.CharField(label=u'Benutzername', max_length=30)
+    member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
+    avatar = forms.ImageField(label=u'Avatar', required=False)
+    delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
+
+    # notification informations
+    email = forms.CharField(label=u'E-Mail', required=True)
+    jabber = forms.CharField(label=u'Jabber', max_length=200, required=False)
+    icq = forms.CharField(label=u'ICQ', max_length=16, required=False)
+    msn = forms.CharField(label=u'MSN', max_length=200, required=False)
+    aim = forms.CharField(label=u'AIM', max_length=200, required=False)
+    yim = forms.CharField(label=u'YIM', max_length=200, required=False)
+    skype = forms.CharField(label=u'Skype', required=False)
+    wengophone = forms.CharField(label=u'WengoPhone', required=False)
+    sip = forms.CharField(label=u'SIP', required=False)
+
+    # misc other things
+    signature = forms.CharField(label=u'Signatur', required=False,
+                                widget=forms.Textarea)
+    coordinates_long = forms.DecimalField(label='Koordinaten (Breite)',
+                       required=False, min_value=-90, max_value=90)
+    coordinates_lat = forms.DecimalField(label=u'Koordinaten (Länge)',
+                      required=False, min_value=-180, max_value=180)
+    location = forms.CharField(label=u'Wohnort', max_length=200,
+                               required=False)
+    interests = forms.CharField(label=u'Interessen', max_length=200,
+                                required=False)
+    website = forms.URLField(label=u'Webseite', required=False)
+    launchpad = forms.CharField(label=u'Launchpad-Nickname', required=False)
+    gpgkey = forms.RegexField('^(0x)?[0-9a-f]{8}$(?i)', required=False,
+                              label=u'GPG-Schlüssel',  max_length=10)
+
+    def clean_gpgkey(self):
+        gpgkey = self.cleaned_data.get('gpgkey', '').upper()
+        if gpgkey.startswith('0X'):
+            gpgkey = gpgkey[2:]
+        return gpgkey
+    
+    def clean_avatar(self):
+        """
+        Keep the user form setting avatar to a too big size.
+        """
+        data = self.cleaned_data
+        if data['avatar'] is None:
+            return
+        st = int(storage.get('max_avatar_size'))
+        if st and data['avatar'].size > st * 1024:
+            raise forms.ValidationError(
+                u'Der von dir ausgewählte Avatar konnte nicht '
+                u'hochgeladen werden, da er zu groß ist. Bitte '
+                u'wähle einen anderen Avatar.')
+        return data['avatar']
+
 class EditUserForm(forms.Form):
     # personal informations
     username = forms.CharField(label=u'Benutzername', max_length=30)
@@ -328,8 +382,65 @@ class EditUserForm(forms.Form):
                 u'wähle einen anderen Avatar.')
         return data['avatar']
 
+class EditUserGroupsForm(forms.Form):
+    primary_group = forms.CharField(label=u'Primäre Gruppe', required=False,
+        help_text=u'Wird unter anderem für das anzeigen des Team-Icons verwendet')
 
+class EditUserStatusForm(forms.Form):
+    status = forms.ChoiceField(label=u'Status', required=False,
+                                   choices=enumerate([
+                                       u'noch nicht aktiviert',
+                                       u'aktiv',
+                                       u'gebannt',
+                                       u'hat sich selbst gelöscht']))
+    banned_until = forms.DateTimeField(label=u'Automatisch entsperren', required=False,
+        widget=DateTimeWidget,
+        help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
+    
+    def clean_banned_until(self):
+        """
+        Keep the user from setting banned_until if status is not banned.
+        This is to avoid confusion because this was previously possible.
+        """
+        data = self.cleaned_data
+        if data['banned_until'] is None:
+            return
+        if data['status'] not in (2, '2'):
+            raise forms.ValidationError(
+                u'Der Benutzer ist gar nicht gebannt'
+            )
+        if data['banned_until'] < datetime.datetime.now():
+            #XXX: timezone does not work. but those few hours … :)
+            raise forms.ValidationError(
+                u'Der Zeitpunkt liegt in der Vergangenheit'
+            )
+        return data['banned_until']
 
+class EditUserPasswordForm(forms.Form):
+    new_password = forms.CharField(label=u'Neues Passwort',
+        required=False, widget=forms.PasswordInput(render_value=False))
+    confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
+        required=False, widget=forms.PasswordInput(render_value=False))
+    
+    def clean_confirm_password(self):
+        """
+        Validates that the two password inputs match.
+        """
+        data = self.cleaned_data
+        if 'new_password' in data and 'confirm_password' in data:
+            if data['new_password'] == data['confirm_password']:
+                return data['confirm_password']
+            raise forms.ValidationError(
+                u'Das Passwort muss mit der Passwortbestätigung übereinstimmen!'
+            )
+        else:
+            raise forms.ValidationError(
+                u'Du musst ein Passwort und eine Passwortbestätigung angeben!'
+            )
+
+class EditUserPrivilegesForm(forms.Form):
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                                            required=False)
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)

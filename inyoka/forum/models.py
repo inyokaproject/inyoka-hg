@@ -161,7 +161,7 @@ class ForumQuery(db.Query):
             for key, value in forums.iteritems():
                 if value is None:
                     forums[key] = missing_objects[key.split('/')[-1]]
-            cache.set_many(forums, 86400)
+            cache.set_many(forums, 300)
         else:
             # merge forums into sqlalchemy session again
             objects = forums.itervalues()
@@ -178,7 +178,7 @@ class ForumQuery(db.Query):
             forum = cache.get('forum/forums/%s' % slug)
             if forum is None:
                 forum = query.one()
-                cache.set('forum/forums/%s' % slug, forum, 86400)
+                cache.set('forum/forums/%s' % slug, forum, 300)
             else:
                 forum = db.session.merge(forum, load=False)
             return forum

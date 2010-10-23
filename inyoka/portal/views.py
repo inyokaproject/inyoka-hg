@@ -494,6 +494,7 @@ def profile(request, username):
         'groups':   groups,
         'wikipage': content,
         'User':     User,
+        'request':  request
     }
 
 

@@ -41,16 +41,20 @@ from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
+     EditUserProfileForm, EditUserGroupsForm, EditUserPrivilegesForm, \
+     EditUserPasswordForm, EditUserStatusForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
      EditPublicArticleForm
-from inyoka.portal.models import StaticPage, Event, StaticFile
+from inyoka.portal.forms import UserCPSettingsForm as EditUserSettingsForm, \
+     NOTIFICATION_CHOICES
+from inyoka.portal.models import StaticPage, Event, StaticFile, Subscription
 from inyoka.portal.user import User, Group, PERMISSION_NAMES, send_activation_mail
 from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
     PRIVILEGES_DETAILS
-from inyoka.forum.models import Forum, Privilege, WelcomeMessage
+from inyoka.forum.models import Forum, Privilege, WelcomeMessage, UBUNTU_VERSIONS
 from inyoka.forum.compat import SAUser, user_group_table
 from inyoka.wiki.parser import parse, RenderContext
 
@@ -695,11 +699,8 @@ def users_with_special_rights(request):
         'count': len(users),
     }
 
-
-@require_permission('user_edit')
-@templated('admin/user_edit.html')
-def user_edit(request, username):
-    #: check if the user exists
+def get_user(username):
+    """Check if the user exists and return it"""
     try:
         if '@' in username:
             user = User.objects.get(email__iexact=username)
@@ -707,6 +708,12 @@ def user_edit(request, username):
             user = User.objects.get(username)
     except User.DoesNotExist:
         raise PageNotFound
+    return user
+
+@require_permission('user_edit')
+@templated('admin/user_edit.html')
+def user_edit(request, username):
+    user = get_user(username)
     if username != user.urlsafe_username:
         return HttpResponseRedirect(user.get_absolute_url('admin'))
 
@@ -714,10 +721,21 @@ def user_edit(request, username):
     groups_joined, groups_not_joined = ([], [])
     checked_perms = [int(p) for p in request.POST.getlist('permissions')]
 
+    return {
+        'user': user
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_profile.html')
+def user_edit_profile(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    initial = model_to_dict(user)
+    form = EditUserProfileForm(initial=initial)
     if request.method == 'POST':
-        form = EditUserForm(request.POST, request.FILES)
-        form.fields['permissions'].choices = [(k, '') for k in
-                                              PERMISSION_NAMES.keys()]
+        form = EditUserProfileForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
             if data['username'] != user.username:
@@ -727,15 +745,13 @@ def user_edit(request, username):
                     user.username = data['username']
                 else:
                     form.errors['username'] = ErrorList(
-                        [u'Ein Benutzer mit diesem Namen existiert bereits'])
-
+                        [u'Ein Benutzer mit diesem Namen existiert bereits']
+                    )
         if form.is_valid():
-            #: set the user attributes, avatar and forum privileges
-            for key in ('status', 'date_joined', 'banned_until',
-                        'website', 'interests', 'location', 'jabber', 'icq',
-                        'msn', 'aim', 'yim', 'signature', 'coordinates_long',
-                        'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'member_title', 'launchpad'):
+            for key in ('website', 'interests', 'location', 'jabber', 'icq',
+                         'msn', 'aim', 'yim', 'signature', 'coordinates_long',
+                         'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
+                         'wengophone', 'launchpad', 'member_title'):
                 setattr(user, key, data[key])
             if data['delete_avatar']:
                 user.delete_avatar()
@@ -751,9 +767,173 @@ def user_edit(request, username):
                           u'Bitte beachte dies.'
                           % (ava_mh, ava_mw))
 
-            if data['new_password']:
-                user.set_password(data['new_password'])
+            dbsession.commit()
+            user.save()
+            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+            # redirect to the new username if given
+            if user.username != username:
+                return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
+    return {
+        'user': user,
+        'form': form,
+        'avatar_height': storage_data['max_avatar_height'],
+        'avatar_width': storage_data['max_avatar_width']
+    }
 
+@require_permission('user_edit')
+@templated('admin/user_edit_settings.html')
+def user_edit_settings(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    ubuntu_version = [s.ubuntu_version for s in Subscription.objects.\
+                      filter(user=request.user, ubuntu_version__isnull=False)]
+    try:
+        timezone = pytz.timezone(user.settings.get('timezone', ''))
+    except pytz.UnknownTimeZoneError:
+        timezone = pytz.timezone('Europe/Berlin')
+    initial = {
+        'notify': user.settings.get('notify', ['mail']),
+        'notifications': user.settings.get('notifications', [c[0] for c in
+                                                NOTIFICATION_CHOICES]),
+        'ubuntu_version': ubuntu_version,
+        'timezone': timezone,
+        'hide_avatars': user.settings.get('hide_avatars', False),
+        'hide_signatures': user.settings.get('hide_signatures', False),
+        'hide_profile': user.settings.get('hide_profile', False),
+        'autosubscribe': user.settings.get('autosubscribe', True),
+        'show_preview': user.settings.get('show_preview', False),
+        'show_thumbnails': user.settings.get('show_thumbnails', False),
+        'highlight_search': user.settings.get('highlight_search', True),
+        'mark_read_on_logout': user.settings.get('mark_read_on_logout', False)
+    }
+    form = EditUserSettingsForm(initial=initial)
+    if request.method == 'POST':
+        form = EditUserSettingsForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            new_versions = data.pop('ubuntu_version')
+            old_versions = [s.ubuntu_version for s in Subscription.objects \
+                          .filter(user=user).exclude(ubuntu_version__isnull=True)]
+            for version in [v.number for v in UBUNTU_VERSIONS]:
+                if version in new_versions and version not in old_versions:
+                    Subscription(user=user, ubuntu_version=version).save()
+                elif version not in new_versions and version in old_versions:
+                    Subscription.objects.filter(user=user,
+                                                ubuntu_version=version).delete()
+            for key, value in data.iteritems():
+                user.settings[key] = data[key]
+            dbsession.commit()
+            user.save()
+            flash(u'Die Benutzereinstellungen von "%s" wurden erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+    return {
+        'user': user,
+        'form': form
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_groups.html')
+def user_edit_groups(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+    initial = model_to_dict(user)
+    if initial['_primary_group']:
+        initial.update({
+            'primary_group': Group.objects.get(id=initial['_primary_group']).name
+        })
+    form = EditUserGroupsForm(initial=initial)
+    groups = dict((g.name, g) for g in Group.objects.all())
+    if request.method == 'POST':
+        form = EditUserGroupsForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            groups_joined = [groups[gn] for gn in
+                             request.POST.getlist('user_groups_joined')]
+            groups_not_joined = [groups[gn] for gn in
+                                request.POST.getlist('user_groups_not_joined')]
+            user.groups.remove(*groups_not_joined)
+            user.groups.add(*groups_joined)
+
+            if user._primary_group:
+                oprimary = user._primary_group.name
+            else:
+                oprimary = ""
+
+            primary = None
+            if oprimary != data['primary_group']:
+                try:
+                    primary = Group.objects.get(name=data['primary_group'])
+                except Group.DoesNotExist:
+                    primary = None
+            user._primary_group = primary
+
+            dbsession.commit()
+            user.save()
+            flash(u'Die Gruppen von "%s" wurden erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    groups_joined, groups_not_joined = ([], [])
+    groups_joined = groups_joined or user.groups.all()
+    groups_not_joined = groups_not_joined or \
+                        [x for x in groups.itervalues() if not x in groups_joined]
+    return {
+        'user': user,
+        'form': form,
+        'joined_groups': [g.name for g in groups_joined],
+        'not_joined_groups': [g.name for g in groups_not_joined],
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_status.html')
+def user_edit_status(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    initial = model_to_dict(user)
+    form = EditUserStatusForm(initial=initial)
+    if request.method == 'POST':
+        form = EditUserStatusForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            for key in ('status', 'banned_until',):
+                setattr(user, key, data[key])
+            dbsession.commit()
+            user.save()
+            flash(u'Die Gruppen von "%s" wurden erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+    if user.status > 0:
+        activation_link = None
+    else:
+        activation_link = user.get_absolute_url('activate')
+    return {
+        'user': user,
+        'form': form,
+        'activation_link': activation_link
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_privileges.html')
+def user_edit_privileges(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    checked_perms = [int(p) for p in request.POST.getlist('permissions')]
+
+    if request.method == 'POST':
+        form = EditUserPrivilegesForm(request.POST, request.FILES)
+        form.fields['permissions'].choices = [(k, '') for k in
+                                              PERMISSION_NAMES.keys()]
+        if form.is_valid():
             # permissions
             permissions = 0
             for perm in checked_perms:
@@ -793,38 +973,12 @@ def user_edit(request, username):
                     elif privilege is not None:
                         dbsession.delete(privilege)
 
-            # group editing
-            groups_joined = [groups[gn] for gn in
-                             request.POST.getlist('user_groups_joined')]
-            groups_not_joined = [groups[gn] for gn in
-                                request.POST.getlist('user_groups_not_joined')]
-            user.groups.remove(*groups_not_joined)
-            user.groups.add(*groups_joined)
-
-            if user._primary_group:
-                oprimary = user._primary_group.name
-            else:
-                oprimary = ""
-
-            primary = None
-            if oprimary != data['primary_group']:
-                try:
-                    primary = Group.objects.get(name=data['primary_group'])
-                except Group.DoesNotExist:
-                    primary = None
-            user._primary_group = primary
-
-            # save the user object back to the database as well as other
-            # database changes
             dbsession.commit()
             user.save()
             cache.delete('user_permissions/%s' % user.id)
 
-            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
+            flash(u'Die Privilegien von "%s" wurden erfolgreich aktualisiert!'
                   % escape(user.username), True)
-            # redirect to the new username if given
-            if user.username != username:
-                return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     else:
@@ -833,7 +987,7 @@ def user_edit(request, username):
             initial.update({
                 'primary_group': Group.objects.get(id=initial['_primary_group']).name
             })
-        form = EditUserForm(initial=initial)
+        form = EditUserPrivilegesForm(initial=initial)
 
     # collect forum privileges
     forum_privileges = []
@@ -851,12 +1005,6 @@ def user_edit(request, username):
             list(split_bits(privilege and privilege.negative or None))
         ))
 
-    groups_joined = groups_joined or user.groups.all()
-    groups_not_joined = groups_not_joined or \
-                        [x for x in groups.itervalues() if not x in groups_joined]
-
-    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
-
     permissions = []
 
     groups = user.groups.all()
@@ -870,24 +1018,32 @@ def user_edit(request, username):
 
     forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
 
-    if user.status > 0:
-        activation_link = None
-    else:
-        activation_link = user.get_absolute_url('activate')
-
     return {
         'user': user,
         'form': form,
         'forum_privileges': PRIVILEGE_DICT,
         'user_forum_privileges': forum_privileges,
-        'joined_groups': [g.name for g in groups_joined],
-        'not_joined_groups': [g.name for g in groups_not_joined],
-        'avatar_height': storage_data['max_avatar_height'],
-        'avatar_width': storage_data['max_avatar_width'],
         'permissions': sorted(permissions, key=lambda p: p[1]),
-        'activation_link': activation_link,
     }
 
+@require_permission('user_edit')
+@templated('admin/user_edit_password.html')
+def user_edit_password(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+    form = EditUserPasswordForm(request.POST)
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        user.set_password(data['new_password'])
+        dbsession.commit()
+        user.save()
+        flash(u'Das Passwort von "%s" wurde erfolgreich geändert!'
+              % escape(user.username), True)
+    return {
+        'user': user,
+        'form': form
+    }
 
 @require_permission('user_edit')
 @templated('admin/user_new.html')
