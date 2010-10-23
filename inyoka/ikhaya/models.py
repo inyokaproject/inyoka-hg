@@ -182,15 +182,15 @@ class Article(models.Model):
 
     @property
     def rendered_text(self):
-        if hasattr(self, '_rendered_text'):
-            return self._rendered_text
-        return self._render(self.text, 'ikhaya/article_text/%s' % self.id)
+        if not hasattr(self, '_rendered_text'):
+            self._rendered_text = self._render(self.text, 'ikhaya/article_text/%s' % self.id)
+        return self._rendered_text
 
     @property
     def rendered_intro(self):
-        if hasattr(self, '_rendered_intro'):
-            return self._rendered_intro
-        return self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
+        if not hasattr(self, '_rendered_intro'):
+            self._rendered_intro = self._render(self.intro, 'ikhaya/article_intro/%s' % self.id)
+        return self._rendered_intro
 
     @property
     def simplified_text(self):
