@@ -113,7 +113,8 @@ def populate_context_defaults(context):
                 events = Event.objects.filter(visible=False).all().count()
                 to_update[key] = events
 
-        cache.set_many(to_update)
+        if to_update:
+            cache.set_many(to_update)
 
     # we don't need to use cache here because storage does this for us
     global_message = storage['global_message']
