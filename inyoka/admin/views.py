@@ -41,7 +41,8 @@ from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
-     EditUserProfileForm, \
+     EditUserProfileForm, EditUserGroupsForm, EditUserPrivilegesForm, \
+     EditUserPasswordForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \
      EditPublicArticleForm
 from inyoka.portal.forms import UserCPSettingsForm as EditUserSettingsForm, \
@@ -920,7 +921,7 @@ def user_edit_profile(request, username):
             for key in ('website', 'interests', 'location', 'jabber', 'icq',
                          'msn', 'aim', 'yim', 'signature', 'coordinates_long',
                          'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                         'wengophone', 'launchpad'):
+                         'wengophone', 'launchpad', 'member_title'):
                 setattr(user, key, data[key])
             if data['delete_avatar']:
                 user.delete_avatar()
@@ -947,7 +948,7 @@ def user_edit_profile(request, username):
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     return {
         'user': user,
-        'form': form
+        'form': form,
     }
 
 @require_permission('user_edit')
@@ -1007,24 +1008,179 @@ def user_edit_settings(request, username):
 @templated('admin/user_edit_groups.html')
 def user_edit_groups(request, username):
     user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+    initial = model_to_dict(user)
+    if initial['_primary_group']:
+        initial.update({
+            'primary_group': Group.objects.get(id=initial['_primary_group']).name
+        })
+    form = EditUserGroupsForm(initial=initial)
     groups = dict((g.name, g) for g in Group.objects.all())
     if request.method == 'POST':
-        groups_joined = [groups[gn] for gn in
-                         request.POST.getlist('user_groups_joined')]
-        groups_not_joined = [groups[gn] for gn in
-                            request.POST.getlist('user_groups_not_joined')]
-        user.groups.remove(*groups_not_joined)
-        user.groups.add(*groups_joined)
-        dbsession.commit()
-        user.save()
+        form = EditUserGroupsForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            groups_joined = [groups[gn] for gn in
+                             request.POST.getlist('user_groups_joined')]
+            groups_not_joined = [groups[gn] for gn in
+                                request.POST.getlist('user_groups_not_joined')]
+            user.groups.remove(*groups_not_joined)
+            user.groups.add(*groups_joined)
+
+            if user._primary_group:
+                oprimary = user._primary_group.name
+            else:
+                oprimary = ""
+
+            primary = None
+            if oprimary != data['primary_group']:
+                try:
+                    primary = Group.objects.get(name=data['primary_group'])
+                except Group.DoesNotExist:
+                    primary = None
+            user._primary_group = primary
+
+            dbsession.commit()
+            user.save()
+            flash(u'Die Gruppen von "%s" wurden erfolgreich aktualisiert!'
+                      % escape(user.username), True)
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
     groups_joined, groups_not_joined = ([], [])
     groups_joined = groups_joined or user.groups.all()
     groups_not_joined = groups_not_joined or \
                         [x for x in groups.itervalues() if not x in groups_joined]
     return {
         'user': user,
+        'form': form,
         'joined_groups': [g.name for g in groups_joined],
         'not_joined_groups': [g.name for g in groups_not_joined],
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_privileges.html')
+def user_edit_privileges(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+
+    checked_perms = [int(p) for p in request.POST.getlist('permissions')]
+
+    if request.method == 'POST':
+        form = EditUserPrivilegesForm(request.POST, request.FILES)
+        form.fields['permissions'].choices = [(k, '') for k in
+                                              PERMISSION_NAMES.keys()]
+        if form.is_valid():
+            # permissions
+            permissions = 0
+            for perm in checked_perms:
+                permissions |= perm
+            user._permissions = permissions
+
+            #: forum privileges
+            privileges = Privilege.query
+            for key, value in request.POST.iteritems():
+                if key.startswith('forum_privileges_'):
+                    positive = 0
+                    negative = 0
+                    for bit in value.split(','):
+                        try:
+                            bit = int(bit)
+                        except ValueError:
+                            continue
+                        if bit > 0:
+                            positive |= abs(bit)
+                        else:
+                            negative |= abs(bit)
+
+                    forum_id = key.split('_')[2]
+                    privilege = privileges.filter(and_(
+                        Privilege.forum_id==forum_id,
+                        Privilege.group_id==None,
+                        Privilege.user_id==user.id
+                    )).first()
+                    if privilege is None and (positive or negative):
+                        privilege = Privilege(
+                            user=user,
+                            forum=Forum.query.get(int(forum_id))
+                        )
+                    if negative or positive:
+                        privilege.positive = positive
+                        privilege.negative = negative
+                    elif privilege is not None:
+                        dbsession.delete(privilege)
+
+            dbsession.commit()
+            user.save()
+            cache.delete('user_permissions/%s' % user.id)
+
+            flash(u'Die Privilegien von "%s" wurden erfolgreich aktualisiert!'
+                  % escape(user.username), True)
+        else:
+            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    else:
+        initial = model_to_dict(user)
+        if initial['_primary_group']:
+            initial.update({
+                'primary_group': Group.objects.get(id=initial['_primary_group']).name
+            })
+        form = EditUserPrivilegesForm(initial=initial)
+
+    # collect forum privileges
+    forum_privileges = []
+    forums = Forum.query.all()
+    for forum in forums:
+        privilege = Privilege.query.filter(and_(
+            Privilege.forum_id==forum.id,
+            Privilege.user_id==user.id
+        )).first()
+
+        forum_privileges.append((
+            forum.id,
+            forum.name,
+            list(split_bits(privilege and privilege.positive or None)),
+            list(split_bits(privilege and privilege.negative or None))
+        ))
+
+    permissions = []
+
+    groups = user.groups.all()
+    for id, name in PERMISSION_NAMES.iteritems():
+        derived = filter(lambda g: id & g.permissions, groups)
+        if request.method == 'POST':
+            checked = id in checked_perms
+        else:
+            checked = id & user._permissions
+        permissions.append((id, name, checked, derived))
+
+    forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
+
+    return {
+        'user': user,
+        'form': form,
+        'forum_privileges': PRIVILEGE_DICT,
+        'user_forum_privileges': forum_privileges,
+        'permissions': sorted(permissions, key=lambda p: p[1]),
+    }
+
+@require_permission('user_edit')
+@templated('admin/user_edit_password.html')
+def user_edit_password(request, username):
+    user = get_user(username)
+    if username != user.urlsafe_username:
+        return HttpResponseRedirect(user.get_absolute_url('admin'))
+    form = EditUserPasswordForm(request.POST)
+    if form.is_valid():
+        data = form.cleaned_data
+        user.set_password(data['new_password'])
+        dbsession.commit()
+        user.save()
+        flash(u'Das Passwort von "%s" wurde erfolgreich geändert!'
+                  % escape(user.username), True)
+    return {
+        'user': user,
+        'form': form
     }
 
 @require_permission('user_edit')

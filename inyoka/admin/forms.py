@@ -215,6 +215,7 @@ class CreateUserForm(forms.Form):
 
 class EditUserProfileForm(forms.Form):
     username = forms.CharField(label=u'Benutzername', max_length=30)
+    member_title = forms.CharField(label=u'Benutzer-Titel', required=False)
     avatar = forms.ImageField(label=u'Avatar', required=False)
     delete_avatar = forms.BooleanField(label=u'Avatar löschen', required=False)
 
@@ -375,8 +376,35 @@ class EditUserForm(forms.Form):
                 u'wähle einen anderen Avatar.')
         return data['avatar']
 
+class EditUserGroupsForm(forms.Form):
+    primary_group = forms.CharField(label=u'Primäre Gruppe', required=False,
+        help_text=u'Wird unter anderem für das anzeigen des Team-Icons verwendet')
 
+class EditUserPasswordForm(forms.Form):
+    new_password = forms.CharField(label=u'Neues Passwort',
+        required=False, widget=forms.PasswordInput(render_value=False))
+    confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
+        required=False, widget=forms.PasswordInput(render_value=False))
+    
+    def clean_confirm_password(self):
+        """
+        Validates that the two password inputs match.
+        """
+        data = self.cleaned_data
+        if 'new_password' in data and 'confirm_password' in data:
+            if data['new_password'] == data['confirm_password']:
+                return data['confirm_password']
+            raise forms.ValidationError(
+                u'Das Passwort muss mit der Passwortbestätigung übereinstimmen!'
+            )
+        else:
+            raise forms.ValidationError(
+                u'Du musst ein Passwort und eine Passwortbestätigung angeben!'
+            )
 
+class EditUserPrivilegesForm(forms.Form):
+    permissions = forms.MultipleChoiceField(label=u'Privilegien',
+                                            required=False)
 
 class EditGroupForm(forms.Form):
     name = forms.CharField(label=u'Gruppenname', max_length=80)
