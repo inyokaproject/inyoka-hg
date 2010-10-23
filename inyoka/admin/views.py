@@ -721,178 +721,8 @@ def user_edit(request, username):
     groups_joined, groups_not_joined = ([], [])
     checked_perms = [int(p) for p in request.POST.getlist('permissions')]
 
-    if request.method == 'POST':
-        form = EditUserForm(request.POST, request.FILES)
-        form.fields['permissions'].choices = [(k, '') for k in
-                                              PERMISSION_NAMES.keys()]
-        if form.is_valid():
-            data = form.cleaned_data
-            if data['username'] != user.username:
-                try:
-                    User.objects.get(data['username'])
-                except User.DoesNotExist:
-                    user.username = data['username']
-                else:
-                    form.errors['username'] = ErrorList(
-                        [u'Ein Benutzer mit diesem Namen existiert bereits'])
-
-        if form.is_valid():
-            #: set the user attributes, avatar and forum privileges
-            for key in ('status', 'date_joined', 'banned_until',
-                        'website', 'interests', 'location', 'jabber', 'icq',
-                        'msn', 'aim', 'yim', 'signature', 'coordinates_long',
-                        'coordinates_lat', 'gpgkey', 'email', 'skype', 'sip',
-                        'wengophone', 'member_title', 'launchpad'):
-                setattr(user, key, data[key])
-            if data['delete_avatar']:
-                user.delete_avatar()
-
-            if data['avatar']:
-                avatar_resized = user.save_avatar(data['avatar'])
-                if avatar_resized:
-                    ava_mh, ava_mw = storage.get_many(('max_avatar_height',
-                        'max_avatar_width')).itervalues()
-                    flash(u'Der von dir hochgeladene Avatar wurde auf '
-                          u'%sx%s Pixel skaliert. Dadurch könnten '
-                          u'Qualitätseinbußen aufgetreten sein. '
-                          u'Bitte beachte dies.'
-                          % (ava_mh, ava_mw))
-
-            if data['new_password']:
-                user.set_password(data['new_password'])
-
-            # permissions
-            permissions = 0
-            for perm in checked_perms:
-                permissions |= perm
-            user._permissions = permissions
-
-            #: forum privileges
-            privileges = Privilege.query
-            for key, value in request.POST.iteritems():
-                if key.startswith('forum_privileges_'):
-                    positive = 0
-                    negative = 0
-                    for bit in value.split(','):
-                        try:
-                            bit = int(bit)
-                        except ValueError:
-                            continue
-                        if bit > 0:
-                            positive |= abs(bit)
-                        else:
-                            negative |= abs(bit)
-
-                    forum_id = key.split('_')[2]
-                    privilege = privileges.filter(and_(
-                        Privilege.forum_id==forum_id,
-                        Privilege.group_id==None,
-                        Privilege.user_id==user.id
-                    )).first()
-                    if privilege is None and (positive or negative):
-                        privilege = Privilege(
-                            user=user,
-                            forum=Forum.query.get(int(forum_id))
-                        )
-                    if negative or positive:
-                        privilege.positive = positive
-                        privilege.negative = negative
-                    elif privilege is not None:
-                        dbsession.delete(privilege)
-
-            # group editing
-            groups_joined = [groups[gn] for gn in
-                             request.POST.getlist('user_groups_joined')]
-            groups_not_joined = [groups[gn] for gn in
-                                request.POST.getlist('user_groups_not_joined')]
-            user.groups.remove(*groups_not_joined)
-            user.groups.add(*groups_joined)
-
-            if user._primary_group:
-                oprimary = user._primary_group.name
-            else:
-                oprimary = ""
-
-            primary = None
-            if oprimary != data['primary_group']:
-                try:
-                    primary = Group.objects.get(name=data['primary_group'])
-                except Group.DoesNotExist:
-                    primary = None
-            user._primary_group = primary
-
-            # save the user object back to the database as well as other
-            # database changes
-            dbsession.commit()
-            user.save()
-            cache.delete('user_permissions/%s' % user.id)
-
-            flash(u'Das Benutzerprofil von "%s" wurde erfolgreich aktualisiert!'
-                  % escape(user.username), True)
-            # redirect to the new username if given
-            if user.username != username:
-                return HttpResponseRedirect(href('admin', 'users', 'edit', user.username))
-        else:
-            flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
-    else:
-        initial = model_to_dict(user)
-        if initial['_primary_group']:
-            initial.update({
-                'primary_group': Group.objects.get(id=initial['_primary_group']).name
-            })
-        form = EditUserForm(initial=initial)
-
-    # collect forum privileges
-    forum_privileges = []
-    forums = Forum.query.all()
-    for forum in forums:
-        privilege = Privilege.query.filter(and_(
-            Privilege.forum_id==forum.id,
-            Privilege.user_id==user.id
-        )).first()
-
-        forum_privileges.append((
-            forum.id,
-            forum.name,
-            list(split_bits(privilege and privilege.positive or None)),
-            list(split_bits(privilege and privilege.negative or None))
-        ))
-
-    groups_joined = groups_joined or user.groups.all()
-    groups_not_joined = groups_not_joined or \
-                        [x for x in groups.itervalues() if not x in groups_joined]
-
-    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
-
-    permissions = []
-
-    groups = user.groups.all()
-    for id, name in PERMISSION_NAMES.iteritems():
-        derived = filter(lambda g: id & g.permissions, groups)
-        if request.method == 'POST':
-            checked = id in checked_perms
-        else:
-            checked = id & user._permissions
-        permissions.append((id, name, checked, derived))
-
-    forum_privileges = sorted(forum_privileges, lambda x, y: cmp(x[1], y[1]))
-
-    if user.status > 0:
-        activation_link = None
-    else:
-        activation_link = user.get_absolute_url('activate')
-
     return {
-        'user': user,
-        'form': form,
-        'forum_privileges': PRIVILEGE_DICT,
-        'user_forum_privileges': forum_privileges,
-        'joined_groups': [g.name for g in groups_joined],
-        'not_joined_groups': [g.name for g in groups_not_joined],
-        'avatar_height': storage_data['max_avatar_height'],
-        'avatar_width': storage_data['max_avatar_width'],
-        'permissions': sorted(permissions, key=lambda p: p[1]),
-        'activation_link': activation_link
+        'user': user
     }
 
 @require_permission('user_edit')
@@ -946,9 +776,12 @@ def user_edit_profile(request, username):
                 return HttpResponseRedirect(href('admin', 'users', 'edit',  user.username, 'profile'))
         else:
             flash(u'Es sind Fehler aufgetreten, bitte behebe sie!', False)
+    storage_data = storage.get_many(('max_avatar_height', 'max_avatar_width'))
     return {
         'user': user,
         'form': form,
+        'avatar_height': storage_data['max_avatar_height'],
+        'avatar_width': storage_data['max_avatar_width']
     }
 
 @require_permission('user_edit')
@@ -1200,7 +1033,7 @@ def user_edit_password(request, username):
     if username != user.urlsafe_username:
         return HttpResponseRedirect(user.get_absolute_url('admin'))
     form = EditUserPasswordForm(request.POST)
-    if form.is_valid():
+    if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data
         user.set_password(data['new_password'])
         dbsession.commit()
