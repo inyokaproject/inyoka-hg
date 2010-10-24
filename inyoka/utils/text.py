@@ -71,7 +71,7 @@ def slugify(string, convert_lowercase=True):
                 word = word.replace(search, replace)
             word = unicodedata.normalize('NFKD', word)
             result.append(word.encode('ascii', 'ignore'))
-    return u'-'.join(result)
+    return u'-'.join(result) or u'-'
 
 
 def human_number(number, genus=None):
