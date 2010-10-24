@@ -1604,10 +1604,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     topic_ids = (obj.id for obj in pagination.objects)
     pagination = pagination.generate()
 
-    def _get_read_status(post_id):
-        user = request.user
-        return user.is_authenticated and user._readstatus(post_id=post_id)
-
     # check for moderatation permissions
     moderatable_forums = [forum.id for forum in
         Forum.query.get_forums_filtered(request.user, CAN_MODERATE, reverse=True)
@@ -1629,7 +1625,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'topics':       topics,
         'pagination':   pagination,
         'title':        title,
-        'get_read_status':  _get_read_status,
         'can_moderate': can_moderate,
         'hide_sticky': False
     }
