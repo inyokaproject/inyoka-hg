@@ -109,7 +109,7 @@ class RequestCache(object):
 
         # fetch keys that are not yet in the thread local cache
         keys_to_fetch = set(key for key in keys if not key in self.request_cache)
-        key_mappping.update(self.real_cache.get_dict(*keys_to_fetch))
+        key_mapping.update(self.real_cache.get_dict(*keys_to_fetch))
 
         # pull in remaining keys from thread local cache.
         missing = keys_to_fetch.difference(set(keys))
