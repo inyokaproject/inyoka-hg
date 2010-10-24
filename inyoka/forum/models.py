@@ -969,6 +969,9 @@ class Post(db.Model):
             self.rendered_text = None
         self.is_plaintext = is_plaintext
 
+        # mark the topic as read
+        self.topic.mark_read(request.user)
+
     @property
     def page(self):
         """
