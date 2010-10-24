@@ -30,7 +30,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
-from inyoka.utils.cache import cache
+from inyoka.utils.cache import cache, request_cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
 
@@ -114,10 +114,10 @@ def fix_plaintext(text):
 class ForumQuery(db.Query):
 
     def get_slugs(self):
-        slug_map = cache.get('forum/slugs')
+        slug_map = request_cache.get('forum/slugs')
         if slug_map is None:
             slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
-            cache.set('forum/slugs', slug_map, 86400)
+            request_cache.set('forum/slugs', slug_map, 86400)
         return slug_map
 
     def get_ids(self):
