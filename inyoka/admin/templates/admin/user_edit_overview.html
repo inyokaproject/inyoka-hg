@@ -12,7 +12,7 @@
 {% macro user_edit_button(link, icon, name) %}
   <li>
     <span><a href="{{ link }}">
-      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      <img src="{{ href('static', 'img/admin/user_%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
       {{ name }}
     </a></span>
   </li>
@@ -24,11 +24,11 @@
   <div class="admin_control">
     <ul>
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'profile'), 'profile', 'Profilinformationen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'preferences', 'Benutzereinstellungen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'groups'), 'preferences', 'Gruppen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'privileges'), 'preferences', 'Privilegien') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'settings', 'Benutzereinstellungen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'groups'), 'groups', 'Gruppen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'privileges'), 'privileges', 'Privilegien') }}
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'password'), 'password', 'Passwort ändern') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'status'), 'deactivate', 'Status') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'status'), 'status', 'Status') }}
       {#
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'subscriptions'), 'subscriptions', 'Abonnements') }}
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'userpage'), 'wikipage', 'Benutzerseite') }}
