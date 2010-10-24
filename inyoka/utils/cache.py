@@ -101,6 +101,21 @@ class RequestCache(object):
         else:
             return self.real_cache.get(key)
 
+    def get_dict(self, *keys):
+        if not local_has_key('cache'):
+            return self.real_cache.get_dict(*keys)
+
+        key_mapping = {}
+
+        # fetch keys that are not yet in the thread local cache
+        keys_to_fetch = set(key for key in keys if not key in self.request_cache)
+        key_mappping.update(self.real_cache.get_dict(*keys_to_fetch))
+
+        # pull in remaining keys from thread local cache.
+        missing = keys_to_fetch.difference(set(keys))
+        key_mapping.update(dict((k, self.request_cache[k]) for k in missing))
+        return key_mapping
+
     def set(self, key, value, timeout=None):
         if local_has_key('cache'):
             self.request_cache[key] = value
