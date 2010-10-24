@@ -21,7 +21,7 @@
 {% block admin_content %}
 {{ super() }}
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
-  <div class="usercp_control">
+  <div class="admin_control">
     <ul>
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'profile'), 'profile', 'Profilinformationen') }}
       {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'preferences', 'Benutzereinstellungen') }}
