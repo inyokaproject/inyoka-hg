@@ -14,6 +14,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from cPickle import loads
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 from django.utils.encoding import force_unicode
 from inyoka.utils.local import current_request, _request_cache, local_has_key
@@ -138,7 +139,21 @@ class CacheDebugProxy(object):
             if not hasattr(request, 'cache_queries'):
                 request.cache_queries = list()
             ctx = find_calling_context(3)
-            request.cache_queries.append((ctx, force_unicode(query), force_unicode(result)))
+
+            # workaround to properly log wiki parser instructions
+            obj = result
+            if isinstance(obj, str) and obj[0] in ('!', '@'):
+                node, format, instructions = None, None, None
+                if obj[0] == '!':
+                    pos = obj.index('\0')
+                    format = obj[1:pos]
+                    instructions = [obj[pos + 1:].decode('utf-8')]
+                elif obj[0] == '@':
+                    format, instructions = loads(obj[1:])
+                obj = ('%s%s%s' % (obj[0], format, instructions)).decode('utf-8')
+            elif isinstance(obj, basestring):
+                obj = force_unicode(obj)
+            request.cache_queries.append((ctx, force_unicode(query), obj))
         return result
 
     def __init__(self, cache):
