@@ -271,9 +271,7 @@ class Article(models.Model):
             self.icon = self.category.icon
 
         # Force to use a valid slug
-        slugified = slugify(self.slug)
-        if slugified != self.slug:
-            self.slug = slugified
+        self.slug = slugify(self.slug)
 
         super(Article, self).save(force_insert, force_update)
         self.update_search()
