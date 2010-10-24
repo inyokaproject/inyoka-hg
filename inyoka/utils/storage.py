@@ -11,7 +11,7 @@
 from sqlalchemy import Table, Column, Integer, String, Text, \
                         select, bindparam
 from sqlalchemy.exceptions import IntegrityError
-from inyoka.utils.cache import cache
+from inyoka.utils.cache import request_cache
 from inyoka.utils.database import metadata, session
 
 #XXX: migration: remove the id column and rename the table
@@ -39,7 +39,7 @@ class CachedStorage(object):
 
     def get(self, key, default=None, timeout=None):
         """get *key* from the cache or if not exist return *default*"""
-        value = cache.get('storage/' + key)
+        value = request_cache.get('storage/' + key)
         if value is not None:
             return value
         results = session.execute(fetch, {'skey': key}).fetchone()
@@ -74,7 +74,7 @@ class CachedStorage(object):
         """
         Get many cached values with just one cache hit or database query.
         """
-        objects = cache.get_dict(*('storage/%s' % key for key in keys))
+        objects = request_cache.get_dict(*('storage/%s' % key for key in keys))
         values = {}
         for key, value in objects.iteritems():
             values[key[8:]] = value
@@ -99,7 +99,7 @@ class CachedStorage(object):
         self.set(key, value)
 
     def _update_cache(self, key, value, timeout=None):
-        cache.set('storage/%s' % key, value, timeout)
+        request_cache.set('storage/%s' % key, value, timeout)
 
 
 storage = CachedStorage()
