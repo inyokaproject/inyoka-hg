@@ -711,7 +711,7 @@ def get_user(username):
     return user
 
 @require_permission('user_edit')
-@templated('admin/user_edit.html')
+@templated('admin/user_edit_overview.html')
 def user_edit(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:

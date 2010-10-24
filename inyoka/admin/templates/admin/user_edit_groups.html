@@ -7,21 +7,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 #}
-{%- extends 'admin/overall.html' %}
-{% from 'macros.html' import render_form %}
-
-{% macro user_edit_button(link, icon, name) %}
-  <li>
-    <span><a href="{{ link }}">
-      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
-      {{ name }}
-    </a></span>
-  </li>
-{% endmacro %}
-
-{% set styles = ['editor-sprite.css', 'datetimefield.css'] %}
-{% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js',
-                  'jquery.autocomplete.min.js'] %}
+{%- extends 'admin/user_edit.html' %}
 
 {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
@@ -29,13 +15,8 @@
     (href('admin', 'users', 'edit', user.username, 'groups'), 'Gruppen')
 ] %}
 
-{% block appheader %}
-<h1><a href="{{ href('admin') }}">Administration</a></h1>
-<h2><a href="{{ href('admin', 'users') }}">Benutzer</a></h2>
-{% endblock %}
-
-
 {% block admin_content %}
+{{ super() }}
 <form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
   <h3>Gruppenzugehörigkeiten</h3>
   <table class="user_groups">

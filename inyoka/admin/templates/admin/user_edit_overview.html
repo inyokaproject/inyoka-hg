@@ -1,0 +1,39 @@
+{#
+    admin/edit_user.html
+    ~~~~~~~~~~~~~~~~~~~~
+
+    Just edit an user...
+
+    :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
+    :license: GNU GPL, see LICENSE for more details.
+#}
+{%- extends 'admin/user_edit.html' %}
+
+{% macro user_edit_button(link, icon, name) %}
+  <li>
+    <span><a href="{{ link }}">
+      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
+      {{ name }}
+    </a></span>
+  </li>
+{% endmacro %}
+
+{% block admin_content %}
+{{ super() }}
+<form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
+  <div class="usercp_control">
+    <ul>
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'profile'), 'profile', 'Profilinformationen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'preferences', 'Benutzereinstellungen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'groups'), 'preferences', 'Gruppen') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'privileges'), 'preferences', 'Privilegien') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'password'), 'password', 'Passwort ändern') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'status'), 'deactivate', 'Status') }}
+      {#
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'subscriptions'), 'subscriptions', 'Abonnements') }}
+      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'userpage'), 'wikipage', 'Benutzerseite') }}
+      #}
+    </ul>
+  </div>
+  <a href="{{ href('portal', 'user', user.username) }}">Öffentliches Profil ansehen</a>
+{% endblock %}
