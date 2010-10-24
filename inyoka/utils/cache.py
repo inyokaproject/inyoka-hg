@@ -3,7 +3,13 @@
     inyoka.utils.cache
     ~~~~~~~~~~~~~~~~~~
 
-    Holds the current active cache object.
+    The caching infrastructure of Inyoka.  This module makes use of
+    :module:`werkzeug.contrib.cache` and implements some layers above that.
+
+    On top of the cache client that speaks directly to either memcached or
+    caches in-memory we have a :class:`RequestCache` that caches memcached-commands
+    in a thread-local dictionary.  This saves a lot of memcached-commands in
+    some szenarios.
 
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
@@ -44,6 +50,7 @@ class CustomizedPylibmcClient(Client):
             Client.set(self, key, delta)
 
     def decr(self, key, delta=1):
+        """Set the delta value if there's no existing key."""
         try:
             Client.incr(self, key, delta)
         except NotFound:
