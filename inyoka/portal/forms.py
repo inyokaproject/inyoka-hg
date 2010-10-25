@@ -423,13 +423,10 @@ class SearchForm(forms.Form):
     show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
         required=False)
 
-    def clean_area(self):
-        # Select all areas when no area was specified explicitely
-        return self.cleaned_data.get('area') or 'all'
-
     def clean(self):
         # Default search order depends on the search area.
-        cleaned_data = self.cleaned_data
+        cleaned_data = forms.Form.clean(self)
+        cleaned_data['area'] = self.data['area'] = (cleaned_data.get('area') or 'all').lower()
         if not cleaned_data.get('sort'):
             if cleaned_data['area'] == 'wiki':
                 cleaned_data['sort'] = 'relevance'

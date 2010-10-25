@@ -447,7 +447,7 @@ def search(request):
             except WikiPage.DoesNotExist:
                 pass
         rv = {
-            'area':             d['area'],
+            'area':             d['area'].lower(),
             'query':            d['query'],
             'highlight':        highlight,
             'results':          results,
@@ -456,7 +456,7 @@ def search(request):
             'sort':             d['sort'],
         }
     else:
-        rv = {'area': request.GET.get('area') or 'all'}
+        rv = {'area': (request.GET.get('area') or 'all').lower()}
 
     rv.update({
         'searchform':   f,
