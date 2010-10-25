@@ -78,7 +78,7 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
     UbuntuVersion('8.04', 'Hardy Heron', lts=True),
     UbuntuVersion('8.10', 'Intrepid Ibex', active=False),
-    UbuntuVersion('9.04', 'Jaunty Jackalope'),
+    UbuntuVersion('9.04', 'Jaunty Jackalope', active=False),
     UbuntuVersion('9.10', 'Karmic Koala'),
     UbuntuVersion('10.04', 'Lucid Lynx', lts=True),
     UbuntuVersion('10.10', 'Maverick Meerkat', current=True),
