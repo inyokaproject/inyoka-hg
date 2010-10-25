@@ -297,6 +297,7 @@ class SearchSystem(object):
                     enq.set_sort_by_relevance()
                 if collapse:
                     enq.set_collapse_key(1)
+                enq.set_docid_order(xapian.Enquire.DESCENDING)
                 enq.set_query(qry)
 
                 mset = enq.get_mset(offset, per_page, per_page, None, auth)
