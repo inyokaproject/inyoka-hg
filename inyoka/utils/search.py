@@ -293,7 +293,7 @@ class SearchSystem(object):
                 elif sort == 'date':
                     enq.set_sort_by_value(2, True)
                 else:
-                    enq.set_sort_by_relevance_then_value(2, False)
+                    enq.set_sort_by_relevance()
                 if collapse:
                     enq.set_collapse_key(1)
                 enq.set_query(qry)
