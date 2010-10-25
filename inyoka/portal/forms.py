@@ -56,9 +56,10 @@ SEARCH_SORT_CHOICES = (
     ('', 'Bereichsvorgabe verwenden'),
     ('date', 'Datum'),
     ('relevance', 'Relevanz'),
+    ('magic', 'Datum und Relevanz'),
 )
 
-DEFAULT_SEARCH_PARAMETER = 'date'
+DEFAULT_SEARCH_PARAMETER = 'magic'
 
 VERSION_CHOICES = [(v.number, str(v)) for v in UBUNTU_VERSIONS if v.active]
 
@@ -430,10 +431,10 @@ class SearchForm(forms.Form):
         # Default search order depends on the search area.
         cleaned_data = self.cleaned_data
         if not cleaned_data.get('sort'):
-            if cleaned_data['area'] == 'forum':
-                cleaned_data['sort'] = 'date'
-            else:
+            if cleaned_data['area'] == 'wiki':
                 cleaned_data['sort'] = 'relevance'
+            else:
+                cleaned_data['sort'] = DEFAULT_SEARCH_PARAMETER
         return cleaned_data
 
     def search(self):
