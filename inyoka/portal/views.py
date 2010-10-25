@@ -420,22 +420,23 @@ def search(request):
                         area=d['area'], per_page=results.per_page,
                         sort=d['sort'], forums=d['forums'])
 
-        add(((results.page == 1) and disabled or normal) % {
-            'href': _link(results.page - 1),
-            'text': u'« Zurück',
-        })
-        add(active % {
-            'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
-        })
-        add(((results.page < results.page_count) and normal or disabled) % {
-            'href': _link(results.page + 1),
-            'text': u'Weiter »'
-        })
-        add(u'<div style="clear: both"></div></div>')
+        if results:
+            add(((results.page == 1) and disabled or normal) % {
+                'href': _link(results.page - 1),
+                'text': u'« Zurück',
+            })
+            add(active % {
+                'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
+            })
+            add(((results.page < results.page_count) and normal or disabled) % {
+                'href': _link(results.page + 1),
+                'text': u'Weiter »'
+            })
+            add(u'<div style="clear: both"></div></div>')
 
         # only highlight for users with that setting enabled.
         highlight = None
-        if request.user.settings.get('highlight_search', True):
+        if request.user.settings.get('highlight_search', True) and results:
             highlight = results.highlight_string
         wiki_result = None
         if d['area'] in ('wiki', 'all'):
