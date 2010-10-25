@@ -56,9 +56,10 @@ SEARCH_SORT_CHOICES = (
     ('', 'Bereichsvorgabe verwenden'),
     ('date', 'Datum'),
     ('relevance', 'Relevanz'),
+    ('magic', 'Datum und Relevanz'),
 )
 
-DEFAULT_SEARCH_PARAMETER = 'date'
+DEFAULT_SEARCH_PARAMETER = 'magic'
 
 VERSION_CHOICES = [(v.number, str(v)) for v in UBUNTU_VERSIONS if v.active]
 
@@ -422,18 +423,15 @@ class SearchForm(forms.Form):
     show_wiki_attachments = forms.BooleanField(label='Zeige Dateianhänge',
         required=False)
 
-    def clean_area(self):
-        # Select all areas when no area was specified explicitely
-        return self.cleaned_data.get('area') or 'all'
-
     def clean(self):
         # Default search order depends on the search area.
-        cleaned_data = self.cleaned_data
+        cleaned_data = forms.Form.clean(self)
+        cleaned_data['area'] = (cleaned_data.get('area') or 'all').lower()
         if not cleaned_data.get('sort'):
-            if cleaned_data['area'] == 'forum':
-                cleaned_data['sort'] = 'date'
-            else:
+            if cleaned_data['area'] == 'wiki':
                 cleaned_data['sort'] = 'relevance'
+            else:
+                cleaned_data['sort'] = DEFAULT_SEARCH_PARAMETER
         return cleaned_data
 
     def search(self):

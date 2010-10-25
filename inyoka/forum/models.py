@@ -366,23 +366,23 @@ class PostMapperExtension(db.MapperExtension):
                 Post.id != instance.id
             )).order_by(Post.id.desc()).first()
             connection.execute(Topic.__table__.update(
-                Topic.id == instance.topic_id, values={
-                    'last_post_id': new_last_post.id
-            }))
-
-        # and also look if we are the last post of the overall forum
-        if instance.id == instance.topic.forum.last_post_id:
-            # we cannot loop over all posts in the forum so we cheat a bit
-            # with selecting the last post from the current topic.
-            # Everything else would kill the server...
-            new_last_post = Post.query.filter(db.and_(
-                Post.id != instance.id,
-                Topic.id == instance.topic.id
-            )).order_by(Post.id.desc()).first()
-            connection.execute(Forum.__table__.update(
-                Forum.id.in_(forums_to_root_ids),
+                db.and_(Topic.id == instance.topic_id,
+                        Topic.last_post_id == instance.id),
                 values={'last_post_id': new_last_post.id}
             ))
+
+        # we cannot loop over all posts in the forum so we cheat a bit
+        # with selecting the last post from the current topic.
+        # Everything else would kill the server...
+        new_last_post = Post.query.filter(db.and_(
+            Post.id != instance.id,
+            Topic.id == instance.topic.id
+        )).order_by(Post.id.desc()).first()
+        connection.execute(Forum.__table__.update(
+            db.and_(Forum.id.in_(forums_to_root_ids),
+                    Forum.last_post_id == instance.id),
+            values={'last_post_id': new_last_post.id}
+        ))
 
         # decrement post_counts
         connection.execute(Topic.__table__.update(
@@ -1254,6 +1254,8 @@ class Attachment(db.Model):
     def size(self):
         """The size of the attachment in bytes."""
         fn = self.filename
+        if not os.path.exists(fn):
+            return 0.0
         if isinstance(fn, unicode):
             fn = fn.encode('utf-8')
         stat = os.stat(fn)
@@ -1277,7 +1279,13 @@ class Attachment(db.Model):
         it can cause the memory limit to be reached if the file is too
         big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
+
+        This method only opens files that are less than 2MB great, if the
+        file is greater we return None.
         """
+        if (self.size / (1024 * 1024)) > 2 or not os.path.exists(self.filename):
+            return
+
         f = self.open()
         try:
             return f.read()
@@ -1310,8 +1318,7 @@ class Attachment(db.Model):
             This helper returns True if this attachment is a text file with
             at most 250 characters, else False.
             """
-            return True if self.mimetype.startswith('text/') \
-                and len(self.contents) < 250 else False
+            return self.mimetype.startswith('text/')
 
         def thumbnail():
             """
