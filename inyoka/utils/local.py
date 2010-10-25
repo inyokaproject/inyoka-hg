@@ -20,7 +20,7 @@
 from werkzeug import Local, LocalManager
 
 
-def has_local_key(key):
+def local_has_key(key):
     return hasattr(local, key)
 
 

@@ -210,6 +210,24 @@ div.warning h3 {
   background-color: #d40000;
 }
 
+div.warning_important {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 1px solid #d40000;
+  border-radius: 5px;
+  background-color: #D40000;
+  color: white;
+  font-weight: bold;
+  margin: 0px auto 20px auto;
+  position: relative;
+  text-align: center;
+  width: 75%;
+}
+
+div.warning_important a {
+  color: white;
+}
+
 div.experts {
   border: 1px solid #666;
 }

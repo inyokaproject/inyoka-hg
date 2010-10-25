@@ -1246,16 +1246,18 @@ def delete_post(request, post_id, action='hide'):
     if not post:
         raise PageNotFound
 
-    if not have_privilege(request.user, post.topic.forum, CAN_MODERATE) and not\
+    topic = post.topic
+
+    if not have_privilege(request.user, topic.forum, CAN_MODERATE) and not\
        (post.author_id==request.user.id and post.check_ownpost_limit('delete')):
         flash(u'Du darfst diesen Beitrag nicht löschen!', False)
-        return HttpResponseRedirect(href('forum', 'topic', post.topic.slug,
+        return HttpResponseRedirect(href('forum', 'topic', topic.slug,
                                          post.page))
 
-    if post.id == post.topic.first_post.id:
-        if post.topic.post_count == 1:
+    if post.id == topic.first_post.id:
+        if topic.post_count == 1:
             return HttpResponseRedirect(href('forum', 'topic',
-                                             post.topic.slug, action))
+                                             topic.slug, action))
         t = u'gelöscht' if action=='delete' else u'unsichtbar gemacht'
         flash(u'Der erste Beitrag eines Themas darf nicht %s werden' % t,
               success=False)
@@ -1276,13 +1278,11 @@ def delete_post(request, post_id, action='hide'):
                     author = post.author
                     db.session.delete(post)
                     db.session.commit()
-                    last_post = Post.query.filter_by(topic_id=post.topic_id) \
-                                          .order_by('-id').first()
-                    post.topic.last_post_id = last_post.id
                     flash(u'Der Beitrag von <a href="%s">%s</a> wurde gelöscht.'
                           % (url_for(author), escape(author.username)),
                           success=True)
-                    db.session.commit()
+                    return HttpResponseRedirect(href('forum', 'topic', topic.slug,
+                                                topic.last_post.page))
         else:
             flash(render_template('forum/post_delete.html',
                                   {'post': post, 'action': action}))
@@ -1604,10 +1604,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
     topic_ids = (obj.id for obj in pagination.objects)
     pagination = pagination.generate()
 
-    def _get_read_status(post_id):
-        user = request.user
-        return user.is_authenticated and user._readstatus(post_id=post_id)
-
     # check for moderatation permissions
     moderatable_forums = [forum.id for forum in
         Forum.query.get_forums_filtered(request.user, CAN_MODERATE, reverse=True)
@@ -1629,7 +1625,6 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'topics':       topics,
         'pagination':   pagination,
         'title':        title,
-        'get_read_status':  _get_read_status,
         'can_moderate': can_moderate,
         'hide_sticky': False
     }

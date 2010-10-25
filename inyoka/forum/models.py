@@ -30,7 +30,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.urls import href
 from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
-from inyoka.utils.cache import cache
+from inyoka.utils.cache import cache, request_cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
 
@@ -114,10 +114,10 @@ def fix_plaintext(text):
 class ForumQuery(db.Query):
 
     def get_slugs(self):
-        slug_map = cache.get('forum/slugs')
+        slug_map = request_cache.get('forum/slugs')
         if slug_map is None:
             slug_map = dict(db.session.query(Forum.id, Forum.slug).all())
-            cache.set('forum/slugs', slug_map, 86400)
+            request_cache.set('forum/slugs', slug_map, 86400)
         return slug_map
 
     def get_ids(self):
@@ -969,6 +969,9 @@ class Post(db.Model):
             self.rendered_text = None
         self.is_plaintext = is_plaintext
 
+        # mark the topic as read
+        self.topic.mark_read(request.user)
+
     @property
     def page(self):
         """
@@ -1251,6 +1254,8 @@ class Attachment(db.Model):
     def size(self):
         """The size of the attachment in bytes."""
         fn = self.filename
+        if not os.path.exists(fn):
+            return 0.0
         if isinstance(fn, unicode):
             fn = fn.encode('utf-8')
         stat = os.stat(fn)
@@ -1274,7 +1279,13 @@ class Attachment(db.Model):
         it can cause the memory limit to be reached if the file is too
         big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
+
+        This method only opens files that are less than 2MB great, if the
+        file is greater we return None.
         """
+        if (self.size / (1024 * 1024)) > 2 or not os.path.exists(self.filename):
+            return
+
         f = self.open()
         try:
             return f.read()
@@ -1307,8 +1318,7 @@ class Attachment(db.Model):
             This helper returns True if this attachment is a text file with
             at most 250 characters, else False.
             """
-            return True if self.mimetype.startswith('text/') \
-                and len(self.contents) < 250 else False
+            return self.mimetype.startswith('text/')
 
         def thumbnail():
             """

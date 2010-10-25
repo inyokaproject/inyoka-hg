@@ -3,14 +3,21 @@
     inyoka.utils.cache
     ~~~~~~~~~~~~~~~~~~
 
-    Holds the current active cache object.
+    The caching infrastructure of Inyoka.  This module makes use of
+    :module:`werkzeug.contrib.cache` and implements some layers above that.
+
+    On top of the cache client that speaks directly to either memcached or
+    caches in-memory we have a :class:`RequestCache` that caches memcached-commands
+    in a thread-local dictionary.  This saves a lot of memcached-commands in
+    some szenarios.
 
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from cPickle import loads
 from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
 from django.utils.encoding import force_unicode
-from inyoka.utils.local import current_request, _request_cache, has_local_key
+from inyoka.utils.local import current_request, _request_cache, local_has_key
 from inyoka.utils.debug import find_calling_context
 
 try:
@@ -44,6 +51,7 @@ class CustomizedPylibmcClient(Client):
             Client.set(self, key, delta)
 
     def decr(self, key, delta=1):
+        """Set the delta value if there's no existing key."""
         try:
             Client.incr(self, key, delta)
         except NotFound:
@@ -82,7 +90,7 @@ class RequestCache(object):
         self.request_cache = _request_cache
 
     def get(self, key):
-        if has_local_key('cache'):
+        if local_has_key('cache'):
             try:
                 return self.request_cache[key]
             except KeyError:
@@ -94,13 +102,28 @@ class RequestCache(object):
         else:
             return self.real_cache.get(key)
 
+    def get_dict(self, *keys):
+        if not local_has_key('cache'):
+            return self.real_cache.get_dict(*keys)
+
+        key_mapping = {}
+
+        # fetch keys that are not yet in the thread local cache
+        keys_to_fetch = set(key for key in keys if not key in self.request_cache)
+        key_mapping.update(self.real_cache.get_dict(*keys_to_fetch))
+
+        # pull in remaining keys from thread local cache.
+        missing = keys_to_fetch.difference(set(keys))
+        key_mapping.update(dict((k, self.request_cache[k]) for k in missing))
+        return key_mapping
+
     def set(self, key, value, timeout=None):
-        if has_local_key('cache'):
+        if local_has_key('cache'):
             self.request_cache[key] = value
         return self.real_cache.set(key, value, timeout)
 
     def delete(self, key):
-        if has_local_key('cache'):
+        if local_has_key('cache'):
             self.request_cache.pop(key)
         self.real_cache.delete(key)
 
@@ -116,7 +139,21 @@ class CacheDebugProxy(object):
             if not hasattr(request, 'cache_queries'):
                 request.cache_queries = list()
             ctx = find_calling_context(3)
-            request.cache_queries.append((ctx, force_unicode(query), force_unicode(result)))
+
+            # workaround to properly log wiki parser instructions
+            obj = result
+            if isinstance(obj, str) and obj[0] in ('!', '@'):
+                node, format, instructions = None, None, None
+                if obj[0] == '!':
+                    pos = obj.index('\0')
+                    format = obj[1:pos]
+                    instructions = [obj[pos + 1:].decode('utf-8')]
+                elif obj[0] == '@':
+                    format, instructions = loads(obj[1:])
+                obj = ('%s%s%s' % (obj[0], format, instructions)).decode('utf-8')
+            elif isinstance(obj, basestring):
+                obj = force_unicode(obj)
+            request.cache_queries.append((ctx, force_unicode(query), obj))
         return result
 
     def __init__(self, cache):

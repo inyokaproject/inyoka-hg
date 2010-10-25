@@ -95,7 +95,7 @@ def after_install(options, home_dir):
     easy_install('wsgiref', home_dir)
     easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
     easy_install('Django==1.2.3', home_dir)
-    easy_install('python-memcached', home_dir)
+    easy_install('pylibmc', home_dir)
     easy_install('South', home_dir)
     easy_install('mercurial', home_dir)
     easy_install('xmpppy', home_dir)

@@ -10,45 +10,25 @@
 {%- extends 'admin/overall.html' %}
 {% from 'macros.html' import render_form %}
 
-{% macro user_edit_button(link, icon, name) %}
-  <li>
-    <span><a href="{{ link }}">
-      <img src="{{ href('static', 'img/usercp/usercp-%s.png'|format(icon)) }}" alt="{{ name }}" /><br />
-      {{ name }}
-    </a></span>
-  </li>
-{% endmacro %}
-
 {% set styles = ['editor-sprite.css', 'datetimefield.css', 'portal.css'] %}
 {% set scripts = ['WikiEditor.min.js', 'DateTime.min.js', 'PrivilegeBox.min.js', 'UserGroupBox.min.js',
                   'jquery.autocomplete.min.js'] %}
 
-{% set navigation_trace = [
+{% if not navigation_trace %}
+  {% set navigation_trace = [
     (href('admin', 'users'), 'Benutzer'),
     (href('admin', 'users', 'edit', user.username), 'Benutzer „%s“ editieren'|format(user.username|e))
-] %}
+  ] %}
+{% endif %}
 
 {% block appheader %}
-<h1><a href="{{ href('admin') }}">Administration</a></h1>
-<h2><a href="{{ href('admin', 'users') }}">Benutzer</a></h2>
+  <h1><a href="{{ href('admin') }}">Administration</a></h1>
+  <h2><a href="{{ href('admin', 'users') }}">Benutzer</a></h2>
 {% endblock %}
 
 
 {% block admin_content %}
-<form enctype="multipart/form-data" id="user_edit_form" method="post" action="">
-  <div class="usercp_control">
-    <ul>
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'profile'), 'profile', 'Profilinformationen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'settings'), 'preferences', 'Benutzereinstellungen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'groups'), 'preferences', 'Gruppen') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'privileges'), 'preferences', 'Privilegien') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'password'), 'password', 'Passwort ändern') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'status'), 'deactivate', 'Status') }}
-      {#
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'subscriptions'), 'subscriptions', 'Abonnements') }}
-      {{ user_edit_button(href('admin', 'users', 'edit', user.username, 'userpage'), 'wikipage', 'Benutzerseite') }}
-      #}
-    </ul>
-  </div>
-  <a href="{{ href('portal', 'user', user.username) }}">Öffentliches Profil ansehen</a>
+<div class="warning_important">
+  Warnung: Du bearbeitest gerade <a href="{{ href('portal', 'user', user.username) }}">{{ user.username }}</a>
+</div>
 {% endblock %}

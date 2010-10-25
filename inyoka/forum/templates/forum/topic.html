@@ -56,7 +56,7 @@
       {%- if can_moderate %}
       <br />
       <span class="linklist">
-	{%- if topic.posts.all()|length > 1 %}
+	{%- if posts|length > 1 %}
 	<a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> | 
 	{%- endif %}
         <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
