@@ -1279,7 +1279,13 @@ class Attachment(db.Model):
         it can cause the memory limit to be reached if the file is too
         big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
+
+        This method only opens files that are less than 2MB great, if the
+        file is greater we return None.
         """
+        if (self.size / (1024 * 1024)) > 2 or not os.path.exists(self.filename):
+            return
+
         f = self.open()
         try:
             return f.read()
@@ -1312,8 +1318,7 @@ class Attachment(db.Model):
             This helper returns True if this attachment is a text file with
             at most 250 characters, else False.
             """
-            return True if self.mimetype.startswith('text/') \
-                and len(self.contents) < 250 else False
+            return self.mimetype.startswith('text/')
 
         def thumbnail():
             """
