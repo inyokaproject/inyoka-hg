@@ -292,6 +292,7 @@ class SearchSystem(object):
                     enq.set_sort_by_value_then_relevance(2, True)
                 elif sort == 'date':
                     enq.set_sort_by_value(2, True)
+                    enq.set_weighting_scheme(xapian.BoolWeight())
                 else:
                     enq.set_sort_by_relevance()
                 if collapse:
