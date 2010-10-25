@@ -123,7 +123,7 @@ class RequestCache(object):
         return self.real_cache.set(key, value, timeout)
 
     def delete(self, key):
-        if local_has_key('cache'):
+        if local_has_key('cache') and key in self.request_cache:
             self.request_cache.pop(key)
         self.real_cache.delete(key)
 
