@@ -366,9 +366,10 @@ class PostMapperExtension(db.MapperExtension):
                 Post.id != instance.id
             )).order_by(Post.id.desc()).first()
             connection.execute(Topic.__table__.update(
-                Topic.id == instance.topic_id, values={
-                    'last_post_id': new_last_post.id
-            }))
+                db.and_(Topic.id == instance.topic_id,
+                        Topic.last_post_id == instance.id),
+                values={'last_post_id': new_last_post.id}
+            ))
 
         # we cannot loop over all posts in the forum so we cheat a bit
         # with selecting the last post from the current topic.
