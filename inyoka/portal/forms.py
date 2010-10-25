@@ -426,7 +426,7 @@ class SearchForm(forms.Form):
     def clean(self):
         # Default search order depends on the search area.
         cleaned_data = forms.Form.clean(self)
-        cleaned_data['area'] = self.data['area'] = (cleaned_data.get('area') or 'all').lower()
+        cleaned_data['area'] = (cleaned_data.get('area') or 'all').lower()
         if not cleaned_data.get('sort'):
             if cleaned_data['area'] == 'wiki':
                 cleaned_data['sort'] = 'relevance'
