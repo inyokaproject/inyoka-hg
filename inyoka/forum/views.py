@@ -547,12 +547,16 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         elif 'delete_attachment' in request.POST:
             id = int(request.POST['delete_attachment'])
-            attachment = filter(lambda a: a.id==id, attachments)[0]
-            attachment.delete()
-            db.session.commit()
-            attachments.remove(attachment)
-            att_ids.remove(attachment.id)
-            flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
+            matching_attachments = filter(lambda a: a.id==id, attachments)
+            if not matching_attachments:
+                flash(u'Der Anhang mit der ID %d existiert nicht', id)
+            else:
+                attachment = matching_attachments[0]
+                attachment.delete()
+                db.session.commit()
+                attachments.remove(attachment)
+                att_ids.remove(attachment.id)
+                flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
