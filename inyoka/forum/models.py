@@ -1254,6 +1254,8 @@ class Attachment(db.Model):
     def size(self):
         """The size of the attachment in bytes."""
         fn = self.filename
+        if not os.path.exists(fn):
+            return 0.0
         if isinstance(fn, unicode):
             fn = fn.encode('utf-8')
         stat = os.stat(fn)
