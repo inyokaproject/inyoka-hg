@@ -418,6 +418,8 @@ def ikhaya_article_edit(request, article_id=None, suggestion_id=None):
                             article.save()
                             flash(u'Der Artikel „%s“ wurde gespeichert.'
                                   % escape(article.subject), True)
+                            cache.delete('ikhaya/article/%s/%s' %
+                                         (article.pub_date, article.slug))
                             return HttpResponseRedirect(url_for(article))
                         else:
                             form.errors['__all__'] = ErrorList(
