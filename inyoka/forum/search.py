@@ -123,7 +123,7 @@ class ForumSearchAdapter(SearchAdapter):
     def get_doc_ids(self):
         pids = db.session.query(Post.id).filter(Post.topic_id==Topic.id)
         for pid in pids:
-            yield pid
+            yield pid.id
 
 
 search.register(ForumSearchAdapter())
