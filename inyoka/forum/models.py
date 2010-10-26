@@ -1280,10 +1280,10 @@ class Attachment(db.Model):
         big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
 
-        This method only opens files that are less than 2MB great, if the
+        This method only opens files that are less than 1KB great, if the
         file is greater we return None.
         """
-        if (self.size / (1024 * 1024)) > 2 or not os.path.exists(self.filename):
+        if (self.size / 1024) > 1 or not os.path.exists(self.filename):
             return
 
         f = self.open()
@@ -1355,11 +1355,13 @@ class Attachment(db.Model):
                 return u'<a href="%s" type="%s" title="%s">%s ansehen</a>' % (
                     url, self.mimetype, self.comment, self.name)
         elif show_preview and istext():
-            return highlight_code(self.contents.decode('utf-8'),
-                mimetype=self.mimetype)
-        else:
-            return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
-                url, self.mimetype, self.comment, self.name)
+            contents = self.contents
+            if contents is not None:
+                return highlight_code(contents.decode('utf-8'),
+                    mimetype=self.mimetype)
+
+        return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
+            url, self.mimetype, self.comment, self.name)
 
 
     def open(self, mode='rb'):
