@@ -103,7 +103,6 @@ $(function() {
         $(tags).fadeOut('fast');
         $(tags).text(new_text);
         $(tags).fadeIn('fast');
-        console.debug(callback);
         if (typeof callback == 'function')
           callback();
       }
@@ -129,7 +128,6 @@ $(function() {
       $(this).click(function() {
         doAction('topic', $(this).attr('id'), $('a.solve_topic'), function() {
           // switch classes
-          console.debug('success');
           if ($('a.solve_topic').hasClass('action_solve')) {
             $('a.solve_topic').removeClass('action_solve');
             $('a.solve_topic').addClass('action_unsolve');
