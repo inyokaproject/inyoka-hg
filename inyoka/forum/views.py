@@ -391,7 +391,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         }, force_version=forum.force_version)
     elif quote:
         form = EditPostForm(request.POST or None, initial={
-            'text': quote_text(quote.text, quote.author, 'post:%s' % quote.id) + '\n',
+            'text': quote_text(quote.text, quote.author, 'post:%s:' % quote.id) + '\n',
         })
     else:
         form = EditPostForm(request.POST or None)
