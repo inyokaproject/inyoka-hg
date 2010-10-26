@@ -306,7 +306,7 @@ def clean_thumbnail_cache():
     return deleted
 
 
-def quote_text(text, author=None):
+def quote_text(text, author=None, item_url=None):
     """
     Returns the wiki syntax quoted version of `text`.
     If the optional argument `author` (username as string or User object) is
@@ -314,7 +314,11 @@ def quote_text(text, author=None):
     """
     if isinstance(author, User):
         author = author.username
-    by = author and (u"[user:%s:] schrieb:\n" % author) or u''
+
+    if item_url:
+        by = author and (u'[user:%s:] [%s schrieb]:\n' % (author, item_url)) or u''
+    else:
+        by = author and (u"[user:%s:] schrieb:\n" % author) or u''
     return text and by + u'\n'.join(
         '>' + (not line.startswith('>') and ' ' or '') + line
         for line in text.split('\n')
