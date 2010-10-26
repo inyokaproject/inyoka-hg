@@ -441,7 +441,8 @@ def search(request):
         wiki_result = None
         if d['area'] in ('wiki', 'all'):
             try:
-                wiki_page = WikiPage.objects.filter(name=d['query']).get()
+                wiki_page = WikiPage.objects.filter(
+                              name=normalize_pagename(d['query'])).get()
                 rev = Revision.objects.select_related(depth=2) \
                         .filter(page__id=wiki_page.id).latest()
                 wiki_result = {'title': wiki_page.title, 'url': url_for(rev.page)}
