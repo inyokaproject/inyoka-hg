@@ -1357,8 +1357,8 @@ class Attachment(db.Model):
         elif show_preview and istext():
             contents = self.contents
             if contents is not None:
-                return highlight_code(contents.decode('utf-8'),
-                    mimetype=self.mimetype)
+                return u'<div class="code">%s</div>' %\
+                    highlight_code(contents.decode('utf-8'), mimetype=self.mimetype)
 
         return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
             url, self.mimetype, self.comment, self.name)
