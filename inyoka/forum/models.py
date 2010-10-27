@@ -1153,7 +1153,7 @@ class Attachment(db.Model):
     name = db.Column(db.String(255), nullable=False)
     comment = db.Column(db.Text, nullable=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_post.id'), nullable=True)
-    #_mimetype = db.Column('mimetype', db.String(100), nullable=True) MIMETYPE
+    #_mimetype = db.Column('mimetype', db.String(100), nullable=True)
     mimetype = db.Column('mimetype', db.String(100), nullable=True)
 
     @staticmethod
