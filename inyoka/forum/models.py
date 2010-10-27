@@ -12,13 +12,14 @@ from __future__ import division, with_statement
 import os
 import cPickle
 import operator
+import subprocess
 from os import path
 from hashlib import md5
 from PIL import Image
 from time import time
 from StringIO import StringIO
 from datetime import datetime
-from mimetypes import guess_type
+#from mimetypes import guess_type
 from itertools import groupby
 from operator import attrgetter
 
@@ -1152,7 +1153,8 @@ class Attachment(db.Model):
     name = db.Column(db.String(255), nullable=False)
     comment = db.Column(db.Text, nullable=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_post.id'), nullable=True)
-    _mimetype = db.Column('mimetype', db.String(100), nullable=True)
+    #_mimetype = db.Column('mimetype', db.String(100), nullable=True) MIMETYPE
+    mimetype = db.Column('mimetype', db.String(100), nullable=True)
 
     @staticmethod
     def create(name, content, mime, attachments, override=False, **kwargs):
@@ -1192,10 +1194,18 @@ class Attachment(db.Model):
             # on binding to the posts
             fn = path.join('forum', 'attachments', 'temp',
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
-            attachment = Attachment(name=name, file=fn, _mimetype=mime,
-                                    **kwargs)
-            with open(path.join(settings.MEDIA_ROOT, fn), 'wb') as fobj:
+            #attachment = Attachment(name=name, file=fn, _mimetype=mime,
+            #                        **kwargs)
+            osfn = path.join(settings.MEDIA_ROOT, fn)
+            with open(osfn, 'wb') as fobj:
                 fobj.write(content)
+                fobj.flush()
+                os.fsync(fobj.fileno())
+                mime = subprocess.Popen('file -bi "%s"' % osfn,
+                          shell=True,
+                          stdout=subprocess.PIPE).communicate()[0].split()[0][:-1]
+            attachment = Attachment(name=name, file=fn, mimetype=mime,
+                                    **kwargs)
             return attachment
 
     def delete(self):
@@ -1266,11 +1276,11 @@ class Attachment(db.Model):
         """The filename of the attachment on the filesystem."""
         return path.join(settings.MEDIA_ROOT, self.file)
 
-    @property
-    def mimetype(self):
-        """The mimetype of the attachment."""
-        return self._mimetype or guess_type(self.filename)[0] or \
-               'application/octet-stream'
+    #@property
+    #def mimetype(self):
+    #    """The mimetype of the attachment."""
+    #    return self._mimetype or guess_type(self.filename)[0] or \
+    #           'application/octet-stream'
 
     @property
     def contents(self):

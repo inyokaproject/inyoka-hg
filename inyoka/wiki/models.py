@@ -81,7 +81,8 @@ from hashlib import sha1
 import pickle
 from math import log
 from datetime import datetime
-from mimetypes import guess_type
+import subprocess
+#from mimetypes import guess_type
 from django.db import models, connection
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
@@ -1226,7 +1227,11 @@ class Attachment(models.Model):
     @property
     def mimetype(self):
         """The mimetype of the attachment."""
-        return guess_type(self.file.path)[0] or \
+        #return guess_type(self.file.path)[0] or \
+        #       'application/octet-stream'
+        return subprocess.Popen('file -bi "%s"' % self.file.path,
+                  shell=True,
+                  stdout=subprocess.PIPE).communicate()[0].split()[0][:-1] or \
                'application/octet-stream'
 
     @property
