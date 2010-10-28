@@ -11,7 +11,7 @@
       <p class="name"><a href="{{ forum|url }}" class="title">{{ forum.name|e }}</a></p>
 
       {%- if forum.description %}
-      <p class="description">{{ forum.description|e }}</p> 
+      <p class="description">{{ forum.description|e }}</p>
       {%- endif %}
       {%- if subforums %}
       <p class="subforums">Unterforen:
@@ -61,5 +61,25 @@
   {%- if topic.hidden %}verstecktes {% endif -%}
   {%- if can_moderate and topic.reported %}gemeldetes {% endif -%}
   Thema" />
+{%- endmacro %}
 
+
+{% macro quickjump(categories) %}
+  {%- if categories %}
+    <select name="quickjump">
+      {%- for category, forums in categories %}
+        <option disabled="disabled">{{ category.name|e }}</option>
+        {%- if forums %}
+          {%- for forum, subforums in forums %}
+            <option value="{{ forum.slug }}">&nbsp;&nbsp;&nbsp;{{ forum.name|e }}</option>
+            {%- if subforums %}
+              {%- for subforum in subforums %}
+                <option value="{{ subforum.slug }}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ subforum.name|e }}</option>
+              {%- endfor %}
+            {%- endif %}
+          {%- endfor %}
+        {%- endif %}
+      {%- endfor %}
+    </select>
+  {%- endif %}
 {%- endmacro %}
