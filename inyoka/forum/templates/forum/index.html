@@ -11,7 +11,7 @@
 #}
 {%- extends 'forum/page.html' %}
 {% set scripts = ['jquery.cookie.min.js'] %}
-{% from 'forum/_forum.html' import render_forum %}
+{% from 'forum/_forum.html' import render_forum, quickjumpbox %}
 {% if not is_index and categories %}
   {% set title_trace = ['Kategorie „%s“'|format(categories[0])] %}
   {% set navigation_trace = [
@@ -27,6 +27,7 @@
 
 {% block forum_content %}
   {%- if categories %}
+  {{ quickjumpbox(quickjump) }}
   <table class="forum{% if is_index %} category_box{% endif %}">
   {%- for category, forums in forum_hierarchy %}
   <tr class="head" id="category-{{ category.id }}">
@@ -40,6 +41,7 @@
     {%- endfor %}
   {%- endfor %}
   </table>
+  {{ quickjumpbox(quickjump) }}
 
   {%- else %}
     <p>Keine Kategorien</p>

@@ -64,22 +64,24 @@
 {%- endmacro %}
 
 
-{% macro quickjump(categories) %}
-  {%- if categories %}
-    <select name="quickjump">
-      {%- for category, forums in categories %}
-        <option disabled="disabled">{{ category.name|e }}</option>
-        {%- if forums %}
-          {%- for forum, subforums in forums %}
-            <option value="{{ forum.slug }}">&nbsp;&nbsp;&nbsp;{{ forum.name|e }}</option>
-            {%- if subforums %}
-              {%- for subforum in subforums %}
-                <option value="{{ subforum.slug }}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ subforum.name|e }}</option>
-              {%- endfor %}
-            {%- endif %}
-          {%- endfor %}
-        {%- endif %}
-      {%- endfor %}
-    </select>
+{% macro quickjumpbox_rec(forums, prefix) %}
+  {%- if forums %}
+    {%- for top, subs in forums %}
+      <option value="{{ top.slug }}">{{ prefix }}{{ top.name|e }}</option>
+      {{ quickjumpbox_rec(subs, "&nbsp;&nbsp;&nbsp;%s" % prefix) }}
+    {%- endfor %}
+  {%- endif %}
+{%- endmacro %}
+
+{% macro quickjumpbox(forums) %}
+  {%- if forums %}
+    <div style="float: right; text-align: right;">
+      <select name="quickjump">
+        {%- for top, subs in forums %}
+          <option disabled="disabled">{{ top.name|e }}</option>
+          {{ quickjumpbox_rec(subs, "&nbsp;&nbsp;&nbsp;") }}
+        {%- endfor %}
+      </select>
+    </div>
   {%- endif %}
 {%- endmacro %}

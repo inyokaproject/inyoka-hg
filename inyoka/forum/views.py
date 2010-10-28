@@ -55,6 +55,18 @@ from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
 
+def quickjump(user, current_forum_id=None, all_forums=None):
+    hierarchy = None
+    forums = all_forums or Forum.query.get_forums_filtered(user, sort=True)
+    for forum in forums:
+        if forum.parent_id == current_forum_id:
+            #forums.remove(forum)
+            if not hierarchy:
+                hierarchy = []
+            hierarchy.append((forum, quickjump(user, forum.id, forums)))
+    return hierarchy
+
+
 
 def not_found(request, err_message=None):
     """
@@ -115,6 +127,7 @@ def index(request, category=None):
         'is_index':             is_index,
         'hidden_categories':    hidden_categories,
         'forum_hierarchy':      forum_hierarchy,
+        'quickjump':            quickjump(request.user),
     }
 
 
@@ -186,7 +199,8 @@ def forum(request, slug, page=1):
                                                               forum=forum),
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
-        'supporters':     supporters
+        'supporters':    supporters,
+        'quickjump':            quickjump(request.user),
     })
     return ctx
 
@@ -316,6 +330,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
         'discussions':       discussions,
+        'quickjump':         quickjump(request.user),
     }
 
 
@@ -1630,7 +1645,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'pagination':   pagination,
         'title':        title,
         'can_moderate': can_moderate,
-        'hide_sticky': False
+        'hide_sticky':  False,
     }
 
 

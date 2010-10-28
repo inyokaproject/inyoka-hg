@@ -11,6 +11,7 @@
 #}
 {%- extends 'forum/page.html' %}
 {% from 'macros.html' import breadcrump %}
+{% from 'forum/_forum.html' import quickjumpbox %}
 
 {% set title_trace = [topic.title|e] %}
 {% set name = 'Thema „%s“ - ' % topic.title|e %}
@@ -57,9 +58,9 @@
       <br />
       <span class="linklist">
 	    <a href="{{ topic|url('split') }}" class="action action_split adminlink">aufteilen</a> |
-        <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> | 
+        <a href="{{ topic|url('move') }}" class="action action_move adminlink">verschieben</a> |
         {%- if topic.locked %}
-        <a href="{{ topic|url('unlock') }}" class="action action_unlock adminlink">entsperren</a> | 
+        <a href="{{ topic|url('unlock') }}" class="action action_unlock adminlink">entsperren</a> |
         {%- else %}
         <a href="{{ topic|url('lock') }}" class="action action_lock adminlink">sperren</a> |
         {%- endif %}
@@ -67,7 +68,7 @@
         <a href="{{ topic|url('restore') }}" class="action action_restore adminlink">wiederherstellen</a> |
         <a href="{{ topic|url('delete') }}" class="action action_delete adminlink">löschen</a>
         {%- else %}
-        <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a> 
+        <a href="{{ topic|url('hide') }}" class="action action_hide adminlink">verbergen</a>
         {%- endif %}
       </span>
       {%- endif %}
@@ -82,6 +83,7 @@
     <h2>{{ topic.title|e }}</h2>
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
+      {{ quickjumpbox(quickjump) }}
       <strong>Status:</strong> <span class="status_{{
         topic.solved and 'solved' or 'unsolved' }}">{{
         topic.solved and 'gelöst' or 'ungelöst' }}</span>
@@ -263,10 +265,11 @@
     {%- endfor %}
     </tbody>
   </table>
-  
+
   <div class="topic_box">
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
+      {{ quickjumpbox(quickjump) }}
       {{ topic_actions() }}
     </div>
   </div>
