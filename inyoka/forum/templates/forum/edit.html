@@ -138,7 +138,7 @@
           </p>
           {%- for att in attachments %}
           <li>
-            {{ att.name|e }} - {{ att.size|filesizeformat(true) }}
+            <a href="{{ att.get_absolute_url() }}">{{ att.name|e }}</a> - {{ att.size|filesizeformat(true) }}
             <button type="submit" name="delete_attachment" value="{{ att.id }}">Löschen</button>
             <button type="submit" name="rename_attachment" value="{{ att.id }}">Umbenennen</button>
           </li>
