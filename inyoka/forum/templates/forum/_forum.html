@@ -76,7 +76,7 @@
 {% macro quickjumpbox(forums) %}
   {%- if forums %}
     <div style="float: right; text-align: right;">
-      <select name="quickjump">
+      <select name="quickjump" onchange="quickjumpboxgo(this.value)">
         {%- for top, subs in forums %}
           <option disabled="disabled">{{ top.name|e }}</option>
           {{ quickjumpbox_rec(subs, "&nbsp;&nbsp;&nbsp;") }}

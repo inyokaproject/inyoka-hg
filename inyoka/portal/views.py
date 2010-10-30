@@ -1038,12 +1038,15 @@ def privmsg_new(request, username=None):
                 entry = PrivateMessageEntry.objects.get(user=request.user,
                     message=int(reply_to or reply_to_all or forward))
                 msg = entry.message
-                data['subject'] = msg.subject.lower().startswith(u're: ') and \
-                                  msg.subject or u'Re: %s' % msg.subject
+                data['subject'] = msg.subject
                 if reply_to or reply_to_all:
                     data['recipient'] = msg.author.username
+                    if not data['subject'].lower().startswith(u're: '):
+                        data['subject'] = u'Re: %s' % data['subject']
                 if reply_to_all:
                     data['recipient'] += ';'+';'.join(x.username for x in msg.recipients if x != request.user)
+                if forward and not data['subject'].lower().startswith(u'fw: '):
+                    data['subject'] = u'Fw: %s' % data['subject']
                 data['text'] = quote_text(msg.text, msg.author) + '\n'
                 form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist):
