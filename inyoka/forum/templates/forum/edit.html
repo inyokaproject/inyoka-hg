@@ -132,10 +132,15 @@
       <dd>
         {%- if attachments %}
         <ul>
+          <p>
+            <label for="id_new_filename">Neuer Name:</label>
+            {{ edit_attach_form.new_filename }}{{ edit_attach_form.errors.new_filename}}
+          </p>
           {%- for att in attachments %}
           <li>
             {{ att.name|e }} - {{ att.size|filesizeformat(true) }}
             <button type="submit" name="delete_attachment" value="{{ att.id }}">Löschen</button>
+            <button type="submit" name="rename_attachment" value="{{ att.id }}">Umbenennen</button>
           </li>
           {%- endfor %}
         </ul>

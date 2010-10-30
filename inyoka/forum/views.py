@@ -48,7 +48,7 @@ from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
 from inyoka.forum.compat import SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
-    AddAttachmentForm
+    AddAttachmentForm, EditAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, CAN_READ, CAN_MODERATE, \
     check_privilege
@@ -352,6 +352,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
+    edit_attach_form = None
     attachments = []
     preview = None
     article = None
@@ -539,6 +540,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attach_form = AddAttachmentForm(request.POST, request.FILES)
         else:
             attach_form = AddAttachmentForm()
+        if 'rename_attachment' in request.POST:
+            edit_attach_form = EditAttachmentForm(request.POST)
+        else:
+            edit_attach_form = EditAttachmentForm()
 
         if 'attach' in request.POST:
             # the user uploaded a new attachment
@@ -572,6 +577,18 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 attachments.remove(attachment)
                 att_ids.remove(attachment.id)
                 flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
+
+        elif 'rename_attachment' in request.POST and edit_attach_form.is_valid():
+            id = int(request.POST['rename_attachment'])
+            matching_attachments = filter(lambda a: a.id==id, attachments)
+            if not matching_attachments:
+                flash(u'Der Anhang mit der ID %d existiert nicht', id)
+            else:
+                attachment = matching_attachments[0]
+                d = edit_attach_form.cleaned_data
+                attachment.name = (d.get('new_filename'))
+                db.session.commit()
+                flash(u'Der Anhang „%s“ wurde umbenannt.' % attachment.name)
 
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
@@ -741,6 +758,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_moderate': check_privilege(privileges, 'moderate'),
         'can_sticky':   check_privilege(privileges, 'sticky'),
         'attach_form':  attach_form,
+        'edit_attach_form':  edit_attach_form,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
