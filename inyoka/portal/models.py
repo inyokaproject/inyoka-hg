@@ -444,7 +444,7 @@ class Event(models.Model):
             or ''
         if with_html_link:
             return u'<a href="%s" class="event_link">%s</a>%s%s' % (
-                escape(self.get_absolute_url(), True),
+                escape(self.get_absolute_url()),
                 escape(self.name),
                 escape(s_date),
                 escape(s_location),
