@@ -198,14 +198,17 @@ class ModelBase(object):
                 break
         return equal
 
-    def __repr__(self):
+    def __unicode__(self):
         attrs = []
         dict_ = type(self)._sa_class_manager.mapper.columns.keys()
         for key in dict_:
             if not key.startswith('_'):
                 attrs.append((key, getattr(self, key)))
-        return self.__class__.__name__ + '(' + ', '.join(x[0] + '=' +
-                                            repr(x[1]) for x in attrs) + ')'
+        return u'%s(%s)' % (self.__class__.__name__,
+                            u', '.join(x[0] + '=' + repr(x[1]) for x in attrs))
+
+    def __repr__(self):
+        return self.__unicode__().encode('utf-8')
 
 
 # configure the declarative base
