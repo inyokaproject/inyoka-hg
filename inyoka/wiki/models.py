@@ -81,10 +81,12 @@ from hashlib import sha1
 import pickle
 from math import log
 from datetime import datetime
-from mimetypes import guess_type
 from django.db import models, connection
+from werkzeug import cached_property
+
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
+from inyoka.utils import magic
 from inyoka.utils.decorators import deferred
 from inyoka.utils.dates import format_specific_datetime, format_datetime, \
     datetime_to_timezone
@@ -1211,11 +1213,11 @@ class Attachment(models.Model):
         """The filename of the attachment on the filesystem."""
         return self.file.path
 
-    @property
+    @cached_property
     def mimetype(self):
         """The mimetype of the attachment."""
-        return guess_type(self.file.path)[0] or \
-               'application/octet-stream'
+        return magic.from_file(self.file.path, mime=True) or \
+                'application/octet-stream'
 
     @property
     def contents(self):

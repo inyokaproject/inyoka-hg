@@ -166,6 +166,7 @@ STANDARD_WIKI_MAP = {
     'topic':  lambda x: href('forum', 'topic', x),
     'ikhaya': _ikhaya_id,
     'search': lambda x: href('portal', 'search', query=x),
+    'post':   lambda x: href('forum', 'post', x),
 }
 
 _hex_color_re = re.compile(r'#([a-f0-9]{3}){1,2}$')

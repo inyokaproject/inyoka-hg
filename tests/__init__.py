@@ -112,7 +112,6 @@ class Context(object):
 
     def teardown_instance(self):
         session.rollback()
-        session.clear()
         metadata.drop_all()
         os.rmdir(instance_dir)
 

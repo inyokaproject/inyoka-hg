@@ -225,6 +225,11 @@ class AddAttachmentForm(forms.Form):
     comment = forms.CharField(label='Beschreibung', required=False,
                   widget=forms.TextInput(attrs={'size':'60'}))
 
+class EditAttachmentForm(forms.Form):
+    """
+    Allows the user to edit an attachment
+    """
+    new_filename = forms.CharField(max_length=512, required=True)
 
 class AddPollForm(forms.Form):
     question = forms.CharField(max_length=250, widget=forms.TextInput(attrs={'size':'60'}))

@@ -18,11 +18,14 @@ from PIL import Image
 from time import time
 from StringIO import StringIO
 from datetime import datetime
-from mimetypes import guess_type
 from itertools import groupby
 from operator import attrgetter
 
+from django.core.files.storage import default_storage
+
 from inyoka.conf import settings
+from inyoka.utils import magic
+from inyoka.utils.files import fix_extension
 from inyoka.utils.text import get_new_unique_filename
 from inyoka.utils.database import db
 from inyoka.utils.dates import timedelta_to_seconds
@@ -78,7 +81,7 @@ UBUNTU_VERSIONS = [
     UbuntuVersion('7.10', 'Gutsy Gibbon', active=False),
     UbuntuVersion('8.04', 'Hardy Heron', lts=True),
     UbuntuVersion('8.10', 'Intrepid Ibex', active=False),
-    UbuntuVersion('9.04', 'Jaunty Jackalope'),
+    UbuntuVersion('9.04', 'Jaunty Jackalope', active=False),
     UbuntuVersion('9.10', 'Karmic Koala'),
     UbuntuVersion('10.04', 'Lucid Lynx', lts=True),
     UbuntuVersion('10.10', 'Maverick Meerkat', current=True),
@@ -366,23 +369,23 @@ class PostMapperExtension(db.MapperExtension):
                 Post.id != instance.id
             )).order_by(Post.id.desc()).first()
             connection.execute(Topic.__table__.update(
-                Topic.id == instance.topic_id, values={
-                    'last_post_id': new_last_post.id
-            }))
-
-        # and also look if we are the last post of the overall forum
-        if instance.id == instance.topic.forum.last_post_id:
-            # we cannot loop over all posts in the forum so we cheat a bit
-            # with selecting the last post from the current topic.
-            # Everything else would kill the server...
-            new_last_post = Post.query.filter(db.and_(
-                Post.id != instance.id,
-                Topic.id == instance.topic.id
-            )).order_by(Post.id.desc()).first()
-            connection.execute(Forum.__table__.update(
-                Forum.id.in_(forums_to_root_ids),
+                db.and_(Topic.id == instance.topic_id,
+                        Topic.last_post_id == instance.id),
                 values={'last_post_id': new_last_post.id}
             ))
+
+        # we cannot loop over all posts in the forum so we cheat a bit
+        # with selecting the last post from the current topic.
+        # Everything else would kill the server...
+        new_last_post = Post.query.filter(db.and_(
+            Post.id != instance.id,
+            Topic.id == instance.topic.id
+        )).order_by(Post.id.desc()).first()
+        connection.execute(Forum.__table__.update(
+            db.and_(Forum.id.in_(forums_to_root_ids),
+                    Forum.last_post_id == instance.id),
+            values={'last_post_id': new_last_post.id}
+        ))
 
         # decrement post_counts
         connection.execute(Topic.__table__.update(
@@ -1152,10 +1155,10 @@ class Attachment(db.Model):
     name = db.Column(db.String(255), nullable=False)
     comment = db.Column(db.Text, nullable=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_post.id'), nullable=True)
-    _mimetype = db.Column('mimetype', db.String(100), nullable=True)
+    mimetype = db.Column('mimetype', db.String(100), nullable=True)
 
     @staticmethod
-    def create(name, content, mime, attachments, override=False, **kwargs):
+    def create(name, uploaded_file, mime, attachments, override=False, **kwargs):
         """
         This method writes a new attachment bound to a post that is
         not written into the database yet.
@@ -1165,8 +1168,8 @@ class Attachment(db.Model):
         :Parameters:
             name
                 The file name of the attachment.
-            content
-                The content of the attachment.
+            uploaded_file
+                The attachment.
             mime
                 The mimetype of the attachment (guess_file is implemented
                 as fallback)
@@ -1192,10 +1195,12 @@ class Attachment(db.Model):
             # on binding to the posts
             fn = path.join('forum', 'attachments', 'temp',
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
-            attachment = Attachment(name=name, file=fn, _mimetype=mime,
+            fn = default_storage.save(fn, uploaded_file)
+            uploaded_file.seek(0)
+            mime = magic.from_buffer(uploaded_file.read(1024), mime=True)
+            name = fix_extension(name, mime)
+            attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
-            with open(path.join(settings.MEDIA_ROOT, fn), 'wb') as fobj:
-                fobj.write(content)
             return attachment
 
     def delete(self):
@@ -1267,12 +1272,6 @@ class Attachment(db.Model):
         return path.join(settings.MEDIA_ROOT, self.file)
 
     @property
-    def mimetype(self):
-        """The mimetype of the attachment."""
-        return self._mimetype or guess_type(self.filename)[0] or \
-               'application/octet-stream'
-
-    @property
     def contents(self):
         """
         The raw contents of the file.  This is usually unsafe because
@@ -1280,10 +1279,10 @@ class Attachment(db.Model):
         big.  However this limitation currently affects the whole django
         system which handles uploads in the memory.
 
-        This method only opens files that are less than 2MB great, if the
+        This method only opens files that are less than 1KB great, if the
         file is greater we return None.
         """
-        if (self.size / (1024 * 1024)) > 2 or not os.path.exists(self.filename):
+        if (self.size / 1024) > 1 or not os.path.exists(self.filename):
             return
 
         f = self.open()
@@ -1355,11 +1354,13 @@ class Attachment(db.Model):
                 return u'<a href="%s" type="%s" title="%s">%s ansehen</a>' % (
                     url, self.mimetype, self.comment, self.name)
         elif show_preview and istext():
-            return highlight_code(self.contents.decode('utf-8'),
-                mimetype=self.mimetype)
-        else:
-            return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
-                url, self.mimetype, self.comment, self.name)
+            contents = self.contents
+            if contents is not None:
+                return u'<div class="code">%s</div>' %\
+                    highlight_code(contents.decode('utf-8'), mimetype=self.mimetype)
+
+        return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
+            url, self.mimetype, self.comment, self.name)
 
 
     def open(self, mode='rb'):

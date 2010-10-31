@@ -17,7 +17,7 @@ var set_quote_links = (function() {
           $.getJSON('/?__service__=forum.get_post', {post_id: post_id}, function(post) {
             if (post) {
               var editor = $('#id_text')[0].inyokaWikiEditor;
-              editor.setSelection("[user:" + post.author + ":] schrieb:\n" +
+              editor.setSelection("[user:" + post.author + ":] [post:" + post_id + ": schrieb]:\n" +
                                   editor.quoteText(post.text));
               editor.focus();
             }

@@ -13,19 +13,15 @@
   /* !important is needed to overwrite default :visited style */
 }
 
-a.user, a.team, a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser,
+a.search, a.interwiki-isbn, a.interwiki-ubuntu, a.interwiki-bug, a.interwiki-lpuser,
 a.interwiki-getdeb, a.interwiki-launchpad, a.interwiki-googlecode, a.interwiki-sourceforge {
   background-repeat: no-repeat;
   padding-left: 16px;
 }
 
 
-a.user {
-  background-image: url(../img/interwiki/user.png);
-}
-
 a.team {
-  background-image: url(../img/team.png);
+  color: #597A00;
 }
 
 a.search {

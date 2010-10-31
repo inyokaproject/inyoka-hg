@@ -253,6 +253,18 @@ li p + p {
   margin-top: 0.5em!important;
 }
 
+ol.arabic {
+  list-style-type: decimal;
+}
+
+ol.alphalower {
+  list-style-type: lower-alpha;
+}
+
+ol.alphaupper {
+  list-style-type: upper-alpha;
+}
+
 /*** Pagination *************************************************************/
 div.pagination_right {
     float: right;

@@ -123,8 +123,8 @@ def detail(request, year, month, day, slug):
     try:
         article = Article.objects.get_cached([(date(int(year), int(month),
             int(day)), slug)])[0]
-    except KeyError:
-        raise PageNotFound
+    except IndexError:
+        raise PageNotFound()
     preview = None
     if article.hidden or article.pub_datetime > datetime.utcnow():
         if not request.user.can('article_read'):

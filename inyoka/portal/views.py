@@ -420,34 +420,36 @@ def search(request):
                         area=d['area'], per_page=results.per_page,
                         sort=d['sort'], forums=d['forums'])
 
-        add(((results.page == 1) and disabled or normal) % {
-            'href': _link(results.page - 1),
-            'text': u'« Zurück',
-        })
-        add(active % {
-            'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
-        })
-        add(((results.page < results.page_count) and normal or disabled) % {
-            'href': _link(results.page + 1),
-            'text': u'Weiter »'
-        })
-        add(u'<div style="clear: both"></div></div>')
+        if results:
+            add(((results.page == 1) and disabled or normal) % {
+                'href': _link(results.page - 1),
+                'text': u'« Zurück',
+            })
+            add(active % {
+                'text': u'Seite %d von ungefähr %d' % (results.page, results.page_count)
+            })
+            add(((results.page < results.page_count) and normal or disabled) % {
+                'href': _link(results.page + 1),
+                'text': u'Weiter »'
+            })
+            add(u'<div style="clear: both"></div></div>')
 
         # only highlight for users with that setting enabled.
         highlight = None
-        if request.user.settings.get('highlight_search', True):
+        if request.user.settings.get('highlight_search', True) and results:
             highlight = results.highlight_string
         wiki_result = None
         if d['area'] in ('wiki', 'all'):
             try:
-                wiki_page = WikiPage.objects.filter(name=d['query']).get()
-                rev = Revision.objects.select_related('page') \
-                        .filter(page__id=wiki_page.id).latest()
+                wiki_page = WikiPage.objects.filter(
+                              name=normalize_pagename(d['query'])).get()
+                rev = Revision.objects.select_related('page')\
+                        .get(pk=wiki_page.last_rev_id)
                 wiki_result = {'title': wiki_page.title, 'url': url_for(rev.page)}
             except WikiPage.DoesNotExist:
                 pass
         rv = {
-            'area':             d['area'],
+            'area':             d['area'].lower(),
             'query':            d['query'],
             'highlight':        highlight,
             'results':          results,
@@ -456,7 +458,7 @@ def search(request):
             'sort':             d['sort'],
         }
     else:
-        rv = {'area': request.GET.get('area') or 'all'}
+        rv = {'area': (request.GET.get('area') or 'all').lower()}
 
     rv.update({
         'searchform':   f,
@@ -1036,12 +1038,15 @@ def privmsg_new(request, username=None):
                 entry = PrivateMessageEntry.objects.get(user=request.user,
                     message=int(reply_to or reply_to_all or forward))
                 msg = entry.message
-                data['subject'] = msg.subject.lower().startswith(u're: ') and \
-                                  msg.subject or u'Re: %s' % msg.subject
+                data['subject'] = msg.subject
                 if reply_to or reply_to_all:
                     data['recipient'] = msg.author.username
+                    if not data['subject'].lower().startswith(u're: '):
+                        data['subject'] = u'Re: %s' % data['subject']
                 if reply_to_all:
                     data['recipient'] += ';'+';'.join(x.username for x in msg.recipients if x != request.user)
+                if forward and not data['subject'].lower().startswith(u'fw: '):
+                    data['subject'] = u'Fw: %s' % data['subject']
                 data['text'] = quote_text(msg.text, msg.author) + '\n'
                 form = PrivateMessageForm(initial=data)
             except (PrivateMessageEntry.DoesNotExist):

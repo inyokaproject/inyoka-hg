@@ -48,12 +48,24 @@ from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
 from inyoka.forum.compat import SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
-    AddAttachmentForm
+    AddAttachmentForm, EditAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, CAN_READ, CAN_MODERATE, \
     check_privilege
 
 _legacy_forum_re = re.compile(r'^/forum/(\d+)(?:/(\d+))?/?$')
+
+def quickjump(user, current_forum_id=None, all_forums=None):
+    hierarchy = None
+    forums = all_forums or Forum.query.get_forums_filtered(user, sort=True)
+    for forum in forums:
+        if forum.parent_id == current_forum_id:
+            #forums.remove(forum)
+            if not hierarchy:
+                hierarchy = []
+            hierarchy.append((forum, quickjump(user, forum.id, forums)))
+    return hierarchy
+
 
 
 def not_found(request, err_message=None):
@@ -115,6 +127,7 @@ def index(request, category=None):
         'is_index':             is_index,
         'hidden_categories':    hidden_categories,
         'forum_hierarchy':      forum_hierarchy,
+        #'quickjump':            quickjump(request.user),
     }
 
 
@@ -172,7 +185,8 @@ def forum(request, slug, page=1):
                                           Privilege.user_id != None)).all()
         subset = [r.user_id for r in query if check_privilege(r.positive, 'moderate')]
         if subset:
-            supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
+            supporters = SAUser.query.options(db.defer('settings'), db.defer('forum_read_status')) \
+                                     .filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
         cache.set('forum/forum/supporters-%s' % forum.id, supporters, 86400)
     else:
@@ -186,7 +200,8 @@ def forum(request, slug, page=1):
                                                               forum=forum),
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
-        'supporters':     supporters
+        'supporters':    supporters,
+        #'quickjump':     quickjump(request.user),
     })
     return ctx
 
@@ -316,6 +331,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
         'discussions':       discussions,
+        #'quickjump':         quickjump(request.user),
     }
 
 
@@ -337,6 +353,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
+    edit_attach_form = None
     attachments = []
     preview = None
     article = None
@@ -391,7 +408,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         }, force_version=forum.force_version)
     elif quote:
         form = EditPostForm(request.POST or None, initial={
-            'text': quote_text(quote.text, quote.author) + '\n',
+            'text': quote_text(quote.text, quote.author, 'post:%s:' % quote.id) + '\n',
         })
     else:
         form = EditPostForm(request.POST or None)
@@ -524,6 +541,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attach_form = AddAttachmentForm(request.POST, request.FILES)
         else:
             attach_form = AddAttachmentForm()
+        if 'rename_attachment' in request.POST:
+            edit_attach_form = EditAttachmentForm(request.POST)
+        else:
+            edit_attach_form = EditAttachmentForm()
 
         if 'attach' in request.POST:
             # the user uploaded a new attachment
@@ -531,7 +552,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 d = attach_form.cleaned_data
                 att_name = (d.get('filename') or d['attachment'].name)
                 attachment = Attachment.create(
-                    att_name, d['attachment'].read(),
+                    att_name, d['attachment'],
                     request.FILES['attachment'].content_type,
                     attachments, override=d['override']
                 )
@@ -547,12 +568,28 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
         elif 'delete_attachment' in request.POST:
             id = int(request.POST['delete_attachment'])
-            attachment = filter(lambda a: a.id==id, attachments)[0]
-            attachment.delete()
-            db.session.commit()
-            attachments.remove(attachment)
-            att_ids.remove(attachment.id)
-            flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
+            matching_attachments = filter(lambda a: a.id==id, attachments)
+            if not matching_attachments:
+                flash(u'Der Anhang mit der ID %d existiert nicht', id)
+            else:
+                attachment = matching_attachments[0]
+                attachment.delete()
+                db.session.commit()
+                attachments.remove(attachment)
+                att_ids.remove(attachment.id)
+                flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
+
+        elif 'rename_attachment' in request.POST and edit_attach_form.is_valid():
+            id = int(request.POST['rename_attachment'])
+            matching_attachments = filter(lambda a: a.id==id, attachments)
+            if not matching_attachments:
+                flash(u'Der Anhang mit der ID %d existiert nicht', id)
+            else:
+                attachment = matching_attachments[0]
+                d = edit_attach_form.cleaned_data
+                attachment.name = (d.get('new_filename'))
+                db.session.commit()
+                flash(u'Der Anhang „%s“ wurde umbenannt.' % attachment.name)
 
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
@@ -722,6 +759,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_moderate': check_privilege(privileges, 'moderate'),
         'can_sticky':   check_privilege(privileges, 'sticky'),
         'attach_form':  attach_form,
+        'edit_attach_form':  edit_attach_form,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
@@ -1626,7 +1664,7 @@ def topiclist(request, page=1, action='newposts', hours=24, user=None):
         'pagination':   pagination,
         'title':        title,
         'can_moderate': can_moderate,
-        'hide_sticky': False
+        'hide_sticky':  False,
     }
 
 

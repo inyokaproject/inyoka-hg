@@ -74,7 +74,7 @@ $(document).ready(function() {
 
     $('.toc').each(function () {
       toc = $(this);
-      // find out depth of old toc, so we can make ours look the same in the beginning 
+      // find out depth of old toc, so we can make ours look the same in the beginning
       var _classes = this.className.split(/\s+/);
       for(var i=0; i < _classes.length; i++) {
         if(_classes[i].match(/^toc-depth-(\d+)$/)) {
@@ -124,7 +124,7 @@ $(document).ready(function() {
         }
       }
       newtoc.append(tocTree);
-      
+
       //we have to hide all sublevels, create [+/-], and the click-event
       toc.find(":not(.originaltoc) ol").each(function(){
         $('<a class="toctoggle"> [-] </a>').toggle(
@@ -143,17 +143,12 @@ $(document).ready(function() {
             break;
           }
         }
-        if(curDepth >= tocDepth){
-          $(this).parent().find('.toctoggle').click();
-        }
-
       });
 
       toc.find('.originaltoc').remove();
       newtoc.show();
     });
 	}());
-
 
   // if we have JavaScript we style the search bar so that it looks
   // like a firefox search thingy and apply some behavior
@@ -401,7 +396,7 @@ $(document).ready(function() {
       sel.siblings('pre').text(sel.data('deb-url-orig').replace(/VERSION/, version));
       return false;
     };
-      
+
     $('.thirdpartyrepo-outer').each(function () {
       var versions = [],
           set_version_callback = function() { return set_version(this); },

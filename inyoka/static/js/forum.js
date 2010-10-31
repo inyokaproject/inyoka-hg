@@ -16,7 +16,7 @@ $(function() {
       $(this).toggleClass('collapsed').nextWhile('dd').toggle();
     }).addClass('collapse_enabled collapsed');
   });
-  
+
   /* poll helpers */
   (function() {
     $('#id_add_option').click(function addReply() {
@@ -53,7 +53,7 @@ $(function() {
         return false;
       })
       .prependTo('table.category_box tr.head a');
-  
+
     /* this function is used by the index template */
     hideForumCategories = function(hidden_categories) {
       $('table.category_box tr.head').each(function() {
@@ -103,7 +103,6 @@ $(function() {
         $(tags).fadeOut('fast');
         $(tags).text(new_text);
         $(tags).fadeIn('fast');
-        console.debug(callback);
         if (typeof callback == 'function')
           callback();
       }
@@ -129,7 +128,6 @@ $(function() {
       $(this).click(function() {
         doAction('topic', $(this).attr('id'), $('a.solve_topic'), function() {
           // switch classes
-          console.debug('success');
           if ($('a.solve_topic').hasClass('action_solve')) {
             $('a.solve_topic').removeClass('action_solve');
             $('a.solve_topic').addClass('action_unsolve');
@@ -188,3 +186,7 @@ $(function() {
     });
   })();
 });
+
+function quickjumpboxgo(slug) {
+    window.location.href = "http://forum.inyoka-prod.local:8080/forum/" + slug + "/";
+}

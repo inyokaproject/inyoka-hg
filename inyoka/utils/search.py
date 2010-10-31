@@ -292,10 +292,12 @@ class SearchSystem(object):
                     enq.set_sort_by_value_then_relevance(2, True)
                 elif sort == 'date':
                     enq.set_sort_by_value(2, True)
+                    enq.set_weighting_scheme(xapian.BoolWeight())
                 else:
-                    enq.set_sort_by_relevance_then_value(2, False)
+                    enq.set_sort_by_relevance()
                 if collapse:
                     enq.set_collapse_key(1)
+                enq.set_docid_order(xapian.Enquire.DESCENDING)
                 enq.set_query(qry)
 
                 mset = enq.get_mset(offset, per_page, per_page, None, auth)
