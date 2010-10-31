@@ -127,7 +127,7 @@ def index(request, category=None):
         'is_index':             is_index,
         'hidden_categories':    hidden_categories,
         'forum_hierarchy':      forum_hierarchy,
-        'quickjump':            quickjump(request.user),
+        #'quickjump':            quickjump(request.user),
     }
 
 
@@ -199,8 +199,9 @@ def forum(request, slug, page=1):
                                                               forum=forum),
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
+        'supporters':    supporters
         'supporters':    supporters,
-        'quickjump':     quickjump(request.user),
+        #'quickjump':     quickjump(request.user),
     })
     return ctx
 
@@ -330,7 +331,7 @@ def viewtopic(request, topic_slug, page=1):
         'can_delete':        can_delete,
         'team_icon_url':     team_icon,
         'discussions':       discussions,
-        'quickjump':         quickjump(request.user),
+        #'quickjump':         quickjump(request.user),
     }
 
 

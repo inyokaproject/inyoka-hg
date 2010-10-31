@@ -27,7 +27,7 @@
 
 {% block forum_content %}
   {%- if categories %}
-  {{ quickjumpbox(quickjump) }}
+  {#{{ quickjumpbox(quickjump) }}#}
   <table class="forum{% if is_index %} category_box{% endif %}">
   {%- for category, forums in forum_hierarchy %}
   <tr class="head" id="category-{{ category.id }}">
@@ -41,7 +41,7 @@
     {%- endfor %}
   {%- endfor %}
   </table>
-  {{ quickjumpbox(quickjump) }}
+  {#{{ quickjumpbox(quickjump) }}#}
 
   {%- else %}
     <p>Keine Kategorien</p>

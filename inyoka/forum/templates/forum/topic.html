@@ -83,7 +83,7 @@
     <h2>{{ topic.title|e }}</h2>
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
-      {{ quickjumpbox(quickjump) }}
+      {#{{ quickjumpbox(quickjump) }}#}
       <strong>Status:</strong> <span class="status_{{
         topic.solved and 'solved' or 'unsolved' }}">{{
         topic.solved and 'gelöst' or 'ungelöst' }}</span>
@@ -269,7 +269,7 @@
   <div class="topic_box">
     <div class="topic_box_content">
       {{ pagination.generate('right') }}
-      {{ quickjumpbox(quickjump) }}
+      {#{{ quickjumpbox(quickjump) }}#}
       {{ topic_actions() }}
     </div>
   </div>
