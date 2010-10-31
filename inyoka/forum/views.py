@@ -200,7 +200,7 @@ def forum(request, slug, page=1):
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
         'supporters':    supporters,
-        'quickjump':            quickjump(request.user),
+        'quickjump':     quickjump(request.user),
     })
     return ctx
 

@@ -251,7 +251,7 @@ class EditUserProfileForm(forms.Form):
         if gpgkey.startswith('0X'):
             gpgkey = gpgkey[2:]
         return gpgkey
-    
+
     def clean_avatar(self):
         """
         Keep the user form setting avatar to a too big size.
@@ -396,7 +396,7 @@ class EditUserStatusForm(forms.Form):
     banned_until = forms.DateTimeField(label=u'Automatisch entsperren', required=False,
         widget=DateTimeWidget,
         help_text='leer lassen, um dauerhaft zu bannen (wirkt nur wenn Status=gebannt)')
-    
+
     def clean_banned_until(self):
         """
         Keep the user from setting banned_until if status is not banned.
@@ -421,7 +421,7 @@ class EditUserPasswordForm(forms.Form):
         required=False, widget=forms.PasswordInput(render_value=False))
     confirm_password = forms.CharField(label=u'Neues Passwort (Wiederholung)',
         required=False, widget=forms.PasswordInput(render_value=False))
-    
+
     def clean_confirm_password(self):
         """
         Validates that the two password inputs match.
