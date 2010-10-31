@@ -157,7 +157,7 @@ def render_query_table(request):
         qresult.append(render_string(TEMPLATE, {
             'topic': escape(u'%s from Cache' % ctx),
             'query': escape(query[1]),
-            'data': escape(query[2]) if isinstance(query[2], basestring) else query[0],
+            'data': escape(query[2]) if isinstance(query[2], basestring) else query[2],
             'duration': 0,
             'odd': _odd
         }))
