@@ -552,7 +552,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 d = attach_form.cleaned_data
                 att_name = (d.get('filename') or d['attachment'].name)
                 attachment = Attachment.create(
-                    att_name, d['attachment'].read(),
+                    att_name, d['attachment'],
                     request.FILES['attachment'].content_type,
                     attachments, override=d['override']
                 )

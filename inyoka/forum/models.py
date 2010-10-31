@@ -12,18 +12,20 @@ from __future__ import division, with_statement
 import os
 import cPickle
 import operator
-import subprocess
 from os import path
 from hashlib import md5
 from PIL import Image
 from time import time
 from StringIO import StringIO
 from datetime import datetime
-#from mimetypes import guess_type
 from itertools import groupby
 from operator import attrgetter
 
+from django.core.files.storage import default_storage
+
 from inyoka.conf import settings
+from inyoka.utils import magic
+from inyoka.utils.files import fix_extension
 from inyoka.utils.text import get_new_unique_filename
 from inyoka.utils.database import db
 from inyoka.utils.dates import timedelta_to_seconds
@@ -1153,11 +1155,10 @@ class Attachment(db.Model):
     name = db.Column(db.String(255), nullable=False)
     comment = db.Column(db.Text, nullable=True)
     post_id = db.Column(db.Integer, db.ForeignKey('forum_post.id'), nullable=True)
-    #_mimetype = db.Column('mimetype', db.String(100), nullable=True)
     mimetype = db.Column('mimetype', db.String(100), nullable=True)
 
     @staticmethod
-    def create(name, content, mime, attachments, override=False, **kwargs):
+    def create(name, uploaded_file, mime, attachments, override=False, **kwargs):
         """
         This method writes a new attachment bound to a post that is
         not written into the database yet.
@@ -1167,8 +1168,8 @@ class Attachment(db.Model):
         :Parameters:
             name
                 The file name of the attachment.
-            content
-                The content of the attachment.
+            uploaded_file
+                The attachment.
             mime
                 The mimetype of the attachment (guess_file is implemented
                 as fallback)
@@ -1194,16 +1195,10 @@ class Attachment(db.Model):
             # on binding to the posts
             fn = path.join('forum', 'attachments', 'temp',
                 md5((str(time()) + name).encode('utf-8')).hexdigest())
-            #attachment = Attachment(name=name, file=fn, _mimetype=mime,
-            #                        **kwargs)
-            osfn = path.join(settings.MEDIA_ROOT, fn)
-            with open(osfn, 'wb') as fobj:
-                fobj.write(content)
-                fobj.flush()
-                os.fsync(fobj.fileno())
-                mime = subprocess.Popen('file -bi "%s"' % osfn,
-                          shell=True,
-                          stdout=subprocess.PIPE).communicate()[0].split()[0][:-1]
+            fn = default_storage.save(fn, uploaded_file)
+            uploaded_file.seek(0)
+            mime = magic.from_buffer(uploaded_file.read(1024), mime=True)
+            name = fix_extension(name, mime)
             attachment = Attachment(name=name, file=fn, mimetype=mime,
                                     **kwargs)
             return attachment
@@ -1275,12 +1270,6 @@ class Attachment(db.Model):
     def filename(self):
         """The filename of the attachment on the filesystem."""
         return path.join(settings.MEDIA_ROOT, self.file)
-
-    #@property
-    #def mimetype(self):
-    #    """The mimetype of the attachment."""
-    #    return self._mimetype or guess_type(self.filename)[0] or \
-    #           'application/octet-stream'
 
     @property
     def contents(self):
