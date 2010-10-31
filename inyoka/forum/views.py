@@ -185,7 +185,8 @@ def forum(request, slug, page=1):
                                           Privilege.user_id != None)).all()
         subset = [r.user_id for r in query if check_privilege(r.positive, 'moderate')]
         if subset:
-            supporters = SAUser.query.filter(SAUser.id.in_(subset)) \
+            supporters = SAUser.query.options(db.defer('settings'), db.defer('forum_read_status')) \
+                                     .filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
         cache.set('forum/forum/supporters-%s' % forum.id, supporters, 86400)
     else:
