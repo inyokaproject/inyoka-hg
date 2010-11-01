@@ -103,8 +103,10 @@ $(document).ready(function() {
         var thisClass = $(headerLinks[i]).parent().parent().attr("class");
 
         if ( i < headerLinks.length-1 ) {
+          // we are not the last headline
           nextClass = $(headerLinks[i+1]).parent().parent().attr("class");
         } else {
+          // after the last headline a first-level HL would follow
           nextClass = "section_1";
         }
 
@@ -125,16 +127,20 @@ $(document).ready(function() {
       }
       newtoc.append(tocTree);
 
+      toc.find('.originaltoc').remove();
+      newtoc.show();
       //we have to hide all sublevels, create [+/-], and the click-event
       toc.find(":not(.originaltoc) ol").each(function(){
-        $('<a class="toctoggle"> [-] </a>').toggle(
+        folder = $('<a class="toctoggle"> [-] </a>');
+        folder.insertBefore($(this));
+        folder.toggle(
           function() {
             $(this).text(' [+] ').next().slideUp('fast');
           },
           function() {
             $(this).text(' [-] ').next().slideDown('fast');
           }
-        ).insertBefore($(this));
+        );
 
         var _classes = this.className.split(/\s+/);
         for(var i=0; i < _classes.length; i++) {
@@ -143,10 +149,11 @@ $(document).ready(function() {
             break;
           }
         }
+        if(curDepth >= tocDepth){
+          folder.click();
+        }
       });
 
-      toc.find('.originaltoc').remove();
-      newtoc.show();
     });
 	}());
 
