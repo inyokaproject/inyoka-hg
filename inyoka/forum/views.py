@@ -165,10 +165,11 @@ def forum(request, slug, page=1):
         required_ids = [obj.id for obj in pagination.objects]
         topics = Topic.query.filter_overview(forum.id).filter(Topic.id.in_(required_ids)).all()
 
+        #TODO: investigate if it makes sense to store the topic-count of all forums
+        #      in the global cache and only increment and decrement it
         ctx = {
             'topics':           topics,
-            'pagination_left':  pagination.generate(),
-            'pagination_right': pagination.generate('right')
+            'topic_count':      pagination.total
         }
 
         if page < CACHE_PAGES_COUNT:
@@ -176,6 +177,8 @@ def forum(request, slug, page=1):
     else:
         merge = db.session.merge
         ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
+        pagination = Pagination(request, ctx['topics'], page, TOPICS_PER_PAGE,
+                                url_for(forum), total=ctx['topic_count'])
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
@@ -201,6 +204,8 @@ def forum(request, slug, page=1):
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
         'supporters':    supporters,
+        'pagination_left':  pagination.generate(),
+        'pagination_right': pagination.generate('right'),
         #'quickjump':     quickjump(request.user),
     })
     return ctx
