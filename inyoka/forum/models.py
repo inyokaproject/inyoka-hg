@@ -509,6 +509,8 @@ class Forum(db.Model):
         Return a list of the latest topics in this forum. If no count is
         given the default value from the settings will be used and the whole
         output will be cached (highly recommended!).
+
+        The returned object do not include hidden objects!
         """
         limit = max(settings.FORUM_TOPIC_CACHE, count)
         key = 'forum/latest_topics/%d' % self.id
@@ -519,7 +521,7 @@ class Forum(db.Model):
                 .options(db.eagerload('author'),
                          db.eagerload('last_post'),
                          db.eagerload('last_post.author')) \
-                .filter_by(forum_id=self.id) \
+                .filter(db.and_(Forum.forum_id == self.id, Topic.hidden == False)) \
                 .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
                 .limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:

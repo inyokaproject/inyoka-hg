@@ -1483,9 +1483,12 @@ def forum_feed(request, slug=None, mode='short', count=20):
         allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.get_cached())]
         if not allowed_forums:
             return abort_access_denied(request)
-        topics = Topic.query.order_by(Topic.id.desc()).options(
-            eagerload('first_post'), eagerload('author')
-        ).filter(Topic.forum_id.in_(allowed_forums))[:count]
+        topics = Topic.query \
+            .options(db.eagerload('first_post'), db.eagerload('author')) \
+            .filter(db.and_(Topic.forum_id.in_(allowed_forums),
+                            Topic.hidden == False)) \
+            .order_by(Topic.id.desc()) \
+            .limit(count)
         title = u'ubuntuusers Forum'
         url = href('forum')
 
@@ -1497,13 +1500,10 @@ def forum_feed(request, slug=None, mode='short', count=20):
         icon=href('static', 'img', 'favicon.ico'),
     )
 
-    for topic in topics:
+    #TODO: the first_post check is yet only a workaround for our broken
+    #      foreign key relationships
+    for topic in (topic for topic in topics if topic.first_post):
         kwargs = {}
-        post = topic.first_post
-
-        #XXX: this way there might be less than `count` items
-        if topic.hidden or post is None:
-            continue
 
         if post.rendered_text is None and not post.is_plaintext:
             post.render_text()
