@@ -947,6 +947,11 @@ class Post(db.Model):
         Change the text of the post. If the post is already stored in the
         database, create a post revision containing the new text.
         If the text has not changed, return.
+
+        .. note::
+
+            This method does neither flush or commit the created state.
+            You need to do that after :method:`edit` was called.
         """
         if self.text == text and self.is_plaintext == is_plaintext:
             return
