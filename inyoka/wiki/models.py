@@ -243,7 +243,7 @@ class PageManager(models.Manager):
                             nocache=False):
         """
         Works like `get_page_list` but just lists attachments.  If parent is
-        given only pages blow that page are displayed.
+        given only pages below that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
                     if not existing_only or not x[1] and not x[3])
