@@ -586,7 +586,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if not post: # not when editing an existing post
             doublepost = Post.query \
                 .filter_by(author_id=request.user.id, text=d['text']) \
-                .filter(Post.pub_date > (datetime.utcnow() - timedelta(0, 120)))
+                .filter(Post.pub_date > (datetime.utcnow() - timedelta(0, 300)))
             if not newtopic:
                 doublepost = doublepost.filter_by(topic_id=topic.id)
             doublepost = doublepost.options(eagerload(Post.topic)).first()
