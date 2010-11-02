@@ -179,7 +179,10 @@ def get_thumbnail(location, width=None, height=None, force=False):
         except IOError:
             return
     else:
-        src = open(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
+        try:
+            src = open(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
+        except IOError:
+            return
 
 
     # convert into the PNG and JPEG using imagemagick. Right now this
