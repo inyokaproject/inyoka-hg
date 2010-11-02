@@ -287,7 +287,7 @@ class RecentChanges(Macro):
                             page_notes.children.append(nodes.ListItem([
                                 nodes.Text(rev.note or ''),
                                 nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
-                                nodes.Link(href('portal', 'user', rev.user.username), [
+                                nodes.Link(rev.user.get_absolute_url(), [
                                     nodes.Text(rev.user.username)]),
                                 nodes.Text(rev.note and u')' or '')
                             ]))
