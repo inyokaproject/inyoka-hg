@@ -531,8 +531,6 @@ class Forum(db.Model):
 
         return (count < limit) and topics[:count] or topics
 
-    latest_topics = property(get_latest_topics)
-
     def get_read_status(self, user):
         """
         Determine the read status of the whole forum for a specific
