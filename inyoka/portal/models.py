@@ -29,6 +29,9 @@ class SubscriptionManager(models.Manager):
     """
 
     def user_subscribed(self, user, topic=None, forum=None, wiki_page=None):
+        if user.is_anonymous:
+            return False
+
         if topic is not None:
             column = 'topic_id'
             if isinstance(topic, int):
