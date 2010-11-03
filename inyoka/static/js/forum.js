@@ -169,16 +169,16 @@ $(function() {
         version: version_str
       }, function(data) {
         if (data.class_ == 'unstable') {
-          $('p#version_info').attr('class', 'unstable')
+          $('span#version_info').attr('class', 'unstable')
             .html(with_link(text_unstable, data));
         } else if (data.lts) {
-          $('p#version_info').attr('class', 'lts')
+          $('span#version_info').attr('class', 'lts')
             .html(with_link(text_lts, data));
         } else if (data.current) {
-          $('p#version_info').attr('class', 'current')
+          $('span#version_info').attr('class', 'current')
             .html(with_link(text_current, data));
         } else {
-          $('p#version_info').attr('class', '').text('');
+          $('span#version_info').attr('class', '').text('');
         }
       });
 

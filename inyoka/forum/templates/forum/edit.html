@@ -69,10 +69,10 @@
     <dl>
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
-      <strong>Titel: </strong>{{ form.title }}{{ form.errors.title }}
+      <strong>Titel: </strong>{{ form.title }}{{ form.errors.title }}<p class="version_chooser">
         {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
         {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
-        <p id="version_info"></p>
+        <span id="version_info"></span></p>
       {%- else %}
       <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>
       {%- endif %}
