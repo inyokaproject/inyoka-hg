@@ -297,7 +297,7 @@ def viewtopic(request, topic_slug, page=1):
     post_objects = pagination.objects.all()
 
     for post in post_objects:
-        if not post.rendered_text and not post.is_plaintext:
+        if not post.rendered_text:
             try:
                 post.rendered_text = post.render_text(force_existing=True)
                 db.session.commit()
@@ -618,7 +618,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             post = Post(topic=topic, author_id=request.user.id)
             if newtopic:
                 post.position = 0
-        post.edit(request, d['text'], d['is_plaintext'])
+        post.edit(request, d['text'])
         db.session.commit()
 
         if attachments:
@@ -709,8 +709,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif 'preview' in request.POST:
         ctx = RenderContext(request)
         tt = request.POST.get('text', '')
-        preview = request.POST.get('is_plaintext', False) and \
-            fix_plaintext(tt) or parse(tt).render(ctx, 'html')
+        preview = parse(tt).render(ctx, 'html')
 
     # the user is going to edit an existing post/topic
     elif post:
@@ -720,7 +719,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             'ubuntu_version': topic.ubuntu_version,
             'sticky': topic.sticky,
             'text': post.text,
-            'is_plaintext': post.is_plaintext,
         })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
@@ -1505,7 +1503,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
     for topic in (topic for topic in topics if topic.first_post):
         kwargs = {}
 
-        if post.rendered_text is None and not post.is_plaintext:
+        if post.rendered_text is None:
             post.render_text()
         text = post.get_text()
 
