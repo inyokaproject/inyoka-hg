@@ -1141,11 +1141,9 @@ def group(request, name, page=1):
     }
 
 
-@templated('portal/usermap.html')
 def usermap(request):
-    return {
-        'apikey':       settings.GOOGLE_MAPS_APIKEY,
-    }
+    flash(u'Die Benutzerkarte wurde vorrübergehend deaktiviert.')
+    return HttpResponseRedirect(href('portal'))
 
 
 app_feed_forms = {
