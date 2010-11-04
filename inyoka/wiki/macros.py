@@ -29,7 +29,7 @@ import random
 import string
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
-from inyoka.utils.urls import href, url_encode
+from inyoka.utils.urls import href, url_encode, url_for
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
@@ -287,7 +287,7 @@ class RecentChanges(Macro):
                             page_notes.children.append(nodes.ListItem([
                                 nodes.Text(rev.note or ''),
                                 nodes.Text(u'%svon ' % (rev.note and u' (' or '')),
-                                nodes.Link(rev.user.get_absolute_url(), [
+                                nodes.Link(url_for(rev.user), [
                                     nodes.Text(rev.user.username)]),
                                 nodes.Text(rev.note and u')' or '')
                             ]))

@@ -69,14 +69,10 @@
     <dl>
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
-      <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ form.errors.title }}</dd>
-      <dt>Ubuntu-Version:</dt>
-      <dd>
+      <strong>Titel: </strong>{{ form.title }}{{ form.errors.title }}<p class="version_chooser">
         {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
         {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
-        <span id="version_info"></span>
-      </dd>
+        <span id="version_info"></span></p>
       {%- else %}
       <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>
       {%- endif %}
@@ -152,13 +148,10 @@
         <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
       </dd>
       {%- endif %}
-      <dt class="collapse">Optionen:</dt>
       {%- if can_sticky and (isnewtopic or isfirstpost) %}
+      <dt>Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
-      <dd>{{ form.is_plaintext }} <label for="id_is_plaintext">Beitrag soll Plaintext sein</label>
-          <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
-      </dd>
     </dl>
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="

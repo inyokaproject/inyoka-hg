@@ -41,8 +41,7 @@ def nl2p(s):
 
 def debug(msg):
     """Helper function that prints to stderr if debugging is enabled."""
-    if settings.DEBUG:
-        sys.stderr.write(msg.encode('utf-8') + '\n')
+    sys.stderr.write(msg.encode('utf-8') + '\n')
 
 
 def sync():
@@ -59,7 +58,12 @@ def sync():
         try:
             feed = feedparser.parse(blog.feed_url)
         except UnicodeDecodeError:
+            debug('UnicodeDecodeError on %s' % blog.feed_url)
             continue
+        except LookupError:
+            debug('LookupError on %s' % blog.feed_url)
+            continue
+
         blog_author = feed.get('author') or blog.name
         blog_author_detail = feed.get('author_detail')
 

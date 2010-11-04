@@ -56,23 +56,6 @@ def on_get_group_list(request):
         groupnames[10] = '...'
     return groupnames
 
-def on_get_usermap_markers(request):
-    """Return markers for the usermap."""
-    markers = []
-    for user in User.objects.filter(coordinates_long__isnull=False,
-                                    coordinates_lat__isnull=False):
-        long = user.coordinates_long
-        lat = user.coordinates_lat
-        markers.append({
-            'type':     'user',
-            'detail': {
-                'user_id':      user.id,
-                'username':     user.username
-            },
-            'pos':      (lat, long)
-        })
-    return {'markers': markers}
-
 
 def on_get_random_password(request):
     return {'password': get_random_password()}
@@ -133,7 +116,6 @@ dispatcher = SimpleDispatcher(
     get_current_user=on_get_current_user,
     get_user_autocompletion=on_get_user_list,
     get_group_autocompletion=on_get_group_list,
-    get_usermap_markers=on_get_usermap_markers,
     get_random_password=on_get_random_password,
     get_captcha=on_get_captcha,
     get_calendar_entry=on_get_calendar_entry,

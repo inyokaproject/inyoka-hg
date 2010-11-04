@@ -44,15 +44,6 @@ $(document).ready(function() {
       return false;
     });
 
-  // add a link to the user map if javascript available and on the index page
-  (function() {
-    var navigation = $('h3.navi_ubuntuusers').next();
-    if (navigation.is('ul'))
-      $('<li><a href="/map/">Benutzerkarte</a></li>')
-        .appendTo(navigation);
-  })();
-
-
   // Make TOC links expandable.
 	(function() {
 		//Execute this function only when if there are tocs.

@@ -6,7 +6,7 @@ load("extra/jslint.js");
 var files = ["DateTime.js", "FeedSelector.js", "forum.js", "ikhaya.js",
              "jquery.extensions.js", "NewTopic.js", "overall.js",
              "Pastebin.js", "PrivilegeBox.js",
-             "UserGroupBox.js", "UserMap.js", "WikiEditor.js"]
+             "UserGroupBox.js", "WikiEditor.js"]
 
 for (var file in files) {
   var src = readFile("inyoka/static/js/" + files[file]);
