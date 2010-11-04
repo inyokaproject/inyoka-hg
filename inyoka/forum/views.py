@@ -1502,6 +1502,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
     #      foreign key relationships
     for topic in (topic for topic in topics if topic.first_post):
         kwargs = {}
+        post = topic.first_post
 
         if post.rendered_text is None:
             post.render_text()
