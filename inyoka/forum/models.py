@@ -521,7 +521,7 @@ class Forum(db.Model):
                 .options(db.eagerload('author'),
                          db.eagerload('last_post'),
                          db.eagerload('last_post.author')) \
-                .filter(db.and_(Forum.forum_id == self.id, Topic.hidden == False)) \
+                .filter(db.and_(Forum.id == self.id, Topic.hidden == False)) \
                 .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
                 .limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
