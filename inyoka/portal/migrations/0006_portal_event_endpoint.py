@@ -18,7 +18,7 @@ class Migration(SchemaMigration):
             events = orm.Event.objects.all()
             for event in events:
                 if hasattr(event, 'duration') and event.duration:
-                    event.eddate = event.duration.date()
+                    event.enddate = event.duration.date()
                     event.endtime = event.duration.time()
                 event.save()
 
