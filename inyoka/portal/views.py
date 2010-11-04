@@ -1266,8 +1266,16 @@ def event_new(request):
             else:
                 event.date = data['date']
                 event.time = None
-            if data['duration']:
-                event.duration = convert(data['duration'])
+            if data['endtime']:
+                d = convert (date_time_to_datetime(
+                    data['enddate'] or event.date,
+                    data['endtime']
+                ))
+                event.enddate = d.date()
+                event.endtime = event.time and d.time()
+            else:
+                event.enddate = data['enddate'] or None
+                event.endtime = None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']

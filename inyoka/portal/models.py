@@ -482,12 +482,12 @@ class Event(models.Model):
 
         if self.time is None:
             if self.enddate is None or self.enddate <= self.date:
-                return " "+ _convert(self.date)
+                return ' ' + _convert(self.date)
             else:
                 return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False)
         else:
             if self.enddate is None and self.endtime is None:
-                return _convert(self.date, self.time)
+                return ' ' + _convert(self.date, self.time)
             else:
                 """
                 since, one endpoint information is given, we calculate the duration:

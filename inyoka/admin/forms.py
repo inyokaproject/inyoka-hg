@@ -544,10 +544,6 @@ class NewEventForm(forms.Form):
     location_long = forms.DecimalField(label=u'Koordinaten (Länge)',
                                       required=False,
                                       min_value=-90, max_value=90)
-    #duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
-    #    input_formats=DATETIME_INPUT_FORMATS, required=False,
-    #    widget=DateTimeWidget)
-
 
 class EditEventForm(NewEventForm):
     visible = forms.BooleanField(label=u'Kalendereintrag sichtbar?', required=False)

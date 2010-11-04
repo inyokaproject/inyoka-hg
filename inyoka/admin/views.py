@@ -1360,12 +1360,12 @@ def event_edit(request, id=None):
                 event.date = data['date']
                 event.time = None
             if data['endtime']:
-                d = convert (date_time_to_datetime(
-                    data['enddate'] or event.date,
+                d = convert(date_time_to_datetime(
+                    data['enddate'] or data['date'],
                     data['endtime']
                 ))
                 event.enddate = d.date()
-                event.endtime = d.time()
+                event.endtime = event.time and d.time()
             else:
                 event.enddate = data['enddate'] or None
                 event.endtime = None
@@ -1405,11 +1405,11 @@ def event_edit(request, id=None):
                 dt_date = event.date
                 time_ = None
 
-            if event.endtime:
-                dt = datetime_to_timezone(date_time_to_datetime(
+            if event.endtime is not None:
+                dt_end = datetime_to_timezone(date_time_to_datetime(
                     event.enddate or event.date, event.endtime))
-                dt_enddate = dt.date()
-                endtime_ = dt.time
+                dt_enddate = dt_end.date()
+                endtime_ = dt_end.time()
             else:
                 dt_enddate = event.enddate or None
                 endtime_ = None
