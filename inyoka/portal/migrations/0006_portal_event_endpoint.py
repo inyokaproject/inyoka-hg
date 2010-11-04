@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Deleting field 'Event.duration'
         db.delete_column('portal_event', 'duration')
 
@@ -19,7 +19,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Adding field 'Event.duration'
         db.add_column('portal_event', 'duration', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
 
