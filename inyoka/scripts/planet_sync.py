@@ -151,8 +151,11 @@ def sync():
                     max_length = None
                 if isinstance(locals()[n], basestring):
                     setattr(entry, n, locals()[n][:max_length])
-            entry.save()
-            debug(' synced entry %r' % guid)
+            try:
+                entry.save()
+                debug(' synced entry %r' % guid)
+            except Exception, exc:
+                debug(' Error on entry %r' % guid)
         blog.last_sync = datetime.utcnow()
         blog.save()
 
