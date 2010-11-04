@@ -16,7 +16,7 @@ from inyoka.utils.sessions import SurgeProtectionMixin
 
 VERSION_CHOICES = [('', 'Version auswählen')] + \
                   [(v.number, str(v)) for v in filter(lambda v: v.active, UBUNTU_VERSIONS)]
-DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS.items()
+DISTRO_CHOICES = [('', 'Distribution auswählen')] + UBUNTU_DISTROS
 
 
 class NewPostForm(SurgeProtectionMixin, forms.Form):

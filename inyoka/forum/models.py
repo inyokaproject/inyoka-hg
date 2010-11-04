@@ -98,14 +98,14 @@ UBUNTU_DISTROS_LEGACY = {
     'xubuntu': 'Xubuntu'
 }
 
-UBUNTU_DISTROS = {
-    'keine': 'Keine Angabe',
-    'edubuntu': 'Edubuntu',
-    'kubuntu': 'Kubuntu',
-    'server': 'Server',
-    'ubuntu': 'Ubuntu',
-    'xubuntu': 'Xubuntu'
-}
+UBUNTU_DISTROS = [
+    ('keine', 'Keine Angabe'),
+    ('edubuntu', 'Edubuntu'),
+    ('kubuntu', 'Kubuntu'),
+    ('server', 'Server'),
+    ('ubuntu', 'Ubuntu'),
+    ('xubuntu', 'Xubuntu')
+]
 
 
 def fix_plaintext(text):
