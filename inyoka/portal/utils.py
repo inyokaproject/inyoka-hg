@@ -94,12 +94,26 @@ def calendar_entries_for_month(year, month):
         Q(duration__range=(start_date, end_date)),visible=True).all()
 
     for event in events:
+        """
         if event.duration is not None:
             if event.date < start_date:
                 delta = event.duration.date() - start_date
                 base = start_date.day
             else:
                 delta = event.duration.date() - event.date
+                base = event.date.day
+            for day in range(delta.days+1):
+                if base + day in days:
+                    days[base+day].append(event)
+        else:
+            days[event.date.day].append(event)
+        """
+        if event.date is not None:
+            if event.date < start_date:
+                delta = event.date.date() - start_date
+                base = start_date.day
+            else:
+                delta = event.date.date() - event.date
                 base = event.date.day
             for day in range(delta.days+1):
                 if base + day in days:

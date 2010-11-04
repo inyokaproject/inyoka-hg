@@ -526,8 +526,12 @@ class EditStyleForm(forms.Form):
 class NewEventForm(forms.Form):
     name = forms.CharField(label=u'Name', max_length=50)
     date = forms.DateField(label=u'Datum (Von)', input_formats=DATE_INPUT_FORMATS,
-        widget=DateWidget)
-    time = forms.TimeField(label=u'Uhrzeit', input_formats=TIME_INPUT_FORMATS,
+                           widget=DateWidget)
+    time = forms.TimeField(label=u'Uhrzeit (Von)', input_formats=TIME_INPUT_FORMATS,
+                           required=False, widget=TimeWidget)
+    enddate = forms.DateField(label=u'Datum (Bis)', input_formats=DATE_INPUT_FORMATS,
+                           required=False, widget=DateWidget)
+    endtime = forms.TimeField(label=u'Uhrzeit (Bis)', input_formats=TIME_INPUT_FORMATS,
                            required=False, widget=TimeWidget)
     description = forms.CharField(label=u'Details', required=False,
                                   widget=forms.Textarea(attrs={'rows': 6}))
@@ -540,9 +544,9 @@ class NewEventForm(forms.Form):
     location_long = forms.DecimalField(label=u'Koordinaten (Länge)',
                                       required=False,
                                       min_value=-90, max_value=90)
-    duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
-        input_formats=DATETIME_INPUT_FORMATS, required=False,
-        widget=DateTimeWidget)
+    #duration = forms.DateTimeField(label=u'Zeitfenster (Bis)',
+    #    input_formats=DATETIME_INPUT_FORMATS, required=False,
+    #    widget=DateTimeWidget)
 
 
 class EditEventForm(NewEventForm):

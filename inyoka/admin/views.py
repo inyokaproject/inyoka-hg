@@ -1359,8 +1359,16 @@ def event_edit(request, id=None):
             else:
                 event.date = data['date']
                 event.time = None
-            if data['duration']:
-                event.duration = convert(data['duration'])
+            if data['endtime']:
+                d = convert (date_time_to_datetime(
+                    data['enddate'] or event.date,
+                    data['endtime']
+                ))
+                event.enddate = d.date()
+                event.endtime = d.time()
+            else:
+                event.enddate = data['enddate'] or None
+                event.endtime = None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
@@ -1397,16 +1405,21 @@ def event_edit(request, id=None):
                 dt_date = event.date
                 time_ = None
 
-            # fix duration to user timezone
-            duration = datetime_to_timezone(event.duration)
-            if duration:
-                duration.replace(tzinfo=None)
+            if event.endtime:
+                dt = datetime_to_timezone(date_time_to_datetime(
+                    event.enddate or event.date, event.endtime))
+                dt_enddate = dt.date()
+                endtime_ = dt.time
+            else:
+                dt_enddate = event.enddate or None
+                endtime_ = None
 
             form = EditEventForm({
                 'name': event.name,
                 'date': dt_date,
                 'time': time_,
-                'duration': duration,
+                'enddate': dt_enddate,
+                'endtime': endtime_,
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
