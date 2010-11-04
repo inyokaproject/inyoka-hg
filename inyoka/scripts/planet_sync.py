@@ -41,7 +41,8 @@ def nl2p(s):
 
 def debug(msg):
     """Helper function that prints to stderr if debugging is enabled."""
-    sys.stderr.write(msg.encode('utf-8') + '\n')
+    if settings.DEBUG:
+        sys.stderr.write(msg.encode('utf-8') + '\n')
 
 
 def sync():
