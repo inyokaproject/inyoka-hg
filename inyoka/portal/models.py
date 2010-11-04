@@ -403,7 +403,6 @@ class Event(models.Model):
                                      blank=True, null=True)
     location_long = models.FloatField('Koordinaten (Länge)',
                                       blank=True, null=True)
-    #duration = models.DateTimeField(blank=True, null=True)
     visible = models.BooleanField(default=False)
 
 

@@ -3,34 +3,25 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from inyoka.utils.dates import date_time_to_datetime
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Adding field 'Event.enddate'
-        db.add_column('portal_event', 'enddate', self.gf('django.db.models.fields.DateField')(null=True, blank=True), keep_default=False)
+        # Deleting field 'Event.duration'
+        db.delete_column('portal_event', 'duration')
 
-        # Adding field 'Event.endtime'
-        db.add_column('portal_event', 'endtime', self.gf('django.db.models.fields.TimeField')(null=True, blank=True), keep_default=False)
+    def backwards(self, orm):
+
+        # Adding field 'Event.duration'
+        db.add_column('portal_event', 'duration', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
 
         if not db.dry_run:
             events = orm.Event.objects.all()
             for event in events:
-                if hasattr(event, 'duration') and event.duration:
-                    event.eddate = event.duration.date()
-                    event.endtime = event.duration.time()
+                if event.enddate and event.endtime:
+                    event.duration = date_time_to_datetime(event.enddate, event.endtime)
                 event.save()
-
-    def backwards(self, orm):
-
-        # Deleting field 'Event.enddate'
-        db.delete_column('portal_event', 'enddate')
-
-        # Deleting field 'Event.endtime'
-        db.delete_column('portal_event', 'endtime')
-
 
     models = {
         'portal.event': {
@@ -42,7 +33,6 @@ class Migration(SchemaMigration):
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'enddate': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'endtime': ('django.db.models.fields.TimeField', [], {'null': 'True', 'blank': 'True'}),
-            'duration': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.CharField', [], {'max_length': '25', 'blank': 'True'}),
             'location_lat': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
