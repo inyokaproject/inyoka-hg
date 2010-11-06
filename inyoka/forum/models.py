@@ -524,7 +524,6 @@ class Forum(db.Model):
                 .filter(db.and_(Topic.forum_id == self.id, Topic.hidden == False)) \
                 .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
                 .limit(limit)
-            print topics
             if limit == settings.FORUM_TOPIC_CACHE:
                 topics = topics.all()
                 cache.set(key, topics, 300)
