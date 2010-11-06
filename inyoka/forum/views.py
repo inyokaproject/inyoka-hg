@@ -1419,10 +1419,7 @@ def topic_feed(request, slug=None, mode='short', count=25):
 
     if topic is None or topic.hidden:
         raise PageNotFound()
-    # We check if request.user has CAN_READ, though we only display
-    # the anonymous feed; this is to allow logged in users to view
-    # the feeds (eg in firefox).
-    if not have_privilege(request.user, topic.forum, CAN_READ):
+    if not have_privilege(anonymous, topic.forum, CAN_READ):
         return abort_access_denied(request)
 
     posts = topic.posts.options(eagerload('author')) \
@@ -1468,10 +1465,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         forum = Forum.query.get_cached(slug=slug)
         if forum is None:
             raise PageNotFound()
-        # We check if request.user has CAN_READ, though we only display
-        # the anonymous feed; this is to allow logged in users to view
-        # the feeds (eg in firefox).
-        if not have_privilege(request.user, forum, CAN_READ):
+        if not have_privilege(anonymous, forum, CAN_READ):
             return abort_access_denied(request)
 
         topics = forum.get_latest_topics(count=count)
