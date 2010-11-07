@@ -19,6 +19,7 @@ import sys
 import feedparser
 from time import time
 from datetime import datetime
+from django.utils.encoding import force_unicode
 
 from inyoka.conf import settings
 from inyoka.utils.html import escape, cleanup_html
@@ -50,19 +51,19 @@ def sync():
     Performs a synchronization.  Articles that are already syncronized aren't
     touched anymore.
     """
-    debug('debugging enabled')
+    debug(u'debugging enabled')
     for blog in Blog.objects.filter(active=True):
-        debug('syncing blog %s' % blog.name)
+        debug(u'syncing blog %s' % blog.name)
 
         # parse the feed. feedparser.parse will never given an exception
         # but the bozo bit might be defined.
         try:
             feed = feedparser.parse(blog.feed_url)
         except UnicodeDecodeError:
-            debug('UnicodeDecodeError on %s' % blog.feed_url)
+            debug(u'UnicodeDecodeError on %s' % blog.feed_url)
             continue
         except LookupError:
-            debug('LookupError on %s' % blog.feed_url)
+            debug(u'LookupError on %s' % blog.feed_url)
             continue
 
         blog_author = feed.get('author') or blog.name
@@ -73,7 +74,7 @@ def sync():
             # if none is available we skip the entry.
             guid = entry.get('id') or entry.get('link')
             if not guid:
-                debug(' no guid found, skipping')
+                debug(u' no guid found, skipping')
                 continue
 
             try:
@@ -91,7 +92,7 @@ def sync():
                 else:
                     title = escape(title)
             else:
-                debug(' no title found for %r, skipping' % guid)
+                debug(u' no title found for %r, skipping' % guid)
                 continue
 
             url = entry.get('link') or blog.blog_url
@@ -99,7 +100,7 @@ def sync():
                    entry.get('summary_detail')
 
             if not text:
-                debug('no text found for %r, skipping' % guid)
+                debug(u'no text found for %r, skipping' % guid)
                 continue
 
             # if we have an html text we use that, otherwise we HTML
@@ -122,7 +123,7 @@ def sync():
 
             # if we don't have a pub_date we skip.
             if not pub_date:
-                debug(' no pub_date for %r found, skipping' % guid)
+                debug(u' no pub_date for %r found, skipping' % guid)
                 continue
 
             # convert the time tuples to datetime objects.
@@ -135,7 +136,7 @@ def sync():
             if not author and author_detail:
                 author = author_detail.get('name')
             if not author:
-                debug(' no author for entry %r found, skipping' % guid)
+                debug(u' no author for entry %r found, skipping' % guid)
             author_homepage = author_detail and author_detail.get('href') \
                               or url
 
@@ -144,19 +145,20 @@ def sync():
             entry = old_entry or Entry()
             for n in ('blog', 'guid', 'title', 'url', 'text', 'pub_date',
                       'updated', 'author', 'author_homepage'):
-                setattr(entry, n, locals()[n])
                 # prevent mysql warnings
                 try:
                     max_length = entry._meta.get_field(n).max_length
                 except AttributeError:
                     max_length = None
                 if isinstance(locals()[n], basestring):
-                    setattr(entry, n, locals()[n][:max_length])
+                    setattr(entry, n, force_unicode(locals()[n][:max_length]).encode('utf-8'))
+                else:
+                    setattr(entry, n, locals()[n])
             try:
                 entry.save()
-                debug(' synced entry %r' % guid)
+                debug(u' synced entry %r' % guid)
             except Exception, exc:
-                debug(' Error on entry %r' % guid)
+                debug(u' Error on entry %r: %r' % (guid, exc))
         blog.last_sync = datetime.utcnow()
         blog.save()
 
