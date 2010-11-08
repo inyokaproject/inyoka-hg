@@ -642,8 +642,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             for s in Subscription.objects.filter(member=request.user):
                 notified_users.append(s.user)
                 notify_about_subscription(s, 'user_new_topic',
-                    u'Neues Thema vom Benutzer %s' % \
-                        (post.author.username),
+                    u'Neues Thema vom Benutzer %s' % post.author.username,
                     {'username':   s.user.username,
                      'post':       post,
                      'topic':      topic,
@@ -681,9 +680,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             # not visited, because unlike the posts you won't see
             # other new topics
         elif not post_id:
+            notified_users = []
             for s in Subscription.objects.filter(topic_id=topic.id,
                                                  notified=False) \
                                          .exclude(user=request.user):
+                notified_users.append(s.user)
                 notify_about_subscription(s, 'new_post',
                     u'Neue Antwort im Thema „%s“' % topic.title,
                     {'username':   s.user.username,
@@ -691,6 +692,16 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                      'topic':      topic})
                 s.notified = True
                 s.save()
+            for s in Subscription.objects.filter(member=request.user):
+                if not s.user in notified_users:
+                    notified_users.append(s.user)
+                    notify_about_subscription(s, 'user_new_post',
+                        u'Neue Antwort vom Benutzer %s' % post.author.username,
+                        {'username': s.user.username,
+                         'post':      post,
+                         'topic':     topic})
+                    s.notified = True
+                    s.save()
 
         if article:
             # the topic is a wiki discussion, bind it to the wiki
