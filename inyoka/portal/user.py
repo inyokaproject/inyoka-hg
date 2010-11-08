@@ -510,19 +510,6 @@ class User(models.Model):
             u'hat seinen Account gelöscht',
         ][self.status]
 
-    def inc_post_count(self):
-        """Increment the post count in a safe way."""
-        cur = connection.cursor()
-        cur.execute('''
-            UPDATE portal_user
-            SET    post_count = post_count + 1
-            WHERE  id         = %s;
-        ''', [self.id])
-        cur.close()
-        connection._commit()
-        self.post_count += 1
-        cache.delete('portal/user/%d' % self.id)
-
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""
         salt = get_hexdigest(str(random.random()), str(random.random()))[:5]
