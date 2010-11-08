@@ -444,8 +444,8 @@ class Parser(object):
                     next()
                 else:
                     assert 0, 'arrrr. the lexer screwed us'
-        except TemplateSyntaxError, e:
-            result.append(e.get_node())
+        except TemplateSyntaxError, exc:
+            result.append(exc.get_node())
         return assemble_compound()
 
     def parse(self):

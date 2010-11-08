@@ -675,12 +675,12 @@ def users(request):
         try:
             try:
                 user = User.objects.get(name)
-            except User.DoesNotExist, e:
+            except User.DoesNotExist, exc:
                 # fallback to email
                 if '@' in name:
                     user = User.objects.get(email__iexact=name)
                 else:
-                    raise e
+                    raise exc
         except User.DoesNotExist:
             flash(u'Der Benutzer „%s“ existiert nicht.'
                   % escape(name))

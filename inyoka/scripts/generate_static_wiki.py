@@ -118,8 +118,8 @@ def fetch_page(name):
             name = name.encode('utf-8')
         fobj = urllib2.urlopen(os.path.join(URL, quote(name)))
         data = fobj.read()
-    except urllib2.HTTPError, e:
-        print "http error on page %s: %s" % (name, str(e))
+    except urllib2.HTTPError, exc:
+        print "http error on page %s: %s" % (name, str(exc))
         return
     return data
 

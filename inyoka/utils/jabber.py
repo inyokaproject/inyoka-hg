@@ -44,8 +44,8 @@ def send(jid, message, xhtml=True):
     try:
         (_proxy.jabber.sendMessage, _proxy.jabber.sendRawMessage) \
         [not xhtml](jid, message)
-    except Fault, e:
-        raise ValueError(e.faultString)
+    except Fault, exc:
+        raise ValueError(exc.faultString)
     except socket.error:
         return False
     return True

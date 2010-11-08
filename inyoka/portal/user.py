@@ -381,12 +381,12 @@ class UserManager(models.Manager):
         """
         try:
             user = User.objects.get(username)
-        except User.DoesNotExist, e:
+        except User.DoesNotExist, exc:
             # fallback to email login
             if '@' in username:
                 user = User.objects.get(email__iexact=username)
             else:
-                raise e
+                raise exc
 
         if user.is_banned:
             # gebannt für immer…
