@@ -678,6 +678,8 @@ class User(models.Model):
                         self.urlsafe_username, gen_activation_key(self))
         elif action == 'admin':
             return href('admin', 'users', 'edit', self.urlsafe_username)
+        elif action in ('subscribe', 'unsubscribe'):
+            return href('portal', 'user', self.urlsafe_username, action)
 
     def login(self, request):
         self.last_login = datetime.utcnow()
