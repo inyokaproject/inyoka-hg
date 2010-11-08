@@ -44,6 +44,8 @@
           Wiki-Seite: <a href="{{ sub.wiki_page|url }}">{{ sub.wiki_page.title|e }}</a>
           {%- elif sub.forum -%}
           Forum: <a href="{{ sub.forum|url }}">{{ sub.forum.name|e }}</a>
+          {%- elif sub.member -%}
+          Benutzer: <a href="{{ sub.member|url }}">{{ sub.member.username|e }}</a>
           {%- endif -%}
         </td>
       </tr>
