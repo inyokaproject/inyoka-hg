@@ -491,12 +491,15 @@ def profile(request, username):
         groups = user.groups.all()
     else:
         groups = user.groups.filter(is_public=True)
+    subscribed = Subscription.objects.user_subscribed(request.user,
+                                                      member=user)
     return {
-        'user':     user,
-        'groups':   groups,
-        'wikipage': content,
-        'User':     User,
-        'request':  request
+        'user':          user,
+        'groups':        groups,
+        'wikipage':      content,
+        'User':          User,
+        'is_subscribed': subscribed,
+        'request':       request
     }
 
 def subscribe_user(request, username):

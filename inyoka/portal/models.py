@@ -46,7 +46,7 @@ class SubscriptionManager(models.Manager):
             column = 'wiki_page_id'
             ident = wiki_page.id
         elif member is not None:
-            column = 'member'
+            column = 'member_id'
             ident = member.id
         else:
             raise TypeError('user_subscribed takes exactly 3 arguments (2 given)')
