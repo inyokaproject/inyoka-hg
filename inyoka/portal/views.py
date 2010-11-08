@@ -499,6 +499,31 @@ def profile(request, username):
         'request':  request
     }
 
+def subscribe_user(request, username):
+    """Subscribe to a user to follow all of his activities."""
+    user = User.objects.get(username)
+    try:
+        Subscription.objects.get(user=request.user, member=user.id)
+    except Subscription.DoesNotExist:
+        # there's no such subscription yet, create a new one
+        Subscription(user=request.user, member_id=user.id).save()
+        flash(u'Du wirst ab nun über Aktivitäten von %s benachrichtigt'
+              % user.username)
+    return HttpResponseRedirect(url_for(user))
+
+def unsubscribe_user(request, username):
+    """Remove a user subscription."""
+    user = User.objects.get(username)
+    try:
+        subscription = Subscription.objects.get(user=request.user,
+                                                member=user.id)
+    except Subscription.DoesNotExist:
+        pass
+    else:
+        subscription.delete()
+        flash(u'Du wirst ab nun nicht mehr über Aktivitäten von %s benachrichtigt'
+              % user.username)
+    return HttpResponseRedirect(url_for(user))
 
 @check_login(message=u'Du musst eingeloggt sein, um dein Verwaltungscenter '
                      u'zu sehen')
