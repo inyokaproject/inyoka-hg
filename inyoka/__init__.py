@@ -112,7 +112,6 @@
 import socket
 import os
 from os.path import realpath, join, dirname
-import inyoka
 from mercurial import ui as hgui
 from mercurial.localrepo import localrepository
 from mercurial.node import short as shorthex
@@ -129,7 +128,7 @@ def _bootstrap():
     global INYOKA_REVISION
 
     # the path to the contents of the Inyoka module
-    conts = realpath(join(dirname(inyoka.__file__)))
+    conts = realpath(join(dirname(__file__)))
 
     # get the `INYOKA_REVISION` using the mercurial python api
     try:
