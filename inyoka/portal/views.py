@@ -59,8 +59,8 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
     reactivate_user, set_new_email, send_new_email_confirmation, \
     reset_email, send_activation_mail, send_new_user_password
-from inyoka.portal.utils import check_login, calendar_entries_for_month
-
+from inyoka.portal.utils import check_login, calendar_entries_for_month, \
+     require_permission
 
 # TODO: move into some kind of config, but as a quick fix for now...
 AUTOBAN_SPAMMER_WORDS = (
@@ -502,6 +502,7 @@ def profile(request, username):
         'request':       request
     }
 
+@require_permission('subscribe_to_users')
 def subscribe_user(request, username):
     """Subscribe to a user to follow all of his activities."""
     user = User.objects.get(username)

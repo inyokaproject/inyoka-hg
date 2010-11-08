@@ -156,7 +156,7 @@
   {%- if request.user.can('user_edit') %}
     <a href="{{ href('admin', 'users', 'edit', user.username) }}">Nutzer bearbeiten</a>
   {%- endif %}
-  {%- if True %}
+  {%- if request.user.can('subscribe_to_users') %}
     |
     {%- if is_subscribed %}
       <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe subscribe_user adminlink">abbestellen</a>
