@@ -53,7 +53,7 @@ class CustomizedPylibmcClient(Client):
     def decr(self, key, delta=1):
         """Set the delta value if there's no existing key."""
         try:
-            Client.incr(self, key, delta)
+            Client.decr(self, key, delta)
         except NotFound:
             Client.set(self, key, delta)
 
