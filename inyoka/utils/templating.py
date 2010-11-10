@@ -66,10 +66,11 @@ def populate_context_defaults(context):
 
     try:
         request = current_request._get_current_object()
+        user = request.user
     except RuntimeError:
         request = None
+        user = None
 
-    user = request.user
     reported = pms = suggestions = events = 0
     if request and user.is_authenticated:
         can = {'manage_topics': user.can('manage_topics'),
