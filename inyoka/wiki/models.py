@@ -105,7 +105,7 @@ from inyoka.portal.user import User
 
 
 # maximum number of bytes for metadata.  everything above is truncated
-MAX_METADATA = 2 << 15
+MAX_METADATA = 2 << 8
 
 
 class PageManager(models.Manager):
