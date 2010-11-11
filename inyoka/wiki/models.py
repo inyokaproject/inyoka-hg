@@ -997,6 +997,10 @@ class Page(models.Model):
         cur.close()
 
         for key, value in new_metadata:
+            # ignore keys that do not fetch into the column length.
+            # Most commonly such metadata entries are broken comments...
+            if len(key) > 30:
+                continue
             MetaData(page=self, key=key, value=value[:MAX_METADATA]).save()
 
         # searchindex
