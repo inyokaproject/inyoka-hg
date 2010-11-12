@@ -28,6 +28,20 @@ $(document).ready(function() {
     // Add auto completion to #user_query fields
     $('#user_query').autocomplete("/?__service__=admin.get_user_autocompletion", {
       delay: 40, maxItemsToShow: 10, limit: 10, minChars: 3});
-  })();
 
+    // various callbacks for user group editing
+    $('select[name="user_groups_joined"]').change(function() {
+      var field = $('select[name="user_groups_joined"]');
+      $('input[name="primary_group"]').val(field.find('option:selected').val());
+    });
+
+    $('a.delete_primary_group').click(function() {
+      $('input[name="primary_group"]').val("");
+      return false;
+    });
+
+    $('input[name="primary_group"]').autocomplete("/?__service__=admin.get_group_autocompletion", {
+      delay: 40, maxItemsToShow: 10, limit: 10, minChars: 1
+    });
+  })();
 });
