@@ -10,8 +10,10 @@
 
 $(document).ready(function() {
   (function() {
-    // create a WikiEditor instance for all signature fields
-    var signature = new WikiEditor('textarea[name="signature"]');
+    if (! $('textarea[name="signature"]').length == 0) {
+      // create a WikiEditor instance for all signature fields
+      var signature = new WikiEditor('textarea[name="signature"]');
+    }
 
     // Small helper to define a users group title
     $('input[name="group_titles"]').change(function() {
@@ -22,6 +24,10 @@ $(document).ready(function() {
       });
       $('#id_member_title').val(value);
     });
+
+    // Add auto completion to #user_query fields
+    $('#user_query').autocomplete("/?__service__=admin.get_user_autocompletion", {
+      delay: 40, maxItemsToShow: 10, limit: 10, minChars: 3});
   })();
 
 });
