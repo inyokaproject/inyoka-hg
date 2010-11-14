@@ -387,6 +387,7 @@ class PostMapperExtension(db.MapperExtension):
                         Forum.last_post_id == instance.id),
                 values={'last_post_id': new_last_post.id}
             ))
+            cache.delete('forum/forums/%s' % instance.topic.forum.slug)
 
         # decrement post_counts
         connection.execute(Topic.__table__.update(
