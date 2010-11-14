@@ -1355,7 +1355,7 @@ def confirm(request, action=None):
         'set_new_email': set_new_email,
         'reset_email': reset_email,
     }
-    data = request.REQUEST.get('data')
+    data = (request.REQUEST.get('data') or u'').strip()
     if not data:
         # print the form
         return {'action': action}
