@@ -66,19 +66,17 @@ def atom_feed(cache_key=None, available_counts=AVAILABLE_FEED_COUNTS):
             if cache_key is not None:
                 key = cache_key % kwargs
                 content = cache.get(key)
-                if content is not None:
-                    content_type = 'application/atom+xml; charset=utf-8'
-                    return HttpResponse(content, content_type=content_type)
+                if content is None:
+                    rv = f(*args, **kwargs)
+                    if not hasattr(rv, 'get_atom_response'):
+                        # ret is a HttpResponse object
+                        return rv
+                    content = rv.to_atom()
+                    cache.set(key, content, 600)
 
-            rv = f(*args, **kwargs)
-            if not hasattr(rv, 'get_atom_response'):
-                # ret is a HttpResponse object
-                return rv
+            content_type='application/atom+xml; charset=utf-8'
+            response = HttpResponse(content, content_type=content_type)
 
-            response = rv.get_atom_response()
-
-            if cache_key is not None:
-                cache.set(key, response.content, 600)
             return response
         return func
     return decorator
