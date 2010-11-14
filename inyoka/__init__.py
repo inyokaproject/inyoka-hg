@@ -111,6 +111,7 @@
 """
 import socket
 import os
+import locale
 from os.path import realpath, join, dirname
 from mercurial import ui as hgui
 from mercurial.localrepo import localrepository
@@ -145,6 +146,10 @@ def _bootstrap():
     # Socket timeouts are set globally within the whole application.
     # The value *must* be a floating point value.
     socket.setdefaulttimeout(10.0)
+
+    # We set the LC_ALL locale here so that we force the os.path functions
+    # to use a utf-8 encoding for bytecode encoding of unicode strings.
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
     return revision
 
