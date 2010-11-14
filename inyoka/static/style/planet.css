@@ -13,40 +13,21 @@
 
 div.articles .day > h2 {
   font-size: 2.4em;
-  margin: 0.4em 0 0 0;
+  margin: 0;
 }
 
 
 div.articles div.article {
   margin: 1.5em 0 1.5em 0;
-  padding: 0;
-  background: url(../img/planet/bubble-left.png) repeat-y 136px top;
-  position: relative;
-  top: 0px;
-  left: 0px;
-
+  padding: 1px 0 0 0;
 }
 
-div.articles div.article div.author {
-  background: url(../img/planet/bubble-nipple.png) no-repeat right top;
-  float: left;
-  margin: 30px 0 0 0;
-  padding: 0 20px 30px 0;
-  text-align: center;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 120px;
-}
 
-div.articles div.article div.author a {
-  color: #888;
-  text-decoration: none;
-}
 
 div.articles div.article div.contents {
-  background: url(../img/planet/bubble-top-left.png) no-repeat left top;
-  margin-left: 136px;
+  border: 1px solid #DDD;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
 }
 
 div.articles div.article div.contents div.post .hidden {
@@ -54,15 +35,28 @@ div.articles div.article div.contents div.post .hidden {
 }
 
 div.articles div.article div.head {
-  background: url(../img/planet/bubble-top.png) repeat-x left top;
-  margin: 0 0 0 12px;
+  background: url(../img/planet/bubble-nipple.png) no-repeat 120px bottom;
+  position: relative;
+  top: 2px;
+  height: 110px;
+}
+
+div.articles div.article div.head img {
+  float: left;
+  margin-left: 30px;
+}
+
+div.articles div.article div.head p {
+  margin-left: 160px
+}
+
+div.articles div.article div.head p a {
+  color: #888;
+  text-decoration: none;
 }
 
 div.articles div.article div.head h3 {
-  background: url(../img/planet/bubble-top-right.png) no-repeat right top;
-  margin: 0;
-  padding: 20px 0 0 18px;
-  font-family: 'Trebuchet MS', sans-serif;
+  margin: 0 0 0 160px;
   font-size: 1.6em;
   font-weight: normal;
 }
@@ -72,8 +66,11 @@ div.articles div.article div.head h3 a {
   text-decoration: none;
 }
 
+div.articles div.article div.head h3 a.headerlink {
+  color: #999;
+}
+
 div.articles div.article div.text {
-  background: url(../img/planet/bubble-right.png) repeat-y right top;
   padding: 10px 30px 0 30px;
 }
 
@@ -88,13 +85,11 @@ div.articles div.article p {
 }
 
 div.articles div.article div.meta {
-  background: url(../img/planet/bubble-bottom.png) repeat-x left bottom;
   margin-right: 20px;
   clear: right;
 }
 
 div.articles div.article div.meta p {
-  background: url(../img/planet/bubble-bottom-left.png) no-repeat left bottom;
   text-align: right;
   font-size: 0.9em;
   padding: 10px 10px 20px 0;
@@ -109,7 +104,10 @@ div.articles div.article div.meta p a:hover {
 }
 
 div.articles div.article div.post {
-  background: url(../img/planet/bubble-bottom-right.png) no-repeat right bottom;
+  background: #F8F8F8;
+  border: 1px solid #BFBFBF;
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
 }
 
 /* we use last/first-child everywhere to not display crap on clients
