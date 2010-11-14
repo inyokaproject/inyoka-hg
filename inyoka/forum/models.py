@@ -508,28 +508,28 @@ class Forum(db.Model):
         """
         Return a list of the latest topics in this forum. If no count is
         given the default value from the settings will be used and the whole
-        output will be cached (highly recommended!).
+        output will be partly cached (highly recommended!).
 
         The returned object do not include hidden objects!
         """
         limit = max(settings.FORUM_TOPIC_CACHE, count)
         key = 'forum/latest_topics/%d' % self.id
-        topics = (limit == 100) and cache.get(key) or None
+        topic_ids = (limit == 100) and cache.get(key) or None
 
-        if not topics:
-            topics = Topic.query \
-                .options(db.eagerload('author'),
-                         db.eagerload('last_post'),
-                         db.eagerload('last_post.author')) \
+        if not topic_ids:
+            topic_ids = db.session.query(Topic.id) \
                 .filter(db.and_(Topic.forum_id == self.id, Topic.hidden == False)) \
                 .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
                 .limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
-                topics = topics.all()
-                cache.set(key, topics, 300)
-        else:
-            merge = db.session.merge
-            topics = [merge(obj, load=False) for obj in topics]
+                topic_ids = [t.id for t in topic_ids.all()]
+                cache.set(key, topic_ids, 300)
+
+        topics = Topic.query \
+                .options(db.eagerload('author'),
+                         db.eagerload('last_post'),
+                         db.eagerload('last_post.author')) \
+                .filter(Topic.id.in_(topic_ids)).all()
 
         return (count < limit) and topics[:count] or topics
 
