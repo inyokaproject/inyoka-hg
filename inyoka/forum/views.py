@@ -162,23 +162,22 @@ def forum(request, slug, page=1):
                               .filter_by(forum_id=forum.id) \
                               .order_by(Topic.sticky.desc(), Topic.last_post_id.desc())
         pagination = Pagination(request, topic_ids, page, TOPICS_PER_PAGE, url_for(forum))
-        required_ids = [obj.id for obj in pagination.objects]
-        topics = Topic.query.filter_overview(forum.id).filter(Topic.id.in_(required_ids)).all()
 
         #TODO: investigate if it makes sense to store the topic-count of all forums
         #      in the global cache and only increment and decrement it
         ctx = {
-            'topics':           topics,
+            'topic_ids':        [obj.id for obj in pagination.objects],
             'topic_count':      pagination.total
         }
 
         if page < CACHE_PAGES_COUNT:
             cache.set(key, ctx, 60)
     else:
-        merge = db.session.merge
-        ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
-        pagination = Pagination(request, ctx['topics'], page, TOPICS_PER_PAGE,
+        pagination = Pagination(request, ctx['topic_ids'], page, TOPICS_PER_PAGE,
                                 url_for(forum), total=ctx['topic_count'])
+
+    topics = Topic.query.filter_overview(forum.id) \
+                                        .filter(Topic.id.in_(ctx['topic_ids'])).all()
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
@@ -196,7 +195,7 @@ def forum(request, slug, page=1):
         merge = db.session.merge
         supporters = [merge(obj, load=False) for obj in supporters]
 
-    ctx.update({
+    context = {
         'forum':         forum,
         'subforums':     filter_invisible(request.user, forum.children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
@@ -204,11 +203,11 @@ def forum(request, slug, page=1):
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
         'supporters':    supporters,
+        'topics':        topics,
         'pagination_left':  pagination.generate(),
-        'pagination_right': pagination.generate('right'),
-        #'quickjump':     quickjump(request.user),
-    })
-    return ctx
+        'pagination_right': pagination.generate('right')}
+    context.update(ctx)
+    return context
 
 
 @transaction.autocommit
