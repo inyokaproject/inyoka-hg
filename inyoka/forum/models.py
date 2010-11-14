@@ -1244,8 +1244,6 @@ class Attachment(db.Model):
 
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             name = os.path.basename(get_new_unique_filename(
                 name, path=new_abs_path, length=100-len(new_path) - len(os.sep)
             ))
@@ -1266,8 +1264,6 @@ class Attachment(db.Model):
     def size(self):
         """The size of the attachment in bytes."""
         fn = self.filename
-        if isinstance(fn, unicode):
-            fn = fn.encode('utf-8')
         if not os.path.exists(fn):
             return 0.0
         stat = os.stat(fn)

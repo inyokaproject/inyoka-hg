@@ -1481,7 +1481,7 @@ def monitoring(request, page):
     database = get_mdb_database(True)
     collection = database['errors']
 
-    page = int(page) if page is not None and page.isdigit() else 1
+    page = int(page) if (page is not None and page.isdigit()) else 1
 
     # ensure the indexes exists
     collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
