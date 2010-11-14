@@ -32,23 +32,19 @@
       <h2>{{ day.date|dateformat }}</h2>
       {% for article in day.articles %}
       <div class="article" id="article_{{ article.id }}">
-        <div class="author">
+        <div class="head">
           <a href="{{ article.blog|url|e }}">
             <img src="{{ article.blog.icon_url|e }}" alt="" /><br />
-            {{ article.blog.name|e }}
           </a>
+          <p><a href="{{ article.blog|url|e }}">{{ article.blog.name|e }}</a> {{ article.pub_date|specificdatetimeformat(true) }}</p>
+          <h3><a href="{{ article|url|e }}">{{ article.title }}</a><a class="headerlink" href="#article_{{ article.id }}">¶</a></h3>
         </div>
         <div class="contents">
           <div class="post{% if article.hidden %} hidden{% endif %}">
-            <div class="head">
-              <h3><a href="{{ article|url|e }}">{{ article.title }}</a></h3>
-            </div>
             <div class="text">{{ article.text }}</div>
             <div class="meta">
               <p>
-                {{ article.pub_date|specificdatetimeformat(true) }} |
-		<a href="#article_{{ article.id }}">#</a> |
-		<a href="{{ article|url|e }}">Permalink</a>
+		            <a href="{{ article|url|e }}">Permalink</a>
                 {% if USER.can('blog_edit') %}
                   |{% if article.hidden and article.hidden_by %} Versteckt von: <a href="{{ article.hidden_by|url }}">{{ article.hidden_by.username|e }}</a> | {% endif %}
                   <a class="adminlink" href="{{ article|url('hide')|e }}">{% if article.hidden %}wiederherstellen{% else %}verstecken{% endif %}</a>
