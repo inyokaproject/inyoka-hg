@@ -22,6 +22,7 @@ from itertools import groupby
 from operator import attrgetter
 
 from django.core.files.storage import default_storage
+from django.utils.encoding import force_unicode
 
 from inyoka.conf import settings
 from inyoka.utils import magic
@@ -1360,7 +1361,7 @@ class Attachment(db.Model):
             contents = self.contents
             if contents is not None:
                 return u'<div class="code">%s</div>' %\
-                    highlight_code(contents.decode('utf-8'), mimetype=self.mimetype)
+                    highlight_code(force_unicode(contents), mimetype=self.mimetype)
 
         return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
             url, self.mimetype, self.comment, self.name)
