@@ -374,18 +374,19 @@ class PostMapperExtension(db.MapperExtension):
                 values={'last_post_id': new_last_post.id}
             ))
 
-        # we cannot loop over all posts in the forum so we cheat a bit
-        # with selecting the last post from the current topic.
-        # Everything else would kill the server...
-        new_last_post = Post.query.filter(db.and_(
-            Post.id != instance.id,
-            Topic.id == instance.topic.id
-        )).order_by(Post.id.desc()).first()
-        connection.execute(Forum.__table__.update(
-            db.and_(Forum.id.in_(forums_to_root_ids),
-                    Forum.last_post_id == instance.id),
-            values={'last_post_id': new_last_post.id}
-        ))
+        if instance.id == instance.topic.forum.last_post_id:
+            # we cannot loop over all posts in the forum so we cheat a bit
+            # with selecting the last post from the current topic.
+            # Everything else would kill the server...
+            new_last_post = Post.query.filter(db.and_(
+                Post.id != instance.id,
+                Topic.id == instance.topic.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Forum.__table__.update(
+                db.and_(Forum.id.in_(forums_to_root_ids),
+                        Forum.last_post_id == instance.id),
+                values={'last_post_id': new_last_post.id}
+            ))
 
         # decrement post_counts
         connection.execute(Topic.__table__.update(
