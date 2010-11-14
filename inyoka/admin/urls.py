@@ -61,7 +61,7 @@ urlpatterns = patterns('inyoka.admin.views',
     (r'^groups/edit/(?P<name>.*)/$', 'group_edit'),
     (r'^groups/new/$', 'group_edit'),
     (r'^styles/$', 'styles'),
-    (r'^monitoring/$', 'monitoring'),
+    (r'^monitoring/(?P<page>\d+/)?$', 'monitoring'),
 )
 
 handler404 = 'inyoka.admin.views.not_found'

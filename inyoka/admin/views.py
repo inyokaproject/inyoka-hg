@@ -1476,10 +1476,12 @@ def styles(request):
 
 @require_permission('manage_stats')
 @templated('admin/monitoring.html')
-def monitoring(request):
+def monitoring(request, page):
     from pymongo import DESCENDING, ASCENDING
     database = get_mdb_database(True)
     collection = database['errors']
+
+    page = int(page) if page is not None and page.isdigit() else 1
 
     # ensure the indexes exists
     collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
@@ -1492,7 +1494,7 @@ def monitoring(request):
             return HttpResponseRedirect(href('admin', 'monitoring'))
 
     all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
-                           .sort('created', DESCENDING)
+                           .sort('created', DESCENDING).skip(page-1).limit(10)
     error_count = collection.count()
     closed = collection.find({'status': 'close'}).count()
     reopened = collection.find({'status': 'reopen'}).count()
@@ -1505,5 +1507,6 @@ def monitoring(request):
     return {
         'count': error_count,
         'stats': stats,
-        'errors': all_errors
+        'errors': all_errors,
+        'page': page,
     }
