@@ -984,11 +984,13 @@ def first_unread_post(request, topic_slug):
     """
     Redirect the user to the first unread post in a special topic.
     """
-    topic_id, forum_id = db.session.query(Topic.id, Topic.forum_id) \
-                                   .filter(Topic.slug==topic_slug).first()
-    if not topic_id or not forum_id:
+    unread = db.session.query(Topic.id, Topic.forum_id) \
+                       .filter(Topic.slug==topic_slug).first()
+    if not unread:
         # there's no topic with such a slug
         raise PageNotFound()
+
+    topic_id, forum_id = unread
 
     data = request.user._readstatus.data.get(forum_id, [None, []])
     query = db.session.query(Post.id).filter(Post.topic_id == topic_id)
