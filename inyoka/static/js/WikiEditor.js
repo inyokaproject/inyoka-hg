@@ -174,18 +174,18 @@
     button('external-link', 'Externer Link', insert('[%s]',
            'http://www.example.org/'), ['wiki', 'forum', 'small'], help("[www.example.com]")),
     button('user-link', 'Benutzerlink', insert('[user:%s:]', 'Benutzername'),
-           ['wiki', 'forum'], help("[user:Beispiel:]")),
+           ['forum'], help("[user:Beispiel:]")),
     button('quote', 'Auswahl zitieren', function(evt) {
       var selection = this.getSelection();
       if (selection.length)
         this.setSelection(this.quoteText(selection));
-    }, ['wiki', 'forum'], help("Auswahl zitieren")),
+    }, ['forum'], help("Auswahl zitieren")),
     button('picture', 'Bild', insert('[[Bild(%s)]]', 'Bildname'),
            ['wiki', 'forum'], help("[[Bild(Bildname)]]")),
     button('pre', 'Codeblock', insert('{{{\n%s\n}}}', 'Code'),
            ['wiki', 'forum'], help("{{{ Code }}}")),
     (function(editor) {
-      if (editor.profile == 'small') {
+      if (editor.profile == 'small' || editor.profile == 'wiki') {
         return;
       }
       var result = $('<div />');
@@ -244,14 +244,6 @@
       });
       return result;
     }),
-    button('date', 'Datum', function(evt) {
-      this.insertTag('[[Datum(%s)]]', formatISO8601(new Date()));
-    }, ['wiki'], help("[[Datum(DATUM)]]")),
-    button('sig', 'Signatur', function(evt) {
-      this.insertText(' --- ' + (this.username ?
-        '[user:' + this.username.replace(':', '::') + ':], ' : '') +
-        '[[Datum(' + formatISO8601(new Date()) + ')]]');
-    }, ['wiki'], help("Signatur einfügen")),
     dropdown('headline', 'Überschrift', [
         item('=', 'Überschrift: Stufe 1'),
         item('==', 'Überschrift: Stufe 2'),
@@ -265,40 +257,34 @@
           this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
         evt.target.selectedIndex = 0;
     }, ['wiki'], help("= Überschrift =")),
-    dropdown('macro', 'Makro', [
-        item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
-        item('[[TagListe(%s)]]', 'Tag-Liste'),
-        item('[[Anhänge(%s)]]', 'Anhänge'),
-        item('[[Seitenzahl(%s)]]', 'Seitenzahl'),
+    dropdown('macro', 'Textbausteine', [
+        item('[[Vorlage(InArbeit, %s)]]', 'in Arbeit'),
         item('[[Inhaltsverzeichnis(%s)]]', 'Inhaltsverzeichnis'),
-        item('[[Einbinden(%s)]]', 'Seite einbinden'),
-        item('[[Seitenliste(%s)]]', 'Seitenliste'),
-        item('[[Seitenname(%s)]]', 'Aktueller Seitenname'),
-        item('[[Weiterleitungen(%s)]]', 'Weiterleitungen'),
-        item('[[ÄhnlicheSeiten(%s)]]', 'Ähnliche Seiten'),
-        item('[[TagWolke(%s)]]', 'Tag-Wolke'),
-        item('[[LetzteÄnderungen(%s)]]', 'Letzte Änderungen'),
-        item('[[VerwaisteSeiten(%s)]]', 'Verwaiste Seiten'),
-        item('[[NeueSeiten(%s)]]', 'Neue Seiten')],
-      function(evt) {
-        if (evt.target.value.length > 0)
-          this.insertTag(evt.target.value, '');
-        evt.target.selectedIndex = 0;
-    }, ['wiki'], help("Makros einfügen")),
-    dropdown('template', 'Vorlage', [
-        item('[[Vorlage(Tasten, %s)]]', 'Tasten'),
-        item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
-        item('{{{#!vorlage Hinweis\n%s\n}}}', 'Hinweis'),
-        item('{{{#!vorlage Warnung\n%s\n}}}', 'Warnung'),
         item('[[Vorlage(Getestet, %s)]]', 'Getestet'),
-        item('[[Vorlage(Fremd, Paket, "%s")]]', 'Fremdpakete-Warnung'),
+        item('[[Vorlage(Paketinstallation, %s)]]', 'Paketinstallation'),
+        item('{{{#!vorlage Befehl\n%s\n}}}', 'Befehl'),
+        item('[[Vorlage(PPA, %s)]]', 'PPA-Vorlage'),
+        item('{{{#!vorlage Hinweis\n%s\n}}}', 'Hinweis'),
         item('[[Vorlage(Fremd, Quelle, "%s")]]', 'Fremdquelle-Warnung'),
-        item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info')],
+        item('{{{#!vorlage Warnung\n%s\n}}}', 'Warnung'),
+        item('{{{#!vorlage Experten\n%s\n}}}', 'Experten-Info')
+      ],
       function(evt) {
         if (evt.target.value.length > 0)
           this.insertTag(evt.target.value, '');
         evt.target.selectedIndex = 0;
-    }, ['wiki'], help("Vorlagen einfügen")),
+    }, ['wiki'], help("Textbausteine einfügen")),
+    dropdown('textformat', 'Textformat', [
+      item("'''Verzeichnisse'''", 'Verzeichnisse'),
+      item("''\"Menü -> Untermenü -> Menübefehl\"''", 'Menüs'),
+      item("'''Dateien'''", 'Dateien'),
+      item('`Befehl`', 'Befehl')
+    ],
+    function(evt) {
+        if (evt.target.value.length > 0)
+          this.insertTag(evt.target.value, '');
+        evt.target.selectedIndex = 0;
+    }, ['wiki'], help("Textformat einfügen")),
     button('shrink', 'Eingabefeld verkleinern', function(evt) {
       var height = this.textarea.height() - 50;
       this.textarea.height((height >= 100) ? height : 100).focus();
