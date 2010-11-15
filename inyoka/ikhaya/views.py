@@ -24,6 +24,7 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.portal.user import User
+from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
@@ -259,13 +260,41 @@ def suggestion_delete(request, suggestion):
                 flash('Diesen Vorschlag gibt es nicht.', False)
                 return HttpResponseRedirect(href('ikhaya', 'suggestions'))
             if request.POST.get('note'):
-                args = {
-                    'title':    s.title,
-                    'username': request.user.username,
-                    'note':     request.POST['note']
-                }
+                args = {'title':    s.title,
+                        'username': request.user.username,
+                        'note':     request.POST['note']}
                 send_notification(s.author, u'suggestion_rejected',
                     u'Ikhaya-Vorschlag gelöscht', args)
+
+                # Send the user a private message
+                msg = PrivateMessage()
+                msg.author = request.user
+                msg.subject = u'Ikhaya-Vorschlag gelöscht'
+                msg.text = render_template('mails/suggestion_rejected.txt', args)
+                msg.pub_date = datetime.utcnow()
+                recipients = [s.author]
+                msg.send(recipients)
+                # send notification
+                for recipient in recipients:
+                    entry = PrivateMessageEntry.objects \
+                        .filter(message=msg, user=recipient)[0]
+                    if 'pm_new' in recipient.settings.get('notifications',
+                                                          ('pm_new',)):
+                        text = render_template('mails/new_pm.txt', {
+                            'user':     recipient,
+                            'sender':   request.user,
+                            'subject':  msg.subject,
+                            'entry':    entry,
+                        })
+                        send_notification(recipient, 'new_pm', u'Neue private '
+                                          u'Nachricht von %s: %s' %
+                                          (request.user.username, msg.subject), {
+                                              'user':     recipient,
+                                              'sender':   request.user,
+                                              'subject':  msg.subject,
+                                              'entry':    entry,
+                                          })
+
             cache.delete('ikhaya/suggestion_count')
             s.delete()
             flash(u'Der Vorschlag wurde gelöscht.', True)
