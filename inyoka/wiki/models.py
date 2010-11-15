@@ -1232,11 +1232,7 @@ class Attachment(models.Model):
     @cached_property
     def mimetype(self):
         """The mimetype of the attachment."""
-        # inyoka.utils.magic isn't unicode aware
-        fn = self.file.path
-        if isinstance(fn, unicode):
-            fn = fn.encode('utf-8')
-        return magic.from_file(fn, mime=True) or \
+        return magic.from_file(self.file.path, mime=True) or \
                 'application/octet-stream'
 
     @property
