@@ -180,6 +180,10 @@ def do_missing_page(request, name, _page=None):
         else:
             create_link = None
 
+    not_finished = Page.objects.get_by_name(join_pagename(
+        storage['wiki_newpage_root'], name
+    ))
+
     return {
         'page':         _page,
         'page_name':    name,
@@ -193,7 +197,8 @@ def do_missing_page(request, name, _page=None):
             'name':     x.name,
             'title':    x.title
         } for x in sorted(Page.objects.find_by_metadata('X-Link', name),
-                          key=lambda x: x.title.lower())]
+                          key=lambda x: x.title.lower())],
+        'not_finished': not_finished
     }
 
 
