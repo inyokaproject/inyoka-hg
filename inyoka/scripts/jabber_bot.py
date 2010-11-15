@@ -47,8 +47,8 @@ class Bot(object):
             self.client.connect(use_srv=srv)
             self.client.auth(jid.getNode(), password, jid.resource)
             self.client.sendInitPresence(requestRoster=False)
-        except Exception, e:
-            msg = 'Could not connect: %s' % e
+        except Exception, exc:
+            msg = 'Could not connect: %s' % exc
             if self.debug:
                 print log(msg)
             else:
@@ -97,8 +97,8 @@ class Bot(object):
                 'http://www.w3.org/1999/xhtml',
                 xhtml
             ))
-        except ExpatError, e:
-            raise Fault(1, str(e))
+        except ExpatError, exc:
+            raise Fault(1, str(exc))
 
         buffer = []
 
@@ -176,8 +176,8 @@ def main():
         opts, args = getopt(sys.argv[1:], 'j:p:dh', ['jid=', 'password=',
                                                      'debug', 'auto-reload',
                                                      'help', 'no-srv'])
-    except GetoptError, e:
-        return usage(unicode(e))
+    except GetoptError, exc:
+        return usage(unicode(exc))
     hostname = args and args[0] or None
     jid = password = None
     debug = auto_reload = False

@@ -22,6 +22,7 @@ from itertools import groupby
 from operator import attrgetter
 
 from django.core.files.storage import default_storage
+from django.utils.encoding import force_unicode
 
 from inyoka.conf import settings
 from inyoka.utils import magic
@@ -98,14 +99,14 @@ UBUNTU_DISTROS_LEGACY = {
     'xubuntu': 'Xubuntu'
 }
 
-UBUNTU_DISTROS = {
-    'keine': 'Keine Angabe',
-    'edubuntu': 'Edubuntu',
-    'kubuntu': 'Kubuntu',
-    'server': 'Server',
-    'ubuntu': 'Ubuntu',
-    'xubuntu': 'Xubuntu'
-}
+UBUNTU_DISTROS = [
+    ('keine', 'Keine Angabe'),
+    ('edubuntu', 'Edubuntu'),
+    ('kubuntu', 'Kubuntu'),
+    ('server', 'Server'),
+    ('ubuntu', 'Ubuntu'),
+    ('xubuntu', 'Xubuntu')
+]
 
 
 def fix_plaintext(text):
@@ -374,18 +375,20 @@ class PostMapperExtension(db.MapperExtension):
                 values={'last_post_id': new_last_post.id}
             ))
 
-        # we cannot loop over all posts in the forum so we cheat a bit
-        # with selecting the last post from the current topic.
-        # Everything else would kill the server...
-        new_last_post = Post.query.filter(db.and_(
-            Post.id != instance.id,
-            Topic.id == instance.topic.id
-        )).order_by(Post.id.desc()).first()
-        connection.execute(Forum.__table__.update(
-            db.and_(Forum.id.in_(forums_to_root_ids),
-                    Forum.last_post_id == instance.id),
-            values={'last_post_id': new_last_post.id}
-        ))
+        if instance.id == instance.topic.forum.last_post_id:
+            # we cannot loop over all posts in the forum so we cheat a bit
+            # with selecting the last post from the current topic.
+            # Everything else would kill the server...
+            new_last_post = Post.query.filter(db.and_(
+                Post.id != instance.id,
+                Topic.id == instance.topic.id
+            )).order_by(Post.id.desc()).first()
+            connection.execute(Forum.__table__.update(
+                db.and_(Forum.id.in_(forums_to_root_ids),
+                        Forum.last_post_id == instance.id),
+                values={'last_post_id': new_last_post.id}
+            ))
+            cache.delete('forum/forums/%s' % instance.topic.forum.slug)
 
         # decrement post_counts
         connection.execute(Topic.__table__.update(
@@ -508,30 +511,30 @@ class Forum(db.Model):
         """
         Return a list of the latest topics in this forum. If no count is
         given the default value from the settings will be used and the whole
-        output will be cached (highly recommended!).
+        output will be partly cached (highly recommended!).
+
+        The returned object do not include hidden objects!
         """
         limit = max(settings.FORUM_TOPIC_CACHE, count)
         key = 'forum/latest_topics/%d' % self.id
-        topics = (limit == 100) and cache.get(key) or None
+        topic_ids = (limit == 100) and cache.get(key) or None
 
-        if not topics:
-            topics = Topic.query \
-                .options(db.eagerload('author'),
-                         db.eagerload('last_post'),
-                         db.eagerload('last_post.author')) \
-                .filter_by(forum_id=self.id) \
+        if not topic_ids:
+            topic_ids = db.session.query(Topic.id) \
+                .filter(db.and_(Topic.forum_id == self.id, Topic.hidden == False)) \
                 .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
                 .limit(limit)
             if limit == settings.FORUM_TOPIC_CACHE:
-                topics = topics.all()
-                cache.set(key, topics, 300)
-        else:
-            merge = db.session.merge
-            topics = [merge(obj, load=False) for obj in topics]
+                topic_ids = [t.id for t in topic_ids.all()]
+                cache.set(key, topic_ids, 300)
+
+        topics = Topic.query \
+                .options(db.eagerload('author'),
+                         db.eagerload('last_post'),
+                         db.eagerload('last_post.author')) \
+                .filter(Topic.id.in_(topic_ids)).all()
 
         return (count < limit) and topics[:count] or topics
-
-    latest_topics = property(get_latest_topics)
 
     def get_read_status(self, user):
         """
@@ -947,6 +950,11 @@ class Post(db.Model):
         Change the text of the post. If the post is already stored in the
         database, create a post revision containing the new text.
         If the text has not changed, return.
+
+        .. note::
+
+            This method does neither flush or commit the created state.
+            You need to do that after :method:`edit` was called.
         """
         if self.text == text and self.is_plaintext == is_plaintext:
             return
@@ -1237,8 +1245,6 @@ class Attachment(db.Model):
 
         for row in attachments:
             id, old_fn, name, comment, pid, mime = row
-            if isinstance(name, unicode):
-                name = name.encode('utf-8')
             name = os.path.basename(get_new_unique_filename(
                 name, path=new_abs_path, length=100-len(new_path) - len(os.sep)
             ))
@@ -1261,8 +1267,6 @@ class Attachment(db.Model):
         fn = self.filename
         if not os.path.exists(fn):
             return 0.0
-        if isinstance(fn, unicode):
-            fn = fn.encode('utf-8')
         stat = os.stat(fn)
         return stat.st_size
 
@@ -1357,7 +1361,7 @@ class Attachment(db.Model):
             contents = self.contents
             if contents is not None:
                 return u'<div class="code">%s</div>' %\
-                    highlight_code(contents.decode('utf-8'), mimetype=self.mimetype)
+                    highlight_code(force_unicode(contents), mimetype=self.mimetype)
 
         return u'<a href="%s" type="%s" title="%s">%s herunterladen</a>' % (
             url, self.mimetype, self.comment, self.name)

@@ -211,7 +211,7 @@ def convert_wiki():
                     try:
                         new_page = InyokaPage.objects.create(name, text=text,
                                                              **kwargs)
-                    except IntegrityError, e:
+                    except IntegrityError, exc:
                         name = u'DuplicatePages/%s' % name
                         new_page = InyokaPage.objects.create(name, text=text,
                                                              **kwargs)
@@ -339,14 +339,14 @@ def convert_users():
             data['pk'] = 1
         try:
             u = User.objects.create(**data)
-        except IntegrityError, e:
+        except IntegrityError, exc:
             # same email adress, forbidden
-            if e.args[1].endswith('key 3'):
+            if exc.args[1].endswith('key 3'):
                 data['email'] = "(%d)%s" % (row.user_id, data['email'])
                 u = User.objects.create(**data)
                 mail_error.append(row.user_id)
             else:
-                print e
+                print exc
                 sys.exit(1)
         connection.queries = []
 

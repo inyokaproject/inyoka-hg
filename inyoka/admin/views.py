@@ -675,12 +675,12 @@ def users(request):
         try:
             try:
                 user = User.objects.get(name)
-            except User.DoesNotExist, e:
+            except User.DoesNotExist, exc:
                 # fallback to email
                 if '@' in name:
                     user = User.objects.get(email__iexact=name)
                 else:
-                    raise e
+                    raise exc
         except User.DoesNotExist:
             flash(u'Der Benutzer „%s“ existiert nicht.'
                   % escape(name))
@@ -1359,8 +1359,16 @@ def event_edit(request, id=None):
             else:
                 event.date = data['date']
                 event.time = None
-            if data['duration']:
-                event.duration = convert(data['duration'])
+            if data['endtime']:
+                d = convert(date_time_to_datetime(
+                    data['enddate'] or data['date'],
+                    data['endtime']
+                ))
+                event.enddate = d.date()
+                event.endtime = event.time and d.time()
+            else:
+                event.enddate = data['enddate'] or None
+                event.endtime = None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
@@ -1397,16 +1405,21 @@ def event_edit(request, id=None):
                 dt_date = event.date
                 time_ = None
 
-            # fix duration to user timezone
-            duration = datetime_to_timezone(event.duration)
-            if duration:
-                duration.replace(tzinfo=None)
+            if event.endtime is not None:
+                dt_end = datetime_to_timezone(date_time_to_datetime(
+                    event.enddate or event.date, event.endtime))
+                dt_enddate = dt_end.date()
+                endtime_ = dt_end.time()
+            else:
+                dt_enddate = event.enddate or None
+                endtime_ = None
 
             form = EditEventForm({
                 'name': event.name,
                 'date': dt_date,
                 'time': time_,
-                'duration': duration,
+                'enddate': dt_enddate,
+                'endtime': endtime_,
                 'description': event.description,
                 'location_town': event.location_town,
                 'location': event.location,
@@ -1463,10 +1476,14 @@ def styles(request):
 
 @require_permission('manage_stats')
 @templated('admin/monitoring.html')
-def monitoring(request):
+def monitoring(request, page):
     from pymongo import DESCENDING, ASCENDING
     database = get_mdb_database(True)
     collection = database['errors']
+
+    page = int(page) if (page is not None and page.isdigit()) else 1
+    if page == 0:
+        return HttpResponseRedirect(href('admin', 'monitoring'))
 
     # ensure the indexes exists
     collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
@@ -1479,7 +1496,7 @@ def monitoring(request):
             return HttpResponseRedirect(href('admin', 'monitoring'))
 
     all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
-                           .sort('created', DESCENDING)
+                           .sort('created', DESCENDING).skip(page-1).limit(10)
     error_count = collection.count()
     closed = collection.find({'status': 'close'}).count()
     reopened = collection.find({'status': 'reopen'}).count()
@@ -1492,5 +1509,6 @@ def monitoring(request):
     return {
         'count': error_count,
         'stats': stats,
-        'errors': all_errors
+        'errors': all_errors,
+        'page': page,
     }

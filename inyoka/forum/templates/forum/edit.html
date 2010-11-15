@@ -3,11 +3,11 @@
     ~~~~~~~~~~~~~~~
 
     This page shows displays a formular where the user can create either
-    create a new thread or write / edit a post. 
+    create a new thread or write / edit a post.
 
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
-    
+
 #}
 {% from 'macros.html' import render_form %}
 {%- extends 'forum/page.html' %}
@@ -69,14 +69,10 @@
     <dl>
       {%- if isnewtopic or isfirstpost %}
       {%- if not article %}
-      <dt>Titel:</dt>
-      <dd>{{ form.title }}{{ form.errors.title }}</dd>
-      <dt>Ubuntu-Version:</dt>
-      <dd>
+      <strong>Titel: </strong>{{ form.title }}{{ form.errors.title }}<p class="version_chooser">
         {{ form.ubuntu_distro }}{{ form.errors.ubuntu_distro }}
         {{ form.ubuntu_version }}{{ form.errors.ubuntu_version }}
-        <span id="version_info"></span>
-      </dd>
+        <span id="version_info"></span></p>
       {%- else %}
       <dd><input type="hidden" name="title" value="{{ article.name|e }}" /></dd>
       {%- endif %}
@@ -132,15 +128,10 @@
       <dd>
         {%- if attachments %}
         <ul>
-          <p>
-            <label for="id_new_filename">Neuer Name:</label>
-            {{ edit_attach_form.new_filename }}{{ edit_attach_form.errors.new_filename}}
-          </p>
           {%- for att in attachments %}
           <li>
             <a href="{{ att.get_absolute_url() }}">{{ att.name|e }}</a> - {{ att.size|filesizeformat(true) }}
             <button type="submit" name="delete_attachment" value="{{ att.id }}">Löschen</button>
-            <button type="submit" name="rename_attachment" value="{{ att.id }}">Umbenennen</button>
           </li>
           {%- endfor %}
         </ul>
@@ -157,13 +148,10 @@
         <p><input type="submit" value="Anhang hochladen" name="attach" /></p>
       </dd>
       {%- endif %}
-      <dt class="collapse">Optionen:</dt>
       {%- if can_sticky and (isnewtopic or isfirstpost) %}
+      <dt>Optionen:</dt>
       <dd>{{ form.sticky }} <label for="id_sticky">Thema soll „klebrig“ sein</label></dd>
       {%- endif %}
-      <dd>{{ form.is_plaintext }} <label for="id_is_plaintext">Beitrag soll Plaintext sein</label>
-          <p class="note">Der Beitrag wird nicht mit unserer Inyoka-Syntax gerendert</p>
-      </dd>
     </dl>
     <p>
       <input type="hidden" name="attachments" id="id_attachments" value="
@@ -193,16 +181,11 @@
         output = $('<div class="preview" />')
       var preview = $('<div class="preview_wrapper" />')
         .hide()
-        .append('<h2 id="preview" class="title">Vorschau<\/h2>')
+        .append('<h2 id="preview" name="preview" class="title">Vorschau<\/h2>')
         .append(output);
 
       var after_rendering = function(data) {
-        var is_plaintext = $('input[name="is_plaintext"]')[0].checked;
-        if (is_plaintext) {
-          output.text(data);
-        } else {
-          output.html(data);
-        }
+        output.html(data);
         preview.slideDown('fast');
         $('body, input, textarea').css('cursor', 'auto');
         if (document.location.href.match(/#preview/))
@@ -214,14 +197,7 @@
       $('form input[name="preview"]').click(function() {
         $('body, input, textarea').css('cursor', 'progress');
         preview.hide();
-        var is_plaintext = $('input[name="is_plaintext"]')[0].checked;
-        if (is_plaintext) {
-          after_rendering(editor.val());
-        } else {
-          $.post('/?__service__=wiki.render_preview', {
-            text: editor.val()
-          }, after_rendering);
-        }
+        $.post('/?__service__=wiki.render_preview', {text: editor.val()}, after_rendering);
         return false;
       }).parent().parent().parent().append(preview);
     })();

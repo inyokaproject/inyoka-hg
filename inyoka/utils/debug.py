@@ -12,11 +12,12 @@ import re
 import sys
 from datetime import datetime
 from textwrap import wrap
-from werkzeug import escape, html
+from inyoka.utils.html import html, escape
 from django.db import connection
 from django.db.backends import util
 from django.utils import simplejson
 from django.utils.encoding import force_unicode
+from markupsafe import soft_unicode, Markup
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')
@@ -111,7 +112,7 @@ def render_query_table(request):
                 break
 
         qresult.append(render_string(TEMPLATE, {
-            'topic': '%s %s' % (escape(frame), 'from SA'),
+            'topic': u'%s %s' % (escape(frame), u'from SA'),
             'duration': (end - start) * 1000.0,
             'query': statement,
             'data': u'Parameters: %r' % (parameters,),
@@ -157,7 +158,7 @@ def render_query_table(request):
         qresult.append(render_string(TEMPLATE, {
             'topic': escape(u'%s from Cache' % ctx),
             'query': escape(query[1]),
-            'data': escape(query[2]) if isinstance(query[2], basestring) else query[0],
+            'data': force_unicode(escape(query[2]) if isinstance(query[2], basestring) else query[2]),
             'duration': 0,
             'odd': _odd
         }))
@@ -172,7 +173,7 @@ def render_query_table(request):
     result.extend(qresult)
     result.append(u'<li>%s</li></ul></div></div>' % stat)
 
-    result.append(html.script("""
+    result.append(html.script(u"""
         $(document).ready(function() {
             function toggleLog() {
                 $('#database_debug_table_inner').toggle();
@@ -188,21 +189,21 @@ def render_query_table(request):
         });
         """, type='text/javascript'))
 
-    return u'\n'.join(result)
+    return Markup(u'\n'.join(result))
 
 
 def inject_query_info(request, response):
     """Injects the collected queries into the response."""
 
-    debug_info = render_query_table(request).encode('utf-8')
+    debug_info = render_query_table(request)
 
-    body = response.content
+    body = response.content.decode('utf-8')
     match = _body_end_re.search(body)
     if match is not None:
         pos = match.start()
-        response.content = body[:pos] + debug_info + body[pos:]
+        response.content = u'%s%s%s' % (body[:pos], debug_info, body[pos:])
     else:
-        response.content = body + '<hr>' + debug_info
+        response.content = u'%s<hr>%s' % (body, debug_info)
     if 'content-length' in response:
         response['content-length'] = len(response.content)
 

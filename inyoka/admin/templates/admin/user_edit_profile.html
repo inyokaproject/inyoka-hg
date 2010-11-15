@@ -45,19 +45,4 @@
   <p>{{ form.signature }}</p>
   <p><input type="submit" value="Speichern" /></p>
 </form>
-<script type="text/javascript">
-  /* <![CDATA[ */
-  var signature = new WikiEditor('textarea[name="signature"]');
-
-  $('input[name="group_titles"]').change(function() {
-    var value = "";
-    $('input[name="group_titles"]:checked').each(function(i) {
-      if (i>0) value += " & ";
-      value += $(this).val();
-    });
-    $('#id_member_title').val(value);
-  });
-
-  /* ]]> */
-</script>
 {% endblock %}

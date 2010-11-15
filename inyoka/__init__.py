@@ -112,7 +112,6 @@
 import socket
 import os
 from os.path import realpath, join, dirname
-import inyoka
 from mercurial import ui as hgui
 from mercurial.localrepo import localrepository
 from mercurial.node import short as shorthex
@@ -126,17 +125,15 @@ os.environ['HGRCPATH'] = ''
 
 def _bootstrap():
     """Get the Inyoka version and store it."""
-    global INYOKA_REVISION
-
     # the path to the contents of the Inyoka module
-    conts = realpath(join(dirname(inyoka.__file__)))
+    conts = realpath(join(dirname(__file__)))
 
     # get the `INYOKA_REVISION` using the mercurial python api
     try:
         ui = hgui.ui()
         repository = localrepository(ui, join(conts, '..'))
         ctx = repository['tip']
-        INYOKA_REVISION = '%(num)s:%(id)s' % {
+        revision = '%(num)s:%(id)s' % {
             'num': ctx.rev(), 'id': shorthex(ctx.node())
         }
     except TypeError:
@@ -149,6 +146,8 @@ def _bootstrap():
     # The value *must* be a floating point value.
     socket.setdefaulttimeout(10.0)
 
+    return revision
 
-_bootstrap()
+
+INYOKA_REVISION = _bootstrap()
 del _bootstrap

@@ -1141,11 +1141,9 @@ def group(request, name, page=1):
     }
 
 
-@templated('portal/usermap.html')
 def usermap(request):
-    return {
-        'apikey':       settings.GOOGLE_MAPS_APIKEY,
-    }
+    flash(u'Die Benutzerkarte wurde vorrübergehend deaktiviert.')
+    return HttpResponseRedirect(href('portal'))
 
 
 app_feed_forms = {
@@ -1266,8 +1264,16 @@ def event_new(request):
             else:
                 event.date = data['date']
                 event.time = None
-            if data['duration']:
-                event.duration = convert(data['duration'])
+            if data['endtime']:
+                d = convert (date_time_to_datetime(
+                    data['enddate'] or event.date,
+                    data['endtime']
+                ))
+                event.enddate = d.date()
+                event.endtime = event.time and d.time()
+            else:
+                event.enddate = data['enddate'] or None
+                event.endtime = None
             event.description = data['description']
             event.author = request.user
             event.location = data['location']
@@ -1276,7 +1282,7 @@ def event_new(request):
                 event.location_lat = data['location_lat']
                 event.location_long = data['location_long']
             event.save()
-            cache.inc('ikhaya/event_count')
+            cache.delete('ikhaya/event_count')
             flash(u'Die Veranstaltung wurde gespeichert. Er wird demnächst von einem Moderator freigeschaltet.', True)
             event = Event.objects.get(id=event.id) # get truncated slug
             return HttpResponseRedirect(url_for(event))
@@ -1349,7 +1355,7 @@ def confirm(request, action=None):
         'set_new_email': set_new_email,
         'reset_email': reset_email,
     }
-    data = request.REQUEST.get('data')
+    data = request.REQUEST.get('data', u'').strip()
     if not data:
         # print the form
         return {'action': action}

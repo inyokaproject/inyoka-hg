@@ -29,6 +29,9 @@ class SubscriptionManager(models.Manager):
     """
 
     def user_subscribed(self, user, topic=None, forum=None, wiki_page=None):
+        if user.is_anonymous:
+            return False
+
         if topic is not None:
             column = 'topic_id'
             if isinstance(topic, int):
@@ -390,6 +393,8 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     date = models.DateField(db_index=True)
     time = models.TimeField(blank=True, null=True) # None -> whole day
+    enddate = models.DateField(blank=True, null=True) # None
+    endtime = models.TimeField(blank=True, null=True) # None -> whole day
     description = models.TextField(blank=True)
     author = models.ForeignKey(User)
     location = models.CharField(max_length=25, blank=True)
@@ -398,7 +403,6 @@ class Event(models.Model):
                                      blank=True, null=True)
     location_long = models.FloatField('Koordinaten (Länge)',
                                       blank=True, null=True)
-    duration = models.DateTimeField(blank=True, null=True)
     visible = models.BooleanField(default=False)
 
 
@@ -427,6 +431,7 @@ class Event(models.Model):
         self.slug = find_next_django_increment(Event, 'slug', name, stripdate=True)
         super(self.__class__, self).save(force_insert, force_update)
         cache.delete('ikhaya/event/%s' % self.id)
+        cache.delete('ikhaya/event_count')
 
     def __repr__(self):
         return u'<Event %r (%s)>' % (
@@ -444,7 +449,7 @@ class Event(models.Model):
             or ''
         if with_html_link:
             return u'<a href="%s" class="event_link">%s</a>%s%s' % (
-                escape(self.get_absolute_url(), True),
+                escape(self.get_absolute_url()),
                 escape(self.name),
                 escape(s_date),
                 escape(s_location),
@@ -454,31 +459,56 @@ class Event(models.Model):
 
     @property
     def natural_datetime(self):
-        def _convert(dt, time_only):
-            if dt.time is None:
-                val = natural_date(dt.date, prefix=True)
-            elif dt.time is not None and time_only:
-                val = format_time(date_time_to_datetime(dt.date, dt.time))
+        def _convert(d, t=None, time_only=False, prefix=True):
+            if t is None:
+                val = natural_date(d, prefix)
+            elif t is not None and time_only:
+                val = format_time(date_time_to_datetime(d, t))
             else:
-                val = format_datetime(date_time_to_datetime(dt.date, dt.time))
+                val = format_datetime(date_time_to_datetime(d, t))
             return val
-        if self.duration:
-            obj = (type('DateTimeValue', (object,), {
-                'date': self.duration.date(),
-                'time': self.duration.time()
-            }))()
-            time_only = False
-            if self.time:
-                dt = date_time_to_datetime(obj.date, obj.time)
-                delta = (dt - date_time_to_datetime(self.date, self.time))
-                if not delta.days:
-                    time_only = True
-            return (' ' + _convert(self, False) +
-                    ' bis ' + _convert(obj, time_only) +
-                    ''
-            )
+
+        """
+        SD  ST  ED  ET
+        x   -   -   -   am dd.mm.yyyy
+        x   -   x   -   vom dd.mm.yyyy bis dd.mm.yyyy
+        x   -   -   x   am dd.mm.yyyy                               ignore the ET
+        x   -   x   x   vom dd.mm.yyyy bis dd.mm.yyyy               ignore the ET
+        x   x   -   -   dd.mm.yyyy HH:MM
+        x   x   x   -   dd.mm.yyyy HH:MM bis dd.mm.yyyy HH:MM       set ET to ST by convention
+        x   x   -   x   dd.mm.yyyy HH:MM bis HH:MM
+        x   x   x   x   dd.mm.yyyy HH:MM bis dd.mm.yyyy HH:MM
+        """
+
+        if self.time is None:
+            if self.enddate is None or self.enddate <= self.date:
+                return ' ' + _convert(self.date)
+            else:
+                return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False)
         else:
-            return ' ' + _convert(self, False)
+            if self.enddate is None and self.endtime is None:
+                return ' ' + _convert(self.date, self.time)
+            else:
+                """
+                since, one endpoint information is given, we calculate the duration:
+                #if no enddate is set, we take the startdate as enddate, too
+                if no endtime is set, we take the starttime as endtime, too
+                """
+                #self.enddate = self.enddate or self.date
+                self.endtime = self.endtime or self.time
+                start = date_time_to_datetime(self.date, self.time)
+                end = date_time_to_datetime(self.enddate or self.date, self.endtime)
+                if end > start:
+                    delta = end - start
+                else:
+                    # return the same as if no endpoint is given
+                    return " " + _convert(self.date, self.time)
+
+                if not delta.days:
+                    # duration < 1 day
+                    return " am " + _convert(self.date, self.time, False) + ' bis ' + _convert(self.date, self.endtime, True, False)
+                else:
+                    return " " + _convert(self.date, self.time, False, False) + ' bis ' + _convert(self.enddate, self.endtime, False, False)
 
     @property
     def natural_coordinates(self):

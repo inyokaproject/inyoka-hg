@@ -16,7 +16,9 @@ def fix_extension(filename, mime):
     possible_extensions = mimetypes.guess_all_extensions(mime)
     if not possible_extensions:
         return filename
-    if '.' + filename.rsplit('.', 1)[-1].lower() not in possible_extensions:
+    if '.' + filename.rsplit('.', 1)[-1].lower() in possible_extensions:
+        return filename
+    else:
         # .jpe is an ugly extension for jpeg, use .jpg
         ext = '.jpg' if mime=='image/jpeg' else mimetypes.guess_extension(mime)
         return filename.rsplit('.', 1)[0] + ext

@@ -15,7 +15,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from cPickle import loads
-from werkzeug.contrib.cache import MemcachedCache, SimpleCache, _test_memcached_key
+from werkzeug.contrib.cache import MemcachedCache, SimpleCache
 from django.utils.encoding import force_unicode
 from inyoka.utils.local import current_request, _request_cache, local_has_key
 from inyoka.utils.debug import find_calling_context
@@ -53,7 +53,7 @@ class CustomizedPylibmcClient(Client):
     def decr(self, key, delta=1):
         """Set the delta value if there's no existing key."""
         try:
-            Client.incr(self, key, delta)
+            Client.decr(self, key, delta)
         except NotFound:
             Client.set(self, key, delta)
 

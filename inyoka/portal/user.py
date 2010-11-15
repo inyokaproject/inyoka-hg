@@ -282,6 +282,9 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __repr__(self):
+        return self.__unicode__().encode('utf-8')
+
     @classmethod
     def get_default_group(self):
         """Return a default group for all registered users."""
@@ -378,12 +381,12 @@ class UserManager(models.Manager):
         """
         try:
             user = User.objects.get(username)
-        except User.DoesNotExist, e:
+        except User.DoesNotExist, exc:
             # fallback to email login
             if '@' in username:
                 user = User.objects.get(email__iexact=username)
             else:
-                raise e
+                raise exc
 
         if user.is_banned:
             # gebannt für immer…
@@ -506,19 +509,6 @@ class User(models.Model):
             u'wurde gesperrt',
             u'hat seinen Account gelöscht',
         ][self.status]
-
-    def inc_post_count(self):
-        """Increment the post count in a safe way."""
-        cur = connection.cursor()
-        cur.execute('''
-            UPDATE portal_user
-            SET    post_count = post_count + 1
-            WHERE  id         = %s;
-        ''', [self.id])
-        cur.close()
-        connection._commit()
-        self.post_count += 1
-        cache.delete('portal/user/%d' % self.id)
 
     def set_password(self, raw_password):
         """Set a new sha1 generated password hash"""

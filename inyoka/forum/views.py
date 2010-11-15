@@ -48,7 +48,7 @@ from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
 from inyoka.forum.compat import SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \
-    AddAttachmentForm, EditAttachmentForm
+    AddAttachmentForm
 from inyoka.forum.acl import filter_invisible, get_forum_privileges, \
     have_privilege, CAN_READ, CAN_MODERATE, \
     check_privilege
@@ -162,20 +162,22 @@ def forum(request, slug, page=1):
                               .filter_by(forum_id=forum.id) \
                               .order_by(Topic.sticky.desc(), Topic.last_post_id.desc())
         pagination = Pagination(request, topic_ids, page, TOPICS_PER_PAGE, url_for(forum))
-        required_ids = [obj.id for obj in pagination.objects]
-        topics = Topic.query.filter_overview(forum.id).filter(Topic.id.in_(required_ids)).all()
 
+        #TODO: investigate if it makes sense to store the topic-count of all forums
+        #      in the global cache and only increment and decrement it
         ctx = {
-            'topics':           topics,
-            'pagination_left':  pagination.generate(),
-            'pagination_right': pagination.generate('right')
+            'topic_ids':        [obj.id for obj in pagination.objects],
+            'topic_count':      pagination.total
         }
 
         if page < CACHE_PAGES_COUNT:
             cache.set(key, ctx, 60)
     else:
-        merge = db.session.merge
-        ctx['topics'] = [merge(obj, load=False) for obj in ctx['topics']]
+        pagination = Pagination(request, ctx['topic_ids'], page, TOPICS_PER_PAGE,
+                                url_for(forum), total=ctx['topic_count'])
+
+    topics = Topic.query.filter_overview(forum.id) \
+                                        .filter(Topic.id.in_(ctx['topic_ids'])).all()
 
     supporters = cache.get('forum/forum/supporters-%s' % forum.id)
     if supporters is None:
@@ -185,7 +187,7 @@ def forum(request, slug, page=1):
                                           Privilege.user_id != None)).all()
         subset = [r.user_id for r in query if check_privilege(r.positive, 'moderate')]
         if subset:
-            supporters = SAUser.query.options(db.defer('settings'), db.defer('forum_read_status')) \
+            supporters = SAUser.query.options(db.defer('_settings'), db.defer('forum_read_status')) \
                                      .filter(SAUser.id.in_(subset)) \
                                      .order_by(SAUser.username).all()
         cache.set('forum/forum/supporters-%s' % forum.id, supporters, 86400)
@@ -193,7 +195,7 @@ def forum(request, slug, page=1):
         merge = db.session.merge
         supporters = [merge(obj, load=False) for obj in supporters]
 
-    ctx.update({
+    context = {
         'forum':         forum,
         'subforums':     filter_invisible(request.user, forum.children),
         'is_subscribed': Subscription.objects.user_subscribed(request.user,
@@ -201,9 +203,11 @@ def forum(request, slug, page=1):
         'can_moderate':  check_privilege(privs, 'moderate'),
         'can_create':    check_privilege(privs, 'create'),
         'supporters':    supporters,
-        #'quickjump':     quickjump(request.user),
-    })
-    return ctx
+        'topics':        topics,
+        'pagination_left':  pagination.generate(),
+        'pagination_right': pagination.generate('right')}
+    context.update(ctx)
+    return context
 
 
 @transaction.autocommit
@@ -292,7 +296,7 @@ def viewtopic(request, topic_slug, page=1):
     post_objects = pagination.objects.all()
 
     for post in post_objects:
-        if not post.rendered_text and not post.is_plaintext:
+        if not post.rendered_text:
             try:
                 post.rendered_text = post.render_text(force_existing=True)
                 db.session.commit()
@@ -353,7 +357,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     newtopic = firstpost = False
     poll_form = poll_options = polls = None
     attach_form = None
-    edit_attach_form = None
     attachments = []
     preview = None
     article = None
@@ -541,10 +544,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             attach_form = AddAttachmentForm(request.POST, request.FILES)
         else:
             attach_form = AddAttachmentForm()
-        if 'rename_attachment' in request.POST:
-            edit_attach_form = EditAttachmentForm(request.POST)
-        else:
-            edit_attach_form = EditAttachmentForm()
 
         if 'attach' in request.POST:
             # the user uploaded a new attachment
@@ -579,18 +578,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 att_ids.remove(attachment.id)
                 flash(u'Der Anhang „%s“ wurde gelöscht.' % attachment.name)
 
-        elif 'rename_attachment' in request.POST and edit_attach_form.is_valid():
-            id = int(request.POST['rename_attachment'])
-            matching_attachments = filter(lambda a: a.id==id, attachments)
-            if not matching_attachments:
-                flash(u'Der Anhang mit der ID %d existiert nicht', id)
-            else:
-                attachment = matching_attachments[0]
-                d = edit_attach_form.cleaned_data
-                attachment.name = (d.get('new_filename'))
-                db.session.commit()
-                flash(u'Der Anhang „%s“ wurde umbenannt.' % attachment.name)
-
     # the user submitted a valid form
     if 'send' in request.POST and form.is_valid():
         d = form.cleaned_data
@@ -598,7 +585,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if not post: # not when editing an existing post
             doublepost = Post.query \
                 .filter_by(author_id=request.user.id, text=d['text']) \
-                .filter(Post.pub_date > (datetime.utcnow() - timedelta(0, 120)))
+                .filter(Post.pub_date > (datetime.utcnow() - timedelta(0, 300)))
             if not newtopic:
                 doublepost = doublepost.filter_by(topic_id=topic.id)
             doublepost = doublepost.options(eagerload(Post.topic)).first()
@@ -630,7 +617,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             post = Post(topic=topic, author_id=request.user.id)
             if newtopic:
                 post.position = 0
-        post.edit(request, d['text'], d['is_plaintext'])
+        post.edit(request, d['text'])
         db.session.commit()
 
         if attachments:
@@ -721,8 +708,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif 'preview' in request.POST:
         ctx = RenderContext(request)
         tt = request.POST.get('text', '')
-        preview = request.POST.get('is_plaintext', False) and \
-            fix_plaintext(tt) or parse(tt).render(ctx, 'html')
+        preview = parse(tt).render(ctx, 'html')
 
     # the user is going to edit an existing post/topic
     elif post:
@@ -732,7 +718,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             'ubuntu_version': topic.ubuntu_version,
             'sticky': topic.sticky,
             'text': post.text,
-            'is_plaintext': post.is_plaintext,
         })
         if not attachments:
             attachments = Attachment.query.filter_by(post_id=post.id)
@@ -759,7 +744,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         'can_moderate': check_privilege(privileges, 'moderate'),
         'can_sticky':   check_privilege(privileges, 'sticky'),
         'attach_form':  attach_form,
-        'edit_attach_form':  edit_attach_form,
         'attachments':  list(attachments),
         'posts':        posts,
         'storage':      storage,
@@ -1000,11 +984,13 @@ def first_unread_post(request, topic_slug):
     """
     Redirect the user to the first unread post in a special topic.
     """
-    topic_id, forum_id = db.session.query(Topic.id, Topic.forum_id) \
-                                   .filter(Topic.slug==topic_slug).first()
-    if not topic_id or not forum_id:
+    unread = db.session.query(Topic.id, Topic.forum_id) \
+                       .filter(Topic.slug==topic_slug).first()
+    if not unread:
         # there's no topic with such a slug
         raise PageNotFound()
+
+    topic_id, forum_id = unread
 
     data = request.user._readstatus.data.get(forum_id, [None, []])
     query = db.session.query(Post.id).filter(Post.topic_id == topic_id)
@@ -1434,10 +1420,7 @@ def topic_feed(request, slug=None, mode='short', count=25):
 
     if topic is None or topic.hidden:
         raise PageNotFound()
-    # We check if request.user has CAN_READ, though we only display
-    # the anonymous feed; this is to allow logged in users to view
-    # the feeds (eg in firefox).
-    if not have_privilege(request.user, topic.forum, CAN_READ):
+    if not have_privilege(anonymous, topic.forum, CAN_READ):
         return abort_access_denied(request)
 
     posts = topic.posts.options(eagerload('author')) \
@@ -1483,10 +1466,7 @@ def forum_feed(request, slug=None, mode='short', count=20):
         forum = Forum.query.get_cached(slug=slug)
         if forum is None:
             raise PageNotFound()
-        # We check if request.user has CAN_READ, though we only display
-        # the anonymous feed; this is to allow logged in users to view
-        # the feeds (eg in firefox).
-        if not have_privilege(request.user, forum, CAN_READ):
+        if not have_privilege(anonymous, forum, CAN_READ):
             return abort_access_denied(request)
 
         topics = forum.get_latest_topics(count=count)
@@ -1496,9 +1476,12 @@ def forum_feed(request, slug=None, mode='short', count=20):
         allowed_forums = [f.id for f in filter_invisible(anonymous, Forum.query.get_cached())]
         if not allowed_forums:
             return abort_access_denied(request)
-        topics = Topic.query.order_by(Topic.id.desc()).options(
-            eagerload('first_post'), eagerload('author')
-        ).filter(Topic.forum_id.in_(allowed_forums))[:count]
+        topics = Topic.query \
+            .options(db.eagerload('first_post'), db.eagerload('author')) \
+            .filter(db.and_(Topic.forum_id.in_(allowed_forums),
+                            Topic.hidden == False)) \
+            .order_by(Topic.id.desc()) \
+            .limit(count)
         title = u'ubuntuusers Forum'
         url = href('forum')
 
@@ -1510,15 +1493,13 @@ def forum_feed(request, slug=None, mode='short', count=20):
         icon=href('static', 'img', 'favicon.ico'),
     )
 
-    for topic in topics:
+    #TODO: the first_post check is yet only a workaround for our broken
+    #      foreign key relationships
+    for topic in (topic for topic in topics if topic.first_post):
         kwargs = {}
         post = topic.first_post
 
-        #XXX: this way there might be less than `count` items
-        if topic.hidden or post is None:
-            continue
-
-        if post.rendered_text is None and not post.is_plaintext:
+        if post.rendered_text is None:
             post.render_text()
         text = post.get_text()
 

@@ -332,8 +332,8 @@ class UserCPProfileForm(forms.Form):
         signature = self.cleaned_data.get('signature', '')
         try:
             validate_signature(signature)
-        except SignatureError, e:
-            raise forms.ValidationError(e.message)
+        except SignatureError, exc:
+            raise forms.ValidationError(exc.message)
         return signature
 
     def clean_coordinates(self):

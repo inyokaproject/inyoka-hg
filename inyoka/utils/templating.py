@@ -40,7 +40,7 @@ def get_dtd():
     """
     global inyoka_dtd
     if inyoka_dtd is None:
-        inyoka_dtd = '<!DOCTYPE html SYSTEM "%s">' % (
+        inyoka_dtd = u'<!DOCTYPE html SYSTEM "%s">' % (
             settings.DEBUG and os.path.realpath(
                 os.path.join(os.path.dirname(__file__), '..',
                              'static', 'xhtml1-strict-uu.dtd'))
@@ -52,7 +52,7 @@ def get_dtd():
             return inyoka_dtd
     except:
         pass
-    return '<?xml version="1.0" encoding="utf-8"?>\n' + inyoka_dtd
+    return u'<?xml version="1.0" encoding="utf-8"?>\n' + inyoka_dtd
 
 
 def populate_context_defaults(context):
@@ -66,10 +66,11 @@ def populate_context_defaults(context):
 
     try:
         request = current_request._get_current_object()
+        user = request.user
     except RuntimeError:
         request = None
+        user = None
 
-    user = request.user
     reported = pms = suggestions = events = 0
     if request and user.is_authenticated:
         can = {'manage_topics': user.can('manage_topics'),

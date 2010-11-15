@@ -86,24 +86,24 @@ class InyokaHandler(WSGIHandler):
 
                 try:
                     return callback(request, *args, **kwargs)
-                except Exception, e:
+                except Exception, exc:
                     # If the view raised an exception, run it through
                     # exception middleware, and if the exception middleware
                     # returns a response, use that. Otherwise, reraise the
                     # exception.
                     for middleware_method in self._exception_middleware:
-                        response = middleware_method(request, e)
+                        response = middleware_method(request, exc)
                         if response:
                             return response
                     raise
-            except PageNotFound, e:
+            except PageNotFound, exc:
                 if resolver is None:
                     urlconf = getattr(request, "urlconf", settings.ROOT_URLCONF)
                     resolver = urlresolvers.RegexURLResolver(r'^/', urlconf)
                 callback, param_dict = resolver.resolve404()
                 return callback(request, **param_dict)
-            except DirectResponse, e:
-                return e.response
+            except DirectResponse, exc:
+                return exc.response
             except core_exceptions:
                 raise
             except:

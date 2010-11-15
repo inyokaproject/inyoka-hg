@@ -32,6 +32,7 @@
   </tr>
 </table>
 
+<div class="pagination pagination_right"><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div>
 <h3>Tracebacks</h3>
 <div class="errorlist">
   {%- for error in errors %}
@@ -75,6 +76,7 @@
   {%- else %}
     <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
   {%- endfor %}
+  <div class="pagination pagination_right"><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div><div style="clear: both;"/>
 </div>
 
 <script type="text/javascript">

@@ -105,7 +105,7 @@ from inyoka.portal.user import User
 
 
 # maximum number of bytes for metadata.  everything above is truncated
-MAX_METADATA = 2 << 15
+MAX_METADATA = 2 << 8
 
 
 class PageManager(models.Manager):
@@ -230,7 +230,7 @@ class PageManager(models.Manager):
                             nocache=False):
         """
         Works like `get_page_list` but just lists attachments.  If parent is
-        given only pages blow that page are displayed.
+        given only pages below that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
                     if not existing_only or not x[1] and not x[3])
@@ -983,6 +983,10 @@ class Page(models.Model):
         cur.close()
 
         for key, value in new_metadata:
+            # ignore keys that do not fetch into the column length.
+            # Most commonly such metadata entries are broken comments...
+            if len(key) > 30:
+                continue
             MetaData(page=self, key=key, value=value[:MAX_METADATA]).save()
 
         # searchindex
