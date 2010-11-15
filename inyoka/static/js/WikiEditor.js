@@ -157,19 +157,6 @@
    */
   var toolbar = function() {
     return [
-    dropdown('headline', 'Überschrift', [
-        item('=', 'Überschrift: Stufe 1'),
-        item('==', 'Überschrift: Stufe 2'),
-        item('===', 'Überschrift: Stufe 3'),
-        item('====', 'Überschrift: Stufe 4'),
-        item('=====', 'Überschrift: Stufe 5')
-      ],
-      function(evt) {
-        var delim = evt.target.value;
-        if (delim.length > 0)
-          this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
-        evt.target.selectedIndex = 0;
-    }, ['wiki'], help("= Überschrift =")),
     button('bold', 'Fetter Text', insert("'''%s'''"),
            ['wiki', 'forum', 'small'], help("'''Text'''")),
     button('italic', 'Kursiver Text', insert("''%s''"),
@@ -265,6 +252,19 @@
         '[user:' + this.username.replace(':', '::') + ':], ' : '') +
         '[[Datum(' + formatISO8601(new Date()) + ')]]');
     }, ['wiki'], help("Signatur einfügen")),
+    dropdown('headline', 'Überschrift', [
+        item('=', 'Überschrift: Stufe 1'),
+        item('==', 'Überschrift: Stufe 2'),
+        item('===', 'Überschrift: Stufe 3'),
+        item('====', 'Überschrift: Stufe 4'),
+        item('=====', 'Überschrift: Stufe 5')
+      ],
+      function(evt) {
+        var delim = evt.target.value;
+        if (delim.length > 0)
+          this.insertTag(delim + ' %s ' + delim + '\n', 'Überschrift');
+        evt.target.selectedIndex = 0;
+    }, ['wiki'], help("= Überschrift =")),
     dropdown('macro', 'Makro', [
         item('[[FehlendeSeiten(%s)]]', 'Fehlende Seiten'),
         item('[[TagListe(%s)]]', 'Tag-Liste'),
