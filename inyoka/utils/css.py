@@ -23,7 +23,7 @@ acceptable_css_properties = frozenset([
     'richness', 'speak', 'speak-header', 'speak-numeral',
     'speak-punctuation', 'speech-rate', 'stress', 'text-align',
     'text-decoration', 'text-indent', 'unicode-bidi', 'vertical-align',
-    'voice-family', 'volume', 'white-space', 'width'
+    'voice-family', 'volume', 'white-space', 'width', 'max-width',
 ])
 
 acceptable_css_keywords = frozenset([
