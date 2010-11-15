@@ -1482,6 +1482,8 @@ def monitoring(request, page):
     collection = database['errors']
 
     page = int(page) if (page is not None and page.isdigit()) else 1
+    if page == 0:
+        return HttpResponseRedirect(href('admin', 'monitoring'))
 
     # ensure the indexes exists
     collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
