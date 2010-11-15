@@ -1282,7 +1282,7 @@ def event_new(request):
                 event.location_lat = data['location_lat']
                 event.location_long = data['location_long']
             event.save()
-            cache.inc('ikhaya/event_count')
+            cache.delete('ikhaya/event_count')
             flash(u'Die Veranstaltung wurde gespeichert. Er wird demnächst von einem Moderator freigeschaltet.', True)
             event = Event.objects.get(id=event.id) # get truncated slug
             return HttpResponseRedirect(url_for(event))

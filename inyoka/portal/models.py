@@ -431,6 +431,7 @@ class Event(models.Model):
         self.slug = find_next_django_increment(Event, 'slug', name, stripdate=True)
         super(self.__class__, self).save(force_insert, force_update)
         cache.delete('ikhaya/event/%s' % self.id)
+        cache.delete('ikhaya/event_count')
 
     def __repr__(self):
         return u'<Event %r (%s)>' % (
