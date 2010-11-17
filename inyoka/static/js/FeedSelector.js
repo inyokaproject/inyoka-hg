@@ -77,15 +77,11 @@
       else
         feed_url = FORUM_URL + 'feeds/' + data.component + '/' + data.forum + '/' +
                    data.mode + '/' + data.count + '/';
-      if (!$.browser.opera) {
-        if ($('#forum_feed_url').length === 0) {
-          $('#forum_submit_p input').hide();
-          $('#forum_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
-            '<a id="forum_feed_url" href="about:blank>-</a></span> ');
-        }
-        $('#forum_feed_url').text(feed_url);
-        $('#forum_feed_url').attr('href', feed_url);
+      if (!$('#forum_feed_url').length) {
+        $('#forum_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
+          '<a id="forum_feed_url" href="about:blank">-</a></span><br/>');
       }
+      $('#forum_feed_url').text(feed_url).attr('href', feed_url);
       return feed_url;
     }
     else return false;
@@ -109,14 +105,11 @@
         feed_url = IKHAYA_URL + 'feeds/' + data.mode + '/' + data.count + '/';
       else
         feed_url = IKHAYA_URL + 'feeds/' + data.category + '/' + data.mode + '/' + data.count + '/';
-      if (!$.browser.opera) {
-        if (!$('#ikhaya_feed_url').length) {
-          $('#ikhaya_submit_p input').hide();
-          $('#ikhaya_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
-            '<a id="ikhaya_feed_url" href="about:blank>-</a></span> ');
-        }
-        $('#ikhaya_feed_url').text(feed_url).attr('href', feed_url);
+      if (!$('#ikhaya_feed_url').length) {
+        $('#ikhaya_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
+          '<a id="ikhaya_feed_url" href="about:blank">-</a></span><br/>');
       }
+      $('#ikhaya_feed_url').text(feed_url).attr('href', feed_url);
       return feed_url;
     }
     else return false;
@@ -134,14 +127,11 @@
     }
     if (OK) {
       feed_url = PLANET_URL + 'feeds/' + data.mode + '/' + data.count + '/';
-      if (navigator.userAgent.substring(0,5).toLowerCase() != 'opera') {
-        if ($('#planet_feed_url').length === 0) {
-          $('#planet_submit_p input').hide();
-          $('#planet_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
-            '<a id="planet_feed_url" href="about:blank>-</a></span> ');
-        }
-        $('#planet_feed_url').text(feed_url).attr('href', feed_url);
+      if ($('#planet_feed_url').length) {
+        $('#planet_submit_p').prepend('<strong>Adresse des Feeds:</strong> ' +
+          '<a id="planet_feed_url" href="about:blank">-</a></span><br/>');
       }
+      $('#planet_feed_url').text(feed_url).attr('href', feed_url);
       return feed_url;
     }
     else
