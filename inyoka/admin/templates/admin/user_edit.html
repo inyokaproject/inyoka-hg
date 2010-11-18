@@ -29,6 +29,6 @@
 
 {% block admin_content %}
 <div class="warning_important">
-  Warnung: Du bearbeitest gerade <a href="{{ href('portal', 'user', user.username) }}">{{ user.username }}</a>
+  Warnung: Du bearbeitest gerade <a href="{{ href('portal', 'user', user.urlsafe_username) }}">{{ user.username }}</a>
 </div>
 {% endblock %}
