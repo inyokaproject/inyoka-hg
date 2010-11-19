@@ -239,7 +239,8 @@ $(document).ready(function() {
             .toggleClass('navi_toggle_down');
           if ($IS_LOGGED_IN)
             $.get('/?__service__=portal.toggle_sidebar', {
-              hide: !sidebar.is(':visible')
+              hide: !sidebar.is(':visible'),
+              component: window.location.hostname.split('.')[0]
             });
           return false;
         })
