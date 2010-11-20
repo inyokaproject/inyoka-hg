@@ -655,7 +655,7 @@ class User(models.Model):
             os.remove(fn)
         self.avatar = None
 
-    def get_absolute_url(self, action='show'):
+    def get_absolute_url(self, action='show', *args):
         if action == 'show':
             return href('portal', 'user', self.urlsafe_username)
         elif action == 'privmsg':
@@ -668,7 +668,7 @@ class User(models.Model):
             return href('portal', 'delete',
                         self.urlsafe_username, gen_activation_key(self))
         elif action == 'admin':
-            return href('admin', 'users', 'edit', self.urlsafe_username)
+            return href('admin', 'users', 'edit', self.urlsafe_username, *args)
         elif action in ('subscribe', 'unsubscribe'):
             return href('portal', 'user', self.urlsafe_username, action)
 

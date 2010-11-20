@@ -18,6 +18,15 @@
 {% set navi_type  = 'sidebar' %}
 {% set styles = styles|default([]) + ['planet.css'] %}
 
+{%- block html_head %}
+  {{ super() }}
+  <script type="text/javascript">
+    /*<![CDATA[*/
+      var $SIDEBAR_HIDDEN = {{ USER.settings.planet_sidebar_hidden and 'true' or 'false' }};
+    /*]]>*/
+  </script>
+{%- endblock %}
+
 {% block appheader %}
   <h1><a href="{{ href('planet') }}">Planet</a></h1>
   <h2>Was passiert in der Ubuntu-Welt?</h2>

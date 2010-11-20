@@ -532,7 +532,9 @@ class Forum(db.Model):
                 .options(db.eagerload('author'),
                          db.eagerload('last_post'),
                          db.eagerload('last_post.author')) \
-                .filter(Topic.id.in_(topic_ids)).all()
+                .filter(Topic.id.in_(topic_ids)) \
+                .order_by(Topic.sticky.desc(), Topic.last_post_id.desc()) \
+                .all()
 
         return (count < limit) and topics[:count] or topics
 
