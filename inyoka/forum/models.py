@@ -1069,7 +1069,7 @@ class Post(db.Model):
                         SAUser.post_count, db.select([db.func.count()],
                             ((Post.topic_id == old_topic.id) &
                              (Post.author_id == SAUser.id)),
-                            Post.__table)
+                            Post.__table__)
                         )
                     }
                 ))
