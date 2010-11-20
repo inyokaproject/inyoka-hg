@@ -1,5 +1,5 @@
 /**
- * syle.wiki
+ * style.wiki
  * ~~~~~~~~~
  *
  * The style for the wiki. This does not include styles for wiki markup
@@ -38,10 +38,12 @@ div.preview {
 }
 
 p.meta {
+    border-top: 1px solid #AAA;
     margin: 1em 0 0 0;
     padding: 0.4em;
     text-align: right;
     font-size: 0.85em;
+    clear: both;
 }
 
 #form_addattachment textarea {
