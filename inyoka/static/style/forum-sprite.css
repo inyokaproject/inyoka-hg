@@ -589,9 +589,10 @@ tr.unstable .topic_title {
     background: url(../img/forum/unstable.png) no-repeat right top;
 }
 
+
 p.version_chooser {
-  padding-left: 24px;
-  margin-left: 24px;
+  padding-left: 22px;
+  margin-left: 22px;
 }
 
 span#version_info.unstable,

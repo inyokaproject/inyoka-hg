@@ -17,7 +17,7 @@
         <label for="id_active">Blog indizieren?</label>
       </dt>
       <dd>
-        <input checked="checked" type="checkbox" name="active" id="id_active" /> Ja, indiziere diesen Blog.
+        <input {{ 'checked="checked"' if blog.active }} type="checkbox" name="active" id="id_active" /> Ja, indiziere diesen Blog.
       </dd>
 
       <dt>Icon:</dt>

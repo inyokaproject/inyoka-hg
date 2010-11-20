@@ -28,7 +28,8 @@ class SubscriptionManager(models.Manager):
     Manager class for the `Subscription` model.
     """
 
-    def user_subscribed(self, user, topic=None, forum=None, wiki_page=None):
+    def user_subscribed(self, user, topic=None, forum=None, wiki_page=None,
+                        member=None):
         if user.is_anonymous:
             return False
 
@@ -47,6 +48,9 @@ class SubscriptionManager(models.Manager):
         elif wiki_page is not None:
             column = 'wiki_page_id'
             ident = wiki_page.id
+        elif member is not None:
+            column = 'member_id'
+            ident = member.id
         else:
             raise TypeError('user_subscribed takes exactly 3 arguments (2 given)')
         cursor = connection.cursor()
@@ -339,6 +343,7 @@ class Subscription(models.Model):
     forum_id = models.IntegerField(null=True)
     ubuntu_version = models.CharField(max_length=5, null=True)
     wiki_page = models.ForeignKey(Page, null=True)
+    member = models.ForeignKey(User, null=True, related_name='member')
     notified = models.BooleanField('User was already notified',
                                    default=False)
 
@@ -373,6 +378,9 @@ class Subscription(models.Model):
         elif self.forum:
             type = u'forum'
             title = self.forum.name
+        elif self.member:
+            type = u'member'
+            title = self.member.username
         return u'Subscription(%s, %s:"%s")' % (
             self.user.username,
             type, title
@@ -383,6 +391,7 @@ class Subscription(models.Model):
             ('topic_id', 'user'),
             ('forum_id', 'user'),
             ('wiki_page', 'user'),
+            ('member', 'user'),
         )
 
 

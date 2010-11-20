@@ -69,6 +69,9 @@ class Magic:
         if not os.path.exists(filename):
             raise IOError("File does not exist: " + filename)
 
+        if isinstance(filename, unicode):
+            filename = filename.encode('utf-8')
+
         return magic_file(self.cookie, filename)
 
     def __del__(self):

@@ -732,7 +732,7 @@ def user_edit(request, username):
 def user_edit_profile(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'profile'))
 
     initial = model_to_dict(user)
     form = EditUserProfileForm(initial=initial)
@@ -791,7 +791,7 @@ def user_edit_profile(request, username):
 def user_edit_settings(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'settings'))
 
     ubuntu_version = [s.ubuntu_version for s in Subscription.objects.\
                       filter(user=request.user, ubuntu_version__isnull=False)]
@@ -844,7 +844,7 @@ def user_edit_settings(request, username):
 def user_edit_groups(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'groups'))
     initial = model_to_dict(user)
     if initial['_primary_group']:
         initial.update({
@@ -898,7 +898,7 @@ def user_edit_groups(request, username):
 def user_edit_status(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'privileges'))
 
     initial = model_to_dict(user)
     form = EditUserStatusForm(initial=initial)
@@ -927,7 +927,7 @@ def user_edit_status(request, username):
 def user_edit_privileges(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'password'))
 
     checked_perms = [int(p) for p in request.POST.getlist('permissions')]
 
@@ -1033,7 +1033,7 @@ def user_edit_privileges(request, username):
 def user_edit_password(request, username):
     user = get_user(username)
     if username != user.urlsafe_username:
-        return HttpResponseRedirect(user.get_absolute_url('admin'))
+        return HttpResponseRedirect(user.get_absolute_url('admin', 'status'))
     form = EditUserPasswordForm(request.POST)
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data

@@ -28,6 +28,7 @@ div.articles div.article div.contents {
   border: 1px solid #DDD;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
+  border-radius: 10px;
 }
 
 div.articles div.article div.contents div.post .hidden {
@@ -59,6 +60,7 @@ div.articles div.article div.head h3 {
   margin: 0 0 0 160px;
   font-size: 1.6em;
   font-weight: normal;
+  line-height: 1em;
 }
 
 div.articles div.article div.head h3 a {
@@ -108,6 +110,7 @@ div.articles div.article div.post {
   border: 1px solid #BFBFBF;
   -moz-border-radius: 8px;
   -webkit-border-radius: 8px;
+  border-radius: 8px;
 }
 
 /* we use last/first-child everywhere to not display crap on clients

@@ -20,9 +20,10 @@
 }
 
 body {
-  font-family: 'Verdana', 'DejaVu Sans', 'Bitstream Vera Sans', sans-serif;
+  font-family: sans-serif;
   color: black;
   font-size: 0.9em;
+  line-height: 1.5;
 }
 
 html, body {

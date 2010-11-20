@@ -180,9 +180,12 @@ def do_missing_page(request, name, _page=None):
         else:
             create_link = None
 
-    not_finished = Page.objects.get_by_name(join_pagename(
-        storage['wiki_newpage_root'], name
-    ))
+    try:
+        not_finished = Page.objects.get_by_name(join_pagename(
+            storage['wiki_newpage_root'], name
+        ))
+    except Page.DoesNotExist:
+        not_finished = None
 
     return {
         'page':         _page,

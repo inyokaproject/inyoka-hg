@@ -5,7 +5,7 @@
 
     This script is used by fabric for easy deployment.
 
-    :copyright: Copyright 2008 by Florian Apolloner.
+    :copyright: Copyright 2008-2010 by Florian Apolloner.
     :license: GNU GPL.
 """
 import os as _os
@@ -153,6 +153,7 @@ def check_js():
 
 
 def compile_js(file=None):
+    """Minimize js files"""
     rhino = 'java -jar extra/js.jar'
     minjar = 'java -jar extra/google-compiler.jar'
     #TODO: find some way to preserve comments on top
@@ -164,3 +165,12 @@ def compile_js(file=None):
     for file in files:
         local("%s --js inyoka/static/js/%s --warning_level QUIET > inyoka/static/js/%s" %
             (minjar, file, file.split('.js')[0] + '.min.js'), capture=False)
+
+def compile_css():
+    """Create sprited css files for deployment"""
+    local("java -Djava.ext.dirs=extra/smartsprites org.carrot2.labs.smartsprites.SmartSprites"
+          " --root-dir-path inyoka/static --log-level WARN ", capture=False)
+
+def compile_static():
+    compile_js()
+    compile_css()
