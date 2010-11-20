@@ -625,24 +625,37 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         db.session.commit()
 
         if newtopic:
-            notified_user = []
-            for s in Subscription.objects.filter(forum_id=forum.id) \
-                                         .exclude(user=request.user):
-                notified_user.append(s.user)
-                notify_about_subscription(s, 'new_topic',
-                    u'Neues Thema im Forum %s: „%s“' % \
-                        (forum.name, topic.title),
+            notified_users = []
+            # Inform users who subscribed to the author
+            for s in Subscription.objects.filter(member=request.user):
+                notified_users.append(s.user)
+                notify_about_subscription(s, 'user_new_topic',
+                    u'Neues Thema vom Benutzer %s' % post.author.username,
                     {'username':   s.user.username,
                      'post':       post,
                      'topic':      topic,
                      'forum':      forum})
+
+            # Inform users who subscribed to the forum
+            for s in Subscription.objects.filter(forum_id=forum.id) \
+                                         .exclude(user=request.user):
+                if not s.user in notified_users:
+                    notified_users.append(s.user)
+                    notify_about_subscription(s, 'new_topic',
+                        u'Neues Thema im Forum %s: „%s“' % \
+                            (forum.name, topic.title),
+                        {'username':   s.user.username,
+                         'post':       post,
+                         'topic':      topic,
+                         'forum':      forum})
 
             #Inform about ubuntu_version, without the users, which has already
             #imformed about this new topic
             for s in Subscription.objects.filter(ubuntu_version= \
                            topic.ubuntu_version) \
                            .exclude(user=request.user):
-                if not s.user in notified_user:
+                if not s.user in notified_users:
+                    notified_users.append(s.user)
                     notify_about_subscription(s, 'new_topic_ubuntu_version',
                         u'Neues Thema mit der Version %s: „%s“' % \
                             (topic.get_ubuntu_version(), topic.title),
@@ -655,9 +668,11 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             # not visited, because unlike the posts you won't see
             # other new topics
         elif not post_id:
+            notified_users = []
             for s in Subscription.objects.filter(topic_id=topic.id,
                                                  notified=False) \
                                          .exclude(user=request.user):
+                notified_users.append(s.user)
                 notify_about_subscription(s, 'new_post',
                     u'Neue Antwort im Thema „%s“' % topic.title,
                     {'username':   s.user.username,
@@ -665,6 +680,16 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                      'topic':      topic})
                 s.notified = True
                 s.save()
+            for s in Subscription.objects.filter(member=request.user):
+                if not s.user in notified_users:
+                    notified_users.append(s.user)
+                    notify_about_subscription(s, 'user_new_post',
+                        u'Neue Antwort vom Benutzer %s' % post.author.username,
+                        {'username': s.user.username,
+                         'post':      post,
+                         'topic':     topic})
+                    s.notified = True
+                    s.save()
 
         if article:
             # the topic is a wiki discussion, bind it to the wiki

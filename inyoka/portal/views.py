@@ -59,8 +59,8 @@ from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
 from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
     reactivate_user, set_new_email, send_new_email_confirmation, \
     reset_email, send_activation_mail, send_new_user_password
-from inyoka.portal.utils import check_login, calendar_entries_for_month
-
+from inyoka.portal.utils import check_login, calendar_entries_for_month, \
+     require_permission
 
 # TODO: move into some kind of config, but as a quick fix for now...
 AUTOBAN_SPAMMER_WORDS = (
@@ -491,14 +491,43 @@ def profile(request, username):
         groups = user.groups.all()
     else:
         groups = user.groups.filter(is_public=True)
+    subscribed = Subscription.objects.user_subscribed(request.user,
+                                                      member=user)
     return {
-        'user':     user,
-        'groups':   groups,
-        'wikipage': content,
-        'User':     User,
-        'request':  request
+        'user':          user,
+        'groups':        groups,
+        'wikipage':      content,
+        'User':          User,
+        'is_subscribed': subscribed,
+        'request':       request
     }
 
+@require_permission('subscribe_to_users')
+def subscribe_user(request, username):
+    """Subscribe to a user to follow all of his activities."""
+    user = User.objects.get(username)
+    try:
+        Subscription.objects.get(user=request.user, member=user.id)
+    except Subscription.DoesNotExist:
+        # there's no such subscription yet, create a new one
+        Subscription(user=request.user, member_id=user.id).save()
+        flash(u'Du wirst ab nun über Aktivitäten von %s benachrichtigt'
+              % user.username)
+    return HttpResponseRedirect(url_for(user))
+
+def unsubscribe_user(request, username):
+    """Remove a user subscription."""
+    user = User.objects.get(username)
+    try:
+        subscription = Subscription.objects.get(user=request.user,
+                                                member=user.id)
+    except Subscription.DoesNotExist:
+        pass
+    else:
+        subscription.delete()
+        flash(u'Du wirst ab nun nicht mehr über Aktivitäten von %s benachrichtigt'
+              % user.username)
+    return HttpResponseRedirect(url_for(user))
 
 @check_login(message=u'Du musst eingeloggt sein, um dein Verwaltungscenter '
                      u'zu sehen')
