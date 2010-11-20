@@ -18,7 +18,7 @@
 {% block planet_content %}
   {%- if days %}
   <div class="newestarticles">
-  <h2>Direkt zu den neuesten Artikeln</h2>
+  <h2>Direkt zu den Artikeln springen</h2>
   <ul>
   {%- for article in articles[:10] %}
     <li><a title="{{ article.blog }}" href="#article_{{ article.id }}">{{ article.title }}</a></li>
