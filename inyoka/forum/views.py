@@ -817,7 +817,11 @@ def _generate_subscriber(cls, obj_slug, subscriptionkw, flasher):
         If there isn't such a subscription, a new one is created.
         """ % obj_slug
         slug = kwargs[obj_slug]
-        obj = cls.query.filter(cls.slug==slug).one()
+        obj = cls.query.filter(cls.slug==slug).first()
+        if not obj:
+            flash(u'Es gibt kein %s „%s” mehr.' % (subscriptionkw, slug), False)
+            return HttpResponseRedirect(href('forum'))
+
         if not have_privilege(request.user, obj, CAN_READ):
             return abort_access_denied(request)
         try:
@@ -848,7 +852,11 @@ def _generate_unsubscriber(cls, obj_slug, subscriptionkw, flasher):
         """ If the user has already subscribed to this %s, this view removes it.
         """ % obj_slug
         slug = kwargs[obj_slug]
-        obj = cls.query.filter(cls.slug==slug).one()
+        obj = cls.query.filter(cls.slug==slug).first()
+        if not obj:
+            flash(u'Es gibt kein %s „%s” mehr.' % (subscriptionkw, slug), False)
+            return HttpResponseRedirect(href('forum'))
+
         try:
             s = Subscription.objects.get(user=request.user, **{subscriptionkw : obj.id})
         except Subscription.DoesNotExist:
