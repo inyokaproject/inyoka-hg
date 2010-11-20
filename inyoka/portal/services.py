@@ -104,7 +104,6 @@ def on_toggle_sidebar(request):
         request.user.settings[component] = True
     else:
         request.user.settings.pop(component)
-    print component
     request.user.save()
     return True
 
