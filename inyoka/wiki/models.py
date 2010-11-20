@@ -196,7 +196,7 @@ class PageManager(models.Manager):
     def _get_object_list(self, nocache):
         """
         Get a list of all objects that are pages or attachments.  The return
-        value is a list of ``(name, deleted, latest_rev, is_page)`` tuples
+        value is a list of ``(name, deleted, is_page)`` tuples
         where `is_page` is False if that object is an attachment.
         """
         key = 'wiki/object_list'
@@ -207,7 +207,7 @@ class PageManager(models.Manager):
         if pagelist is None:
             pagelist = Page.objects.all().select_related('last_rev')\
                 .order_by('name').values_list('name', 'last_rev__deleted',
-                    'last_rev__id', 'last_rev__attachment__id')
+                    'last_rev__attachment__id')
             # force a list, can't pickle ValueQueryset that way
             pagelist = list(pagelist)
             # we cache that also if the user wants something uncached
@@ -224,7 +224,7 @@ class PageManager(models.Manager):
         pagelist cache is invalidated.
         """
         return [x[0] for x in self._get_object_list(nocache)
-                if not existing_only or not x[1] and x[3]]
+                if (not existing_only or not x[1]) and x[2]]
 
     def get_attachment_list(self, parent=None, existing_only=True,
                             nocache=False):
@@ -233,7 +233,7 @@ class PageManager(models.Manager):
         given only pages below that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
-                    if not existing_only or not x[1] and not x[3])
+                    if (not existing_only or not x[1]) and not x[2])
         if parent is not None:
             parent += u'/'
             parents = set(parent.split('/'))
