@@ -154,7 +154,7 @@
   {%- endif %}
   {%- endif %}
   {%- if request.user.can('user_edit') %}
-    <a href="{{ href('admin', 'users', 'edit', user.username) }}">Nutzer bearbeiten</a>
+    <a href="{{ href('admin', 'users', 'edit', user.username) }}" class="adminlink">Nutzer bearbeiten</a>
   {%- endif %}
   {%- if request.user.can('subscribe_to_users') %}
     |
