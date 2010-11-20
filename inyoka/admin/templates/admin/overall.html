@@ -32,6 +32,15 @@
   {%- endif %}
 {% endmacro %}
 
+{%- block html_head %}
+  {{ super() }}
+  <script type="text/javascript">
+    /*<![CDATA[*/
+      var $SIDEBAR_HIDDEN = {{ USER.settings.admin_sidebar_hidden and 'true' or 'false' }};
+    /*]]>*/
+  </script>
+{%- endblock %}
+
 {% block appheader %}
 <h1><a href="{{ href('admin') }}">Administration</a></h1>
 <h2><a href="{{ href('admin') }}">Übersicht</a></h2>

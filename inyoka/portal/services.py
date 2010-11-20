@@ -97,7 +97,7 @@ def on_toggle_sidebar(request):
     if not request.user.is_authenticated:
         return False
     component = request.GET.get('component')
-    if component not in ('ikhaya', 'planet'):
+    if component not in ('ikhaya', 'planet', 'admin'):
         component = 'portal'
     component = '_'.join([component, 'sidebar_hidden'])
     if request.GET.get('hide') == 'true':
