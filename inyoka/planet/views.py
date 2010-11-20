@@ -58,6 +58,7 @@ def index(request, page=1):
         'days':         group_by_day(pagination.objects),
         'articles':     pagination.objects,
         'pagination':   pagination,
+        'page':         page,
     }
 
 
