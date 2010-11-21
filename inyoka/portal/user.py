@@ -252,7 +252,7 @@ class Group(models.Model):
         image_path = path.join(settings.MEDIA_ROOT, fn)
         # clear the file system
         if self.icon:
-            self.delete_icon()
+            self.icon.delete(save=False)
 
         std = storage.get_many(('team_icon_height', 'team_icon_width'))
         max_size = (int(std['team_icon_height']),
@@ -267,13 +267,6 @@ class Group(models.Model):
         self.icon = fn
 
         return resized
-
-    def delete_icon(self):
-        """Deletes the icon from the file system."""
-        fn = self.icon.path
-        if path.exists(fn):
-            os.remove(fn)
-        self.icon = None
 
     def get_absolute_url(self, action=None):
         if action == 'edit':

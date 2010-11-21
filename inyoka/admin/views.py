@@ -18,9 +18,12 @@ from StringIO import StringIO
 from sqlalchemy import and_, select
 from sqlalchemy.util import to_list
 from datetime import date, time as dt_time
+
+from django.core.files.storage import default_storage
 from django.db.models import Max
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
+
 from inyoka.conf import settings
 from inyoka.utils.text import slugify
 from inyoka.utils.http import templated
@@ -1179,7 +1182,7 @@ def group_edit(request, name=None):
             group.is_public = data['is_public']
 
             if data['delete_icon']:
-                group.delete_icon()
+                group.icon.delete(save=False)
 
             if data['icon'] and not data['import_icon_from_global']:
                 icon_resized = group.save_icon(data['icon'])
@@ -1191,17 +1194,14 @@ def group_edit(request, name=None):
 
             if data['import_icon_from_global']:
                 if group.icon:
-                    group.delete_icon()
+                    group.icon.delete(save=False)
 
                 icon_path = 'portal/team_icons/team_%s.%s' % (group.name,
                             storage['team_icon'].split('.')[-1])
                 if storage['team_icon']:
-                    global_icon_name = path.join(settings.MEDIA_ROOT, storage['team_icon'])
-                    icon_name = path.join(settings.MEDIA_ROOT, icon_path)
-                    with open(global_icon_name, 'rb') as gicon:
-                        with open(icon_name, 'wb') as icon:
-                            icon.write(gicon.read())
-                            group.icon = icon_path
+                    gicon = default_storage.open(storage['team_icon'])
+                    group.icon.save(icon_path, gicon)
+                    gicon.close()
                 else:
                     flash(u'Es wurde noch kein globales Team-Icon definiert', False)
 
