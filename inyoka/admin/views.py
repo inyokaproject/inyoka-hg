@@ -292,10 +292,9 @@ def planet_edit(request, blog=None):
             for k in ('name', 'description', 'blog_url', 'feed_url', 'active'):
                 setattr(blog, k, d[k])
             if d['delete_icon']:
-                blog.delete_icon()
+                blog.icon.delete(save=False)
             if d['icon']:
-                blog.save()
-                blog.save_icon(d['icon'])
+                blog.save_icon(d['icon'], save=False)
             blog.save()
             if new:
                 flash(u'Der Blog „<a href="%s">%s</a>“ '

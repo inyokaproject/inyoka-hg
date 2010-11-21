@@ -38,28 +38,18 @@ class Blog(models.Model):
     def delete(self):
         for entry in self.entry_set.all():
             entry.delete()
-        self.delete_icon()
+        self.icon.delete(save=False)
         super(Blog, self).delete()
 
-    def delete_icon(self):
-        """Delete the icon from the file system."""
-        fn = self.icon.path
-        if path.exists(fn):
-            os.remove(fn)
-        self.icon = None
-
-    def save_icon(self, img):
+    def save_icon(self, img, save=True):
         """Save the icon to the file system."""
+        self.icon.delete(save=False)
         icon = Image.open(img)
-        actual_path = self.icon.name
-        ext = path.splitext(img.name)[1][1:]
+        ext = icon.format.lower()
+        if not self.id:
+            blog.save()
         fn = 'planet/icons/icon_%d.%s' % (self.id, ext)
-        if not actual_path:
-            pth = path.join(settings.MEDIA_ROOT, fn)
-        else:
-            pth = self.icon.path
-        icon.save(pth)
-        self.icon = fn
+        self.icon.save(fn, img, save=save)
 
     def __unicode__(self):
         return self.name
