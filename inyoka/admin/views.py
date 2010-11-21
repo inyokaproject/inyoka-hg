@@ -104,16 +104,10 @@ def config(request):
                 storage['global_message_time'] = time.time()
 
             if data['team_icon']:
-                img_data = data['team_icon'].read()
-                icon = Image.open(StringIO(img_data))
+                default_storage.delete(storage['team_icon'])
+                icon = Image.open(data['team_icon'])
                 fn = 'portal/global_team_icon.%s' % icon.format.lower()
-                imgp = path.join(settings.MEDIA_ROOT, fn)
-
-                if path.exists(imgp):
-                    os.remove(imgp)
-
-                icon.save(imgp)
-
+                default_storage.save(fn, data['team_icon'])
                 storage['team_icon'] = team_icon = fn
 
             if data['license_note']:
