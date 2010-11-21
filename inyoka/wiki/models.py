@@ -224,7 +224,7 @@ class PageManager(models.Manager):
         pagelist cache is invalidated.
         """
         return [x[0] for x in self._get_object_list(nocache)
-                if (not existing_only or not x[1]) and x[2]]
+                if (not existing_only or not x[1]) and not x[2]]
 
     def get_attachment_list(self, parent=None, existing_only=True,
                             nocache=False):
@@ -233,7 +233,7 @@ class PageManager(models.Manager):
         given only pages below that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
-                    if (not existing_only or not x[1]) and not x[2])
+                    if (not existing_only or not x[1]) and x[2])
         if parent is not None:
             parent += u'/'
             parents = set(parent.split('/'))
