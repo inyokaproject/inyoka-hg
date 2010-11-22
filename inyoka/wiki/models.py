@@ -82,6 +82,7 @@ import pickle
 from math import log
 from datetime import datetime
 from django.db import models, connection
+from django.db.models import Count, Max
 from werkzeug import cached_property
 
 from inyoka.conf import settings
@@ -129,20 +130,12 @@ class PageManager(models.Manager):
         head revision, say to compare head with head - 1 you can call
         ``Page.objects.get_head("Page_Name", -1)``.
         """
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT   r.id
-            FROM     wiki_revision r,
-                     wiki_page p
-            WHERE    p.name = %s
-            AND      p.id   = r.page_id
-            ORDER BY r.id DESC
-            LIMIT    1, %s;
-        ''', [name, abs(offset)])
-        row = cur.fetchone()
-        cur.close()
-        if row:
-            return row[0]
+        revs = Revision.objects.filter(
+            page__name = name,
+        ).order_by('-id')\
+         .values_list('id', flat=True)[abs(offset):abs(offset)+1]
+        if revs:
+            return revs[0]
 
     def get_tagcloud(self, max=100):
         """
@@ -162,24 +155,17 @@ class PageManager(models.Manager):
             In theory there is no upper limit for the tag size but it won't
             grow unnecessary high with a sane page count (< 1000000 pages)
         """
-        cur = connection.cursor()
-        count_field = connection.ops.quote_name('count')
-        cur.execute('''
-            SELECT   w.value,
-            COUNT(w.value) AS %s
-            FROM     wiki_metadata w
-            WHERE    w.key = 'tag'
-            GROUP BY w.value
-            ORDER BY %s DESC %s;
-        ''' % (count_field, count_field , (max is not None and 'limit %d' % max or '')))
-        try:
-            return [{
-                'name':     tag[0],
-                'count':    tag[1],
-                'size':     round(100 + log(tag[1] or 1) * 20, 2)
-            } for tag in sorted(cur.fetchall(), key=lambda x: x[0].lower())]
-        finally:
-            cur.close()
+        tags = MetaData.objects.filter(key = 'tag').values_list('value')\
+                               .annotate(count = Count('value'))\
+                               .order_by('-count')
+        if max is not None:
+            tags = tags[:max]
+
+        return [{
+            'name':     tag[0],
+            'count':    tag[1],
+            'size':     round(100 + log(tag[1] or 1) * 20, 2)
+        } for tag in sorted(tags, key=lambda x: x[0].lower())]
 
     def compare(self, name, old_rev, new_rev=None):
         """
@@ -196,7 +182,7 @@ class PageManager(models.Manager):
     def _get_object_list(self, nocache):
         """
         Get a list of all objects that are pages or attachments.  The return
-        value is a list of ``(name, deleted, latest_rev, is_page)`` tuples
+        value is a list of ``(name, deleted, is_page)`` tuples
         where `is_page` is False if that object is an attachment.
         """
         key = 'wiki/object_list'
@@ -205,24 +191,11 @@ class PageManager(models.Manager):
             pagelist = request_cache.get(key)
 
         if pagelist is None:
-            cur = connection.cursor()
-            cur.execute('''
-                SELECT   p.name   ,
-                         r.deleted,
-                         r.id     ,
-                         r.attachment_id IS NULL
-                FROM     wiki_page p,
-                         wiki_revision r
-                WHERE    p.id = r.page_id
-                AND      r.id =
-                         ( SELECT MAX(id)
-                         FROM    wiki_revision
-                         WHERE   page_id = p.id
-                         )
-                ORDER BY p.name;
-            ''')
-            pagelist = cur.fetchall()
-            cur.close()
+            pagelist = Page.objects.all().select_related('last_rev')\
+                .order_by('name').values_list('name', 'last_rev__deleted',
+                    'last_rev__attachment__id')
+            # force a list, can't pickle ValueQueryset that way
+            pagelist = list(pagelist)
             # we cache that also if the user wants something uncached
             # because if we are already fetching it we can cache it.
             request_cache.set(key, pagelist, 10000)
@@ -237,7 +210,7 @@ class PageManager(models.Manager):
         pagelist cache is invalidated.
         """
         return [x[0] for x in self._get_object_list(nocache)
-                if not existing_only or not x[1] and x[3]]
+                if (not existing_only or not x[1]) and not x[2]]
 
     def get_attachment_list(self, parent=None, existing_only=True,
                             nocache=False):
@@ -246,7 +219,7 @@ class PageManager(models.Manager):
         given only pages below that page are displayed.
         """
         filtered = (x[0] for x in self._get_object_list(nocache)
-                    if not existing_only or not x[1] and not x[3])
+                    if (not existing_only or not x[1]) and x[2])
         if parent is not None:
             parent += u'/'
             parents = set(parent.split('/'))
@@ -275,19 +248,9 @@ class PageManager(models.Manager):
 
         Groups are prefixed with an ``'@'`` sig.-
         """
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT m.value
-            FROM   wiki_metadata m,
-                   wiki_page p
-            WHERE  m.key     = 'X-Owner'
-            AND    m.page_id = p.id
-            AND    p.name    = %s;
-        ''', [page_name])
-        try:
-            return set(x[0] for x in cursor.fetchall())
-        finally:
-            cursor.close()
+        owners = MetaData.objects.filter(page__name=page_name, key='X-Owner')\
+                                 .values_list('value', flat=True)
+        return set(owners)
 
     def get_owned(self, owners):
         """
@@ -298,19 +261,9 @@ class PageManager(models.Manager):
         """
         if not owners:
             return []
-        cursor = connection.cursor()
-        cursor.execute('''
-        SELECT p.name
-        FROM   wiki_metadata m,
-               wiki_page p
-        WHERE  m.key     = 'X-Owner'
-        AND    m.page_id = p.id
-        AND    m.value IN (%s);
-        ''' % ', '.join(['%s'] * len(owners)), list(owners))
-        try:
-            return set(x[0] for x in cursor.fetchall())
-        finally:
-            cursor.close()
+        pages = MetaData.objects.filter(key='X-Owner', value__in=owners)\
+                                .values_list('page__name')
+        return set(pages)
 
     def get_orphans(self):
         """
@@ -370,11 +323,7 @@ class PageManager(models.Manager):
                 AND    m.value = p.name
                 AND    r.deleted
                 AND    p.id = r.page_id
-                AND    r.id =
-                       ( SELECT MAX(id)
-                       FROM    wiki_revision
-                       WHERE   page_id = p.id
-                       );
+                AND    r.id = p.last_rev_id;
                 ''')
             pages.union(x[0] for x in cur.fetchall())
         finally:
@@ -401,8 +350,8 @@ class PageManager(models.Manager):
         the caching backend by passing `nocache` = True.
         """
         rev = None
+        key = 'wiki/page/' + name
         if not nocache:
-            key = 'wiki/page/' + name
             rev = cache.get(key)
         if rev is None:
             try:
@@ -411,13 +360,13 @@ class PageManager(models.Manager):
                                       .latest()
             except Revision.DoesNotExist:
                 raise Page.DoesNotExist()
-        if not nocache:
-            try:
-                cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
-            except (IndexError, ValueError):
-                cachetime = None
-            rev.prepare_for_caching()
-            cache.set(key, rev, cachetime)
+            if not nocache:
+                try:
+                    cachetime = int(rev.page.metadata['X-Cache-Time'][0]) or None
+                except (IndexError, ValueError):
+                    cachetime = None
+                rev.prepare_for_caching()
+                cache.set(key, rev, cachetime)
         page = rev.page
         page.rev = rev
         if rev.deleted and raise_on_deleted:
@@ -456,19 +405,9 @@ class PageManager(models.Manager):
 
     def find_by_tag(self, tag):
         """Return a list of page names tagged with `tag`."""
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT p.name
-            FROM   wiki_page p,
-                   wiki_metadata m
-            WHERE  m.key     = 'tag'
-            AND    m.value   =%s
-            AND    m.page_id = p.id;
-        ''', (tag,))
-        try:
-            return [x[0] for x in cur.fetchall()]
-        finally:
-            cur.close()
+        pages = MetaData.objects.filter(key='tag', value=tag)\
+                                .values_list('page__name', flat=True)
+        return pages
 
     def attachment_for_page(self, page_name):
         """
@@ -476,27 +415,11 @@ class PageManager(models.Manager):
         provided.  If the page does not exist or it doesn't have an attachment
         defined the return value will be `None`.
         """
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT   a.file,
-                     MAX(r.id)
-            FROM     wiki_attachment a,
-                     wiki_revision r  ,
-                     wiki_page p
-            WHERE    r.page_id       = p.id
-            AND      r.attachment_id = a.id
-            AND      p.name          = %s
-            AND      NOT r.deleted
-            GROUP BY a.file,
-                     r.id
-            ORDER BY r.id DESC;
-        ''', [page_name])
-        row = cursor.fetchone()
-        if row:
-            # XXX: right now django does not support any unicode character
-            # in filenames. I believe however that this will change over time
-            # so this goes the save way and encodes it to utf-8.
-            return row[0].encode('utf-8')
+        attachments = Revision.objects.filter(page__name=page_name, deleted=False)\
+                              .values_list('attachment__file')\
+                              .annotate(Max('id')).order_by('-id')[:1]
+        if attachments:
+            return attachments[0][0]
 
     def get_recently_created(self, date):
         """
@@ -611,6 +534,8 @@ class PageManager(models.Manager):
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
         page.rev.save()
+        page.last_rev = page.rev
+        page.save()
         if update_meta:
             page.update_meta()
         return page
@@ -840,6 +765,7 @@ class Page(models.Model):
     objects = PageManager()
     name = models.CharField(max_length=200, unique=True, db_index=True)
     topic_id = models.IntegerField(null=True)
+    last_rev = models.ForeignKey('Revision', null=True, related_name='unneded_dummy')
 
     #: this points to a revision if created with a query method
     #: that attaches revisions. Also creating a page object using
@@ -894,17 +820,8 @@ class Page(models.Model):
         non existing pages the list returned contains just the link targets
         in normalized format, not the page objects as such.
         """
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT m.value
-            FROM   wiki_metadata m
-            WHERE  m.page_id = %s
-            AND    m.key     = 'X-Link'
-        ''', [self.id])
-        try:
-            return [x[0] for x in cur.fetchall()]
-        finally:
-            cur.close()
+        return MetaData.objects.filter(page=self.id, key='X-Link')\
+                               .values_list('value', flat=True)
 
     @deferred
     def metadata(self):
@@ -913,17 +830,8 @@ class Page(models.Model):
         change metadata from the model because it's an aggregated value from
         multiple sources (explicit metadata, backlinks, macros etc.)
         """
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT m.key,
-                   m.value
-            FROM   wiki_metadata m
-            WHERE  m.page_id = %s;
-        ''', [self.id])
-        try:
-            return MultiMap(cur.fetchall())
-        finally:
-            cur.close()
+        meta = MetaData.objects.filter(page=self.id).values_list('key', 'value')
+        return MultiMap(meta)
 
     @property
     def topic(self):
@@ -971,17 +879,10 @@ class Page(models.Model):
                     new_metadata.remove(t)
                 new_metadata.add((key, join_pagename(self.name, value)))
 
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT m.id ,
-                   m.key,
-                   m.value
-            FROM   wiki_metadata m
-            WHERE  m.page_id = %s;
-        ''', [self.id])
+        qs = MetaData.objects.filter(page=self.id).values_list('id', 'key', 'value')
         to_remove = []
 
-        for id, key, value in cur.fetchall():
+        for id, key, value in qs:
             item = (key, value)
             if item in new_metadata:
                 new_metadata.remove(item)
@@ -989,12 +890,7 @@ class Page(models.Model):
                 to_remove.append(id)
 
         if to_remove:
-            cur.execute('''
-                DELETE
-                FROM   wiki_metadata
-                WHERE  id IN (%s);
-            ''' % ', '.join(['%s'] * len(to_remove)), list(to_remove))
-        cur.close()
+            MetaData.objects.filter(id__in=to_remove).delete()
 
         for key, value in new_metadata:
             # ignore keys that do not fetch into the column length.
@@ -1184,6 +1080,8 @@ class Page(models.Model):
                             change_date=change_date, note=note,
                             attachment=attachment, deleted=deleted,
                             remote_addr=remote_addr)
+        self.rev.save()
+        self.last_rev = self.rev
         self.save(update_meta=update_meta)
         if (deleted and rev and not rev.deleted) or \
            (not deleted and rev and rev.deleted):
@@ -1362,13 +1260,17 @@ class Revision(models.Model):
         note = (note and note + ' ' or '') + '[Revision vom ' + \
                datetime_to_timezone(self.change_date).strftime(
                    '%d.%m.%Y %H:%M %Z') + \
-               (' von %s wiederhergestellt]' % self.user.username)
-        new_rev = Revision(page=self.page, text=self.text, user=user or
-                           self.user, change_date=datetime.utcnow(),
+               (' von %s wiederhergestellt]' % (
+                   self.user.username if self.user else self.remote_addr))
+        new_rev = Revision(page=self.page, text=self.text,
+                           user=(user if user.is_authenticated else None),
+                           change_date=datetime.utcnow(),
                            note=note, deleted=False, remote_addr=
                            remote_addr or '127.0.0.1',
                            attachment=self.attachment)
         new_rev.save()
+        self.page.last_rev = new_rev
+        self.page.save()
         return new_rev
 
     def save(self, force_insert=False, force_update=False):

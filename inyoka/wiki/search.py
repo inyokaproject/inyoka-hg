@@ -10,7 +10,7 @@
 """
 from django.db import connection
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
-from inyoka.wiki.models import Revision
+from inyoka.wiki.models import Revision, Page
 from inyoka.utils.urls import url_for, href
 from inyoka.utils.search import search, SearchAdapter
 
@@ -43,17 +43,31 @@ class WikiSearchAdapter(SearchAdapter):
                 'user_url': url_for(rev.user)}
 
     def recv(self, page_id):
-        rev = Revision.objects.select_related(depth=2) \
+        rev = Revision.objects.select_related('page', 'user', 'text') \
                 .filter(page__id=page_id).latest()
         return self.extract_data(rev)
 
     def recv_multi(self, page_ids):
-        #TODO: make this efficient...
-        return [self.recv(id) for id in page_ids]
+        cur = connection.cursor()
+        cur.execute('''
+            SELECT   r.id
+            FROM     wiki_page p,
+                     wiki_revision r
+            WHERE    p.id IN (%s)
+            AND      r.id = p.last_rev_id
+            GROUP BY p.id
+        ''' % u', '.join(map(str, page_ids)))
+        revlist = [id[0] for id in cur.fetchall()]
+        cur.close()
+
+        revisions = Revision.objects.select_related('page', 'user', 'text') \
+                            .filter(id__in=revlist)
+
+        return [self.extract_data(rev) for rev in revisions]
 
     def store(self, page_id):
-        rev = Revision.objects.select_related(depth=1) \
-                .filter(page__id=page_id).latest()
+        rev = Revision.objects.select_related('page', 'text') \
+                .filter(page__id=page_id)
         search.store(
             component='w',
             uid=rev.page.id,
