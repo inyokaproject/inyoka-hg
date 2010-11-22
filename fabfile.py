@@ -144,8 +144,8 @@ def mysql():
 
 def clean_files():
     """Clean most temporary files"""
-    for f in '*.py[co]', '*~', '*.orig', '*.orig.*', '*.rej':
-        local("find -name '%s' -delete" % f)
+    for f in '*.py[co]', '*~', '*.orig', '*.rej':
+        local("rm -rf `find -name '%s'|grep -v .hg`" % f)
 
 def check_js():
     rhino = 'java -jar extra/js.jar'
