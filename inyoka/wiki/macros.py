@@ -850,40 +850,6 @@ class Date(Macro):
         return nodes.Text(format_datetime(date))
 
 
-class NewPages(Macro):
-    """
-    This macro shows the latest wiki articles and orders them by the month of
-    their creation.
-    """
-
-    arguments = (
-        ('months', int, 3),
-    )
-
-    def __init__(self, months):
-        self.months = months
-
-    def build_node(self, context, format):
-        now = datetime.utcnow()
-        if now.month > self.months:
-            date = datetime(now.year, now.month - self.months, 1)
-        else:
-            date = datetime(now.year - 1, 12 + now.month - self.months, 1)
-        result = nodes.Container()
-        last_month = None
-        for page, change_date in Page.objects.get_recently_created(date):
-            if change_date.month != last_month:
-                last_month = change_date.month
-                last_list = nodes.List('unordered')
-                text = nodes.Text(change_date.strftime('%B'))
-                headline = nodes.Headline(level=3, children=[text])
-                result.children.extend([headline, last_list])
-            title = [nodes.Text(get_pagetitle(page, True))]
-            link = nodes.InternalLink(page, title, force_existing=True)
-            last_list.children.append(nodes.ListItem([link]))
-        return result
-
-
 class Newline(Macro):
     """
     This macro just forces a new line.
@@ -1111,7 +1077,6 @@ ALL_MACROS = {
     u'Inhaltsverzeichnis':  TableOfContents,
     u'LetzteÄnderungen':    RecentChanges,
     u'NeueSeite':           NewPage,
-#    u'NeueSeiten':          NewPages,
     u'Seitenliste':         PageList,
     u'Seitenname':          PageName,
     u'Seitenzahl':          PageCount,
