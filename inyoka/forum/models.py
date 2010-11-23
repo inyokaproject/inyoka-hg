@@ -1104,7 +1104,8 @@ class Post(db.Model):
                     Topic.id == old_topic.id,
                     {'topic_id': new_topic.id}))
             db.session.delete(old_topic)
-            db.session.commit()
+
+        db.session.commit()
 
         # update the search index which has the post --> topic mapping indexed
         Post.multi_update_search([post.id for post in posts])
