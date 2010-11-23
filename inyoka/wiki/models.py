@@ -298,10 +298,8 @@ class PageManager(models.Manager):
         Return a list of referenced page names that do not have existing
         pages.
         """
-        defined = MetaData.objects.values_list('value') \
-            .extra(select={'value': 'wiki_metadata.value'},
-                   where=["wiki_metadata.key = 'X-Link'",
-                          "wiki_page.id IS NULL"])
+        defined = MetaData.objects.filter(key='X-Link').values_list('value') \
+                                  .extra(where=["wiki_page.id IS NULL"])
         defined.query.join(('wiki_metadata', 'wiki_page', 'value', 'name'), promote=True, nullable=True)
         pages = set(x[0] for x in defined.all())
 
