@@ -1,1 +1,1 @@
-Neuer Beitrag vom von dir beobachteten {{ post.author }} im Thema „{{ topic.title }}“: {{ post|url }}
+Neuer Beitrag vom von dir beobachteten Benutzer „{{ post.author }}“ im Thema „{{ topic.title }}“: {{ post|url }}

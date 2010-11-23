@@ -511,7 +511,7 @@ def subscribe_user(request, username):
     except Subscription.DoesNotExist:
         # there's no such subscription yet, create a new one
         Subscription(user=request.user, member_id=user.id).save()
-        flash(u'Du wirst ab nun über Aktivitäten von %s benachrichtigt'
+        flash(u'Du wirst ab nun über Aktivitäten von „%s“ benachrichtigt'
               % user.username)
     return HttpResponseRedirect(url_for(user))
 
@@ -525,7 +525,7 @@ def unsubscribe_user(request, username):
         pass
     else:
         subscription.delete()
-        flash(u'Du wirst ab nun nicht mehr über Aktivitäten von %s benachrichtigt'
+        flash(u'Du wirst ab nun nicht mehr über Aktivitäten von „%s“ benachrichtigt'
               % user.username)
     return HttpResponseRedirect(url_for(user))
 
