@@ -82,7 +82,7 @@ import pickle
 from math import log
 from datetime import datetime
 from django.db import models, connection
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q
 from werkzeug import cached_property
 
 from inyoka.conf import settings
@@ -302,32 +302,22 @@ class PageManager(models.Manager):
         Return a list of referenced page names that do not have existing
         pages.
         """
-        pages = set()
-        cur = connection.cursor()
-        try:
-            cur.execute('''
-                SELECT m.value
-                FROM   wiki_metadata m
-                       LEFT OUTER JOIN wiki_page p
-                       ON     m.value = p.name
-                WHERE  m.key          = 'X-Link'
-                AND    p.id     IS NULL;
-                ''')
-            pages = set(x[0] for x in cur.fetchall())
-            cur.execute('''
-                SELECT m.value
-                FROM   wiki_metadata m,
-                       wiki_page p    ,
-                       wiki_revision r
-                WHERE  m.key   = 'X-Link'
-                AND    m.value = p.name
-                AND    r.deleted
-                AND    p.id = r.page_id
-                AND    r.id = p.last_rev_id;
-                ''')
-            pages.union(x[0] for x in cur.fetchall())
-        finally:
-            cur.close()
+        defined = MetaData.objects.values_list('value') \
+            .extra(select={'value': 'wiki_metadata.value'},
+                   where=["wiki_metadata.key = 'X-Link'",
+                          "wiki_page.id IS NULL"])
+        defined.query.join(('wiki_metadata', 'wiki_page', 'value', 'name'), promote=True, nullable=True)
+        pages = set(x[0] for x in defined.all())
+
+        deleted = MetaData.objects.values_list('value') \
+            .extra(select={'value': 'wiki_metadata.value'},
+                   tables=['wiki_metadata', 'wiki_page', 'wiki_revision'],
+                   where=["wiki_metadata.key = 'X-Link'",
+                          "wiki_metadata.value = wiki_page.name",
+                          "wiki_revision.deleted",
+                          "wiki_page.id = wiki_revision.page_id",
+                          "wiki_revision.id = wiki_page.last_rev_id"])
+        pages.union(x[0] for x in deleted.all())
         return pages
 
     def get_similar(self, name, n=10):
