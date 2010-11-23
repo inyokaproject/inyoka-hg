@@ -284,11 +284,7 @@ class PageManager(models.Manager):
         WHERE    r.page_id             = p.id
         AND      r.attachment_id IS NULL
         AND      m.id            IS NULL
-        AND      r.id                  =
-                 (SELECT MAX(id)
-                 FROM    wiki_revision
-                 WHERE   page_id = p.id
-                 )
+        AND      r.id = p.last_rev_id
         AND      r.deleted = 0
         ORDER BY p.name;
         ''')
