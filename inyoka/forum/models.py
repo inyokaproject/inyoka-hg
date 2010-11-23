@@ -205,15 +205,19 @@ class ForumMapperExtension(db.MapperExtension):
 
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forums/%s' % instance.slug)
+        db.session.expire(instance)
         return db.EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         cache.delete('forum/forums/%s' % instance.slug)
         cache.delete('forum/slugs')
+        db.session.expire(instance)
         return db.EXT_CONTINUE
 
     def after_delete(self, mapper, connection, instance):
-        self.after_insert(self, mapper, connection, instance)
+        cache.delete('forum/forums/%s' % instance.slug)
+        cache.delete('forum/slugs')
+        db.session.expire(instance)
         return db.EXT_CONTINUE
 
 
