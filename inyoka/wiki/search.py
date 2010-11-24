@@ -72,11 +72,9 @@ class WikiSearchAdapter(SearchAdapter):
         )
 
     def get_doc_ids(self):
-        cur = connection.cursor()
-        cur.execute('SELECT id FROM wiki_page;')
-        for row in cur.fetchall():
+        pages = Page.objects.values_list('id', flat=True).order_by()
+        for row in pages:
             yield row[0]
-        cur.close()
 
 
 search.register(WikiSearchAdapter())
