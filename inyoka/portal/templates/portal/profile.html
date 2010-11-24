@@ -159,9 +159,9 @@
   {%- if request.user.can('subscribe_to_users') %}
     |
     {%- if is_subscribed %}
-      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe subscribe_user adminlink">Verfolgung einstellen</a>
+      <a href="{{ generate_subscription_link(do='unsubscribe') }}" class="action action_subscribe subscribe_user adminlink">Nicht mehr beobachten</a>
     {%- else %}
-      <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_user adminlink">stalken</a>
+      <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_user adminlink">Beobachten</a>
     {%- endif %}
   {%- endif %}
 {% endblock %}
