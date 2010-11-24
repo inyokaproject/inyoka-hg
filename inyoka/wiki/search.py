@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.db import connection
+from django.db.models import Count
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
 from inyoka.wiki.models import Revision, Page
 from inyoka.utils.urls import url_for, href
@@ -48,17 +49,8 @@ class WikiSearchAdapter(SearchAdapter):
         return self.extract_data(rev)
 
     def recv_multi(self, page_ids):
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT   r.id
-            FROM     wiki_page p,
-                     wiki_revision r
-            WHERE    p.id IN (%s)
-            AND      r.id = p.last_rev_id
-            GROUP BY p.id
-        ''' % u', '.join(map(str, page_ids)))
-        revlist = [id[0] for id in cur.fetchall()]
-        cur.close()
+        revlist = Page.objects.value_list('last_rev_id', flat=True) \
+                              .filter(id__in=page_ids).order_by()
 
         revisions = Revision.objects.select_related('page', 'user', 'text') \
                             .filter(id__in=revlist)
