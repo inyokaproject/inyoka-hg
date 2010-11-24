@@ -20,10 +20,13 @@
   <h3>Status</h3>
   <dl>
     <dt>{{ form.status.label }}</dt>
-    <dd>{{ form.status }} {{ form.errors.status }}<br />
-      <span class="note">
+    <dd>{{ form.status }} {{ form.errors.status }}
+      <div class="note">
         Der Benutzer hat sich {{ user.last_login|specificdatetimeformat(true) }} das letzte Mal eingeloggt.
-      </span>
+      </div>
+      <div class="note">
+        Der Benutzer hat sich {{ user.date_joined|specificdatetimeformat(true) }} registriert.
+      </div>
       <div class="note">
         {{ user.username }} eine <a href="{{ href('admin', 'users', 'mail', user.username, next=CURRENT_URL) }}">E-Mail schreiben</a>.
       </div>
