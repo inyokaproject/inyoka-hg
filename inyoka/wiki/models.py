@@ -272,26 +272,13 @@ class PageManager(models.Manager):
         attachments!
         """
         ignore = set([settings.WIKI_MAIN_PAGE])
-        cur = connection.cursor()
-        cur.execute('''
-        SELECT   p.name,
-                 r.id
-        FROM     wiki_page p
-                 LEFT OUTER JOIN wiki_metadata m
-                 ON       m.key  = 'X-Link'
-                 AND      p.name = m.value,
-                          wiki_revision r
-        WHERE    r.page_id             = p.id
-        AND      r.attachment_id IS NULL
-        AND      m.id            IS NULL
-        AND      r.id = p.last_rev_id
-        AND      r.deleted = 0
-        ORDER BY p.name;
-        ''')
-        try:
-            return [x[0] for x in cur.fetchall() if x[0] not in ignore]
-        finally:
-            cur.close()
+        pages = set(self.get_page_list())
+        linked_pages = set(MetaData.objects.values_list('page__name', flat=True) \
+                                           .filter(key='X-Link').all())
+        redirects = set(MetaData.objects.values_list('page__name', flat=True) \
+                                        .filter(key='X-Redirect'))
+        pages = (pages - linked_pages) - redirects
+        return sorted([page for page in pages if not page in ignore])
 
     def get_missing(self):
         """
