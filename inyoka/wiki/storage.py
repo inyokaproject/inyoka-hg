@@ -95,11 +95,7 @@ class BaseStorage(object):
             WHERE    p.id = r.page_id
             AND      p.id = m.page_id
             AND      t.id = r.text_id
-            AND      r.id =
-                     (SELECT MAX(id)
-                     FROM    wiki_revision
-                     WHERE   page_id = p.id
-                     )
+            AND      r.id = p.last_rev_id
             AND      NOT r.deleted
             AND      m.key   = 'X-Behave'
             AND      m.value = %s
@@ -207,11 +203,7 @@ class SmileyMap(DictStorage):
                    wiki_attachment a
             WHERE  p.name IN (%s)
             AND    r.page_id = p.id
-            AND    r.id      =
-                   (SELECT MAX(id)
-                   FROM    wiki_revision
-                   WHERE   page_id = p.id
-                   )
+            AND    r.id      = p.last_rev_id
             AND    NOT r.deleted
             AND    r.attachment_id = a.id;
         ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
