@@ -1474,6 +1474,10 @@ def monitoring(request, page):
     database = get_mdb_database(True)
     collection = database['errors']
 
+    # ensure the indexes exists
+    collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
+    collection.ensure_index([('hash', ASCENDING)], unique=True)
+
     if page == 'all':
         show_all = True
         page = 1
@@ -1484,9 +1488,10 @@ def monitoring(request, page):
     if page == 0:
         return HttpResponseRedirect(href('admin', 'monitoring'))
 
-    # ensure the indexes exists
-    collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
-    collection.ensure_index([('hash', ASCENDING)], unique=True)
+    if request.method == 'POST' and 'delete_marked' in request.POST:
+        hashes = request.POST.getlist('selected')
+        collection.update({'hash': {'$in': hashes}}, {'$set': {'status': 'close'}})
+        return HttpResponseRedirect(href('admin', 'monitoring'))
 
     if 'close' in request.GET:
         hash = request.GET.get('close')
