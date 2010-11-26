@@ -1490,14 +1490,15 @@ def monitoring(request, page):
 
     if request.method == 'POST' and 'delete_marked' in request.POST:
         hashes = request.POST.getlist('selected')
-        collection.update({'hash': {'$in': hashes}}, {'$set': {'status': 'close'}})
+        collection.update({'hash': {'$in': hashes}}, {'$set': {'status': 'close'}},
+                          multi=True, upsert=True)
         flash(u'Es wurden %s Einträge gelöscht' % len(hashes))
         return HttpResponseRedirect(href('admin', 'monitoring'))
 
     if 'close' in request.GET:
         hash = request.GET.get('close')
         if collection.find({'hash': hash}).count():
-            collection.update({'hash': hash}, {'$set': {'status': 'close'}})
+            collection.update({'hash': hash}, {'$set': {'status': 'close'}}, upsert=True)
             return HttpResponseRedirect(href('admin', 'monitoring'))
 
     all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
