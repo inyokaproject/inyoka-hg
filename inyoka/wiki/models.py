@@ -273,12 +273,12 @@ class PageManager(models.Manager):
         """
         ignore = set([settings.WIKI_MAIN_PAGE])
         pages = set(self.get_page_list())
-        linked_pages = set(MetaData.objects.values_list('page__name', flat=True) \
+        linked_pages = set(MetaData.objects.values_list('value', flat=True) \
                                            .filter(key='X-Link').all())
-        redirects = set(MetaData.objects.values_list('page__name', flat=True) \
+        redirects = set(MetaData.objects.values_list('value', flat=True) \
                                         .filter(key='X-Redirect'))
         pages = (pages - linked_pages) - redirects
-        return sorted([page for page in pages if not page in ignore])
+        return sorted(page for page in pages if not page in ignore)
 
     def get_missing(self):
         """
