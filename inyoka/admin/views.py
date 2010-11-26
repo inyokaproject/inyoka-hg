@@ -1491,6 +1491,7 @@ def monitoring(request, page):
     if request.method == 'POST' and 'delete_marked' in request.POST:
         hashes = request.POST.getlist('selected')
         collection.update({'hash': {'$in': hashes}}, {'$set': {'status': 'close'}})
+        flash(u'Es wurden %s Einträge gelöscht' % len(hashes))
         return HttpResponseRedirect(href('admin', 'monitoring'))
 
     if 'close' in request.GET:
