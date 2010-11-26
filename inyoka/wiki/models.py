@@ -285,20 +285,21 @@ class PageManager(models.Manager):
         Return a list of referenced page names that do not have existing
         pages.
         """
-        defined = MetaData.objects.filter(key='X-Link').values_list('value') \
-                                  .extra(where=["wiki_page.id IS NULL"])
-        defined.query.join(('wiki_metadata', 'wiki_page', 'value', 'name'), promote=True, nullable=True)
-        pages = set(x[0] for x in defined.all())
+        missing = MetaData.objects.filter(key='X-Link')\
+                                  .values_list('value', flat=True)\
+                                  .extra(where=["wiki_page.id IS NULL"])\
+                                  .distinct()
+        missing.query.join(('wiki_metadata', 'wiki_page', 'value', 'name'), promote=True, nullable=True)
+        pages = set(missing)
 
-        deleted = MetaData.objects.values_list('value') \
-            .extra(select={'value': 'wiki_metadata.value'},
-                   tables=['wiki_metadata', 'wiki_page', 'wiki_revision'],
+        deleted = MetaData.objects.values_list('value', flat=True) \
+            .extra(tables=['wiki_metadata', 'wiki_page', 'wiki_revision'],
                    where=["wiki_metadata.key = 'X-Link'",
                           "wiki_metadata.value = wiki_page.name",
                           "wiki_revision.deleted",
                           "wiki_page.id = wiki_revision.page_id",
                           "wiki_revision.id = wiki_page.last_rev_id"])
-        pages.union(x[0] for x in deleted.all())
+        pages.union(deleted)
         return pages
 
     def get_similar(self, name, n=10):
