@@ -35,48 +35,53 @@
 <div class="pagination pagination_right"><span><a href="{{ href('admin', 'monitoring' 'all') }}">Alle anzeigen</a> <span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div>
 <h3>Tracebacks</h3>
 <div class="errorlist">
-  {%- for error in errors %}
-  <div id="w{{ error.hash }}">
-    <h4><strong>{{ error.message|e }}:</strong> {{ error.info|e }}</h4>
-    <div><pre>{{ error.exc_text|e }}</pre></div>
-    <ul class="advanced" id="v{{ error.hash }}">
-    {%- if not error.frames %}
-    {%- set frames = [error.frame] %}
-    {%- else %}
-    {%- set frames = error.frames %}
-    {% endif %}
-    {%- for frame in frames %}
-      {% if frame.vars %}
-        <li class="frame">
-          <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
-          {% if frame.vars %}
-          <table class="vars" id="v{{ error.hash }}">
-            <tr>
-              <th>Variable</th>
-              <th>Value</th>
-            </tr>
-            {% for var in frame.vars|sort %}
-              <tr>
-                <td>{{ var[0]|e }}</td>
-                <td class="code"><pre>{{ var[1]|e }}</pre></td>
-              </tr>
-            {% endfor %}
-          </table>
-          {% endif %}
-        </li>
+  <form method="post" action="">
+    {%- for error in errors %}
+    <div id="w{{ error.hash }}">
+      <h4><strong>{{ error.message|e }}:</strong> {{ error.info|e }}</h4>
+      <div><pre>{{ error.exc_text|e }}</pre></div>
+      <ul class="advanced" id="v{{ error.hash }}">
+      {%- if not error.frames %}
+      {%- set frames = [error.frame] %}
+      {%- else %}
+      {%- set frames = error.frames %}
       {% endif %}
-    {% endfor %}
-    </ul>
+      {%- for frame in frames %}
+        {% if frame.vars %}
+          <li class="frame">
+            <strong><code>{{ frame.filename }}</code> in <code>{{ frame.function }}</code></strong>
+            {% if frame.vars %}
+            <table class="vars" id="v{{ error.hash }}">
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+              </tr>
+              {% for var in frame.vars|sort %}
+                <tr>
+                  <td>{{ var[0]|e }}</td>
+                  <td class="code"><pre>{{ var[1]|e }}</pre></td>
+                </tr>
+              {% endfor %}
+            </table>
+            {% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+      </ul>
 
-    <p class="details">
-      <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
-      <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
-    </p>
-    </div>
-  {%- else %}
-    <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
-  {%- endfor %}
-  <div class="pagination pagination_right"><span><a href="{{ href('admin', 'monitoring' 'all') }}">Alle anzeigen</a> </span><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div><div style="clear: both;"/>
+      <p class="details">
+        <span>Occured {{ error.occured }} times, Created {{ error.created|datetimeformat }}</span>
+        <span><input type="checkbox" value="{{ error.hash }}" name="selected" /></span>
+        <span class="actions"><a href="#" class="show_frames" id="v{{ error.hash }}">Show frame vars</a> | <a href="{{ href('admin', 'monitoring', close=error.hash) }}">close</a></span>
+      </p>
+      </div>
+    {%- else %}
+      <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
+    {%- endfor %}
+    <div class="pagination pagination_right"><span><a href="{{ href('admin', 'monitoring' 'all') }}">Alle anzeigen</a> </span><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div><div style="clear: both;"/>
+
+    <input type="submit" value="Markierte Einträge löschen" name="delete_marked" />
+  </form>
 </div>
 
 <script type="text/javascript">
