@@ -1474,7 +1474,13 @@ def monitoring(request, page):
     database = get_mdb_database(True)
     collection = database['errors']
 
-    page = int(page) if (page is not None and page.isdigit()) else 1
+    if page == 'all':
+        show_all = True
+        page = 1
+    else:
+        show_all = False
+        page = int(page) if (page is not None and page.isdigit()) else 1
+
     if page == 0:
         return HttpResponseRedirect(href('admin', 'monitoring'))
 
@@ -1489,7 +1495,10 @@ def monitoring(request, page):
             return HttpResponseRedirect(href('admin', 'monitoring'))
 
     all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
-                           .sort('created', DESCENDING).skip(page-1).limit(10)
+                           .sort('created', DESCENDING)
+    if not show_all:
+        all_errors = all_errors.skip(page-1).limit(25)
+
     error_count = collection.count()
     closed = collection.find({'status': 'close'}).count()
     reopened = collection.find({'status': 'reopen'}).count()
