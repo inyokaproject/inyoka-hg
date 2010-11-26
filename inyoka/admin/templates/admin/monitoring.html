@@ -78,7 +78,7 @@
     {%- else %}
       <strong>Es gibt keine Fehler, wir sind die Helden der Welt!</strong>
     {%- endfor %}
-    <div class="pagination pagination_right"><span><a href="{{ href('admin', 'monitoring' 'all') }}">Alle anzeigen</a> </span><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div><div style="clear: both;"/>
+    <div class="pagination pagination_right"><span><a href="{{ href('admin', 'monitoring', 'all') }}">Alle anzeigen</a> </span><span class="prev"><a href="{{ href('admin', 'monitoring', page - 1) }}">« Zurück</a></span><span class="next"><a href="{{ href('admin', 'monitoring', page + 1) }}">Weiter »</a></span></div><div style="clear: both;"/>
 
     <input type="submit" value="Markierte Einträge löschen" name="delete_marked" />
   </form>
