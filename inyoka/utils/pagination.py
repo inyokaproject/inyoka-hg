@@ -37,6 +37,7 @@
 import math
 from inyoka.utils.http import PageNotFound, HttpResponseRedirect
 from inyoka.utils.html import escape
+from django.utils.encoding import force_unicode
 from werkzeug import url_encode
 
 
@@ -89,8 +90,8 @@ class Pagination(object):
         if page == 1:
             url = self.link_base
         else:
-            url = '%s%d/' % (self.link_base, page)
-        return url + (params and '?' + url_encode(params) or '')
+            url = u'%s%d/' % (self.link_base, page)
+        return url + (params and u'?' + url_encode(params) or u'')
 
     def generate(self, position=None, threshold=2, show_next_link=True,
                  show_prev_link=True):
@@ -103,7 +104,14 @@ class Pagination(object):
         pages = 1
         if self.total:
             pages = max(0, self.total - 1) // self.per_page + 1
-        params = dict((k, v) for k, v in self.parameters.iteritems())
+
+        # This unicode/utf-8 conversion exists because of some fancy hacker-bots
+        # that try to fuzzy the pagination with some extremly invalid unicode data.
+        # Catching those here fixes vulerabilty of the whole application.
+        _get_v = lambda v: force_unicode(v).encode('utf-8') if isinstance(v, basestring) else v
+        params = dict((force_unicode(k).encode('utf-8'), _get_v(v))
+                       for k, v in self.parameters.iteritems())
+
         half_threshold = max(math.ceil(threshold / 2.0), 2)
         for num in xrange(1, pages + 1):
             if num <= threshold or num > pages - threshold or\
