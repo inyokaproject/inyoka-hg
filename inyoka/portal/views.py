@@ -10,6 +10,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import binascii
 from werkzeug import parse_accept_header
 from pytz import country_timezones, utc
 from datetime import timedelta, datetime, date
@@ -1391,7 +1392,7 @@ def confirm(request, action=None):
 
     try:
         data = decode_confirm_data(data)
-    except ValueError:
+    except (ValueError, binascii.Error):
         return {
             'failed': u'Die eingebenen Daten sind ungültig!',
             'action': action
