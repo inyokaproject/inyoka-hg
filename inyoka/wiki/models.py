@@ -778,7 +778,7 @@ class Page(models.Model):
         meta = MetaData.objects.filter(page=self.id).values_list('key', 'value')
         return MultiMap(meta)
 
-    @property
+    @deferred
     def topic(self):
         from inyoka.forum.models import Topic
         # XXX: own foreign-key mapping for django
