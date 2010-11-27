@@ -1387,7 +1387,6 @@ def confirm(request, action=None):
     }
     data = request.REQUEST.get('data', u'').strip()
     if not data:
-        # print the form
         return {'action': action}
 
     try:

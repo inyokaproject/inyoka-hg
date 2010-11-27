@@ -218,8 +218,12 @@ class SearchSystem(object):
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
-                user = User.objects.get(data)
-                return u'user_id:%s' % user.id
+                try:
+                    user = User.objects.get(data)
+                except User.DoesNotExist:
+                    pass
+                else:
+                    return u'user_id:%s' % user.id
             elif prefix in (u'area', u'bereich'):
                 map = {
                     'forum': 'f',
@@ -276,6 +280,7 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
+
 
         connection = self.get_connection()
 
