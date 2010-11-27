@@ -21,7 +21,6 @@ from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
 from inyoka.utils import get_significant_digits
-from inyoka.utils.text import create_excerpt
 from inyoka.utils.parsertools import OrderedDict
 
 
@@ -74,7 +73,6 @@ class SearchResult(object):
         self.page = page
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
-        terms = _description_re.findall(str(query))
         results = OrderedDict()
         for match in mset:
             adapter, id = match.document.get_value(0).split(':')
@@ -99,7 +97,7 @@ class SearchResult(object):
                 except KeyError:
                     text = None
                 if text:
-                    data['excerpt'] = create_excerpt(text, terms)
+                    data['excerpt'] = create_excerpt(text, query)
                 data['title'] = data['title']
                 data['score'] = match.percent
                 results[mq] = data
@@ -437,3 +435,7 @@ class SearchAdapter(object):
 
     def get_doc_ids(self):
         raise NotImplementedError('get_doc_ids')
+
+
+# circ import
+from inyoka.utils.highlight import create_excerpt
