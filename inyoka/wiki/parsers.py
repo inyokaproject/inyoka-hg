@@ -172,6 +172,7 @@ class TemplateParser(Parser):
     def __init__(self, data, args, kwargs):
         if not args:
             self.template = None
+            self.context = None
             return
         items = kwargs.items()
         for idx, arg in enumerate(args[1:] + (data,)):

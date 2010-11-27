@@ -21,7 +21,6 @@ from cPickle import dumps, loads
 from django.core.exceptions import ObjectDoesNotExist
 from inyoka.conf import settings
 from inyoka.utils import get_significant_digits
-from inyoka.utils.text import create_excerpt
 from inyoka.utils.parsertools import OrderedDict
 
 
@@ -74,7 +73,6 @@ class SearchResult(object):
         self.page = page
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
-        terms = _description_re.findall(str(query))
         results = OrderedDict()
         for match in mset:
             adapter, id = match.document.get_value(0).split(':')
@@ -99,7 +97,7 @@ class SearchResult(object):
                 except KeyError:
                     text = None
                 if text:
-                    data['excerpt'] = create_excerpt(text, terms)
+                    data['excerpt'] = create_excerpt(text, query)
                 data['title'] = data['title']
                 data['score'] = match.percent
                 results[mq] = data
@@ -220,8 +218,12 @@ class SearchSystem(object):
             data = match.group(2).strip()
             if prefix in (u'user', u'author'):
                 from inyoka.portal.user import User
-                user = User.objects.get(data)
-                return u'user_id:%s' % user.id
+                try:
+                    user = User.objects.get(data)
+                except User.DoesNotExist:
+                    pass
+                else:
+                    return u'user_id:%s' % user.id
             elif prefix in (u'area', u'bereich'):
                 map = {
                     'forum': 'f',
@@ -278,6 +280,7 @@ class SearchSystem(object):
                                  xapian.sortable_serialise(d1),
                                  xapian.sortable_serialise(d2))
             qry = xapian.Query(xapian.Query.OP_FILTER, qry, range)
+
 
         connection = self.get_connection()
 
@@ -437,3 +440,7 @@ class SearchAdapter(object):
 
     def get_doc_ids(self):
         raise NotImplementedError('get_doc_ids')
+
+
+# circ import
+from inyoka.utils.highlight import create_excerpt
