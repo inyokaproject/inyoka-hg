@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.add_column('wiki_page', 'last_rev', self.gf('django.db.models.fields.related.ForeignKey')(related_name='unneded_dummy', null=True, to=orm['wiki.Revision']), keep_default=False)
 
         db.execute('''
-            update wiki_page p set p.last_rev_id = (
+            update wiki_page p set last_rev_id = (
                 select max(r.id) from wiki_revision r
                 where r.page_id = p.id
             );
