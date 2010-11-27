@@ -864,12 +864,21 @@ class Page(models.Model):
             cache.delete('wiki/object_list')
         models.Model.save(self)
 
+        related_pages = set()
+        linked = MetaData.objects.values_list('value', 'page__id') \
+                                 .filter(key__in=('X-Link', 'X-Attach'),
+                                         value=self.name)
+        for value, pid in linked.all():
+            cache.delete('wiki/page/%s' % value)
+            related_pages.add(pid)
+        cache.delete('wiki/page/%s' % self.name)
+
         # This kills kinda everything on the wrong article, rethink that!
         # Right now it seems that this is required to update reference-links and such
         # things.  I don't know how that system works right now, but I try to
         # investigate some time into it -- entequak (11:40 12.10.10)
-#        related_pages = set()
-#        cur = connection.cursor()
+        # I (--entequak) enabled partly the cache erasion of related pages.  Right now I
+        # don't see any reason why we need to erase the render instructions too. (07:55 27.11.)
 #        try:
 #            cur.execute('''
 #                select distinct p.name, p.id
@@ -907,7 +916,7 @@ class Page(models.Model):
 #                ''' % ', '.join(all))
 #        finally:
 #            cur.close()
-
+#
         if self.rev is not None:
             self.rev.save()
         if update_meta:

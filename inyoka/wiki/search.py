@@ -8,7 +8,6 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django.db import connection
 from django.db.models import Count
 from inyoka.wiki.acl import MultiPrivilegeTest, PRIV_READ
 from inyoka.wiki.models import Revision, Page
