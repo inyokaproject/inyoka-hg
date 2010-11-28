@@ -117,9 +117,9 @@ def resolve_interwiki_link(wiki, page):
         return
     quoted_page = url_quote(page, safe='%')
     if '$PAGE' not in rule:
-        link = rule + page
+        link = rule + quoted_page
     else:
-        link = rule.replace('$PAGE', page)
+        link = rule.replace('$PAGE', quoted_page)
     return link
 
 
