@@ -84,32 +84,16 @@ class BaseStorage(object):
         if self.data is not None:
             return
 
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT   t.value,
-                     p.name
-            FROM     wiki_page p    ,
-                     wiki_revision r,
-                     wiki_text t    ,
-                     wiki_metadata m
-            WHERE    p.id = r.page_id
-            AND      p.id = m.page_id
-            AND      t.id = r.text_id
-            AND      r.id = p.last_rev_id
-            AND      NOT r.deleted
-            AND      m.key   = 'X-Behave'
-            AND      m.value = %s
-            GROUP BY r.id   ,
-                     t.value,
-                     p.name
-            ORDER BY p.name;
-        ''', [self.behavior_key])
+        data = MetaData.objects.values_list('page__last_rev__text__value', 'page__name') \
+            .filter(key='X-Behave',
+                    page__last_rev__deleted=False,
+                    value=self.behavior_key) \
+            .order_by('page__name').all()
 
         objects = []
-        for raw_text, page_name in cur.fetchall():
+        for raw_text, page_name in data:
             block = self.find_block(raw_text)
             objects.append(self.extract_data(block))
-        cur.close()
 
         self.data = self.combine_data(objects)
         request_cache.set(key, self.data, 10000)
@@ -287,3 +271,6 @@ storage = StorageManager(
     interwiki=InterwikiMap,
     acl=AccessControlList
 )
+
+# circ imports
+from inyoka.wiki.models import MetaData
