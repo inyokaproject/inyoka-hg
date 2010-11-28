@@ -178,7 +178,9 @@ def handle_favicon(match, pre, is_main_page, page_name):
 
 
 def handle_link(match, pre, is_main_page, page_name):
-    return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+    if not '?' in match.group():
+        return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+    return u'href="%s%s.html"' % (pre, fix_path(page_name))
 
 
 def handle_powered_by(match, pre, is_main_page, page_name):
