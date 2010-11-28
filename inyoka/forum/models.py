@@ -181,8 +181,9 @@ class ForumQuery(db.Query):
             query = self.get_eager().filter_by(slug=slug)
             forum = cache.get('forum/forums/%s' % slug)
             if forum is None:
-                forum = query.one()
-                cache.set('forum/forums/%s' % slug, forum, 300)
+                forum = query.first()
+                if forum:
+                    cache.set('forum/forums/%s' % slug, forum, 300)
             else:
                 forum = db.session.merge(forum, load=False)
             return forum
