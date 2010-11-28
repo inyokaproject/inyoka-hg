@@ -178,26 +178,15 @@ class SmileyMap(DictStorage):
         if not mapping:
             return []
 
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT a.file,
-                   p.name
-            FROM   wiki_page p    ,
-                   wiki_revision r,
-                   wiki_attachment a
-            WHERE  p.name IN (%s)
-            AND    r.page_id = p.id
-            AND    r.id      = p.last_rev_id
-            AND    NOT r.deleted
-            AND    r.attachment_id = a.id;
-        ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
+        data = Page.objects.values_list('last_rev__attachment__file', 'name') \
+            .filter(name__in=mapping.keys(),
+                    last_rev__deleted=False).all()
 
         result = []
-        for filename, page in cur.fetchall():
+        for filename, page in data:
             path = urljoin(settings.MEDIA_URL, filename)
             for code in mapping[page]:
                 result.append((code, path))
-        cur.close()
         return result
 
 
@@ -273,4 +262,4 @@ storage = StorageManager(
 )
 
 # circ imports
-from inyoka.wiki.models import MetaData
+from inyoka.wiki.models import MetaData, Page
