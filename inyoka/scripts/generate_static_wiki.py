@@ -55,7 +55,7 @@ ERROR_REPORT_RE = re.compile(r'<a href=".[^"]+" id="user_error_report_link">Fehl
 POWERED_BY_RE = re.compile(r'<li class="poweredby">.*?</li>', re.DOTALL)
 SEARCH_PATHBAR_RE = re.compile(r'<form .*? class="search">.+?</form>', re.DOTALL)
 DROPDOWN_RE = re.compile(r'<div class="dropdown">.+?</div>', re.DOTALL)
-
+JS_LOGIN = re.compile(r'<form.*?id="js_login_form">.+?</form>', re.DOTALL)
 GLOBAL_MESSAGE_RE = re.compile(r'(<div class="message global">).+?(</div>)', re.DOTALL)
 
 SNAPSHOT_MESSAGE = u'''<div class="message staticwikinote">
@@ -203,6 +203,7 @@ REPLACERS = (
     (GLOBAL_MESSAGE_RE, ''),
     (SEARCH_PATHBAR_RE, ''),
     (DROPDOWN_RE,       ''),
+    (JS_LOGIN,          ''),
     (TAB_RE,            SNAPSHOT_MESSAGE))
 
 
