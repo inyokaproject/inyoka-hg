@@ -130,8 +130,7 @@ def get_thumbnail(location, width=None, height=None, force=False):
 
     The return value is `None` if it cannot generate a thumbnail or the path
     for the thumbnail.  Join it with the media root or media URL to get the
-    internal filename or external url.  This method either generates a PNG or
-    JPG thumbnail.  It tries both and uses the smaller file.
+    internal filename or external url.  This method generates a PNG thumbnail.
     """
     if not width and not height:
         raise ValueError('neither with nor height given')
@@ -160,12 +159,8 @@ def get_thumbnail(location, width=None, height=None, force=False):
     )
     base_filename = os.path.join('wiki', 'thumbnails', hash[:1],
                                  hash[:2], hash)
-    filenames = [base_filename + '.png', base_filename + '.jpeg']
-
-    # check if we already have a thumbnail for this hash
-    for fn in filenames:
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, fn)):
-            return fn
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, base_filename + '.png')):
+        return fn
 
     # get the source stream. if the location is an url we load it using
     # the urllib2 and convert it into a StringIO so that we can fetch the
