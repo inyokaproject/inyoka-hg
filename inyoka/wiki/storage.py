@@ -43,7 +43,7 @@ import re
 from urlparse import urljoin
 from django.db import connection
 from inyoka.conf import settings
-from inyoka.utils.cache import cache, request_cache
+from inyoka.utils.cache import request_cache
 
 
 _block_re = re.compile(r'\{\{\{(?:\n?#.*?$)?(.*?)\}\}\}(?sm)')

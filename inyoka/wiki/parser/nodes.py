@@ -738,7 +738,7 @@ class Link(Element):
         if self.scheme == 'javascript':
             yield escape(self.caption)
             return
-        rel = style = title = None
+        rel = None
         if not self.netloc or self.netloc == settings.BASE_DOMAIN_NAME or \
            self.netloc.endswith('.' + settings.BASE_DOMAIN_NAME):
             class_ = 'crosslink'

@@ -28,7 +28,6 @@ from inyoka.portal.user import User
 from subprocess import Popen, PIPE
 
 
-
 def has_conflicts(text):
     """Returns `True` if there are conflict markers in the text."""
     from inyoka.wiki.parser import parse, nodes
@@ -47,8 +46,7 @@ def debug_repr(obj):
         obj.__class__.__name__,
         ', '.join('%s=%r' % (key, value)
         for key, value in sorted(getattr(obj, '__dict__', {}).items())
-        if not key.startswith('_'))
-    )
+        if not key.startswith('_')))
 
 
 def simple_match(pattern, string, case_sensitive=False):
@@ -183,7 +181,6 @@ def get_thumbnail(location, width=None, height=None, force=False):
             src = open(os.path.join(settings.MEDIA_ROOT, page_filename), 'rb')
         except IOError:
             return
-
 
     # convert into the PNG and JPEG using imagemagick. Right now this
     # rethumbnails for every format. This should be improved that it

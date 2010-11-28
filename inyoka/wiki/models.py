@@ -81,8 +81,8 @@ from hashlib import sha1
 import pickle
 from math import log
 from datetime import datetime
-from django.db import models, connection
-from django.db.models import Count, Max, Q
+from django.db import models
+from django.db.models import Count, Max
 from werkzeug import cached_property
 
 from inyoka.conf import settings
@@ -130,10 +130,10 @@ class PageManager(models.Manager):
         head revision, say to compare head with head - 1 you can call
         ``Page.objects.get_head("Page_Name", -1)``.
         """
-        revs = Revision.objects.filter(
-            page__name = name,
-        ).order_by('-id')\
-         .values_list('id', flat=True)[abs(offset):abs(offset)+1]
+        revs = Revision.objects.filter(page__name=name) \
+                               .order_by('-id') \
+                               .values_list('id', flat=True)
+        revs = revs[abs(offset):abs(offset) + 1]
         if revs:
             return revs[0]
 
@@ -935,12 +935,11 @@ class Page(models.Model):
         information, for example if you want a cronjob to prune data
         automatically.
         """
-        rev = self.revisions.latest().edit(
-            deleted=True,
-            text=u'',
-            file=None,
-            note=u'Von System gelöscht'
-        )
+        self.revisions.latest() \
+            .edit(deleted=True,
+                  text=u'',
+                  file=None,
+                  note=u'Von System gelöscht')
 
     def edit(self, text=None, user=None, change_date=None,
              note=u'', attachment=None, attachment_filename=None,

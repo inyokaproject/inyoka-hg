@@ -42,7 +42,6 @@ from inyoka.wiki.parser import parse, RenderContext
 from inyoka.wiki.acl import require_privilege, has_privilege, PrivilegeTest
 from inyoka.portal.models import Subscription
 from inyoka.portal.utils import simple_check_login
-from inyoka.portal.user import User
 from inyoka.forum.models import Topic
 
 
@@ -282,7 +281,7 @@ def do_rename(request, name):
                     #      the old redirect points to the wrong
                     #      place. I have no idea how to handle that --entequak
                     old_text = u'# X-Redirect: %s\n' % new_name
-                    new_page = Page.objects.create(
+                    Page.objects.create(
                         name=name, text=old_text, user=request.user,
                         note=u'Umbenannt nach %s' % page.name,
                         remote_addr=request.META.get('REMOTE_ADDR'))
@@ -488,16 +487,6 @@ def do_edit(request, name):
               u'einem anderen Benutzer ebenfalls bearbeitet.  Bitte '
               u'kontrolliere, ob das Zusammenführen der Änderungen '
               u'zufriedenstellend funktioniert hat.')
-
-    if page and has_privilege(User.ANONYMOUS_USER, page.name, 'read'):
-        # update session info
-        if page is not None:
-            session_page = u'<a href="%s">%s</a>' % (
-                escape(url_for(page)),
-                escape(page.title)
-            )
-        else:
-            session_page = escape(get_pagetitle(name))
 
     return {
         'name':         name,
@@ -809,6 +798,7 @@ def do_attach_edit(request, name):
         'page': page
     }
 
+
 @does_not_exist_is_404
 def do_prune(request, name):
     """Clear the page cache."""
@@ -838,9 +828,7 @@ def do_subscribe(request, page_name):
     Subscribe the user to the page with `page_name`
     """
     p = Page.objects.get(name__iexact=page_name)
-    try:
-        s = Subscription.objects.get(user=request.user, wiki_page=p)
-    except Subscription.DoesNotExist:
+    if not Subscription.objects.filter(user=request.user, wiki_page=p).exists():
         # there's no such subscription yet, create a new one
         Subscription(user=request.user, wiki_page=p).save()
         flash(u'Du wirst ab jetzt bei Veränderungen dieser Seite '

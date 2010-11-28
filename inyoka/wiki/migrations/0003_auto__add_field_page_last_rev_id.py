@@ -1,13 +1,10 @@
 # encoding: utf-8
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-
         # Adding field 'Page.last_rev'
         db.add_column('wiki_page', 'last_rev', self.gf('django.db.models.fields.related.ForeignKey')(related_name='unneded_dummy', null=True, to=orm['wiki.Revision']), keep_default=False)
 
@@ -18,12 +15,9 @@ class Migration(SchemaMigration):
             );
         ''')
 
-
     def backwards(self, orm):
-
         # Deleting field 'Page.last_rev'
         db.delete_column('wiki_page', 'last_rev_id')
-
 
     models = {
         'portal.group': {

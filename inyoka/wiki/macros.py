@@ -514,7 +514,7 @@ class NewPage(Macro):
     is_static = True
     arguments = (
         ('base', unicode, ''),
-        ('template', unicode,''),
+        ('template', unicode, ''),
         ('text', unicode, '')
     )
 
@@ -710,6 +710,7 @@ class Template(Macro):
 
     def build_node(self):
         return expand_page_template(self.template, self.context, True)
+
 
 class Attachment(Macro):
     """

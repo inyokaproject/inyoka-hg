@@ -114,7 +114,6 @@ class PygmentsParser(Parser):
         return nodes.Layer(class_='code', children=result)
 
 
-
 class CSVParser(Parser):
     """
     Parser csv files and format it as table.

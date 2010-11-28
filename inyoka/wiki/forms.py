@@ -28,7 +28,7 @@ class PageEditForm(SurgeProtectionMixin, forms.Form):
     `note`
         A textfield for the change note.
     """
-    text = forms.CharField(widget=forms.Textarea(attrs={'rows':20, 'cols':50}))
+    text = forms.CharField(widget=forms.Textarea(attrs={'rows': 20, 'cols': 50}))
     note = forms.CharField(max_length=512, required=False,
                            widget=forms.TextInput(attrs={'size': 50}))
 

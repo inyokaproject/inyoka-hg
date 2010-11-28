@@ -410,7 +410,6 @@ class Parser(object):
 
     def subparse(self, test, drop_needle=True):
         result = []
-        buffer = []
         next = self.stream.next
 
         def assemble_compound():
