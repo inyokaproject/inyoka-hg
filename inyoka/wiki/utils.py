@@ -12,20 +12,22 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+from __future__ import with_statement
 import os
 import re
 import shutil
 import urllib2
+from contextlib import closing
 from cStringIO import StringIO
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 from hashlib import sha1
 from itertools import ifilter
 from werkzeug import url_quote
+from pgmagick import Image, FilterTypes, Blob
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
 from inyoka.portal.user import User
-from subprocess import Popen, PIPE
 
 
 def has_conflicts(text):
@@ -159,8 +161,9 @@ def get_thumbnail(location, width=None, height=None, force=False):
     )
     base_filename = os.path.join('wiki', 'thumbnails', hash[:1],
                                  hash[:2], hash)
-    if os.path.exists(os.path.join(settings.MEDIA_ROOT, base_filename + '.png')):
-        return fn
+    fn = os.path.join(settings.MEDIA_ROOT, base_filename + '.png')
+    if os.path.exists(fn):
+        return base_filename + '.png'
 
     # get the source stream. if the location is an url we load it using
     # the urllib2 and convert it into a StringIO so that we can fetch the
@@ -177,60 +180,27 @@ def get_thumbnail(location, width=None, height=None, force=False):
         except IOError:
             return
 
-    # convert into the PNG and JPEG using imagemagick. Right now this
-    # rethumbnails for every format. This should be improved that it
-    # generates the thumbnail first into a raw format and convert to
-    # png/jpeg from there.
-    base_params = [os.path.join(settings.IMAGEMAGICK_PATH, 'convert'),
-                   '-', '-resize', dimension, '-sharpen', '0.5', '-format']
-
     result = []
     format, quality = ('png', '100')
-    try:
-        dst = TemporaryFile()
-        client = Popen(base_params + [format, '-quality', quality, '-'],
-                       stdin=PIPE, stdout=dst, stderr=PIPE)
-        src.seek(0)
-        shutil.copyfileobj(src, client.stdin)
-        client.stdin.close()
-        client.stderr.close()
-        if client.wait():
-            return
-        dst.seek(0, 2)
-        pos = dst.tell()
-        result = (pos, dst, format)
-    except (IOError, OSError):
-        pass
-    finally:
-        src.close()
+    with closing(src) as src:
+        img = Image()
+        blob = Blob()
+        blob.update(src.read())
+        img.read(blob)
+        img.filterType(FilterTypes.SincFilter)
+        img.scale(dimension)
+        img.sharpen(0.5)
+        img.quality(100)
+        filename = '%s.%s' % (base_filename, format)
+        real_filename = os.path.join(settings.MEDIA_ROOT, filename)
+        try:
+            os.makedirs(os.path.dirname(real_filename))
+        except OSError:
+            pass
+        img.write(real_filename)
 
     # Return none if there were errors in thumbnail rendering, that way we can
     # raise 404 exceptions instead of raising 500 exceptions for the user.
-    if not result:
-        return None
-
-    # select the smaller of the two versions and copy and get the filename for
-    # that format. Then ensure that the target folder exists
-    pos, fp, extension = result
-    filename = '%s.%s' % (
-        base_filename,
-        extension
-    )
-    real_filename = os.path.join(settings.MEDIA_ROOT, filename)
-    try:
-        os.makedirs(os.path.dirname(real_filename))
-    except OSError:
-        pass
-
-    # rewind the descriptor and copy the data over to the target filename.
-    fp.seek(0)
-    f = open(real_filename, 'wb')
-    try:
-        shutil.copyfileobj(fp, f)
-    finally:
-        fp.close()
-        f.close()
-
     return filename
 
 
