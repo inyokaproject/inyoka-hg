@@ -607,13 +607,18 @@ table.syntaxtable td.linenos {
 
 .content {
   clear: right;
-  border: solid 1px #ccc; 
   background-color: #fff;
-  padding: 15px 20px;
+  padding: 0.7em 20px;
+  border-top: 1px solid #bbb;
 }
 
 .content_sidebar {
   margin-left: 15.0em;
+  border-left: 1px solid #DDDDDD;
+}
+
+.content_tabbar {
+  border-top: 1px solid #bbb;
 }
 
 button.navi_toggle_down, button.navi_toggle_up {
@@ -644,15 +649,16 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 
 .navi_sidebar {
   float: left;
+  border-top: 1px solid #bbb;
 }
 
 .navi_sidebar .container {
-  border: solid 1px #ccc;
-  background-color: #fff;
+  background-color: #F4F4F4;
   background-repeat: repeat-x;
-  padding: 0em 1em 0.5em 1em;
-  width: 12em;
-  margin-bottom: 0.8em;
+  padding: 0.1em 1em 0.5em 1em;
+  width: 13em;
+  border-right: 1px solid #DDDDDD;
+  border-bottom: 1px solid #BBBBBB
 }
 
 .navi_sidebar .noh3 {
@@ -827,11 +833,9 @@ button.navi_toggle_down:hover, button.navi_toggle_up:hover {
 }
 
 .pathbar {
-  background-color: #f6f6f6;
-  border: 1px solid #bbb;
   padding: 5px 5px 5px 8px;
   font-size: 0.85em;
-  margin: 0 20px 10px 20px;
+  margin: 0 20px;
   position:relative;
 }
 
@@ -1032,13 +1036,13 @@ p.badges img:hover {
 /*** Message Boxes ************************************************************/
 
 .message {
-  margin: -10px 20px 10px 20px;
+  margin: 0px 20px;
   padding: 0.4em 0.8em;
   background-color: #F9EAAF;
   background-repeat: no-repeat;
   background-position: left center;
-  border: 1px solid #E8A21A;
-  border-top: none;
+  border-bottom: 1px solid #BBBBBB;
+  border-top: 1px solid #BBBBBB;
   text-align: left;
 }
 
@@ -1048,14 +1052,12 @@ p.badges img:hover {
 
 .message.fail {
   background-color: #FFDDDD;
-  border-color: #EE0000;
   /*background-image: url('../img/message_fail.png');*/
   /*padding-left: 26px;*/
 }
 
 .message.success {
   background-color: #DDFFDD;
-  border-color: #008000;
   /*background-image: url('../img/message_success.png');*/
   /*padding-left: 26px;*/
 }
