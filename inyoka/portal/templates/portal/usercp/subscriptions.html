@@ -39,6 +39,11 @@
           {%- if sub.topic -%}
           <span class="status_{{ sub.topic.solved and 'solved' or 'unsolved' }}"></span>
           Thema: <a href="{{ sub.topic|url }}">{{ sub.topic.title|e }}</a>
+          {%- if not sub.topic.get_read_status(USER) %}
+          <a href="{{ sub.topic|url('first_unread') }}" title="Zeige ungelesene Beiträge">
+            <img src="{{ href('static', 'img/forum/goto.png') }}" alt="Zeige ungelesene Beiträge" />
+          </a>
+          {%- endif %}
           {%- if sub.topic.paginated %} &#160; &#160; [
               Gehe zu Seite {{ sub.topic.get_pagination() }}
             ]{% endif -%}
