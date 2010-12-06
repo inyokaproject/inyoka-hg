@@ -55,12 +55,12 @@ ERROR_REPORT_RE = re.compile(r'<a href=".[^"]+" id="user_error_report_link">Fehl
 POWERED_BY_RE = re.compile(r'<li class="poweredby">.*?</li>', re.DOTALL)
 SEARCH_PATHBAR_RE = re.compile(r'<form .*? class="search">.+?</form>', re.DOTALL)
 DROPDOWN_RE = re.compile(r'<div class="dropdown">.+?</div>', re.DOTALL)
-
+JS_LOGIN = re.compile(r'<form.*?id="js_login_form">.+?</form>', re.DOTALL)
 GLOBAL_MESSAGE_RE = re.compile(r'(<div class="message global">).+?(</div>)', re.DOTALL)
 
 SNAPSHOT_MESSAGE = u'''<div class="message staticwikinote">
 <strong>Hinweis:</strong> Dies ist nur ein statischer Snapshot unseres Wikis.  Dieser kann nicht bearbeitet werden und veraltet sein.  Das richtige Wiki ist unter <a href="%s">wiki.ubuntuusers.de</a> zu finden.
-</div>''' % URL
+</div>'''
 
 EXCLUDE_PAGES = [u'Benutzer/', u'Anwendertreffen/', u'Baustelle/', u'LocoTeam/',
                  u'Wiki/Vorlagen', u'Vorlage/', u'Verwaltung/', u'Galerie', 'Trash/',
@@ -151,42 +151,47 @@ def fix_path(pth):
     return normalize_pagename(pth, False).lower()
 
 
-def replacer(func, parts, is_main_page):
+def replacer(func, parts, is_main_page, page_name):
     pre = (parts and u''.join('../' for i in xrange(parts)) or './')
     def replacer(match):
-        return func(match, pre, is_main_page)
+        return func(match, pre, is_main_page, page_name)
     return replacer
 
 
-def handle_src(match, pre, is_main_page):
+def handle_src(match, pre, is_main_page, page_name):
     is_static = 'static' in match.groups()[0]
     return u'src="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, is_static))
 
 
-def handle_img(match, pre, is_main_page):
+def handle_img(match, pre, is_main_page, page_name):
     return u'href="%s%s"' % (pre, save_file(href('wiki', '_image', target=url_unquote(match.groups()[0].encode('utf8'))), is_main_page))
 
 
-def handle_style(match, pre, is_main_page):
+def handle_style(match, pre, is_main_page, page_name):
     ret = u'rel="stylesheet" type="text/css" href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, True))
     return ret
 
 
-def handle_favicon(match, pre, is_main_page):
+def handle_favicon(match, pre, is_main_page, page_name):
     ret = u'rel="shortcut icon" href="%s%s"' % (pre, save_file(match.groups()[0], is_main_page, True))
     return ret
 
 
-def handle_link(match, pre, is_main_page):
-    return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+def handle_link(match, pre, is_main_page, page_name):
+    if not '?' in match.group():
+        return u'href="%s%s.html"' % (pre, fix_path(match.groups()[0]))
+    return u'href="%s%s.html"' % (pre, fix_path(page_name))
 
 
-def handle_powered_by(match, pre, is_main_page):
+def handle_powered_by(match, pre, is_main_page, page_name):
     return u'<li class="poweredby">Generiert mit <a href="http://ubuntuusers.de/inyoka">Inyoka</a></li>'
 
 
-def handle_startpage(match, pre, is_main_page):
+def handle_startpage(match, pre, is_main_page, page_name):
     return u'href="%s%s.html"' % (pre, settings.WIKI_MAIN_PAGE.lower())
+
+def handle_snapshot_message(match, pre, is_main_page, page_name):
+    return SNAPSHOT_MESSAGE % os.path.join(URL, page_name)
 
 
 REPLACERS = (
@@ -203,7 +208,8 @@ REPLACERS = (
     (GLOBAL_MESSAGE_RE, ''),
     (SEARCH_PATHBAR_RE, ''),
     (DROPDOWN_RE,       ''),
-    (TAB_RE,            SNAPSHOT_MESSAGE))
+    (JS_LOGIN,          ''),
+    (TAB_RE,            handle_snapshot_message))
 
 
 def create_snapshot():
@@ -223,7 +229,7 @@ def create_snapshot():
     static_paths = ((path.join(stroot, 'img', 'icons'), 'icons'),
         ff('logo.png'), ff('favicon.ico'), ff('float-left.jpg'),
         ff('float-right.jpg'), ff('float-top.jpg'), ff('head.jpg'),
-        ff('head-right.png'), ff('anchor.png'))
+        ff('head-right.png'), ff('anchor.png'), ff('header-sprite.png'))
     for pth in static_paths:
         _pth = pth[0] if isinstance(pth, _iterables) else pth
         if path.isdir(_pth):
@@ -246,7 +252,6 @@ def create_snapshot():
             else:
                 pages.add(page)
     todo = pages - excluded_pages
-
 
     def _fetch_and_write(name):
         parts = 0
@@ -282,7 +287,7 @@ def create_snapshot():
 
         for regex, repl in REPLACERS:
             if callable(repl):
-                repl = replacer(repl, parts, is_main_page)
+                repl = replacer(repl, parts, is_main_page, page.name)
             content = regex.sub(repl, content)
 
         def _write_file(pth):

@@ -181,8 +181,9 @@ class ForumQuery(db.Query):
             query = self.get_eager().filter_by(slug=slug)
             forum = cache.get('forum/forums/%s' % slug)
             if forum is None:
-                forum = query.one()
-                cache.set('forum/forums/%s' % slug, forum, 300)
+                forum = query.first()
+                if forum:
+                    cache.set('forum/forums/%s' % slug, forum, 300)
             else:
                 forum = db.session.merge(forum, load=False)
             return forum
@@ -205,19 +206,16 @@ class ForumMapperExtension(db.MapperExtension):
 
     def after_update(self, mapper, connection, instance):
         cache.delete('forum/forums/%s' % instance.slug)
-        db.session.refresh(instance)
         return db.EXT_CONTINUE
 
     def after_insert(self, mapper, connection, instance):
         cache.delete('forum/forums/%s' % instance.slug)
         cache.delete('forum/slugs')
-        db.session.refresh(instance)
         return db.EXT_CONTINUE
 
     def after_delete(self, mapper, connection, instance):
         cache.delete('forum/forums/%s' % instance.slug)
         cache.delete('forum/slugs')
-        db.session.refresh(instance)
         return db.EXT_CONTINUE
 
 

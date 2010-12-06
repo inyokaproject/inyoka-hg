@@ -152,7 +152,6 @@
     <a href="{{ href('wiki', 'Benutzer', user.username|e, action='edit') }}">Anlegen</a>
   </p>
   {%- endif %}
-  {%- endif %}
   {%- if request.user.can('user_edit') %}
     <a href="{{ href('admin', 'users', 'edit', user.username) }}" class="adminlink">Nutzer bearbeiten</a>
   {%- endif %}
@@ -163,5 +162,6 @@
     {%- else %}
       <a href="{{ generate_subscription_link() }}" class="action action_subscribe subscribe_user adminlink">Beobachten</a>
     {%- endif %}
+  {%- endif %}
   {%- endif %}
 {% endblock %}
