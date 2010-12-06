@@ -43,7 +43,8 @@ class Blog(models.Model):
 
     def save_icon(self, img, save=True):
         """Save the icon to the file system."""
-        self.icon.delete(save=False)
+        if self.icon:
+            self.icon.delete(save=False)
         icon = Image.open(img)
         ext = icon.format.lower()
         if not self.id:
