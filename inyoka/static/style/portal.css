@@ -24,7 +24,6 @@ form.usercp_form ul {
 }
 
 .content p {
-    margin-left: 0.4em;
 }
 
 img.cat {
@@ -33,10 +32,7 @@ img.cat {
 }
 
 .container.get_ubuntu {
-  background-image: url(../img/caption.png);
-  background-repeat: repeat-x;
-  background-color: #DFCB9D !important; 
-  border: 1px solid #E6A66B;
+  background-color: #F2E7CE !important; 
 }
 
 .get_ubuntu div {
@@ -73,10 +69,7 @@ img.cat {
 }
 
 .container.calendar {
-  background-image: url(../img/caption_blue.png);
-  background-repeat: repeat-x;
-  background-color: #999ead !important; 
-  border: 1px solid #4e636d;
+  background-color: #E6E9F2 !important; 
 }
 
 
@@ -112,24 +105,14 @@ img.cat {
 }
 
 .articles {
-  margin: 0.7em 0 0.7em 1em;
-  border-collapse: collapse;
 }
 
 .article {
-  border-width: 1px;
-  border-style: solid;
-  border-color: #d4d4d4;
   font-size: 0.9em;
-  margin: 0.1em;
-  margin-bottom: 0.5em;
-  padding: 1em;
+  padding: 1em 0;
   background-position: top;
   background-repeat: repeat-x;
-}
-
-.article:hover {
-  border: 1px solid #E6A66B;
+  border-bottom: 1px dashed #d4d4d4;
 }
 
 .article .meta {
