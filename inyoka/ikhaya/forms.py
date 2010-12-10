@@ -16,7 +16,8 @@ class SuggestArticleForm(forms.Form):
     intro = forms.CharField(label=u'Einleitung',
                             widget=forms.Textarea({'rows': 3}))
     text = forms.CharField(label=u'Text', widget=forms.Textarea)
-    notes = forms.CharField(label=u'Anmerkungen', widget=forms.Textarea)
+    notes = forms.CharField(label=u'Anmerkungen', widget=forms.Textarea,
+                            required=False)
 
 
 class EditCommentForm(forms.Form):
