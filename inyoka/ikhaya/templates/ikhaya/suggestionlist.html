@@ -53,8 +53,10 @@
           <h3 class="title">{{ suggestion.title|e }}</h3>
           <div class="intro">{{ suggestion.rendered_intro }}</div>
           <div class="text">{{ suggestion.rendered_text }}</div>
-          <hr />
-          <div>{{ suggestion.rendered_notes }}</div>
+          {%- if suggestion.rendered_notes %}
+            <hr />
+            <div>{{ suggestion.rendered_notes }}</div>
+          {%- endif %}
         </td>
       </tr>
       {%- else %}
