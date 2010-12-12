@@ -112,11 +112,10 @@
                 <a href="{{ comment|url('edit') }}" class="adminlink action action_edit">bearbeiten</a> |
                 {% endif %}
                 {%- if can_admin_comment and comment.deleted %}
-                <a href="{{ comment|url('restore') }}" class="adminlink action action_restore">wiederherstellen
+                <a href="{{ comment|url('restore') }}" class="adminlink action action_restore">wiederherstellen</a> |
                 {%- elif can_admin_comment and not comment.deleted %}
-                <a href="{{ comment|url('hide') }}" class="adminlink action action_hide">verbergen
+                <a href="{{ comment|url('hide') }}" class="adminlink action action_hide">verbergen</a> |
                 {%- endif -%}
-                </a> |
                 {%- if can_post_comment %}
                 <a href="#new_comment" onclick="$('#id_text').val($('#id_text').val() + '@' + {{ loop.index }} + ': ')" class="action action_quote">antworten</a>
                 {%- endif %}
