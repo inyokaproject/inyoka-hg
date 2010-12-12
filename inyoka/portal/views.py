@@ -443,8 +443,8 @@ def search(request):
             try:
                 wiki_page = WikiPage.objects.filter(
                               name=normalize_pagename(d['query'])).get()
-                rev = Revision.objects.select_related(depth=2) \
-                        .filter(page__id=wiki_page.id).latest()
+                rev = Revision.objects.select_related('page')\
+                        .get(pk=wiki_page.last_rev_id)
                 wiki_result = {'title': wiki_page.title, 'url': url_for(rev.page)}
             except WikiPage.DoesNotExist:
                 pass

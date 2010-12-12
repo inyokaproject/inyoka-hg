@@ -42,5 +42,4 @@ def on_render_preview(request):
 
 dispatcher = SimpleDispatcher(
     get_smilies=on_get_smilies,
-    render_preview=on_render_preview
-)
+    render_preview=on_render_preview)

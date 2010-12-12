@@ -41,7 +41,6 @@
 """
 import re
 from urlparse import urljoin
-from django.db import connection
 from inyoka.conf import settings
 from inyoka.utils.cache import request_cache
 
@@ -84,36 +83,16 @@ class BaseStorage(object):
         if self.data is not None:
             return
 
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT   t.value,
-                     p.name
-            FROM     wiki_page p    ,
-                     wiki_revision r,
-                     wiki_text t    ,
-                     wiki_metadata m
-            WHERE    p.id = r.page_id
-            AND      p.id = m.page_id
-            AND      t.id = r.text_id
-            AND      r.id =
-                     (SELECT MAX(id)
-                     FROM    wiki_revision
-                     WHERE   page_id = p.id
-                     )
-            AND      NOT r.deleted
-            AND      m.key   = 'X-Behave'
-            AND      m.value = %s
-            GROUP BY r.id   ,
-                     t.value,
-                     p.name
-            ORDER BY p.name;
-        ''', [self.behavior_key])
+        data = MetaData.objects.values_list('page__last_rev__text__value', 'page__name') \
+            .filter(key='X-Behave',
+                    page__last_rev__deleted=False,
+                    value=self.behavior_key) \
+            .order_by('page__name').all()
 
         objects = []
-        for raw_text, page_name in cur.fetchall():
+        for raw_text, page_name in data:
             block = self.find_block(raw_text)
             objects.append(self.extract_data(block))
-        cur.close()
 
         self.data = self.combine_data(objects)
         request_cache.set(key, self.data, 10000)
@@ -198,30 +177,15 @@ class SmileyMap(DictStorage):
         if not mapping:
             return []
 
-        cur = connection.cursor()
-        cur.execute('''
-            SELECT a.file,
-                   p.name
-            FROM   wiki_page p    ,
-                   wiki_revision r,
-                   wiki_attachment a
-            WHERE  p.name IN (%s)
-            AND    r.page_id = p.id
-            AND    r.id      =
-                   (SELECT MAX(id)
-                   FROM    wiki_revision
-                   WHERE   page_id = p.id
-                   )
-            AND    NOT r.deleted
-            AND    r.attachment_id = a.id;
-        ''' % ', '.join(('%s',) * len(mapping)), mapping.keys())
+        data = Page.objects.values_list('last_rev__attachment__file', 'name') \
+            .filter(name__in=mapping.keys(),
+                    last_rev__deleted=False).all()
 
         result = []
-        for filename, page in cur.fetchall():
+        for filename, page in data:
             path = urljoin(settings.MEDIA_URL, filename)
             for code in mapping[page]:
                 result.append((code, path))
-        cur.close()
         return result
 
 
@@ -295,3 +259,6 @@ storage = StorageManager(
     interwiki=InterwikiMap,
     acl=AccessControlList
 )
+
+# circ imports
+from inyoka.wiki.models import MetaData, Page

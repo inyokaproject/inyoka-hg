@@ -101,6 +101,7 @@ def after_install(options, home_dir):
     easy_install('mercurial', home_dir)
     easy_install('xmpppy', home_dir)
     easy_install('mysql-python', home_dir)
+    easy_install('pgmagick', home_dir)
     xapian_install(os.path.abspath(home_dir))
     pil_install(os.path.abspath(home_dir))
 """

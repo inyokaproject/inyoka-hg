@@ -103,6 +103,7 @@ def _make_interwiki_link(old, new=None):
     to an inyoka interwiki link [new:page:].
     """
     new = new and new or old
+
     def do(self):
         t = self.expect_tag(old)
         if t.attr:
@@ -370,7 +371,7 @@ class Parser(object):
 
     def parse_code(self):
         """parse [code]-tags"""
-        token = self.expect_tag('code')
+        self.expect_tag('code')
         children = []
         textbuf = []
 

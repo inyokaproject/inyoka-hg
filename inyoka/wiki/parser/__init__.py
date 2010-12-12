@@ -890,7 +890,7 @@ class Parser(object):
 
         Returns a `Ruler` node.
         """
-        token = stream.expect('ruler')
+        stream.expect('ruler')
         return nodes.Ruler()
 
     def parse_macro(self, stream):
