@@ -12,7 +12,7 @@
 /**
  * Fetch all the nodes as long as a new node is found.
  */
-jQuery.fn.nextWhile = function(expr) {
+jQuery.fn.nextWhile = function (expr) {
   var next = this.next(expr);
   var pos = 0;
   while (next.length > 0) {

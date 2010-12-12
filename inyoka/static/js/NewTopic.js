@@ -8,23 +8,22 @@
  * :license: GNU GPL, see LICENSE for more details.
  */
 
-var set_quote_links = (function() {
-  $('table.topic div.postinfo').each(function() {
-    if ( $(this).children('div.linklist.floatright').length === 0 ) {
+var set_quote_links = (function () {
+  $('table.topic div.postinfo').each(function () {
+    if ($(this).children('div.linklist.floatright').length === 0) {
       var post_id = $(this).parent().parent()[0].id.substring(5);
-      $('<a href="#" class="action action_quote">Zitat einfügen</a>')
-        .click(function() {
-          $.getJSON('/?__service__=forum.get_post', {post_id: post_id}, function(post) {
-            if (post) {
-              var editor = $('#id_text')[0].inyokaWikiEditor;
-              editor.setSelection("[user:" + post.author + ":] [post:" + post_id + ": schrieb]:\n" +
-                                  editor.quoteText(post.text));
-              editor.focus();
-            }
-          });
-          return false;
-        })
-        .appendTo($('<div class="linklist floatright" />').prependTo(this));
+      $('<a href="#" class="action action_quote">Zitat einfügen</a>').click(function () {
+        $.getJSON('/?__service__=forum.get_post', {
+          post_id: post_id
+        }, function (post) {
+          if (post) {
+            var editor = $('#id_text')[0].inyokaWikiEditor;
+            editor.setSelection("[user:" + post.author + ":] [post:" + post_id + ": schrieb]:\n" + editor.quoteText(post.text));
+            editor.focus();
+          }
+        });
+        return false;
+      }).appendTo($('<div class="linklist floatright" />').prependTo(this));
     }
   });
 });
@@ -42,12 +41,12 @@ $(function () {
   };
 
   var add_new_posts = function (data) {
-    if ( data ) {
+    if (data) {
       $('.latest_posts tbody').prepend(data);
       $('#recent_posts_reload').data('loading', false);
       set_quote_links();
     } else {
-      $('<tr id="no_recent_posts_note"><td colspan="2"><div style="display: none">' +
+      $('<tr id="no_recent_posts_note"><td colspan="2"><div style="display: none">' + 
         '<div style="margin:0.3em 0">Keine neuen Beiträge</div></div></td></tr>')
         .appendTo($('#recent_posts').parent().parent())
         .children('td').css('padding', 0)
@@ -59,8 +58,7 @@ $(function () {
   };
 
   $('#recent_posts_reload').click(function () {
-    if ( $(this).data('loading') )
-      return false;
+    if ($(this).data('loading')) return false;
     $(this).data('loading', true);
     remove_note();
 
