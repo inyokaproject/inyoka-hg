@@ -14,8 +14,6 @@
 .navi_sidebar .navi_categories   { background-image: url('../img/icons/categories.png'); }
 
 div.content {
-  padding: 0;
-  border:none;
 }
 
 div.content_sidebar_bk {
@@ -30,11 +28,7 @@ ul.articles {
 }
 
 .article {
-  border: solid 1px #ccc;
-  background-image:url(../img/ikhaya/article1px.png);
-  background-repeat:repeat-x;
-  background-position:-8px 0px;;
-  margin-bottom: 1em;
+  margin-bottom: 2em;
 }
 
 .article hr {
@@ -50,7 +44,8 @@ h2, h3 {
 }
 
 h3.title {
-  margin: 0.7em 0 1em 1em;
+  margin: 0.7em 0 1em 0em;
+  padding-left: 0.4em;
 }
 
 h3.title a {
@@ -72,8 +67,7 @@ div.intro {
 }
 
 p.meta {
-  color: #444;
-  background-color: #ebd5ab;
+  color: #666;
   font-size: 0.9em;
   margin: 0.5em 0 0 0 !important;
   padding: 0.4em;
