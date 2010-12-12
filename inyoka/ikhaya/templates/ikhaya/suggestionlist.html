@@ -14,7 +14,6 @@
 {% set navigation_trace = [
     (href('ikhaya', 'suggestions'), 'Artikelvorschläge')
     ] %}
-{% set styles = ['forum-sprite.css'] %}
 
 {% block ikhaya_content %}
 <h3>Artikelvorschläge</h3>
@@ -22,19 +21,11 @@
   Hier siehst du alle {{ suggestion_count }} Artikelvorschläge, die noch nicht bearbeitet wurden.
 </p>
 <form action="" method="post">
-  <table class="topic">
-    <tbody>
+  <div class="suggestionlist">
       {%- for suggestion in suggestions %}
-      <tr>
-        <td class="author">
-          <a href="{{ suggestion.author|url }}">{{ suggestion.author.username|e }}</a>
-          {%- if suggestion.author.avatar and not USER.settings['hide_avatars'] %}
-          <img src="{{ suggestion.author.avatar_url }}" alt="Avatar von {{ suggestion.author.username|e }}" />
-          {%- endif %}
-        </td>
-        <td class="post">
-          <div class="postinfo">
-            Verfasst: {{ suggestion.pub_date|datetimeformat }}
+        <div class="article">
+          <span class="articleinfo">
+            Verfasst: {{ suggestion.pub_date|datetimeformat }} von <a href="{{ suggestion.author|url }}">{{ suggestion.author.username|e }}</a>
             <span class="linklist"> |
               {%- if suggestion.owner_id == none %}
               <a href="{{ href('ikhaya', 'suggestions', 'assign', suggestion.id, USER.username) }}">Mir zuweisen</a> |
@@ -49,7 +40,7 @@
               <a href="{{ href('admin', 'ikhaya/articles/new', suggestion.id) }}">Artikel erstellen</a> |
               <a href="{{ href('portal', 'privmsg', 'new', reply_to='suggestion:%d' % suggestion.id) }}">PN schreiben</a>
             </span>
-          </div>
+          </span>
           <h3 class="title">{{ suggestion.title|e }}</h3>
           <div class="intro">{{ suggestion.rendered_intro }}</div>
           <div class="text">{{ suggestion.rendered_text }}</div>
@@ -57,16 +48,11 @@
             <hr />
             <div>{{ suggestion.rendered_notes }}</div>
           {%- endif %}
-        </td>
-      </tr>
+        </div>
       {%- else %}
-      <tr>
-        <td colspan="3">
-          Es gibt zurzeit keine neuen Artikelvorschläge.
-        </td>
-      </tr>
+      <strong>Es gibt zur Zeit keine neuen Artikelvorschläge.</strong>
       {%- endfor %}
-    </tbody>
-  </table>
+    </div>
+  </div>
 </form>
 {% endblock %}

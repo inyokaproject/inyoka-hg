@@ -231,3 +231,13 @@ a.comment_link:hover {
 div.box {
   clear: none !important;
 }
+
+
+div.suggestionlist {
+  padding: 2em;
+}
+
+div.suggestionlist div.article {
+  border: 1px solid #ccc;
+  padding: 1em;
+}
