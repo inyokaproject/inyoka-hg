@@ -8,7 +8,6 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import gc
 from inyoka.forum.acl import get_privileges, check_privilege
 from inyoka.forum.models import Post, Forum, Topic
 from inyoka.utils.urls import url_for, href

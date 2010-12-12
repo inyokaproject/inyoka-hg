@@ -16,7 +16,6 @@ from os import path
 from hashlib import md5
 from PIL import Image
 from time import time
-from StringIO import StringIO
 from datetime import datetime
 from itertools import groupby
 from operator import attrgetter

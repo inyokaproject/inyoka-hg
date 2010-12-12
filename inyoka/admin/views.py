@@ -9,12 +9,9 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from __future__ import with_statement
-import os
 import pytz
 import time
-from os import path
 from PIL import Image
-from StringIO import StringIO
 from sqlalchemy import and_, select
 from sqlalchemy.util import to_list
 from datetime import date, time as dt_time
@@ -43,7 +40,7 @@ from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
 from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
-     EditUserForm, EditEventForm, EditForumForm, EditGroupForm, \
+     EditEventForm, EditForumForm, EditGroupForm, \
      EditUserProfileForm, EditUserGroupsForm, EditUserPrivilegesForm, \
      EditUserPasswordForm, EditUserStatusForm, \
      CreateUserForm, EditStyleForm, CreateGroupForm, UserMailForm, \

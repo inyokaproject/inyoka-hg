@@ -15,9 +15,8 @@ from textwrap import wrap
 from inyoka.utils.html import html, escape
 from django.db import connection
 from django.db.backends import util
-from django.utils import simplejson
 from django.utils.encoding import force_unicode
-from markupsafe import soft_unicode, Markup
+from markupsafe import Markup
 
 
 _body_end_re = re.compile(r'</\s*(body|html)(?i)')

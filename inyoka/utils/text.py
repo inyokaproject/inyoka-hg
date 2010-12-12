@@ -234,7 +234,3 @@ def get_next_increment(values, string, max_length=None, stripdate=False):
         strip = max_length - len(poi)
         string = string[:strip]
     return _get_value(gs(string))
-
-
-# circular imports
-from inyoka.utils.html import escape, striptags

@@ -17,7 +17,7 @@ from datetime import datetime
 from os import path
 from PIL import Image
 from StringIO import StringIO
-from django.db import models, connection
+from django.db import models
 
 from inyoka.conf import settings
 from inyoka.utils import encode_confirm_data, classproperty

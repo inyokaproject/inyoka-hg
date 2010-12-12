@@ -7,9 +7,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import re
-from urlparse import urlparse
-from inyoka.utils.html import escape
-from inyoka.utils.urls import is_safe_domain
 
 
 acceptable_css_properties = frozenset([

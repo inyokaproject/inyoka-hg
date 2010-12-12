@@ -18,7 +18,6 @@ from datetime import timedelta, datetime, date
 from django import forms
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
-from django.utils.translation import ugettext as _
 
 from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data

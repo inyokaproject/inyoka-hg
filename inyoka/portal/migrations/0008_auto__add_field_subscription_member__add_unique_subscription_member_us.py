@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Subscription.member'
         db.add_column('portal_subscription', 'member', self.gf('django.db.models.fields.related.ForeignKey')(related_name='member', null=True, to=orm['portal.User']), keep_default=False)
 
@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing unique constraint on 'Subscription', fields ['member', 'user']
         db.delete_unique('portal_subscription', ['member_id', 'user_id'])
 

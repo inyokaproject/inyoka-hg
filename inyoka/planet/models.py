@@ -8,12 +8,8 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-import os
-from os import path
 from PIL import Image
-from StringIO import StringIO
 from django.db import models, connection
-from inyoka.conf import settings
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.html import striptags

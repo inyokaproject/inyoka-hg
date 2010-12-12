@@ -8,7 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from inyoka.utils.urls import global_not_found, href, url_for
+from inyoka.utils.urls import global_not_found, href
 from inyoka.utils.http import templated, HttpResponseRedirect, HttpResponse, \
         PageNotFound
 from inyoka.utils.flashing import flash

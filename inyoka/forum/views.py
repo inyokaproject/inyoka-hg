@@ -44,7 +44,7 @@ from inyoka.portal.user import User
 from inyoka.portal.models import Subscription
 from inyoka.forum.models import Forum, Topic, POSTS_PER_PAGE, Post, Poll, \
     TOPICS_PER_PAGE, PollVote, PollOption, Attachment, PostRevision, \
-    CACHE_PAGES_COUNT, WelcomeMessage, fix_plaintext, Privilege
+    CACHE_PAGES_COUNT, WelcomeMessage, Privilege
 from inyoka.forum.compat import SAUser
 from inyoka.forum.forms import NewTopicForm, SplitTopicForm, EditPostForm, \
     AddPollForm, MoveTopicForm, ReportTopicForm, ReportListForm, \

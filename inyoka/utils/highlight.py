@@ -22,7 +22,6 @@ from pygments.lexers import get_lexer_by_name, get_lexer_for_filename, \
 from pygments.formatters import HtmlFormatter
 from pygments.util import ClassNotFound
 from pygments.styles.friendly import FriendlyStyle
-from django.utils.encoding import force_unicode
 from inyoka.utils.search import get_stemmer, LANGUAGE
 from inyoka.utils.html import striptags
 
