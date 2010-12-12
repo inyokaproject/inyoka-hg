@@ -13,13 +13,6 @@
 .navi_sidebar .navi_archive      { background-image: url('../img/icons/archive.png'); }
 .navi_sidebar .navi_categories   { background-image: url('../img/icons/categories.png'); }
 
-div.content {
-}
-
-div.content_sidebar_bk {
-  border: solid 1px #ccc;
-  padding: 15px 20px;
-}
 
 ul.articles {
   list-style-type: none;
