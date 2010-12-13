@@ -43,4 +43,5 @@
     {%- if USER.can('event_edit') %} <small>(<a href="{{ event|url('edit') }}" class="adminlink">bearbeiten</a>)</small>{% endif %}</th></tr>
   <tr><td colspan="2"><span class="description">{{ event.rendered_description or '–' }}</span></td></tr>
 </table>
+<span class="hcal-downloads"><a href="{{ "http://h2vx.com/ics/%s"|format(CURRENT_URL) }}">ICal herunterladen</a></span>
 {% endblock %}
