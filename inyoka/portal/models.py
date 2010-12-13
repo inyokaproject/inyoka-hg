@@ -452,18 +452,18 @@ class Event(models.Model):
             s_date = self.natural_datetime
         else:
             s_date = ''
-        s_location = self.location_town \
-            and u' in %s' % self.location_town \
-            or ''
+        s_location = '<span class="location">%s</span>' % (
+             self.location_town and u' in %s' % self.location_town or '')
+        summary = u'<span class="summary">%s</span>' % escape(self.name)
         if with_html_link:
-            return u'<a href="%s" class="event_link">%s</a>%s%s' % (
+            ret = u'<a href="%s" class="event_link">%s</a>%s%s' % (
                 escape(self.get_absolute_url()),
-                escape(self.name),
+                summary,
                 s_date,
-                s_location,
-            )
+                s_location)
         else:
-            return self.name + s_date + s_location
+            ret = summary + s_date + s_location
+        return u'<span class="vevent">%s</span>' % ret
 
     @property
     def natural_datetime(self):

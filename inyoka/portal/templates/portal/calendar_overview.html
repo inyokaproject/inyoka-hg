@@ -9,6 +9,10 @@
 #}
 
 {%- extends 'portal/overall.html' %}
+{% block html_head %}
+    {{ super() }}
+    <link rel="profile" href="http://microformats.org/profile/hcalendar">
+{% endblock %}
 {% set title_trace = ['Kalender'] %}
 {% set styles = ['calendar.css'] %}
 {% block appheader %}
