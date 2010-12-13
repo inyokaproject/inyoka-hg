@@ -15,15 +15,13 @@
 from __future__ import with_statement
 import os
 import re
-import shutil
 import urllib2
 from contextlib import closing
 from cStringIO import StringIO
-from tempfile import NamedTemporaryFile
 from hashlib import sha1
 from itertools import ifilter
 from werkzeug import url_quote
-from pgmagick import Image, FilterTypes, Blob
+from PIL import Image
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
@@ -123,6 +121,15 @@ def resolve_interwiki_link(wiki, page):
     return link
 
 
+def _get_box(width, height):
+    if width and height:
+        return (int(width), int(height))
+    elif width and not height:
+        return (int(width), int(width))
+    elif height and not width:
+        return (int(height), int(height))
+
+
 def get_thumbnail(location, width=None, height=None, force=False):
     """
     This function generates a thumbnail for an uploaded image or external one.
@@ -183,21 +190,15 @@ def get_thumbnail(location, width=None, height=None, force=False):
     result = []
     format, quality = ('png', '100')
     with closing(src) as src:
-        img = Image()
-        blob = Blob()
-        blob.update(src.read())
-        img.read(blob)
-        img.filterType(FilterTypes.SincFilter)
-        img.scale(dimension)
-        img.sharpen(0.5)
-        img.quality(100)
+        img = Image.open(src)
+        img.thumbnail(_get_box(width, height), Image.ANTIALIAS)
         filename = '%s.%s' % (base_filename, format)
         real_filename = os.path.join(settings.MEDIA_ROOT, filename)
         try:
             os.makedirs(os.path.dirname(real_filename))
         except OSError:
             pass
-        img.write(real_filename)
+        img.save(real_filename, quality=100)
 
     # Return none if there were errors in thumbnail rendering, that way we can
     # raise 404 exceptions instead of raising 500 exceptions for the user.
