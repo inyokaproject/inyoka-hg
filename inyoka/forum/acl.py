@@ -191,6 +191,23 @@ def filter_visible(user, forums=None, priv=CAN_READ, privileges=None):
     return result
 
 
+def split_negative_positive(value):
+    """Split a string into negative and positive permissions.
+
+    :return: A tuple of joined (negative, positive) permissions.
+    """
+    positive, negative = 0, 0
+    for bit in value.split(','):
+        try:
+            bit = int(bit)
+        except ValueError:
+            continue
+        if bit > 0:
+            positive |= abs(bit)
+        else:
+            negative |= abs(bit)
+    return negative, positive
+
 # circular imports
 from inyoka.forum.models import Privilege, Forum
 from inyoka.forum.compat import user_group_table

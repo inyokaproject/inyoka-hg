@@ -53,7 +53,7 @@ from inyoka.portal.utils import require_permission
 from inyoka.planet.models import Blog
 from inyoka.ikhaya.models import Article, Suggestion, Category
 from inyoka.forum.acl import REVERSED_PRIVILEGES_BITS, split_bits, \
-    PRIVILEGES_DETAILS
+    PRIVILEGES_DETAILS, split_negative_positive
 from inyoka.forum.models import Forum, Privilege, WelcomeMessage, UBUNTU_VERSIONS
 from inyoka.forum.compat import SAUser, user_group_table
 from inyoka.wiki.parser import parse, RenderContext
@@ -939,18 +939,7 @@ def user_edit_privileges(request, username):
             privileges = Privilege.query
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges_'):
-                    positive = 0
-                    negative = 0
-                    for bit in value.split(','):
-                        try:
-                            bit = int(bit)
-                        except ValueError:
-                            continue
-                        if bit > 0:
-                            positive |= abs(bit)
-                        else:
-                            negative |= abs(bit)
-
+                    negative, positive = split_negative_positive(value)
                     forum_id = key.split('_')[2]
                     privilege = privileges.filter(and_(
                         Privilege.forum_id==forum_id,
@@ -1206,18 +1195,7 @@ def group_edit(request, name=None):
             #: forum privileges
             for key, value in request.POST.iteritems():
                 if key.startswith('forum_privileges_'):
-                    negative = 0
-                    positive = 0
-                    for bit in value.split(','):
-                        try:
-                            bit = int(bit)
-                        except ValueError:
-                            continue
-                        if bit > 0:
-                            positive |= abs(bit)
-                        else:
-                            negative |= abs(bit)
-
+                    negative, positive = split_negative_positive(value)
                     forum_id = key.split('_')[2]
                     privilege = Privilege.query.filter(and_(
                         Privilege.forum_id==forum_id,
