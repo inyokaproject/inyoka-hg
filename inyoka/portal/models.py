@@ -496,7 +496,7 @@ class Event(models.Model):
             if self.enddate is None or self.enddate <= self.date:
                 return ' ' + _convert(self.date)
             else:
-                return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False)
+                return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False, True)
         else:
             if self.enddate is None and self.endtime is None:
                 return ' ' + _convert(self.date, self.time)
@@ -518,9 +518,9 @@ class Event(models.Model):
 
                 if not delta.days:
                     # duration < 1 day
-                    return " am " + _convert(self.date, self.time, False) + ' bis ' + _convert(self.date, self.endtime, True, False)
+                    return " am " + _convert(self.date, self.time, False) + ' bis ' + _convert(self.date, self.endtime, True, False, True)
                 else:
-                    return " " + _convert(self.date, self.time, False, False) + ' bis ' + _convert(self.enddate, self.endtime, False, False)
+                    return " " + _convert(self.date, self.time, False, False) + ' bis ' + _convert(self.enddate, self.endtime, False, False, True)
 
     @property
     def natural_coordinates(self):
