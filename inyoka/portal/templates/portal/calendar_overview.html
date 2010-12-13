@@ -38,7 +38,7 @@
 
 <h3>die nächsten Veranstaltungen</h3>
 {% if events %}
-<ul class="events">
+<ul class="events vcalendar">
   {% for event in events %}
   <li>{{ event.friendly_title(with_html_link=true) }}</li>
   {%- endfor %}
