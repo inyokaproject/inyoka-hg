@@ -90,13 +90,11 @@ def subscription_action(request, action=None):
     try:
         subscription = Subscription.objects.get(user=request.user, **{col: obj.id})
     except Subscription.DoesNotExist:
-        pass
-
-    if action == 'subscribe':
-        Subscription(user=request.user, **{col: obj.id}).save()
+        if action == 'subscribe':
+            Subscription(user=request.user, **{col: obj.id}).save()
     else:
-        # unsubscribe
-        subscription.delete()
+        if action == 'unsubscribe':
+            subscription.delete()
 
 
 def on_change_status(request, solved=None):
