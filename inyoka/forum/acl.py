@@ -8,6 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import operator as ops
 from inyoka.utils.database import db
 from inyoka.utils.cache import cache
 
@@ -170,25 +171,22 @@ def check_privilege(mask, privilege):
     return mask & privilege != 0
 
 
-def filter_invisible(user, forums=None, priv=CAN_READ, privileges=None):
+def filter(user, forums=None, priv=CAN_READ, privileges=None, operator=ops.eq):
     """Filter all forums where the user has a privilege on it."""
     forums = forums or []
     privileges = privileges or get_privileges(user, [f.id for f in forums])
     result = []
     for forum in forums:
-        if privileges.get(forum.id, DISALLOW_ALL) & priv != 0:
+        if operator(privileges.get(forum.id, DISALLOW_ALL) & priv, 0):
             result.append(forum)
     return result
 
 
-def filter_visible(user, forums=None, priv=CAN_READ, privileges=None):
-    forums = forums or []
-    privileges = privileges or get_privileges(user, [f.id for f in forums])
-    result = []
-    for forum in forums:
-        if privileges.get(forum.id, DISALLOW_ALL) & priv == 0:
-            result.append(forum)
-    return result
+#: Shortcut to filter all visible forums
+filter_visible = lambda u, f=None, priv=None, perm=None: filter(u, f, priv, perm, ops.eq)
+
+#: Shortcut to filter all invisible forums
+filter_invisible = lambda u, f=None, priv=None, perm=None: filter(u, f, priv, perm, ops.ne)
 
 
 def split_negative_positive(value):
