@@ -414,7 +414,6 @@ class Event(models.Model):
                                       blank=True, null=True)
     visible = models.BooleanField(default=False)
 
-
     def get_absolute_url(self, action='show'):
         if action == 'copy':
             return href('admin', 'events', 'new', copy_from=self.id)
@@ -468,13 +467,17 @@ class Event(models.Model):
 
     @property
     def natural_datetime(self):
-        def _convert(d, t=None, time_only=False, prefix=True):
+        def _convert(d, t=None, time_only=False, prefix=True, end=False):
+            class_ = 'dtend' if end else 'dtstart'
+            dt = date_time_to_datetime(d, t)
             if t is None:
                 val = natural_date(d, prefix)
             elif t is not None and time_only:
-                val = format_time(date_time_to_datetime(d, t))
+                val = '<abbr title="%s" class="%s">%s</abbr>' % (
+                    dt.isoformat(), class_, format_time(dt))
             else:
-                val = format_datetime(date_time_to_datetime(d, t))
+                val = '<abbr title="%s" class="%s">%s</abbr>' % (
+                    dt.isoformat(), class_, format_datetime(dt))
             return val
 
         """
@@ -529,6 +532,10 @@ class Event(models.Model):
             return u'%s, %s' % (lat, long)
         else:
             return u''
+
+    @property
+    def simple_coordinates(self):
+        return u'%s;%s' % (self.location_lat, self.location_long)
 
     @property
     def coordinates_url(self):

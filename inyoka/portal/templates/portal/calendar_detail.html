@@ -9,6 +9,10 @@
 #}
 
 {%- extends 'portal/overall.html' %}
+{% block html_head %}
+    {{ super() }}
+    <link rel="profile" href="http://microformats.org/profile/hcalendar">
+{% endblock %}
 {% set title_trace = [event.name|e, 'Kalender'] %}
 {% set styles = ['calendar.css'] %}
 {% set navigation_trace =  [
@@ -21,20 +25,22 @@
   <h2><a href="{{ event|url }}">{{ event.name|e }}</a></h2>
 {% endblock %}
 {% block portal_content %}
-<h3>Veranstaltung „{{ event.name|e }}“</h3>
-<table>
+<h3>Veranstaltung „<span class="summary">{{ event.name|e }}</span>“</h3>
+<table class="vevent">
   <tr><th>Zeitpunkt</th><td>{{ event.natural_datetime }}</td></tr>
   {%- if event.location_town %}
   <tr>
     <th>Ort</th>
     <td>
-      {% if event.location %}{{ event.location|e }} in {% endif %}{{ event.location_town|e }}
-      {% if event.location_lat and event.location_long %}(<a href="{{ event.coordinates_url|e }}">{{ event.natural_coordinates|e }}</a>){% endif %}
+      {% if event.location %}<span class="location">{{ event.location|e }} in {% endif %}{{ event.location_town|e }}</span>
+      {%- if event.location_lat and event.location_long %}
+        (<a href="{{ event.coordinates_url|e }}"><abbr class="geo" title="{{ event.simple_coordinates|e }}">{{ event.natural_coordinates|e }}</abbr></a>)
+      {%- endif %}
     </td>
   </tr>
   {%- endif %}
   <tr><th colspan="2">Details
     {%- if USER.can('event_edit') %} <small>(<a href="{{ event|url('edit') }}" class="adminlink">bearbeiten</a>)</small>{% endif %}</th></tr>
-  <tr><td colspan="2">{{ event.rendered_description or '–' }}</td></tr>
+  <tr><td colspan="2"><span class="description">{{ event.rendered_description or '–' }}</span></td></tr>
 </table>
 {% endblock %}
