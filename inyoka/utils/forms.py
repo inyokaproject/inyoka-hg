@@ -201,8 +201,7 @@ class JabberField(forms.CharField):
 class SlugField(forms.CharField):
 
     def clean(self, value):
-        value = slugify(value)
-        value = value.strip()
-        if not value:
-            return
-        return value
+        if value:
+            value = slugify(value)
+            return value.strip() if value else None
+        return None
