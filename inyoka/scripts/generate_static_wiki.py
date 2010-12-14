@@ -23,6 +23,7 @@ from werkzeug import url_unquote
 from inyoka.conf import settings
 from inyoka.utils.urls import href
 from inyoka.utils.text import normalize_pagename
+from inyoka.utils.terminal import ProgressBar, percentize
 from inyoka.wiki.models import Page
 from inyoka.wiki.acl import has_privilege
 from inyoka.portal.user import User
@@ -72,44 +73,6 @@ EXCLUDE_PAGES = [x.lower() for x in EXCLUDE_PAGES]
 INCLUDE_IMAGES = True
 
 _iterables = (tuple, list, set, frozenset)
-
-
-# original from Jochen Kupperschmidt with some modifications
-class ProgressBar(object):
-    """Visualize a status bar on the console."""
-
-    def __init__(self, max_width):
-        """Prepare the visualization."""
-        self.max_width = max_width
-        self.spin = cycle(r'-\|/').next
-        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
-        show(' [ ')
-        self.last_output_length = 0
-
-    def update(self, percent):
-        """Update the visualization."""
-        # Remove last state.
-        show('\b' * self.last_output_length)
-
-        # Generate new state.
-        width = int(percent / 100.0 * self.max_width)
-        output = self.tpl % ('-' * width, self.spin(), percent)
-
-        # Show the new state and store its length.
-        show(output)
-        self.last_output_length = len(output)
-
-
-def show(string):
-    """Show a string instantly on STDOUT."""
-    sys.stdout.write(string)
-    sys.stdout.flush()
-
-
-def percentize(steps):
-    """Generate percental values."""
-    for i in range(steps + 1):
-        yield i * 100.0 / steps
 
 
 def fetch_page(name):

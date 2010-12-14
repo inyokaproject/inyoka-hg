@@ -414,7 +414,6 @@ class Event(models.Model):
                                       blank=True, null=True)
     visible = models.BooleanField(default=False)
 
-
     def get_absolute_url(self, action='show'):
         if action == 'copy':
             return href('admin', 'events', 'new', copy_from=self.id)
@@ -453,28 +452,32 @@ class Event(models.Model):
             s_date = self.natural_datetime
         else:
             s_date = ''
-        s_location = self.location_town \
-            and u' in %s' % self.location_town \
-            or ''
+        s_location = '<span class="location">%s</span>' % (
+             self.location_town and u' in %s' % self.location_town or '')
+        summary = u'<span class="summary">%s</span>' % escape(self.name)
         if with_html_link:
-            return u'<a href="%s" class="event_link">%s</a>%s%s' % (
+            ret = u'<a href="%s" class="event_link">%s</a>%s%s' % (
                 escape(self.get_absolute_url()),
-                escape(self.name),
-                escape(s_date),
-                escape(s_location),
-            )
+                summary,
+                s_date,
+                s_location)
         else:
-            return self.name + s_date + s_location
+            ret = summary + s_date + s_location
+        return u'<span class="vevent">%s</span>' % ret
 
     @property
     def natural_datetime(self):
-        def _convert(d, t=None, time_only=False, prefix=True):
+        def _convert(d, t=None, time_only=False, prefix=True, end=False):
+            class_ = 'dtend' if end else 'dtstart'
+            dt = date_time_to_datetime(d, t)
             if t is None:
                 val = natural_date(d, prefix)
             elif t is not None and time_only:
-                val = format_time(date_time_to_datetime(d, t))
+                val = '<abbr title="%s" class="%s">%s</abbr>' % (
+                    dt.isoformat(), class_, format_time(dt))
             else:
-                val = format_datetime(date_time_to_datetime(d, t))
+                val = '<abbr title="%s" class="%s">%s</abbr>' % (
+                    dt.isoformat(), class_, format_datetime(dt))
             return val
 
         """
@@ -493,7 +496,7 @@ class Event(models.Model):
             if self.enddate is None or self.enddate <= self.date:
                 return ' ' + _convert(self.date)
             else:
-                return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False)
+                return ' vom ' + _convert(self.date, None, False, False) + ' bis ' + _convert(self.enddate, None, False, False, True)
         else:
             if self.enddate is None and self.endtime is None:
                 return ' ' + _convert(self.date, self.time)
@@ -515,9 +518,9 @@ class Event(models.Model):
 
                 if not delta.days:
                     # duration < 1 day
-                    return " am " + _convert(self.date, self.time, False) + ' bis ' + _convert(self.date, self.endtime, True, False)
+                    return " am " + _convert(self.date, self.time, False) + ' bis ' + _convert(self.date, self.endtime, True, False, True)
                 else:
-                    return " " + _convert(self.date, self.time, False, False) + ' bis ' + _convert(self.enddate, self.endtime, False, False)
+                    return " " + _convert(self.date, self.time, False, False) + ' bis ' + _convert(self.enddate, self.endtime, False, False, True)
 
     @property
     def natural_coordinates(self):
@@ -529,6 +532,10 @@ class Event(models.Model):
             return u'%s, %s' % (lat, long)
         else:
             return u''
+
+    @property
+    def simple_coordinates(self):
+        return u'%s;%s' % (self.location_lat, self.location_long)
 
     @property
     def coordinates_url(self):

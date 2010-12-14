@@ -160,7 +160,7 @@ div.box h3 {
   padding: 0 1em;
   -moz-border-radius: 3px 3px 0px 0px;
   -webkit-border-radius: 3px 3px 0px 0px;
-  border-radius: 3px 3px 3px 0px 0px;
+  border-radius: 3px 3px 0px 0px;
 }
 
 div.improvable {
@@ -214,8 +214,8 @@ div.warning h3 {
 div.warning_important {
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
-  border: 1px solid #d40000;
   border-radius: 5px;
+  border: 1px solid #d40000;
   background-color: #D40000;
   color: white;
   font-weight: bold;
@@ -263,6 +263,8 @@ div.workinprogress h3 {
   padding: .5em;
   border: 1px solid #d7b97b;
   -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
   background-image: url(../img/wiki/toc.png);
   background-color: #fff;
   background-position: top right;

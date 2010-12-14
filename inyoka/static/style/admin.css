@@ -204,9 +204,9 @@ div.errorlist h4 {
   font-weight: normal;
   padding: 15px;
   background-color: #eee;
-  -moz-border-radius: 0.6em;
-  -webkit-border-radius: 0.6em;
-  border-radius: 0.6em;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
 
 div.errorlist h4:hover {

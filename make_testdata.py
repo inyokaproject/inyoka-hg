@@ -29,6 +29,7 @@ from inyoka.wiki.models import Page
 from inyoka.utils.database import session
 from inyoka.utils.captcha import generate_word
 from inyoka.utils.text import increment_string
+from inyoka.utils.terminal import ProgressBar, percentize, show
 
 
 MARKS = ('.', ';', '!', '?')
@@ -47,44 +48,6 @@ MAX_TOPIC_COUNT = 20
 MAX_TOPIC_POST_COUNT = 15
 IKHAYA_CATEGORY_COUNT = 5
 WIKI_PAGES_COUNT = 200
-
-
-# original from Jochen Kupperschmidt with some modifications
-class ProgressBar(object):
-    """Visualize a status bar on the console."""
-
-    def __init__(self, max_width):
-        """Prepare the visualization."""
-        self.max_width = max_width
-        self.spin = cycle(r'-\|/').next
-        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
-        show(' [ ')
-        self.last_output_length = 0
-
-    def update(self, percent):
-        """Update the visualization."""
-        # Remove last state.
-        show('\b' * self.last_output_length)
-
-        # Generate new state.
-        width = int(percent / 100.0 * self.max_width)
-        output = self.tpl % ('-' * width, self.spin(), percent)
-
-        # Show the new state and store its length.
-        show(output)
-        self.last_output_length = len(output)
-
-
-def show(string):
-    """Show a string instantly on STDOUT."""
-    sys.stdout.write(string)
-    sys.stdout.flush()
-
-
-def percentize(steps):
-    """Generate percental values."""
-    for i in range(steps + 1):
-        yield i * 100.0 / steps
 
 
 def create_names(count, func=lambda: choice(NAME_WORDS)):

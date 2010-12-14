@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 import sys
+from itertools import cycle
 
 
 _colors = dict((c, '3%d' % x) for x, c in zip(xrange(8),
@@ -82,3 +83,41 @@ class FancyPrinter(object):
         return self
 
     __lshift__ = __call__
+
+
+# original from Jochen Kupperschmidt with some modifications
+class ProgressBar(object):
+    """Visualize a status bar on the console."""
+
+    def __init__(self, max_width):
+        """Prepare the visualization."""
+        self.max_width = max_width
+        self.spin = cycle(r'-\|/').next
+        self.tpl = '%-' + str(max_width) + 's ] %c %5.1f%%'
+        show(' [ ')
+        self.last_output_length = 0
+
+    def update(self, percent):
+        """Update the visualization."""
+        # Remove last state.
+        show('\b' * self.last_output_length)
+
+        # Generate new state.
+        width = int(percent / 100.0 * self.max_width)
+        output = self.tpl % ('-' * width, self.spin(), percent)
+
+        # Show the new state and store its length.
+        show(output)
+        self.last_output_length = len(output)
+
+
+def show(string):
+    """Show a string instantly on STDOUT."""
+    sys.stdout.write(string)
+    sys.stdout.flush()
+
+
+def percentize(steps):
+    """Generate percental values."""
+    for i in range(steps + 1):
+        yield i * 100.0 / steps

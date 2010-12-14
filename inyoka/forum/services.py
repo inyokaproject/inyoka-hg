@@ -68,7 +68,8 @@ def on_toggle_categories(request):
 
 
 @transaction.autocommit
-def on_subscribe(request):
+def subscription_action(request, action=None):
+    assert action is not None and action in ('subscribe', 'unsubscribe')
     type = request.POST['type']
     slug = request.POST['slug']
     cls = None
@@ -87,37 +88,13 @@ def on_subscribe(request):
         #     to cach that in JS.
         return abort_access_denied(request)
     try:
-        Subscription.objects.get(user=request.user, **{col: obj.id})
+        subscription = Subscription.objects.get(user=request.user, **{col: obj.id})
     except Subscription.DoesNotExist:
-        Subscription(user=request.user, **{col: obj.id}).save()
-
-
-@transaction.autocommit
-def on_unsubscribe(request):
-    type = request.POST['type']
-    slug = request.POST['slug']
-    cls = None
-
-    if type == 'forum':
-        cls = Forum
-    elif type == 'topic':
-        cls = Topic
-
-    col = str((type in ('forum', 'topic') and type+'_id' or type))
-
-    obj = cls.query.filter(cls.slug==slug).one()
-    if request.user.is_anonymous \
-       or not have_privilege(request.user, obj, 'read'):
-        #XXX: we should raise here, because it's nearly impossible
-        #     to catch that in JS.
-        return abort_access_denied(request)
-    try:
-        s = Subscription.objects.get(user=request.user, **{col: obj.id})
-    except Subscription.DoesNotExist:
-        pass
+        if action == 'subscribe':
+            Subscription(user=request.user, **{col: obj.id}).save()
     else:
-        # there's already a subscription for this forum, remove it
-        s.delete()
+        if action == 'unsubscribe':
+            subscription.delete()
 
 
 def on_change_status(request, solved=None):
@@ -169,8 +146,8 @@ dispatcher = SimpleDispatcher(
     get_topic_autocompletion=on_get_topic_autocompletion,
     get_post=on_get_post,
     toggle_categories=on_toggle_categories,
-    subscribe=on_subscribe,
-    unsubscribe=on_unsubscribe,
+    subscribe=lambda r: subscription_action(r, 'subscribe'),
+    unsubscribe=lambda r: subscription_action(r, 'unsubscribe'),
     mark_solved=lambda r: on_change_status(r, True),
     mark_unsolved=lambda r: on_change_status(r, False),
     get_version_details=on_get_version_details,
