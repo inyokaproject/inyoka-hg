@@ -44,7 +44,7 @@ class Blog(models.Model):
         icon = Image.open(img)
         ext = icon.format.lower()
         if not self.id:
-            blog.save()
+            self.save()
         fn = 'planet/icons/icon_%d.%s' % (self.id, ext)
         self.icon.save(fn, img, save=save)
 
