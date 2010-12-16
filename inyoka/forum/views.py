@@ -494,11 +494,10 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             poll = Poll(topic=topic, question=d['question'],
                 multiple_votes=d['multiple'], options=options,
                 start_time=now, end_time=end_time)
-            db.session.commit()
             if topic:
                 topic.has_poll = True
-                db.session.commit()
-                topic.forum.invalidate_topic_cache()
+            db.session.commit()
+            topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
             flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question, True)
@@ -523,8 +522,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         if topic:
             conds.append(Poll.topic_id == topic.id)
         polls = Poll.query.filter(db.or_(*conds)).all() if conds else []
-
-
 
     # handle attachments
     att_ids = map(int, filter(bool,
