@@ -1321,10 +1321,10 @@ def delete_post(request, post_id, action='hide'):
             else:
                 if action == 'hide':
                     post.hidden = True
+                    db.session.commit()
                     flash(u'Der Beitrag von „<a href="%s">%s</a>“ wurde unsichtbar '
                           u'gemacht.' % (url_for(post), escape(post.author.username)),
                           success=True)
-                    db.session.commit()
                     return HttpResponseRedirect(url_for(post))
                 elif action == 'delete':
                     author = post.author
