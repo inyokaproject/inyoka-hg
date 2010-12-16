@@ -135,7 +135,7 @@ def parse_iso8601(value):
         else:
             args.append(int(seconds))
 
-    rv = datetime(*args)
+    rv = datetime(*filter(None, args))
     tz = groups[-1]
     if tz and tz != 'Z':
         args = map(int, tz[1:].split(':'))
