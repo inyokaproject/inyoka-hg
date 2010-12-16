@@ -107,9 +107,11 @@ UBUNTU_DISTROS = [
 ]
 
 
+_newline_re = re.compile(r'\r?\n')
+
 def fix_plaintext(text):
     text = escape(text)
-    text = text.replace('\n', '<br />')
+    text = _newline_re.sub('<br />', text)
     return text
 
 
