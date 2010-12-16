@@ -76,7 +76,7 @@ class InyokaSession(SASession):
 
     def __init__(self):
         SASession.__init__(self, get_engine(), autoflush=True,
-                           autocommit=False)
+                           autocommit=False, expire_on_commit=not settings.DEBUG)
 
 
 metadata = MetaData()
