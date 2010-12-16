@@ -297,11 +297,8 @@ def viewtopic(request, topic_slug, page=1):
 
     for post in post_objects:
         if not post.rendered_text:
-            try:
-                post.rendered_text = post.render_text(force_existing=True)
-                db.session.commit()
-            except OperationalError:
-                pass
+            post.rendered_text = post.render_text(force_existing=True)
+            db.session.commit()
 
     team_icon = storage['team_icon']
 
