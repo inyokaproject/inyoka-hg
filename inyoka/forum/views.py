@@ -1198,8 +1198,8 @@ def splittopic(request, topic_slug, page=1):
                         ubuntu_version=data['ubuntu_version'],
                         ubuntu_distro=data['ubuntu_distro'],
                     )
-                    db.atomic_add(new_topic.forum, 'topic_count', 1)
                     db.session.commit()
+                    db.atomic_add(new_topic.forum, 'topic_count', 1, True)
                     Post.split(posts, old_topic, new_topic)
                 else:
                     new_topic = data['topic']
