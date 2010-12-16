@@ -31,7 +31,6 @@ from inyoka.utils.database import db
 from inyoka.utils.dates import timedelta_to_seconds
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href
-from inyoka.utils.highlight import highlight_code
 from inyoka.utils.search import search
 from inyoka.utils.cache import cache, request_cache
 from inyoka.utils.local import current_request
@@ -1619,3 +1618,4 @@ class ReadStatus(object):
 # Circular imports
 from inyoka.wiki.parser import parse, RenderContext
 from inyoka.portal.models import SearchQueue
+from inyoka.utils.highlight import highlight_code
