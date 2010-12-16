@@ -878,6 +878,7 @@ class PostRevision(db.Model):
         revision.
         """
         self.post.edit(request, self.text)
+        db.session.flush()
         db.session.delete(self)
 
 
