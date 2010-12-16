@@ -592,9 +592,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                       u'editieren möchtest.')
                 return HttpResponseRedirect(url_for(doublepost.topic))
 
-        if not topic:
+        if not topic and newtopic or firstpost:
             topic = Topic(forum_id=forum.id, author_id=request.user.id)
-        if newtopic or firstpost:
             topic.title = d['title']
             if topic.ubuntu_distro != d.get('ubuntu_distro')\
                or topic.ubuntu_version != d.get('ubuntu_version'):
@@ -609,6 +608,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
 
             topic.forum.invalidate_topic_cache()
             topic.reindex()
+        else:
+            flash(u'Das Topic „%s” existiert nicht' % topic_slug)
 
         if not post:
             post = Post(topic=topic, author_id=request.user.id)
