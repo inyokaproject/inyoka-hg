@@ -10,6 +10,7 @@
 """
 from __future__ import division, with_statement
 import os
+import re
 import cPickle
 import operator
 from os import path
