@@ -117,7 +117,9 @@ class Category(models.Model):
         }[action])
 
     def save(self, force_insert=False, force_update=False):
-        self.slug = find_next_django_increment(Category, 'slug', slugify(self.name))
+        # only set the slug on first save.
+        if not self.pk:
+            self.slug = find_next_django_increment(Category, 'slug', slugify(self.name))
         super(Category, self).save(force_insert, force_update)
         cache.delete('ikhaya/categories')
 
