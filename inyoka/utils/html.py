@@ -22,7 +22,6 @@ from html5lib import HTMLParser, treewalkers, treebuilders
 from html5lib.serializer import XHTMLSerializer, HTMLSerializer
 from html5lib.filters.optionaltags import Filter as OptionalTagsFilter
 from html5lib.filters import sanitizer
-from werkzeug import html
 
 
 #: set of tags that don't want child elements.

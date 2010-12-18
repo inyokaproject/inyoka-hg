@@ -11,8 +11,9 @@
 import re
 import sys
 from datetime import datetime
+from werkzeug import html
 from textwrap import wrap
-from inyoka.utils.html import html, escape
+from inyoka.utils.html import escape
 from django.db import connection
 from django.db.backends import util
 from django.utils.encoding import force_unicode
