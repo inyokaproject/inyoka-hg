@@ -1,0 +1,8 @@
+Hallo {{ username }},
+
+der Benutzer {{ comment.author }} hat einen neuen Kommentar zum Artikel „{{ article.subject }}“ verfasst.
+Du kannst ihn dir hier ansehen: {{ comment|url }}
+
+{#
+Falls du bei Beiträgen in diesem Thema in Zukunft nicht mehr benachrichtigt werden willst, so kannst du das hier deaktivieren: {{ topic|url('unsubscribe') }}
+#}

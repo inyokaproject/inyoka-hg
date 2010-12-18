@@ -19,7 +19,8 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import MONTHS
 from inyoka.utils.templating import render_template
-from inyoka.utils.notification import send_notification
+from inyoka.utils.notification import send_notification, \
+     notify_about_subscription
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.portal.user import User
 from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
@@ -139,6 +140,13 @@ def detail(request, year, month, day, slug):
                 c.author = request.user
                 c.pub_date = datetime.utcnow()
                 flash(u'Dein Kommentar wurde erstellt.', True)
+                # Send a message to users who subscribed to the article
+                for s in Subscription.objects.filter(article_id=article.id):
+                    notify_about_subscription(s, 'new_comment',
+                        u'Neuer Kommentar zum Artikel %s' % article.subject,
+                        {'username': s.user.username,
+                         'comment': c,
+                         'article': article})
             c.save()
             return HttpResponseRedirect(url_for(c))
     elif request.GET.get('moderate'):

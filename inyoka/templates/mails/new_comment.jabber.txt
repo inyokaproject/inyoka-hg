@@ -1,0 +1,1 @@
+Neuer Kommentar von {{ comment.author }} zum Artikel „{{ article.subject }}“: {{ comment|url }}
