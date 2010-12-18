@@ -27,12 +27,10 @@ def send_notification(user, template_name=None, subject=None, args=None):
     if 'jabber' in methods and user.jabber:
         message = render_template('mails/%s.jabber.txt' % template_name, args)
         send_jabber(user.jabber, message, xhtml=False)
-        print message
     if 'mail' in methods:
         message = render_template('mails/%s.txt' % template_name, args)
         send_mail(settings.EMAIL_SUBJECT_PREFIX + subject, message,
                   settings.INYOKA_SYSTEM_USER_EMAIL, [user.email])
-        print message
 
 
 def notify_about_subscription(sub, template=None, subject=None, args=None):

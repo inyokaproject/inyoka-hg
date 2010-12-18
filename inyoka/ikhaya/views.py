@@ -165,6 +165,8 @@ def detail(request, year, month, day, slug):
         'can_post_comment': request.user.is_authenticated,
         'can_admin_comment': request.user.can('comment_edit'),
         'can_edit_article': request.user.can('article_edit'),
+        'is_subscribed': Subscription.objects.user_subscribed(request.user,
+                                                              article=article)
     }
 
 
