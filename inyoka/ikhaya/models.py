@@ -94,16 +94,9 @@ class SuggestionManager(models.Manager):
 
     def delete(self, ids):
         """
-        Deletes a list of suggestions with only one query.
+        Deletes a list of suggestions with only one query and refresh the caches.
         """
-        cur = connection.cursor()
-        cur.execute('''
-            DELETE
-            FROM   ikhaya_suggestion
-            WHERE  id IN (%s);
-        ''' % ', '.join(['%s'] * len(ids)), list(ids))
-        cur.close()
-        connection._commit()
+        Suggestion.objects.filter(id__in=ids).delete()
         cache.delete('ikhaya/suggestion_count')
 
 
@@ -287,12 +280,7 @@ class Article(models.Model):
         # now that we have the article id we can put it into the slug
         if suffix_id:
             self.slug = '%s-%s' % (self.slug, self.id)
-            cur = connection.cursor()
-            cur.execute('''
-                UPDATE ikhaya_article
-                SET    slug = %s
-                WHERE  id   = %s;
-            ''', [self.slug, self.id])
+            Article.objects.filter(id=self.id).update(slug=self.slug)
         cache.delete('ikhaya/archive')
         cache.delete('ikhaya/short_archive')
         cache.delete('ikhaya/article_text/%s' % self.id)
@@ -441,11 +429,9 @@ class IkhayaSearchAdapter(SearchAdapter):
         return [self.extract_data(article) for article in articles]
 
     def get_doc_ids(self):
-        cur = connection.cursor()
-        cur.execute('SELECT id FROM ikhaya_article;')
-        for row in cur.fetchall():
-            yield row[0]
-        cur.close()
+        ids = Article.objects.values_list('id', flat=True).all()
+        for id in ids:
+            yield id
 
 
 search.register(IkhayaSearchAdapter())
