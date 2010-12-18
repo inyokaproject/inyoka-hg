@@ -14,8 +14,7 @@ import re
 from urlparse import urlparse
 from django.core.urlresolvers import RegexURLResolver
 from inyoka.conf import settings
-from werkzeug import import_string, url_encode, url_decode, url_quote, \
-     url_quote_plus, url_fix
+from werkzeug import import_string, url_encode, url_quote, url_quote_plus
 
 
 # extended at runtime with module introspection information

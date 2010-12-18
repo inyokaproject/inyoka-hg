@@ -29,11 +29,11 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import re
+from werkzeug import url_decode
 from inyoka.utils.html import escape
-from inyoka.utils.urls import url_decode
 from inyoka.utils.http import HttpResponseRedirect
 from inyoka.utils.flashing import flash, unflash
-import re
 
 
 # referrer urls matching this regex will be allowed
