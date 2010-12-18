@@ -8,7 +8,7 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
-from django.db import models, connection
+from django.db import models, connection, transaction
 
 from inyoka.utils.text import slugify
 from inyoka.utils.urls import href
@@ -53,58 +53,24 @@ class SubscriptionManager(models.Manager):
             ident = member.id
         else:
             raise TypeError('user_subscribed takes exactly 3 arguments (2 given)')
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT 1
-            FROM   portal_subscription
-            WHERE  user_id = %%s
-            AND    %s      = %%s;
-        ''' % column, [user.id, ident])
-        row = cursor.fetchone()
-        cursor.close()
-        return row is not None
+
+        subscribed = Subscription.objects.filter(**{'user__id': user.id, column: ident}).exists()
+        return subscribed
 
     @classmethod
     def delete_list(cls, user_id, ids):
         if not ids:
             return
-        cur = connection.cursor()
-
-        query = '''
-            DELETE
-            FROM   portal_subscription
-            WHERE  id IN (%(id_list)s)
-            AND    user_id = %(user_id)d;
-        ''' % {'id_list': ','.join(['%s'] * len(ids)),
-               'user_id': int(user_id)}
-
-        params = [int(i) for i in ids]
-
-        cur.execute(query, params)
-        cur.close()
-        connection._commit()
+        ids = [int(id) for id in ids]
+        Subscription.objects.filter(id__in=ids, user__id=int(user_id)).delete()
 
     @classmethod
     def mark_read_list(cls, user_id, ids):
         if not ids:
             return
-        cur = connection.cursor()
-
-        query = '''
-            UPDATE portal_subscription
-            SET    notified = 0
-            WHERE  id IN (%(id_list)s)
-            AND    user_id = %(user_id)d;
-            ''' % {
-                'id_list': ','.join(['%s'] * len(ids)),
-                'user_id': int(user_id)
-            }
-
-        params = [int(i) for i in ids]
-
-        cur.execute(query, params)
-        cur.close()
-        connection._commit()
+        ids = [int(id) for id in ids]
+        Subscription.objects.filter(id__in=ids, user__id=int(user_id))\
+                            .update(notified=0)
 
 
 class SessionInfo(models.Model):
@@ -576,30 +542,18 @@ class SearchQueueManager(models.Manager):
             SearchQueue.objects.remove(last_id)
             items = fetch()
 
+    @transaction.commit_manually
     def multi_insert(self, component, ids):
-        cursor = connection.cursor()
-        s = ('("' + component + '", %s)',)
-        cursor.execute('''
-            INSERT
-            INTO   portal_searchqueue
-                   (
-                        component,
-                        doc_id
-                   )
-                   VALUES %s;
-        ''' % ', '.join(s * len(ids)), ids)
-        cursor.close()
-        connection._commit()
+        for doc_id in ids:
+            entry = SearchQueue(component=component, doc_id=doc_id)
+            entry.save()
+        transaction.commit()
 
     def remove(self, last_id):
         """
         Remove all elements, which are smaller (or equal)
         than last_id from the queue."""
-        cursor = connection.cursor()
-        cursor.execute('''DELETE FROM portal_searchqueue WHERE id <= %d;
-        ''' % last_id)
-        cursor.close()
-        connection._commit()
+        SearchQueue.objects.filter(id__lt=last_id).delete()
 
 
 class SearchQueue(models.Model):
