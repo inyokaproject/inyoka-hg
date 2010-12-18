@@ -83,29 +83,21 @@ def context_modifier(request, context):
 def index(request, year=None, month=None, category_slug=None, page=1):
     """Shows a few articles by different criteria"""
     category = None
+    can_read = request.user.can('article_read')
+    articles = Article.published if not can_read else Article.objects
+
     if year and month:
-        articles = Article.objects.only('pub_date', 'slug') \
-            .filter(pub_date__year=year, pub_date__month=month)
+        articles = articles.filter(pub_date__year=year, pub_date__month=month)
         link = (year, month)
     elif category_slug:
         category = Category.objects.get(slug=category_slug)
-        articles = Article.objects.filter(category=category).only('pub_date', 'slug')
+        articles = articles.objects.filter(category=category)
         link = ('category', category_slug)
     else:
-        articles = Article.objects.only('pub_date', 'slug').all()
         link = tuple()
 
-    can_read = request.user.can('article_read')
-    if not can_read:
-        now = datetime.utcnow()
-        articles = articles.filter(public=True) \
-                           .filter(Q(pub_date__lt=now.date())|
-                                   Q(pub_date = now.date(), pub_time__lte = now.time()))
-
     link = href('ikhaya', *link)
-
-    articles = articles.order_by('public', '-updated')
-
+    articles = articles.order_by('public', '-updated').only('pub_date', 'slug')
     pagination = Pagination(request, articles, page, 15, link)
     articles = Article.objects.get_cached([(a.pub_date, a.slug) for a in
         pagination.objects])
