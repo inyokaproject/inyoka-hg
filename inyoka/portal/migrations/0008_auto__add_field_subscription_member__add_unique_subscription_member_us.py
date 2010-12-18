@@ -30,6 +30,8 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {'db_index': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'enddate': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'endtime': ('django.db.models.fields.TimeField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.CharField', [], {'max_length': '25', 'blank': 'True'}),
             'location_lat': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
