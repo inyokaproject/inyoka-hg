@@ -92,7 +92,7 @@ def index(request, year=None, month=None, category_slug=None, page=1):
         link = (year, month)
     elif category_slug:
         category = Category.objects.get(slug=category_slug)
-        articles = articles.objects.filter(category=category)
+        articles = articles.filter(category=category)
         link = ('category', category_slug)
     else:
         link = tuple()
