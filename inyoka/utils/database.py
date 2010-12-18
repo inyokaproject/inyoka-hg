@@ -333,7 +333,7 @@ def visit_explain(element, compiler, **kw):
 
 
 @compiles(explain, 'postgresql')
-def visit_explain(element, compiler, **kw):
+def visit_explain_pgsql(element, compiler, **kw):
     text = 'EXPLAIN '
     if element.analyze:
         text += 'ANALYZE '
