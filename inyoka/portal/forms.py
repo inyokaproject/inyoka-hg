@@ -12,6 +12,7 @@ import Image
 from django import forms
 from django.utils.safestring import mark_safe
 from django.db import connection
+from django.db.models import Count
 from django.utils.translation import ugettext as _
 
 from inyoka.conf import settings
@@ -118,9 +119,9 @@ class RegisterForm(forms.Form):
             user = User.objects.get(username)
         except User.DoesNotExist:
             # To bad we had to change the user regex…,  we need to rename users fast…
-            c = connection.cursor()
-            c.execute("SELECT COUNT(*) FROM portal_user WHERE username LIKE %s", [username.replace(' ', '%')])
-            count = c.fetchone()[0]
+            q = Book.objects.annotate(Count('authors'))
+            count = User.objects.annotate(Count('username', distinct=True)) \
+                                .filter(username__contains=username.replace(' ', '%'))
             if count == 0:
                 return username
 

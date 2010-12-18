@@ -157,11 +157,9 @@ class PlanetSearchAdapter(SearchAdapter):
         )
 
     def get_doc_ids(self):
-        cur = connection.cursor()
-        cur.execute('SELECT id FROM planet_entry;')
-        for row in cur.fetchall():
-            yield row[0]
-        cur.close()
+        ids = Entry.objects.values_list('id', flat=True)
+        for id in ids:
+            yield id
 
 
 search.register(PlanetSearchAdapter())
