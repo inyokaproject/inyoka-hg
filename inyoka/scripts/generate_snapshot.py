@@ -15,7 +15,7 @@ import shutil
 import urllib2
 from os import path
 from datetime import datetime
-from itertools import cycle, izip
+from itertools import izip
 
 from inyoka.utils.urls import href
 from inyoka.utils.text import normalize_pagename

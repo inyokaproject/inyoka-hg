@@ -18,7 +18,7 @@ from django.db.models import Q
 from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
-from sqlalchemy.exceptions import InvalidRequestError, OperationalError
+from sqlalchemy.exceptions import InvalidRequestError
 
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain

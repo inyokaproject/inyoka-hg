@@ -9,7 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from PIL import Image
-from django.db import models, connection
+from django.db import models
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.search import search, SearchAdapter
 from inyoka.utils.html import striptags

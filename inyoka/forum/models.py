@@ -42,7 +42,7 @@ from inyoka.forum.acl import filter_invisible, get_privileges, CAN_READ, \
 from inyoka.forum.compat import SAUser
 
 # Import Django models here so that South can find them
-from inyoka.forum.django_models import *
+import inyoka.forum.django_models
 
 
 # initialize PIL to make Image.ID available
