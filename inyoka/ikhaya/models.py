@@ -12,6 +12,7 @@ from hashlib import md5
 from datetime import datetime
 from django.db import models, connection
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from inyoka.portal.user import User
 from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext
@@ -67,10 +68,10 @@ class ArticleManager(models.Manager):
         for i, (key, pub_date, slug) in enumerate(keys):
             if articles[i] is None:
                 try:
-                    cache_vals[key] = articles[i] = article = \
-                        self.select_related('author__username', 'category',
-                                            'category__icon', 'icon').get(
-                            slug=slug, pub_date=pub_date)
+                    article = self.select_related('author__username', 'category',
+                                                  'category__icon', 'icon') \
+                                  .get(slug=slug, pub_date=pub_date)
+                    cache_vals[key] = articles[i] = article
                 except self.model.DoesNotExist:
                     articles[i] = None
                     continue
@@ -78,10 +79,15 @@ class ArticleManager(models.Manager):
                 # possible)
                 article._rendered_text = unicode(article.rendered_text)
                 article._rendered_intro = unicode(article.rendered_intro)
-                article.text = None
-                article.intro = None
+                article._simplified_text = unicode(article.simplified_text)
+                article._simplified_intro = unicode(article.simplified_intro)
+                article.text = article.intro = None
         if len(cache_vals): cache.set_many(cache_vals)
         return filter(None, articles)
+
+    def get_latest_articles(self, count=10):
+        keys = Article.published.order_by('-updated').values_list('pub_date', 'slug')[:count]
+        return self.get_cached(keys)
 
 
 class SuggestionManager(models.Manager):
@@ -164,14 +170,10 @@ class Article(models.Model):
 
     def _simplify(self, text, key):
         """Remove markup of a text that belongs to this Article"""
-        v = cache.get(key)
-        if v:
-            return v
         if self.is_xhtml:
             simple = striptags(text)
         else:
             simple = parse(text).text
-        cache.set(key, simple)
         return simple
 
     def _render(self, text, key):
@@ -196,11 +198,15 @@ class Article(models.Model):
 
     @property
     def simplified_text(self):
-        return self._simplify(self.text, 'ikhaya/simple_text/%s' % self.id)
+        if not hasattr(self, '_simplified_text'):
+            self._simplified_text = self._simplify(self.text, 'ikhaya/simple_text/%s' % self.id)
+        return self._simplified_text
 
     @property
     def simplified_intro(self):
-        return self._simplify(self.intro, 'ikhaya/simple_intro/%s' % self.id)
+        if not hasattr(self, '_simplified_intro'):
+            self._simplified_intro = self._simplify(self.intro, 'ikhaya/simple_intro/%s' % self.id)
+        return self._simplified_intro
 
     @property
     def hidden(self):

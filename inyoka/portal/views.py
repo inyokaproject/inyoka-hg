@@ -93,7 +93,7 @@ def index(request):
     Startpage that shows the latest ikhaya articles
     and some records of ubuntuusers.de
     """
-    ikhaya_latest = Article.published.order_by('-updated').all()[:10]
+    ikhaya_latest = Article.objects.get_latest_articles()
     events = Event.objects.order_by('date').filter(
         date__gte=datetime.utcnow(), visible=True)[:4]
     record, record_time = get_user_record()
