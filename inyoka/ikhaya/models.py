@@ -297,8 +297,6 @@ class Article(models.Model):
         cache.delete('ikhaya/short_archive')
         cache.delete('ikhaya/article_text/%s' % self.id)
         cache.delete('ikhaya/article_intro/%s' % self.id)
-        cache.delete('ikhaya/simple_text/%s' % self.id)
-        cache.delete('ikhaya/simple_intro/%s' % self.id)
         cache.delete('ikhaya/article/%s' % self.slug)
 
     def delete(self):
