@@ -18,7 +18,6 @@ from inyoka.conf import settings
 from inyoka.utils.dates import format_timedelta, natural_date, \
      format_datetime, format_specific_datetime, format_time
 from inyoka.utils.text import human_number
-from inyoka.utils.urls import href, url_for, url_encode, url_quote
 from inyoka.utils.flashing import get_flashed_messages
 from inyoka.utils.cache import cache
 from inyoka.utils.local import current_request
@@ -228,6 +227,9 @@ class InyokaEnvironment(Environment):
         )
 
         self.install_gettext_translations(translation)
+
+# circular imports
+from inyoka.utils.urls import href, url_for, url_encode, url_quote
 
 
 # setup the template environment

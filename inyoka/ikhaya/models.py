@@ -10,9 +10,8 @@
 """
 from hashlib import md5
 from datetime import datetime
-from django.db import models, connection
+from django.db import models
 from django.db.models import Q
-from django.forms.models import model_to_dict
 from inyoka.portal.user import User
 from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import render, parse, RenderContext

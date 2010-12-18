@@ -11,13 +11,12 @@
 """
 import os
 import re
-import sys
 import shutil
 from functools import partial
 from os import path
 from urllib import quote
 from hashlib import md5
-from itertools import cycle, izip
+from itertools import izip
 from werkzeug import url_unquote
 
 from inyoka.conf import settings

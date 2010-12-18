@@ -14,7 +14,6 @@ import sys
 from datetime import datetime, timedelta
 import time
 from inyoka.conf import settings
-from inyoka.application import *
 
 
 def get_expired_users():
