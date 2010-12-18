@@ -13,7 +13,7 @@
 import binascii
 from werkzeug import parse_accept_header
 from pytz import country_timezones, utc
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime, date, time as dt_time
 
 from django import forms
 from django.forms.models import model_to_dict
