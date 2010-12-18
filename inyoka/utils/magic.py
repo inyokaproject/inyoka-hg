@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 """
 = python-magic =
 
@@ -24,18 +25,16 @@ file types according to their headers. It is the core of the Unix
 """
 
 import os.path
-import ctypes
-import ctypes.util
-
+from ctypes import CDLL, util
 from ctypes import c_char_p, c_int, c_size_t, c_void_p
 
-class MagicException(Exception): pass
 
-class Magic:
-    """
-    Magic is a wrapper around the libmagic C library.
+class MagicException(Exception):
+    pass
 
-    """
+
+class Magic(object):
+    """Magic is a wrapper around the libmagic C library."""
 
     def __init__(self, mime=False, magic_file=None):
         """
@@ -111,19 +110,19 @@ def from_buffer(buffer, mime=False):
 
 
 
-libmagic = ctypes.CDLL(ctypes.util.find_library('magic'))
+libmagic = CDLL(util.find_library('magic'))
 if not libmagic or not libmagic._name:
     import sys
     if sys.platform == "darwin":
         # try mac ports location
-        libmagic = ctypes.CDLL('/opt/local/lib/libmagic.dylib')
+        libmagic = CDLL('/opt/local/lib/libmagic.dylib')
     elif sys.platform == "win32":
         # try local magic1.dll
-        libmagic = ctypes.CDLL('magic1.dll')
+        libmagic = CDLL('magic1.dll')
 if not libmagic or not libmagic._name:
     raise Exception('failed to find libmagic.  Check your installation')
 
-magic_t = ctypes.c_void_p
+magic_t = c_void_p
 
 def errorcheck(result, func, args):
     err = magic_error(args[0])
