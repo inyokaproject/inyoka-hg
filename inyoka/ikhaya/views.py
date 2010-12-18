@@ -22,7 +22,8 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import send_notification
 from inyoka.portal.utils import check_login, require_permission
 from inyoka.portal.user import User
-from inyoka.portal.models import PrivateMessage, PrivateMessageEntry
+from inyoka.portal.models import PrivateMessage, PrivateMessageEntry, \
+     Subscription
 from inyoka.ikhaya.forms import SuggestArticleForm, EditCommentForm
 from inyoka.ikhaya.models import Category, Article, Suggestion, Comment
 from inyoka.wiki.parser import parse, RenderContext
@@ -157,6 +158,44 @@ def detail(request, year, month, day, slug):
         'can_admin_comment': request.user.can('comment_edit'),
         'can_edit_article': request.user.can('article_edit'),
     }
+
+
+def subscribe_article(request, year, month, day, slug):
+    """Subscribe to article's comments."""
+    try:
+        article = Article.objects.get_cached([(date(int(year), int(month),
+            int(day)), slug)])[0]
+    except IndexError:
+        raise PageNotFound()
+    if article.hidden or article.pub_datetime > datetime.utcnow():
+        if not request.user.can('article_read'):
+            return AccessDeniedResponse()
+    try:
+        Subscription.objects.get(user=request.user, article_id=article.id)
+    except Subscription.DoesNotExist:
+        Subscription(user=request.user, article_id=article.id).save()
+        flash(u'Du wirst ab nun über neue Kommentare zu diesem Artikel '
+              u'benachrichtigt')
+    return HttpResponseRedirect(url_for(article))
+
+
+def unsubscribe_article(request, year, month, day, slug):
+    """Unsubscribe from article."""
+    try:
+        article = Article.objects.get_cached([(date(int(year), int(month),
+            int(day)), slug)])[0]
+    except IndexError:
+        raise PageNotFound()
+    try:
+        subscription = Subscription.objects.get(user=request.user,
+                                                article_id=article.id)
+    except Subscription.DoesNotExist:
+        pass
+    else:
+        subscription.delete()
+        flash(u'Du wirst nun nicht mehr über neue Kommentare zu diesem '
+              u'Artikel benachrichtigt')
+    return HttpResponseRedirect(url_for(article))
 
 
 def change_comment(boolean, text):
