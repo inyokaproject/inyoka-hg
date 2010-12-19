@@ -92,6 +92,16 @@ a.hide_comments:hover {
   text-decoration: underline;
 }
 
+a.action_unsubscribe,
+a.action_subscribe {
+  float: right;
+}
+
+a.action_unsubscribe:after,
+a.action_subscribe:after {
+  clear: both;
+}
+
 table.comments {
     table-layout: fixed;
     margin: 0;

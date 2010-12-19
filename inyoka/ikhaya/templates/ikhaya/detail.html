@@ -62,13 +62,13 @@
       – zuletzt aktualisiert {{ article.updated|specificdatetimeformat(true) }}
       {%- endif %}
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
+      {% if article.comments_enabled and is_subscribed %}
+      <a href="./unsubscribe" class="action action_unsubscribe">Kommentare abbstellen</a>
+      {% elif article.comments_enabled and not is_subscribed %}
+      <a href="./subscribe" class="action action_subscribe">Kommentare abonnieren</a>
+      {% endif %}
     </p>
     {%- if article.comments_enabled %}
-      {% if is_subscribed %}
-        <a href="./unsubscribe" class="action action_unsubscribe">Kommentare abbstellen</a>
-      {% else %}
-        <a href="./subscribe" class="action action_subscribe">Kommentare abonnieren</a>
-      {% endif %}
       <table id="comments" class="comments">
         <script type="text/javascript">
           /* <![CDATA[ */
