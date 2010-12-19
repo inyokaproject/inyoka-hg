@@ -22,6 +22,7 @@ from hashlib import sha1
 from itertools import ifilter
 from werkzeug import url_quote
 from PIL import Image
+from django.utils.encoding import force_unicode
 from inyoka.conf import settings
 from inyoka.wiki.storage import storage
 from inyoka.utils.urls import href, is_external_target
@@ -145,14 +146,14 @@ def get_thumbnail(location, width=None, height=None, force=False):
         raise ValueError('neither with nor height given')
     if is_external_target(location):
         external = True
-        if isinstance(location, unicode):
-            location = location.encode('utf-8')
+        location = force_unicode(location).encode('utf-8')
         partial_hash = sha1(location).hexdigest()
     else:
         from inyoka.wiki.models import Page
         page_filename = Page.objects.attachment_for_page(location)
         if page_filename is None:
             return
+        page_filename = force_unicode(page_filename).encode('utf-8')
         partial_hash = sha1(page_filename).hexdigest()
         external = False
 
