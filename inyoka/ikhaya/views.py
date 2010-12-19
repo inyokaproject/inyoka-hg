@@ -141,7 +141,8 @@ def detail(request, year, month, day, slug):
                 c.pub_date = datetime.utcnow()
                 flash(u'Dein Kommentar wurde erstellt.', True)
                 # Send a message to users who subscribed to the article
-                for s in Subscription.objects.filter(article_id=article.id):
+                for s in Subscription.objects.filter(article_id=article.id) \
+                                              .exclude(user=request.user):
                     notify_about_subscription(s, 'new_comment',
                         u'Neuer Kommentar zum Artikel %s' % article.subject,
                         {'username': s.user.username,
