@@ -196,7 +196,7 @@ class LostPasswordForm(forms.Form):
                 self.user = User.objects.get(data['username'])
             except User.DoesNotExist:
                 raise forms.ValidationError(
-                    _(u'User “%s” does not exist!') % data['username']
+                    u'Der Benutzer „%s” existiert nicht!' % data['username']
                 )
 
 
