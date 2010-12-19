@@ -46,7 +46,7 @@ class SubscriptionManager(models.Manager):
             else:
                 ident = forum.id
         elif wiki_page is not None:
-            column = 'wiki_page_id'
+            column = 'wiki_page'
             ident = wiki_page.id
         elif member is not None:
             column = 'member'
