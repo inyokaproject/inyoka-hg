@@ -47,7 +47,7 @@ class WikiSearchAdapter(SearchAdapter):
         return self.extract_data(rev)
 
     def recv_multi(self, page_ids):
-        revlist = Page.objects.value_list('last_rev_id', flat=True) \
+        revlist = Page.objects.values_list('last_rev_id', flat=True) \
                               .filter(id__in=page_ids).order_by()
 
         revisions = Revision.objects.select_related('page', 'user', 'text') \
