@@ -30,7 +30,7 @@ class WikiSearchAdapter(SearchAdapter):
 
     def extract_data(self, rev):
         return {'title': rev.page.name,
-                'user': rev.user.username,
+                'user': rev.user or u'Anonymer Benutzer',
                 'date': rev.change_date,
                 'url': url_for(rev.page),
                 'component': u'Wiki',
