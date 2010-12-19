@@ -350,8 +350,14 @@ def suggestion_delete(request, suggestion):
               {'s': s}))
         return HttpResponseRedirect(href('ikhaya', 'suggestions'))
 
+
 def suggestion_assign_to(request, suggestion, username):
-    suggestion = Suggestion.objects.get(id=suggestion)
+    try:
+        suggestion = Suggestion.objects.get(id=suggestion)
+    except Suggestion.DoesNotExist:
+        flash(u'Der Vorschlag „%s” existiert nicht' % suggestion)
+        return HttpResponseRedirect(href('ikhaya', 'suggestions'))
+
     if username == '-':
         suggestion.owner = None
         suggestion.save()
