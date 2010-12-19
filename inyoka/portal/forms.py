@@ -118,8 +118,8 @@ class RegisterForm(forms.Form):
             user = User.objects.get(username)
         except User.DoesNotExist:
             # To bad we had to change the user regex…,  we need to rename users fast…
-            count = User.objects.annotate(Count('username', distinct=True)) \
-                                .filter(username__contains=username.replace(' ', '%'))
+            count = User.objects.filter(username__contains=username.replace(' ', '%')) \
+                                .aggregate(user_count=Count('username'))['user_count']
             if count == 0:
                 return username
 
