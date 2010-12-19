@@ -64,15 +64,30 @@ def get_full_id(match):
     return match.document.get_value(0).split(':')
 
 
-class SearchResult(object):
+class EmptySearchResult(object):
+    """This class more or less is a dummy to define an emtpy result set"""
+
+    def __init__(self, mset=None, enq=None, query=None, page=1, per_page=25, adapters=None, success=False):
+        self.page, self.page_count, self.per_page = (page, 1, per_page)
+        self.results = []
+        self.terms = []
+        self.success = success
+
+    @property
+    def highlight_string(self):
+        return ' '.join(term for term in self.terms)
+
+
+class SearchResult(EmptySearchResult):
     """
     This class holds all search results.
     """
 
-    def __init__(self, mset, enq, query, page, per_page, adapters=None):
+    def __init__(self, mset, enq, query, page, per_page, adapters=None, success=True):
         self.page = page
         self.page_count = get_human_readable_estimate(mset) / per_page + 1
         self.per_page = per_page
+        self.success = success
         results = OrderedDict()
         for match in mset:
             adapter, id = match.document.get_value(0).split(':')
@@ -110,10 +125,6 @@ class SearchResult(object):
             if term.islower():
                 self.terms.append(term)
             t.next()
-
-    @property
-    def highlight_string(self):
-        return ' '.join(term for term in self.terms)
 
 
 class SearchSystem(object):
@@ -263,7 +274,11 @@ class SearchSystem(object):
               sort='date'):
         """Search for something."""
         auth = AuthMatchDecider(user, self.auth_deciders)
-        qry = self.parse_query(query)
+        try:
+            qry = self.parse_query(query)
+        except xapian.QueryParserError:
+            return EmptySearchResult(success=False)
+
         offset = (page - 1) * per_page
 
         if component:
@@ -304,7 +319,7 @@ class SearchSystem(object):
                 enq.set_query(qry)
 
                 mset = enq.get_mset(offset, per_page, per_page, None, auth)
-                return SearchResult(mset, enq, qry, page, per_page, self.adapters)
+                return SearchResult(mset, enq, qry, page, per_page, self.adapters, success=True)
             except xapian.DatabaseModifiedError:
                 time.sleep(0.1)
                 connection.reopen()

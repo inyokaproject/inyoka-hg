@@ -406,6 +406,9 @@ def search(request):
 
     if f.is_valid():
         results = f.search()
+        if not results.success:
+            flash(u'Es ist ein Fehler bei der Verarbeitung deiner Suchanfrage gekommen.  '
+                  u'Bitte überprüfe deine Eingaben.', False)
 
         normal = u'<a href="%(href)s" class="pageselect">%(text)s</a>'
         disabled = u'<span class="disabled next">%(text)s</span>'
