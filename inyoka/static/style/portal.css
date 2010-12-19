@@ -54,11 +54,6 @@ img.cat {
   font-size: 1.1em;
 }
 
-.get_ubuntu span,
-.calendar span {
-  font-size: 1.1em;
-}
-
 .countdown {
   text-align: center;
   border: none !important;
@@ -91,7 +86,6 @@ img.cat {
 .calendar div.calendar.overview {
   margin-top: 10px;
   border-top: 1px solid #000;
-  font-size: 0.8em;
 }
 
 .calendar div.calendar.overview p,
