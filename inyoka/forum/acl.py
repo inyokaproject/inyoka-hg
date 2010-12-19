@@ -183,10 +183,10 @@ def filter(user, forums=None, priv=CAN_READ, privileges=None, operator=ops.eq):
 
 
 #: Shortcut to filter all visible forums
-filter_visible = lambda u, f=None, priv=None, perm=None: filter(u, f, priv, perm, ops.eq)
+filter_visible = lambda u, f=None, priv=CAN_READ, perm=None: filter(u, f, priv, perm, ops.eq)
 
 #: Shortcut to filter all invisible forums
-filter_invisible = lambda u, f=None, priv=None, perm=None: filter(u, f, priv, perm, ops.ne)
+filter_invisible = lambda u, f=None, priv=CAN_READ, perm=None: filter(u, f, priv, perm, ops.ne)
 
 
 def split_negative_positive(value):
