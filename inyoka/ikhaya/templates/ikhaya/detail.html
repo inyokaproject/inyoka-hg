@@ -63,7 +63,7 @@
       {%- endif %}
       {% if can_edit_article %} – <a href="{{ article|url('edit') }}" class="adminlink">bearbeiten</a>{% endif %}
       {% if article.comments_enabled and is_subscribed %}
-      <a href="./unsubscribe" class="action action_unsubscribe">Kommentare abbstellen</a>
+      <a href="./unsubscribe" class="action action_unsubscribe">Kommentare abbestellen</a>
       {% elif article.comments_enabled and not is_subscribed %}
       <a href="./subscribe" class="action action_subscribe">Kommentare abonnieren</a>
       {% endif %}
