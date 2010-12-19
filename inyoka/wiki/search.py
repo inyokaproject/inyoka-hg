@@ -57,7 +57,7 @@ class WikiSearchAdapter(SearchAdapter):
 
     def store(self, page_id):
         rev = Revision.objects.select_related('page', 'text') \
-                .filter(page__id=page_id)
+                .filter(page__id=page_id).latest()
         search.store(component='w',
                      uid=rev.page.id,
                      title=rev.page.name,
