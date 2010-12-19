@@ -465,7 +465,7 @@ class Image(Node):
 
     def prepare_docbook(self):
         yield u'<mediaobject><imageobject>'
-        yield u'<imagedata fileref="%s"/>' % self.href.replace(u'&', u'&amp;')
+        yield u'<imagedata fileref="%s"/>' % escape(self.href)
         yield u'</imageobject></mediaobject>'
 
 
@@ -759,7 +759,7 @@ class Link(Element):
         yield u'</a>'
 
     def prepare_docbook(self):
-        yield u'<ulink url="%s">' % self.href.replace(u'&', u'&amp;')
+        yield u'<ulink url="%s">' % escape(self.href)
         for item in Element.prepare_docbook(self):
             yield item
         yield u'</ulink>'
