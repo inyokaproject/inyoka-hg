@@ -12,7 +12,6 @@ import Image
 from django import forms
 from django.utils.safestring import mark_safe
 from django.db.models import Count
-from django.utils.translation import ugettext as _
 
 from inyoka.conf import settings
 from inyoka.forum.forms import UBUNTU_VERSIONS

@@ -1,13 +1,11 @@
 # encoding: utf-8
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'Subscription.article_id'
         db.add_column('portal_subscription', 'article_id', self.gf('django.db.models.fields.IntegerField')(null=True), keep_default=False)
 
@@ -16,7 +14,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Removing unique constraint on 'Subscription', fields ['article_id', 'user']
         db.delete_unique('portal_subscription', ['article_id', 'user_id'])
 
