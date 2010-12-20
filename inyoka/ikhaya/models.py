@@ -358,7 +358,7 @@ class Comment(models.Model):
             return href('ikhaya', 'comment', self.id, action)
         stamp = self.article.pub_date.strftime('%Y/%m/%d')
         return href('ikhaya', stamp, self.article.slug,
-                    _anchor='comment_%s' % Article.objects.get(id=self.article.id).comment_count)
+                    _anchor='comment_%s' % self.article.comment_count)
 
     def save(self, force_insert=False, force_update=False):
         if self.id is None:

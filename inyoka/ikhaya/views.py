@@ -129,17 +129,21 @@ def detail(request, year, month, day, slug):
             ctx = RenderContext(request)
             preview = parse(request.POST.get('text', '')).render(ctx, 'html')
         elif form.is_valid():
+            send_subscribe = False
             data = form.cleaned_data
             if data.get('comment_id') and request.user.can('comment_edit'):
                 c = Comment.objects.get(id=data['comment_id'])
                 c.text = data['text']
                 flash(u'Das Kommentar wurde erfolgreich bearbeitet.', True)
             else:
+                send_subscribe = True
                 c = Comment(text=data['text'])
                 c.article = article
                 c.author = request.user
                 c.pub_date = datetime.utcnow()
                 flash(u'Dein Kommentar wurde erstellt.', True)
+            c.save()
+            if send_subscribe:
                 # Send a message to users who subscribed to the article
                 for s in Subscription.objects.filter(article_id=article.id) \
                                               .exclude(user=request.user):
@@ -148,7 +152,7 @@ def detail(request, year, month, day, slug):
                         {'username': s.user.username,
                          'comment': c,
                          'article': article})
-            c.save()
+                
             return HttpResponseRedirect(url_for(c))
     elif request.GET.get('moderate'):
         comment = Comment.objects.get(id=int(request.GET.get('moderate')))
