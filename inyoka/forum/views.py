@@ -588,7 +588,8 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                 return HttpResponseRedirect(url_for(doublepost.topic))
 
         if not topic and newtopic or firstpost:
-            topic = Topic(forum_id=forum.id, author_id=request.user.id)
+            if not topic and newtopic:
+                topic = Topic(forum_id=forum.id, author_id=request.user.id)
             topic.title = d['title']
             if topic.ubuntu_distro != d.get('ubuntu_distro')\
                or topic.ubuntu_version != d.get('ubuntu_version'):
