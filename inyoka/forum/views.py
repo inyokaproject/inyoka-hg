@@ -494,7 +494,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
             if topic:
                 topic.has_poll = True
             db.session.commit()
-            topic.forum.invalidate_topic_cache()
             poll_form = AddPollForm()
             poll_options = ['', '']
             flash(u'Die Umfrage "%s" wurde hinzugefügt' % poll.question, True)
@@ -512,7 +511,6 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
                     .limit(1)).fetchone())
                 db.session.delete(poll)
                 db.session.commit()
-                topic.forum.invalidate_topic_cache()
         conds = []
         if poll_ids:
             conds.append(Poll.id.in_(poll_ids))
