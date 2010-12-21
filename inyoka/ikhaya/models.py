@@ -362,8 +362,9 @@ class Comment(models.Model):
 
     def save(self, force_insert=False, force_update=False):
         if self.pk is None:
-            Article.objects.filter(id=self.article.id) \
-                .update(comment_count=models.F('comment_count')+1)
+            self.article = Article.objects.get(id=self.article.id)
+            self.article.comment_count = self.article.comment_count + 1
+            self.article.save()
         context = RenderContext(current_request)
         node = parse(self.text, wiki_force_existing=False)
         self.rendered_text = node.render(context, 'html')
