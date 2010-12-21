@@ -389,7 +389,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
         newtopic = firstpost = True
     elif post_id:
         post = Post.query.get(post_id)
-        if not post:
+        if not post or not post.topic:
             raise PageNotFound()
         topic = post.topic
         forum = topic.forum
@@ -397,7 +397,7 @@ def edit(request, forum_slug=None, topic_slug=None, post_id=None,
     elif quote_id:
         quote = Post.query.options(eagerload('topic'), eagerload('author')) \
                           .get(quote_id)
-        if not quote:
+        if not quote or not quote.topic:
             raise PageNotFound()
         topic = quote.topic
         forum = topic.forum
