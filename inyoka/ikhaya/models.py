@@ -361,7 +361,7 @@ class Comment(models.Model):
                     _anchor='comment_%s' % self.article.comment_count)
 
     def save(self, force_insert=False, force_update=False):
-        if self.id is None:
+        if self.pk is None:
             Article.objects.filter(id=self.article.id) \
                 .update(comment_count=models.F('comment_count')+1)
         context = RenderContext(current_request)
