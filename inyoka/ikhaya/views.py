@@ -123,6 +123,16 @@ def detail(request, year, month, day, slug):
         if not request.user.can('article_read'):
             return AccessDeniedResponse()
         flash(u'Dieser Artikel ist für reguläre Benutzer nicht sichtbar.')
+
+    subscribed = True
+    try:
+        subscription = Subscription.objects \
+            .filter(user=request.user, article_id=article.id).get()
+        subscription.notified = False
+        subscription.save()
+    except Subscription.DoesNotExist:
+        subscribed = False
+
     if article.comments_enabled and request.method == 'POST':
         form = EditCommentForm(request.POST)
         if 'preview' in request.POST:
@@ -145,14 +155,18 @@ def detail(request, year, month, day, slug):
             c.save()
             if send_subscribe:
                 # Send a message to users who subscribed to the article
-                for s in Subscription.objects.filter(article_id=article.id) \
-                                              .exclude(user=request.user):
+                subscriptions = Subscription.objects \
+                    .filter(article_id=article.id, notified=False) \
+                    .exclude(user=request.user)
+                for s in subscriptions:
                     notify_about_subscription(s, 'new_comment',
                         u'Neuer Kommentar zum Artikel %s' % article.subject,
                         {'username': s.user.username,
                          'comment': c,
                          'article': article})
-                
+                    s.notified = True
+                    s.save()
+
             return HttpResponseRedirect(url_for(c))
     elif request.GET.get('moderate'):
         comment = Comment.objects.get(id=int(request.GET.get('moderate')))
@@ -170,8 +184,7 @@ def detail(request, year, month, day, slug):
         'can_post_comment': request.user.is_authenticated,
         'can_admin_comment': request.user.can('comment_edit'),
         'can_edit_article': request.user.can('article_edit'),
-        'is_subscribed': Subscription.objects.user_subscribed(request.user,
-                                                              article=article)
+        'is_subscribed': subscribed
     }
 
 
