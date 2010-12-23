@@ -198,7 +198,7 @@ class FeedBuilder(object):
 
         yield u'<?xml version="1.0" encoding="utf-8"?>\n'
         yield u'<feed xmlns="http://www.w3.org/2005/Atom">\n'
-        yield '  ' + _make_text_block('title', self.title, self.title_type)
+        yield u'  ' + _make_text_block('title', self.title, self.title_type)
         yield u'  <id>%s</id>\n' % escape(self.id_)
         if self.entries:
             yield u'  <updated>%s</updated>\n' % \
@@ -209,7 +209,7 @@ class FeedBuilder(object):
         if self.feed_url:
             yield u'  <link href="%s" rel="self" />\n' % escape(self.feed_url)
         for link in self.links:
-            yield u'  <link %s/>\n' % ''.join('%s="%s" ' % \
+            yield u'  <link %s/>\n' % u''.join(u'%s="%s" ' % \
                 (escape(k), escape(link[k])) for k in link)
         for author in self.author:
             yield u'  <author>\n'
@@ -217,10 +217,10 @@ class FeedBuilder(object):
             if 'uri' in author:
                 yield u'    <uri>%s</uri>\n' % escape(author['uri'])
             if 'email' in author:
-                yield '    <email>%s</email>\n' % escape(author['email'])
-            yield '  </author>\n'
+                yield u'    <email>%s</email>\n' % escape(author['email'])
+            yield u'  </author>\n'
         if self.subtitle:
-            yield '  ' + _make_text_block('subtitle', self.subtitle,
+            yield u'  ' + _make_text_block('subtitle', self.subtitle,
                                           self.subtitle_type)
         if self.icon:
             yield u'  <icon>%s</icon>\n' % escape(self.icon)
