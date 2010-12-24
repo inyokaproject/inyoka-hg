@@ -19,13 +19,14 @@ from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
+from werkzeug.contrib.atom import AtomFeed
 
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
 from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect
-from inyoka.utils.feeds import FeedBuilder, atom_feed
+from inyoka.utils.feeds import atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination
@@ -1453,13 +1454,11 @@ def topic_feed(request, slug=None, mode='short', count=25):
     posts = topic.posts.options(eagerload('author')) \
                        .order_by(Post.id.desc())[:100]
 
-    feed = FeedBuilder(
-        title=u'ubuntuusers Thema – „%s“' % topic.title,
-        url=url_for(topic),
-        feed_url=request.build_absolute_uri(),
-        rights=href('portal', 'lizenz'),
-        icon=href('static', 'img', 'favicon.ico'),
-    )
+    feed = AtomFeed(u'ubuntuusers Thema – „%s“' % topic.title,
+                    url=url_for(topic),
+                    feed_url=request.build_absolute_uri(),
+                    rights=href('portal', 'lizenz'),
+                    icon=href('static', 'img', 'favicon.ico'))
 
     for post in posts:
         kwargs = {}
@@ -1512,13 +1511,9 @@ def forum_feed(request, slug=None, mode='short', count=20):
         title = u'ubuntuusers Forum'
         url = href('forum')
 
-    feed = FeedBuilder(
-        title=title,
-        url=url,
-        feed_url=request.build_absolute_uri(),
-        rights=href('portal', 'lizenz'),
-        icon=href('static', 'img', 'favicon.ico'),
-    )
+    feed = AtomFeed(title, feed_url=request.build_absolute_uri(),
+                    url=url, rights=href('portal', 'lizenz'),
+                    icon=href('static', 'img', 'favicon.ico'))
 
     #TODO: the first_post check is yet only a workaround for our broken
     #      foreign key relationships

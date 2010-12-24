@@ -10,10 +10,11 @@
 """
 from datetime import datetime, date
 from django.utils.text import truncate_html_words
+from werkzeug.contrib.atom import AtomFeed
 from inyoka.utils.urls import href, url_for, global_not_found
 from inyoka.utils.http import templated, AccessDeniedResponse, \
      HttpResponseRedirect, PageNotFound, does_not_exist_is_404
-from inyoka.utils.feeds import FeedBuilder, atom_feed
+from inyoka.utils.feeds import atom_feed
 from inyoka.utils.flashing import flash
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
@@ -405,15 +406,10 @@ def article_feed(request, slug=None, mode='short', count=25):
         title = u'ubuntuusers Ikhaya'
         url = href('ikhaya')
 
-    feed = FeedBuilder(
-        subtitle=IKHAYA_DESCRIPTION,
-        rights=href('portal', 'lizenz'),
-        feed_url=request.build_absolute_uri(),
-        id=url,
-        url=url,
-        title=title,
-        icon=href('static', 'img', 'favicon.png'),
-    )
+    feed = AtomFeed(title, feed_url=request.build_absolute_uri(),
+                    url=url, rights=href('portal', 'lizenz'), id=url,
+                    icon=href('static', 'img', 'favicon.ico'),
+                    subtitle=IKHAYA_DESCRIPTION)
 
     for article in articles[:count]:
         kwargs = {}
@@ -458,15 +454,9 @@ def comment_feed(request, id=None, mode='short', count=25):
         title = u'ubuntuusers Ikhaya-Kommentare'
         url = href('ikhaya')
 
-    feed = FeedBuilder(
-        subtitle=IKHAYA_DESCRIPTION,
-        rights=href('portal', 'lizenz'),
-        feed_url=request.build_absolute_uri(),
-        id=url,
-        url=url,
-        title=title,
-        icon=href('static', 'img', 'favicon.ico'),
-    )
+    feed = AtomFeed(title, feed_url=request.build_absolute_uri(),
+                    subtitle=IKHAYA_DESCRIPTION, rghts=href('portal', 'lizenz'),
+                    id=url, url=url, icon=href('static', 'img', 'favicon.ico'),)
 
     for comment in comments[:count]:
         kwargs = {}

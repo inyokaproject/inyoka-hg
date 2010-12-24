@@ -9,6 +9,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.utils.text import truncate_html_words
+from werkzeug.contrib.atom import AtomFeed
 from inyoka.conf import settings
 from inyoka.portal.user import Group
 from inyoka.portal.utils import check_login, require_permission
@@ -24,7 +25,7 @@ from inyoka.utils.dates import group_by_day
 from inyoka.utils.urls import global_not_found
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
-from inyoka.utils.feeds import FeedBuilder, atom_feed
+from inyoka.utils.feeds import atom_feed
 
 
 def not_found(request, err_message=None):
@@ -101,16 +102,13 @@ def suggest(request):
 @atom_feed('planet/feed/%(mode)s/%(count)s')
 def feed(request, mode='short', count=25):
     """show the feeds for the planet"""
-    feed = FeedBuilder(
-        title=u'ubuntuusers Planet',
-        url=href('planet'),
-        feed_url=request.build_absolute_uri(),
-        id=href('planet'),
-        subtitle=u'Der ubuntuusers-Planet sammelt verschiedene Blogs zu '
-                 u'Ubuntu und Linux',
-        rights=href('portal', 'lizenz'),
-        icon=href('static', 'img', 'favicon.ico'),
-    )
+    feed = AtomFeed(u'ubuntuusers Planet', url=href('planet'),
+                    feed_url=request.build_absolute_uri(),
+                    id=href('planet'),
+                    subtitle=u'Der ubuntuusers-Planet sammelt verschiedene Blogs zu '
+                             u'Ubuntu und Linux',
+                    rights=href('portal', 'lizenz'),
+                    icon=href('static', 'img', 'favicon.ico'))
 
     for entry in Entry.objects.filter(hidden=False)[:count]:
         kwargs = {}

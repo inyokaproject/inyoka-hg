@@ -16,6 +16,7 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from urlparse import urljoin
+from werkzeug.contrib.atom import AtomFeed
 from inyoka.conf import settings
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href, is_safe_domain, url_for
@@ -24,7 +25,7 @@ from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
     AccessDeniedResponse
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.utils.feeds import FeedBuilder, AVAILABLE_FEED_COUNTS
+from inyoka.utils.feeds import AVAILABLE_FEED_COUNTS
 from inyoka.utils.flashing import flash
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.actions import PAGE_ACTIONS
@@ -177,27 +178,23 @@ def feed(request, page_name=None, count=25):
         cache_key = 'wiki/feeds/%s' % normalize_pagename(page_name)
         feed = cache.get(cache_key)
         if feed is None:
-            feed = FeedBuilder(
-                title=u'ubuntuusers Wiki – %s' % page_name,
-                url=href('wiki', page_name),
-                feed_url=request.build_absolute_uri(),
-                id=href('wiki', page_name),
-                rights=href('portal', 'lizenz'),
-                icon=href('static', 'img', 'favicon.ico'),
-            )
+            feed = AtomFeed(title=u'ubuntuusers Wiki – %s' % page_name,
+                            url=href('wiki', page_name),
+                            feed_url=request.build_absolute_uri(),
+                            id=href('wiki', page_name),
+                            rights=href('portal', 'lizenz'),
+                            icon=href('static', 'img', 'favicon.ico'))
             new_cache = True
     else:
         cache_key = 'wiki/LastChangesFeed'
         feed = cache.get(cache_key)
         if feed is None:
-            feed = FeedBuilder(
-                title=u'ubuntuusers Wiki – Letzte Änderungen',
-                url=href('wiki', u'Letzte_Änderungen'),
-                feed_url=request.build_absolute_uri(),
-                id=href('wiki', u'Letzte_Änderungen'),
-                rights=href('portal', 'lizenz'),
-                icon=href('static', 'img', 'favicon.ico'),
-            )
+            feed = AtomFeed(u'ubuntuusers Wiki – Letzte Änderungen',
+                            url=href('wiki', u'Letzte_Änderungen'),
+                            feed_url=request.build_absolute_uri(),
+                            id=href('wiki', u'Letzte_Änderungen'),
+                            rights=href('portal', 'lizenz'),
+                            icon=href('static', 'img', 'favicon.ico'))
             new_cache = True
 
     if new_cache:

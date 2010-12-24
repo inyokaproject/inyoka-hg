@@ -20,6 +20,7 @@
 """
 from datetime import datetime
 from django.db import models
+from werkzeug.contrib.atom import AtomFeed
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
      TemplateResponse, AccessDeniedResponse, PageNotFound, \
@@ -30,7 +31,6 @@ from inyoka.utils.templating import render_template
 from inyoka.utils.notification import notify_about_subscription
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.cache import cache
-from inyoka.utils.feeds import FeedBuilder
 from inyoka.utils.text import normalize_pagename, get_pagetitle, join_pagename
 from inyoka.utils.html import escape
 from inyoka.utils.urls import url_encode
@@ -554,13 +554,11 @@ def do_log(request, name):
         return rv
 
     if request.GET.get('format') == 'atom':
-        feed = FeedBuilder(
-            title=u'Seitenrevisionen von „%s“' % page.name,
-            url=url_for(page),
-            feed_url=request.build_absolute_uri(),
-            rights=href('portal', 'lizenz'),
-            icon=href('static', 'img', 'favicon.ico'),
-        )
+        feed = AtomFeed(u'Seitenrevisionen von „%s“' % page.name,
+                        url=url_for(page),
+                        feed_url=request.build_absolute_uri(),
+                        rights=href('portal', 'lizenz'),
+                        icon=href('static', 'img', 'favicon.ico'))
 
         for rev in page.revisions.all()[:15]:
             feed.add(title=rev.title, url=url_for(rev),
