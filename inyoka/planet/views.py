@@ -9,7 +9,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from django.utils.text import truncate_html_words
-from werkzeug.contrib.atom import AtomFeed
 from inyoka.conf import settings
 from inyoka.portal.user import Group
 from inyoka.portal.utils import check_login, require_permission
@@ -25,7 +24,7 @@ from inyoka.utils.dates import group_by_day
 from inyoka.utils.urls import global_not_found
 from inyoka.planet.models import Blog, Entry
 from inyoka.planet.forms import SuggestBlogForm
-from inyoka.utils.feeds import atom_feed
+from inyoka.utils.feeds import atom_feed, AtomFeed
 
 
 def not_found(request, err_message=None):

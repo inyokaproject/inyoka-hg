@@ -16,7 +16,6 @@
     :license: GNU GPL, see LICENSE for more details.
 """
 from urlparse import urljoin
-from werkzeug.contrib.atom import AtomFeed
 from inyoka.conf import settings
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href, is_safe_domain, url_for
@@ -25,7 +24,7 @@ from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect, \
     AccessDeniedResponse
 from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
-from inyoka.utils.feeds import AVAILABLE_FEED_COUNTS
+from inyoka.utils.feeds import AVAILABLE_FEED_COUNTS, AtomFeed
 from inyoka.utils.flashing import flash
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.actions import PAGE_ACTIONS

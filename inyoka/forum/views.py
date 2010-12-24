@@ -19,14 +19,13 @@ from django.forms.util import ErrorDict
 from sqlalchemy.orm import eagerload
 from sqlalchemy.sql import and_, select
 from sqlalchemy.exceptions import InvalidRequestError
-from werkzeug.contrib.atom import AtomFeed
 
 from inyoka.conf import settings
 from inyoka.utils.urls import global_not_found, href, url_for, is_safe_domain
 from inyoka.utils.html import escape
 from inyoka.utils.text import normalize_pagename
 from inyoka.utils.http import templated, PageNotFound, HttpResponseRedirect
-from inyoka.utils.feeds import atom_feed
+from inyoka.utils.feeds import atom_feed, AtomFeed
 from inyoka.utils.flashing import flash
 from inyoka.utils.templating import render_template
 from inyoka.utils.pagination import Pagination

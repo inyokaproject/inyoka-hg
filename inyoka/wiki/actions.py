@@ -20,11 +20,11 @@
 """
 from datetime import datetime
 from django.db import models
-from werkzeug.contrib.atom import AtomFeed
 from inyoka.utils.urls import href, url_for
 from inyoka.utils.http import templated, does_not_exist_is_404, \
      TemplateResponse, AccessDeniedResponse, PageNotFound, \
      HttpResponseRedirect, HttpResponse
+from inyoka.utils.feeds import AtomFeed
 from inyoka.utils.flashing import flash
 from inyoka.utils.diff3 import merge
 from inyoka.utils.templating import render_template
@@ -564,7 +564,7 @@ def do_log(request, name):
             feed.add(title=rev.title, url=url_for(rev),
                      author=rev.user and rev.user.username or rev.remote_addr,
                      published=rev.change_date, updated=rev.change_date)
-        return feed.get_atom_response()
+        return HttpResponse(feed.to_string(), content_type='application/atom+xml; charset=utf-8')
 
     pagination = Pagination(request, page.revisions.all(), pagination_page,
                             20, link_func)

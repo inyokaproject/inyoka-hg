@@ -10,6 +10,7 @@
 """
 from os.path import join
 from werkzeug.contrib.atom import AtomFeed
+from django.utils.encoding import force_unicode, DjangoUnicodeDecodeError
 from inyoka.utils.html import escape
 from inyoka.utils.http import HttpResponse, PageNotFound, \
     HttpResponsePermanentRedirect
@@ -54,3 +55,14 @@ def atom_feed(cache_key=None, available_counts=AVAILABLE_FEED_COUNTS):
             return response
         return func
     return decorator
+
+
+class AtomFeed(AtomFeed):
+    def to_string(self):
+        ret = []
+        for item in self.generate():
+            try:
+                ret.append(unicode(force_unicode(item).encode('utf-8')))
+            except (DjangoUnicodeDecodeError, UnicodeDecodeError):
+                continue
+        return u''.join(ret)
