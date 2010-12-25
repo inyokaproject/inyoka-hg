@@ -36,6 +36,7 @@
   <tr>
     <th class="name">{{ table.get_html('name', 'Name') }}</th>
     <th class="date">{{ table.get_html('date', 'Zeitpunkt') }}</th>
+    <th class="author">{{ table.get_html('author', 'Ersteller') }}</th>
     <th class="actions">Aktionen</th>
   </tr>
   </thead>
@@ -44,6 +45,7 @@
   <tr>
     <td class="name"><a href="{{ event|url }}">{{ event.name|e }}</a></td>
     <td class="date">{{ event.date|e }}</td>
+    <td class="author"><a href="{{ event.author|url }}">{{ event.author|e }}</a></th>
     <td class="actions">
       <a href="{{ event|url('edit') }}" class="event_edit" title="Editieren" />
       <a href="{{ event|url('delete') }}" class="event_delete" title="Löschen" />

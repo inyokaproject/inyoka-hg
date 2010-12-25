@@ -32,6 +32,7 @@
   {%- if form.errors %}
   <ul>{{ form.errors }}</ul>
   {%- endif %}
+  <dt>Vorgeschlagen von: <a href="{{ event.author|url }}">{{ event.author|e }}</a></dt>
   <dt><label for="id_name">Name:</label></dt>
   <dd>{{ form.name }}</dd>
   <dt>Zeitpunkt:</dt>
