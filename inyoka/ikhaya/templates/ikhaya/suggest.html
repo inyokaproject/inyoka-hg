@@ -29,13 +29,46 @@
     {{ render_form(form, ['title', 'intro', 'text', 'notes']) }}
     <p>
       <input type="submit" value="Abschicken" />
+      <input type="submit" value="Vorschau" name="preview" />
     </p>
   </form>
+
+  {%- if preview %}
+  <div class="preview_wrapper">
+    <h2 class="title">Vorschau</h2>
+    <div class="preview">{{ preview }}</div>
+  </div>
+  {%- endif %}
+
   <script type="text/javascript">
     /* <![CDATA[ */
     var text = new WikiEditor('textarea[name="text"]');
     var intro = new WikiEditor('textarea[name="intro"]');
     var notes = new WikiEditor('textarea[name="notes"]');
+
+  /* Preview implementation */
+  (function() {
+    var
+      ieditor = $('textarea[name="intro"]'),
+      teditor = $('textarea[name="text"]'),
+      output = $('<div class="preview"></div>');
+    var preview = $('<div class="preview_wrapper" />')
+      .hide()
+      .append('<h2 class="title">Vorschau</h2>')
+      .append(output);
+
+    $('form input[name="preview"]').click(function() {
+      preview.hide();
+      $.post('/?__service__=wiki.render_preview', {
+        text: ieditor.val() + '\n----\n\n' + teditor.val()
+      }, function(data) {
+        output.html(data);
+        preview.slideDown('fast');
+      });
+      return false;
+    }).parent().parent().parent().append(preview);
+  })();
+
     /* ]]> */
   </script>
 </div>
