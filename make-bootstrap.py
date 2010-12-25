@@ -82,33 +82,24 @@ def after_install(options, home_dir):
     print '  apt-get install libmemcache-dev python-dev'
     print '  apt-get build-dep python-mysqldb python-imaging libxapian15'
     print
-    easy_install('distribute', home_dir)
-    easy_install('Jinja2==2.5.5', home_dir)
-    easy_install('MarkupSafe==0.11', home_dir) # speedups for Jinja2 as of Jinja2 2.5.1
-    easy_install('Werkzeug==0.6.2', home_dir)
-    easy_install('Pygments==1.3.1', home_dir)
-    easy_install('SQLAlchemy==0.6.5', home_dir)
-    easy_install('simplejson==2.1.2', home_dir)
-    easy_install('pytz==2010o', home_dir)
-    easy_install('html5lib==0.90', home_dir)
-    easy_install('dnspython==1.7.1', home_dir)
-    easy_install('wsgiref', home_dir)
-    easy_install('http://feedparser.googlecode.com/files/feedparser-4.1.zip', home_dir)
-    easy_install('Django==1.2.3', home_dir)
-    easy_install('pylibmc==1.1.1', home_dir)
-    easy_install('Fabric==0.9.3', home_dir)
-    easy_install('South==0.7.3', home_dir)
-    easy_install('mercurial==1.7.2', home_dir)
-    easy_install('xmpppy==0.5.0', home_dir)
-    easy_install('mysql-python==1.2.3', home_dir)
-    easy_install('openid==2.2.5', home_dir)
-    easy_install('django-openid=0.1.5', home_dir)
+    easy_install('pip', home_dir)
+    install_requirements(os.path.abspath(home_dir))
     xapian_install(os.path.abspath(home_dir))
     pil_install(os.path.abspath(home_dir))
+
+def install_requirements(home_dir):
+    req_file = os.path.join(home_dir, 'req.txt')
+    cmd = [os.path.join(home_dir, 'bin', 'pip'), 'install', '-r', req_file]
+    f = open(req_file, 'w')
+    f.write(PIP_REQUIREMENTS)
+    f.close()
+    call_subprocess(cmd)
+    os.unlink(req_file)
 """
 
 def main():
-    print create_bootstrap_script(EXTRA_TEXT)
+    requirements = open('requirements.txt', 'r').read()
+    print create_bootstrap_script(EXTRA_TEXT+"\n\nPIP_REQUIREMENTS = '''%s'''" % requirements)
 
 if __name__ == '__main__':
     main()
