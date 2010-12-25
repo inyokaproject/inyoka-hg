@@ -15,7 +15,10 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import os
+from hashlib import sha1
 from urlparse import urljoin
+from django.utils.encoding import force_unicode
 from inyoka.conf import settings
 from inyoka.utils.html import escape
 from inyoka.utils.urls import href, is_safe_domain, url_for
@@ -26,9 +29,9 @@ from inyoka.utils.cache import cache
 from inyoka.utils.dates import format_datetime
 from inyoka.utils.feeds import AVAILABLE_FEED_COUNTS, AtomFeed
 from inyoka.utils.flashing import flash
+from inyoka.utils.imaging import get_thumbnail
 from inyoka.wiki.models import Page, Revision
 from inyoka.wiki.actions import PAGE_ACTIONS
-from inyoka.wiki.utils import get_thumbnail
 from inyoka.wiki.acl import has_privilege
 
 
@@ -148,10 +151,23 @@ def get_image_resource(request):
         return AccessDeniedResponse()
 
     if height or width:
-        thumbnail = get_thumbnail(target, width, height,
-                                  request.GET.get('force') == 'yes')
-        if thumbnail is None:
+        page_filename = Page.objects.attachment_for_page(target)
+        if page_filename is None:
             raise PageNotFound()
+
+        page_filename = force_unicode(page_filename).encode('utf-8')
+        partial_hash = sha1(page_filename).hexdigest()
+
+        force = request.GET.get('force') == 'yes'
+        dimension = '%sx%s%s' % (width and int(width) or '',
+                                 height and int(height) or '',
+                                 force and '!' or '')
+        hash = '%s%s%s' % (partial_hash, 'i',
+                           dimension.replace('!', 'f'))
+        base_filename = os.path.join('wiki', 'thumbnails', hash[:1],
+                                     hash[:2], hash)
+        thumbnail = get_thumbnail(page_filename, base_filename, width, height, force)
+
         target = urljoin(settings.MEDIA_URL, thumbnail)
     else:
         target = Page.objects.attachment_for_page(target)
