@@ -82,7 +82,9 @@ def get_thumbnail(location, destination, width=None, height=None, force=False):
     with closing(src) as src:
         img = Image.open(src)
         img = fix_colorspace(img)
-        img.thumbnail(_get_box(width, height), Image.ANTIALIAS)
+        box = _get_box(width, height)
+        if img.size > box:
+            img.thumbnail(box, Image.ANTIALIAS)
         filename = '%s.%s' % (destination, format)
         real_filename = os.path.join(settings.MEDIA_ROOT, filename)
         try:
