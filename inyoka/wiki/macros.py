@@ -25,11 +25,13 @@
     :copyright: (c) 2007-2010 by the Inyoka Team, see AUTHORS for more details.
     :license: GNU GPL, see LICENSE for more details.
 """
+import os
 import random
 import string
 from datetime import datetime, date, timedelta
 from inyoka.conf import settings
 from inyoka.utils.urls import href, url_encode, url_for
+from inyoka.portal.models import StaticFile
 from inyoka.wiki.parser import nodes
 from inyoka.wiki.utils import simple_filter, debug_repr, dump_argstring, \
     ArgumentCollector
@@ -45,6 +47,7 @@ from inyoka.utils.cache import cache
 from inyoka.utils.pagination import Pagination
 from inyoka.utils.parsertools import OrderedDict
 from inyoka.utils.collections import MultiMap, flatten_iterator
+from inyoka.utils.imaging import get_thumbnail
 
 
 def get_macro(name, args, kwargs):
@@ -806,15 +809,25 @@ class Picture(Macro):
         else:
             if context.wiki_page:
                 target = join_pagename(context.wiki_page, self.target)
-            source = href('wiki', '_image',
-                target=target,
-                width=self.width,
-                height=self.height
-            )
+                source = href('wiki', '_image', target=target,
+                              width=self.width, height=self.height)
+            elif context.request and context.request.subdomain == 'ikhaya':
+                file = StaticFile.objects.get(identifier=self.target)
+                tt = self.target.rsplit('.', 1)
+                dimension = '%sx%s' % (self.width and int(self.width) or '',
+                                       self.height and int(self.height) or '')
+                target = '%s%s.%s' % (tt[0], dimension, tt[1])
+
+                destination = os.path.join(settings.MEDIA_ROOT, 'portal/thumbnails', target)
+                thumb = get_thumbnail(file.file.path, destination, self.width, self.height)
+                source = os.path.join(settings.MEDIA_URL, 'portal/thumbnails', thumb.rsplit('/', 1)[1])
+
             img = nodes.Image(source, self.alt, class_='image-' +
                               (self.align or 'default'))
-            if self.width or self.height:
+            if (self.width or self.height) and context.wiki_page is not None:
                 return nodes.Link(href('wiki', '_image', target=target), [img])
+            elif (self.width or self.height) and context.request.subdomain == 'ikhaya':
+                return nodes.Link(url_for(file), [img])
             return img
 
 
