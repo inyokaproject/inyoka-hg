@@ -24,6 +24,32 @@ def _get_box(width, height):
         return (int(height), int(height))
 
 
+def fix_colorspace(image, grayscale=False, replace_alpha=False):
+    """Convert an image to the correct color space.
+
+    :param image: an PIL Image instance.
+    :param grayscale:  grayscale the image object.
+    :param replace_alpha: Replace the transparency layer with a solid color.
+                          E.g ``replace_alpha='#fff'``.
+    """
+    if grayscale and image.mode != 'L':
+        return image.convert('L')
+
+    if image.mode in ('L', 'RGB'):
+        return image
+
+    if image.mode == 'RGBA' or (image.mode == 'P' and 'transparency' in image.info):
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
+        if not replace_alpha:
+            return image
+        base = Image.new('RGBA', image.size, replace_alpha)
+        base.paste(image)
+        image = base
+
+    return image.convert('RGB')
+
+
 def get_thumbnail(location, destination, width=None, height=None, force=False):
     """
     This function generates a thumbnail for an uploaded image.
@@ -55,6 +81,7 @@ def get_thumbnail(location, destination, width=None, height=None, force=False):
     format, quality = ('png', '100')
     with closing(src) as src:
         img = Image.open(src)
+        img = fix_colorspace(img)
         img.thumbnail(_get_box(width, height), Image.ANTIALIAS)
         filename = '%s.%s' % (destination, format)
         real_filename = os.path.join(settings.MEDIA_ROOT, filename)
