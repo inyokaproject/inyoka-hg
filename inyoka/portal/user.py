@@ -606,7 +606,7 @@ class User(models.Model):
 
     @property
     def jabber_url(self):
-        return u'xmpp://%s' % escape(self.jabber)
+        return u'xmpp:%s' % escape(self.jabber)
 
     @property
     def urlsafe_username(self):
