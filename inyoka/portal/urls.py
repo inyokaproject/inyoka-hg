@@ -10,7 +10,6 @@
 """
 from django.conf.urls.defaults import patterns
 
-
 urlpatterns = patterns('inyoka.portal.views',
     (r'^$', 'index'),
     (r'^_alive/$', 'alive'),
@@ -65,6 +64,7 @@ urlpatterns = patterns('inyoka.portal.views',
     (r'^calendar/(?P<year>\d{4})/(?P<month>(0?\d|1[0-2]))/$', 'calendar_month'),
     (r'^calendar/(?P<slug>.*?)/$', 'calendar_detail'),
     (r'^opensearch/(?P<app>[a-z]+)/$', 'open_search'),
+    (r'^openid/(.*)', 'openid_consumer'),
     # static pages
     (r'^([-A-Za-z_]+)/$', 'static_page')
 )

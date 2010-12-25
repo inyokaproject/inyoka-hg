@@ -10,6 +10,7 @@
 """
 import Image
 from django import forms
+from django.core.validators import EMPTY_VALUES
 from django.utils.safestring import mark_safe
 from django.db.models import Count
 
@@ -28,7 +29,7 @@ from inyoka.utils.html import escape
 from inyoka.utils.storage import storage
 from inyoka.utils.sessions import SurgeProtectionMixin
 from inyoka.utils.search import search as search_system
-from inyoka.portal.user import User
+from inyoka.portal.user import User, UserData
 from inyoka.wiki.parser import validate_signature, SignatureError
 
 #: Some constants used for ChoiceFields
@@ -74,9 +75,17 @@ class LoginForm(forms.Form):
     """Simple form for the login dialog"""
     username = forms.CharField(label='Benutzername oder E-Mail-Adresse')
     password = forms.CharField(label='Passwort', widget=
-        forms.PasswordInput(render_value=False))
+        forms.PasswordInput(render_value=False), required=False)
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
                                    required=False)
+
+    def clean(self):
+        data = self.cleaned_data
+        if not (data['username'].startswith('http://') or \
+         data['username'].startswith('https://')) and data['password'] == '':
+            msg = 'Dieses Feld ist zwingend erforderlich'
+            self._errors['password'] = self.error_class([msg])
+        return data
 
 
 class RegisterForm(forms.Form):
@@ -320,6 +329,14 @@ class UserCPProfileForm(forms.Form):
     erfährst du <a href="http://wiki.ubuntuusers.de/GnuPG/Web_of_Trust">im
     Wiki</a>.''')
 
+    openid = forms.URLField(label='OpenID', required=False, max_length=255,
+                            help_text=u'''Deine OpenID für den Login auf
+                                dieser Seite.''')
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(UserCPProfileForm, self).__init__(*args, **kwargs)
+
     def clean_gpgkey(self):
         gpgkey = self.cleaned_data.get('gpgkey', '').upper()
         if gpgkey.startswith('0X'):
@@ -391,6 +408,16 @@ class UserCPProfileForm(forms.Form):
                 u'hochgeladen werden, da er zu groß ist. Bitte '
                 u'wähle einen anderen Avatar.')
         return data['avatar']
+
+    def clean_openid(self):
+        if self.cleaned_data['openid'] in EMPTY_VALUES:
+            return 
+        openid = self.cleaned_data['openid']
+        if UserData.objects.filter(key='openid', value=openid)\
+                           .exclude(user=self.user).count():
+            raise forms.ValidationError(u'Diese OpenID ist bereits in '
+                                        u'Verwendung')
+        return openid
 
 
 

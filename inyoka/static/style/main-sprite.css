@@ -1227,6 +1227,12 @@ div.not_found img {
     margin-right: 0.5em;
 }
 
+#js_login_username, .loginform input#id_username {
+    background-image: url(../img/openid.gif);
+    background-repeat: no-repeat;
+    padding-left: 17px;
+}
+
 #js_login_form input.submit:active {
     background-color: #47320f!important;
     color: white;

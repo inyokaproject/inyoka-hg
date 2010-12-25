@@ -19,6 +19,8 @@ from django import forms
 from django.forms.models import model_to_dict
 from django.forms.util import ErrorList
 
+from django_openid.consumer import Consumer, SessionPersist
+
 from inyoka.conf import settings
 from inyoka.utils import decode_confirm_data
 from inyoka.utils.text import get_random_password, human_number, \
@@ -39,6 +41,7 @@ from inyoka.utils.notification import send_notification
 from inyoka.utils.cache import cache
 from inyoka.utils.storage import storage
 from inyoka.utils.user import check_activation_key
+from inyoka.utils.urls import clean_openid_url
 from inyoka.utils.database import db
 from inyoka.wiki.utils import quote_text
 from inyoka.wiki.parser import parse, RenderContext
@@ -56,9 +59,10 @@ from inyoka.portal.forms import LoginForm, SearchForm, RegisterForm, \
 from inyoka.admin.forms import NewEventForm
 from inyoka.portal.models import StaticPage, PrivateMessage, Subscription, \
      PrivateMessageEntry, PRIVMSG_FOLDERS, Event
-from inyoka.portal.user import User, Group, UserBanned, deactivate_user, \
-    reactivate_user, set_new_email, send_new_email_confirmation, \
-    reset_email, send_activation_mail, send_new_user_password
+from inyoka.portal.user import User, Group, UserBanned, UserData, \
+    deactivate_user, reactivate_user, set_new_email, \
+    send_new_email_confirmation, reset_email, send_activation_mail, \
+    send_new_user_password
 from inyoka.portal.utils import check_login, calendar_entries_for_month, \
      require_permission
 
@@ -339,27 +343,34 @@ def login(request):
         form = LoginForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            try:
-                user = User.objects.authenticate(
-                    username=data['username'],
-                    password=data['password'])
-            except User.DoesNotExist:
-                failed = True
-                user = None
-            except UserBanned:
-                failed = banned = True
-                user = None
+            if data['username'].startswith('http://') or \
+               data['username'].startswith('https://'):
+                # till https://github.com/simonw/django-openid/commit/5062aa93abc9a8d6f90837db690c26ace1c68672
+                # is resolved
+                request.session['next'] = request.GET.get('next', '/')
+                return openid_consumer.start_openid_process(request, data['username'])
+            else:
+                try:
+                    user = User.objects.authenticate(
+                        username=data['username'],
+                        password=data['password'])
+                except User.DoesNotExist:
+                    failed = True
+                    user = None
+                except UserBanned:
+                    failed = banned = True
+                    user = None
 
-            if user is not None:
-                if user.is_active:
-                    if data['permanent']:
-                        make_permanent(request)
-                    # username matches password and user is active
-                    flash(u'Du hast dich erfolgreich angemeldet.', True)
-                    user.login(request)
-                    return HttpResponseRedirect(redirect)
-                inactive = True
-            failed = True
+                if user is not None:
+                    if user.is_active:
+                        if data['permanent']:
+                            make_permanent(request)
+                        # username matches password and user is active
+                        flash(u'Du hast dich erfolgreich angemeldet.', True)
+                        user.login(request)
+                        return HttpResponseRedirect(redirect)
+                    inactive = True
+                failed = True
     else:
         if 'username' in request.GET:
             form = LoginForm(initial={'username':request.GET['username']})
@@ -549,7 +560,7 @@ def usercp_profile(request):
     """User control panel view for changing the user's profile"""
     user = request.user
     if request.method == 'POST':
-        form = UserCPProfileForm(request.POST, request.FILES)
+        form = UserCPProfileForm(request.POST, request.FILES, user=user)
         if form.is_valid():
             data = form.cleaned_data
             for key in ('jabber', 'icq', 'msn', 'aim', 'yim',
@@ -589,6 +600,15 @@ def usercp_profile(request):
 
             for key in ('show_email', 'show_jabber'):
                 user.settings[key] = data[key]
+            if data['openid'] is None:
+                UserData.objects.filter(user=user, key='openid').delete()
+            else:
+                openid = clean_openid_url(data['openid'])
+                udata, created = UserData.objects.get_or_create(user=user,
+                    key='openid', defaults={'value': openid})
+                if not created:
+                    udata.value = openid
+                    udata.save()
             user.save()
 
 
@@ -613,7 +633,12 @@ def usercp_profile(request):
             ((k, v) for k, v in user.settings.iteritems()
              if k.startswith('show_'))
         ))
-        form = UserCPProfileForm(initial=values)
+        try:
+            openid = UserData.objects.get(user=user, key='openid')
+            values['openid'] = openid.value
+        except UserData.DoesNotExist:
+            pass
+        form = UserCPProfileForm(initial=values, user=user)
 
     storage_keys = storage.get_many(('max_avatar_width',
         'max_avatar_height', 'max_avatar_size', 'max_signature_length'))
@@ -1407,3 +1432,34 @@ def confirm(request, action=None):
     if isinstance(r, dict) and action:
         r['action'] = action
     return r
+
+class OpenIdConsumer(Consumer):
+    on_complete_url = '/openid/complete/'
+    trust_root = 'http://' + settings.BASE_DOMAIN_NAME
+
+    def on_success(self, request, identity_url, openid_response):
+        response = self.redirect_if_valid_next(request)
+        try:
+            user = UserData.objects.select_related('user').get(
+                    key='openid',
+                    value=openid_response.identity_url).user
+            if not user.is_banned:
+                flash(u'Du hast dich erfolgreich angemeldet', True)
+                user.login(request)
+            else:
+                flash(u'Dieser User ist aktuell gebannt', False)
+        except UserData.DoesNotExist:
+            flash(u'Zu dieser OpenId existiert kein Benutzer')
+
+        # till https://github.com/simonw/django-openid/commit/5062aa93abc9a8d6f90837db690c26ace1c68672
+        # is resolved
+        if not response:
+            response = HttpResponseRedirect(request.session.pop('next', '/'))
+
+        return response
+    
+    def show_error(self, request, message, exception=None):
+        flash(u'Fehler bei OpenId-Login: %s' % message)
+        return HttpResponseRedirect('/')
+
+openid_consumer = OpenIdConsumer(SessionPersist)

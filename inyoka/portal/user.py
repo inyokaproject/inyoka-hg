@@ -683,6 +683,12 @@ class User(models.Model):
     def ANONYMOUS_USER(cls):
         return cls.objects.get_anonymous_user()
 
+
+class UserData(models.Model):
+    user = models.ForeignKey(User)
+    key = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
 # circ imports
 from inyoka.wiki.parser import parse, render, RenderContext
 from inyoka.utils.urls import href

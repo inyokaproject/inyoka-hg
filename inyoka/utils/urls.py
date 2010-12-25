@@ -120,6 +120,17 @@ def get_resolver(host):
     return None, None
 
 
+def clean_openid_url(url):
+    """
+    Forces domain-only openids to have a / at the end.
+    Makes matching against our OpenId assocs easier.
+    """
+    parts = urlparse(url)
+    if parts.path == '':
+        return url + '/'
+    return url
+
+
 from inyoka.utils.http import TemplateResponse
 def global_not_found(request, app, err_message=None):
     return TemplateResponse('errors/404.html', {

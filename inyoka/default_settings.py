@@ -193,6 +193,7 @@ INSTALLED_APPS = (
     'inyoka.pastebin',
     'inyoka.planet',
     'inyoka.admin',
+    'django_openid',
 )
 
 
