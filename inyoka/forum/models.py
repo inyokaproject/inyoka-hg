@@ -36,6 +36,7 @@ from inyoka.utils.search import search
 from inyoka.utils.cache import cache, request_cache
 from inyoka.utils.local import current_request
 from inyoka.utils.decorators import deferred
+from inyoka.utils.imaging import get_thumbnail
 
 from inyoka.forum.acl import filter_invisible, get_privileges, CAN_READ, \
     filter_visible
@@ -1338,22 +1339,8 @@ class Attachment(db.Model):
             ff = self.file.encode('utf-8')
             img_path = path.join(settings.MEDIA_ROOT,
                 'forum/thumbnails/%s-%s' % (self.id, ff.split('/')[-1]))
-            if not path.exists(path.abspath(img_path)):
-                try:
-                    img = Image.open(self.filename.encode('utf-8'))
-                    if not (img.format == 'PNG' and img.info.get('interlace')) \
-                        and img.size > settings.FORUM_THUMBNAIL_SIZE:
-                        img.thumbnail(settings.FORUM_THUMBNAIL_SIZE)
-                        img.save(img_path, img.format)
-                    elif not (img.format == 'PNG' and img.info.get('interlace')) \
-                        and img.size < settings.FORUM_THUMBNAIL_SIZE:
-                        return url
-                    else:
-                        return
-                except IOError:
-                    return
-            return href('media', 'forum/thumbnails/%s-%s'
-                % (self.id, self.file.split('/')[-1]))
+            thumb = get_thumbnail(self.filename.encode('utf-8'), img_path, *settings.FORUM_THUMBNAIL_SIZE)
+            return href('media', 'forum/thumbnails/%s' % thumb.split('/')[-1])
 
         if show_preview and show_thumbnails and isimage():
             thumb = thumbnail()
