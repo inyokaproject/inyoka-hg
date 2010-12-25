@@ -37,7 +37,6 @@ from inyoka.utils.pagination import Pagination
 from inyoka.utils.database import session as dbsession
 from inyoka.utils.dates import datetime_to_timezone, get_user_timezone, \
         date_time_to_datetime
-from inyoka.utils.mongolog import get_mdb_database
 from inyoka.admin.forms import EditStaticPageForm, EditArticleForm, \
      EditBlogForm, EditCategoryForm, EditFileForm, ConfigurationForm, \
      EditEventForm, EditForumForm, EditGroupForm, \
@@ -1441,58 +1440,3 @@ def styles(request):
         'form': form
     }
 
-
-@require_permission('manage_stats')
-@templated('admin/monitoring.html')
-def monitoring(request, page):
-    from pymongo import DESCENDING, ASCENDING
-    database = get_mdb_database(True)
-    collection = database['errors']
-
-    # ensure the indexes exists
-    collection.ensure_index([('created', DESCENDING), ('status', ASCENDING)])
-    collection.ensure_index([('hash', ASCENDING)], unique=True)
-
-    if page == 'all':
-        show_all = True
-        page = 1
-    else:
-        show_all = False
-        page = int(page) if (page is not None and page.isdigit()) else 1
-
-    if page == 0:
-        return HttpResponseRedirect(href('admin', 'monitoring'))
-
-    if request.method == 'POST' and 'delete_marked' in request.POST:
-        hashes = request.POST.getlist('selected')
-        collection.update({'hash': {'$in': hashes}}, {'$set': {'status': 'close'}},
-                          multi=True, upsert=True)
-        flash(u'Es wurden %s Einträge gelöscht' % len(hashes))
-        return HttpResponseRedirect(href('admin', 'monitoring'))
-
-    if 'close' in request.GET:
-        hash = request.GET.get('close')
-        if collection.find({'hash': hash}).count():
-            collection.update({'hash': hash}, {'$set': {'status': 'close'}}, upsert=True)
-            return HttpResponseRedirect(href('admin', 'monitoring'))
-
-    all_errors = collection.find({'status': {'$in': ['new', 'open', 'reopen']}}) \
-                           .sort('created', DESCENDING)
-    if not show_all:
-        all_errors = all_errors.skip(page-1).limit(25)
-
-    error_count = collection.count()
-    closed = collection.find({'status': 'close'}).count()
-    reopened = collection.find({'status': 'reopen'}).count()
-
-    stats = {
-        'closed': closed,
-        'open': error_count - closed - reopened,
-        'reopened': reopened
-    }
-    return {
-        'count': error_count,
-        'stats': stats,
-        'errors': all_errors,
-        'page': page,
-    }

@@ -15,9 +15,9 @@ from inyoka.conf import settings
 logger = logging.getLogger('inyoka')
 
 
-if not settings.DEBUG and settings.ENABLE_TRAC_LOGGING:
-    from inyoka.utils.mongolog import MongoHandler
-    logging_handler = MongoHandler()
+if not settings.DEBUG:
+    from sentry.client.handlers import SentryHandler
+    logging_handler = SentryHandler()
     logging_handler.setLevel(logging.ERROR)
 else:
     logging_handler = logging.StreamHandler()

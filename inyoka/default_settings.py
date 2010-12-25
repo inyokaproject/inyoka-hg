@@ -24,9 +24,6 @@ DEVSERVER_PORT = 8080
 # so is the code execution debugger.  never enable on production
 ENABLE_DEBUGGER = False
 
-# enable logging to trac. Maybe only for development use...
-ENABLE_TRAC_LOGGING = True
-
 # template caching.  If none the templates will be cached if the
 # debug stuff is disabled
 TEMPLATE_CACHING = None
@@ -85,20 +82,6 @@ MEDIA_URL = 'http://media.%s' % BASE_DOMAIN_NAME
 STATIC_ROOT = join(BASE_PATH, 'static')
 STATIC_URL = 'http://static.%s' % BASE_DOMAIN_NAME
 ADMIN_MEDIA_PREFIX = STATIC_URL + '/_admin/'
-
-# trac data
-TRAC_URL = None
-TRAC_USERNAME = None
-TRAC_PASSWORD = None
-
-# MongoDB data
-MONGODB_DATA = {
-    'host': 'localhost',
-    'port': 27092,
-    'db': None,
-    'user': None,
-    'password': None
-}
 
 # system settings
 INYOKA_SYSTEM_USER = u'ubuntuusers.de'
@@ -194,8 +177,8 @@ INSTALLED_APPS = (
     'inyoka.planet',
     'inyoka.admin',
     'django_openid',
+    'sentry.client',
 )
-
 
 # some terms to exclude by default to maintain readability
 SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch']

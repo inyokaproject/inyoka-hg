@@ -17,4 +17,5 @@ xmpppy==0.5.0rc1
 MySQL-python==1.2.3
 psycopg2==2.3.1
 python-openid==2.2.5
+django-sentry==1.5.3
 https://github.com/simonw/django-openid/tarball/master#egg=django-openid
