@@ -64,9 +64,11 @@ def get_thumbnail(location, destination, width=None, height=None, force=False):
     if not width and not height:
         raise ValueError('neither with nor height given')
 
-    fn = os.path.join(settings.MEDIA_ROOT, destination + '.png')
+    format, quality = ('png', '100')
+    destination = u'%s.%s' % (destination.rsplit('.', 1)[0], format)
+    fn = os.path.join(settings.MEDIA_ROOT, destination)
     if os.path.exists(fn):
-        return destination + '.png'
+        return destination
 
     # get the source stream. if the location is an url we load it using
     # the urllib2 and convert it into a StringIO so that we can fetch the
@@ -78,15 +80,13 @@ def get_thumbnail(location, destination, width=None, height=None, force=False):
         return
 
     result = []
-    format, quality = ('png', '100')
     with closing(src) as src:
         img = Image.open(src)
         img = fix_colorspace(img)
         box = _get_box(width, height)
         if img.size > box:
             img.thumbnail(box, Image.ANTIALIAS)
-        filename = '%s.%s' % (destination, format)
-        real_filename = os.path.join(settings.MEDIA_ROOT, filename)
+        real_filename = os.path.join(settings.MEDIA_ROOT, destination)
         try:
             os.makedirs(os.path.dirname(real_filename))
         except OSError:
@@ -95,7 +95,7 @@ def get_thumbnail(location, destination, width=None, height=None, force=False):
 
     # Return none if there were errors in thumbnail rendering, that way we can
     # raise 404 exceptions instead of raising 500 exceptions for the user.
-    return filename
+    return destination
 
 
 def clean_thumbnail_cache():
