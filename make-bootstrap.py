@@ -101,6 +101,8 @@ def after_install(options, home_dir):
     easy_install('mercurial==1.7.2', home_dir)
     easy_install('xmpppy==0.5.0', home_dir)
     easy_install('mysql-python==1.2.3', home_dir)
+    easy_install('openid==2.2.5', home_dir)
+    easy_install('django-openid=0.1.5', home_dir)
     xapian_install(os.path.abspath(home_dir))
     pil_install(os.path.abspath(home_dir))
 """
