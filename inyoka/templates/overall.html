@@ -242,6 +242,10 @@
         <input type="hidden" name="redirect" value="{{ CURRENT_URL|e }}" />
       </div>
     </form>
+
+    <script type="text/javascript">
+      var input = OpenIDHelper($('input[id="js_login_username"]'), {{ OPENID_PROVIDERS|jsonencode }});
+    </script>
     {%- endif %}
   </body>
 </html>

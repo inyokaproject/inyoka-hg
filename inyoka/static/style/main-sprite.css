@@ -1231,9 +1231,6 @@ div.not_found img {
     margin-right: 0.5em;
 }
 
-#js_login_username, .loginform input#id_username {
-}
-
 #js_login_form input.submit:active {
     background-color: #47320f!important;
     color: white;
