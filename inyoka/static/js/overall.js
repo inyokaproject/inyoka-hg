@@ -390,7 +390,7 @@ $(document).ready(function () {
       var self = this;
       var target = $(target);
       for (var provider in openid_providers) {
-        var alt = "Mit " + provider.capitalize() + " einloggen";
+        var alt = provider.capitalize() + " benutzen";
         var element = $('<img src="' + $STATIC_URL + 'img/openid/' + provider + '.png" class="' + provider + '" alt="' + alt + '" title="' + alt + '" />')
           .click(function() {
             $(target).val('');
