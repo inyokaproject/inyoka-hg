@@ -404,7 +404,7 @@ $(document).ready(function () {
           })
           .css('cursor', 'pointer');
 
-        element.appendTo(target.parent());
+        element.insertAfter($(target));
       }
     },
 
