@@ -122,8 +122,8 @@ def get_resolver(host):
 
 def clean_openid_url(url):
     """
-    Forces domain-only openids to have a / at the end.
-    Makes matching against our OpenId assocs easier.
+    Normalizes according to (only URLs though, not XRI):
+    http://openid.net/specs/openid-authentication-2_0.html#normalization_example
     """
     parts = urlparse(url)
     if parts.path == '':

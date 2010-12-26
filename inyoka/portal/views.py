@@ -1435,7 +1435,7 @@ def confirm(request, action=None):
 
 class OpenIdConsumer(Consumer):
     on_complete_url = '/openid/complete/'
-    trust_root = 'http://' + settings.BASE_DOMAIN_NAME
+    trust_root = 'http://*.' + settings.BASE_DOMAIN_NAME
 
     def on_success(self, request, identity_url, openid_response):
         response = self.redirect_if_valid_next(request)
