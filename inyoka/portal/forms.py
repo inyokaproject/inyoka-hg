@@ -73,7 +73,7 @@ SEARCH_AREAS = {
 
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
-    username = forms.CharField(label='Benutzername oder E-Mail-Adresse')
+    username = forms.CharField(label='Benutzername, E-Mail-Adresse oder OpenID')
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False), required=False)
     permanent = forms.BooleanField(label='Eingeloggt bleiben',

@@ -85,6 +85,8 @@
       $('#id_password').select().focus();
     else 
       $('#id_username')[0].focus();
+
+    openid_providers = {{ OPENID_PROVIDERS|jsonencode }};
   </script>
   {%- endif %}
 {% endblock %}

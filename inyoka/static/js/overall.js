@@ -382,8 +382,62 @@ $(document).ready(function () {
     });
   })();
 
+  /* OpenID Integration */
+  (function() {
+
+    var setSelection = function(area, text, match, reselect) {
+      var t = $(area)[0];
+      if (typeof t.selectionStart != 'undefined') {
+        var
+          start = text.indexOf(match),
+          end = text.indexOf(match) + match.length;
+        var
+          s1 = t.value.substring(0, start),
+          s2 = t.value.substring(end);
+
+        t.value = s1 + text + s2;
+        t.focus();
+        if (reselect) {
+          t.selectionStart = start;
+          t.selectionEnd = end;
+        }
+        else
+          t.selectionEnd = t.selectionStart = start + text.length;
+      }
+      else if (typeof document.selection != 'undefined') {
+        t.focus();
+        var range = document.selection.createRange();
+        range.text = text;
+      }
+    };
+
+    username = $('input[name="username"]');
+    for (var provider in openid_providers) {
+      var alt = "Mit " + provider.capitalize() + " einloggen";
+      var element = $('<img src="' + $STATIC_URL + 'img/openid/' + provider + '.png" class="' + provider + '" alt="' + alt + '" title="' + alt + '" />')
+        .click(function() {
+          $(username).val('');
+          p = $(this).attr('class')
+          if (openid_providers[p]['url'] == null) {
+            $(username).val('http://');
+            $(username).focus();
+          } else {
+            setSelection($(username), openid_providers[p]['url'], '{username}', true);
+          }
+        })
+        .css('cursor', 'pointer');
+
+      element.appendTo(username.parent());
+    }
+  })();
+
+
 });
 
 String.prototype.htmlEscape = function () {
   return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/, "&quot;");
+};
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
 };

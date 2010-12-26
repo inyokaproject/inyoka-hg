@@ -133,6 +133,7 @@ def populate_context_defaults(context):
 
     context.update(
         GLOBAL_MESSAGE=global_message,
+        OPENID_PROVIDERS=settings.OPENID_PROVIDERS,
         pm_count=pms,
         report_count=reported,
         suggestion_count=suggestions,

@@ -97,6 +97,10 @@ input {
   color: #000000;
 }
 
+input[name="username"] {
+  width: 350px;
+}
+
 input[type="radio"] {
   border: 0;
 }
@@ -1228,15 +1232,22 @@ div.not_found img {
 }
 
 #js_login_username, .loginform input#id_username {
-    background-image: url(../img/openid.gif);
-    background-repeat: no-repeat;
-    padding-left: 17px;
 }
 
 #js_login_form input.submit:active {
     background-color: #47320f!important;
     color: white;
 }
+
+.claimid, .myopenid, .launchpad, .openid {
+  margin-left: 0.5em;
+  border-bottom: 1px dotted #ccc;
+}
+
+.claimid:hover, .myopenid:hover, .launchpad:hover, .openid:hover {
+  border-bottom: 1px dotted #000;
+}
+
 
 /*** Filterable ***************************************************************/
 

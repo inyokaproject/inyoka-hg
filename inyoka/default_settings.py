@@ -180,6 +180,25 @@ INSTALLED_APPS = (
     'sentry.client',
 )
 
+OPENID_PROVIDERS = {
+    'myopenid': {
+        'name': 'MyOpenID',
+        'url': 'http://{username}.myopenid.com/'
+    },
+    'openid': {
+      'name': 'OpenID',
+      'url': None
+    },
+    'launchpad': {
+        'name': 'Launchpad',
+        'url': 'https://launchpad.net/~{username}'
+    },
+    'claimid': {
+      'name': 'ClaimID',
+      'url': 'http://claimid.com/{username}'
+    }
+}
+
 # some terms to exclude by default to maintain readability
 SEARCH_DEFAULT_EXCLUDE = ['Cstammtisch']
 
