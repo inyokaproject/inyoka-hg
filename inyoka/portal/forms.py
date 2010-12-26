@@ -73,7 +73,8 @@ SEARCH_AREAS = {
 
 class LoginForm(forms.Form):
     """Simple form for the login dialog"""
-    username = forms.CharField(label='Benutzername, E-Mail-Adresse oder OpenID')
+    username = forms.CharField(label='Benutzername, E-Mail-Adresse oder OpenID',
+        help_text=u'Informationen zu OpenID findest du in der deutschen Wikipedia: <a href="http://de.wikipedia.org/wiki/OpenID">OpenID</a>')
     password = forms.CharField(label='Passwort', widget=
         forms.PasswordInput(render_value=False), required=False)
     permanent = forms.BooleanField(label='Eingeloggt bleiben',
@@ -330,8 +331,8 @@ class UserCPProfileForm(forms.Form):
     Wiki</a>.''')
 
     openid = forms.URLField(label='OpenID', required=False, max_length=255,
-                            help_text=u'''Deine OpenID für den Login auf
-                                dieser Seite.''')
+        help_text=u'Deine OpenID für den Login auf dieser Seite. '
+                  u'Weitere Informationen findest du in der deutschen Wikipedia: <a href="http://de.wikipedia.org/wiki/OpenID">OpenID</a>')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
