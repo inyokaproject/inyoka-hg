@@ -381,11 +381,34 @@ $(document).ready(function () {
       return true;
     });
   })();
+});
 
+(function() {
   /* OpenID Integration */
-  (function() {
+  OpenIDHelper = Class.$extend({
+    __init__: function(target, openid_providers) {
+      var self = this;
+      var target = $(target);
+      for (var provider in openid_providers) {
+        var alt = "Mit " + provider.capitalize() + " einloggen";
+        var element = $('<img src="' + $STATIC_URL + 'img/openid/' + provider + '.png" class="' + provider + '" alt="' + alt + '" title="' + alt + '" />')
+          .click(function() {
+            $(target).val('');
+            p = $(this).attr('class')
+            if (openid_providers[p]['url'] == null) {
+              $(target).val('http://');
+              $(target).focus();
+            } else {
+              self.setSelection($(target), openid_providers[p]['url'], '{username}', true);
+            }
+          })
+          .css('cursor', 'pointer');
 
-    var setSelection = function(area, text, match, reselect) {
+        element.appendTo(target.parent());
+      }
+    },
+
+    setSelection: function(area, text, match, reselect) {
       var t = $(area)[0];
       if (typeof t.selectionStart != 'undefined') {
         var
@@ -409,30 +432,9 @@ $(document).ready(function () {
         var range = document.selection.createRange();
         range.text = text;
       }
-    };
-
-    username = $('input[name="username"]');
-    for (var provider in openid_providers) {
-      var alt = "Mit " + provider.capitalize() + " einloggen";
-      var element = $('<img src="' + $STATIC_URL + 'img/openid/' + provider + '.png" class="' + provider + '" alt="' + alt + '" title="' + alt + '" />')
-        .click(function() {
-          $(username).val('');
-          p = $(this).attr('class')
-          if (openid_providers[p]['url'] == null) {
-            $(username).val('http://');
-            $(username).focus();
-          } else {
-            setSelection($(username), openid_providers[p]['url'], '{username}', true);
-          }
-        })
-        .css('cursor', 'pointer');
-
-      element.appendTo(username.parent());
     }
-  })();
-
-
-});
+  });
+})();
 
 String.prototype.htmlEscape = function () {
   return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/, "&quot;");

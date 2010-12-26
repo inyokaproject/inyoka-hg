@@ -86,7 +86,7 @@
     else 
       $('#id_username')[0].focus();
 
-    openid_providers = {{ OPENID_PROVIDERS|jsonencode }};
+    var input = OpenIDHelper($('input[name="username"]'), {{ OPENID_PROVIDERS|jsonencode }});
   </script>
   {%- endif %}
 {% endblock %}
