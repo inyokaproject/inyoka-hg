@@ -1237,6 +1237,8 @@ div.not_found img {
 }
 
 .claimid, .myopenid, .launchpad, .openid {
+  margin-top: 0.5em;
+  margin-bottom: -5px;
   margin-left: 0.5em;
   border-bottom: 1px dotted #ccc;
 }
