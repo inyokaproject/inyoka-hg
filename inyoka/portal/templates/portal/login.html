@@ -56,7 +56,7 @@
     Aktivierungslink in der Bestätigungsmail, die dir nach der
     Registrierung zugeschickt wurde, nicht aufgerufen hast. Solltest du
     diese Mail nicht bekommen haben, kannst du sie <a href="
-    {{- href('portal', 'register', 'resend', username) -}}
+    {{- href('portal', 'register', 'resend', username|e) -}}
     ">erneut anfordern</a>. Falls es weiterhin nicht funktioniert, schreibe
     bitte eine Nachricht an <a href="mailto:webteam@ubuntuusers.de">
     webteam@ubuntuusers.de</a>
